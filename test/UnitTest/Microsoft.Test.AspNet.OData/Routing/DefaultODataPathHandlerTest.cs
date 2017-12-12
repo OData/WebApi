@@ -14,6 +14,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Routing
@@ -114,7 +115,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             string odataPath = "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.Product";
 
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, odataPath),
                 "The type 'Microsoft.Test.AspNet.OData.Routing.Product' specified in the URI is neither a base type " +
                 "nor a sub-type of the previously-specified type 'Microsoft.Test.AspNet.OData.Routing.RoutingCustomer'.");
@@ -125,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             string odataPath = "$metadata/foo";
 
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, odataPath),
                 "The request URI is not valid. The segment '$metadata' must be the last segment in the URI because " +
                 "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
@@ -812,7 +813,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CannotParseDollarId_ThrowsODataException_InvalidDollarId(string odataPath, string expectedError)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath), expectedError);
+            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath), expectedError);
         }
 
         [Theory]
@@ -832,7 +833,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CannotParseSegmentAfterUnresolvedPathSegment()
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers(1)/GetRelatedRoutingCustomers/Segment"),
                 "The URI segment 'Segment' is invalid after the segment 'GetRelatedRoutingCustomers'.");
         }
@@ -941,7 +942,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             model.Container.AddActionImport(new EdmAction(model.Container.Namespace, "ActionAtRoot", returnType));
 
             // Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(model.Model, _serviceRoot, odataPath),
                 String.Format("Resource not found for the segment '{0}'.", segmentName));
         }
@@ -964,7 +965,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CannotParseOperationBoundToDerivedCollectionType(string uri)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + uri),
                 "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
                 " this must be the last segment in the request URI or it must be followed by an function or action " +
@@ -984,7 +985,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CannotParseUnboundOperationAfterEntityCollectionType()
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers/Default.GetAllVIPs()"),
                 "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
                 " this must be the last segment in the request URI or it must be followed by an function or action " +
@@ -1003,7 +1004,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             container.AddActionImport(new EdmAction("NS", "AmbiguousAction", returnType: null));
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model, _serviceRoot, _serviceRoot + "AmbiguousAction"),
                 "Multiple action import overloads were found with the same binding parameter for 'AmbiguousAction'.");
         }
@@ -1033,7 +1034,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CannotParseFunctionImportWithInvalidParameters(string uri, string expectedError)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + uri),
                 expectedError);
         }
@@ -1087,7 +1088,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             model.AddElement(unboundFunction);
 
             // Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(model, _serviceRoot, _serviceRoot + uri),
                 "Resource not found for the segment 'OverloadUnboundFunction'.");
         }
@@ -1109,7 +1110,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string uri = String.Format("FunctionWithEnumParam(Enum={0})", enumerationExpression);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _parser.Parse(model, _serviceRoot, uri));
+            ExceptionAssert.DoesNotThrow(() => _parser.Parse(model, _serviceRoot, uri));
         }
 
         [Theory]
@@ -1129,7 +1130,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string uri = String.Format("FunctionWithEnumParam(Enum={0})", enumerationExpression);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model, _serviceRoot, uri),
                 String.Format("The string '{0}' is not a valid enumeration type constant.", enumerationExpression));
         }
@@ -1154,7 +1155,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.NotNull(path);
-            Assert.Equal(1, path.Segments.Count);
+            Assert.Single(path.Segments);
             var functionSegment = Assert.IsType<OperationImportSegment>(path.Segments.First());
 
             IEdmOperationImport opertionImport = functionSegment.OperationImports.First();
@@ -1257,7 +1258,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("NullFunctionParameterData")]
+        [MemberData(nameof(NullFunctionParameterData))]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithNull(object value, Type type)
         {
             // Arrange & Act
@@ -1268,7 +1269,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("EnumFunctionParameterData")]
+        [MemberData(nameof(EnumFunctionParameterData))]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValueWithEnum(object value, Type type)
         {
             // Arrange & Act
@@ -1281,7 +1282,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("FunctionParameterData")]
+        [MemberData(nameof(FunctionParameterData))]
         public void CanParse_FunctionParameters_CanResolveAliasedParameterValue(object value, Type type)
         {
             // Arrange & Act
@@ -1425,7 +1426,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("NullFunctionParameterData")]
+        [MemberData(nameof(NullFunctionParameterData))]
         public void CanParse_NullFunctionParameters(object value, Type type)
         {
             // Arrange & Act
@@ -1436,7 +1437,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("EnumFunctionParameterData")]
+        [MemberData(nameof(EnumFunctionParameterData))]
         public void CanParse_EnumFunctionParameters(object value, Type type)
         {
             // Arrange & Act
@@ -1449,7 +1450,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("FunctionParameterData")]
+        [MemberData(nameof(FunctionParameterData))]
         public void CanParse_FunctionParameters(object value, Type type)
         {
             // Arrange & Act
@@ -1510,7 +1511,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void ParseComplexTypeAsFunctionParameterInlineThrows(string parameterValue)
         {
             // Arrange & Act
-            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
+            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
         }
 
         [Theory]
@@ -1573,7 +1574,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 "RoutingCustomers(1)/Default.EntityTypeFunction(product={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}";
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
+            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
         }
 
         [Theory]
@@ -1604,7 +1605,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 "{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}";
 
             // & Act
-            Assert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
+            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
         }
 
         [Theory]
@@ -1647,7 +1648,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             var model = GetModelWithFunctions();
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(
                     model,
                     _serviceRoot,
@@ -1705,7 +1706,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             model.Container.AddEntitySet("CustomersWithMultiKeys", customerWithMultiKeys);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model.Model, _serviceRoot, path),
                 "The number of keys specified in the URI does not match number of key properties for the resource 'NS.CustomerWithMultiKeys'.");
         }
@@ -1721,7 +1722,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void DefaultODataPathHandler_ThrowsIfDollarRefIsNotTheLastSegment(string path)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 "The request URI is not valid. The segment '$ref' must be the last segment in the URI because " +
                 "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
@@ -1740,7 +1741,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void DefaultODataPathHandler_ThrowsIfDollarValueIsNotTheLastSegment(string path)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 "The request URI is not valid. The segment '$value' must be the last segment in the URI because " +
                 "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
@@ -1755,7 +1756,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void DefaultODataPathHandler_ThrowsIfDollarCountIsNotTheLastSegment(string path)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 "The request URI is not valid. The segment '$count' must be the last segment in the URI because " +
                 "it is one of the following: $ref, $batch, $count, $value, $metadata, a named media resource, " +
@@ -1770,7 +1771,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string path, string segment)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 String.Format(
                     "The segment '$count' in the request URI is not valid. The segment '{0}' refers to a primitive property, " +
@@ -1788,7 +1789,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string path, string segment)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.Parse(_model, _serviceRoot, path),
                 String.Format(
                     "The request URI is not valid. $count cannot be applied to the segment '{0}' since $count can only " +
@@ -1872,7 +1873,6 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("RoutingCustomers(1)/", "RoutingCustomers", "RoutingCustomer", false)]
         [InlineData("Products(1)", "Products", "Product", false)]
         [InlineData("Products(1)/", "Products", "Product", false)]
-        [InlineData("Products(1)", "Products", "Product", false)]
         public void CanResolveSetAndTypeViaKeySegment(string odataPath, string expectedSetName, string expectedTypeName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -1882,14 +1882,12 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("RoutingCustomers(1)/Products", "Products", "Product", true)]
         [InlineData("RoutingCustomers(1)/Products(1)", "Products", "Product", false)]
         [InlineData("RoutingCustomers(1)/Products/", "Products", "Product", true)]
-        [InlineData("RoutingCustomers(1)/Products", "Products", "Product", true)]
         [InlineData("Products(1)/RoutingCustomers", "RoutingCustomers", "RoutingCustomer", true)]
         [InlineData("Products(1)/RoutingCustomers(1)", "RoutingCustomers", "RoutingCustomer", false)]
         [InlineData("Products(1)/RoutingCustomers/", "RoutingCustomers", "RoutingCustomer", true)]
         [InlineData("VipCustomer/Products", "Products", "Product", true)]
         [InlineData("VipCustomer/Products(1)", "Products", "Product", false)]
         [InlineData("VipCustomer/Products/", "Products", "Product", true)]
-        [InlineData("VipCustomer/Products", "Products", "Product", true)]
         [InlineData("MyProduct/RoutingCustomers", "RoutingCustomers", "RoutingCustomer", true)]
         [InlineData("MyProduct/RoutingCustomers(1)", "RoutingCustomers", "RoutingCustomer", false)]
         [InlineData("MyProduct/RoutingCustomers/", "RoutingCustomers", "RoutingCustomer", true)]
@@ -2021,7 +2019,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             container.AddEntitySet("Motorcycles", motorcycle);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model, _serviceRoot, path),
                 expectedError);
         }
@@ -2086,7 +2084,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             var model = builder.GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model, _serviceRoot, path),
                 "The property 'Products' cannot be used for navigation.");
         }
@@ -2172,7 +2170,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             // Act & Assert
-            Assert.Throws<ODataUnrecognizedPathException>(
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => _parser.ParseTemplate(model.Model, template),
                 String.Format("Resource not found for the segment '{0}'.", segmentValue));
         }
@@ -2184,7 +2182,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, "Customers(ID={key})/Order"),
+            ExceptionAssert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, "Customers(ID={key})/Order"),
                 "Found an unresolved path segment 'Order' in the OData path template 'Customers(ID={key})/Order'.");
         }
 
@@ -2200,7 +2198,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, template),
+            ExceptionAssert.Throws<ODataException>(() => _parser.ParseTemplate(model.Model, template),
                 string.Format("The attribute routing template contains invalid segment '{0}'.", error));
         }
 
@@ -2256,17 +2254,19 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("PathSegmentIdentifierCaseInsensitiveCases")]
-        [PropertyData("UserMetadataCaseInsensitiveCases")]
+        [MemberData(nameof(PathSegmentIdentifierCaseInsensitiveCases))]
+        [MemberData(nameof(UserMetadataCaseInsensitiveCases))]
         public void DefaultUriResolverHandler_Throws_ForCaseSensitive(string path, string template, string expect)
         {
-            Assert.Throws<ODataUnrecognizedPathException>(
+            Assert.NotNull(template);
+            Assert.NotNull(expect);
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
         }
 
         [Theory]
-        [PropertyData("PathSegmentIdentifierCaseInsensitiveCases")]
-        [PropertyData("UserMetadataCaseInsensitiveCases")]
+        [MemberData(nameof(PathSegmentIdentifierCaseInsensitiveCases))]
+        [MemberData(nameof(UserMetadataCaseInsensitiveCases))]
         public void DefaultUriResolverHandler_Works_CaseInsensitive(string path, string template, string expect)
         {
             // Arrange & Act
@@ -2299,15 +2299,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("UnqualifiedCallCases")]
+        [MemberData(nameof(UnqualifiedCallCases))]
         public void Unqualified_Throws_DefaultUriResolverHandler(string path, string template, string expect)
         {
-            Assert.Throws<ODataUnrecognizedPathException>(
+            Assert.NotNull(template);
+            Assert.NotNull(expect);
+            ExceptionAssert.Throws<ODataUnrecognizedPathException>(
                 () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
         }
 
         [Theory]
-        [PropertyData("UnqualifiedCallCases")]
+        [MemberData(nameof(UnqualifiedCallCases))]
         public void Unqualified_Works_CustomUriResolverHandler(string path, string template, string expect)
         {
             // Arrange
@@ -2341,15 +2343,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("PrefixFreeEnumCases")]
+        [MemberData(nameof(PrefixFreeEnumCases))]
         public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
         {
-            Assert.Throws<ODataException>(
+            Assert.NotNull(template);
+            Assert.NotNull(expect);
+            ExceptionAssert.Throws<ODataException>(
                 () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
         }
 
         [Theory]
-        [PropertyData("PrefixFreeEnumCases")]
+        [MemberData(nameof(PrefixFreeEnumCases))]
         public void PrefixFreeEnumValue_Works_PrefixFreeResolver(string path, string template, string expect)
         {
             // Arrange

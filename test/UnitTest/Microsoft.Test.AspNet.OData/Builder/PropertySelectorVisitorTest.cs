@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             Expression<Func<AddressEntity, int>> expr = a => a.ID;
             var properties = PropertySelectorVisitor.GetSelectedProperties(expr).ToArray();
-            Assert.Equal(1, properties.Length);
+            Assert.Single(properties);
             Assert.Equal("ID", properties[0].Name);
         }
 
@@ -35,7 +36,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void FailWhenLambdaExpressionAccessesFields()
         {
             Expression<Func<WorkItem, int>> expr = w => w.Field;
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
                 var properties = PropertySelectorVisitor.GetSelectedProperties(expr);
             });
@@ -46,7 +47,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void FailWhenLambdaExpressionHasMoreThanOneParameter()
         {
             Expression<Func<AddressEntity, AddressEntity, int>> expr = (a1, a2) => a1.ID;
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
                 var properties = PropertySelectorVisitor.GetSelectedProperties(expr);
             });
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void FailWhenMemberExpressionNotBoundToParameter()
         {
             Expression<Func<AddressEntity, int>> expr = (a) => new AddressEntity().ID;
-            var exception = Assert.Throws<InvalidOperationException>(() =>
+            var exception = ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
                 var properties = PropertySelectorVisitor.GetSelectedProperties(expr);
             });
@@ -68,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void FailOnUnsupportedExpressionNodeType()
         {
             Expression<Func<AddressEntity, AddressEntity>> expr = (a) => CreateAddress(a.ID);
-            var exception = Assert.Throws<NotSupportedException>(() =>
+            var exception = ExceptionAssert.Throws<NotSupportedException>(() =>
             {
                 var properties = PropertySelectorVisitor.GetSelectedProperties(expr);
             });

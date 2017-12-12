@@ -6,11 +6,31 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Web;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.TestCommon
 {
-    public partial class Assert
+    public class ExceptionAssert
     {
+        /// <summary>
+        /// Verifies that the exact exception is thrown (and not a derived exception type).
+        /// </summary>
+        /// <typeparam name="T">The type of the exception expected to be thrown</typeparam>
+        /// <param name="testCode">A delegate to the code to be tested</param>
+        /// <returns>The exception that was thrown, when successful</returns>
+        /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
+        public static void DoesNotThrow(Action testCode)
+        {
+            try
+            {
+                testCode();
+            }
+            catch (Exception ex)
+            {
+                Assert.Null(ex);
+            }
+        }
+
         /// <summary>
         /// Verifies that the exact exception is thrown (and not a derived exception type).
         /// </summary>
@@ -123,11 +143,11 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
         /// <returns>The exception that was thrown, when successful</returns>
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
-        public static TException Throws<TException>(Action testCode, string exceptionMessage, bool allowDerivedExceptions = false)
+        public static TException Throws<TException>(Action testCode, string exceptionMessage, bool allowDerivedExceptions = false, bool partialMatch = false)
             where TException : Exception
         {
             var ex = Throws<TException>(testCode, allowDerivedExceptions);
-            VerifyExceptionMessage(ex, exceptionMessage);
+            VerifyExceptionMessage(ex, exceptionMessage, partialMatch);
             return ex;
         }
 
@@ -161,7 +181,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (paramName != null)
             {
-                Equal(paramName, ex.ParamName);
+                Assert.Equal(paramName, ex.ParamName);
             }
 
             return ex;
@@ -182,7 +202,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (paramName != null)
             {
-                Equal(paramName, ex.ParamName);
+                Assert.Equal(paramName, ex.ParamName);
             }
 
             VerifyExceptionMessage(ex, exceptionMessage, partialMatch: true);
@@ -204,7 +224,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (paramName != null)
             {
-                Equal(paramName, ex.ParamName);
+                Assert.Equal(paramName, ex.ParamName);
             }
 
             return ex;
@@ -223,7 +243,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (paramName != null)
             {
-                Equal(paramName, ex.ParamName);
+                Assert.Equal(paramName, ex.ParamName);
             }
 
             return ex;
@@ -280,7 +300,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (paramName != null)
             {
-                Equal(paramName, ex.ParamName);
+                Assert.Equal(paramName, ex.ParamName);
             }
 
             return ex;
@@ -369,7 +389,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         public static HttpException ThrowsHttpException(Action testCode, string exceptionMessage, int httpCode, bool allowDerivedExceptions = false)
         {
             var ex = Throws<HttpException>(testCode, exceptionMessage, allowDerivedExceptions);
-            Equal(httpCode, ex.GetHttpCode());
+            Assert.Equal(httpCode, ex.GetHttpCode());
             return ex;
         }
 
@@ -405,7 +425,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (objectName != null)
             {
-                Equal(objectName, ex.ObjectName);
+                Assert.Equal(objectName, ex.ObjectName);
             }
 
             return ex;
@@ -421,9 +441,10 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <remarks>
         /// Unlike other Throws* methods, this method does not enforce running the exception delegate with a known Thread Culture.
         /// </remarks>
-        public static async Task<TException> ThrowsAsync<TException>(Func<Task> testCode)
+        public static async Task<TException> ThrowsAsync<TException>(Func<Task> testCode, bool allowDerivedExceptions = false)
             where TException : Exception
         {
+            Type exceptionType = typeof(TException);
             Exception exception = null;
             try
             {
@@ -436,8 +457,56 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             {
                 exception = ex;
             }
-            VerifyException(typeof(TException), exception);
+
+            if (exception == null)
+            {
+                throw new ThrowsException(exceptionType);
+            }
+
+            var typedException = exception as TException;
+            if (typedException == null || (!allowDerivedExceptions && typedException.GetType() != typeof(TException)))
+            {
+                throw new ThrowsException(exceptionType, exception);
+            }
+
             return (TException)exception;
+        }
+
+        /// <summary>
+        /// Verifies that an exception of the given type (or optionally a derived type) is thrown.
+        /// Also verifies that the exception message matches.
+        /// </summary>
+        /// <typeparam name="TException">The type of the exception expected to be thrown</typeparam>
+        /// <param name="testCode">A delegate to the code to be tested</param>
+        /// <param name="exceptionMessage">The exception message to verify</param>
+        /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
+        /// <returns>The exception that was thrown, when successful</returns>
+        /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
+        public static async Task<TException> ThrowsAsync<TException>(Func<Task> testCode, string exceptionMessage, bool allowDerivedExceptions = false, bool partialMatch = false)
+            where TException : Exception
+        {
+            var ex = await ThrowsAsync<TException>(testCode, allowDerivedExceptions);
+            VerifyExceptionMessage(ex, exceptionMessage, partialMatch);
+            return ex;
+        }
+
+        /// <summary>
+        /// Verifies that the code throws an ArgumentNullException (or optionally any exception which derives from it).
+        /// </summary>
+        /// <param name="testCode">A delegate to the code to be tested</param>
+        /// <param name="paramName">The name of the parameter that should throw the exception</param>
+        /// <returns>The exception that was thrown, when successful</returns>
+        /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
+        public static async Task<ArgumentNullException> ThrowsArgumentNullAsync(Func<Task> testCode, string paramName)
+        {
+            var ex = await ThrowsAsync<ArgumentNullException>(testCode);
+
+            if (paramName != null)
+            {
+                Assert.Equal(paramName, ex.ParamName);
+            }
+
+            return ex;
         }
 
         // We've re-implemented all the xUnit.net Throws code so that we can get this 
@@ -445,7 +514,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         // of AggregateException. In addition to unwrapping exceptions, this method ensures 
         // that tests are executed in with a known set of Culture and UICulture. This prevents
         // tests from failing when executed on a non-English machine. 
-        private static Exception RecordException(Action testCode)
+        public static Exception RecordException(Action testCode)
         {
             try
             {
@@ -491,11 +560,11 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             {
                 if (!partialMatch)
                 {
-                    Equal(expectedMessage, exception.Message);
+                    Assert.Equal(expectedMessage, exception.Message);
                 }
                 else
                 {
-                    Contains(expectedMessage, exception.Message);
+                    Assert.Contains(expectedMessage, exception.Message);
                 }
             }
         }
@@ -507,16 +576,6 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             public ThrowsException(Type type) : base(type) { }
 
             public ThrowsException(Type type, Exception ex) : base(type, ex) { }
-
-            protected override bool ExcludeStackFrame(string stackFrame)
-            {
-                if (stackFrame.StartsWith("at Microsoft.Test.AspNet.OData.TestCommon.Assert.", StringComparison.OrdinalIgnoreCase))
-                {
-                    return true;
-                }
-
-                return base.ExcludeStackFrame(stackFrame);
-            }
         }
     }
 }

@@ -12,6 +12,7 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -32,7 +33,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("CopyItemsToCollectionData")]
+        [MemberData(nameof(CopyItemsToCollectionData))]
         public void CopyItemsToCollection(IList oldCollection, IEnumerable newCollection)
         {
             oldCollection.AddToCollection(newCollection, typeof(int), typeof(CollectionDeserializationHelpersTest), "PropertyName", newCollection.GetType());

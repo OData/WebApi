@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Template
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Template
         public void Ctor_ThrowsArgumentNull_EntitySetSegment()
         {
             // Assert
-            Assert.ThrowsArgumentNull(() => new EntitySetSegmentTemplate(segment: null), "segment");
+            ExceptionAssert.ThrowsArgumentNull(() => new EntitySetSegmentTemplate(segment: null), "segment");
         }
 
         [Fact]

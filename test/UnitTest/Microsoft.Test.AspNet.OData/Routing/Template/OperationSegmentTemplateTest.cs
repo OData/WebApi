@@ -8,6 +8,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Template
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Template
         public void Ctor_ThrowsArgumentNull_OperationSegment()
         {
             // Assert
-            Assert.ThrowsArgumentNull(() => new OperationSegmentTemplate(segment: null), "segment");
+            ExceptionAssert.ThrowsArgumentNull(() => new OperationSegmentTemplate(segment: null), "segment");
         }
 
         [Fact]

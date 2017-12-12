@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -15,6 +16,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -25,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void Get_OpenEntityType(bool enableNullDynamicProperty)
+        public async Task Get_OpenEntityType(bool enableNullDynamicProperty)
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/SimpleOpenCustomers(9)";
@@ -38,11 +40,11 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/Microsoft.Test.AspNet.OData.TestCommon.SimpleVipCustomer/$entity", result["@odata.context"]);
             Assert.Equal("#Microsoft.Test.AspNet.OData.TestCommon.SimpleVipCustomer", result["@odata.type"]);
             Assert.Equal(9, result["CustomerId"]);
@@ -66,7 +68,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token&$filter=Token ne null", new[] { 2, 4 })]
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$orderby=Token desc&$filter=Token ne null", new[] { 4, 2 })]
         [InlineData("http://localhost/odata/SimpleOpenCustomers?$filter=Token ne null", new[] { 2, 4 })]
-        public void Get_OpenEntityTypeWithOrderbyAndFilter(string uri, int[] customerIds)
+        public async Task Get_OpenEntityTypeWithOrderbyAndFilter(string uri, int[] customerIds)
         {
             // Arrange
             var configuration = new[] { typeof(SimpleOpenCustomersController) }.GetHttpConfiguration();
@@ -77,11 +79,11 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             var resultArray = result["value"] as JArray;
             Assert.Equal(2, resultArray.Count);
             for (var i = 0; i < customerIds.Length; i++)
@@ -89,7 +91,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Get_OpenEntityType_Enum_Collection_Property()
+        public async Task Get_OpenEntityType_Enum_Collection_Property()
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers(1)";
@@ -101,11 +103,11 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#UntypedSimpleOpenCustomers/$entity", result["@odata.context"]);
             Assert.Equal("#Collection(NS.Color)", result["Colors@odata.type"]);
             Assert.Equal(new JArray(new[] { "Red", "0" , "Red"}), result["Colors"]);
@@ -117,7 +119,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("(1)/DeclaredNumbers/$count", "2")]
         [InlineData("(1)/DeclaredColors/$count", "3")]
         [InlineData("(1)/DeclaredAddresses/$count", "2")]
-        public void Get_UnTyped_DollarCount(string requestUri, string expectedResult)
+        public async Task Get_UnTyped_DollarCount(string requestUri, string expectedResult)
         {
             // Arrange
             var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
@@ -126,18 +128,18 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpResponseMessage response = client.GetAsync(_untypedCustomerRequestRooturl + requestUri).Result;
+            HttpResponseMessage response = await client.GetAsync(_untypedCustomerRequestRooturl + requestUri);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(expectedResult, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expectedResult, await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
         [InlineData("(1)/Color/$value", "Red")]
         [InlineData("(1)/Color", "Red")]
         [InlineData("(1)/DeclaredColors", "0")]
-        public void Get_UnTyped_Enum_Collection_Property(string requestUri, string expectedContainsResult)
+        public async Task Get_UnTyped_Enum_Collection_Property(string requestUri, string expectedContainsResult)
         {
             // Arrange
             var configuration = new[] { typeof(UntypedSimpleOpenCustomersController) }.GetHttpConfiguration();
@@ -146,15 +148,15 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpResponseMessage response = client.GetAsync(_untypedCustomerRequestRooturl + requestUri).Result;
+            HttpResponseMessage response = await client.GetAsync(_untypedCustomerRequestRooturl + requestUri);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Contains(expectedContainsResult, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expectedContainsResult, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void CanDispatch_ActionPayload_With_EdmEnumObject()
+        public async Task CanDispatch_ActionPayload_With_EdmEnumObject()
         {
             const string RequestUri = "http://localhost/odata/UntypedSimpleOpenCustomers(1)/NS.AddColor";
             const string Payload = @"{ 
@@ -170,14 +172,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
         }
 
         [Fact]
-        public void Get_OpenEntityTypeWithSelect()
+        public async Task Get_OpenEntityTypeWithSelect()
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/SimpleOpenCustomers?$select=Token";
@@ -189,11 +191,11 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             var resultArray = result["value"] as JArray;
             Assert.Equal(6, resultArray.Count);
             Assert.NotNull(resultArray[2]["Token"]);//customer 2 has a token
@@ -201,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Post_OpenEntityType()
+        public async Task Post_OpenEntityType()
         {
             // Arrange
             const string Payload = "{" +
@@ -230,14 +232,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
         }
 
         [Fact]
-        public void Post_UnTyped_OpenEntityType()
+        public async Task Post_UnTyped_OpenEntityType()
         {
             // Arrange
             const string Payload = "{" +
@@ -268,14 +270,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, _untypedCustomerRequestRooturl);
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
         }
 
         [Fact]
-        public void Patch_OpenEntityType()
+        public async Task Patch_OpenEntityType()
         {
             // Arrange
             const string Payload = "{" +
@@ -297,11 +299,11 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             Assert.Equal(99, result["CustomerId"]);
             Assert.Equal("ChangedName", result["Name"]);
@@ -317,7 +319,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Put_OpenEntityType()
+        public async Task Put_OpenEntityType()
         {
             // Arrange
             const string Payload = "{" +
@@ -337,7 +339,7 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -494,7 +496,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Equal("ChangedName", changedCustomer.Name);
             Assert.Null(changedCustomer.Address);
             Assert.Null(changedCustomer.Website);
-            Assert.Equal(1, changedCustomer.CustomerProperties.Count);
+            Assert.Single(changedCustomer.CustomerProperties);
             return Updated(changedCustomer); // Updated(customer);
         }
 

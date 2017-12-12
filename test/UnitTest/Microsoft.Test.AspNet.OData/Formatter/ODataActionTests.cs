@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -39,7 +41,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void CanDispatch_ActionPayload_ToBoundAction()
+        public async Task CanDispatch_ActionPayload_ToBoundAction()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers(1)/org.odata.DoSomething");
@@ -57,8 +59,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -74,7 +76,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }";
 
         [Fact]
-        public void CanDispatch_ActionPayloadWithEntity_ToBoundAction()
+        public async Task CanDispatch_ActionPayloadWithEntity_ToBoundAction()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/Customers/org.odata.MyAction");
@@ -84,8 +86,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -93,7 +95,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void CanDispatch_ActionPayloadWithEntity_ToBoundAction_UnTyped()
+        public async Task CanDispatch_ActionPayloadWithEntity_ToBoundAction_UnTyped()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/UntypedCustomers/NS.MyAction");
@@ -107,8 +109,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -118,7 +120,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Theory]
         [InlineData("org.odata.DoSomething", "DoSomething")]
         [InlineData("customize.CNSAction", "CNSAction")]
-        public void Response_Includes_ActionLink_WithAcceptHeader(string fullname, string name)
+        public async Task Response_Includes_ActionLink_WithAcceptHeader(string fullname, string name)
         {
             // Arrange
             string editLink = "http://localhost/Customers(1)";
@@ -129,8 +131,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
             dynamic result = JObject.Parse(responseString);
             dynamic action = result[expectedMetadata];
 
@@ -141,21 +143,21 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void Response_Includes_ActionLink_WithDollarFormat()
+        public async Task Response_Includes_ActionLink_WithDollarFormat()
         {
             // Arrange
             string requestUri = "http://localhost/Customers?$format=application/json;odata.metadata=full";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.GetAsync(requestUri);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Contains("\"target\":\"http://localhost/Customers(4)/org.odata.DoSomething\"", responseString);
         }
 
         [Fact]
-        public void Response_Includes_ActionLinkForFeed_WithAcceptHeader()
+        public async Task Response_Includes_ActionLinkForFeed_WithAcceptHeader()
         {
             // Arrange
             string editLink = "http://localhost/Customers";
@@ -164,8 +166,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
             dynamic result = JObject.Parse(responseString);
             dynamic action = result["#org.odata.MyAction"];
 
@@ -176,14 +178,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void Response_Includes_ActionLinkForFeed_WithDollarFormat()
+        public async Task Response_Includes_ActionLinkForFeed_WithDollarFormat()
         {
             // Arrange
             string requestUri = "http://localhost/Customers?$format=application/json;odata.metadata=full";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.GetAsync(requestUri);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Contains("\"target\":\"http://localhost/Customers/org.odata.MyAction\"", responseString);
@@ -351,7 +353,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         private void ValidateAddresses(IList<ODataActionTests.Address> addresses)
         {
             Assert.NotNull(addresses);
-            Assert.Equal(1, addresses.Count);
+            Assert.Single(addresses);
             ValidateAddress(addresses[0]);
         }
 

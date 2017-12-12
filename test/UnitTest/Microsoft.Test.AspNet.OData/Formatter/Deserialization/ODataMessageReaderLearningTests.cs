@@ -5,10 +5,12 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -25,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataCollectionReader());
+                ExceptionAssert.Throws<ODataException>(() => reader.CreateODataCollectionReader());
             }
         }
 
@@ -42,7 +44,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataCollectionReader(expectedItemTypeReference));
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataCollectionReader(expectedItemTypeReference));
             }
         }
 
@@ -57,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceReader());
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceReader());
             }
         }
 
@@ -73,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataResourceReader(null, entityType));
+                ExceptionAssert.Throws<ODataException>(() => reader.CreateODataResourceReader(null, entityType));
             }
         }
 
@@ -89,7 +91,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceReader(null, complexType));
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceReader(null, complexType));
             }
         }
 
@@ -105,7 +107,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceReader(entitySet, null));
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceReader(entitySet, null));
             }
         }
 
@@ -120,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader());
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceSetReader());
             }
         }
 
@@ -136,7 +138,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.CreateODataResourceSetReader(entityType));
+                ExceptionAssert.Throws<ODataException>(() => reader.CreateODataResourceSetReader(entityType));
             }
         }
 
@@ -152,7 +154,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader(complexType));
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceSetReader(complexType));
             }
         }
 
@@ -168,60 +170,60 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.CreateODataResourceSetReader(entitySet, null));
+                ExceptionAssert.DoesNotThrow(() => reader.CreateODataResourceSetReader(entitySet, null));
             }
         }
 
         [Fact]
-        public void TestReadEntityReferenceLink_WithoutNavigationProperty_Throws()
+        public async Task TestReadEntityReferenceLink_WithoutNavigationProperty_Throws()
         {
             // Arrange
-            IODataRequestMessage request = CreateRequest("{\"odata.id\":\"aa:b\"}");
+            IODataRequestMessage request = await CreateRequest("{\"odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.Throws<ODataException>(() => reader.ReadEntityReferenceLink());
+                ExceptionAssert.Throws<ODataException>(() => reader.ReadEntityReferenceLink());
             }
         }
 
         [Fact]
-        public void TestReadEntityReferenceLink_WithNavigationProperty_DoesNotThrow()
+        public async Task TestReadEntityReferenceLink_WithNavigationProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateRequest("{\"@odata.id\":\"aa:b\"}");
+            IODataRequestMessage request = await CreateRequest("{\"@odata.id\":\"aa:b\"}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.ReadEntityReferenceLink());
+                ExceptionAssert.DoesNotThrow(() => reader.ReadEntityReferenceLink());
             }
         }
 
         [Fact]
-        public void TestReadProperty_WithoutStructuralPropertyOrTypeReference_DoesNotThrows()
+        public async Task TestReadProperty_WithoutStructuralPropertyOrTypeReference_DoesNotThrows()
         {
             // Arrange
-            IODataRequestMessage request = CreateRequest("{\"value\":1}");
+            IODataRequestMessage request = await CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
 
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.ReadProperty());
+                ExceptionAssert.DoesNotThrow(() => reader.ReadProperty());
             }
         }
 
         [Fact]
-        public void TestReadProperty_WithStructuralProperty_DoesNotThrow()
+        public async Task TestReadProperty_WithStructuralProperty_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateRequest("{\"value\":1}");
+            IODataRequestMessage request = await CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmStructuralProperty property = model.EntityContainer.EntitySets().First().EntityType().StructuralProperties().First();
@@ -229,15 +231,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.ReadProperty(property));
+                ExceptionAssert.DoesNotThrow(() => reader.ReadProperty(property));
             }
         }
 
         [Fact]
-        public void TestReadProperty_WithTypeReference_DoesNotThrow()
+        public async Task TestReadProperty_WithTypeReference_DoesNotThrow()
         {
             // Arrange
-            IODataRequestMessage request = CreateRequest("{\"value\":1}");
+            IODataRequestMessage request = await CreateRequest("{\"value\":1}");
             ODataMessageReaderSettings settings = CreateSettings();
             IEdmModel model = CreateModel();
             IEdmTypeReference expectedPropertyTypeReference = new EdmPrimitiveTypeReference(
@@ -246,7 +248,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             using (ODataMessageReader reader = new ODataMessageReader(request, settings, model))
             {
                 // Act & Assert
-                Assert.DoesNotThrow(() => reader.ReadProperty(expectedPropertyTypeReference));
+                ExceptionAssert.DoesNotThrow(() => reader.ReadProperty(expectedPropertyTypeReference));
             }
         }
 
@@ -264,13 +266,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             return ODataMessageWrapperHelper.Create(Stream.Null, headers);
         }
 
-        private static IODataRequestMessage CreateRequest(string body)
+        private static async Task<IODataRequestMessage> CreateRequest(string body)
         {
             HttpContent content = new StringContent(body);
             HttpContentHeaders headers = content.Headers;
             headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
-            return ODataMessageWrapperHelper.Create(content.ReadAsStreamAsync().Result, headers);
+            return ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), headers);
         }
 
         private static IEdmModel CreateModel()

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
@@ -18,6 +19,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -32,35 +34,35 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("QueryCompositionCustomerLowLevel")]
         [InlineData("QueryCompositionCustomerGlobal")]
         [InlineData("QueryCompositionCustomerWithTaskOfIEnumerable")]
-        public void QueryComposition_Works(string controllerName)
+        public async Task QueryComposition_Works(string controllerName)
         {
             HttpServer server = new HttpServer(InitializeConfiguration(controllerName, useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 String.Format("http://localhost:8080/{0}?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", controllerName));
-            response.EnsureSuccessStatusCode();
-            var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var customers = await response.Content.ReadAsAsync<List<QueryCompositionCustomer>>();
 
             Assert.Equal(new[] { 22 }, customers.Select(c => c.Id));
         }
 
         [Fact]
-        public void QueryComposition_Works_WithCustomEdmModel()
+        public async Task QueryComposition_Works_WithCustomEdmModel()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", useCustomEdmModel: true));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 String.Format("http://localhost:8080/QueryCompositionCustomer?$filter=Id ge 22 and Address/City ne 'seattle'&$orderby=Name&$skip=0&$top=1", "QueryCompositionCustomer"));
-            response.EnsureSuccessStatusCode();
-            var customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var customers = await response.Content.ReadAsAsync<List<QueryCompositionCustomer>>();
 
             Assert.Equal(new[] { 22 }, customers.Select(c => c.Id));
         }
 
         [Fact]
-        public void QueryComposition_ThrowsException_ForCaseSensitive()
+        public async Task QueryComposition_ThrowsException_ForCaseSensitive()
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
@@ -73,16 +75,16 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Contains("The query parameter '$fIlTer' is not supported.", response.Content.ReadAsStringAsync().Result);
+            Assert.Contains("The query parameter '$fIlTer' is not supported.", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void QueryComposition_WorkAsExpect_ForCaseInsensitive()
+        public async Task QueryComposition_WorkAsExpect_ForCaseInsensitive()
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
@@ -91,46 +93,46 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomer" + caseInSensitive);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Contains("[{\"Name\":\"Highest\",\"Add", response.Content.ReadAsStringAsync().Result);
+            Assert.Contains("[{\"Name\":\"Highest\",\"Add", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ODataQueryOptionsOfT_Works()
+        public async Task ODataQueryOptionsOfT_Works()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT", true));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomerLowLevel_ODataQueryOptionsOfT/?$filter=Id ge 22");
-            response.EnsureSuccessStatusCode();
-            int count = response.Content.ReadAsAsync<int>().Result;
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            int count = await response.Content.ReadAsAsync<int>();
             Assert.Equal(2, count);
         }
 
         [Fact]
-        public void AnonymousTypes_Work_With_EnableQueryAttribute()
+        public async Task AnonymousTypes_Work_With_EnableQueryAttribute()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionAnonymousTypesController", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionAnonymousTypes/?$filter=Id ge 5");
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
             Type anon_type = new { Id = default(int) }.GetType();
-            dynamic result = response.Content.ReadAsAsync(anon_type.MakeArrayType()).Result;
+            dynamic result = await response.Content.ReadAsAsync(anon_type.MakeArrayType());
 
             Assert.Equal(5, result[0].Id);
             Assert.Equal(6, result.Length);
         }
 
         [Fact]
-        public void Queryable_UsesRouteModel_ForMultipleModels()
+        public async Task Queryable_UsesRouteModel_ForMultipleModels()
         {
             // Model 1 only has Name, Model 2 only has Age
             ODataModelBuilder builder1 = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
@@ -151,36 +153,36 @@ namespace Microsoft.Test.AspNet.OData.Query
             using (HttpClient client = new HttpClient(host))
             {
                 // Model 1 has the Name property but not the Age property
-                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Name", HttpStatusCode.OK);
-                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Age", HttpStatusCode.BadRequest);
+                await AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Name", HttpStatusCode.OK);
+                await AssertRespondsWithExpectedStatusCode(client, "http://localhost/v1/People?$orderby=Age", HttpStatusCode.BadRequest);
 
                 // Model 2 has the Age property but not the Name property
-                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Name", HttpStatusCode.BadRequest);
-                AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Age", HttpStatusCode.OK);
+                await AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Name", HttpStatusCode.BadRequest);
+                await AssertRespondsWithExpectedStatusCode(client, "http://localhost/v2/People?$orderby=Age", HttpStatusCode.OK);
             }
         }
 
         [Fact]
-        public void QueryValidationErrors_Are_SentToTheClient()
+        public async Task QueryValidationErrors_Are_SentToTheClient()
         {
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomerValidation", useCustomEdmModel: false));
             HttpClient client = new HttpClient(server);
 
             // skip = 1 is ok
-            HttpResponseMessage response = GetResponse(client, server.Configuration,
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=1");
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            List<QueryCompositionCustomer> customers = response.Content.ReadAsAsync<List<QueryCompositionCustomer>>().Result;
+            List<QueryCompositionCustomer> customers = await response.Content.ReadAsAsync<List<QueryCompositionCustomer>>();
             Assert.Equal(new[] { 11, 22, 33 }, customers.Select(customer => customer.Id));
 
             // skip = 2 exceeds the limit
-            response = GetResponse(client, server.Configuration,
+            response = await GetResponse(client, server.Configuration,
                 "http://localhost:8080/QueryCompositionCustomerValidation/?$skip=2");
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            Assert.True(response.Content.ReadAsStringAsync().Result.Contains("The limit of '1' for Skip query has been exceeded. The value from the incoming request is '2'."));
+            Assert.Contains("The limit of '1' for Skip query has been exceeded. The value from the incoming request is '2'.", await response.Content.ReadAsStringAsync());
         }
 
         public static TheoryDataSet<string, IEnumerable<int>> PrimitiveTypesQueryCompositionData
@@ -201,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("PrimitiveTypesQueryCompositionData")]
+        [MemberData(nameof(PrimitiveTypesQueryCompositionData))]
         public virtual void PrimitiveTypesQueryComposition(string query, IEnumerable<int> expectedResults)
         {
             HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
@@ -214,7 +216,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.Equal(expectedResults, results);
         }
 
-        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel, 
+        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel,
             ODataUriResolver resolver = null)
         {
             var controllers = new[]
@@ -265,17 +267,17 @@ namespace Microsoft.Test.AspNet.OData.Query
             return config;
         }
 
-        private static HttpResponseMessage GetResponse(HttpClient client, HttpConfiguration config, string requestUri)
+        private static async Task<HttpResponseMessage> GetResponse(HttpClient client, HttpConfiguration config, string requestUri)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.SetConfiguration(config);
             request.EnableODataDependencyInjectionSupport("default");
-            return client.SendAsync(request).Result;
+            return await client.SendAsync(request);
         }
 
-        private static void AssertRespondsWithExpectedStatusCode(HttpClient client, string uri, HttpStatusCode expectedStatusCode)
+        private static async Task AssertRespondsWithExpectedStatusCode(HttpClient client, string uri, HttpStatusCode expectedStatusCode)
         {
-            using (HttpResponseMessage response = client.GetAsync(uri).Result)
+            using (HttpResponseMessage response = await client.GetAsync(uri))
             {
                 Assert.Equal(expectedStatusCode, response.StatusCode);
             }

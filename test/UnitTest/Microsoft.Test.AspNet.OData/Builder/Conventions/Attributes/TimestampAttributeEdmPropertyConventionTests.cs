@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -72,12 +72,12 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             // Arrange
             PropertyInfo property = CreateMockPropertyInfo("TestProperty");
             PropertyInfo otherProperty = CreateMockPropertyInfo("OtherTestProperty");
-            EntityTypeConfiguration baseEntityType = new EntityTypeConfiguration();
-            Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>().SetupAllProperties();
-            mockEntityType.Setup(c => c.BaseType).Returns(baseEntityType);
-            mockEntityType.SetupGet(c => c.Kind).Returns(EdmTypeKind.Entity);
+            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            EntityTypeConfiguration baseEntityType = new EntityTypeConfiguration(modelBuilder, typeof(object));
 
-            EntityTypeConfiguration entityType = mockEntityType.Object;
+            EntityTypeConfiguration entityType = new EntityTypeConfiguration(modelBuilder, typeof(Int32));
+            entityType.BaseType = baseEntityType;
+
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, entityType);
             entityType.ExplicitProperties.Add(property, primitiveProperty);
             baseEntityType.ExplicitProperties.Add(otherProperty, new PrimitivePropertyConfiguration(otherProperty, baseEntityType));

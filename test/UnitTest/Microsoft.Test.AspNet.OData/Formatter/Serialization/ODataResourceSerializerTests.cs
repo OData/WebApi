@@ -23,6 +23,7 @@ using Microsoft.Test.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -85,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void Ctor_ThrowsArgumentNull_SerializerProvider()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataResourceSerializer(serializerProvider: null),
                 "serializerProvider");
         }
@@ -93,7 +94,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: _customer, type: typeof(Customer), messageWriter: null, writeContext: null),
                 "messageWriter");
         }
@@ -102,7 +103,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_ThrowsArgumentNull_WriteContext()
         {
             ODataMessageWriter messageWriter = new ODataMessageWriter(new Mock<IODataRequestMessage>().Object);
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: _customer, type: typeof(Customer), messageWriter: messageWriter, writeContext: null),
                 "writeContext");
         }
@@ -129,7 +130,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_Writer()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObjectInline(graph: null, expectedType: null, writer: null, writeContext: new ODataSerializerContext()),
                 "writer");
         }
@@ -137,7 +138,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void WriteObjectInline_ThrowsArgumentNull_WriteContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObjectInline(graph: null, expectedType: null, writer: new Mock<ODataWriter>().Object, writeContext: null),
                 "writeContext");
         }
@@ -146,7 +147,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObjectInline_ThrowsSerializationException_WhenGraphIsNull()
         {
             ODataWriter messageWriter = new Mock<ODataWriter>().Object;
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => _serializer.WriteObjectInline(graph: null, expectedType: null, writer: messageWriter, writeContext: new ODataSerializerContext()),
                 "Cannot serialize a null 'Resource'.");
         }
@@ -579,7 +580,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateResource_ThrowsArgumentNull_SelectExpandNode()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateResource(selectExpandNode: null, resourceContext: _entityContext),
                 "selectExpandNode");
         }
@@ -587,7 +588,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateResource_ThrowsArgumentNull_EntityContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateResource(new SelectExpandNode(), resourceContext: null),
                 "resourceContext");
         }
@@ -831,7 +832,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
 
             // Assert
-            Assert.Equal(resource.TypeName, "Default.Customer");
+            Assert.Equal("Default.Customer", resource.TypeName);
             Assert.Equal(6, resource.Properties.Count());
 
             // Verify the declared properties
@@ -927,7 +928,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataResource resource = serializer.CreateResource(selectExpandNode, entityContext);
 
             // Assert
-            Assert.Equal(resource.TypeName, "Default.Customer");
+            Assert.Equal("Default.Customer", resource.TypeName);
             Assert.Equal(count, resource.Properties.Count());
 
             // Verify the declared properties
@@ -959,7 +960,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateStructuralProperty_ThrowsArgumentNull_StructuralProperty()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateStructuralProperty(structuralProperty: null, resourceContext: null),
                 "structuralProperty");
         }
@@ -969,7 +970,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             Mock<IEdmStructuralProperty> property = new Mock<IEdmStructuralProperty>();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateStructuralProperty(property.Object, resourceContext: null),
                 "resourceContext");
         }
@@ -989,7 +990,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             var serializer = new ODataResourceSerializer(serializerProvider.Object);
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => serializer.CreateStructuralProperty(property.Object, new ResourceContext { EdmObject = entity }),
                 "'Namespace.Name' cannot be serialized using the ODataMediaTypeFormatter.");
         }
@@ -1036,7 +1037,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateNavigationLink_ThrowsArgumentNull_NavigationProperty()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateNavigationLink(navigationProperty: null, resourceContext: _entityContext),
                 "navigationProperty");
         }
@@ -1045,7 +1046,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void CreateNavigationLink_ThrowsArgumentNull_EntityContext()
         {
             IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateNavigationLink(navigationProperty, resourceContext: null),
                 "resourceContext");
         }
@@ -1092,7 +1093,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateODataAction_ThrowsArgumentNull_Action()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateODataAction(action: null, resourceContext: null),
                 "action");
         }
@@ -1102,7 +1103,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             IEdmAction action = new Mock<IEdmAction>().Object;
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateODataAction(action, resourceContext: null),
                 "resourceContext");
         }
@@ -1207,7 +1208,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateSelectExpandNode_ThrowsArgumentNull_EntityContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateSelectExpandNode(resourceContext: null),
                 "resourceContext");
         }

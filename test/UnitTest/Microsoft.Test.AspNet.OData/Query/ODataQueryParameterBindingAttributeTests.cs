@@ -24,6 +24,7 @@ using Microsoft.Test.AspNet.OData.Query.Controllers;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -62,8 +63,8 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("GoodMethodNames")]
-        public void DifferentReturnTypeWorks(string methodName, Type entityClrType)
+        [MemberData(nameof(GoodMethodNames))]
+        public async Task DifferentReturnTypeWorks(string methodName, Type entityClrType)
         {
             // Arrange
             ODataModelBuilder odataModel = new ODataModelBuilder();
@@ -83,18 +84,18 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpParameterDescriptor parameterDescriptor = new ReflectedHttpParameterDescriptor(actionDescriptor, parameterInfo);
 
             // Act
-            attribute.GetBinding(parameterDescriptor).ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait();
+            await attribute.GetBinding(parameterDescriptor).ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None);
 
             // Assert
-            Assert.Equal(1, actionContext.ActionArguments.Count);
+            Assert.Single(actionContext.ActionArguments);
             ODataQueryOptions options = actionContext.ActionArguments[parameterDescriptor.ParameterName] as ODataQueryOptions;
             Assert.NotNull(options);
             Assert.Equal(entityClrType, options.Context.ElementClrType);
         }
 
         [Theory]
-        [PropertyData("BadMethodNames")]
-        public void BadReturnTypeThrows(string methodName)
+        [MemberData(nameof(BadMethodNames))]
+        public async Task BadReturnTypeThrows(string methodName)
         {
             // Arrange
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
@@ -114,8 +115,8 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpParameterBinding binding = attribute.GetBinding(parameterDescriptor);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
+            await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None),
                 String.Format(
                         "Cannot create an EDM model as the action '{0}' on controller '{1}' has a return type '{2}' that does not implement IEnumerable<T>.",
                         actionDescriptor.ActionName,
@@ -124,7 +125,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Fact]
-        public void VoidReturnTypeThrows()
+        public async Task VoidReturnTypeThrows()
         {
             // Arrange
             ODataQueryParameterBindingAttribute attribute = new ODataQueryParameterBindingAttribute();
@@ -142,8 +143,8 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpParameterBinding binding = attribute.GetBinding(parameterDescriptor);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None).Wait(),
+            await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => binding.ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None),
                 "Cannot create an EDM model as the action 'GetVoidReturn' on controller 'CustomerLowLevel' has a void return type.");
         }
 
@@ -179,8 +180,8 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("GoodMethodNames")]
-        public void ExecuteBindingAsync_Works_WithPath(string methodName, Type entityClrType)
+        [MemberData(nameof(GoodMethodNames))]
+        public async Task ExecuteBindingAsync_Works_WithPath(string methodName, Type entityClrType)
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(
@@ -214,12 +215,11 @@ namespace Microsoft.Test.AspNet.OData.Query
                 methodInfo.GetParameters().First());
 
             // Act
-            new ODataQueryParameterBindingAttribute().GetBinding(parameterDescriptor)
-                .ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None)
-                .Wait();
+            await new ODataQueryParameterBindingAttribute().GetBinding(parameterDescriptor)
+                .ExecuteBindingAsync((ModelMetadataProvider)null, actionContext, CancellationToken.None);
 
             // Assert
-            Assert.Equal(1, actionContext.ActionArguments.Count);
+            Assert.Single(actionContext.ActionArguments);
             ODataQueryOptions options =
                 actionContext.ActionArguments[parameterDescriptor.ParameterName] as ODataQueryOptions;
             Assert.NotNull(options);

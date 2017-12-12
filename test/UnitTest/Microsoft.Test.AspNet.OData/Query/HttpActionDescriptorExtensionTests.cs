@@ -8,8 +8,8 @@ using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Query.Controllers;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {

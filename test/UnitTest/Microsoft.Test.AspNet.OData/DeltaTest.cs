@@ -11,6 +11,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -20,6 +21,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData
@@ -45,13 +47,13 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_entityType()
         {
-            Assert.ThrowsArgumentNull(() => new Delta<Base>(structuralType: null), "structuralType");
+            ExceptionAssert.ThrowsArgumentNull(() => new Delta<Base>(structuralType: null), "structuralType");
         }
 
         [Fact]
         public void Ctor_ThrowsInvalidOperation_If_EntityType_IsNotAssignable_To_TEntityType()
         {
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => new Delta<Derived>(typeof(AnotherDerived)),
                 "The actual entity type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived' is not assignable to the expected type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived'.");
         }
@@ -64,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("DeltaModelPropertyNamesData")]
+        [MemberData(nameof(DeltaModelPropertyNamesData))]
         public void RoundTrip_Properties(string propertyName, object value)
         {
             Delta<DeltaModel> delta = new Delta<DeltaModel>();
@@ -88,7 +90,7 @@ namespace Microsoft.Test.AspNet.OData
             var idelta = delta as IDelta;
             // modify in the way we expect the formatter too.
             idelta.TrySetPropertyValue("City", "Sammamish");
-            Assert.Equal(1, idelta.GetChangedPropertyNames().Count());
+            Assert.Single(idelta.GetChangedPropertyNames());
             Assert.Equal("City", idelta.GetChangedPropertyNames().Single());
 
             // read the property back
@@ -100,8 +102,8 @@ namespace Microsoft.Test.AspNet.OData
             delta.StreetAddress = "23213 NE 15th Ct";
             var mods = idelta.GetChangedPropertyNames().ToArray();
             Assert.Equal(2, mods.Count());
-            Assert.True(mods.Contains("StreetAddress"));
-            Assert.True(mods.Contains("City"));
+            Assert.Contains("StreetAddress", mods);
+            Assert.Contains("City", mods);
             Assert.Equal("23213 NE 15th Ct", delta.StreetAddress);
         }
 
@@ -211,7 +213,7 @@ namespace Microsoft.Test.AspNet.OData
             // unchanged values have been reset to defaults
             Assert.Equal(0, original.ID);
             Assert.Equal(0, original.ZipCode);
-            Assert.Equal(null, original.State);
+            Assert.Null(original.State);
             // changed values have been left unmodified
             Assert.Equal("Redmond", original.City);
             Assert.Equal("21110 NE 44th St", original.StreetAddress);
@@ -231,7 +233,7 @@ namespace Microsoft.Test.AspNet.OData
             // unchanged values have been reset to defaults
             Assert.Equal(0, original.ID);
             Assert.Equal(0, original.ZipCode);
-            Assert.Equal(null, original.State);
+            Assert.Null(original.State);
             // changed values have been updated to values in delta
             Assert.Equal("Sammamish", original.City);
             Assert.Equal("23213 NE 15th Ct", original.StreetAddress);
@@ -243,16 +245,16 @@ namespace Microsoft.Test.AspNet.OData
             dynamic delta = new Delta<AddressEntity>();
             delta.StreetAddress = "Test";
             var idelta = delta as IDelta;
-            Assert.Equal(1, idelta.GetChangedPropertyNames().Count());
+            Assert.Single(idelta.GetChangedPropertyNames());
             idelta.Clear();
-            Assert.Equal(0, idelta.GetChangedPropertyNames().Count());
+            Assert.Empty(idelta.GetChangedPropertyNames());
         }
 
         [Fact]
         public void CanCreateDeltaOfDerivedTypes()
         {
             var delta = new Delta<Base>(typeof(Derived));
-            Assert.IsType(typeof(Derived), delta.GetInstance());
+            Assert.IsType<Derived>(delta.GetInstance());
         }
 
         [Fact]
@@ -361,7 +363,7 @@ namespace Microsoft.Test.AspNet.OData
             dynamic delta = new Delta<InvalidDeltaModel>();
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndNullValue = new[] { "1" },
                 "The property 'CollectionPropertyWithoutSetAndNullValue' on type 'Microsoft.Test.AspNet.OData.DeltaTest+InvalidD" +
                 "eltaModel' returned a null value. The input stream contains collection items which cannot be added if " +
@@ -375,7 +377,7 @@ namespace Microsoft.Test.AspNet.OData
             dynamic delta = new Delta<InvalidDeltaModel>();
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndClear = new[] { "1" },
                 "The type 'System.Int32[]' of the property 'CollectionPropertyWithoutSetAndClear' on type 'Microsoft.Test." +
                 "AspNet.OData.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
@@ -390,7 +392,7 @@ namespace Microsoft.Test.AspNet.OData
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => delta.Patch(unrelatedEntity),
                 "original",
                 "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
@@ -404,7 +406,7 @@ namespace Microsoft.Test.AspNet.OData
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => delta.Put(unrelatedEntity),
                 "original",
                 "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
@@ -418,7 +420,7 @@ namespace Microsoft.Test.AspNet.OData
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => delta.CopyChangedValues(unrelatedEntity),
                 "original",
                 "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
@@ -432,7 +434,7 @@ namespace Microsoft.Test.AspNet.OData
             AnotherDerived unrelatedEntity = new AnotherDerived();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => delta.CopyUnchangedValues(unrelatedEntity),
                 "original",
                 "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
@@ -468,8 +470,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("ODataFormatter_Can_Read_Delta_DataSet")]
-        public void ODataFormatter_Can_Read_Delta(string propertyName, string propertyJsonValue, object expectedValue)
+        [MemberData(nameof(ODataFormatter_Can_Read_Delta_DataSet))]
+        public async Task ODataFormatter_Can_Read_Delta(string propertyName, string propertyJsonValue, object expectedValue)
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
@@ -494,7 +496,7 @@ namespace Microsoft.Test.AspNet.OData
                 content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;IEEE754Compatible=true");
 
                 // Act
-                delta = content.ReadAsAsync<Delta<DeltaModel>>(perRequestFormatters).Result;
+                delta = await content.ReadAsAsync<Delta<DeltaModel>>(perRequestFormatters);
             }
 
             // Assert
@@ -519,8 +521,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("ODataFormatter_Can_Read_Delta_DataSet_WithAlias")]
-        public void ODataFormatter_CanReadDelta_WithAlias(string propertyName, string propertyNameAlias, string propertyJsonValue, object expectedValue)
+        [MemberData(nameof(ODataFormatter_Can_Read_Delta_DataSet_WithAlias))]
+        public async Task ODataFormatter_CanReadDelta_WithAlias(string propertyName, string propertyNameAlias, string propertyJsonValue, object expectedValue)
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
@@ -546,7 +548,7 @@ namespace Microsoft.Test.AspNet.OData
                 content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
                 // Act
-                delta = content.ReadAsAsync<Delta<DeltaModelWithAlias>>(perRequestFormatters).Result;
+                delta = await content.ReadAsAsync<Delta<DeltaModelWithAlias>>(perRequestFormatters);
             }
 
             // Assert
@@ -569,7 +571,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet")]
+        [MemberData(nameof(TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet))]
         public void TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType(Type actualType)
         {
             // Arrange

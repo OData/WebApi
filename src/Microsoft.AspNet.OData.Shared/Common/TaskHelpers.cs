@@ -14,8 +14,6 @@ namespace Microsoft.AspNet.OData.Common
 #if NETFX
         private static readonly Task _defaultCompleted = Task.FromResult<AsyncVoid>(default(AsyncVoid));
 
-        private static readonly Task<object> _completedTaskReturningNull = Task.FromResult<object>(null);
-
         /// <summary>
         /// Returns a canceled Task. The task is completed, IsCanceled = True, IsFaulted = False.
         /// </summary>

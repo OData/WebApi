@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using Microsoft.AspNet.OData;
@@ -15,28 +16,28 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class MetadataControllerTest
     {
         [Fact]
-        public void DollarMetaData_Works_WithoutAcceptHeader()
+        public async Task DollarMetaData_Works_WithoutAcceptHeader()
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
+            Assert.Contains("<edmx:Edmx", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -53,21 +54,21 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetaDataWorks_AfterTracingIsEnabled()
+        public async Task DollarMetaDataWorks_AfterTracingIsEnabled()
         {
             HttpServer server = new HttpServer(GetConfiguration());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("<edmx:Edmx", response.Content.ReadAsStringAsync().Result);
+            Assert.Contains("<edmx:Edmx", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithMultipleModels()
+        public async Task DollarMetadata_Works_WithMultipleModels()
         {
             ODataConventionModelBuilder builder1 = new ODataConventionModelBuilder();
             builder1.EntitySet<FormatterPerson>("People1");
@@ -83,12 +84,12 @@ namespace Microsoft.Test.AspNet.OData
             config.MapODataServiceRoute("OData2", "v2", model2);
 
             HttpClient client = new HttpClient(server);
-            AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
-            AssertHasEntitySet(client, "http://localhost/v2/$metadata", "People2");
+            await AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
+            await AssertHasEntitySet(client, "http://localhost/v2/$metadata", "People2");
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithReferencialConstraint_IfForeignKeyAttributeOnNavigationProperty()
+        public async Task DollarMetadata_Works_WithReferencialConstraint_IfForeignKeyAttributeOnNavigationProperty()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -102,17 +103,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"ForeignCustomerId\" />",
-                response.Content.ReadAsStringAsync().Result);
+                await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithfForeignKeyAttribute()
+        public async Task DollarMetadata_Works_ForNullableReferencialConstraint_WithfForeignKeyAttribute()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -126,14 +127,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.Int32\" />", payload);
             Assert.Contains("<ReferentialConstraint Property=\"SupplierId\" ReferencedProperty=\"Id\" />", payload);
 
@@ -142,7 +143,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithCustomReferentialConstraints()
+        public async Task DollarMetadata_Works_ForNullableReferencialConstraint_WithCustomReferentialConstraints()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -161,13 +162,13 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
 
             // non-nullable
             Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.Int32\" />", payload);
@@ -181,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyAttributeAndRequiredAttribute()
+        public async Task DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyAttributeAndRequiredAttribute()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -195,14 +196,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
 
             // non-nullable
             Assert.Contains("<Property Name=\"SupplierId\" Type=\"Edm.String\" Nullable=\"false\" />", payload);
@@ -216,7 +217,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyDiscovery()
+        public async Task DollarMetadata_Works_ForNullableReferencialConstraint_WithForeignKeyDiscovery()
         {
             // Arrange
             const string expect =
@@ -244,17 +245,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithReferencialConstraint_IfForeignKeyAttributeOnForeignKeyProperty()
+        public async Task DollarMetadata_Works_WithReferencialConstraint_IfForeignKeyAttributeOnForeignKeyProperty()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -268,8 +269,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
-            string payload = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
+            string payload = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -280,7 +281,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithCustomReferentialConstraints()
+        public async Task DollarMetadata_Works_WithCustomReferentialConstraints()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -301,17 +302,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<ReferentialConstraint Property=\"CustomerId\" ReferencedProperty=\"OtherCustomerKey\" />",
-                response.Content.ReadAsStringAsync().Result);
+                await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithOnDeleteAction()
+        public async Task DollarMetadata_Works_WithOnDeleteAction()
         {
             // Arrange
             const string expect =
@@ -337,16 +338,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithMultipleReferentialConstraints()
+        public async Task DollarMetadata_Works_WithMultipleReferentialConstraints()
         {
             // Arrange
             const string expect =
@@ -371,16 +372,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithPrincipalKeyOnBaseType_ButBaseTypeNotInEdmModel()
+        public async Task DollarMetadata_Works_WithPrincipalKeyOnBaseType_ButBaseTypeNotInEdmModel()
         {
             // Arrange
             const string expect =
@@ -400,17 +401,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithMultipleReferentialConstraints_ForUntypeModel()
+        public async Task DollarMetadata_Works_WithMultipleReferentialConstraints_ForUntypeModel()
         {
             // Arrange
             EdmModel model = new EdmModel();
@@ -451,16 +452,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync("http://localhost/odata/$metadata").Result;
+            HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithOpenComplexType()
+        public async Task DollarMetadata_Works_WithOpenComplexType()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -473,17 +474,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<ComplexType Name=\"FormatterAddress\" OpenType=\"true\">",
-                response.Content.ReadAsStringAsync().Result);
+                await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithInheritanceOpenComplexType()
+        public async Task DollarMetadata_Works_WithInheritanceOpenComplexType()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -496,17 +497,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
             Assert.Contains("<ComplexType Name=\"FormatterUsAddress\" BaseType=\"Microsoft.Test.AspNet.OData.Formatter.FormatterAddress\" OpenType=\"true\">",
-                response.Content.ReadAsStringAsync().Result);
+                await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithDerivedOpenComplexType()
+        public async Task DollarMetadata_Works_WithDerivedOpenComplexType()
         {
             // Arrange
             const string expectMetadata =
@@ -536,16 +537,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Equal(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expectMetadata.Replace("'", "\""), await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithActionParameterNullable_ReturnTypeNullable()
+        public async Task DollarMetadata_Works_WithActionParameterNullable_ReturnTypeNullable()
         {
             // Arrange
             const string expectMetadata =
@@ -581,17 +582,17 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            var result = response.Content.ReadAsStringAsync().Result;
+            var result = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata.Replace("'", "\""), result);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithFunctionParameterNullable_ReturnTypeNullable()
+        public async Task DollarMetadata_Works_WithFunctionParameterNullable_ReturnTypeNullable()
         {
             // Arrange
             const string expectMetadata =
@@ -628,16 +629,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(expectMetadata.Replace("'", "\""), response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(expectMetadata.Replace("'", "\""), await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithAbstractEntityTypeWithoutKey()
+        public async Task DollarMetadata_Works_WithAbstractEntityTypeWithoutKey()
         {
             // Arrange
             const string expectMetadata =
@@ -655,19 +656,19 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata, payload);
             Assert.DoesNotContain("<key>", payload);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithDerivedEntityTypeWithOwnKeys()
+        public async Task DollarMetadata_Works_WithDerivedEntityTypeWithOwnKeys()
         {
             // Arrange
             const string expectMetadata =
@@ -701,18 +702,18 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata, payload);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithEntityTypeWithEnumKeys()
+        public async Task DollarMetadata_Works_WithEntityTypeWithEnumKeys()
         {
             // Arrange
             const string expectMetadata =
@@ -735,18 +736,18 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata, payload);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithConcurrencyVocabuaryAnnotation()
+        public async Task DollarMetadata_Works_WithConcurrencyVocabuaryAnnotation()
         {
             // Arrange
             const string expectMetadata =
@@ -769,41 +770,41 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata, payload);
         }
 
-        private static void AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
+        private static async Task AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
-            var response = client.GetAsync(uri).Result;
+            var response = await client.GetAsync(uri);
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(entitySetName, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(entitySetName, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
+        public async Task ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
         {
             HttpServer server = new HttpServer(GetConfiguration());
             server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
 
             HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
 
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", response.Content.ReadAsStringAsync().Result);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ServiceDocumentWorks_OutputSingleton()
+        public async Task ServiceDocumentWorks_OutputSingleton()
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
@@ -813,8 +814,8 @@ namespace Microsoft.Test.AspNet.OData
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
-            var response = client.SendAsync(request).Result;
-            var repsoneString = response.Content.ReadAsStringAsync().Result;
+            var response = await client.SendAsync(request);
+            var repsoneString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -825,7 +826,7 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("application/xml")]
         [InlineData("application/abcd")]
-        public void ServiceDocument_Returns_NotAcceptable_ForNonJsonMediaType(string mediaType)
+        public async Task ServiceDocument_Returns_NotAcceptable_ForNonJsonMediaType(string mediaType)
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
@@ -836,21 +837,21 @@ namespace Microsoft.Test.AspNet.OData
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(mediaType));
 
             // Act
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
         }
 
         [Fact]
-        public void ServiceDocument_ContainsFunctonImport()
+        public async Task ServiceDocument_ContainsFunctonImport()
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/").Result;
+            var responseString = await client.GetStringAsync("http://localhost/");
 
             // Assert
             Assert.Contains("\"name\":\"GetPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetPerson\"", responseString);
@@ -858,7 +859,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ServiceDocument_DoesNotContainFunctonImport_IfWithParameters()
+        public async Task ServiceDocument_DoesNotContainFunctonImport_IfWithParameters()
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
@@ -869,7 +870,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/").Result;
+            var responseString = await client.GetStringAsync("http://localhost/");
 
             // Assert
             var functionImport = Assert.Single(functionImports);
@@ -880,7 +881,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ServiceDocument_DoesNotContainFunctonImport_IfNotIncludeInServiceDocument()
+        public async Task ServiceDocument_DoesNotContainFunctonImport_IfNotIncludeInServiceDocument()
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
@@ -891,7 +892,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/").Result;
+            var responseString = await client.GetStringAsync("http://localhost/");
 
             // Assert
             Assert.Equal(2, functionImports.Length);
@@ -910,7 +911,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ServiceDocument_OnlyContainOneFunctonImport_ForOverloadFunctions()
+        public async Task ServiceDocument_OnlyContainOneFunctonImport_ForOverloadFunctions()
         {
             // Arrange
             IEdmModel model = ODataTestUtil.GetEdmModel();
@@ -921,7 +922,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/").Result;
+            var responseString = await client.GetStringAsync("http://localhost/");
 
             // Assert
             Assert.Equal(3, functionImports.Length);
@@ -939,15 +940,15 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ServiceDocument_FunctionNamespace_Configuration()
+        public async Task ServiceDocument_FunctionNamespace_Configuration()
         {
             // Arrange
             HttpServer server = new HttpServer(GetConfiguration());
             HttpClient client = new HttpClient(server);
 
             // Act
-            var response = client.GetAsync("http://localhost/$metadata").Result;
-            var responseString = response.Content.ReadAsStringAsync().Result;
+            var response = await client.GetAsync("http://localhost/$metadata");
+            var responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Contains("CustomizeNamepace.GetNS", responseString);
@@ -969,7 +970,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void RequiredAttribute_Works_OnComplexTypeProperty()
+        public async Task RequiredAttribute_Works_OnComplexTypeProperty()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -982,7 +983,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+            var responseString = await client.GetStringAsync("http://localhost/$metadata");
 
             // Assert
             Assert.Contains(
@@ -995,7 +996,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath()
+        public async Task DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath()
         {
             // Arrange
           const string expectMetadata =
@@ -1023,14 +1024,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+            var responseString = await client.GetStringAsync("http://localhost/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_WithDerived()
+        public async Task DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_WithDerived()
         {
             // Arrange
             const string expectMetadata =
@@ -1062,14 +1063,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+            var responseString = await client.GetStringAsync("http://localhost/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);
         }
 
         [Fact]
-        public void DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_ConventionModelBuilder()
+        public async Task DollarMetadata_Works_WithNavigationPropertyBindingOnMultiplePath_ConventionModelBuilder()
         {
             // Arrange
             const string expectMetadata =
@@ -1110,7 +1111,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            var responseString = client.GetStringAsync("http://localhost/$metadata").Result;
+            var responseString = await client.GetStringAsync("http://localhost/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);

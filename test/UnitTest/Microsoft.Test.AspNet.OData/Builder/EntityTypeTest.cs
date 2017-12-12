@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -38,7 +39,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(typeof(Order).Namespace, orderType.Namespace);
             Assert.Equal("OrderId", orderType.DeclaredKey.Single().Name);
             Assert.Equal(5, orderType.DeclaredProperties.Count());
-            Assert.Equal(1, orderType.NavigationProperties().Count());
+            Assert.Single(orderType.NavigationProperties());
             var deliveryDateProperty = orderType.DeclaredProperties.Single(dp => dp.Name == "DeliveryDate");
             Assert.NotNull(deliveryDateProperty);
             Assert.True(deliveryDateProperty.Type.IsNullable);
@@ -110,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.NotNull(entityType);
             Assert.Equal(2, entityType.Properties().Count());
 
-            Assert.Equal(1, entityType.DeclaredKey.Count());
+            Assert.Single(entityType.DeclaredKey);
             IEdmStructuralProperty key = entityType.DeclaredKey.First();
             Assert.Equal(EdmTypeKind.Enum, key.Type.TypeKind());
             Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum", key.Type.Definition.FullTypeName());
@@ -356,7 +357,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntityTypeConfiguration<SportBike> sportBikeType = builder.EntityType<SportBike>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sportBikeType.DerivesFrom<Motorcycle>().HasKey(s => s.SportBikeProperty_NotVisible),
+            ExceptionAssert.Throws<InvalidOperationException>(() => sportBikeType.DerivesFrom<Motorcycle>().HasKey(s => s.SportBikeProperty_NotVisible),
                 "Cannot define keys on type 'Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike' deriving from 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle'. " +
                 "The base type in the entity inheritance hierarchy already contains keys.");
         }
@@ -371,7 +372,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntityTypeConfiguration<SportBike> sportBikeType = builder.EntityType<SportBike>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => sportBikeType.HasKey(s => s.SportBikeProperty_NotVisible).DerivesFrom<Motorcycle>(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => sportBikeType.HasKey(s => s.SportBikeProperty_NotVisible).DerivesFrom<Motorcycle>(),
                 "Cannot define keys on type 'Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike' deriving from 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle'. " +
                 "The base type in the entity inheritance hierarchy already contains keys.");
         }
@@ -412,11 +413,11 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             var edmVehicle = model.AssertHasEntityType(typeof(Vehicle));
             Assert.Null(edmVehicle.BaseEntityType());
-            Assert.Equal(0, edmVehicle.Properties().Count());
+            Assert.Empty(edmVehicle.Properties());
 
             var edmMotorcycle = model.AssertHasEntityType(typeof(Motorcycle));
             Assert.Equal(edmVehicle, edmMotorcycle.BaseEntityType());
-            Assert.Equal(1, edmMotorcycle.Properties().Count());
+            Assert.Single(edmMotorcycle.Properties());
             edmMotorcycle.AssertHasPrimitiveProperty(model, "Model", EdmPrimitiveTypeKind.Int32, isNullable: false);
         }
 
@@ -429,7 +430,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 .EntityType<Vehicle>()
                 .Property(v => v.WheelCount);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder
                         .EntityType<Motorcycle>()
                         .DerivesFrom<Vehicle>()
@@ -448,7 +449,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 .DerivesFrom<Vehicle>()
                 .Property(m => m.Model);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder
                         .EntityType<Vehicle>()
                         .Property(v => v.Model),
@@ -463,7 +464,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.DoesNotThrow(() => builder.EntityType<Motorcycle>().HasKey(m => m.Model).DerivesFrom<Vehicle>());
+            ExceptionAssert.DoesNotThrow(() => builder.EntityType<Motorcycle>().HasKey(m => m.Model).DerivesFrom<Vehicle>());
         }
 
         [Fact]
@@ -471,7 +472,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             var builder = new ODataModelBuilder();
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder
                         .EntityType<string>()
                         .DerivesFrom<Vehicle>(),
@@ -492,7 +493,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                             .EntityType<Motorcycle>();
             motorcycle.Property(m => m.Model);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => motorcycle.DerivesFrom<Vehicle>(),
                 "propertyInfo",
                 "Cannot redefine property 'Model' already defined on the base type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Vehicle'.");
@@ -512,7 +513,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 .DerivesFrom<Motorcycle>()
                 .Property(c => c.Model);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder
                     .EntityType<Motorcycle>()
                     .DerivesFrom<Vehicle>(),
@@ -525,7 +526,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             var builder = new ODataModelBuilder();
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
             () => builder
                 .EntityType<Vehicle>()
                 .DerivesFrom<Vehicle>(),
@@ -596,7 +597,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var motorcycle = builder.AddEntityType(typeof(Motorcycle));
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => motorcycle.RemoveKey(keyProperty: null),
                 "keyProperty");
         }
@@ -626,7 +627,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var motorcycle = builder.AddEntityType(typeof(Motorcycle));
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => motorcycle.RemoveKey(enumKeyProperty: null),
                 "enumKeyProperty");
         }

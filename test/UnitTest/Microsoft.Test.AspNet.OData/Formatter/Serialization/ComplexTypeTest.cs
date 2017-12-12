@@ -3,12 +3,14 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -24,14 +26,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ComplexTypeSerializesAsOData()
+        public async Task ComplexTypeSerializesAsOData()
         {
             // Arrange
             ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)),
                 _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(Resources.PersonComplexType, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.PersonComplexType, await content.ReadAsStringAsync());
         }
 
         private static HttpRequestMessage GetSampleRequest()

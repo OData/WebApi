@@ -12,6 +12,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Query.Expressions;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -442,14 +443,14 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [Fact]
         public void ValidateThrowsOnNullOption()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(null, new ODataValidationSettings()));
         }
 
         [Fact]
         public void ValidateThrowsOnNullSettings()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new FilterQueryOption("Name eq 'abc'", _context), null));
         }
 
@@ -499,7 +500,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [InlineData("NonFilterableProperty")]
         public void ValidateThrowsIfNotFilterableProperty(string property)
         {
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(
                     new FilterQueryOption(String.Format("{0} eq 'David'", property), _context),
                     new ODataValidationSettings()),
@@ -511,7 +512,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [InlineData("NonFilterableNavigationProperty")]
         public void ValidateThrowsIfNotFilterableNavigationProperty(string property)
         {
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(
                     new FilterQueryOption(String.Format("{0}/Name eq 'Seattle'", property), _context),
                     new ODataValidationSettings()),
@@ -523,7 +524,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [InlineData("NonFilterableProperty")]
         public void ValidateThrowsIfNavigationHasNotFilterableProperty(string property)
         {
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(
                     new FilterQueryOption(String.Format("NavigationWithNotFilterableProperty/{0} eq 'David'", property), _context),
                     new ODataValidationSettings()),
@@ -531,7 +532,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         }
 
         [Theory]
-        [PropertyData("NestedAnyAllInputs")]
+        [MemberData(nameof(NestedAnyAllInputs))]
         public void MaxAnyAllExpressionDepthLimitExceeded(string filter)
         {
             // Arrange
@@ -539,11 +540,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             settings.MaxAnyAllExpressionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or EnableQueryAttribute.");
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings), "The Any/All nesting limit of '1' has been exceeded. 'MaxAnyAllExpressionDepth' can be configured on ODataQuerySettings or EnableQueryAttribute.");
         }
 
         [Theory]
-        [PropertyData("NestedAnyAllInputs")]
+        [MemberData(nameof(NestedAnyAllInputs))]
         public void IncreaseMaxAnyAllExpressionDepthWillAllowNestedAnyAllInputs(string filter)
         {
             // Arrange
@@ -551,11 +552,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             settings.MaxAnyAllExpressionDepth = 2;
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new FilterQueryOption(filter, _productContext), settings));
         }
 
         [Theory]
-        [PropertyData("LongInputs")]
+        [MemberData(nameof(LongInputs))]
         public void LongInputs_CauseMaxNodeCountExceededException(string filter)
         {
             // Arrange
@@ -567,11 +568,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), "The node count limit of '100' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on EnableQueryAttribute or ODataValidationSettings.");
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), "The node count limit of '100' has been exceeded. To increase the limit, set the 'MaxNodeCount' property on EnableQueryAttribute or ODataValidationSettings.");
         }
 
         [Theory]
-        [PropertyData("LongInputs")]
+        [MemberData(nameof(LongInputs))]
         public void IncreaseMaxNodeCountWillAllowLongInputs(string filter)
         {
             // Arrange
@@ -584,11 +585,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("CloseToLongInputs")]
+        [MemberData(nameof(CloseToLongInputs))]
         public void AlmostLongInputs_DonotCauseMaxNodeCountExceededExceptionOrTimeoutDuringCompilation(string filter)
         {
             // Arrange
@@ -600,8 +601,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
-            Assert.DoesNotThrow(() => option.ApplyTo(new List<Product>().AsQueryable(), new ODataQuerySettings()));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
+            ExceptionAssert.DoesNotThrow(() => option.ApplyTo(new List<Product>().AsQueryable(), new ODataQuerySettings()));
         }
 
         [Fact]
@@ -636,7 +637,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         }
 
         [Theory]
-        [PropertyData("ArithmeticOperators")]
+        [MemberData(nameof(ArithmeticOperators))]
         public void AllowedArithmeticOperators_SucceedIfAllowed(AllowedArithmeticOperators allow, string query, string unused)
         {
             // Arrange
@@ -647,11 +648,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("ArithmeticOperators")]
+        [MemberData(nameof(ArithmeticOperators))]
         public void AllowedArithmeticOperators_ThrowIfNotAllowed(AllowedArithmeticOperators exclude, string query, string operatorName)
         {
             // Arrange
@@ -666,11 +668,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("ArithmeticOperators")]
+        [MemberData(nameof(ArithmeticOperators))]
         public void AllowedArithmeticOperators_ThrowIfNoneAllowed(AllowedArithmeticOperators unused, string query, string operatorName)
         {
             // Arrange
@@ -685,11 +687,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(unused, settings.AllowedArithmeticOperators);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("ArithmeticOperators_CheckArguments")]
+        [MemberData(nameof(ArithmeticOperators_CheckArguments))]
         public void ArithmeticOperators_CheckArguments_SucceedIfAllowed(string query)
         {
             // Arrange
@@ -700,11 +703,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("ArithmeticOperators_CheckArguments")]
+        [MemberData(nameof(ArithmeticOperators_CheckArguments))]
         public void ArithmeticOperators_CheckArguments_ThrowIfNotAllowed(string query)
         {
             // Arrange
@@ -718,7 +721,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
@@ -762,10 +765,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         }
 
         [Theory]
-        [PropertyData("DateTimeFunctions")]
-        [PropertyData("MathFunctions")]
-        [PropertyData("OtherFunctions")]
-        [PropertyData("StringFunctions")]
+        [MemberData(nameof(DateTimeFunctions))]
+        [MemberData(nameof(MathFunctions))]
+        [MemberData(nameof(OtherFunctions))]
+        [MemberData(nameof(StringFunctions))]
         public void AllowedFunctions_SucceedIfAllowed(AllowedFunctions allow, string query, string unused)
         {
             // Arrange
@@ -776,14 +779,15 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("DateTimeFunctions")]
-        [PropertyData("MathFunctions")]
-        [PropertyData("OtherFunctions")]
-        [PropertyData("StringFunctions")]
+        [MemberData(nameof(DateTimeFunctions))]
+        [MemberData(nameof(MathFunctions))]
+        [MemberData(nameof(OtherFunctions))]
+        [MemberData(nameof(StringFunctions))]
         public void AllowedFunctions_ThrowIfNotAllowed(AllowedFunctions exclude, string query, string functionName)
         {
             // Arrange
@@ -798,14 +802,14 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("DateTimeFunctions")]
-        [PropertyData("MathFunctions")]
-        [PropertyData("OtherFunctions")]
-        [PropertyData("StringFunctions")]
+        [MemberData(nameof(DateTimeFunctions))]
+        [MemberData(nameof(MathFunctions))]
+        [MemberData(nameof(OtherFunctions))]
+        [MemberData(nameof(StringFunctions))]
         public void AllowedFunctions_ThrowIfNoneAllowed(AllowedFunctions unused, string query, string functionName)
         {
             // Arrange
@@ -820,11 +824,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("DateTimeFunctions")]
+        [MemberData(nameof(DateTimeFunctions))]
         public void DateTimeFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
         {
             // Arrange
@@ -835,11 +840,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("DateTimeFunctions")]
+        [MemberData(nameof(DateTimeFunctions))]
         public void DateTimeFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
         {
             // Arrange
@@ -854,11 +861,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("MathFunctions")]
+        [MemberData(nameof(MathFunctions))]
         public void MathFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
         {
             // Arrange
@@ -869,11 +877,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("MathFunctions")]
+        [MemberData(nameof(MathFunctions))]
         public void MathFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
         {
             // Arrange
@@ -888,11 +898,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("StringFunctions")]
+        [MemberData(nameof(StringFunctions))]
         public void StringFunctions_SucceedIfGroupAllowed(AllowedFunctions unused, string query, string unusedName)
         {
             // Arrange
@@ -903,11 +914,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("StringFunctions")]
+        [MemberData(nameof(StringFunctions))]
         public void StringFunctions_ThrowIfGroupNotAllowed(AllowedFunctions unused, string query, string functionName)
         {
             // Arrange
@@ -922,11 +935,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("OtherFunctions_SomeSingleParameterCasts")]
+        [MemberData(nameof(OtherFunctions_SomeSingleParameterCasts))]
         public void OtherFunctions_SomeSingleParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
         {
             // Thrown at
@@ -960,11 +974,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("OtherFunctions_SomeTwoParameterCasts")]
+        [MemberData(nameof(OtherFunctions_SomeTwoParameterCasts))]
         public void OtherFunctions_SomeTwoParameterCasts_ThrowODataException(AllowedFunctions unused, string query, string unusedName)
         {
             // Thrown at
@@ -1006,11 +1022,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("OtherFunctions_SomeQuotedTwoParameterCasts")]
+        [MemberData(nameof(OtherFunctions_SomeQuotedTwoParameterCasts))]
         public void OtherFunctions_SomeQuotedTwoParameterCasts_DoesnotThrowArgumentException(AllowedFunctions unused, string query, string unusedName)
         {
             // Arrange
@@ -1021,11 +1039,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(AllowedFunctions.None, unused);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("Functions_CheckArguments")]
+        [MemberData(nameof(Functions_CheckArguments))]
         public void Functions_CheckArguments_SucceedIfAllowed(AllowedFunctions outer, AllowedFunctions inner, string query, string unused)
         {
             // Arrange
@@ -1036,11 +1056,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("Functions_CheckArguments")]
+        [MemberData(nameof(Functions_CheckArguments))]
         public void Functions_CheckArguments_ThrowIfNotAllowed(AllowedFunctions outer, AllowedFunctions inner, string query, string functionName)
         {
             // Arrange
@@ -1055,11 +1076,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(AllowedFunctions.None, inner);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("Functions_CheckNotFilterable")]
+        [MemberData(nameof(Functions_CheckNotFilterable))]
         public void Functions_CheckNotFilterable_ThrowODataException(string query, string propertyName)
         {
             // Arrange
@@ -1073,7 +1095,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
@@ -1108,7 +1130,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         }
 
         [Theory]
-        [PropertyData("LogicalOperators")]
+        [MemberData(nameof(LogicalOperators))]
         public void AllowedLogicalOperators_SucceedIfAllowed(AllowedLogicalOperators allow, string query, string unused)
         {
             // Arrange
@@ -1119,11 +1141,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("LogicalOperators")]
+        [MemberData(nameof(LogicalOperators))]
         public void AllowedLogicalOperators_ThrowIfNotAllowed(AllowedLogicalOperators exclude, string query, string operatorName)
         {
             // Arrange
@@ -1138,11 +1161,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("LogicalOperators")]
+        [MemberData(nameof(LogicalOperators))]
         public void AllowedLogicalOperators_ThrowIfNoneAllowed(AllowedLogicalOperators unused, string query, string operatorName)
         {
             // Arrange
@@ -1157,11 +1180,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(unused, settings.AllowedLogicalOperators);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("LogicalOperators_CheckArguments")]
+        [MemberData(nameof(LogicalOperators_CheckArguments))]
         public void LogicalOperators_CheckArguments_SucceedIfAllowed(string query)
         {
             // Arrange
@@ -1172,11 +1196,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("LogicalOperators_CheckArguments")]
+        [MemberData(nameof(LogicalOperators_CheckArguments))]
         public void LogicalOperators_CheckArguments_ThrowIfNotAllowed(string query)
         {
             // Arrange
@@ -1190,7 +1214,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption(query, _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
@@ -1204,7 +1228,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption("-UnitPrice lt 0", _productContext);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         // Note Negate is _not_ a logical operator.
@@ -1222,7 +1246,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new FilterQueryOption("-UnitPrice lt 0", _productContext);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]
@@ -1304,7 +1328,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             FilterQueryOption option = new FilterQueryOption(filter, _context);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, _settings));
         }
 
         [Fact]
@@ -1321,7 +1345,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                     new Dictionary<string, string> { { "$filter", "Id eq @p" }, { "@p", "1" } }));
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, _settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, _settings));
             Assert.Equal(6, _validator.Times.Keys.Count);
             Assert.Equal(1, _validator.Times["Validate"]); // entry
             Assert.Equal(1, _validator.Times["ValidateParameterQueryNode"]); // $it

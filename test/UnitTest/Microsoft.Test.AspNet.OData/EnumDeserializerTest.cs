@@ -11,6 +11,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -52,7 +53,7 @@ namespace Microsoft.Test.AspNet.OData
             Type type = typeof(Color);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => EnumDeserializationHelpers.ConvertEnumValue(value, type),
                 "value");
         }
@@ -65,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData
             Type type = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => EnumDeserializationHelpers.ConvertEnumValue(value, type),
                 "type");
         }
@@ -78,7 +79,7 @@ namespace Microsoft.Test.AspNet.OData
             Type type = typeof(Color);
 
             // Act & Assert
-            Assert.Throws<ValidationException>(
+            ExceptionAssert.Throws<ValidationException>(
                 () => EnumDeserializationHelpers.ConvertEnumValue(value, type),
                 "The value with type 'ODataPrimitiveValue' must have type 'ODataEnumValue'.");
         }
@@ -91,7 +92,7 @@ namespace Microsoft.Test.AspNet.OData
             Type type = typeof(int);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => EnumDeserializationHelpers.ConvertEnumValue(value, type),
                 "The type 'Int32' must be an enum or Nullable<T> where T is an enum type.");
         }
@@ -105,7 +106,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataEnumDeserializer().Read(messageReader, type, readContext),
                 "messageReader");
         }
@@ -119,7 +120,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataEnumDeserializer().Read(messageReader, type, readContext),
                 "type");
         }
@@ -133,7 +134,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataDeserializerContext readContext = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataEnumDeserializer().Read(messageReader, type, readContext),
                 "readContext");
         }
@@ -196,7 +197,7 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData(Color.Red)]
         [InlineData(Color.Green | Color.Blue)]
-        [InlineData((Color)1)]
+        [InlineData((Color)3)]
         [InlineData((Color)123)]
         public void EnumValueDeserializerTest(Color color)
         {

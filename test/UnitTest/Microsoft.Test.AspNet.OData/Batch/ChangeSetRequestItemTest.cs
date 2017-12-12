@@ -12,6 +12,7 @@ using System.Web.Http;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
@@ -29,23 +30,23 @@ namespace Microsoft.Test.AspNet.OData.Batch
         [Fact]
         public void Constructor_NullRequests_Throws()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ChangeSetRequestItem(null),
                 "requests");
         }
 
         [Fact]
-        public void SendRequestAsync_NullInvoker_Throws()
+        public async Task SendRequestAsync_NullInvoker_Throws()
         {
             ChangeSetRequestItem requestItem = new ChangeSetRequestItem(new HttpRequestMessage[0]);
 
-            Assert.ThrowsArgumentNull(
-                () => requestItem.SendRequestAsync(null, CancellationToken.None).Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => requestItem.SendRequestAsync(null, CancellationToken.None),
                 "invoker");
         }
 
         [Fact]
-        public void SendRequestAsync_ReturnsChangeSetResponse()
+        public async Task SendRequestAsync_ReturnsChangeSetResponse()
         {
             HttpRequestMessage[] requests = new HttpRequestMessage[]
                 {
@@ -61,14 +62,14 @@ namespace Microsoft.Test.AspNet.OData.Batch
                     return Task.FromResult(new HttpResponseMessage());
                 });
 
-            var response = requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result;
+            var response = await requestItem.SendRequestAsync(invoker.Object, CancellationToken.None);
 
             var changesetResponse = Assert.IsType<ChangeSetResponseItem>(response);
             Assert.Equal(2, changesetResponse.Responses.Count());
         }
 
         [Fact]
-        public void SendRequestAsync_ReturnsSingleErrorResponse()
+        public async Task SendRequestAsync_ReturnsSingleErrorResponse()
         {
             HttpRequestMessage[] requests = new HttpRequestMessage[]
                 {
@@ -89,15 +90,15 @@ namespace Microsoft.Test.AspNet.OData.Batch
                     return Task.FromResult(new HttpResponseMessage());
                 });
 
-            var response = requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result;
+            var response = await requestItem.SendRequestAsync(invoker.Object, CancellationToken.None);
 
             var changesetResponse = Assert.IsType<ChangeSetResponseItem>(response);
-            Assert.Equal(1, changesetResponse.Responses.Count());
+            Assert.Single(changesetResponse.Responses);
             Assert.Equal(HttpStatusCode.BadRequest, changesetResponse.Responses.First().StatusCode);
         }
 
         [Fact]
-        public void SendRequestAsync_DisposesResponseInCaseOfException()
+        public async Task SendRequestAsync_DisposesResponseInCaseOfException()
         {
             List<MockHttpResponseMessage> responses = new List<MockHttpResponseMessage>();
             ChangeSetRequestItem requestItem = new ChangeSetRequestItem(new HttpRequestMessage[]
@@ -119,8 +120,8 @@ namespace Microsoft.Test.AspNet.OData.Batch
                     return Task.FromResult<HttpResponseMessage>(response);
                 });
 
-            Assert.Throws<InvalidOperationException>(
-                () => requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result);
+            await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => requestItem.SendRequestAsync(invoker.Object, CancellationToken.None));
 
             Assert.Equal(2, responses.Count);
             foreach (var response in responses)

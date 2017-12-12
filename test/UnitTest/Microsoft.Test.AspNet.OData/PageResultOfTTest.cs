@@ -4,20 +4,22 @@
 using System;
 using System.IO;
 using System.Net.Http.Formatting;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class PageResultOfTTest
     {
         [Fact]
-        public void PageResult_SerializesToJson()
+        public async Task PageResult_SerializesToJson()
         {
             PageResult<string> result = new PageResult<string>(new string[] { "a", "b", "c" }, new Uri("http://localhost/NextPage"), 3);
             MemoryStream ms = new MemoryStream();
 
-            new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(PageResult<string>), result, ms, content: null, transportContext: null).Wait();
+            await new JsonMediaTypeFormatter().WriteToStreamAsync(typeof(PageResult<string>), result, ms, content: null, transportContext: null);
 
             ms.Position = 0;
             Assert.Equal(
@@ -26,12 +28,12 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void PageResult_SerializesToXml()
+        public async Task PageResult_SerializesToXml()
         {
             PageResult<string> result = new PageResult<string>(new string[] { "a", "b", "c" }, new Uri("http://localhost/NextPage"), 3);
             MemoryStream ms = new MemoryStream();
 
-            new XmlMediaTypeFormatter().WriteToStreamAsync(typeof(PageResult<string>), result, ms, content: null, transportContext: null).Wait();
+            await new XmlMediaTypeFormatter().WriteToStreamAsync(typeof(PageResult<string>), result, ms, content: null, transportContext: null);
 
             ms.Position = 0;
             Assert.Equal(
@@ -42,13 +44,13 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void EmptyPageResult_CanBeCreated()
         {
-            Assert.DoesNotThrow(() => new PageResult<string>(new string[] {}, null, 0));
+            ExceptionAssert.DoesNotThrow(() => new PageResult<string>(new string[] {}, null, 0));
         }
 
         [Fact]
         public void Ctor_Throws_OnNegativeCount()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(
+            ExceptionAssert.Throws<ArgumentOutOfRangeException>(
                 () => new PageResult<string>(new string[] { }, null, -1),
                 "Value must be greater than or equal to 0.\r\nParameter name: value\r\nActual value was -1.");
         }

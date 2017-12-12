@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -10,6 +9,7 @@ using System.Web.Http;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
@@ -27,23 +27,23 @@ namespace Microsoft.Test.AspNet.OData.Batch
         [Fact]
         public void Constructor_NullRequests_Throws()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new OperationRequestItem(null),
                 "request");
         }
 
         [Fact]
-        public void SendRequestAsync_NullInvoker_Throws()
+        public async Task SendRequestAsync_NullInvoker_Throws()
         {
             OperationRequestItem requestItem = new OperationRequestItem(new HttpRequestMessage());
 
-            Assert.ThrowsArgumentNull(
-                () => requestItem.SendRequestAsync(null, CancellationToken.None).Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => requestItem.SendRequestAsync(null, CancellationToken.None),
                 "invoker");
         }
 
         [Fact]
-        public void SendRequestAsync_ReturnsOperationResponse()
+        public async Task SendRequestAsync_ReturnsOperationResponse()
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://example.com");
             OperationRequestItem requestItem = new OperationRequestItem(request);
@@ -55,7 +55,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
                     return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotModified));
                 });
 
-            var response = requestItem.SendRequestAsync(invoker.Object, CancellationToken.None).Result;
+            var response = await requestItem.SendRequestAsync(invoker.Object, CancellationToken.None);
 
             var operationResponse = Assert.IsType<OperationResponseItem>(response);
             Assert.Equal(HttpStatusCode.NotModified, operationResponse.Response.StatusCode);
@@ -72,7 +72,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
 
             var resourcesForDisposal = requestItem.GetResourcesForDisposal();
 
-            Assert.Equal(1, resourcesForDisposal.Count());
+            Assert.Single(resourcesForDisposal);
             Assert.Contains(disposeObject, resourcesForDisposal);
         }
 

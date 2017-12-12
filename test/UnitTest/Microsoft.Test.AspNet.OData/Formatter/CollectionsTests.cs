@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -16,6 +17,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -47,23 +49,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("List")]
         [InlineData("Collection")]
         [InlineData("CustomCollection")]
-        public void CollectionProperties_Deserialize(string propertyName)
+        public async Task CollectionProperties_Deserialize(string propertyName)
         {
             string message = "{ \"ID\" : 42, \"" + propertyName + "\": [ 1, 2, 3 ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+            HttpResponseMessage response = await _client.SendAsync(request);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JToken.Parse(await response.Content.ReadAsStringAsync());
 
             Assert.Equal(new[] { 1, 2, 3 }, (IEnumerable<int>)result[propertyName].Values<int>());
         }
 
         [Fact]
-        public void NullableEnumCollectionProperty_Deserialize()
+        public async Task NullableEnumCollectionProperty_Deserialize()
         {
             // Arrange
             string message = "{ \"ID\" : 42, \"NullableColors\" : [ \"Red\", null, \"Green\" ]}";
@@ -72,26 +74,26 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            JToken result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            JToken result = JToken.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(new[] { "Red", null, "Green" }, result["NullableColors"].Values<string>());
         }
 
         [Fact]
-        public void ComplexCollectionProperty_Deserialize()
+        public async Task ComplexCollectionProperty_Deserialize()
         {
             string message = "{ \"ID\" : 42, \"ComplexCollection\" : [  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+            HttpResponseMessage response = await _client.SendAsync(request);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JToken.Parse(await response.Content.ReadAsStringAsync());
             IEnumerable<JObject> complexCollection = result["ComplexCollection"].Values<JObject>();
             Assert.Equal(
                 new[] { 1, 2, 3 },
@@ -99,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void EntityCollectionProperty_Deserialize()
+        public async Task EntityCollectionProperty_Deserialize()
         {
             string message = "{ 'ID' : 44,  'Vehicles' : [ " +
                 "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
@@ -111,12 +113,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
+            HttpResponseMessage response = await _client.SendAsync(request);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Fact]
-        public void Posting_A_Feed_To_NonCollectionProperty_ODataLibThrows()
+        public async Task Posting_A_Feed_To_NonCollectionProperty_ODataLibThrows()
         {
             string message = "{ 'ID' : 44,  'Vehicle' : [ " +
                 "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
@@ -128,7 +130,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
             Assert.Equal(HttpStatusCode.ExpectationFailed, response.StatusCode);
         }
     }
@@ -148,15 +150,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 Assert.NotNull(model.Vehicles);
                 Assert.Equal(3, model.Vehicles.Length);
 
-                Assert.IsType(typeof(Car), model.Vehicles[0]);
+                Assert.IsAssignableFrom<Car>(model.Vehicles[0]);
                 Assert.Equal(2009, model.Vehicles[0].Model);
                 Assert.Equal("Car", model.Vehicles[0].Name);
 
-                Assert.IsType(typeof(Motorcycle), model.Vehicles[1]);
+                Assert.IsAssignableFrom<Motorcycle>(model.Vehicles[1]);
                 Assert.Equal(2010, model.Vehicles[1].Model);
                 Assert.Equal("Motorcycle", model.Vehicles[1].Name);
 
-                Assert.IsType(typeof(SportBike), model.Vehicles[2]);
+                Assert.IsAssignableFrom<SportBike>(model.Vehicles[2]);
                 Assert.Equal(2012, model.Vehicles[2].Model);
                 Assert.Equal("SportBike", model.Vehicles[2].Name);
             }

@@ -1,15 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -18,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData
         private const string _requestRooturl = "http://localhost/odata/";
 
         [Fact]
-        public void AGet_Full()
+        public async Task AGet_Full()
         {
             // Arrange
             var configuration = new[] { typeof(AccountsController) }.GetHttpConfiguration();
@@ -28,15 +28,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpResponseMessage response = client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=full").Result;
+            HttpResponseMessage response = await client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=full");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
         }
 
         [Fact]
-        public void AGet_Minimial()
+        public async Task AGet_Minimial()
         {
             // Arrange
             var configuration = new[] { typeof(AccountsController) }.GetHttpConfiguration();
@@ -45,11 +44,10 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             // Act
-            HttpResponseMessage response = client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=minimal").Result;
+            HttpResponseMessage response = await client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=minimal");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
         }
 
         private static IEdmModel GetEdmModel()

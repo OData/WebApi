@@ -21,6 +21,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.Test.AspNet.OData
@@ -93,7 +94,7 @@ namespace Microsoft.Test.AspNet.OData
             configuration.AddODataQueryFilter();
 
             var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
-            Assert.Equal(1, queryFilterProviders.Count());
+            Assert.Single(queryFilterProviders);
             var queryAttribute = Assert.IsType<EnableQueryAttribute>(queryFilterProviders.First().QueryFilter);
         }
 
@@ -106,7 +107,7 @@ namespace Microsoft.Test.AspNet.OData
             configuration.AddODataQueryFilter(myQueryFilter.Object);
 
             var queryFilterProviders = configuration.Services.GetFilterProviders().OfType<QueryFilterProvider>();
-            Assert.Equal(1, queryFilterProviders.Count());
+            Assert.Single(queryFilterProviders);
             Assert.Same(myQueryFilter.Object, queryFilterProviders.First().QueryFilter);
         }
 
@@ -120,7 +121,7 @@ namespace Microsoft.Test.AspNet.OData
 
             Collection<FilterInfo> filters = actionDescriptor.GetFilterPipeline();
 
-            Assert.Equal(1, filters.Count);
+            Assert.Single(filters);
             Assert.Equal(100, ((EnableQueryAttribute)filters[0].Instance).PageSize);
         }
 
@@ -269,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData
             Action action = () => config.GetODataRootContainer("odata");
 
             // Assert
-            Assert.Throws<InvalidOperationException>(action);
+            ExceptionAssert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
@@ -282,7 +283,7 @@ namespace Microsoft.Test.AspNet.OData
             Action action = () => config.GetNonODataRootContainer();
 
             // Assert
-            Assert.Throws<InvalidOperationException>(action);
+            ExceptionAssert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
@@ -379,10 +380,10 @@ namespace Microsoft.Test.AspNet.OData
             DefaultQuerySettings defaultQuerySettings = config.GetDefaultQuerySettings();
 
             // Assert
-            Assert.Equal(true, defaultQuerySettings.EnableFilter);
-            Assert.Equal(false, defaultQuerySettings.EnableCount);
-            Assert.Equal(true, defaultQuerySettings.EnableExpand);
-            Assert.Equal(true, defaultQuerySettings.EnableOrderBy);
+            Assert.True(defaultQuerySettings.EnableFilter);
+            Assert.False(defaultQuerySettings.EnableCount);
+            Assert.True(defaultQuerySettings.EnableExpand);
+            Assert.True(defaultQuerySettings.EnableOrderBy);
             Assert.Equal(10, defaultQuerySettings.MaxTop);
         }
 

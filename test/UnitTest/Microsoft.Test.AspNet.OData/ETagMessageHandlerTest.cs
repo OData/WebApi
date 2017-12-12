@@ -19,36 +19,37 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class ETagMessageHandlerTest
     {
         [Fact]
-        public void SendAsync_ThrowsIfRequestIsNull()
+        public async Task SendAsync_ThrowsIfRequestIsNull()
         {
             // Arrange
             ETagMessageHandler handler = new ETagMessageHandler();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => { var result = handler.SendAsync(null).Result; }, "request");
+            await ExceptionAssert.ThrowsArgumentNullAsync(() => handler.SendAsync(null), "request");
         }
 
         [Fact]
-        public void SendAsync_ThrowsInvalidOperationExceptionIfRequestDoesntHaveConfiguration()
+        public async Task SendAsync_ThrowsInvalidOperationExceptionIfRequestDoesntHaveConfiguration()
         {
             // Arrange
             ETagMessageHandler handler = new ETagMessageHandler();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://host/");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
-                () => { var result = handler.SendAsync(request).Result; },
+            await ExceptionAssert.ThrowsAsync<InvalidOperationException>(
+                () => handler.SendAsync(request),
                 "Request message does not contain an HttpConfiguration object.");
         }
 
         [Fact]
-        public void SendAsync_ReturnsNullIfInnerHandlerReturnsNull()
+        public async Task SendAsync_ReturnsNullIfInnerHandlerReturnsNull()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/Customers(3)");
@@ -56,14 +57,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(null) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response);
         }
 
         [Fact]
-        public void SendAsync_DoesntWriteETagIfResponseIsNotSuccessful()
+        public async Task SendAsync_DoesntWriteETagIfResponseIsNotSuccessful()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/Customers(3)");
@@ -72,14 +73,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response.Headers.ETag);
         }
 
         [Fact]
-        public void SendAsync_DoesntWriteETagIfResponseIsNoContent()
+        public async Task SendAsync_DoesntWriteETagIfResponseIsNoContent()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "/Customers(3)");
@@ -88,14 +89,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response.Headers.ETag);
         }
 
         [Fact]
-        public void SendAsync_DoesntWriteETagIfETagIsNull()
+        public async Task SendAsync_DoesntWriteETagIfETagIsNull()
         {
             // Arrange
             HttpRequestMessage request = SetupRequest(HttpMethod.Get, "NonEtagEntity(3)");
@@ -106,14 +107,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response.Headers.ETag);
         }
 
         [Fact]
-        public void SendAsync_DoesntWriteETagIfContentIsNull()
+        public async Task SendAsync_DoesntWriteETagIfContentIsNull()
         {
             // Arrange
             HttpRequestMessage request = SetupRequest(HttpMethod.Get, "Customers(3)");
@@ -124,14 +125,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response.Headers.ETag);
         }
 
         [Fact]
-        public void SendAsync_DoesntWriteETagIfContentIsntObjectContent()
+        public async Task SendAsync_DoesntWriteETagIfContentIsntObjectContent()
         {
             // Arrange
             HttpRequestMessage request = SetupRequest(HttpMethod.Get, "Customers(3)");
@@ -141,7 +142,7 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response.Headers.ETag);
@@ -177,7 +178,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SendAsync_WritesETagToResponseHeaders()
+        public async Task SendAsync_WritesETagToResponseHeaders()
         {
             // Arrange
             HttpRequestMessage request = SetupRequest(HttpMethod.Get, "Customers(3)");
@@ -187,14 +188,14 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.NotNull(response.Headers.ETag);
         }
 
         [Fact]
-        public void SendAsync_WritesETagToResponseHeaders_InUntyped()
+        public async Task SendAsync_WritesETagToResponseHeaders_InUntyped()
         {
             // Arrange
             IEdmModel model = GetUnTypeEdmModel();
@@ -209,7 +210,7 @@ namespace Microsoft.Test.AspNet.OData
             ETagMessageHandler handler = new ETagMessageHandler() { InnerHandler = new TestHandler(originalResponse) };
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.NotNull(response.Headers.ETag);

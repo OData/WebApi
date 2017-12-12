@@ -12,6 +12,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -31,28 +32,28 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void Constructor_ThrowsException_IfNullContextArgument()
         {
-            Assert.ThrowsArgumentNull(() => new CountQueryOption("false", context: null, queryOptionParser: null),
+            ExceptionAssert.ThrowsArgumentNull(() => new CountQueryOption("false", context: null, queryOptionParser: null),
                 "context");
         }
 
         [Fact]
         public void Constructor_ThrowsException_IfNullRawValueArgument()
         {
-            Assert.Throws<ArgumentException>(() => new CountQueryOption(null, _context, null),
+            ExceptionAssert.Throws<ArgumentException>(() => new CountQueryOption(null, _context, null),
                 "The argument 'rawValue' is null or empty.\r\nParameter name: rawValue");
         }
 
         [Fact]
         public void Constructor_ThrowsException_IfEmptyRawValue()
         {
-            Assert.Throws<ArgumentException>(() => new CountQueryOption(string.Empty, _context, null),
+            ExceptionAssert.Throws<ArgumentException>(() => new CountQueryOption(string.Empty, _context, null),
                 "The argument 'rawValue' is null or empty.\r\nParameter name: rawValue");
         }
 
         [Fact]
         public void Constructor_ThrowsException_IfNullQueryOptionParser()
         {
-            Assert.ThrowsArgumentNull(() => new CountQueryOption("false", _context, queryOptionParser: null),
+            ExceptionAssert.ThrowsArgumentNull(() => new CountQueryOption("false", _context, queryOptionParser: null),
                 "queryOptionParser");
         }
 
@@ -110,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var countOption = new CountQueryOption(countValue, _context);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => countOption.Value,
+            ExceptionAssert.Throws<ODataException>(() => countOption.Value,
                 "'" + countValue + "' is not a valid count option.");
         }
 
@@ -176,7 +177,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IQueryable queryable = new Mock<IQueryable>().Object;
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => countOption.GetEntityCount(queryable),
+            ExceptionAssert.Throws<NotSupportedException>(() => countOption.GetEntityCount(queryable),
                 "The query option is not bound to any CLR type. 'GetEntityCount' is only supported with a query option bound to a CLR type.");
         }
     }

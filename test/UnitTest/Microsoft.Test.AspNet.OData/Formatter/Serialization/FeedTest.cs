@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -14,6 +15,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -23,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         private IEdmModel _model = GetSampleModel();
 
         [Fact]
-        public void IEnumerableOfEntityTypeSerializesAsODataFeed()
+        public async Task IEnumerableOfEntityTypeSerializesAsODataFeed()
         {
             // Arrange
             ODataMediaTypeFormatter formatter = CreateFormatter();
@@ -38,7 +40,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(Resources.FeedOfEmployee, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.FeedOfEmployee, await content.ReadAsStringAsync());
         }
 
         private ODataMediaTypeFormatter CreateFormatter()

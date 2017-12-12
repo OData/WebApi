@@ -7,6 +7,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -16,7 +17,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void Ctor_ThrowsArgumentNull_ModelBuilder()
         {
             // Assert & Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new BindingPathConfiguration<object>(null, structuralType: null, navigationSource: null),
                 "modelBuilder");
         }
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Mock<ODataModelBuilder> builder = new Mock<ODataModelBuilder>();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new BindingPathConfiguration<object>(builder.Object, structuralType: null, navigationSource: null),
                 "structuralType");
         }
@@ -42,7 +43,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ComplexTypeConfiguration<object> structuralType = new ComplexTypeConfiguration<object>(complex);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new BindingPathConfiguration<object>(builder.Object, structuralType, navigationSource: null),
                 "navigationSource");
         }
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntitySetConfiguration navigationSource = new EntitySetConfiguration();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () =>
                     new BindingPathConfiguration<object>(builder.Object, structuralType, navigationSource,
                         bindingPath: null), "bindingPath");

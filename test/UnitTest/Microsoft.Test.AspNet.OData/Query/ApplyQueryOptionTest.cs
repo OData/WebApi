@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -15,6 +16,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 using Address = Microsoft.Test.AspNet.OData.Builder.TestModels.Address;
 
 namespace Microsoft.Test.AspNet.OData.OData.Query
@@ -598,7 +600,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Theory]
-        [PropertyData("CustomerTestApplies")]
+        [MemberData(nameof(CustomerTestApplies))]
         public void ApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
         {
             // Arrange
@@ -642,7 +644,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Theory]
-        [PropertyData("CustomerTestAppliesMixedWithOthers")]
+        [MemberData(nameof(CustomerTestAppliesMixedWithOthers))]
         public void ClausesAfterApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
         {
             // Arrange
@@ -685,7 +687,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Theory]
-        [PropertyData("AppliesWithReferencesOnGroupedOut")]
+        [MemberData(nameof(AppliesWithReferencesOnGroupedOut))]
         public void ClausesWithGroupedOutReferences_Throw_ODataException(string clause)
         {
             // Arrange
@@ -705,14 +707,14 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
             IEnumerable<Customer> customers = CustomerApplyTestData;
 
             // Act & Assert
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
             {
                 IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
             });
         }
 
         [Theory]
-        [PropertyData("CustomerTestAppliesForPaging")]
+        [MemberData(nameof(CustomerTestAppliesForPaging))]
         public void StableSortingAndPagingApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
         {
             // Arrange
@@ -754,7 +756,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Theory]
-        [PropertyData("CustomerTestFilters")]
+        [MemberData(nameof(CustomerTestFilters))]
         public void ApplyTo_Returns_Correct_Queryable_ForFilter(string filter, int[] customerIds)
         {
             // Arrange
@@ -786,7 +788,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Fact]
-        public void ApplyToSerializationWorks()
+        public async Task ApplyToSerializationWorks()
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -806,12 +808,12 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                 "http://localhost/odata/Customers?$apply=groupby((Name), aggregate(CustomerId with sum as TotalId))");
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response);
-            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var result = await response.Content.ReadAsAsync<JObject>();
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
             Assert.Equal("10", results[0]["TotalId"].ToString());
@@ -823,7 +825,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
         }
 
         [Fact]
-        public void ApplyToSerializationWorksForCompelxTypes()
+        public async Task ApplyToSerializationWorksForCompelxTypes()
         {
             // Arrange
             var model = new ODataModelBuilder()
@@ -843,12 +845,12 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                 "http://localhost/odata/Customers?$apply=groupby((Address/City), aggregate(CustomerId with sum as TotalId))");
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response);
-            var result = response.Content.ReadAsAsync<JObject>().Result;
+            var result = await response.Content.ReadAsAsync<JObject>();
             var results = result["value"] as JArray;
             Assert.Equal(4, results.Count);
             Assert.Equal("6", results[0]["TotalId"].ToString());

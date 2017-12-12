@@ -13,6 +13,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -43,7 +44,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void Ctor_Throws_ArgumentNull_NavigationSource()
         {
-            Assert.ThrowsArgumentNull(() => new NavigationSourceLinkBuilderAnnotation(navigationSource: null), "navigationSource");
+            ExceptionAssert.ThrowsArgumentNull(() => new NavigationSourceLinkBuilderAnnotation(navigationSource: null), "navigationSource");
         }
 
         [Theory]
@@ -53,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void BuildIdLink_DoesNotThrow_IfJsonAndIdLinkBuilderIsNull(object metadataLevel)
         {
             NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(_entitySet);
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => linkBuilder.BuildIdLink(new ResourceContext(), (ODataMetadataLevel)metadataLevel));
         }
 

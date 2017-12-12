@@ -7,6 +7,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -24,14 +25,14 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [Fact]
         public void ValidateThrowsOnNullOption()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(null, new ODataValidationSettings()));
         }
 
         [Fact]
         public void ValidateThrowsOnNullSettings()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new SkipQueryOption("2", _context), null));
         }
 
@@ -43,7 +44,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxSkip = 10
             };
 
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(new SkipQueryOption("11", _context), settings),
                 "The limit of '10' for Skip query has been exceeded. The value from the incoming request is '11'.");
         }
@@ -56,7 +57,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxSkip = 10
             };
 
-            Assert.DoesNotThrow(() => _validator.Validate(new SkipQueryOption("10", _context), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new SkipQueryOption("10", _context), settings));
         }
 
         [Fact]
@@ -67,7 +68,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxSkip = 10
             };
 
-            Assert.DoesNotThrow(() => _validator.Validate(new SkipQueryOption("9", _context), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new SkipQueryOption("9", _context), settings));
         }
     }
 }

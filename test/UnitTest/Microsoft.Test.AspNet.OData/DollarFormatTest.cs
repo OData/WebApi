@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expected, response.Content.Headers.ContentType);
         }
 

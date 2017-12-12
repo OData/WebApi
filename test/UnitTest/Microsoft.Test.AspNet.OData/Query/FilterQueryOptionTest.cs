@@ -18,6 +18,7 @@ using Microsoft.Test.AspNet.OData.Query.Validators;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 using Address = Microsoft.Test.AspNet.OData.Builder.TestModels.Address;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -460,7 +461,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void ConstructorNullContextThrows()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 new FilterQueryOption("Name eq 'MSFT'", null));
         }
 
@@ -471,7 +472,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new FilterQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -482,7 +483,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new FilterQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -493,7 +494,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() =>
+            ExceptionAssert.ThrowsArgumentNull(() =>
                 new FilterQueryOption("test", new ODataQueryContext(model, typeof(Customer)), queryOptionParser: null),
                 "queryOptionParser");
         }
@@ -570,12 +571,12 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = ValidationTestHelper.CreateCustomerContext();
             FilterQueryOption option = new FilterQueryOption("substring(Name,8,1) eq '7'", context);
 
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 option.Validate(settings),
                 "Function 'substring' is not allowed. To allow it, set the 'AllowedFunctions' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
-            Assert.DoesNotThrow(() => option.Validate(settings));
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
         }
 
         [Fact]
@@ -587,7 +588,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var filter = new FilterQueryOption("Addresses/any(a: a/HouseNumber eq 1)", context);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => filter.ApplyTo(null, new ODataQuerySettings()), "query");
+            ExceptionAssert.ThrowsArgumentNull(() => filter.ApplyTo(null, new ODataQuerySettings()), "query");
         }
 
         [Fact]
@@ -599,11 +600,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             var filter = new FilterQueryOption("Addresses/any(a: a/HouseNumber eq 1)", context);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => filter.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
+            ExceptionAssert.ThrowsArgumentNull(() => filter.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
         }
 
         [Theory]
-        [PropertyData("CustomerTestFilters")]
+        [MemberData(nameof(CustomerTestFilters))]
         public void ApplyTo_Returns_Correct_Queryable(string filter, int[] customerIds)
         {
             // Arrange
@@ -630,7 +631,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("EnumModelTestFilters")]
+        [MemberData(nameof(EnumModelTestFilters))]
         public void ApplyToEnums_ReturnsCorrectQueryable(string filter, int[] enumModelIds)
         {
             // Arrange
@@ -651,7 +652,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("EnumModelTestFilters")]
+        [MemberData(nameof(EnumModelTestFilters))]
         public void ApplyToEnums_ReturnsCorrectQueryabl_IfEnableConstantParameterizationSetFalse(string filter, int[] enumModelIds)
         {
             // Arrange
@@ -691,7 +692,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
 
             // Act & Assert
-            Assert.Throws(
+            ExceptionAssert.Throws(
                 exceptionType,
                 () => filterOption.ApplyTo(
                     enumModels.AsQueryable(),
@@ -710,7 +711,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
 
             // Act
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => filterOption.ApplyTo(enumModels.AsQueryable(),
                     new ODataQuerySettings
                     {
@@ -720,7 +721,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("CastModelTestFilters")]
+        [MemberData(nameof(CastModelTestFilters))]
         public void ApplyWithCast_ReturnsCorrectQueryable(string filter, int[] castModelIds)
         {
             // Arrange
@@ -755,7 +756,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEnumerable<DataTypes> castModels = CastModelTestData;
 
             // Act & Assert
-            Assert.Throws(
+            ExceptionAssert.Throws(
                 exceptionType,
                 () => filterOption.ApplyTo(
                     castModels.AsQueryable(),
@@ -814,14 +815,14 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEnumerable<EnumModel> enumModels = EnumModelTestData;
 
             // Act
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => filterOption.ApplyTo(enumModels.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }),
                 exceptionMessage
             );
         }
 
         [Theory]
-        [PropertyData("ParameterAliasTestFilters")]
+        [MemberData(nameof(ParameterAliasTestFilters))]
         public void ApplyWithParameterAlias_ReturnsCorrectQueryable(string filter, string parameterAliasValue, int[] parameterAliasModelIds)
         {
             // Arrange
@@ -851,7 +852,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("PropertyAliasTestFilters")]
+        [MemberData(nameof(PropertyAliasTestFilters))]
         public void ApplyTo_ReturnsCorrectQueryable_PropertyAlias(string filter, int[] propertyAliasIds)
         {
             // Arrange
@@ -895,7 +896,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             FilterQueryOption filter = new FilterQueryOption("Id eq 42", context);
             IQueryable queryable = new Mock<IQueryable>().Object;
 
-            Assert.Throws<NotSupportedException>(() => filter.ApplyTo(queryable, new ODataQuerySettings()),
+            ExceptionAssert.Throws<NotSupportedException>(() => filter.ApplyTo(queryable, new ODataQuerySettings()),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 

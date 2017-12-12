@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.Equal(AllowedArithmeticOperators.All, querySettings.AllowedArithmeticOperators);
             Assert.Equal(AllowedFunctions.AllFunctions, querySettings.AllowedFunctions);
             Assert.Equal(AllowedLogicalOperators.All, querySettings.AllowedLogicalOperators);
-            Assert.Equal(0, querySettings.AllowedOrderByProperties.Count);
+            Assert.Empty(querySettings.AllowedOrderByProperties);
             Assert.Equal(AllowedQueryOptions.Supported, querySettings.AllowedQueryOptions);
             Assert.Equal(1, querySettings.MaxAnyAllExpressionDepth);
             Assert.Equal(100, querySettings.MaxNodeCount);
@@ -29,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void AllowedFunctions_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedFunctions>(
+            ReflectionAssert.EnumProperty<ODataValidationSettings, AllowedFunctions>(
                 new ODataValidationSettings(),
                 o => o.AllowedFunctions,
                 expectedDefaultValue: AllowedFunctions.AllFunctions,
@@ -40,13 +41,13 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void AllowedFunctions_SetToAllFunctions_DoesNotThrow()
         {
-            Assert.DoesNotThrow(() => new ODataValidationSettings().AllowedFunctions = AllowedFunctions.AllFunctions);
+            ExceptionAssert.DoesNotThrow(() => new ODataValidationSettings().AllowedFunctions = AllowedFunctions.AllFunctions);
         }
 
         [Fact]
         public void AllowedArithmeticOperators_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedArithmeticOperators>(
+            ReflectionAssert.EnumProperty<ODataValidationSettings, AllowedArithmeticOperators>(
                 new ODataValidationSettings(),
                 o => o.AllowedArithmeticOperators,
                 expectedDefaultValue: AllowedArithmeticOperators.All,
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void AllowedLogicalOperators_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedLogicalOperators>(
+            ReflectionAssert.EnumProperty<ODataValidationSettings, AllowedLogicalOperators>(
                 new ODataValidationSettings(),
                 o => o.AllowedLogicalOperators,
                 expectedDefaultValue: AllowedLogicalOperators.All,
@@ -68,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void AllowedQueryOptions_Property_RoundTrips()
         {
-            Assert.Reflection.EnumProperty<ODataValidationSettings, AllowedQueryOptions>(
+            ReflectionAssert.EnumProperty<ODataValidationSettings, AllowedQueryOptions>(
                 new ODataValidationSettings(),
                 o => o.AllowedQueryOptions,
                 expectedDefaultValue: AllowedQueryOptions.Supported,
@@ -81,7 +82,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             ODataValidationSettings settings = new ODataValidationSettings();
             Assert.NotNull(settings.AllowedOrderByProperties);
-            Assert.Equal(0, settings.AllowedOrderByProperties.Count);
+            Assert.Empty(settings.AllowedOrderByProperties);
 
             settings.AllowedOrderByProperties.Add("Id");
             settings.AllowedOrderByProperties.Add("Name");
@@ -94,7 +95,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxAnyAllExpressionDepth_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty<ODataValidationSettings, int>(
+            ReflectionAssert.IntegerProperty<ODataValidationSettings, int>(
                 new ODataValidationSettings(),
                 o => o.MaxAnyAllExpressionDepth,
                 expectedDefaultValue: 1,
@@ -108,7 +109,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxNodeCount_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty<ODataValidationSettings, int>(
+            ReflectionAssert.IntegerProperty<ODataValidationSettings, int>(
                 new ODataValidationSettings(),
                 o => o.MaxNodeCount,
                 expectedDefaultValue: 100,
@@ -122,7 +123,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxTop_Property_RoundTrips()
         {
-            Assert.Reflection.NullableIntegerProperty<ODataValidationSettings, int>(
+            ReflectionAssert.NullableIntegerProperty<ODataValidationSettings, int>(
                 new ODataValidationSettings(),
                 o => o.MaxTop,
                 expectedDefaultValue: null,
@@ -136,7 +137,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxSkip_Property_RoundTrips()
         {
-            Assert.Reflection.NullableIntegerProperty<ODataValidationSettings, int>(
+            ReflectionAssert.NullableIntegerProperty<ODataValidationSettings, int>(
                 new ODataValidationSettings(),
                 o => o.MaxSkip,
                 expectedDefaultValue: null,
@@ -150,7 +151,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxExpansionDepth_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty(
+            ReflectionAssert.IntegerProperty(
              new ODataValidationSettings(),
              o => o.MaxExpansionDepth,
              expectedDefaultValue: 2,
@@ -164,7 +165,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void MaxOrderByNodeCount_Property_RoundTrips()
         {
-            Assert.Reflection.IntegerProperty(
+            ReflectionAssert.IntegerProperty(
              new ODataValidationSettings(),
              o => o.MaxOrderByNodeCount,
              expectedDefaultValue: 5,

@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_ThrowsArgumentNull_MessageWriter()
         {
             ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(42, _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
         }
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_ThrowsArgumentNull_Graph()
         {
             ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(null, type: _workspaceType, messageWriter: null, writeContext: null),
                 "messageWriter");
         }
@@ -37,7 +38,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_Throws_CannotWriteType()
         {
             ODataServiceDocumentSerializer serializer = new ODataServiceDocumentSerializer();
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => serializer.WriteObject(42, _workspaceType, messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "ODataServiceDocumentSerializer cannot write an object of type 'ODataServiceDocument'.");
         }

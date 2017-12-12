@@ -6,9 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
@@ -24,7 +27,6 @@ namespace Microsoft.Test.AspNet.OData.Batch
 
             Assert.NotNull(boundary);
             Assert.NotEmpty(boundary.Value);
-            Assert.NotNull(odataVersion);
             Assert.NotEmpty(odataVersion.Value);
             Assert.Equal("multipart/mixed", contentType.MediaType);
         }
@@ -32,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
         [Fact]
         public void Constructor_Throws_WhenResponsesAreNull()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => CreateBatchContent(null),
                 "responses");
         }
@@ -43,12 +45,11 @@ namespace Microsoft.Test.AspNet.OData.Batch
             ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[0]);
             var odataVersion = batchContent.Headers.FirstOrDefault(h => String.Equals(h.Key, ODataVersionConstraint.ODataServiceVersionHeader, StringComparison.OrdinalIgnoreCase));
 
-            Assert.NotNull(odataVersion);
             Assert.Equal("4.0", odataVersion.Value.FirstOrDefault());
         }
 
         [Fact]
-        public void SerializeToStreamAsync_WritesODataBatchResponseItems()
+        public async Task SerializeToStreamAsync_WritesODataBatchResponseItems()
         {
             ODataBatchContent batchContent = CreateBatchContent(new ODataBatchResponseItem[]
             {
@@ -64,7 +65,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
                 Content = batchContent
             };
 
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             Assert.Contains("changesetresponse", responseString);
             Assert.Contains("OK", responseString);

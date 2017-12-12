@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -25,14 +26,14 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [Fact]
         public void ValidateThrowsOnNullOption()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(null, new ODataValidationSettings()));
         }
 
         [Fact]
         public void ValidateThrowsOnNullSettings()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new TopQueryOption("2", _context), null));
         }
 
@@ -44,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxTop = 10
             };
 
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(new TopQueryOption("11", _context), settings),
                 "The limit of '10' for Top query has been exceeded. The value from the incoming request is '11'.");
         }
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxTop = 10
             };
 
-            Assert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("10", _context), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("10", _context), settings));
         }
 
         [Fact]
@@ -68,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                 MaxTop = 10
             };
 
-            Assert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("9", _context), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("9", _context), settings));
         }
 
         [Fact]
@@ -85,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             context.Model.SetAnnotationValue(context.ElementType as IEdmStructuredType, modelBoundQuerySettings);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("20", context), settings));
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(new TopQueryOption("20", context), settings));
         }
 
         [Fact]
@@ -102,7 +103,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             context.Model.SetAnnotationValue(context.ElementType as IEdmStructuredType, modelBoundQuerySettings);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 _validator.Validate(new TopQueryOption("11", context), settings),
                 "The limit of '10' for Top query has been exceeded. The value from the incoming request is '11'.");
         }

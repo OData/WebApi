@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IList<MemberInfo> path = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => path.ConvertBindingPath(), "bindingPath");
+            ExceptionAssert.ThrowsArgumentNull(() => path.ConvertBindingPath(), "bindingPath");
         }
 
         [Fact]

@@ -14,6 +14,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Query.Validators;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void ConstructorNullContextThrows()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 new OrderByQueryOption("Name", null));
         }
 
@@ -33,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new OrderByQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -44,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new OrderByQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -55,7 +56,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() =>
+            ExceptionAssert.ThrowsArgumentNull(() =>
                 new OrderByQueryOption("test", new ODataQueryContext(model, typeof(Customer)), queryOptionParser: null),
                 "queryOptionParser");
         }
@@ -105,7 +106,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
             var orderby = new OrderByQueryOption(orderbyValue, context);
 
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 orderby.ApplyTo(ODataQueryOptionTest.Customers));
         }
 
@@ -284,7 +285,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType_With_Address().Add_Customers_EntitySet().GetServiceModel();
             var orderByOption = new OrderByQueryOption(orderByQuery, new ODataQueryContext(model, typeof(Customer)));
 
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => orderByOption.OrderByNodes.Count(),
                 "Only ordering by properties is supported for non-primitive collections. Expressions are not supported.");
         }
@@ -300,11 +301,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             settings.AllowedOrderByProperties.Add("Id");
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => option.Validate(settings),
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings),
                 "Order by 'Name' is not allowed. To allow it, set the 'AllowedOrderByProperties' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
-            Assert.DoesNotThrow(() => option.Validate(settings));
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
         }
 
         [Fact]
@@ -317,7 +318,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var orderbyOption = new OrderByQueryOption("Name, Name", context);
 
             // Act
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => orderbyOption.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()),
                 "Duplicate property named 'Name' is not supported in '$orderby'.");
         }
@@ -330,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var orderbyOption = new OrderByQueryOption("$it, $it", context);
 
             // Act
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => orderbyOption.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "Multiple '$it' nodes are not supported in '$orderby'.");
         }
@@ -345,7 +346,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var orderbyOption = new OrderByQueryOption("Address/City, Address/City", context);
 
             // Act
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => orderbyOption.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()),
                 "Duplicate property named 'Address/City' is not supported in '$orderby'.");
         }
@@ -488,7 +489,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQuerySettings settings = new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False };
 
             // Act & Assert
-            Assert.Throws<NullReferenceException>(() => orderByOption.ApplyTo(customers, settings).ToArray());
+            ExceptionAssert.Throws<NullReferenceException>(() => orderByOption.ApplyTo(customers, settings).ToArray());
         }
 
         [Fact]
@@ -513,7 +514,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IQueryable queryable = new Mock<IQueryable>().Object;
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => orderBy.ApplyTo(queryable),
+            ExceptionAssert.Throws<NotSupportedException>(() => orderBy.ApplyTo(queryable),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 
@@ -589,7 +590,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var orderByOption = new OrderByQueryOption("@p", new ODataQueryContext(model, typeof(Customer)));
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => orderByOption.OrderByNodes,
                 "Only ordering by properties is supported for non-primitive collections. Expressions are not supported.");
         }

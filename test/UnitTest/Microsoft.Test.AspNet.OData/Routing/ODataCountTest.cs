@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -17,6 +18,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -75,62 +77,62 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("DollarCountData")]
-        public void DollarCount_Works(string uri, int expectedCount)
+        [MemberData(nameof(DollarCountData))]
+        public async Task DollarCount_Works(string uri, int expectedCount)
         {
             // Arrange & Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            int actualCount = Int32.Parse(response.Content.ReadAsStringAsync().Result);
+            int actualCount = Int32.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(expectedCount, actualCount);
         }
 
         [Fact]
-        public void GetCollection_Works_WithoutDollarCount()
+        public async Task GetCollection_Works_WithoutDollarCount()
         {
             // Arrange
             var uri = "DollarCountEntities(5)/StringCollectionProp";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(2, result["value"].Count());
             Assert.Equal("1", result["value"][0]);
             Assert.Equal("2", result["value"][1]);
         }
 
         [Fact]
-        public void Function_Works_WithDollarCountInQueryOption()
+        public async Task Function_Works_WithDollarCountInQueryOption()
         {
             // Arrange
             var uri = "DollarCountEntities/Default.BoundFunctionReturnsComplexCollection()?$count=true";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(15, result["@odata.count"]);
         }
 
         [Fact]
-        public void GetCount_Throws_DollarCountNotAllowed()
+        public async Task GetCount_Throws_DollarCountNotAllowed()
         {
             // Arrange
             var uri = "DollarCountEntities(5)/DollarCountNotAllowedCollectionProp/$count";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            var result = response.Content.ReadAsStringAsync().Result;
+            var result = await response.Content.ReadAsStringAsync();
             Assert.Contains(
                 "The query specified in the URI is not valid. Query option 'Count' is not allowed. " +
                 "To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",

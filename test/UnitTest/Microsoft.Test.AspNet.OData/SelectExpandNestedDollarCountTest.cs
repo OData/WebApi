@@ -6,12 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -38,19 +39,19 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithOneLevelNestedDollarCount_Works()
+        public async Task SelectExpand_WithOneLevelNestedDollarCount_Works()
         {
             // Arrange
             string uri = "/odata/MsCustomers?$expand=Orders($count=true)";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
 
             Assert.DoesNotContain(",\"@odata.count\":7", payload); // Top (Customers)
             Assert.Contains("\"Orders@odata.count\":5,", payload); // Orders
@@ -58,38 +59,38 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithTopLevelDollarCount_AndWithOneLevelNestedDollarCount_Works()
+        public async Task SelectExpand_WithTopLevelDollarCount_AndWithOneLevelNestedDollarCount_Works()
         {
             // Arrange
             string uri = "/odata/MsCustomers?$expand=Orders($count=true)&$count=true";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(",\"@odata.count\":7", payload); // Top (Customers)
             Assert.Contains("\"Orders@odata.count\":5,", payload); // Orders
             Assert.DoesNotContain("\"Categories@odata.count\":9", payload); // Categories
         }
 
         [Fact]
-        public void SelectExpand_WithDollarFilter_AndWithOneLevelNestedDollarCount_Works()
+        public async Task SelectExpand_WithDollarFilter_AndWithOneLevelNestedDollarCount_Works()
         {
             // Arrange
             string uri = "/odata/MsCustomers?$expand=Orders($filter=Id ge 3;$expand=Categories;$count=true)";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
 
             Assert.DoesNotContain(",\"@odata.count\":7", payload); // Top (Customers)
             Assert.Contains("\"Orders@odata.count\":3,", payload); // Orders
@@ -97,29 +98,29 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithAllDollarCount_Works()
+        public async Task SelectExpand_WithAllDollarCount_Works()
         {
             // Arrange
             string uri = "/odata/MsCustomers?$expand=Orders($expand=Categories($count=true);$count=true)&$count=true";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            string payload = response.Content.ReadAsStringAsync().Result;
+            string payload = await response.Content.ReadAsStringAsync();
             Assert.Contains(",\"@odata.count\":7", payload); // Top (Customers)
             Assert.Contains("\"Orders@odata.count\":5,", payload); // Orders
             Assert.Contains("\"Categories@odata.count\":9", payload); // Categories
         }
 
-        private HttpResponseMessage GetResponse(string uri, string acceptHeader)
+        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
-            return _client.SendAsync(request).Result;
+            return _client.SendAsync(request);
         }
 
         private IEdmModel GetModel()

@@ -5,6 +5,7 @@ using System;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Buildert
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Test.AspNet.OData.Buildert
         [InlineData(typeof(DateTime?))]
         public void Ctor_DoesnotThrows_IfPropertyIsDateTime(Type type)
         {
-            Assert.DoesNotThrow(() => new ComplexTypeConfiguration(Mock.Of<ODataModelBuilder>(), type));
+            ExceptionAssert.DoesNotThrow(() => new ComplexTypeConfiguration(Mock.Of<ODataModelBuilder>(), type));
         }
     }
 }

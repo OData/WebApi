@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void Constructor_Throws_NullParameterAliasNodes()
         {
             // Arrange & Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ParameterAliasNodeTranslator(null),
                 "parameterAliasNodes");
         }

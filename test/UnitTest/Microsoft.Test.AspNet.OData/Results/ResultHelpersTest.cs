@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Query.Results
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             request.EnableHttpDependencyInjectionSupport(model.Model);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => ResultHelpers.GenerateODataLink(request, _entity, isEntityId: true),
                 "The Id link builder for the entity set 'Customers' returned null. An Id link is required for the OData-EntityId header.");
         }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.TestCommon
 {
@@ -105,7 +106,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// </summary>
         /// <typeparam name="T">The type to test for properties.</typeparam>
         /// <param name="typeProperties">The set of type properties to test for.</param>
-        public void HasProperties<T>(TypeProperties typeProperties)
+        public static void HasProperties<T>(TypeProperties typeProperties)
         {
             HasProperties(typeof(T), typeProperties);
         }
@@ -117,7 +118,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <typeparam name="T">The type to test for properties.</typeparam>
         /// <typeparam name="TIsAssignableFrom">Verify that the type to test is assignable from this type.</typeparam>
         /// <param name="typeProperties">The set of type properties to test for.</param>
-        public void HasProperties<T, TIsAssignableFrom>(TypeProperties typeProperties)
+        public static void HasProperties<T, TIsAssignableFrom>(TypeProperties typeProperties)
         {
             HasProperties(typeof(T), typeProperties, typeof(TIsAssignableFrom));
         }
@@ -128,7 +129,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// </summary>
         /// <param name="type">The type to test for properties.</param>
         /// <param name="typeProperties">The set of type properties to test for.</param>
-        public void HasProperties(Type type, TypeProperties typeProperties)
+        public static void HasProperties(Type type, TypeProperties typeProperties)
         {
             HasProperties(type, typeProperties, null);
         }
@@ -140,7 +141,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <param name="type">The type to test for properties.</param>
         /// <param name="typeProperties">The set of type properties to test for.</param>
         /// <param name="isAssignableFrom">Verify that the type to test is assignable from this type.</param>
-        public void HasProperties(Type type, TypeProperties typeProperties, Type isAssignableFrom)
+        public static void HasProperties(Type type, TypeProperties typeProperties, Type isAssignableFrom)
         {
             TypeAssert.CheckProperty(type, (typeProperties & TypeProperties.IsAbstract) > 0, type.IsAbstract, "abstract");
             TypeAssert.CheckProperty(type, (typeProperties & TypeProperties.IsClass) > 0, type.IsClass, "a class");

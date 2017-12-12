@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void Property_Name_RoundTrips()
         {
-            Assert.Reflection.Property(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
+            ReflectionAssert.Property(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
         }
 
         [Fact]
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void Property_AddedExplicitly_RoundTrips()
         {
-            Assert.Reflection.BooleanProperty(_configuration, c => c.AddedExplicitly, true);
+            ReflectionAssert.BooleanProperty(_configuration, c => c.AddedExplicitly, true);
         }
 
         [Fact]
@@ -277,10 +278,10 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(5, property.QueryConfiguration.ModelBoundQuerySettings.ExpandConfigurations["a"].MaxDepth);
             Assert.Equal(10, property.QueryConfiguration.ModelBoundQuerySettings.MaxTop);
             Assert.Equal(20, property.QueryConfiguration.ModelBoundQuerySettings.PageSize);
-            Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.Countable);
-            Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["A"]);
-            Assert.Equal(true, property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["B"]);
-            Assert.Equal(false, property.QueryConfiguration.ModelBoundQuerySettings.DefaultEnableFilter);
+            Assert.True(property.QueryConfiguration.ModelBoundQuerySettings.Countable);
+            Assert.True(property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["A"]);
+            Assert.True(property.QueryConfiguration.ModelBoundQuerySettings.OrderByConfigurations["B"]);
+            Assert.False(property.QueryConfiguration.ModelBoundQuerySettings.DefaultEnableFilter);
         }
     }
 }

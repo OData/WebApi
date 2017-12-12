@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("CollectionTypesData")]
+        [MemberData(nameof(CollectionTypesData))]
         public void IsCollection_with_Collections(Type collectionType, Type elementType)
         {
             Type type;
@@ -47,7 +48,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("CollectionTypesData")]
+        [MemberData(nameof(CollectionTypesData))]
         public void GetInnerElementType(Type collectionType, Type elementType)
         {
             Assert.Equal(elementType, TypeHelper.GetInnerElementType(collectionType));
@@ -291,10 +292,10 @@ namespace Microsoft.Test.AspNet.OData
 
             foreach (string name in definedNames)
             {
-                Assert.True(foundNames.Contains(name));
+                Assert.Contains(foundNames, s => s == name);
             }
 
-            Assert.False(foundTypes.Contains(typeof(TypeHelperTest)));
+            Assert.DoesNotContain(foundTypes, t => t == typeof(TypeHelperTest));
         }
 
         /// <summary>

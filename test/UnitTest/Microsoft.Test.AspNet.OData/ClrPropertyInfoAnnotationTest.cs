@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsForNullPropertyInfo()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ClrPropertyInfoAnnotation(clrPropertyInfo: null),
                 "clrPropertyInfo");
         }

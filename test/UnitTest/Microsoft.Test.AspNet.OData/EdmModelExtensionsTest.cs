@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData
         public void GetNavigationSourceLinkBuilder_ThrowsArgumentNull_Model()
         {
             IEdmModel model = null;
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => model.GetNavigationSourceLinkBuilder(navigationSource: new Mock<IEdmNavigationSource>().Object),
                 "model");
         }
@@ -79,7 +80,7 @@ namespace Microsoft.Test.AspNet.OData
             IEdmFunction function = new Mock<IEdmFunction>().Object;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => model.GetOperationLinkBuilder(function), "model");
+            ExceptionAssert.ThrowsArgumentNull(() => model.GetOperationLinkBuilder(function), "model");
         }
 
         [Fact]
@@ -89,7 +90,7 @@ namespace Microsoft.Test.AspNet.OData
             IEdmModel model = new EdmModel();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => model.GetOperationLinkBuilder(operation: null), "operation");
+            ExceptionAssert.ThrowsArgumentNull(() => model.GetOperationLinkBuilder(operation: null), "operation");
         }
 
         [Fact]

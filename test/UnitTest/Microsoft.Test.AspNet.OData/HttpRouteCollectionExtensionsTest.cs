@@ -17,6 +17,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -47,7 +48,6 @@ namespace Microsoft.Test.AspNet.OData
             Assert.NotEmpty(GetRoutingConvetions(config));
 
             var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
-            Assert.NotNull(odataVersionConstraint.Version);
             Assert.Equal(ODataVersion.V4, odataVersionConstraint.Version);
         }
 
@@ -78,7 +78,6 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Empty(GetRoutingConvetions(config));
 
             var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
-            Assert.NotNull(odataVersionConstraint.Version);
             Assert.Equal(ODataVersion.V4, odataVersionConstraint.Version);
         }
 
@@ -145,7 +144,7 @@ namespace Microsoft.Test.AspNet.OData
             configuration.MapODataServiceRoute(model);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
+            ExceptionAssert.DoesNotThrow(() => configuration.EnsureInitialized());
         }
 
         [Fact]
@@ -164,7 +163,7 @@ namespace Microsoft.Test.AspNet.OData
                 ODataRoutingConventions.CreateDefault());
 
             // Act & Assert
-            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
+            ExceptionAssert.DoesNotThrow(() => configuration.EnsureInitialized());
         }
 
         [Fact]
@@ -183,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             IHttpRoute odataRoute = routes[routeName];
             var odataVersionConstraint = Assert.Single(odataRoute.Constraints.Values.OfType<ODataVersionConstraint>());
-            Assert.Equal(true, odataVersionConstraint.IsRelaxedMatch);
+            Assert.True(odataVersionConstraint.IsRelaxedMatch);
         }
 
         private static IEdmModel GetModel(HttpConfiguration config)

@@ -6,10 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
@@ -27,23 +29,23 @@ namespace Microsoft.Test.AspNet.OData.Batch
         [Fact]
         public void Constructor_NullResponses_Throws()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ChangeSetResponseItem(null),
                 "responses");
         }
 
         [Fact]
-        public void WriteResponseAsync_NullWriter_Throws()
+        public async Task WriteResponseAsync_NullWriter_Throws()
         {
             ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new HttpResponseMessage[0]);
 
-            Assert.ThrowsArgumentNull(
-                () => responseItem.WriteResponseAsync(null, CancellationToken.None).Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => responseItem.WriteResponseAsync(null, CancellationToken.None),
                 "writer");
         }
 
         [Fact]
-        public void WriteResponseAsync_WritesChangeSet()
+        public async Task WriteResponseAsync_WritesChangeSet()
         {
             HttpResponseMessage[] responses = new HttpResponseMessage[]
                 {
@@ -57,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
-            responseItem.WriteResponseAsync(batchWriter, CancellationToken.None).Wait();
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
 
             batchWriter.WriteEndBatch();
             memoryStream.Position = 0;

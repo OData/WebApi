@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void Property_Instance_RoundTrips()
         {
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
-            Assert.Reflection.Property(wrapper, w => w.Instance, expectedDefaultValue: null, allowNull: true, roundTripTestValue: new TestEntity());
+            ReflectionAssert.Property(wrapper, w => w.Instance, expectedDefaultValue: null, allowNull: true, roundTripTestValue: new TestEntity());
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
-            Assert.Reflection.Property(
+            ReflectionAssert.Property(
                 wrapper, w => w.Container, expectedDefaultValue: null, allowNull: true, roundTripTestValue: new MockPropertyContainer());
         }
 
@@ -58,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             SelectExpandWrapper<int> wrapper = new SelectExpandWrapper<int> { TypeName = _model.Customer.FullName(), ModelID = _modelID };
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => wrapper.GetEdmType(),
                 "Cannot find the resource type 'NS.Customer' in the model.");
         }
@@ -238,7 +239,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => wrapper.ToDictionary(mapperProvider: null));
+            ExceptionAssert.Throws<ArgumentNullException>(() => wrapper.ToDictionary(mapperProvider: null));
         }
 
         [Fact]
@@ -263,7 +264,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 (IEdmModel m, IEdmStructuredType t) => null;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => 
+            ExceptionAssert.Throws<InvalidOperationException>(() => 
                 wrapper.ToDictionary(mapperProvider: mapperProvider),
                 "The mapper provider must return a valid 'Microsoft.AspNet.OData.Query.IPropertyMapper' instance for the given 'NS.Name' IEdmType.");
         }
@@ -294,7 +295,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 (IEdmModel m, IEdmStructuredType t) => mapperMock.Object;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() =>
+            ExceptionAssert.Throws<InvalidOperationException>(() =>
                 testWrapper.ToDictionary(mapperProvider), 
                 "The key mapping for the property 'SampleProperty' can't be null or empty.");
         }

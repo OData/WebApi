@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             ODataSerializer serializer = new Mock<ODataSerializer>(ODataPayloadKind.Unsupported) { CallBase = true }.Object;
 
-            Assert.Throws<NotSupportedException>(
+            ExceptionAssert.Throws<NotSupportedException>(
                 () => serializer.WriteObject(graph: null, type: typeof(int),messageWriter: null, writeContext: null),
                 "ODataSerializerProxy does not support WriteObject.");
         }

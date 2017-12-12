@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -14,7 +15,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void Ctor_ThrowsForNullPropertyInfo()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new DynamicPropertyDictionaryAnnotation(propertyInfo: null),
                 "propertyInfo");
         }
@@ -27,7 +28,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             propertyInfo.Setup(p => p.PropertyType).Returns(typeof(int));
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new DynamicPropertyDictionaryAnnotation(
+            ExceptionAssert.Throws<ArgumentException>(() => new DynamicPropertyDictionaryAnnotation(
                 propertyInfo: propertyInfo.Object),
                 "Type 'Int32' is not supported as dynamic property annotation. " +
                 "Referenced property must be of type 'IDictionary<string, object>'." +

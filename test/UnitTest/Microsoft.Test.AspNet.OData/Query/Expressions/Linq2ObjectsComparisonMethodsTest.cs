@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [PropertyData("AreByteArraysEqualDataset")]
+        [MemberData(nameof(AreByteArraysEqualDataset))]
         public void AreByteArraysEqual(byte[] left, byte[] right, bool result)
         {
             Assert.Equal(
@@ -34,7 +35,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [PropertyData("AreByteArraysEqualDataset")]
+        [MemberData(nameof(AreByteArraysEqualDataset))]
         public void AreByteArraysNotEqual(byte[] left, byte[] right, bool result)
         {
             Assert.Equal(

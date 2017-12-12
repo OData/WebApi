@@ -5,6 +5,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -13,14 +14,14 @@ namespace Microsoft.Test.AspNet.OData
          [Fact]
          public void Ctor_ThrowsArgumentNull_EdmType()
          {
-             Assert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType: null), "entityType");
+             ExceptionAssert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType: null), "entityType");
          }
 
          [Fact]
          public void Ctor_ThrowsArgumentNull_List()
          {
              IEdmEntityType entityType = new Mock<IEdmEntityType>().Object;
-             Assert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType, changedObjectList: null), "list");
+             ExceptionAssert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType, changedObjectList: null), "list");
          }
 
          [Fact]

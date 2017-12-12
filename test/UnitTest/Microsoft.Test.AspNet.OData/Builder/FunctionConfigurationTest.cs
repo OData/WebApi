@@ -10,13 +10,13 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -202,7 +202,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -219,7 +219,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(string.Format("Collection({0})", typeof(Customer).FullName), sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -386,13 +386,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(1, model.SchemaElements.OfType<IEdmFunction>().Count());
+            Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             Assert.False(function.IsComposable);
             Assert.True(function.IsBound);
             Assert.Equal("FunctionName", function.Name);
             Assert.NotNull(function.ReturnType);
-            Assert.Equal(1, function.Parameters.Count());
+            Assert.Single(function.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, function.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, function.Parameters.Single().Type.FullName());
         }
@@ -412,8 +412,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainer;
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmFunctionImport>().Count());
-            Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
+            Assert.Single(container.Elements.OfType<IEdmFunctionImport>());
+            Assert.Single(container.Elements.OfType<IEdmEntitySet>());
             IEdmFunctionImport functionImport = Assert.Single(container.Elements.OfType<IEdmFunctionImport>());
             IEdmFunction function = functionImport.Function;
             Assert.False(function.IsComposable);
@@ -459,7 +459,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(1, model.SchemaElements.OfType<IEdmFunction>().Count());
+            Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             IEdmFunction function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
             Assert.False(function.IsComposable);
             Assert.True(function.IsBound);
@@ -497,7 +497,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             FunctionConfiguration function = builder.Function("NoBindableFunction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => function.HasFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register a function link factory, functions must be bindable to a single entity. " +
                 "Function 'NoBindableFunction' does not meet this requirement.");
@@ -512,7 +512,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             FunctionConfiguration function = customer.Collection.Function("CollectionFunction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => function.HasFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register a function link factory, functions must be bindable to a single entity. " +
                 "Function 'CollectionFunction' does not meet this requirement.");
@@ -526,7 +526,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             FunctionConfiguration function = builder.Function("NoBindableFunction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => function.HasFeedFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register a function link factory, functions must be bindable to the collection of entity. " +
                 "Function 'NoBindableFunction' does not meet this requirement.");
@@ -541,7 +541,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             FunctionConfiguration function = customer.Function("NonCollectionFunction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => function.HasFeedFunctionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register a function link factory, functions must be bindable to the collection of entity. " +
                 "Function 'NonCollectionFunction' does not meet this requirement.");

@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks), messageWriter: null,
                     writeContext: new ODataSerializerContext()),
                 "messageWriter");
@@ -35,7 +36,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: typeof(ODataEntityReferenceLinks),
                     messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => serializer.WriteObject(graph: "not uri", type: typeof(ODataEntityReferenceLinks),
                     messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: new ODataSerializerContext()),
                 "ODataEntityReferenceLinksSerializer cannot write an object of type 'System.String'.");
@@ -77,7 +78,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Theory]
-        [PropertyData("SerializationTestData")]
+        [MemberData(nameof(SerializationTestData))]
         public void ODataEntityReferenceLinkSerializer_Serializes_UrisAndEntityReferenceLinks(object uris)
         {
             // Arrange
@@ -118,7 +119,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Theory]
-        [PropertyData("SerializationTestData2")]
+        [MemberData(nameof(SerializationTestData2))]
         public void ODataEntityReferenceLinkSerializer_Serializes_UrisAndEntityReferenceLinks_WithCount(object uris)
         {
             // Arrange

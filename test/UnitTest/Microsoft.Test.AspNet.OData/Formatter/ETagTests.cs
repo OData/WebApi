@@ -15,6 +15,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -79,7 +80,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             etag.IsWellFormed = false;
 
             // Act && Assert
-            Assert.Throws<InvalidOperationException>(() => etag["Name"], "The ETag is not well-formed.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => etag["Name"], "The ETag is not well-formed.");
         }
 
         [Fact]
@@ -92,7 +93,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             dynamic dynamicETag = etag;
 
             // Act && Assert
-            Assert.Throws<InvalidOperationException>(() => dynamicETag.Name, "The ETag is not well-formed.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => dynamicETag.Name, "The ETag is not well-formed.");
         }
 
         [Fact]

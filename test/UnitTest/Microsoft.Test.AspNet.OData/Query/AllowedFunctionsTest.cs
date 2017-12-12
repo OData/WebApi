@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -106,42 +107,42 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("AllStringFunctionsData")]
+        [MemberData(nameof(AllStringFunctionsData))]
         public void AllStringFunctions_Has_AllStringFunctions(AllowedFunctions stringFunction)
         {
             Assert.Equal(stringFunction, AllowedFunctions.AllStringFunctions & stringFunction);
         }
 
         [Theory]
-        [PropertyData("AllNonStringFunctionsData")]
+        [MemberData(nameof(AllNonStringFunctionsData))]
         public void AllStringFunctions_DoesNot_Have_NonStringFunctions(AllowedFunctions nonStringFunction)
         {
             Assert.Equal(AllowedFunctions.None, AllowedFunctions.AllStringFunctions & nonStringFunction);
         }
 
         [Theory]
-        [PropertyData("AllDateTimeFunctionsData")]
+        [MemberData(nameof(AllDateTimeFunctionsData))]
         public void AllDateTimeFunctions_Has_AllDateFunctions(AllowedFunctions dateFunction)
         {
             Assert.Equal(dateFunction, AllowedFunctions.AllDateTimeFunctions & dateFunction);
         }
 
         [Theory]
-        [PropertyData("AllNonDateTimeFunctionsData")]
+        [MemberData(nameof(AllNonDateTimeFunctionsData))]
         public void AllDateTimeFunctions_DoesNot_Have_NontringFunctions(AllowedFunctions nonDateTimeFunction)
         {
             Assert.Equal(AllowedFunctions.None, AllowedFunctions.AllDateTimeFunctions & nonDateTimeFunction);
         }
 
         [Theory]
-        [PropertyData("AllMathFunctionsData")]
+        [MemberData(nameof(AllMathFunctionsData))]
         public void AllMathFunctions_Has_AllMathFunctions(AllowedFunctions mathFunction)
         {
             Assert.Equal(mathFunction, AllowedFunctions.AllMathFunctions & mathFunction);
         }
 
         [Theory]
-        [PropertyData("AllNonMathFunctionsData")]
+        [MemberData(nameof(AllNonMathFunctionsData))]
         public void AllMathFunctions_DoesNot_Have_NonMathFunctions(AllowedFunctions nonMathFunction)
         {
             Assert.Equal(AllowedFunctions.None, AllowedFunctions.AllMathFunctions & nonMathFunction);
@@ -159,7 +160,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                 }
             }
 
-            Assert.Equal(allFunctions, AllowedFunctions.AllFunctions);
+            Assert.Equal(AllowedFunctions.AllFunctions, allFunctions);
         }
     }
 }

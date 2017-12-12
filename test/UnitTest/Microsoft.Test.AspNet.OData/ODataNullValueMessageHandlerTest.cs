@@ -17,6 +17,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData
@@ -32,17 +33,17 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SendAsync_ThrowsIfRequestIsNull()
+        public async Task SendAsync_ThrowsIfRequestIsNull()
         {
             // Arrange
             ODataNullValueMessageHandler handler = new ODataNullValueMessageHandler();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => { HttpResponseMessage result = handler.SendAsync(null).Result; }, "request");
+            await ExceptionAssert.ThrowsArgumentNullAsync(() => handler.SendAsync(null), "request");
         }
 
         [Fact]
-        public void SendAsync_ReturnsNullIfResponseIsNull()
+        public async Task SendAsync_ReturnsNullIfResponseIsNull()
         {
             // Arrange
             ODataNullValueMessageHandler handler = new ODataNullValueMessageHandler
@@ -53,14 +54,14 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Null(response);
         }
 
         [Fact]
-        public void SendAsync_ReturnsOriginalResponseIfContentIsNull()
+        public async Task SendAsync_ReturnsOriginalResponseIfContentIsNull()
         {
             // Arrange
             HttpResponseMessage originalResponse = new HttpResponseMessage(HttpStatusCode.OK);
@@ -74,14 +75,14 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
         }
 
         [Fact]
-        public void SendAsync_ReturnsOriginalResponseIfNoObjectContent()
+        public async Task SendAsync_ReturnsOriginalResponseIfNoObjectContent()
         {
             // Arrange
             HttpResponseMessage originalResponse = new HttpResponseMessage(HttpStatusCode.OK);
@@ -96,14 +97,14 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
         }
 
         [Fact]
-        public void SendAsync_ReturnsOriginalResponseIfObjectContentHasValue()
+        public async Task SendAsync_ReturnsOriginalResponseIfObjectContentHasValue()
         {
             // Arrange
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
@@ -121,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
@@ -132,7 +133,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData(HttpStatusCode.Redirect)]
         [InlineData(HttpStatusCode.BadRequest)]
         [InlineData(HttpStatusCode.InternalServerError)]
-        public void SendAsync_ReturnsOriginalResponseIfStatusCodeIsNotOk(HttpStatusCode status)
+        public async Task SendAsync_ReturnsOriginalResponseIfStatusCodeIsNotOk(HttpStatusCode status)
         {
             // Arrange
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
@@ -150,7 +151,7 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
@@ -161,7 +162,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("Post")]
         [InlineData("Put")]
         [InlineData("Patch")]
-        public void SendAsync_ReturnsOriginalResponseIfRequestIsNotGet(string method)
+        public async Task SendAsync_ReturnsOriginalResponseIfRequestIsNotGet(string method)
         {
             // Arrange
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
@@ -179,14 +180,14 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = new ODataPath(new EntitySetSegment(_entitySet));
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
         }
 
         [Fact]
-        public void SendAsync_ReturnsOriginalResponseIfRequestDoesNotHaveODataPath()
+        public async Task SendAsync_ReturnsOriginalResponseIfRequestDoesNotHaveODataPath()
         {
             // Arrange
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
@@ -203,14 +204,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/any");
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Same(originalResponse, response);
         }
 
         [Fact]
-        public void SendAsync_ReturnsNotFoundForNullEntityResponse()
+        public async Task SendAsync_ReturnsNotFoundForNullEntityResponse()
         {
             // Arrange
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
@@ -230,7 +231,7 @@ namespace Microsoft.Test.AspNet.OData
             request.ODataProperties().Path = path;
 
             // Act 
-            HttpResponseMessage response = handler.SendAsync(request).Result;
+            HttpResponseMessage response = await handler.SendAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
@@ -247,7 +248,6 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("Customers(3)/NavigationProperty", HttpStatusCode.NoContent)]
         [InlineData("Customers(3)/CollectionNavigationProperty", null)]
         [InlineData("Customers(3)/CollectionNavigationProperty(3)", HttpStatusCode.NoContent)]
-        [InlineData("Customers(3)", HttpStatusCode.NotFound)]
         [InlineData("Navigations/Test.SpecialNavigation", null)]
         [InlineData("Navigations(3)/Test.SpecialNavigation", HttpStatusCode.NotFound)]
         [InlineData("Navigations/Test.SpecialNavigation(3)", HttpStatusCode.NotFound)]

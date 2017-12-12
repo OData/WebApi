@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
@@ -16,6 +17,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Builder.TestModelss;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -39,15 +41,15 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Get_Containment()
+        public async Task Get_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -55,15 +57,15 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void GetSpecialOrderLines_Containment()
+        public async Task GetSpecialOrderLines_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines/Microsoft.Test.AspNet.OData.Builder.TestModels.SpecialOrderLine";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -75,15 +77,15 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("/odata/MyOrders(2)/Microsoft.Test.AspNet.OData.Builder.TestModels.MySpecialOrder")]
         [InlineData("/odata/MyOrders(2)")]
-        public void GetMyOrder_WithOrWithoutCastType_Containment(string url)
+        public async Task GetMyOrder_WithOrWithoutCastType_Containment(string url)
         {
             // Arrange
             var requestUri = BaseAddress + url;
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -93,15 +95,15 @@ namespace Microsoft.Test.AspNet.OData
         }
         
         [Fact]
-        public void GetOrderLine_Containment()
+        public async Task GetOrderLine_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines(2)";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -109,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void GetOrderLine_OperationAdvertised_Containment()
+        public async Task GetOrderLine_OperationAdvertised_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines(2)";
@@ -117,8 +119,8 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.TryParseAdd("application/json;odata.metadata=full");
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -132,15 +134,15 @@ namespace Microsoft.Test.AspNet.OData
         }
         
         [Fact]
-        public void GetMyOrders_WithContainmentProperties()
+        public async Task GetMyOrders_WithContainmentProperties()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -148,7 +150,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void GetMyOrders_HasLinks_WithContainmentPropertiesAndJsonFullMetadata()
+        public async Task GetMyOrders_HasLinks_WithContainmentPropertiesAndJsonFullMetadata()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders";
@@ -156,8 +158,8 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.TryParseAdd("application/json;odata.metadata=full");
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -177,15 +179,15 @@ namespace Microsoft.Test.AspNet.OData
         }
         
         [Fact]
-        public void ExpandOrderLines_Containment()
+        public async Task ExpandOrderLines_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)?$expand=OrderLines";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -193,7 +195,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ExpandOrderLines_Containment_FullMetadata()
+        public async Task ExpandOrderLines_Containment_FullMetadata()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)?$expand=OrderLines";
@@ -201,8 +203,8 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.TryParseAdd("application/json;odata.metadata=full");
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -236,7 +238,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Post_Containment()
+        public async Task Post_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines";
@@ -250,8 +252,8 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json"); 
             
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -261,7 +263,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Put_Containment()
+        public async Task Put_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines(2)";
@@ -275,7 +277,7 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            var response = _client.SendAsync(request).Result;
+            var response = await _client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -283,7 +285,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Patch_Containment()
+        public async Task Patch_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines(2)";
@@ -296,7 +298,7 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            var response = _client.SendAsync(request).Result;
+            var response = await _client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -304,14 +306,14 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Delete_Containment()
+        public async Task Delete_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines(2)";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
-            var response = _client.SendAsync(request).Result;
+            var response = await _client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -319,15 +321,15 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void GetMostExpensiveOrderLine_Containment()
+        public async Task GetMostExpensiveOrderLine_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines/ns.MostExpensive()";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -336,15 +338,15 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void TopOrder_Containment()
+        public async Task TopOrder_Containment()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders/ns.TopOrder()/OrderLines";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -352,7 +354,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void Post_MyOrders()
+        public async Task Post_MyOrders()
         {
             // Arrange
             var requestUri = BaseAddress + "/odata/MyOrders";
@@ -366,8 +368,8 @@ namespace Microsoft.Test.AspNet.OData
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            var response = _client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);

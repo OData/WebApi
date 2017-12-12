@@ -12,10 +12,10 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
-//using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
+using Xunit;
 using BuilderTestModels = Microsoft.Test.AspNet.OData.Builder.TestModels;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -56,7 +56,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             bool removed = builder.RemoveOperation("Format");
 
             // Assert      
-            Assert.Equal(0, builder.Operations.Count());
+            Assert.Empty(builder.Operations);
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             Assert.True(removed);
-            Assert.Equal(0, builder.Operations.Count());
+            Assert.Empty(builder.Operations);
         }
 
         [Fact]
@@ -85,7 +85,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ActionConfiguration action2 = builder.Action("Format");
             action2.Parameter<int>("SegmentSize");
 
-            Assert.Throws<InvalidOperationException>(() =>
+            ExceptionAssert.Throws<InvalidOperationException>(() =>
             {
                 builder.RemoveOperation("Format");
             });
@@ -117,7 +117,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            Assert.Reflection.Property(builder, b => b.DataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+            ReflectionAssert.Property(builder, b => b.DataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
         }
 
         [Fact]
@@ -125,7 +125,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             ODataModelBuilder builder = new ODataModelBuilder();
 
-            Assert.Reflection.Property(builder, b => b.MaxDataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
+            ReflectionAssert.Property(builder, b => b.MaxDataServiceVersion, new Version(4, 0), allowNull: false, roundTripTestValue: new Version(1, 0));
         }
 
         [Fact]
@@ -244,7 +244,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
             Assert.NotNull(properties);
 
-            Assert.Equal(1, properties.Elements.Count());
+            Assert.Single(properties.Elements);
             var element = properties.Elements.First() as IEdmPathExpression;
             Assert.NotNull(element);
 
@@ -268,7 +268,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(0, model.EntityContainer.OperationImports().Count());
+            Assert.Empty(model.EntityContainer.OperationImports());
         }
 
         [Fact]
@@ -443,7 +443,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             builder.EntityType<Customer>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(), "The entity 'Customer' does not have a key defined.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(), "The entity 'Customer' does not have a key defined.");
         }
 
         [Fact]
@@ -680,7 +680,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntityTypeConfiguration<MultiRole> roleType = builder.EntityType<MultiRole>();
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => roleType.HasRequired(c => c.User,
+            ExceptionAssert.Throws<NotSupportedException>(() => roleType.HasRequired(c => c.User,
                 (c, r) => c.UserKey1 == r.PrincipalUserKey1 && r.PrincipalUserKey3),
                 "Unsupported Expression NodeType 'MemberAccess'.");
         }
@@ -806,7 +806,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ODataModelBuilder builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.EntityType<ForeignEntity>().HasRequired(c => c.Principal,
                     (c, r) => c.InvalidForeignKey == r.InvalidPrincipalKey),
                 String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.TestCommon.MockType"));
@@ -874,9 +874,9 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 (IEdmDecimalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DecimalProperty")).Type;
 
             // Assert
-            Assert.Equal(decimalType.Precision, null);
-            Assert.Equal(decimalType.Scale, 0);
-            Assert.Equal(stringType.MaxLength, null);
+            Assert.Null(decimalType.Precision);
+            Assert.Equal(0, decimalType.Scale);
+            Assert.Null(stringType.MaxLength);
         }
 
         [Fact]
@@ -900,9 +900,9 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 (IEdmTemporalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DateTimeOffsetProperty")).Type;
 
             // Assert
-            Assert.Equal(durationType.Precision.Value, 5);
-            Assert.Equal(timeOfDayType.Precision.Value, 6);
-            Assert.Equal(dateTimeOffsetType.Precision.Value, 7);
+            Assert.Equal(5, durationType.Precision.Value);
+            Assert.Equal(6, timeOfDayType.Precision.Value);
+            Assert.Equal(7, dateTimeOffsetType.Precision.Value);
         }
 
         [Fact]
@@ -921,8 +921,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 (IEdmDecimalTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("DecimalProperty")).Type;
 
             // Assert
-            Assert.Equal(decimalType.Precision.Value, 5);
-            Assert.Equal(decimalType.Scale.Value, 3);
+            Assert.Equal(5, decimalType.Precision.Value);
+            Assert.Equal(3, decimalType.Scale.Value);
         }
 
         [Fact]
@@ -943,8 +943,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 (IEdmBinaryTypeReference)edmEntityType.DeclaredProperties.First(p => p.Name.Equals("BinaryProperty")).Type;
 
             // Assert
-            Assert.Equal(stringType.MaxLength.Value, 5);
-            Assert.Equal(binaryType.MaxLength.Value, 3);
+            Assert.Equal(5, stringType.MaxLength.Value);
+            Assert.Equal(3, binaryType.MaxLength.Value);
         }
 
         class BasePrincipal

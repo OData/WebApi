@@ -5,9 +5,11 @@ using System;
 using System.Globalization;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -31,30 +33,30 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("PUT", "Put")]
         [InlineData("PATCH", "Patch")]
         [InlineData("MERGE", "Patch")]
-        public void SingletonPath_RoutesCorrectly_ForValidHttpMethods(string httpMethod, string expectedResponse)
+        public async Task SingletonPath_RoutesCorrectly_ForValidHttpMethods(string httpMethod, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.SendAsync(
-                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer")).Result;
+            HttpResponseMessage response = await _client.SendAsync(
+                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer"));
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
         [Theory]
         [InlineData("Post")]
         [InlineData("Delete")]
-        public void SingletonPath_ReturnsBadResponse_ForInvalidHttpMethods(string httpMethod)
+        public async Task SingletonPath_ReturnsBadResponse_ForInvalidHttpMethods(string httpMethod)
         {
             // Arrange
-            HttpResponseMessage response = _client.SendAsync(
-                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer")).Result;
+            HttpResponseMessage response = await _client.SendAsync(
+                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer"));
 
             // Act & Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             Assert.Contains("No HTTP resource was found that matches the request URI 'http://localhost/VipCustomer'.",
-                response.Content.ReadAsStringAsync().Result);
+                await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
@@ -62,28 +64,28 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("PUT", "PutFromSpecialCustomer")]
         [InlineData("PATCH", "PatchFromSpecialCustomer")]
         [InlineData("MERGE", "PatchFromSpecialCustomer")]
-        public void SingletonPath_ToCast_RoutesCorrectly(string httpMethod, string expectedResponse)
+        public async Task SingletonPath_ToCast_RoutesCorrectly(string httpMethod, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.SendAsync(
-                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer/NS.SpecialCustomer")).Result;
+            HttpResponseMessage response = await _client.SendAsync(
+                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer/NS.SpecialCustomer"));
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
         [Theory]
         [InlineData("GET", "GetOrders")]
         [InlineData("POST", "PostToOrders")]
-        public void SingletonPath_ToNavigationProperty_RoutesCorrectly(string httpMethod, string expectedResponse)
+        public async Task SingletonPath_ToNavigationProperty_RoutesCorrectly(string httpMethod, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.SendAsync(
-                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer/Orders")).Result;
+            HttpResponseMessage response = await _client.SendAsync(
+                new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/VipCustomer/Orders"));
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
@@ -94,13 +96,13 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialAddress", "GetSpecialAddress")]
         [InlineData("VipCustomer/Name/$value", "GetName")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialCustomerProperty/$value", "GetSpecialCustomerProperty")]
-        public void SingletonPath_ToAccessProperty_RoutesCorrectly(string path, string expectedResponse)
+        public async Task SingletonPath_ToAccessProperty_RoutesCorrectly(string path, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.GetAsync("http://localhost/" + path).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/" + path);
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
@@ -115,27 +117,27 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders/$ref", "PUT", "CreateRef(SpecialOrders)")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders/$ref", "DELETE", "DeleteRef(SpecialOrders)")]
         [InlineData("VipCustomer/NS.SpecialCustomer/SpecialOrders(7)/$ref", "DELETE", "DeleteRef(SpecialOrders)ByKey(7)")]
-        public void SingletonPath_ToDollaRef_RoutesCorrectly(string path, string httpMethod, string expectedResponse)
+        public async Task SingletonPath_ToDollaRef_RoutesCorrectly(string path, string httpMethod, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.SendAsync(
-                 new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + path)).Result;
+            HttpResponseMessage response = await _client.SendAsync(
+                 new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/" + path));
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
         [Theory]
         [InlineData("VipCustomer/NS.upgrade", "Upgrade")]
         [InlineData("VipCustomer/NS.SpecialCustomer/NS.specialUpgrade", "SpecialUpgrade")]
-        public void SingletonPath_OnAction_RoutesCorrectly(string path, string expectedResponse)
+        public async Task SingletonPath_OnAction_RoutesCorrectly(string path, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.PostAsync("http://localhost/" + path, new StringContent("")).Result;
+            HttpResponseMessage response = await _client.PostAsync("http://localhost/" + path, new StringContent(""));
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
@@ -144,13 +146,13 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("VipCustomer/NS.SpecialCustomer/NS.IsSpecialUpgraded()", "IsSpecialUpgraded")]
         [InlineData("VipCustomer/NS.IsUpgradedWithParam(city='Shanghai')", "IsUpgradedWithParam(Shanghai)")]
         [InlineData("VipCustomer/NS.OrderByCityAndAmount(city=@city,amount=@amount)?@city='Shanghai'&@amount=9", "OrderByCityAndAmount(Shanghai, 9)")]
-        public void SingletonPath_OnFunction_RoutesCorrectly(string path, string expectedResponse)
+        public async Task SingletonPath_OnFunction_RoutesCorrectly(string path, string expectedResponse)
         {
             // Arrange
-            HttpResponseMessage response = _client.GetAsync("http://localhost/" + path).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/" + path);
 
             // Act & Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
     }

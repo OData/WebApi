@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         [Fact]
         public void CtorTakingModelAndConfiguration_ThrowsArgumentNull_Configuration()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(routeName: RouteName, configuration: null),
                 "configuration");
         }
@@ -34,7 +35,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             HttpConfiguration configuration = new HttpConfiguration();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(routeName: null, configuration: configuration),
                 "routeName");
         }
@@ -44,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(configuration: null,
                     routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
                 "configuration");
@@ -55,7 +56,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             HttpConfiguration configuration = DependencyInjectionHelper.CreateConfigurationWithRootContainer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(configuration: configuration,
                     routeName: RouteName, pathTemplateHandler: null),
                 "pathTemplateHandler");
@@ -64,7 +65,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         [Fact]
         public void CtorTakingModelAndControllers_ThrowsArgumentNull_Controllers()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(routeName: RouteName, controllers: null),
                 "controllers");
         }
@@ -74,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             IODataPathTemplateHandler oDataPathTemplateHandler = new Mock<IODataPathTemplateHandler>().Object;
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(controllers: null,
                     routeName: RouteName, pathTemplateHandler: oDataPathTemplateHandler),
                 "controllers");
@@ -85,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             IEnumerable<HttpControllerDescriptor> controllers = new HttpControllerDescriptor[0];
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new AttributeRoutingConvention(controllers: controllers,
                     routeName: RouteName, pathTemplateHandler: null),
                 "pathTemplateHandler");
@@ -164,7 +165,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 "TestController", typeof(InvalidPathTemplateController));
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => new AttributeRoutingConvention(RouteName, new[] { controller }, new DefaultODataPathHandler()),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
                 "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
@@ -180,7 +181,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => convention.AttributeMappings,
                 "The object has not yet been initialized. Ensure that HttpConfiguration.EnsureInitialized() is called " +
                 "in the application's startup code after all other initialization code.");
@@ -195,7 +196,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => configuration.EnsureInitialized(),
                 "The path template 'Customers' on the action 'GetCustomers' in controller 'TestOData' is not a valid OData path template. " +
                 "The operation import overloads matching 'Customers' are invalid. This is most likely an error in the IEdmModel.");
@@ -211,7 +212,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             AttributeRoutingConvention convention = new AttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => configuration.EnsureInitialized());
+            ExceptionAssert.DoesNotThrow(() => configuration.EnsureInitialized());
         }
 
         public class TestODataController : ODataController

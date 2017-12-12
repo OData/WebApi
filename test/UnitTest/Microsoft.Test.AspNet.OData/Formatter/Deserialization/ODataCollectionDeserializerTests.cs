@@ -14,6 +14,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -38,7 +39,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
             // Arrange & Act & Assert
-            Assert.ThrowsArgumentNull(() => new ODataCollectionDeserializer(deserializerProvider: null),
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataCollectionDeserializer(deserializerProvider: null),
                 "deserializerProvider");
         }
 
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, type: typeof(int[]), readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
@@ -61,7 +62,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgument(() => deserializer.Read(messageReader: ODataTestUtil.GetMockODataMessageReader(),
+            ExceptionAssert.ThrowsArgument(() => deserializer.Read(messageReader: ODataTestUtil.GetMockODataMessageReader(),
                 type: typeof(int), readContext: new ODataDeserializerContext { Model = Model }),
                 "type", "The argument must be of type 'Collection'.");
         }
@@ -73,7 +74,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => deserializer.ReadInline(42, IntCollectionType, new ODataDeserializerContext()),
                 "The argument must be of type 'ODataCollectionValue'.\r\nParameter name: item");
         }
@@ -85,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadInline(42, null, new ODataDeserializerContext()),
                 "edmType");
         }
@@ -125,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => deserializer.ReadCollectionValue(collectionValue: null,
+            ExceptionAssert.ThrowsArgumentNull(() => deserializer.ReadCollectionValue(collectionValue: null,
                 elementType: IntCollectionType.ElementType(), readContext: new ODataDeserializerContext()).GetEnumerator().MoveNext(),
                 "collectionValue");
         }
@@ -137,7 +138,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(DeserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadCollectionValue(new ODataCollectionValue(), elementType: null,
                     readContext: new ODataDeserializerContext()).GetEnumerator().MoveNext(),
                 "elementType");
@@ -152,7 +153,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataCollectionDeserializer(deserializerProvider.Object);
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.ReadCollectionValue(new ODataCollectionValue() { Items = new[] { 1, 2, 3 }.Cast<object>() },
                     ColorCollectionType.ElementType(), new ODataDeserializerContext())
                     .GetEnumerator()

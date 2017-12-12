@@ -14,6 +14,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -184,7 +185,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void GenerateSelfLink_ThrowsArgumentNull_EntityContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => LinkGenerationHelpers.GenerateSelfLink(resourceContext: null, includeCast: false),
                 "resourceContext");
         }
@@ -194,7 +195,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             ResourceContext context = new ResourceContext();
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => LinkGenerationHelpers.GenerateSelfLink(context, includeCast: false),
                 "resourceContext",
                 "The property 'Url' of ResourceContext cannot be null.");
@@ -205,7 +206,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => LinkGenerationHelpers.GenerateNavigationPropertyLink(resourceContext: null, navigationProperty: navigationProperty, includeCast: false),
                 "resourceContext");
         }
@@ -216,7 +217,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmNavigationProperty navigationProperty = new Mock<IEdmNavigationProperty>().Object;
             ResourceContext context = new ResourceContext();
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => LinkGenerationHelpers.GenerateNavigationPropertyLink(context, navigationProperty, includeCast: false),
                 "resourceContext",
                 "The property 'Url' of ResourceContext cannot be null.");
@@ -230,7 +231,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmAction action = new Mock<IEdmAction>().Object;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action), "resourceSetContext");
+            ExceptionAssert.ThrowsArgumentNull(() => feedContext.GenerateActionLink(action), "resourceSetContext");
         }
 
         [Fact]
@@ -240,7 +241,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ResourceSetContext resourceSetContext = new ResourceSetContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => resourceSetContext.GenerateActionLink(action: null), "action");
+            ExceptionAssert.ThrowsArgumentNull(() => resourceSetContext.GenerateActionLink(action: null), "action");
         }
 
         [Fact]
@@ -253,7 +254,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             action.Setup(a => a.Name).Returns("SomeAction");
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => context.GenerateActionLink(action.Object),
                 "action",
                 "The action 'SomeAction' is not bound to the collection of entity. Only actions that are bound to entities can have action links.");
@@ -330,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ResourceContext entityContext = null;
             IEdmActionImport action = new Mock<IEdmActionImport>().Object;
 
-            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action.Action), "resourceContext");
+            ExceptionAssert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action.Action), "resourceContext");
         }
 
         [Fact]
@@ -338,7 +339,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             ResourceContext entityContext = new ResourceContext();
 
-            Assert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action: null), "action");
+            ExceptionAssert.ThrowsArgumentNull(() => entityContext.GenerateActionLink(action: null), "action");
         }
 
         [Fact]
@@ -349,7 +350,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             action.Setup(a => a.Parameters).Returns(Enumerable.Empty<IEdmOperationParameter>());
             action.Setup(a => a.Name).Returns("SomeAction");
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => entityContext.GenerateActionLink(action.Object),
                 "action",
                 "The action 'SomeAction' is not bound to an entity. Only actions that are bound to entities can have action links.");
@@ -454,7 +455,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmFunction function = new Mock<IEdmFunction>().Object;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => resourceSetContext.GenerateFunctionLink(function), "resourceSetContext");
+            ExceptionAssert.ThrowsArgumentNull(() => resourceSetContext.GenerateFunctionLink(function), "resourceSetContext");
         }
 
         [Fact]
@@ -464,7 +465,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ResourceSetContext feedContext = new ResourceSetContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function: null), "function");
+            ExceptionAssert.ThrowsArgumentNull(() => feedContext.GenerateFunctionLink(function: null), "function");
         }
 
         [Fact]
@@ -477,7 +478,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             function.Setup(a => a.Name).Returns("SomeFunction");
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => context.GenerateFunctionLink(function.Object),
                 "function",
                 "The function 'SomeFunction' is not bound to the collection of entity. Only functions that are bound to entities can have function links.");

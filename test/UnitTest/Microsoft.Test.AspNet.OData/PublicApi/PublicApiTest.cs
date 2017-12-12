@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.PublicApi
 {

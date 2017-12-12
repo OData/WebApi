@@ -18,6 +18,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -40,7 +41,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataActionPayloadDeserializer(deserializerProvider: null),
                 "deserializerProvider");
         }
@@ -78,7 +79,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataActionPayloadDeserializer deserializer = new ODataActionPayloadDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, type: typeof(ODataActionParameters), readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
@@ -91,7 +92,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader, typeof(ODataActionParameters), readContext: null),
                 "readContext");
         }
@@ -104,7 +105,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.Read(messageReader, typeof(ODataActionParameters), readContext: new ODataDeserializerContext()),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
@@ -204,7 +205,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithPrimitiveParametersTest")]
+        [MemberData(nameof(DeserializeWithPrimitiveParametersTest))]
         public void Can_DeserializePayload_WithPrimitiveParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -224,6 +225,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.Same(expectedAction, action);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Quantity"));
@@ -243,7 +245,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithComplexParametersTest")]
+        [MemberData(nameof(DeserializeWithComplexParametersTest))]
         public void Can_DeserializePayload_WithComplexParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -258,6 +260,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.Same(expectedAction, action);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Quantity"));
@@ -272,7 +275,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithPrimitiveCollectionsTest")]
+        [MemberData(nameof(DeserializeWithPrimitiveCollectionsTest))]
         public void Can_DeserializePayload_WithPrimitiveCollections_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -291,6 +294,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
 
             //Assert
+            Assert.NotNull(actionName);
             Assert.Same(expectedAction, action);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Name"));
@@ -307,7 +311,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithComplexCollectionsTest")]
+        [MemberData(nameof(DeserializeWithComplexCollectionsTest))]
         public void Can_DeserializePayload_WithComplexCollections_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -322,6 +326,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.Same(expectedAction, payload.Action);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Name"));
@@ -337,7 +342,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithEnumCollectionsTest")]
+        [MemberData(nameof(DeserializeWithEnumCollectionsTest))]
         public void Can_DeserializePayload_WithEnumCollections_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -352,6 +357,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.Same(expectedAction, payload.Action);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Colors"));
@@ -362,7 +368,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithComplexParametersTest")]
+        [MemberData(nameof(DeserializeWithComplexParametersTest))]
         public void Can_DeserializePayload_WithComplexParameters_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -379,6 +385,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.NotNull(payload);
             Assert.Same(expectedAction, payload.Action);
             Assert.True(payload.ContainsKey("Quantity"));
@@ -393,7 +400,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithEnumParametersTest")]
+        [MemberData(nameof(DeserializeWithEnumParametersTest))]
         public void Can_DeserializePayload_WithEnumParameters_InUntypedMode(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -410,6 +417,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataUntypedActionParameters payload = _deserializer.Read(reader, typeof(ODataUntypedActionParameters), context) as ODataUntypedActionParameters;
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.NotNull(payload);
             Assert.Same(expectedAction, payload.Action);
             Assert.True(payload.ContainsKey("Color"));
@@ -419,7 +427,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithPrimitiveCollectionsTest")]
+        [MemberData(nameof(DeserializeWithPrimitiveCollectionsTest))]
         public void Can_DeserializePayload_WithPrimitiveCollectionParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -438,6 +446,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
 
             // Assert
+            Assert.NotNull(actionName);
             Assert.NotNull(payload);
             Assert.Same(expectedAction, action);
             Assert.True(payload.ContainsKey("Name"));
@@ -458,7 +467,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithComplexCollectionsTest")]
+        [MemberData(nameof(DeserializeWithComplexCollectionsTest))]
         public void Can_DeserializePayload_WithComplexCollectionParameters(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -472,13 +481,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataActionParameters payload = _deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
 
             // Assert
+            Assert.NotNull(actionName);
+            Assert.NotNull(expectedAction);
             Assert.NotNull(payload);
             Assert.True(payload.ContainsKey("Name"));
             Assert.Equal("Microsoft", payload["Name"]);
             Assert.True(payload.ContainsKey("Addresses"));
             IList<MyAddress> addresses = (payload["Addresses"] as IEnumerable<MyAddress>).ToList();
             Assert.NotNull(addresses);
-            Assert.Equal(1, addresses.Count);
+            Assert.Single(addresses);
             MyAddress address = addresses[0];
             Assert.NotNull(address);
             Assert.Equal("1 Microsoft Way", address.StreetAddress);
@@ -496,7 +507,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             "}";
 
         [Theory]
-        [PropertyData("DeserializeWithEntityParametersTest")]
+        [MemberData(nameof(DeserializeWithEntityParametersTest))]
         public void Can_DeserializePayload_WithEntityParameters(IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -525,7 +536,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithEntityParametersTest")]
+        [MemberData(nameof(DeserializeWithEntityParametersTest))]
         public void Can_DeserializePayload_WithEntityParameters_InUntypedMode(IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -566,7 +577,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             "}";
 
         [Theory]
-        [PropertyData("DeserializeWithEntityCollectionsTest")]
+        [MemberData(nameof(DeserializeWithEntityCollectionsTest))]
         public void Can_DeserializePayload_WithEntityCollectionParameters(IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -600,7 +611,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithEntityCollectionsTest")]
+        [MemberData(nameof(DeserializeWithEntityCollectionsTest))]
         public void Can_DeserializePayload_WithEntityCollectionParameters_InUntypedMode(IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -632,7 +643,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DeserializeWithPrimitiveParametersTest")]
+        [MemberData(nameof(DeserializeWithPrimitiveParametersTest))]
         public void Throws_ODataException_When_Parameter_Notfound(string actionName, IEdmAction expectedAction, ODataPath path)
         {
             // Arrange
@@ -643,7 +654,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataDeserializerContext context = new ODataDeserializerContext { Path = path, Model = _model };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() =>
+            Assert.NotNull(expectedAction);
+            ExceptionAssert.Throws<ODataException>(() =>
             {
                 ODataActionParameters payload = _deserializer.Read(reader, typeof(ODataActionParameters), context) as ODataActionParameters;
             }, "The parameter 'MissingParameter' in the request payload is not a valid parameter for the operation '" + actionName + "'.");

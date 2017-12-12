@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.TestCommon
 {
@@ -81,7 +82,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <param name="allowDerivedExceptions">Pass true to allow exceptions which derive from TException; pass false, otherwise</param>
         protected virtual void AssertForUndefinedValue(Action testCode, string parameterName, int invalidValue, Type enumType, bool allowDerivedExceptions = false)
         {
-            Assert.ThrowsInvalidEnumArgument(
+            ExceptionAssert.ThrowsInvalidEnumArgument(
                 testCode,
                 parameterName,
                 invalidValue,

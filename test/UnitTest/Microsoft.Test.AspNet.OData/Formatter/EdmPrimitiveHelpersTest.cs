@@ -8,6 +8,7 @@ using System.Xml.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Theory]
-        [PropertyData("ConvertPrimitiveValue_NonStandardPrimitives_Data")]
+        [MemberData(nameof(ConvertPrimitiveValue_NonStandardPrimitives_Data))]
         public void ConvertPrimitiveValue_NonStandardPrimitives(object valueToConvert, object result, Type conversionType)
         {
             Assert.Equal(result.GetType(), EdmPrimitiveHelpers.ConvertPrimitiveValue(valueToConvert, conversionType).GetType());
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Theory]
-        [PropertyData("ConvertDateTime_NonStandardPrimitives_Data")]
+        [MemberData(nameof(ConvertDateTime_NonStandardPrimitives_Data))]
         public void ConvertDateTimeValue_NonStandardPrimitives_DefaultTimeZoneInfo(DateTimeOffset valueToConvert)
         {
             // Arrange & Act
@@ -70,7 +71,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Theory]
-        [PropertyData("ConvertDateTime_NonStandardPrimitives_Data")]
+        [MemberData(nameof(ConvertDateTime_NonStandardPrimitives_Data))]
         public void ConvertDateTimeValue_NonStandardPrimitives_CustomTimeZoneInfo(DateTimeOffset valueToConvert)
         {
             // Arrange & Act
@@ -88,7 +89,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("")]
         public void ConvertPrimitiveValueToChar_Throws(string input)
         {
-            Assert.Throws<ValidationException>(
+            ExceptionAssert.Throws<ValidationException>(
                 () => EdmPrimitiveHelpers.ConvertPrimitiveValue(input, typeof(char)),
                 "The value must be a string with a length of 1.");
         }
@@ -96,7 +97,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Fact]
         public void ConvertPrimitiveValueToNullableChar_Throws()
         {
-            Assert.Throws<ValidationException>(
+            ExceptionAssert.Throws<ValidationException>(
                 () => EdmPrimitiveHelpers.ConvertPrimitiveValue("123", typeof(char?)),
                 "The value must be a string with a maximum length of 1.");
         }
@@ -104,7 +105,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Fact]
         public void ConvertPrimitiveValueToXElement_Throws_IfInputIsNotString()
         {
-            Assert.Throws<ValidationException>(
+            ExceptionAssert.Throws<ValidationException>(
                 () => EdmPrimitiveHelpers.ConvertPrimitiveValue(123, typeof(XElement)),
                 "The value must be a string.");
         }

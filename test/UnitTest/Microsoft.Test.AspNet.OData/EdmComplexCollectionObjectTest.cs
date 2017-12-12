@@ -5,6 +5,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -13,14 +14,14 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmType()
         {
-            Assert.ThrowsArgumentNull(() => new EdmComplexObjectCollection(edmType: null), "edmType");
+            ExceptionAssert.ThrowsArgumentNull(() => new EdmComplexObjectCollection(edmType: null), "edmType");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_List()
         {
             IEdmCollectionTypeReference edmType = new Mock<IEdmCollectionTypeReference>().Object;
-            Assert.ThrowsArgumentNull(() => new EdmComplexObjectCollection(edmType, list: null), "list");
+            ExceptionAssert.ThrowsArgumentNull(() => new EdmComplexObjectCollection(edmType, list: null), "list");
         }
 
         [Fact]
@@ -29,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData
             IEdmTypeReference elementType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: true);
             IEdmCollectionTypeReference collectionType = new EdmCollectionTypeReference(new EdmCollectionType(elementType));
 
-            Assert.ThrowsArgument(() => new EdmComplexObjectCollection(collectionType), "edmType",
+            ExceptionAssert.ThrowsArgument(() => new EdmComplexObjectCollection(collectionType), "edmType",
             "The element type '[Edm.Int32 Nullable=True]' of the given collection type '[Collection([Edm.Int32 Nullable=True]) Nullable=True]' " +
             "is not of the type 'IEdmComplexType'.");
         }

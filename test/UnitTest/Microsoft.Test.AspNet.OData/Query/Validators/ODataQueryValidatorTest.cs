@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -59,7 +60,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [Fact]
         public void ValidateThrowsOnNullOption()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(null, new ODataValidationSettings()));
         }
 
@@ -69,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             HttpRequestMessage message = new HttpRequestMessage();
             message.EnableHttpDependencyInjectionSupport();
 
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new ODataQueryOptions(_context, message), null));
         }
 
@@ -108,8 +109,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         }
 
         [Theory]
-        [PropertyData("SupportedQueryOptions")]
-        [PropertyData("UnsupportedQueryOptions")]
+        [MemberData(nameof(SupportedQueryOptions))]
+        [MemberData(nameof(UnsupportedQueryOptions))]
         public void AllowedQueryOptions_SucceedIfAllowed(AllowedQueryOptions allow, string query, string unused)
         {
             // Arrange
@@ -122,12 +123,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("SupportedQueryOptions")]
-        [PropertyData("UnsupportedQueryOptions")]
+        [MemberData(nameof(SupportedQueryOptions))]
+        [MemberData(nameof(UnsupportedQueryOptions))]
         public void AllowedQueryOptions_ThrowIfNotAllowed(AllowedQueryOptions exclude, string query, string optionName)
         {
             // Arrange
@@ -144,12 +146,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("SupportedQueryOptions")]
-        [PropertyData("UnsupportedQueryOptions")]
+        [MemberData(nameof(SupportedQueryOptions))]
+        [MemberData(nameof(UnsupportedQueryOptions))]
         public void AllowedQueryOptions_ThrowIfNoneAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
@@ -166,11 +168,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(unused, settings.AllowedQueryOptions);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("SupportedQueryOptions")]
+        [MemberData(nameof(SupportedQueryOptions))]
         public void SupportedQueryOptions_SucceedIfGroupAllowed(AllowedQueryOptions unused, string query, string unusedName)
         {
             // Arrange
@@ -183,11 +186,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(unused, settings.AllowedQueryOptions);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("SupportedQueryOptions")]
+        [MemberData(nameof(SupportedQueryOptions))]
         public void SupportedQueryOptions_ThrowIfGroupNotAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
@@ -204,11 +209,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(unused, settings.AllowedQueryOptions);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Theory]
-        [PropertyData("UnsupportedQueryOptions")]
+        [MemberData(nameof(UnsupportedQueryOptions))]
         public void UnsupportedQueryOptions_SucceedIfGroupAllowed(AllowedQueryOptions unused, string query, string unusedName)
         {
             // Arrange
@@ -221,11 +227,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.DoesNotThrow(() => _validator.Validate(option, settings));
+            Assert.NotEqual(unused, settings.AllowedQueryOptions);
+            Assert.NotNull(unusedName);
+            ExceptionAssert.DoesNotThrow(() => _validator.Validate(option, settings));
         }
 
         [Theory]
-        [PropertyData("UnsupportedQueryOptions")]
+        [MemberData(nameof(UnsupportedQueryOptions))]
         public void UnsupportedQueryOptions_ThrowIfGroupNotAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
@@ -242,7 +250,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
+            Assert.NotEqual(unused, settings.AllowedQueryOptions);
+            ExceptionAssert.Throws<ODataException>(() => _validator.Validate(option, settings), expectedMessage);
         }
 
         [Fact]

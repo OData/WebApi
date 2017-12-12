@@ -10,6 +10,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -99,7 +100,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataDeserializerContext context = new ODataDeserializerContext { Path = null };
 
             // Act & Assert
-            Assert.Throws<SerializationException>(() =>
+            ExceptionAssert.Throws<SerializationException>(() =>
             {
                 IEdmAction action = ODataActionPayloadDeserializer.GetAction(context);
             }, "The operation cannot be completed because no ODataPath is available for the request.");
@@ -112,7 +113,7 @@ namespace Microsoft.Test.AspNet.OData
             IEdmModel model = GetModel();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 new DefaultODataPathHandler().Parse(model, _serviceRoot, "Vehicles/Microsoft.Test.AspNet.OData.Builder.TestModels.Car(Model=8,Name='8')/org.odata.Park"),
                 "Multiple action overloads were found with the same binding parameter for 'org.odata.Park'.");
         }

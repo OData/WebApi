@@ -19,6 +19,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Query.Results
@@ -35,21 +36,21 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(entity: null, controller: _controller), "entity");
         }
 
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Controller()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(_entity, controller: null), "controller");
         }
 
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Entity()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(entity: null, contentNegotiator: _contentNegotiator,
                     request: _request, formatters: _formatters, locationHeader: _locationHeader), "entity");
         }
@@ -57,7 +58,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_ContentNegotiator()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(_entity, contentNegotiator: null,
                     request: _request, formatters: _formatters, locationHeader: _locationHeader), "contentNegotiator");
         }
@@ -65,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Request()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(_entity, _contentNegotiator,
                     request: null, formatters: _formatters, locationHeader: _locationHeader), "request");
         }
@@ -73,7 +74,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Formatters()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, _request,
                     formatters: null, locationHeader: _locationHeader), "formatters");
         }
@@ -81,7 +82,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_LocationHeader()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, _request, _formatters,
                     locationHeader: null), "locationHeader");
         }
@@ -198,7 +199,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
+            ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The operation cannot be completed because no ODataPath is available for the request.");
         }
 
@@ -213,7 +214,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
+            ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to serialize the payload.");
         }
 
@@ -229,7 +230,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
+            ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "Cannot find the resource type 'Microsoft.Test.AspNet.OData.Query.Results.CreatedODataResultTest+TestEntity' in the model.");
         }
 
@@ -245,7 +246,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
+            ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "NS.Address is not an entity type. Only entity types are supported.");
         }
 
@@ -318,7 +319,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
 
             // Act
-            Assert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
+            ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
                 "The edit link builder for the entity set 'Customers' returned null. An edit link is required for the location header.");
         }
 

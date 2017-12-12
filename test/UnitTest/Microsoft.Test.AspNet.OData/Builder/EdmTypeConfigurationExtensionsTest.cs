@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -72,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             entity.Setup(e => e.Keys).Returns(keys);
 
             // Act & Assert
-            Assert.ReferenceEquals(keys, entity.Object.Keys());
+            Assert.Equal(keys, entity.Object.Keys());
         }
 
         [Fact]
@@ -93,7 +94,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             baseEntity.Setup(e => e.BaseType).Returns(baseEntity.Object);
 
             // Act & Assert
-            Assert.ReferenceEquals(keys, entity.Object.Keys());
+            Assert.Equal(keys, entity.Object.Keys());
         }
 
         [Fact]

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Tracing;
 using Microsoft.AspNet.OData;
@@ -25,6 +26,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -38,7 +40,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
         [InlineData("application/json;odata.metadata=minimal", "PersonEntryInJsonLightMinimalMetadata.json")]
         [InlineData("application/json;odata.metadata=full", "PersonEntryInJsonLightFullMetadata.json")]
-        public void GetEntryInODataJsonLightFormat(string metadata, string expect)
+        public async Task GetEntryInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -48,10 +50,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 MediaTypeWithQualityHeaderValue.Parse(metadata)))
 
             // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpResponseMessage response = await client.SendAsync(request))
             {
                 // Assert
-                AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
+                await AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
             }
         }
 
@@ -59,7 +61,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("application/json;odata.metadata=none", "PresidentInJsonLightNoMetadata.json")]
         [InlineData("application/json;odata.metadata=minimal", "PresidentInJsonLightMinimalMetadata.json")]
         [InlineData("application/json;odata.metadata=full", "PresidentInJsonLightFullMetadata.json")]
-        public void GetSingletonInODataJsonLightFormat(string metadata, string expect)
+        public async Task GetSingletonInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -69,15 +71,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 MediaTypeWithQualityHeaderValue.Parse(metadata)))
 
             // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpResponseMessage response = await client.SendAsync(request))
             {
                 // Assert
-                AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
+                await AssertODataVersion4JsonResponse(Resources.GetString(expect), response);
             }
         }
 
         [Fact]
-        public void GetEntry_UsesRouteModel_ForMultipleModels()
+        public async Task GetEntry_UsesRouteModel_ForMultipleModels()
         {
             // Model 1 only has Name, Model 2 only has Age
             ODataModelBuilder builder1 = new ODataModelBuilder();
@@ -101,20 +103,20 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpServer host = new HttpServer(config))
             using (HttpClient client = new HttpClient(host))
             {
-                using (HttpResponseMessage response = client.GetAsync("http://localhost/v1/People(10)").Result)
+                using (HttpResponseMessage response = await client.GetAsync("http://localhost/v1/People(10)"))
                 {
                     Assert.True(response.IsSuccessStatusCode);
-                    JToken json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+                    JToken json = JToken.Parse(await response.Content.ReadAsStringAsync());
 
                     // Model 1 has the Name property but not the Age property
                     Assert.NotNull(json["Name"]);
                     Assert.Null(json["Age"]);
                 }
 
-                using (HttpResponseMessage response = client.GetAsync("http://localhost/v2/People(10)").Result)
+                using (HttpResponseMessage response = await client.GetAsync("http://localhost/v2/People(10)"))
                 {
                     Assert.True(response.IsSuccessStatusCode);
-                    JToken json = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+                    JToken json = JToken.Parse(await response.Content.ReadAsStringAsync());
 
                     // Model 2 has the Age property but not the Name property
                     Assert.Null(json["Name"]);
@@ -124,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void GetFeedInODataJsonFullMetadataFormat()
+        public async Task GetFeedInODataJsonFullMetadataFormat()
         {
             // Arrange
             IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
@@ -135,16 +137,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full")))
             // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpResponseMessage response = await client.SendAsync(request))
             {
                 // Assert
-                AssertODataVersion4JsonResponse(
+                await AssertODataVersion4JsonResponse(
                     Resources.MainEntryFeedInJsonFullMetadata, response);
             }
         }
 
         [Fact]
-        public void GetFeedInODataJsonNoMetadataFormat()
+        public async Task GetFeedInODataJsonNoMetadataFormat()
         {
             // Arrange
             IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
@@ -155,15 +157,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none")))
             // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpResponseMessage response = await client.SendAsync(request))
             {
                 // Assert
-                AssertODataVersion4JsonResponse(Resources.MainEntryFeedInJsonNoMetadata, response);
+                await AssertODataVersion4JsonResponse(Resources.MainEntryFeedInJsonNoMetadata, response);
             }
         }
 
         [Fact]
-        public void SupportOnlyODataFormat()
+        public async Task SupportOnlyODataFormat()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -181,21 +183,21 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                         ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
 
                     // Act
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(request))
                     {
                         // Assert
                         Assert.NotNull(response);
                         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                         Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                             response.Content.Headers.ContentType.MediaType);
-                        ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                        await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
                     }
                 }
             }
         }
 
         [Fact]
-        public void ConditionallySupportODataIfQueryStringPresent()
+        public async Task ConditionallySupportODataIfQueryStringPresent()
         {
             // Arrange #1, #2 and #3
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -214,10 +216,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
                         CreateAbsoluteUri("People(10)?$format=application/json")))
                     // Act #1
-                    using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
                     {
                         // Assert #1
-                        AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
+                        await AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
                     }
 
                     // Arrange #2: when the query string is not present, request should be handled by the regular Json
@@ -225,7 +227,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                     using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
                         CreateAbsoluteUri("People(10)")))
                     // Act #2
-                    using (HttpResponseMessage response = client.SendAsync(requestWithNonODataJsonHeader).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(requestWithNonODataJsonHeader))
                     {
                         // Assert #2
                         Assert.NotNull(response);
@@ -234,17 +236,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                             response.Content.Headers.ContentType.MediaType);
                         Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
-                        ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                        await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
                     }
 
                     // Arrange #3: this request should return response in OData json format
                     using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
                         CreateAbsoluteUri("President?$format=application/json")))
                     // Act #3
-                    using (HttpResponseMessage response = client.SendAsync(requestWithJsonHeader).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
                     {
                         // Assert #3
-                        AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
+                        await AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
                             response);
                     }
                 }
@@ -252,7 +254,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void GetFeedInODataJsonFormat_LimitsResults()
+        public async Task GetFeedInODataJsonFormat_LimitsResults()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -261,13 +263,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$count=true",
                     ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
             // Act
-            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            using (HttpResponseMessage response = await client.SendAsync(request))
             {
                 // Assert
                 Assert.NotNull(response);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                string result = response.Content.ReadAsStringAsync().Result;
+                string result = await response.Content.ReadAsStringAsync();
                 dynamic json = JToken.Parse(result);
 
                 // Assert the PageSize correctly limits three results to two
@@ -282,7 +284,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         [Fact]
         [ReplaceCulture]
-        public void HttpErrorInODataFormat_GetsSerializedCorrectly()
+        public async Task HttpErrorInODataFormat_GetsSerializedCorrectly()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -293,13 +295,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
                     MediaTypeWithQualityHeaderValue.Parse("application/json")))
                 // Act
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     // Assert
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-                    string result = response.Content.ReadAsStringAsync().Result;
+                    string result = await response.Content.ReadAsStringAsync();
                     dynamic json = JToken.Parse(result);
 
                     Assert.Equal("The query specified in the URI is not valid. " +
@@ -316,7 +318,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void CustomSerializerWorks()
+        public async Task CustomSerializerWorks()
         {
             // Arrange
             using (HttpConfiguration configuration = CreateConfiguration())
@@ -328,12 +330,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
                 // Act
-                using (HttpResponseMessage response = client.SendAsync(request).Result)
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     // Assert
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    string payload = response.Content.ReadAsStringAsync().Result;
+                    string payload = await response.Content.ReadAsStringAsync();
 
                     Assert.Contains("\"@Custom.Int32Annotation\":321", payload);
                     Assert.Contains("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
@@ -346,7 +348,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("-*", "PeopleWithoutAnnotations.json")]
         [InlineData("Entry.*", "PeopleWithSpecialAnnotations.json")]
         [InlineData("Property.*,Hello.*", "PeopleWithMultipleAnnotations.json")]
-        public void CustomSerializerWorks_ForInstanceAnnotationsFilter(string filter, string expect)
+        public async Task CustomSerializerWorks_ForInstanceAnnotationsFilter(string filter, string expect)
         {
             // Remove indentation in expect string
             expect = Regex.Replace(Resources.GetString(expect), @"\r\n\s*([""{}\]])", "$1");
@@ -362,19 +364,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 String.Format("odata.include-annotations=\"{0}\"", filter));
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
-            Assert.Equal(expect, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expect, await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
         [InlineData("EnumKeyCustomers")] // using CLR as parameter type
         [InlineData("EnumKeyCustomers2")] // using EdmEnumObject as parameter type
-        public void EnumKeySimpleSerializerTest(string entitySet)
+        public async Task EnumKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -391,11 +392,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/" + entitySet + "(Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red')");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            var customer = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(9, customer["ID"]);
             Assert.Equal(Color.Red, Enum.Parse(typeof(Color), customer["Color"].ToString()));
             var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
@@ -405,7 +406,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void EnumTypeRoundTripTest()
+        public async Task EnumTypeRoundTripTest()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -427,11 +428,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                     request.Headers.Accept.ParseAdd("application/json");
 
                     // Act
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(request))
                     {
                         // Assert
-                        response.EnsureSuccessStatusCode();
-                        var customer = response.Content.ReadAsAsync<JObject>().Result;
+                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                        var customer = await response.Content.ReadAsAsync<JObject>();
                         Assert.Equal(0, customer["ID"]);
                         Assert.Equal(Color.Green | Color.Blue, Enum.Parse(typeof(Color), customer["Color"].ToString()));
                         var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
@@ -444,15 +445,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void EnumSerializer_HasODataType_ForFullMetadata()
+        public async Task EnumSerializer_HasODataType_ForFullMetadata()
         {
             // Arrange & Act
             string acceptHeader = "application/json;odata.metadata=full";
-            HttpResponseMessage response = GetEnumResponse(acceptHeader);
+            HttpResponseMessage response = await GetEnumResponse(acceptHeader);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            JObject customer = response.Content.ReadAsAsync<JObject>().Result;
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            JObject customer = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color",
                 customer.GetValue("Color@odata.type"));
             Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)",
@@ -462,19 +463,19 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Theory]
         [InlineData("application/json;odata.metadata=minimal")]
         [InlineData("application/json;odata.metadata=none")]
-        public void EnumSerializer_HasNoODataType_ForNonFullMetadata(string acceptHeader)
+        public async Task EnumSerializer_HasNoODataType_ForNonFullMetadata(string acceptHeader)
         {
             // Arrange & Act
-            HttpResponseMessage response = GetEnumResponse(acceptHeader);
+            HttpResponseMessage response = await GetEnumResponse(acceptHeader);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            JObject customer = response.Content.ReadAsAsync<JObject>().Result;
-            Assert.False(customer.Values().Contains("Color@odata.type"));
-            Assert.False(customer.Values().Contains("Colors@odata.type"));
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            JObject customer = await response.Content.ReadAsAsync<JObject>();
+            Assert.Contains("Color@odata.type", customer.Values());
+            Assert.Contains("Colors@odata.type", customer.Values());
         }
 
-        private HttpResponseMessage GetEnumResponse(string acceptHeader)
+        private async Task<HttpResponseMessage> GetEnumResponse(string acceptHeader)
         {
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
@@ -492,12 +493,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
 
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
             return response;
         }
 
         [Fact]
-        public void EnumSerializer_HasMetadataType()
+        public async Task EnumSerializer_HasMetadataType()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -519,11 +520,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                     request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
 
                     // Act
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(request))
                     {
                         // Assert
-                        response.EnsureSuccessStatusCode();
-                        dynamic payload = JToken.Parse(response.Content.ReadAsStringAsync().Result);
+                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                        dynamic payload = JToken.Parse(await response.Content.ReadAsStringAsync());
                         Assert.Equal("#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer", payload["@odata.type"].Value);
                         Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color", payload["Color@odata.type"].Value);
                         Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
@@ -533,7 +534,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void RequestProperty_HasCorrectContextUrl()
+        public async Task RequestProperty_HasCorrectContextUrl()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -548,18 +549,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (HttpClient client = new HttpClient(host))
 
                 // Act
-                using (HttpResponseMessage response = client.GetAsync("http://localhost/EnumCustomers(5)/Color").Result)
+                using (HttpResponseMessage response = await client.GetAsync("http://localhost/EnumCustomers(5)/Color"))
                 {
                     // Assert
-                    response.EnsureSuccessStatusCode();
-                    JObject payload = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                    JObject payload = JObject.Parse(await response.Content.ReadAsStringAsync());
                     Assert.Equal("http://localhost/$metadata#EnumCustomers(5)/Color", payload.GetValue("@odata.context"));
                 }
             }
         }
 
         [Fact]
-        public void ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
+        public async Task ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
         {
             // Arrange
             ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
@@ -575,17 +576,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CollectionSerializerCustomers?$select=ID"))
                 {
                     // Act
-                    using (HttpResponseMessage response = client.SendAsync(request).Result)
+                    using (HttpResponseMessage response = await client.SendAsync(request))
                     {
                         // Assert
-                        response.EnsureSuccessStatusCode();
+                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
                     }
                 }
             }
         }
 
         [Fact]
-        public void RequestCollectionProperty_HasNextPageLine_Count()
+        public async Task RequestCollectionProperty_HasNextPageLine_Count()
         {
             // Arrange
             const string expect = @"{
@@ -609,11 +610,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (HttpClient client = new HttpClient(host))
 
                 // Act
-                using (HttpResponseMessage response = client.GetAsync("http://localhost/EnumCustomers(5)/Colors?$count=true").Result)
+                using (HttpResponseMessage response = await client.GetAsync("http://localhost/EnumCustomers(5)/Colors?$count=true"))
                 {
                     // Assert
-                    response.EnsureSuccessStatusCode();
-                    JObject payload = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                    JObject payload = JObject.Parse(await response.Content.ReadAsStringAsync());
                     Assert.Equal(expect, payload.ToString());
                 }
             }
@@ -681,7 +682,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
         [InlineData("KeyCustomers3")] // without [FromODataUriAttribute] in attribute routing
         [InlineData("KeyCustomers4")] // with [FromODataUriAttribute] int attribute routing
-        public void SingleKeySimpleSerializerTest(string entitySet)
+        public async Task SingleKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
@@ -695,11 +696,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/" + entitySet + "(5)");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            var customer = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(5, customer["value"]);
         }
 
@@ -708,7 +709,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("KeyOrders2")] // with [FromODataUriAttribute] in convention routing
         [InlineData("KeyOrders3")] // without [FromODataUriAttribute] in attribute routing
         [InlineData("KeyOrders4")] // with [FromODataUriAttribute] int attribute routing
-        public void MultipleKeySimpleSerializerTest(string entitySet)
+        public async Task MultipleKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
@@ -722,11 +723,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/" + entitySet + "(StringKey='my',DateKey=2016-05-11,GuidKey=46538EC2-E497-4DFE-A039-1C22F0999D6C)");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            var customer = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal("my", customer["value"]);
         }
 
@@ -735,7 +736,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("KeyCustomers2")] // with [FromODataUriAttribute] in convention routing
         [InlineData("KeyCustomers3")] // without [FromODataUriAttribute] in attribute routing
         [InlineData("KeyCustomers4")] // with [FromODataUriAttribute] int attribute routing
-        public void RelatedKeySimpleSerializerTest(string entitySet)
+        public async Task RelatedKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
@@ -749,11 +750,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete,
                 "http://localhost/" + entitySet + "(6)/Orders(StringKey='my',DateKey=2016-05-11,GuidKey=46538EC2-E497-4DFE-A039-1C22F0999D6C)/$ref");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = response.Content.ReadAsAsync<JObject>().Result;
+            var customer = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal("6+my", customer["value"]);
         }
 
@@ -940,7 +941,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Headers.Add("OData-MaxVersion", "4.0");
         }
 
-        private static void AssertODataVersion4JsonResponse(string expectedContent, HttpResponseMessage actual)
+        private static Task AssertODataVersion4JsonResponse(string expectedContent, HttpResponseMessage actual)
         {
             Assert.NotNull(actual);
             Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
@@ -948,7 +949,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 actual.Content.Headers.ContentType.MediaType);
             Assert.Equal(ODataTestUtil.Version4NumberString,
                 ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
-            ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
+            return ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 
         private static Uri CreateAbsoluteUri(string relativeUri)

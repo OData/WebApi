@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Template
 {
@@ -14,7 +15,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Template
         public void Ctor_ThrowsArgumentNull_KeySegment()
         {
             // Assert
-            Assert.ThrowsArgumentNull(() => new KeySegmentTemplate(segment: null), "segment");
+            ExceptionAssert.ThrowsArgumentNull(() => new KeySegmentTemplate(segment: null), "segment");
         }
 
         [Fact]

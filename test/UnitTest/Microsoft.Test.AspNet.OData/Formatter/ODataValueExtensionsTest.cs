@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Theory]
-        [PropertyData("GetInnerValueTestData")]
+        [MemberData(nameof(GetInnerValueTestData))]
         public void GetInnerValue_Returns_CorrectObject(ODataValue value, object expectedResult)
         {
             Assert.Equal(expectedResult, value.GetInnerValue());

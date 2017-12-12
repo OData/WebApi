@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -13,7 +14,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         [Fact]
         public void Ctor_ThrowsFor_Null_attributeFilter()
         {
-            Assert.ThrowsArgumentNull(() => { AttributeConvention convention = new TestAttributeConvention(null, true); }, "attributeFilter");
+            ExceptionAssert.ThrowsArgumentNull(() => { AttributeConvention convention = new TestAttributeConvention(null, true); }, "attributeFilter");
         }
 
         [Fact]
@@ -44,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             Func<Attribute, bool> filter = attribute => attribute.GetType() == typeof(SampleAttribute);
             AttributeConvention convention = new TestAttributeConvention(filter, false);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => convention.GetAttributes(GetType().GetMethod("GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse")),
                 "member",
                 "The member 'GetAttributes_Throws_IfMultipleAttributesPresentAndAllowMultipleIsFalse' on type 'AttributeConventionTests' contains multiple instances of the attribute 'SampleAttribute'.");

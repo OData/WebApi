@@ -8,7 +8,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -42,8 +42,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             // Assert
             Color color = Assert.IsType<Color>(value);
-            Assert.NotNull(color);
-
             Assert.Equal(Color.Blue, color);
         }
 

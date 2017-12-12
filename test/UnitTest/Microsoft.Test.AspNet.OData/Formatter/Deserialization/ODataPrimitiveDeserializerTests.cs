@@ -17,6 +17,7 @@ using Microsoft.Test.AspNet.OData.Formatter.Serialization;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -77,7 +78,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmPrimitiveTypeReference primitiveType = EdmCoreModel.Instance.GetInt32(isNullable: true);
             var deserializer = new ODataPrimitiveDeserializer();
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => deserializer.ReadInline(42, _edmIntType, new ODataDeserializerContext()),
                 "item",
                 "The argument must be of type 'ODataProperty'");
@@ -107,7 +108,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             var deserializer = new ODataPrimitiveDeserializer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, type: typeof(int), readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
@@ -117,7 +118,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             var deserializer = new ODataPrimitiveDeserializer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadPrimitive(primitiveProperty: null, readContext: new ODataDeserializerContext()),
                 "primitiveProperty");
         }
@@ -150,11 +151,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act & Assert
+            Assert.NotNull(edmType);
+            Assert.NotNull(value);
             Assert.Equal(obj, deserializer.Read(messageReader, type, readContext));
         }
 
         [Theory]
-        [PropertyData("NonEdmPrimitiveData")]
+        [MemberData(nameof(NonEdmPrimitiveData))]
         public void Read_MappedPrimitive(object obj, object expected)
         {
             // Arrange
@@ -185,7 +188,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [PropertyData("DateTimePrimitiveData")]
+        [MemberData(nameof(DateTimePrimitiveData))]
         public void Read_DateTimePrimitive(DateTimeOffset expected, DateTime value, TimeZoneInfo timeZoneInfo)
         {
             // Arrange

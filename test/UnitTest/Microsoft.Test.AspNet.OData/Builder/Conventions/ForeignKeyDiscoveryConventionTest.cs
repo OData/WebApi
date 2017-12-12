@@ -7,6 +7,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 {
@@ -15,7 +16,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void Empty_Ctor_DoesnotThrow()
         {
-            Assert.DoesNotThrow(() => new ForeignKeyDiscoveryConvention());
+            ExceptionAssert.DoesNotThrow(() => new ForeignKeyDiscoveryConvention());
         }
 
         [Theory]

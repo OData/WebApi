@@ -15,6 +15,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -50,7 +51,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             var response = await _client.SendAsync(request);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -74,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("NavigationPropertyToTest")]
+        [MemberData(nameof(NavigationPropertyToTest))]
         public async Task ODataSingleton_WorksOnNavigationProperty(string path, string expectedPayload)
         {
             // Remove indentation in expect string 
@@ -87,7 +88,7 @@ namespace Microsoft.Test.AspNet.OData
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -95,24 +96,24 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void ODataSingleton_WorksOn_EntityReferenceLink()
+        public async Task ODataSingleton_WorksOn_EntityReferenceLink()
         {
             // 1. It's successful to query the navigation property
             string requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
             Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             // 2. Use the $ref to delete the reference link.
             requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter/$ref";
             request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
-            response = _client.SendAsync(request).Result;
+            response = await _client.SendAsync(request);
             Assert.True(response.StatusCode == System.Net.HttpStatusCode.OK);
 
             // 3. Now, Can't navigation to the navigation property
             requestUri = BaseAddress + "/odata/OscorpSubs(102)/HeadQuarter";
             request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            response = _client.SendAsync(request).Result;
+            response = await _client.SendAsync(request);
             Assert.True(response.StatusCode == System.Net.HttpStatusCode.NotFound);
         }
 

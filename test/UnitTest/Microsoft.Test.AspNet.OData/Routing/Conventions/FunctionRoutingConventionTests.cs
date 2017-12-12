@@ -8,6 +8,7 @@ using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => functionConvention.SelectAction(odataPath: null, controllerContext: null, actionMap: null),
                 "odataPath");
         }
@@ -35,7 +36,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ODataPath odataPath = new ODataPath();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => functionConvention.SelectAction(odataPath, controllerContext: null, actionMap: null),
                 "controllerContext");
         }
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             HttpControllerContext controllerContext = new HttpControllerContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => functionConvention.SelectAction(odataPath, controllerContext, actionMap: null),
                 "actionMap");
         }
@@ -98,7 +99,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 
             // Assert
             Assert.Equal("IsUpgraded", function);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Single(controllerContext.Request.GetRouteData().Values);
             Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
@@ -201,7 +202,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 
             // Assert
             Assert.Equal("IsUpgradedWithParam", function);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Single(controllerContext.Request.GetRouteData().Values);
             Assert.Equal("any", controllerContext.Request.GetRouteData().Values["city"]);
         }
 

@@ -6,6 +6,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.BindUriFunctionName(null, padRightStringMethodInfo);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "functionName");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "functionName");
         }
 
         [Fact]
@@ -42,7 +43,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.BindUriFunctionName(string.Empty, padRightStringMethodInfo);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "functionName");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "functionName");
         }
 
         [Fact]
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.BindUriFunctionName("startswith", null);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "methodInfo");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "methodInfo");
         }
 
         // Add - succ
@@ -101,7 +102,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
                 // Add for the second time
                 Action bindExisting = () => UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, addStrTwiceStaticMethodInfo);
 
-                Assert.Throws<ODataException>(bindExisting);
+                ExceptionAssert.Throws<ODataException>(bindExisting);
             }
             finally
             {
@@ -212,7 +213,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
                 UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, padRightStaticMethodInfo);
                 Action bindingInstance = () => UriFunctionsBinder.BindUriFunctionName(FUNCTION_NAME, padRightInstanceMethodInfo);
 
-                Assert.Throws<ODataException>(bindingInstance);
+                ExceptionAssert.Throws<ODataException>(bindingInstance);
             }
             finally
             {
@@ -271,7 +272,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.UnbindUriFunctionName(null, padRightStringMethodInfo);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "functionName");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "functionName");
         }
 
         [Fact]
@@ -282,7 +283,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.UnbindUriFunctionName(string.Empty, padRightStringMethodInfo);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "functionName");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "functionName");
         }
 
         [Fact]
@@ -291,7 +292,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
             Action bindUriFunction = () =>
                 UriFunctionsBinder.UnbindUriFunctionName("startswith", null);
 
-            Assert.ThrowsArgumentNull(bindUriFunction, "methodInfo");
+            ExceptionAssert.ThrowsArgumentNull(bindUriFunction, "methodInfo");
         }
 
         // Remove -

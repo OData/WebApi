@@ -6,7 +6,7 @@ using System;
 namespace Microsoft.Test.AspNet.OData.TestCommon
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
-    public abstract class DataAttribute : Xunit.Extensions.DataAttribute
+    public abstract class DataAttribute : Xunit.Sdk.DataAttribute
     {
     }
 }

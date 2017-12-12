@@ -13,6 +13,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -37,13 +38,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void Ctor_ThrowsArgumentNull_SerializerProvider()
         {
-            Assert.ThrowsArgumentNull(() => new ODataCollectionSerializer(serializerProvider: null), "serializerProvider");
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataCollectionSerializer(serializerProvider: null), "serializerProvider");
         }
 
         [Fact]
         public void WriteObject_Throws_ArgumentNull_MessageWriter()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: null, type: typeof(int[]), messageWriter: null, writeContext: null),
                 "messageWriter");
         }
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void WriteObject_Throws_ArgumentNull_WriteContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.WriteObject(graph: null, type: typeof(int[]),
                     messageWriter: ODataTestUtil.GetMockODataMessageWriter(), writeContext: null),
                 "writeContext");
@@ -94,7 +95,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void CreateODataCollectionValue_ThrowsArgumentNull_WriteContext()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializer.CreateODataCollectionValue(enumerable: null, elementType: _edmIntType, writeContext: null),
                 "writeContext");
         }
@@ -107,7 +108,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             var serializer = new ODataCollectionSerializer(serializerProvider.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => serializer.CreateODataValue(graph: nonEnumerable, expectedType: _collectionType, writeContext: new ODataSerializerContext()),
                 "graph",
                 "The argument must be of type 'IEnumerable'.");
@@ -121,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             var serializer = new ODataCollectionSerializer(serializerProvider.Object);
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(It.IsAny<IEdmTypeReference>())).Returns<IEdmTypeReference>(null);
 
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => serializer.CreateODataCollectionValue(enumerable, _edmIntType, new ODataSerializerContext { Model = _model }),
                 "'Edm.Int32' cannot be serialized using the ODataMediaTypeFormatter.");
         }

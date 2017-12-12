@@ -4,6 +4,7 @@
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -17,6 +18,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -49,7 +51,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataSerializerContext writeContext = new ODataSerializerContext();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () =>
                     new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter,
                         writeContext),
@@ -68,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataSerializerContext writeContext = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext");
         }
@@ -85,7 +87,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataSerializerContext writeContext = new ODataSerializerContext();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => new ODataEnumSerializer(_serializerProvider).WriteObject(graph, type, messageWriter, writeContext),
                 "writeContext",
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.");
@@ -100,13 +102,13 @@ namespace Microsoft.Test.AspNet.OData
             ODataSerializerContext writeContext = new ODataSerializerContext();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => new ODataEnumSerializer(_serializerProvider).CreateODataValue(graph, expectedType, writeContext),
                 "ODataEnumSerializer cannot write an object of type 'Edm.Int32'.");
         }
 
         [Fact]
-        public void EnumTypeSerializerTestForOData()
+        public async Task EnumTypeSerializerTestForOData()
         {
             // Arrange
             string enumComplexPayload = @"{
@@ -125,11 +127,11 @@ namespace Microsoft.Test.AspNet.OData
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(enumComplexPayload, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(enumComplexPayload, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void NullableEnumParameter_Works_WithNotNullEnumValue()
+        public async Task NullableEnumParameter_Works_WithNotNullEnumValue()
         {
             // Arrange
             const string expect =
@@ -145,14 +147,14 @@ namespace Microsoft.Test.AspNet.OData
                 "http://localhost/odata/NullableEnumFunction(ColorParameter=Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red')");
 
             // Act
-            HttpResponseMessage respone = client.SendAsync(request).Result;
+            HttpResponseMessage respone = await client.SendAsync(request);
 
             // Assert
-            Assert.Equal(expect, respone.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expect, await respone.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void NullableEnumParameter_Works_WithNullEnumValue()
+        public async Task NullableEnumParameter_Works_WithNullEnumValue()
         {
             // Arrange
             const string expect =
@@ -168,10 +170,10 @@ namespace Microsoft.Test.AspNet.OData
                 "http://localhost/odata/NullableEnumFunction(ColorParameter=null)");
 
             // Act
-            HttpResponseMessage respone = client.SendAsync(request).Result;
+            HttpResponseMessage respone = await client.SendAsync(request);
 
             // Assert
-            Assert.Equal(expect, respone.Content.ReadAsStringAsync().Result);
+            Assert.Equal(expect, await respone.Content.ReadAsStringAsync());
         }
 
         private static ODataMediaTypeFormatter GetFormatter()

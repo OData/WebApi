@@ -12,6 +12,7 @@ using Microsoft.Test.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builderr
 {
@@ -165,7 +166,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => vehicles.AddBinding(navProperty, manufacturers));
+            ExceptionAssert.DoesNotThrow(() => vehicles.AddBinding(navProperty, manufacturers));
         }
 
         [Fact]
@@ -182,7 +183,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             var vehicles = builder.AddEntitySet("vehicles", vehicle);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
                 "The declaring entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' " +
@@ -340,7 +341,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
             builder.EntitySet<Customer>("Customers");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
                 "The entity set or singleton 'Customers' is based on type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Customer' that has no keys defined.");
         }
 

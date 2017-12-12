@@ -10,6 +10,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void Constructor_With_Null_Throws()
         {
             // Arrange & Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new OrderByPropertyNode(property: null, direction: OrderByDirection.Ascending),
                 "property");
         }
@@ -34,14 +35,14 @@ namespace Microsoft.Test.AspNet.OData.Query
             OrderByPropertyNode node = new OrderByPropertyNode(mockProperty.Object, OrderByDirection.Descending);
 
             // Assert
-            Assert.ReferenceEquals(mockProperty.Object, node.Property);
+            Assert.Same(mockProperty.Object, node.Property);
             Assert.Equal(OrderByDirection.Descending, node.Direction);
         }
 
         [Fact]
         public void Ctor_TakingOrderByClause_ThrowsArgumentNull_OrderByClause()
         {
-            Assert.ThrowsArgumentNull(() => new OrderByPropertyNode(orderByClause: null),
+            ExceptionAssert.ThrowsArgumentNull(() => new OrderByPropertyNode(orderByClause: null),
                 "orderByClause");
         }
 
@@ -109,7 +110,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.Equal(OrderByDirection.Descending, propertyNodes.First().Direction);
             Assert.Equal("Property1", propertyNodes.First().PropertyPath);
 
-            Assert.ReferenceEquals("Property2", propertyNodes.Last().Property.Name);
+            Assert.Equal("Property2", propertyNodes.Last().Property.Name);
             Assert.Equal(OrderByDirection.Ascending, nodes.Last().Direction);
             Assert.Equal("Property2", propertyNodes.Last().PropertyPath);
         }
@@ -144,7 +145,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.Equal(OrderByDirection.Descending, propertyNodes.First().Direction);
             Assert.Equal(propertyName, propertyNodes.First().PropertyPath);
 
-            Assert.ReferenceEquals("Id", propertyNodes.Last().Property.Name);
+            Assert.Equal("Id", propertyNodes.Last().Property.Name);
             Assert.Equal(OrderByDirection.Ascending, nodes.Last().Direction);
             Assert.Equal("Id", propertyNodes.Last().PropertyPath);
         }

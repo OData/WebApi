@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -12,13 +13,13 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmTypeOfTypeIEdmComplexType()
         {
-            Assert.ThrowsArgumentNull(() => new EdmDeltaComplexObject((IEdmComplexType)null), "edmType");
+            ExceptionAssert.ThrowsArgumentNull(() => new EdmDeltaComplexObject((IEdmComplexType)null), "edmType");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmTypeOfTypeIEdmComplexTypeReference()
         {
-            Assert.ThrowsArgumentNull(() => new EdmDeltaComplexObject((IEdmComplexTypeReference)null), "type");
+            ExceptionAssert.ThrowsArgumentNull(() => new EdmDeltaComplexObject((IEdmComplexTypeReference)null), "type");
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             EdmDeltaComplexObject edmObject = new EdmDeltaComplexObject(new EdmComplexType("NS", "Complex"));
 
-            Assert.Reflection.BooleanProperty(edmObject, e => e.IsNullable, expectedDefaultValue: false);
+            ReflectionAssert.BooleanProperty(edmObject, e => e.IsNullable, expectedDefaultValue: false);
         }
     }
 }

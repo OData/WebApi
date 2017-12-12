@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -325,16 +327,16 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("LogicalOperatorsTestData")]
-        [PropertyData("ArithmeticOperatorsTestData")]
-        [PropertyData("StringFunctionsTestData")]
-        [PropertyData("MathFunctionsTestData")]
-        [PropertyData("SupportedDateTimeFunctionsTestData")]
-        [PropertyData("UnsupportedDateTimeFunctionsTestData")]
-        [PropertyData("AnyAndAllFunctionsTestData")]
-        [PropertyData("OtherQueryOptionsTestData")]
-        [PropertyData("OtherUnsupportedQueryOptionsTestData")]
-        public void EnableQuery_Blocks_NotAllowedQueries(string queryString, string expectedElement)
+        [MemberData(nameof(LogicalOperatorsTestData))]
+        [MemberData(nameof(ArithmeticOperatorsTestData))]
+        [MemberData(nameof(StringFunctionsTestData))]
+        [MemberData(nameof(MathFunctionsTestData))]
+        [MemberData(nameof(SupportedDateTimeFunctionsTestData))]
+        [MemberData(nameof(UnsupportedDateTimeFunctionsTestData))]
+        [MemberData(nameof(AnyAndAllFunctionsTestData))]
+        [MemberData(nameof(OtherQueryOptionsTestData))]
+        [MemberData(nameof(OtherUnsupportedQueryOptionsTestData))]
+        public async Task EnableQuery_Blocks_NotAllowedQueries(string queryString, string expectedElement)
         {
             // Arrange
             string url = "http://localhost/odata/OnlyFilterAndEqualsAllowedCustomers";
@@ -342,8 +344,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -352,14 +354,14 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("LogicalOperatorsTestData")]
-        [PropertyData("ArithmeticOperatorsTestData")]
-        [PropertyData("StringFunctionsTestData")]
-        [PropertyData("MathFunctionsTestData")]
-        [PropertyData("SupportedDateTimeFunctionsTestData")]
-        [PropertyData("UnsupportedDateTimeFunctionsTestData")]
-        [PropertyData("AnyAndAllFunctionsTestData")]
-        public void EnableQuery_BlocksFilter_WhenNotAllowed(string queryString, string unused)
+        [MemberData(nameof(LogicalOperatorsTestData))]
+        [MemberData(nameof(ArithmeticOperatorsTestData))]
+        [MemberData(nameof(StringFunctionsTestData))]
+        [MemberData(nameof(MathFunctionsTestData))]
+        [MemberData(nameof(SupportedDateTimeFunctionsTestData))]
+        [MemberData(nameof(UnsupportedDateTimeFunctionsTestData))]
+        [MemberData(nameof(AnyAndAllFunctionsTestData))]
+        public async Task EnableQuery_BlocksFilter_WhenNotAllowed(string queryString, string unused)
         {
             // Arrange
             string url = "http://localhost/odata/FilterDisabledCustomers";
@@ -367,18 +369,19 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
+            Assert.NotNull(unused);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("not allowed", errorMessage);
             Assert.Contains("Filter", errorMessage);
         }
 
         [Theory]
-        [PropertyData("OtherUnsupportedQueryOptionsTestData")]
-        public void EnableQuery_ReturnsBadRequest_ForUnsupportedQueryOptions(string queryString, string expectedElement)
+        [MemberData(nameof(OtherUnsupportedQueryOptionsTestData))]
+        public async Task EnableQuery_ReturnsBadRequest_ForUnsupportedQueryOptions(string queryString, string expectedElement)
         {
             // Arrange
             string url = "http://localhost/odata/EverythingAllowedCustomers";
@@ -386,8 +389,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -400,8 +403,8 @@ namespace Microsoft.Test.AspNet.OData
         // enable it in those tests and this test only makes sure it covers the case
         // when everything is disabled
         [Theory]
-        [PropertyData("EqualsOperatorTestData")]
-        public void EnableQuery_BlocksEquals_WhenNotAllowed(string queryString, string expectedElement)
+        [MemberData(nameof(EqualsOperatorTestData))]
+        public async Task EnableQuery_BlocksEquals_WhenNotAllowed(string queryString, string expectedElement)
         {
             // Arrange
             string url = "http://localhost/odata/OnlyFilterAllowedCustomers";
@@ -409,8 +412,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -419,17 +422,17 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("LogicalOperatorsTestData")]
-        [PropertyData("ArithmeticOperatorsTestData")]
-        [PropertyData("EqualsOperatorTestData")]
-        [PropertyData("OtherQueryOptionsTestData")]
-        [PropertyData("StringFunctionsTestData")]
-        [PropertyData("MathFunctionsTestData")]
-        [PropertyData("SupportedDateTimeFunctionsTestData")]
-        [PropertyData("AnyAndAllFunctionsTestData")]
-        [PropertyData("CastFunctionTestData")]
-        [PropertyData("IsOfFunctionTestData")]
-        public void EnableQuery_DoesNotBlockQueries_WhenEverythingIsAllowed(string queryString, string unused)
+        [MemberData(nameof(LogicalOperatorsTestData))]
+        [MemberData(nameof(ArithmeticOperatorsTestData))]
+        [MemberData(nameof(EqualsOperatorTestData))]
+        [MemberData(nameof(OtherQueryOptionsTestData))]
+        [MemberData(nameof(StringFunctionsTestData))]
+        [MemberData(nameof(MathFunctionsTestData))]
+        [MemberData(nameof(SupportedDateTimeFunctionsTestData))]
+        [MemberData(nameof(AnyAndAllFunctionsTestData))]
+        [MemberData(nameof(CastFunctionTestData))]
+        [MemberData(nameof(IsOfFunctionTestData))]
+        public async Task EnableQuery_DoesNotBlockQueries_WhenEverythingIsAllowed(string queryString, string unused)
         {
             // Arrange
             string url = "http://localhost/odata/EverythingAllowedCustomers";
@@ -437,15 +440,16 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
 
             // Assert
+            Assert.NotNull(unused);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
-        [PropertyData("AutoExpandedTestData")]
-        public void EnableQuery_Works_WithAutoExpanded(string queryString)
+        [MemberData(nameof(AutoExpandedTestData))]
+        public async Task EnableQuery_Works_WithAutoExpanded(string queryString)
         {
             // Arrange
             string url = "http://localhost/odata/AutoExpandedCustomers";
@@ -461,8 +465,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -471,8 +475,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("UnsupportedDateTimeFunctionsTestData")]
-        public void EnableQuery_ReturnsBadRequest_ForUnsupportedFunctions(string queryString, string expectedElement)
+        [MemberData(nameof(UnsupportedDateTimeFunctionsTestData))]
+        public async Task EnableQuery_ReturnsBadRequest_ForUnsupportedFunctions(string queryString, string expectedElement)
         {
             // Arrange
             string url = "http://localhost/odata/EverythingAllowedCustomers";
@@ -480,8 +484,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
@@ -490,8 +494,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [PropertyData("NumericQueryLimitationsTestData")]
-        public void EnableQuery_BlocksQueries_WithOtherLimitations(string queryString, string expectedElement)
+        [MemberData(nameof(NumericQueryLimitationsTestData))]
+        public async Task EnableQuery_BlocksQueries_WithOtherLimitations(string queryString, string expectedElement)
         {
             // Arrange
             string url = "http://localhost/odata/OtherLimitationsCustomers";
@@ -499,8 +503,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url + queryString).Result;
-            string errorMessage = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string errorMessage = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

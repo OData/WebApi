@@ -7,13 +7,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -62,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void QueryableLimitation_ExposedAsQueryCapabilitesVocabularyAnnotations_InMetadataDocument()
+        public async Task QueryableLimitation_ExposedAsQueryCapabilitesVocabularyAnnotations_InMetadataDocument()
         {
             // Arrange
             string expect = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -194,8 +195,8 @@ namespace Microsoft.Test.AspNet.OData
             string requestUri = BaseAddress + "/odata/$metadata";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync(requestUri).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.GetAsync(requestUri);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             // Remove the following condition after updating to ODL 6.13.
@@ -206,19 +207,19 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void QueryableLimitation_NotSortableFromModelTest()
+        public async Task QueryableLimitation_NotSortableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$orderby=Name";
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("The query specified in the URI is not valid. The property 'Name' cannot be used in the $orderby query option.",
                 responseString);
         }
@@ -226,38 +227,38 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("NotFilterableNotSortableLastName")]
         [InlineData("NonFilterableUnsortableLastName")]
-        public void QueryableLimitation_NotSortableFromAttributeTest(string property)
+        public async Task QueryableLimitation_NotSortableFromAttributeTest(string property)
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$orderby=" + property;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains(
                 String.Format("The query specified in the URI is not valid. The property '{0}' cannot be used in the $orderby query option.", property),
                 responseString);
         }
 
         [Fact]
-        public void QueryableLimitation_NotFilterableFromModelTest()
+        public async Task QueryableLimitation_NotFilterableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=Name eq 'FirstName 1'";
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("The query specified in the URI is not valid. The property 'Name' cannot be used in the $filter query option.",
                 responseString);
         }
@@ -265,7 +266,7 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("NotFilterableNotSortableLastName")]
         [InlineData("NonFilterableUnsortableLastName")]
-        public void QueryableLimitation_NotFilterableFromAttributeTest(string property)
+        public async Task QueryableLimitation_NotFilterableFromAttributeTest(string property)
         {
             // Arrange
             string requestUri = BaseAddress +
@@ -273,12 +274,12 @@ namespace Microsoft.Test.AspNet.OData
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains(
                 String.Format(
                     "The query specified in the URI is not valid. The property '{0}' cannot be used in the $filter query option.",
@@ -287,54 +288,54 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void QueryableLimitation_NotFilterableAttributeOverrideByModelTest()
+        public async Task QueryableLimitation_NotFilterableAttributeOverrideByModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$filter=Age eq 31";
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.OK);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("\"Age\":31", responseString);
         }
 
         [Fact]
-        public void QueryableLimitation_NotNavigableFromModelTest()
+        public async Task QueryableLimitation_NotNavigableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$select=Orders";
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("The query specified in the URI is not valid. The property 'Orders' cannot be used for navigation.",
                 responseString);
         }
 
         [Fact]
-        public void QueryableLimitation_NotExpandableFromModelTest()
+        public async Task QueryableLimitation_NotExpandableFromModelTest()
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/QueryLimitCustomers?$expand=Orders";
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
-            Assert.Equal(response.StatusCode, HttpStatusCode.BadRequest);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("The query specified in the URI is not valid. The property 'Orders' cannot be used in the $expand query option.",
                 responseString);
         }
@@ -344,15 +345,15 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("QueryLimitCustomers(1)/Addresses/$count")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Addresses?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Addresses/$count")]
-        public void QueryableLimitation_NotCountableFromModelTest(string uri)
+        public async Task QueryableLimitation_NotCountableFromModelTest(string uri)
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/" + uri;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -366,15 +367,15 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("QueryLimitCustomers(1)/ImportantOrders/$count")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/ImportantOrders?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/ImportantOrders/$count")]
-        public void QueryableLimitation_NotCountableFromAttributeTest(string uri)
+        public async Task QueryableLimitation_NotCountableFromAttributeTest(string uri)
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/" + uri;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -388,15 +389,15 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("QueryLimitCustomers(1)/Numbers/$count")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Numbers?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Numbers/$count")]
-        public void QueryableLimitation_NotCountableAttributeOverrideByModelTest(string uri)
+        public async Task QueryableLimitation_NotCountableAttributeOverrideByModelTest(string uri)
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/" + uri;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -408,15 +409,15 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("QueryLimitCustomers(1)/Notes/$count")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Notes?$count=true")]
         [InlineData("QueryLimitCustomers(1)/Microsoft.Test.AspNet.OData.DerivedQueryLimitCustomer/Notes/$count")]
-        public void QueryableLimitation_CountNotAllowedInQueryOptionsTest(string uri)
+        public async Task QueryableLimitation_CountNotAllowedInQueryOptionsTest(string uri)
         {
             // Arrange
             string requestUri = BaseAddress + "/odata/" + uri;
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);

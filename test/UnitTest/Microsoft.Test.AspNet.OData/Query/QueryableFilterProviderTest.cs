@@ -10,8 +10,8 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -30,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             FilterInfo[] filters = new QueryFilterProvider(new EnableQueryAttribute()).GetFilters(config, actionDescriptor).ToArray();
 
-            Assert.Equal(1, filters.Length);
+            Assert.Single(filters);
             Assert.Equal(FilterScope.Global, filters[0].Scope);
             EnableQueryAttribute filter = Assert.IsType<EnableQueryAttribute>(filters[0].Instance);
         }

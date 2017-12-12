@@ -7,6 +7,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PrimitivePropertyConfiguration property = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => property.AsDate(), "property");
+            ExceptionAssert.ThrowsArgumentNull(() => property.AsDate(), "property");
         }
 
         [Fact]
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PrimitivePropertyConfiguration property = null;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => property.AsTimeOfDay(), "property");
+            ExceptionAssert.ThrowsArgumentNull(() => property.AsTimeOfDay(), "property");
         }
 
         [Theory]
@@ -55,7 +56,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PrimitivePropertyConfiguration propertyConfig = new PrimitivePropertyConfiguration(property, _structuralType.Object);
 
             // Assert
-            Assert.ThrowsArgument(() => propertyConfig.AsDate(), "property",
+            ExceptionAssert.ThrowsArgument(() => propertyConfig.AsDate(), "property",
                 "The property 'Birthday' on type 'NS.Customer' must be a System.DateTime property");
         }
 
@@ -75,7 +76,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PrimitivePropertyConfiguration propertyConfig = new PrimitivePropertyConfiguration(property, _structuralType.Object);
 
             // Assert
-            Assert.ThrowsArgument(() => propertyConfig.AsTimeOfDay(), "property",
+            ExceptionAssert.ThrowsArgument(() => propertyConfig.AsTimeOfDay(), "property",
                 "The property 'CreatedTime' on type 'NS.Customer' must be a System.TimeSpan property");
         }
 

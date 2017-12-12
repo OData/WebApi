@@ -8,6 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -28,9 +29,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json");
         public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
-        public static void VerifyResponse(HttpContent actualContent, string expected)
+        public static async Task VerifyResponse(HttpContent actualContent, string expected)
         {
-            string actual = actualContent.ReadAsStringAsync().Result;
+            string actual = await actualContent.ReadAsStringAsync();
             JsonAssert.Equal(expected, actual);
         }
 

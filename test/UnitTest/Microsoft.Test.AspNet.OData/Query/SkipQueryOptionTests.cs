@@ -12,6 +12,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Query.Validators;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -20,7 +21,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void ConstructorNullContextThrows()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 new SkipQueryOption("1", null));
         }
 
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new SkipQueryOption(null, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -42,7 +43,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() =>
+            ExceptionAssert.Throws<ArgumentException>(() =>
                 new SkipQueryOption(string.Empty, new ODataQueryContext(model, typeof(Customer))));
         }
 
@@ -53,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() =>
+            ExceptionAssert.ThrowsArgumentNull(() =>
                 new SkipQueryOption("5", new ODataQueryContext(model, typeof(Customer)), queryOptionParser: null),
                 "queryOptionParser");
         }
@@ -83,7 +84,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 skip.ApplyTo(ODataQueryOptionTest.Customers, new ODataQuerySettings()));
         }
 
@@ -111,7 +112,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var context = new ODataQueryContext(model, typeof(Customer));
             var skip = new SkipQueryOption(skipValue, context);
 
-            Assert.Throws<ODataException>(() => skip.Value);
+            ExceptionAssert.Throws<ODataException>(() => skip.Value);
         }
 
         [Fact]
@@ -165,11 +166,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             SkipQueryOption option = new SkipQueryOption("11", ValidationTestHelper.CreateCustomerContext());
 
             // Act and Assert
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                 option.Validate(settings),
                 "The limit of '10' for Skip query has been exceeded. The value from the incoming request is '11'.");
             option.Validator = null;
-            Assert.DoesNotThrow(() => option.Validate(settings));
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
         }
 
         [Fact]
@@ -194,7 +195,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IQueryable queryable = new Mock<IQueryable>().Object;
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => skip.ApplyTo(queryable, new ODataQuerySettings()),
+            ExceptionAssert.Throws<NotSupportedException>(() => skip.ApplyTo(queryable, new ODataQuerySettings()),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
     }

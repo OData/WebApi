@@ -4,6 +4,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.TestCommon
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             TestPropertyValue(instance, getFunc, setFunc, value, value);
         }
 
-        public void Property<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, bool allowNull = false, TResult roundTripTestValue = null) where TResult : class
+        public static void Property<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, bool allowNull = false, TResult roundTripTestValue = null) where TResult : class
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, TResult> getFunc = (obj) => (TResult)property.GetValue(obj, index: null);
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             }
             else
             {
-                Assert.ThrowsArgumentNull(() =>
+                ExceptionAssert.ThrowsArgumentNull(() =>
                 {
                     setFunc(instance, null);
                 }, "value");
@@ -63,7 +64,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             }
         }
 
-        public void IntegerProperty<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue,
+        public static void IntegerProperty<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue,
             TResult? minLegalValue, TResult? illegalLowerValue,
             TResult? maxLegalValue, TResult? illegalUpperValue,
             TResult roundTripTestValue) where TResult : struct
@@ -86,18 +87,18 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (illegalLowerValue.HasValue)
             {
-                Assert.ThrowsArgumentGreaterThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", minLegalValue.Value.ToString(), illegalLowerValue.Value);
+                ExceptionAssert.ThrowsArgumentGreaterThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", minLegalValue.Value.ToString(), illegalLowerValue.Value);
             }
 
             if (illegalUpperValue.HasValue)
             {
-                Assert.ThrowsArgumentLessThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", maxLegalValue.Value.ToString(), illegalUpperValue.Value);
+                ExceptionAssert.ThrowsArgumentLessThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", maxLegalValue.Value.ToString(), illegalUpperValue.Value);
             }
 
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
-        public void NullableIntegerProperty<T, TResult>(T instance, Expression<Func<T, TResult?>> propertyGetter, TResult? expectedDefaultValue,
+        public static void NullableIntegerProperty<T, TResult>(T instance, Expression<Func<T, TResult?>> propertyGetter, TResult? expectedDefaultValue,
             TResult? minLegalValue, TResult? illegalLowerValue,
             TResult? maxLegalValue, TResult? illegalUpperValue,
             TResult roundTripTestValue) where TResult : struct
@@ -122,18 +123,18 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             if (illegalLowerValue.HasValue)
             {
-                Assert.ThrowsArgumentGreaterThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", minLegalValue.Value.ToString(), illegalLowerValue.Value);
+                ExceptionAssert.ThrowsArgumentGreaterThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", minLegalValue.Value.ToString(), illegalLowerValue.Value);
             }
 
             if (illegalUpperValue.HasValue)
             {
-                Assert.ThrowsArgumentLessThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", maxLegalValue.Value.ToString(), illegalUpperValue.Value);
+                ExceptionAssert.ThrowsArgumentLessThanOrEqualTo(() => { setFunc(instance, illegalLowerValue.Value); }, "value", maxLegalValue.Value.ToString(), illegalUpperValue.Value);
             }
 
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
-        public void BooleanProperty<T>(T instance, Expression<Func<T, bool>> propertyGetter, bool expectedDefaultValue)
+        public static void BooleanProperty<T>(T instance, Expression<Func<T, bool>> propertyGetter, bool expectedDefaultValue)
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, bool> getFunc = (obj) => (bool)property.GetValue(obj, index: null);
@@ -144,7 +145,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             TestPropertyValue(instance, getFunc, setFunc, !expectedDefaultValue);
         }
 
-        public void EnumProperty<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, TResult illegalValue, TResult roundTripTestValue) where TResult : struct
+        public static void EnumProperty<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, TResult illegalValue, TResult roundTripTestValue) where TResult : struct
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, TResult> getFunc = (obj) => (TResult)property.GetValue(obj, index: null);
@@ -152,12 +153,12 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
 
             Assert.Equal(expectedDefaultValue, getFunc(instance));
 
-            Assert.ThrowsInvalidEnumArgument(() => { setFunc(instance, illegalValue); }, "value", Convert.ToInt32(illegalValue), typeof(TResult));
+            ExceptionAssert.ThrowsInvalidEnumArgument(() => { setFunc(instance, illegalValue); }, "value", Convert.ToInt32(illegalValue), typeof(TResult));
 
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
-        public void EnumPropertyWithoutIllegalValueCheck<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, TResult roundTripTestValue) where TResult : struct
+        public static void EnumPropertyWithoutIllegalValueCheck<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, TResult roundTripTestValue) where TResult : struct
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, TResult> getFunc = (obj) => (TResult)property.GetValue(obj, index: null);
@@ -168,7 +169,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             TestPropertyValue(instance, getFunc, setFunc, roundTripTestValue);
         }
 
-        public void StringProperty<T>(T instance, Expression<Func<T, string>> propertyGetter, string expectedDefaultValue,
+        public static void StringProperty<T>(T instance, Expression<Func<T, string>> propertyGetter, string expectedDefaultValue,
                                       bool allowNullAndEmpty = true, bool treatNullAsEmpty = true)
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
@@ -187,7 +188,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             }
             else
             {
-                Assert.ThrowsArgumentNullOrEmpty(
+                ExceptionAssert.ThrowsArgumentNullOrEmpty(
                     delegate()
                     {
                         try
@@ -200,7 +201,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
                         }
                     },
                     "value");
-                Assert.ThrowsArgumentNullOrEmpty(
+                ExceptionAssert.ThrowsArgumentNullOrEmpty(
                     delegate()
                     {
                         try

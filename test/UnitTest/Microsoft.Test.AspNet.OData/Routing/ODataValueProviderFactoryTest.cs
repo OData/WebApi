@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Dispatcher;
@@ -10,6 +11,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -19,7 +21,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void GetValueProvider_ThrowsArgumentNull_ActionContext()
         {
             ODataValueProviderFactory factory = new ODataValueProviderFactory();
-            Assert.ThrowsArgumentNull(() => factory.GetValueProvider(actionContext: null), "actionContext");
+            ExceptionAssert.ThrowsArgumentNull(() => factory.GetValueProvider(actionContext: null), "actionContext");
         }
 
         [Fact]
@@ -40,7 +42,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void CanModelBindNonStringData()
+        public async Task CanModelBindNonStringData()
         {
             // Arrange
             HttpServer server = new HttpServer();
@@ -55,10 +57,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Test");
             request.ODataProperties().RoutingConventionsStore["test"] = new TestClass { Id = 42 };
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
 
             // Assert
-            TestClass result = response.Content.ReadAsAsync<TestClass>().Result;
+            TestClass result = await response.Content.ReadAsAsync<TestClass>();
             Assert.Equal(42, result.Id);
         }
 

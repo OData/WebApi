@@ -7,14 +7,15 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -26,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData
         private readonly string _bastUri = "http://localhost/odata/DateTimeModels";
 
         [Fact]
-        public void MetadataDocument_IncludesDateTimeProperties()
+        public async Task MetadataDocument_IncludesDateTimeProperties()
         {
             // Arrange
             const string Uri = "http://localhost/odata/$metadata";
@@ -62,15 +63,15 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(Expected, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void CanQueryEntitySet_WithDateTimeProperties()
+        public async Task CanQueryEntitySet_WithDateTimeProperties()
         {
             // Arrange
             DateTimeOffset expect = new DateTimeOffset(new DateTime(2015, 12, 31, 20, 12, 30, DateTimeKind.Utc));
@@ -79,8 +80,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            HttpResponseMessage response = await client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -97,7 +98,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void CanQuerySingleEntity_WithDateTimeProperties_CustomTimeZoneInfo()
+        public async Task CanQuerySingleEntity_WithDateTimeProperties_CustomTimeZoneInfo()
         {
             // Arrange
             const string Expected = "],\"BirthdayD@odata.type\":\"#Collection(DateTimeOffset)\",\"BirthdayD\":[" +
@@ -110,15 +111,15 @@ namespace Microsoft.Test.AspNet.OData
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Contains(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Contains(Expected, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void CanSelect_OnDateTimeProperty()
+        public async Task CanSelect_OnDateTimeProperty()
         {
             // Arrange
             const string Expected = "{" +
@@ -132,18 +133,18 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(Expected, await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
         [InlineData("UTC")] // +0:00
         [InlineData("Pacific Standard Time")] // -8:00
         // [InlineData("China Standard Time")] // +8:00
-        public void CanFilter_OnDateTimeProperty_WithDifferentTimeZoneInfo(string timeZoneId)
+        public async Task CanFilter_OnDateTimeProperty_WithDifferentTimeZoneInfo(string timeZoneId)
         {
             // Arrange
             const string uri1 = "http://localhost/odata/DateTimeModels?$filter=BirthdayB lt cast(2015-04-01T04:11:31%2B08:00,Edm.DateTimeOffset)";
@@ -153,15 +154,15 @@ namespace Microsoft.Test.AspNet.OData
             var client2 = GetClient(timeZoneInfo: TimeZoneInfo.FindSystemTimeZoneById(timeZoneId));
 
             // Act
-            var response1 = client1.GetAsync(uri1).Result;
-            var response2 = client2.GetAsync(uri2).Result;
+            var response1 = await client1.GetAsync(uri1);
+            var response2 = await client2.GetAsync(uri2);
 
             // Assert
             Assert.True(response1.IsSuccessStatusCode);
             Assert.True(response2.IsSuccessStatusCode);
 
-            string payload1 = response1.Content.ReadAsStringAsync().Result;
-            string payload2 = response2.Content.ReadAsStringAsync().Result;
+            string payload1 = await response1.Content.ReadAsStringAsync();
+            string payload2 = await response2.Content.ReadAsStringAsync();
             Assert.Equal(payload1, payload2);
 
             var result = JObject.Parse(payload1);
@@ -177,13 +178,13 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("?$filter=BirthdayA lt 2015-04-01T04:11:31Z")]
         [InlineData("?$filter=BirthdayB lt 2015-04-01T04:11:31Z")]
         [InlineData("?$filter=2015-04-01T04:11:31Z ge BirthdayB")]
-        public void CanFilter_OnDateTimeProperty_WithDateTimeAndDateTimeOffset(string uri)
+        public async Task CanFilter_OnDateTimeProperty_WithDateTimeAndDateTimeOffset(string uri)
         {
             // Arrange
             var client = GetClient(timeZoneInfo: null);
 
             // Act
-            var response = client.GetAsync(_bastUri + uri).Result;
+            var response = await client.GetAsync(_bastUri + uri);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -193,7 +194,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("UTC", 5)] // +0:00
         [InlineData("Pacific Standard Time", 5)] // -8:00
         [InlineData("China Standard Time", 5)] // +8:00
-        public void CanFilter_OnDateTimePropertyWithBuiltInFunction(string timeZoneId, int expectId)
+        public async Task CanFilter_OnDateTimePropertyWithBuiltInFunction(string timeZoneId, int expectId)
         {
             // Arrange
             const string Uri = "http://localhost/odata/DateTimeModels?$filter=year(BirthdayA) eq 2019";
@@ -201,11 +202,10 @@ namespace Microsoft.Test.AspNet.OData
             var request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
 
             Assert.True(response.IsSuccessStatusCode);
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
-            Console.WriteLine(response.Content.ReadAsStringAsync().Result);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Single(result["value"]);
             Assert.Equal(expectId, result["value"][0]["Id"]);
         }
@@ -215,7 +215,7 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("UTC")] // +0:00
         [InlineData("Pacific Standard Time")] // -8:00
         [InlineData("China Standard Time")] // +8:00
-        public void CanOrderBy_OnDateTimeProperty(string timeZoneId)
+        public async Task CanOrderBy_OnDateTimeProperty(string timeZoneId)
         {
             // Arrange
             TimeZoneInfo tzi = String.IsNullOrEmpty(timeZoneId) ? null : TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
@@ -224,12 +224,12 @@ namespace Microsoft.Test.AspNet.OData
             var request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            var response = client.SendAsync(request).Result;
+            var response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(5, result["value"].Count());
 
             Assert.Equal(DateTimeOffset.Parse("2020-01-01T04:12:30+08:00"), result["value"][0]["BirthdayA"]);
@@ -240,7 +240,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void PostEntity_WithDateTimeProperties_OnCustomTimeZone()
+        public async Task PostEntity_WithDateTimeProperties_OnCustomTimeZone()
         {
             // Arrange
             const string Payload = "{" +
@@ -262,7 +262,7 @@ namespace Microsoft.Test.AspNet.OData
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -271,7 +271,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void PutEntity_WithDateTimeProperties()
+        public async Task PutEntity_WithDateTimeProperties()
         {
             // Arrange
             const string Payload = "{" +
@@ -287,7 +287,7 @@ namespace Microsoft.Test.AspNet.OData
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -295,7 +295,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void CanQuerySingleDateTimeProperty()
+        public async Task CanQuerySingleDateTimeProperty()
         {
             // Arrange
             const string Expected =
@@ -310,15 +310,15 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(Expected, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void FunctionsWorksOnDateTime()
+        public async Task FunctionsWorksOnDateTime()
         {
             // Arrange
             const string Expected =
@@ -332,11 +332,11 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(Expected, response.Content.ReadAsStringAsync().Result);
+            Assert.Equal(Expected, await response.Content.ReadAsStringAsync());
         }
 
         private static HttpClient GetClient(TimeZoneInfo timeZoneInfo)
@@ -397,7 +397,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Equal(99, dt.Id);
             Assert.Equal(new DateTime(2098, 12, 31, 16, 1, 2, DateTimeKind.Unspecified), dt.BirthdayA);
             Assert.Equal(new DateTime(2099, 2, 1, 16, 1, 2), dt.BirthdayB);
-            Assert.Equal(1, dt.BirthdayC.Count);
+            Assert.Single(dt.BirthdayC);
             Assert.Equal(3, dt.BirthdayD.Count);
 
             return Created(dt);

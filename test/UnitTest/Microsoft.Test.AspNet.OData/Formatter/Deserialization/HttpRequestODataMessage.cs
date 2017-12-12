@@ -32,6 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         public Stream GetStream()
         {
+            // Can't make this async as the interface requires a return stream, not Task<Stream>
             return _request.Content.ReadAsStreamAsync().Result;
         }
 

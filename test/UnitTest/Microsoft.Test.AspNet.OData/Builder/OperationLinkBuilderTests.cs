@@ -5,6 +5,7 @@ using System;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -13,13 +14,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void Ctor_ThrowsArgumentNull_EntityLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceContext, Uri>)null, true), "linkFactory");
+            ExceptionAssert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceContext, Uri>)null, true), "linkFactory");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_FeedLinkFactory()
         {
-            Assert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceSetContext, Uri>)null, true), "linkFactory");
+            ExceptionAssert.ThrowsArgumentNull(() => new OperationLinkBuilder((Func<ResourceSetContext, Uri>)null, true), "linkFactory");
         }
 
         [Theory]

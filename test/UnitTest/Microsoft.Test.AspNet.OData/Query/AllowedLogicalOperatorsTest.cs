@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -27,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                 }
             }
 
-            Assert.Equal(allLogicalOperators, AllowedLogicalOperators.All);
+            Assert.Equal(AllowedLogicalOperators.All, allLogicalOperators);
         }
     }
 }

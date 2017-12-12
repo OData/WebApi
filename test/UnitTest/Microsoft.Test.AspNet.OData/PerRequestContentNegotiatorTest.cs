@@ -9,8 +9,8 @@ using System.Net.Http.Headers;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {

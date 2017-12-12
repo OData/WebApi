@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.OData.WebApi.AspNet.Formatter
 {
@@ -105,10 +105,7 @@ namespace Microsoft.Test.OData.WebApi.AspNet.Formatter
         [InlineData("application/json;odata.metadata=full", ODataMetadataLevel.FullMetadata)]
         [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
         [InlineData("application/json;odata.metadata=minimal", ODataMetadataLevel.MinimalMetadata)]
-        [InlineData("application/json;odata.metadata=full", ODataMetadataLevel.FullMetadata)]
-        [InlineData("application/json;odata.metadata=none", ODataMetadataLevel.NoMetadata)]
         [InlineData("application/json", ODataMetadataLevel.MinimalMetadata)]
-        [InlineData("application/json;randomparameter=randomvalue", ODataMetadataLevel.MinimalMetadata)]
         [InlineData("application/random", ODataMetadataLevel.MinimalMetadata)]
         public void GetMetadataLevel_Returns_Correct_MetadataLevel(string contentType, object metadataLevel)
         {

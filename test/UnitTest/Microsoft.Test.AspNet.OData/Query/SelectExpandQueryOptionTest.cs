@@ -16,6 +16,7 @@ using Microsoft.Test.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
+using Xunit;
 using Customer = Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void Ctor_ThrowsArgumentNull_Context()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SelectExpandQueryOption(select: "select", expand: "expand", context: null),
                 "context");
         }
@@ -41,7 +42,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(Customer));
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => new SelectExpandQueryOption(select: null, expand: null, context: context),
                 "'select' and 'expand' cannot be both null or empty.");
         }
@@ -53,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(int));
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => new SelectExpandQueryOption(select: "Name", expand: "Name", context: context),
                 "context",
                 "The type 'Edm.Int32' is not an entity type. Only entity types support $select and $expand.");
@@ -66,7 +67,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(int));
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SelectExpandQueryOption("select", "expand", context, queryOptionParser: null),
                 "queryOptionParser");
         }
@@ -165,7 +166,6 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("LastName,    FirstName", null)]
         [InlineData("LastName,FirstName", "Orders")]
         [InlineData("LastName,FirstName,Orders", "Orders")]
-        [InlineData("LastName,FirstName,Orders", "Orders")]
         [InlineData("Orders", "Orders,Orders($expand=Customer),Orders($expand=Customer($expand=Orders))")]
         [InlineData("SimpleEnum", "Orders")]
         public void SelectExpandClause_CanParse_ModelBuiltForQueryable(string select, string expand)
@@ -182,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => option.SelectExpandClause.ToString());
+            ExceptionAssert.DoesNotThrow(() => option.SelectExpandClause.ToString());
         }
 
         [Theory]
@@ -200,7 +200,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => option.SelectExpandClause.ToString(),
                 error);
         }
@@ -229,7 +229,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IQueryable queryable = new Mock<IQueryable>().Object;
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(queryable, new ODataQuerySettings()),
+            ExceptionAssert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(queryable, new ODataQuerySettings()),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 
@@ -244,7 +244,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             object entity = new object();
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(entity, new ODataQuerySettings()),
+            ExceptionAssert.Throws<NotSupportedException>(() => selectExpand.ApplyTo(entity, new ODataQuerySettings()),
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 
@@ -269,7 +269,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Assert
             // Level 1.
             Assert.True(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             var item = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
             Assert.Equal(
@@ -280,7 +280,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Level 2.
             clause = item.SelectAndExpand;
             Assert.True(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             item = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
             Assert.Equal(
@@ -291,7 +291,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Level 3.
             clause = item.SelectAndExpand;
             Assert.True(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             item = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
             Assert.Equal(
@@ -301,7 +301,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clause = item.SelectAndExpand;
             Assert.True(clause.AllSelected);
-            Assert.Equal(0, clause.SelectedItems.Count());
+            Assert.Empty(clause.SelectedItems);
         }
 
         [Fact]
@@ -365,7 +365,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clause = expandedItem.SelectAndExpand;
             Assert.False(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             idSelectItem = Assert.IsType<PathSelectItem>(clause.SelectedItems.Single());
             Assert.Equal("ID", ((PropertySegment)idSelectItem.SelectedPath.FirstSegment).Property.Name);
@@ -412,7 +412,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Level 2 of inline Parent.
             var inlineParentClause = inlineParent.SelectAndExpand;
             Assert.True(inlineParentClause.AllSelected);
-            Assert.Equal(1, inlineParentClause.SelectedItems.Count());
+            Assert.Single(inlineParentClause.SelectedItems);
 
             inlineParent = Assert.IsType<ExpandedNavigationSelectItem>(inlineParentClause.SelectedItems.Single());
             Assert.Equal(
@@ -422,7 +422,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             inlineParentClause = inlineParent.SelectAndExpand;
             Assert.True(inlineParentClause.AllSelected);
-            Assert.Equal(0, inlineParentClause.SelectedItems.Count());
+            Assert.Empty(inlineParentClause.SelectedItems);
 
             // Level 1 of inline DerivedAncestors.
             var inlineDerivedAncestors = Assert.Single(clauseOfParent.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
@@ -453,7 +453,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             inlineDerivedAncestorsClause = inlineDerivedAncestors.SelectAndExpand;
             Assert.False(inlineDerivedAncestorsClause.AllSelected);
-            Assert.Equal(1, inlineDerivedAncestorsClause.SelectedItems.Count());
+            Assert.Single(inlineDerivedAncestorsClause.SelectedItems);
 
             idItem = Assert.Single(inlineDerivedAncestorsClause.SelectedItems.OfType<PathSelectItem>());
             Assert.Equal("ID", ((PropertySegment)idItem.SelectedPath.FirstSegment).Property.Name);
@@ -467,7 +467,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Level 2 of BaseEntities.
             var baseEntitiesClause = baseEntities.SelectAndExpand;
             Assert.True(baseEntitiesClause.AllSelected);
-            Assert.Equal(1, baseEntitiesClause.SelectedItems.Count());
+            Assert.Single(baseEntitiesClause.SelectedItems);
 
             baseEntities = Assert.IsType<ExpandedNavigationSelectItem>(baseEntitiesClause.SelectedItems.Single());
             Assert.Equal(
@@ -477,7 +477,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             baseEntitiesClause = baseEntities.SelectAndExpand;
             Assert.True(baseEntitiesClause.AllSelected);
-            Assert.Equal(0, baseEntitiesClause.SelectedItems.Count());
+            Assert.Empty(baseEntitiesClause.SelectedItems);
         }
 
         [Fact]
@@ -500,7 +500,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             // Assert
             Assert.True(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             // Level 1 of Parent.
             var parent = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
@@ -521,7 +521,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             var clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
-            Assert.Equal(1, clauseOfDerivedAncestors.SelectedItems.Count());
+            Assert.Single(clauseOfDerivedAncestors.SelectedItems);
 
             // Level 2 of DerivedAncestors.
             derivedAncestors = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfDerivedAncestors.SelectedItems.Single());
@@ -532,7 +532,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
-            Assert.Equal(0, clauseOfDerivedAncestors.SelectedItems.Count());
+            Assert.Empty(clauseOfDerivedAncestors.SelectedItems);
 
             // Level 2 of Parent.
             parent = Assert.Single(clauseOfParent.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
@@ -542,7 +542,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfParent = parent.SelectAndExpand;
             Assert.True(clauseOfParent.AllSelected);
-            Assert.Equal(1, clauseOfParent.SelectedItems.Count());
+            Assert.Single(clauseOfParent.SelectedItems);
 
             // Level 1 of DerivedAncestors.
             derivedAncestors = Assert.Single(clauseOfParent.SelectedItems.OfType<ExpandedNavigationSelectItem>().Where(
@@ -552,7 +552,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
-            Assert.Equal(1, clauseOfDerivedAncestors.SelectedItems.Count());
+            Assert.Single(clauseOfDerivedAncestors.SelectedItems);
 
             // Level 2 of DerivedAncestors.
             derivedAncestors = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfDerivedAncestors.SelectedItems.Single());
@@ -563,7 +563,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
-            Assert.Equal(0, clauseOfDerivedAncestors.SelectedItems.Count());
+            Assert.Empty(clauseOfDerivedAncestors.SelectedItems);
         }
 
         [Fact]
@@ -585,7 +585,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             // Assert
             Assert.True(clause.AllSelected);
-            Assert.Equal(1, clause.SelectedItems.Count());
+            Assert.Single(clause.SelectedItems);
 
             // Level 1 of Parent.
             var parent = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
@@ -608,7 +608,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             var clauseOfDerivedAncestors = derivedAncestors.SelectAndExpand;
             Assert.True(clauseOfDerivedAncestors.AllSelected);
-            Assert.Equal(0, clauseOfDerivedAncestors.SelectedItems.Count());
+            Assert.Empty(clauseOfDerivedAncestors.SelectedItems);
 
             // Level 2 of Parent.
             parent = Assert.Single(
@@ -620,7 +620,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfParent = parent.SelectAndExpand;
             Assert.True(clauseOfParent.AllSelected);
-            Assert.Equal(0, clauseOfParent.SelectedItems.Count());
+            Assert.Empty(clauseOfParent.SelectedItems);
         }
 
         [Theory]
@@ -669,13 +669,13 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             var clauseOfOrder = order.SelectAndExpand;
             Assert.True(clauseOfOrder.AllSelected);
-            Assert.Equal(1, clauseOfOrder.SelectedItems.Count());
+            Assert.Single(clauseOfOrder.SelectedItems);
 
             // Choice Order under Order
             var choiceOrder = Assert.IsType<ExpandedNavigationSelectItem>(clauseOfOrder.SelectedItems.Single());
             Assert.Null(choiceOrder.LevelsOption);
             Assert.True(choiceOrder.SelectAndExpand.AllSelected);
-            Assert.Equal(0, choiceOrder.SelectAndExpand.SelectedItems.Count());
+            Assert.Empty(choiceOrder.SelectAndExpand.SelectedItems);
 
             // Level 2 of Order.
             order = Assert.Single(
@@ -688,7 +688,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfOrder = order.SelectAndExpand;
             Assert.True(clauseOfOrder.AllSelected);
-            Assert.Equal(0, clauseOfOrder.SelectedItems.Count());
+            Assert.Empty(clauseOfOrder.SelectedItems);
 
             // Level 2 of Customer.
             cutomer = Assert.Single(
@@ -701,7 +701,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             clauseOfCustomer = cutomer.SelectAndExpand;
             Assert.True(clauseOfCustomer.AllSelected);
-            Assert.Equal(0, clauseOfCustomer.SelectedItems.Count());
+            Assert.Empty(clauseOfCustomer.SelectedItems);
         }
 
         private IEdmModel GetAutoExpandEdmModel()

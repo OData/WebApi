@@ -4,32 +4,34 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class ODataBatchRequestItemTest
     {
         [Fact]
-        public void SendMessageAsync_Throws_WhenInvokerIsNull()
+        public async Task SendMessageAsync_Throws_WhenInvokerIsNull()
         {
-            Assert.ThrowsArgumentNull(
-                () => ODataBatchRequestItem.SendMessageAsync(null, new HttpRequestMessage(), CancellationToken.None, null).Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => ODataBatchRequestItem.SendMessageAsync(null, new HttpRequestMessage(), CancellationToken.None, null),
                 "invoker");
         }
 
         [Fact]
-        public void SendMessageAsync_Throws_WhenRequestIsNull()
+        public async Task SendMessageAsync_Throws_WhenRequestIsNull()
         {
-            Assert.ThrowsArgumentNull(
-                () => ODataBatchRequestItem.SendMessageAsync(new HttpMessageInvoker(new HttpServer()), null, CancellationToken.None, null).Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => ODataBatchRequestItem.SendMessageAsync(new HttpMessageInvoker(new HttpServer()), null, CancellationToken.None, null),
                 "request");
         }
 
         [Fact]
-        public void SendMessageAsync_CallsInvoker()
+        public async Task SendMessageAsync_CallsInvoker()
         {
             HttpResponseMessage response = new HttpResponseMessage();
 
@@ -38,7 +40,7 @@ namespace Microsoft.Test.AspNet.OData.Batch
                     return response;
                 }));
 
-            var result = ODataBatchRequestItem.SendMessageAsync(invoker, new HttpRequestMessage(HttpMethod.Get, "http://example.com"), CancellationToken.None, new Dictionary<string, string>()).Result;
+            var result = await ODataBatchRequestItem.SendMessageAsync(invoker, new HttpRequestMessage(HttpMethod.Get, "http://example.com"), CancellationToken.None, new Dictionary<string, string>());
 
             Assert.Same(response, result);
         }

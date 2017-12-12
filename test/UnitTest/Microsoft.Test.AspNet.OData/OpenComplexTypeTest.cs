@@ -8,13 +8,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void OpenComplexType_SimpleSerialization(bool enableNullDynamicProperty)
+        public async Task OpenComplexType_SimpleSerialization(bool enableNullDynamicProperty)
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/OpenCustomers(2)/Address";
@@ -36,11 +37,11 @@ namespace Microsoft.Test.AspNet.OData
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#OpenCustomers(2)/Address", result["@odata.context"]);
             Assert.Equal("Street 2", result["Street"]);
             Assert.Equal("City 2", result["City"]);
@@ -60,7 +61,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void OpenComplexType_SimpleDeserialization()
+        public async Task OpenComplexType_SimpleDeserialization()
         {
             // Arrange
             const string Payload = "{" +
@@ -86,11 +87,11 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
             request.Content = new StringContent(Payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#OpenCustomers/$entity", result["@odata.context"]);
             Assert.Equal("Earth", result["Address"]["Place"]);
             Assert.Equal(990, result["Address"]["Number"]);
@@ -99,7 +100,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void OpenComplexType_PutComplexTypeProperty()
+        public async Task OpenComplexType_PutComplexTypeProperty()
         {
             // Arrange
             const string payload = "{" +
@@ -119,7 +120,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, requestUri);
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -127,7 +128,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void OpenComplexType_PatchComplexTypeProperty()
+        public async Task OpenComplexType_PatchComplexTypeProperty()
         {
             // Arrange
             const string payload = "{" +
@@ -148,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -156,7 +157,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void OpenComplexType_DeleteComplexTypeProperty()
+        public async Task OpenComplexType_DeleteComplexTypeProperty()
         {
             // Arrange
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
@@ -167,7 +168,7 @@ namespace Microsoft.Test.AspNet.OData
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -306,11 +307,9 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Equal(3, origin.DynamicProperties.Count); // include the origin dynamic properties
 
             KeyValuePair<string, object> dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "Token");
-            Assert.NotNull(dynamicProperty);
             Assert.Equal(new Guid("2E724E81-8462-4BA0-B920-DC87A61C8EA3"), dynamicProperty.Value);
 
             dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
-            Assert.NotNull(dynamicProperty);
             Assert.Equal(new Date(2016, 1, 29), dynamicProperty.Value);
 
             return Updated(customer);

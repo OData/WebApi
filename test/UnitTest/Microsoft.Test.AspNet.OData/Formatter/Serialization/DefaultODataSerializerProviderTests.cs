@@ -17,6 +17,7 @@ using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 using Microsoft.Test.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -62,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializerProvider.GetODataPayloadSerializer(type: null, request: request),
                "type");
         }
@@ -71,13 +72,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void GetODataPayloadSerializer_ThrowsArgumentNull_Request()
         {
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializerProvider.GetODataPayloadSerializer(typeof(int), request: null),
                "request");
         }
 
         [Theory]
-        [PropertyData("EdmPrimitiveMappingData")]
+        [MemberData(nameof(EdmPrimitiveMappingData))]
         public void GetODataSerializer_Primitive(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
@@ -88,13 +89,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             var serializer = _serializerProvider.GetODataPayloadSerializer(type, request);
 
             // Assert
+            Assert.NotEqual(EdmPrimitiveTypeKind.None, edmPrimitiveTypeKind);
             Assert.NotNull(serializer);
             var primitiveSerializer = Assert.IsType<ODataPrimitiveSerializer>(serializer);
-            Assert.Equal(primitiveSerializer.ODataPayloadKind, ODataPayloadKind.Property);
+            Assert.Equal(ODataPayloadKind.Property, primitiveSerializer.ODataPayloadKind);
         }
 
         [Theory]
-        [PropertyData("EdmPrimitiveMappingData")]
+        [MemberData(nameof(EdmPrimitiveMappingData))]
         public void GetODataPayloadSerializer_ReturnsRawValueSerializer_ForValueRequests(Type type, EdmPrimitiveTypeKind edmPrimitiveTypeKind)
         {
             // Arrange
@@ -107,6 +109,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             var serializer = _serializerProvider.GetODataPayloadSerializer(type, request);
 
             // Assert
+            Assert.NotEqual(EdmPrimitiveTypeKind.None, edmPrimitiveTypeKind);
             Assert.NotNull(serializer);
             Assert.Equal(ODataPayloadKind.Value, serializer.ODataPayloadKind);
         }
@@ -197,7 +200,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Assert.NotNull(serializer);
             var entitySerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(entitySerializer.SerializerProvider, _serializerProvider);
-            Assert.Equal(entitySerializer.ODataPayloadKind, ODataPayloadKind.Resource);
+            Assert.Equal(ODataPayloadKind.Resource, entitySerializer.ODataPayloadKind);
         }
 
         [Fact]
@@ -214,7 +217,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Assert.NotNull(serializer);
             var complexSerializer = Assert.IsType<ODataResourceSerializer>(serializer);
             Assert.Equal(complexSerializer.SerializerProvider, _serializerProvider);
-            Assert.Equal(complexSerializer.ODataPayloadKind, ODataPayloadKind.Resource);
+            Assert.Equal(ODataPayloadKind.Resource, complexSerializer.ODataPayloadKind);
         }
 
         [Theory]
@@ -236,7 +239,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(serializer);
             var resourceSetSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
-            Assert.Equal(resourceSetSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
+            Assert.Equal(ODataPayloadKind.ResourceSet, resourceSetSerializer.ODataPayloadKind);
             Assert.Same(resourceSetSerializer.SerializerProvider, _serializerProvider);
         }
 
@@ -259,7 +262,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(serializer);
             var resourceSetSerializer = Assert.IsType<ODataResourceSetSerializer>(serializer);
-            Assert.Equal(resourceSetSerializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
+            Assert.Equal(ODataPayloadKind.ResourceSet, resourceSetSerializer.ODataPayloadKind);
             Assert.Same(resourceSetSerializer.SerializerProvider, _serializerProvider);
         }
 
@@ -304,7 +307,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void GetEdmTypeSerializer_ThrowsArgumentNull_EdmType()
         {
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _serializerProvider.GetEdmTypeSerializer(edmType: null),
                 "edmType");
         }

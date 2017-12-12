@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builderer
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_ModelBuilder()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EntitySetConfiguration(modelBuilder: null, entityClrType: typeof(EntitySetConfigurationTest), name: "entityset"),
                 "modelBuilder");
         }
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_EntityType()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: (Type)null, name: "entityset"),
                 "clrType");
         }
@@ -39,7 +40,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_Name()
         {
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => new EntitySetConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: typeof(EntitySetConfigurationTest), name: null),
                 "The argument 'name' is null or empty.\r\nParameter name: name");
         }
@@ -47,7 +48,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_ModelBuilder()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EntitySetConfiguration(
                     modelBuilder: null,
                     entityType: new EntityTypeConfiguration(new ODataModelBuilder(), typeof(EntitySetConfigurationTest)),
@@ -58,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_EntityType()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EntitySetConfiguration(
                     modelBuilder: new ODataModelBuilder(),
                     entityType: (EntityTypeConfiguration)null,
@@ -69,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_Name()
         {
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => new EntitySetConfiguration(
                     modelBuilder: new ODataModelBuilder(),
                     entityType: new EntityTypeConfiguration(new ODataModelBuilder(), typeof(EntitySetConfigurationTest)),

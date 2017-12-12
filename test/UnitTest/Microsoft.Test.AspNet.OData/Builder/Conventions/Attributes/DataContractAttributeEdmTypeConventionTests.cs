@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         [Fact]
         public void DefaultCtor()
         {
-            Assert.DoesNotThrow(() => new DataContractAttributeEdmTypeConvention());
+            ExceptionAssert.DoesNotThrow(() => new DataContractAttributeEdmTypeConvention());
         }
 
         [Fact]

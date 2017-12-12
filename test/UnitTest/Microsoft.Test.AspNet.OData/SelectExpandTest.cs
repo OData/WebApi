@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -17,6 +18,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -59,18 +61,18 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_Works()
+        public async Task SelectExpand_Works()
         {
             // Arrange
             string uri = "/odata/SelectExpandTestCustomers?$select=ID,Orders&$expand=Orders";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)", result["@odata.context"]);
             ValidateCustomer(result["value"][0]);
         }
@@ -79,34 +81,34 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("*")]
         [InlineData("*,Orders")]
         [InlineData("*,PreviousCustomer($levels=1)")]
-        public void SelectExpand_Works_WithExpandStar(string expand)
+        public async Task SelectExpand_Works_WithExpandStar(string expand)
         {
             // Arrange
             string uri = "/odata/SelectExpandTestCustomers?$expand=" + expand;
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.NotNull(result["value"][0]["ID"]);
             Assert.NotNull(result["value"][0]["Orders"]);
             Assert.NotNull(result["value"][0]["PreviousCustomer"]);
         }
 
         [Fact]
-        public void SelectExpand_Works_WithNestedFilter()
+        public async Task SelectExpand_Works_WithNestedFilter()
         {
             // Arrange
             var uri = "/odata/SelectExpandTestCustomers?$expand=Orders($filter=ID eq 28)";
             // Act
-            var response = GetResponse(uri, AcceptJson);
+            var response = await GetResponse(uri, AcceptJson);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            var content = response.Content.ReadAsStringAsync().Result;
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var content = await response.Content.ReadAsStringAsync();
             dynamic result = JObject.Parse(content);
             var customer = result.value[0];
             var orders = customer.Orders;
@@ -115,7 +117,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithInheritance_Works()
+        public async Task SelectExpand_WithInheritance_Works()
         {
             // Arrange
             string @namespace = typeof(SelectExpandTestCustomer).Namespace;
@@ -124,13 +126,13 @@ namespace Microsoft.Test.AspNet.OData
             string uri = "/odata-inheritance/SelectExpandTestCustomers?" + select + "&" + expand;
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Null(result["value"][0]["ID"]);
             Assert.Null(result["value"][0]["SpecialOrders"]);
             Assert.Equal(100, result["value"][1]["Rank"]);
@@ -138,18 +140,18 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_Works_WithAlias()
+        public async Task SelectExpand_Works_WithAlias()
         {
             // Arrange
             string uri = "/odata-alias/SelectExpandTestCustomersAlias?$select=ID,OrdersAlias&$expand=OrdersAlias";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(
                 "http://localhost/odata-alias/$metadata#SelectExpandTestCustomersAlias(ID,OrdersAlias)",
                 result["@odata.context"]);
@@ -157,7 +159,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithInheritance_Alias_Works()
+        public async Task SelectExpand_WithInheritance_Alias_Works()
         {
             // Arrange
             string @namespace = "com.contoso";
@@ -166,13 +168,13 @@ namespace Microsoft.Test.AspNet.OData
             string uri = "/odata-alias2-inheritance/SelectExpandTestCustomersAlias?" + select + "&" + expand;
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Null(result["value"][0]["ID"]);
             Assert.Null(result["value"][0]["SpecialOrdersAlias"]);
             Assert.Equal(100, result["value"][1]["RankAlias"]);
@@ -180,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithInheritanceAndNonODataJson_Works()
+        public async Task SelectExpand_WithInheritanceAndNonODataJson_Works()
         {
             // Arrange
             string customerNamespace = typeof(SelectExpandTestCustomer).Namespace;
@@ -189,13 +191,13 @@ namespace Microsoft.Test.AspNet.OData
             string uri = "/api/?" + select + "&" + expand;
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            JArray result = JArray.Parse(await response.Content.ReadAsStringAsync());
             Assert.Empty(result[0]);
             Assert.Null(result[1]["ID"]);
             Assert.Equal(100, result[1]["Rank"]);
@@ -203,83 +205,83 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_WithNonODataJson_Respects_JsonProperty()
+        public async Task SelectExpand_WithNonODataJson_Respects_JsonProperty()
         {
             // Arrange
             string uri = "/api/AttributedSelectExpandCustomers?$select=Id,Orders&$expand=Orders($select=Total)";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
-            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            JArray result = JArray.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(1, result[0]["JsonId"]);
             Assert.Equal(1, result[0]["JsonOrders"][0]["JsonTotal"]);
         }
 
         [Fact]
-        public void SelectExpand_WithNonODataJson_JsonProperty_Wins_OverDataMember()
+        public async Task SelectExpand_WithNonODataJson_JsonProperty_Wins_OverDataMember()
         {
             // Arrange
             string uri = "/api/AttributedSelectExpandCustomers?$select=DataMemberCustomerName";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
-            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            JArray result = JArray.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("Name 1", result[0]["JsonName"]);
         }
 
         [Fact]
-        public void SelectExpand_QueryableOnSingleEntity_Works()
+        public async Task SelectExpand_QueryableOnSingleEntity_Works()
         {
             // Arrange
             string uri = "/odata/SelectExpandTestCustomers(42)?$select=ID,Orders&$expand=Orders";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#SelectExpandTestCustomers(ID,Orders)/$entity", result["@odata.context"]);
             ValidateCustomer(result);
         }
 
         [Fact]
-        public void SelectExpand_QueryableOnSingleResult_Works()
+        public async Task SelectExpand_QueryableOnSingleResult_Works()
         {
             // Arrange
             string uri = "/api/?id=42&$select=ID,Orders&$expand=Orders";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(42, result["ID"]);
             Assert.Null(result["Name"]);
             Assert.NotNull(result["Orders"]);
         }
 
         [Fact]
-        public void SelectExpand_Works_WithLevels()
+        public async Task SelectExpand_Works_WithLevels()
         {
             // Arrange
             string uri = "/api/?id=44&$select=ID&$expand=PreviousCustomer($levels=2)";
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJson);
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal(44, result["ID"]);
             Assert.Equal(43, result["PreviousCustomer"]["ID"]);
             Assert.Equal(42, result["PreviousCustomer"]["PreviousCustomer"]["ID"]);
@@ -287,14 +289,14 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
+        public async Task SelectExpand_Works_ForSelectAction_WithNamespaceQualifiedName()
         {
             // Arrange
             const string URI = "/odata2/Players?$select=Name,Default.*";
 
             // Act
-            HttpResponseMessage response = GetResponse(URI, AcceptJsonFullMetadata);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await GetResponse(URI, AcceptJsonFullMetadata);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -311,14 +313,14 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public void SelectExpand_Works_ForSelectInstanceFunction()
+        public async Task SelectExpand_Works_ForSelectInstanceFunction()
         {
             // Arrange
             const string URI = "/odata2/Players?$select=Name,Default.PlayerFunction1";
 
             // Act
-            HttpResponseMessage response = GetResponse(URI, AcceptJsonFullMetadata);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await GetResponse(URI, AcceptJsonFullMetadata);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -329,14 +331,14 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("Default.Container.*")]
         [InlineData("Container.*")]
-        public void SelectExpand_DoesnotWork_ForSelectAction_WithNonNamespaceQualifiedName(string nonNamespaceQualifiedName)
+        public async Task SelectExpand_DoesnotWork_ForSelectAction_WithNonNamespaceQualifiedName(string nonNamespaceQualifiedName)
         {
             // Arrange
             string uri = "/odata2/Players?$select=Name," + nonNamespaceQualifiedName;
 
             // Act
-            HttpResponseMessage response = GetResponse(uri, AcceptJsonFullMetadata);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await GetResponse(uri, AcceptJsonFullMetadata);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.False(response.IsSuccessStatusCode);
@@ -345,12 +347,12 @@ namespace Microsoft.Test.AspNet.OData
                 responseString);
         }
 
-        private HttpResponseMessage GetResponse(string uri, string acceptHeader)
+        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
             request.SetConfiguration(_configuration);
-            return _client.SendAsync(request).Result;
+            return _client.SendAsync(request);
         }
 
         private static void ValidateCustomer(JToken customer)
@@ -371,7 +373,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Null(customer["NameAlias"]);
             var orders = customer["OrdersAlias"] as JArray;
             Assert.NotNull(orders);
-            Assert.Equal(1, orders.Count);
+            Assert.Single(orders);
             var order = orders[0];
             Assert.Equal(24, order["ID"]);
             Assert.Equal(100, order["AmountAlias"]);

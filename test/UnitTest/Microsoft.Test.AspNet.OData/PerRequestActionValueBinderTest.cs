@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -19,7 +20,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_InnerActionValueBinder()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new PerRequestActionValueBinder(innerActionValueBinder: null),
                 "innerActionValueBinder");
         }

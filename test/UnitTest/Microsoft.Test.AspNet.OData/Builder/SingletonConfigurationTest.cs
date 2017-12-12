@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_ModelBuilder()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SingletonConfiguration(modelBuilder: null, entityClrType: typeof(SingletonConfigurationTest), name: "singleton"),
                 "modelBuilder");
         }
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_EntityType()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SingletonConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: (Type)null, name: "singleton"),
                 "clrType");
         }
@@ -39,7 +40,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_Name()
         {
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => new SingletonConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: typeof(SingletonConfigurationTest), name: null),
                 "The argument 'name' is null or empty.\r\nParameter name: name");
         }
@@ -47,7 +48,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_ModelBuilder()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SingletonConfiguration(
                     modelBuilder: null,
                     entityType: new EntityTypeConfiguration(new ODataModelBuilder(), typeof(SingletonConfigurationTest)),
@@ -58,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_EntityType()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new SingletonConfiguration(
                     modelBuilder: new ODataModelBuilder(),
                     entityType: (EntityTypeConfiguration)null,
@@ -69,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_Name()
         {
-            Assert.Throws<ArgumentException>(
+            ExceptionAssert.Throws<ArgumentException>(
                 () => new SingletonConfiguration(
                     modelBuilder: new ODataModelBuilder(),
                     entityType: new EntityTypeConfiguration(new ODataModelBuilder(), typeof(SingletonConfigurationTest)),

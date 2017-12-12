@@ -5,13 +5,14 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -41,7 +42,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Fact]
-        public void ODataSingletonQueryOption_CanSelectDerivedProperty()
+        public async Task ODataSingletonQueryOption_CanSelectDerivedProperty()
         {
             // Arrange
             const string expectedPayload = "{" +
@@ -53,15 +54,15 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(expectedPayload, responseString);
         }
 
         [Fact]
-        public void ODataSingletonQueryOption_CanExpandThenSelectProperty()
+        public async Task ODataSingletonQueryOption_CanExpandThenSelectProperty()
         {
             // Arrange
             string expectedPayload = Resources.SingletonSelectAndExpand;
@@ -70,8 +71,8 @@ namespace Microsoft.Test.AspNet.OData.Query
             expectedPayload = Regex.Replace(expectedPayload, @"\r\n\s*([""{}\]])", "$1");
 
             // Act
-            string respsoneString = _client.GetStringAsync(
-                "http://localhost/odata/Me?$select=Orders&$expand=Orders($select=Name)").Result;
+            string respsoneString = await _client.GetStringAsync(
+                "http://localhost/odata/Me?$select=Orders&$expand=Orders($select=Name)");
 
             // Assert
             Assert.Equal(expectedPayload, respsoneString);
@@ -83,14 +84,14 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("$orderby=ID,Name")]
         [InlineData("$count=true")]
         [InlineData("$skip=3")]
-        public void ODataSingletonQueryOption_Failed_OnOtherQueryOptions(string queryOption)
+        public async Task ODataSingletonQueryOption_Failed_OnOtherQueryOptions(string queryOption)
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/odata/Me?" + queryOption);
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(System.Net.HttpStatusCode.BadRequest, response.StatusCode);

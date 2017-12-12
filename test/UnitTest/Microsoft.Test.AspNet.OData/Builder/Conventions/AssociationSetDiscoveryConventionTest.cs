@@ -10,6 +10,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 {
@@ -72,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Mock<ODataModelBuilder> modelBuilder = new Mock<ODataModelBuilder>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => AssociationSetDiscoveryConvention.GetTargetNavigationSource(config, modelBuilder.Object),
                 "Could not find the target entity type for the navigation property 'SamplePropertyName' on entity type 'Microsoft.Test.AspNet.OData.Builder.Conventions.AssociationSetDiscoveryConventionTest'.");
         }

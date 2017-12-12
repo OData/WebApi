@@ -10,6 +10,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -34,18 +35,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [InlineData(typeof(Int16), EdmPrimitiveTypeKind.Int16)]
-        [InlineData(typeof(int), EdmPrimitiveTypeKind.Int32)]
-        [InlineData(typeof(Decimal), EdmPrimitiveTypeKind.Decimal)]
-        [InlineData(typeof(DateTimeOffset), EdmPrimitiveTypeKind.DateTimeOffset)]
-        [InlineData(typeof(DateTime), EdmPrimitiveTypeKind.DateTimeOffset)]
-        [InlineData(typeof(Date), EdmPrimitiveTypeKind.Date)]
-        [InlineData(typeof(TimeOfDay), EdmPrimitiveTypeKind.TimeOfDay)]
-        [InlineData(typeof(double), EdmPrimitiveTypeKind.Double)]
-        [InlineData(typeof(byte[]), EdmPrimitiveTypeKind.Binary)]
-        [InlineData(typeof(bool), EdmPrimitiveTypeKind.Boolean)]
-        [InlineData(typeof(int?), EdmPrimitiveTypeKind.Int32)]
-        public void GetODataDeserializer_Primitive(Type type, EdmPrimitiveTypeKind primitiveKind)
+        [InlineData(typeof(Int16))]
+        [InlineData(typeof(int))]
+        [InlineData(typeof(Decimal))]
+        [InlineData(typeof(DateTimeOffset))]
+        [InlineData(typeof(DateTime))]
+        [InlineData(typeof(Date))]
+        [InlineData(typeof(TimeOfDay))]
+        [InlineData(typeof(double))]
+        [InlineData(typeof(byte[]))]
+        [InlineData(typeof(bool))]
+        [InlineData(typeof(int?))]
+        public void GetODataDeserializer_Primitive(Type type)
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage();
@@ -74,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             // Assert
             Assert.NotNull(deserializer);
             ODataResourceDeserializer entityDeserializer = Assert.IsType<ODataResourceDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
+            Assert.Equal(ODataPayloadKind.Resource, deserializer.ODataPayloadKind);
             Assert.Equal(entityDeserializer.DeserializerProvider, _deserializerProvider);
         }
 
@@ -92,7 +93,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             // Assert
             Assert.NotNull(deserializer);
             ODataResourceDeserializer complexDeserializer = Assert.IsType<ODataResourceDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.Resource);
+            Assert.Equal(ODataPayloadKind.Resource, deserializer.ODataPayloadKind);
             Assert.Equal(complexDeserializer.DeserializerProvider, _deserializerProvider);
         }
 
@@ -115,7 +116,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             // Assert
             Assert.NotNull(deserializer);
             ODataResourceSetDeserializer resourceSetDeserializer = Assert.IsType<ODataResourceSetDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
+            Assert.Equal(ODataPayloadKind.ResourceSet, deserializer.ODataPayloadKind);
             Assert.Equal(resourceSetDeserializer.DeserializerProvider, _deserializerProvider);
         }
 
@@ -138,7 +139,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             // Assert
             Assert.NotNull(deserializer);
             ODataResourceSetDeserializer resourceSetDeserializer = Assert.IsType<ODataResourceSetDeserializer>(deserializer);
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.ResourceSet);
+            Assert.Equal(ODataPayloadKind.ResourceSet, deserializer.ODataPayloadKind);
             Assert.Equal(resourceSetDeserializer.DeserializerProvider, _deserializerProvider);
         }
 
@@ -182,7 +183,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _deserializerProvider.GetODataDeserializer(type: null, request: request),
                 "type");
         }
@@ -191,7 +192,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetEdmTypeDeserializer_ThrowsArgument_EdmType()
         {
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => _deserializerProvider.GetEdmTypeDeserializer(edmType: null),
                 "edmType");
         }

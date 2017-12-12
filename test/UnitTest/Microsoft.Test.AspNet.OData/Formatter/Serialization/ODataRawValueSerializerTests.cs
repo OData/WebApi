@@ -11,6 +11,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -63,7 +64,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             get
             {
-                DateTime dt = DateTime.UtcNow;
+                // Because Xunit uses the test data for a unique Id, we'll use a stable time
+                // derived from UtcNow() to allow a test discovery pass and run work
+                // for a 24 hour period.
+                DateTime dt = DateTime.Today;
                 DateTimeOffset dto = new DateTimeOffset(dt).ToLocalTime();
                 return new TheoryDataSet<object, DateTimeOffset>
                 {
@@ -74,7 +78,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Theory]
-        [PropertyData("DateTimeTestData")]
+        [MemberData(nameof(DateTimeTestData))]
         public void SerializesDateTimeTypes(object value, DateTimeOffset expect)
         {
             // Arrange

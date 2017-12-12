@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -13,7 +14,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
     {
         [Fact]
         [Trait("Description", "ODataModelBuilder can build model without using Generic methods")]
-        public void CreateModelUsingProgrammableApi()
+        public void CreateModelusingProgrammableApi()
         {
             var builder = new ODataModelBuilder();
             var customerConfig = builder.AddEntityType(typeof(Customer));
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.True(nameProperty.Type.IsString());
             Assert.True(nameProperty.Type.IsNullable);
 
-            Assert.Equal(1, customerType.NavigationProperties().Count());
+            Assert.Single(customerType.NavigationProperties());
             var ordersProperty = customerType.NavigationProperties().Single();
             Assert.Equal("Orders", ordersProperty.Name);
             Assert.Equal(EdmTypeKind.Collection, ordersProperty.Type.Definition.TypeKind);

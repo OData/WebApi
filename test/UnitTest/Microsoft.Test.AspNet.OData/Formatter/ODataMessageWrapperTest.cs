@@ -8,6 +8,7 @@ using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -17,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void ResolveUrl_ThrowsArgumentNull_PayloadUri()
         {
             var message = new ODataMessageWrapper();
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => message.ConvertPayloadUri(new Uri("http://localhost"), null),
                 "payloadUri");
         }

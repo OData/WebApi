@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Microsoft.Test.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -47,11 +48,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
                 String.Format(CultureInfo.CurrentCulture, MaxExpandDepthExceededErrorString, maxExpansionDepth));
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }));
         }
 
@@ -82,7 +83,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             model.Model.SetAnnotationValue(customerType, querySettings);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }),
                 String.Format(CultureInfo.CurrentCulture, MaxExpandDepthExceededErrorString, maxExpansionDepth));
         }
@@ -107,7 +108,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 1;
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
@@ -116,7 +117,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
                     MaxExpandDepthExceededErrorString,
                     maxExpansionDepth));
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth + 1 }));
@@ -136,7 +137,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = 0 }));
@@ -157,7 +158,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = 4;
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = 3 }),
@@ -181,7 +182,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }));
@@ -202,7 +203,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
-            Assert.Throws<ArgumentOutOfRangeException>(
+            ExceptionAssert.Throws<ArgumentOutOfRangeException>(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
@@ -229,7 +230,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             selectExpandQueryOption.LevelsMaxLiteralExpansionDepth = levelsMaxLiteralExpansionDepth;
 
             // Act & Assert
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }));
@@ -242,7 +243,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             SelectExpandQueryValidator validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, _queryContext);
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }));
         }
 
@@ -269,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             model.Model.SetAnnotationValue(customerType, querySettings);
 
             // Act & Assert
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings { MaxExpansionDepth = 0 }));
         }
 
@@ -287,7 +288,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             string select = "Orders";
             SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(select, null, queryContext);
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 "The property 'Orders' cannot be used for navigation.");
         }
@@ -307,7 +308,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             string select = "NS.SpecialCustomer/" + propertyName;
             SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(select, null, queryContext);
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 String.Format(CultureInfo.InvariantCulture, "The property '{0}' cannot be used for navigation.", propertyName));
         }
@@ -324,7 +325,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             string expand = "Orders";
             SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 "The property 'Orders' cannot be used in the $expand query option.");
         }
@@ -350,7 +351,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             model.Model.SetAnnotationValue(customerType, querySettings);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 "The property 'Orders' cannot be used in the $expand query option.");
         }
@@ -370,7 +371,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             string expand = "NS.SpecialCustomer/" + propertyName;
             SelectExpandQueryValidator validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(queryContext);
             SelectExpandQueryOption selectExpandQueryOption = new SelectExpandQueryOption(null, expand, queryContext);
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => validator.Validate(selectExpandQueryOption, new ODataValidationSettings()),
                 String.Format(CultureInfo.InvariantCulture, "The property '{0}' cannot be used in the $expand query option.", propertyName));
         }

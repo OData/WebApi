@@ -70,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             };
         }
 
-        public override IEnumerable<object[]> GetData(MethodInfo methodUnderTest, Type[] parameterTypes)
+        public override IEnumerable<object[]> GetData(MethodInfo methodUnderTest)
         {
             IEnumerable<object[]> baseDataSet = GetBaseDataSet(DeclaringType, PropertyName, TestDataVariations);
             IEnumerable<IEnumerable<object[]>> extraDataSets = GetExtraDataSets();

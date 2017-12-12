@@ -17,6 +17,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.DataTypes;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -47,7 +48,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Fact]
         public void TypeIsCorrect()
         {
-            Assert.Type.HasProperties<TFormatter, MediaTypeFormatter>(TypeAssert.TypeProperties.IsPublicVisibleClass);
+            TypeAssert.HasProperties<TFormatter, MediaTypeFormatter>(TypeAssert.TypeProperties.IsPublicVisibleClass);
         }
 
         [Fact]
@@ -94,8 +95,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void ReadFromStreamAsync_ThrowsOnNull()
         {
             TFormatter formatter = CreateFormatter();
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
         }
 
         [Fact]
@@ -148,19 +149,19 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData(false)]
         [InlineData(0)]
         [InlineData("")]
-        public void ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
+        public async Task ReadFromStreamAsync_WhenContentLengthIsZero_ReturnsDefaultTypeValue<T>(T value)
         {
             // Arrange
             TFormatter formatter = CreateFormatter();
             HttpContent content = new StringContent("");
 
             // Act
-            var result = formatter.ReadFromStreamAsync(typeof(T), content.ReadAsStreamAsync().Result,
+            T result = (T)await formatter.ReadFromStreamAsync(typeof(T), await content.ReadAsStreamAsync(),
                 content, null);
-            result.WaitUntilCompleted();
 
             // Assert
-            Assert.Equal(default(T), (T)result.Result);
+            Assert.NotNull(value.GetType());
+            Assert.Equal(default(T), result);
         }
 
         [Fact]
@@ -176,13 +177,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
-                readTask =>
+                async readTask =>
                 {
                     // Assert
                     Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                     Assert.True(memStream.CanRead);
 
-                    var value = Assert.IsType<SampleType>(readTask.Result);
+                    var value = Assert.IsType<SampleType>(await readTask);
                     Assert.Equal(42, value.Number);
                 });
         }
@@ -200,13 +201,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Act
             return formatter.ReadFromStreamAsync(typeof(SampleType), memStream, content, null).ContinueWith(
-                readTask =>
+                async readTask =>
                 {
                     // Assert
                     Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
                     Assert.True(memStream.CanRead);
 
-                    var value = Assert.IsType<SampleType>(readTask.Result);
+                    var value = Assert.IsType<SampleType>(await readTask);
                     Assert.Equal(42, value.Number);
                 });
         }
@@ -215,8 +216,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void WriteToStreamAsync_ThrowsOnNull()
         {
             TFormatter formatter = CreateFormatter();
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(null, new object(), Stream.Null, null, null); }, "type");
-            Assert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "writeStream");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(null, new object(), Stream.Null, null, null); }, "type");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.WriteToStreamAsync(typeof(object), new object(), null, null, null); }, "writeStream");
         }
 
         [Fact]
@@ -346,10 +347,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             formatter.Verify();
         }
 
-        public abstract Task ReadFromStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
-
-        public abstract Task WriteToStreamAsync_UsesCorrectCharacterEncoding(string content, string encoding, bool isDefaultEncoding);
-
         protected virtual TFormatter CreateFormatter()
         {
             ConstructorInfo constructor = typeof(TFormatter).GetConstructor(Type.EmptyTypes);
@@ -364,103 +361,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         protected virtual MediaTypeHeaderValue CreateSupportedMediaType()
         {
             return ExpectedSupportedMediaTypes.First();
-        }
-
-        public object ReadFromStreamAsync_RoundTripsWriteToStreamAsync_Helper(MediaTypeFormatter formatter, Type variationType, object testData)
-        {
-            // Arrange
-            HttpContent content = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = content.Headers;
-            object readObj = null;
-
-            // Act & Assert
-            Assert.Stream.WriteAndRead(
-                stream =>
-                {
-                    Assert.Task.Succeeds(formatter.WriteToStreamAsync(variationType, testData, stream, content, transportContext: null));
-                    contentHeaders.ContentLength = stream.Length;
-                },
-                stream => readObj = Assert.Task.SucceedsWithResult(formatter.ReadFromStreamAsync(variationType, stream, content, formatterLogger: null)));
-
-            return readObj;
-        }
-
-        public Task ReadFromStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
-        {
-            // Arrange
-            Encoding enc = null;
-            if (isDefaultEncoding)
-            {
-                enc = formatter.SupportedEncodings.First((e) => e.WebName.Equals(encoding, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                enc = Encoding.GetEncoding(encoding);
-                formatter.SupportedEncodings.Add(enc);
-            }
-
-            byte[] data = enc.GetBytes(formattedContent);
-            MemoryStream memStream = new MemoryStream(data);
-
-            StringContent dummyContent = new StringContent(string.Empty);
-            HttpContentHeaders headers = dummyContent.Headers;
-            headers.Clear();
-            headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
-            headers.ContentLength = data.Length;
-
-            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-
-            // Act
-            return formatter.ReadFromStreamAsync(typeof(string), memStream, dummyContent, mockFormatterLogger).ContinueWith(
-                (readTask) =>
-                {
-                    string result = readTask.Result as string;
-
-                    // Assert
-                    Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
-                    Assert.Equal(content, result);
-                });
-        }
-
-        public Task WriteToStreamAsync_UsesCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
-        {
-            // Arrange
-            Encoding enc = null;
-            if (isDefaultEncoding)
-            {
-                enc = formatter.SupportedEncodings.First((e) => e.WebName.Equals(encoding, StringComparison.OrdinalIgnoreCase));
-            }
-            else
-            {
-                enc = Encoding.GetEncoding(encoding);
-                formatter.SupportedEncodings.Add(enc);
-            }
-
-            byte[] preamble = enc.GetPreamble();
-            byte[] data = enc.GetBytes(formattedContent);
-            byte[] expectedData = new byte[preamble.Length + data.Length];
-            Buffer.BlockCopy(preamble, 0, expectedData, 0, preamble.Length);
-            Buffer.BlockCopy(data, 0, expectedData, preamble.Length, data.Length);
-
-            MemoryStream memStream = new MemoryStream();
-
-            HttpContent httpContent = new StringContent(String.Empty);
-            HttpContentHeaders contentHeaders = httpContent.Headers;
-            contentHeaders.Clear();
-            contentHeaders.ContentType = MediaTypeHeaderValue.Parse(mediaType);
-            contentHeaders.ContentLength = expectedData.Length;
-
-            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
-
-            // Act
-            return formatter.WriteToStreamAsync(typeof(string), content, memStream, httpContent, null).ContinueWith(
-                (writeTask) =>
-                {
-                    // Assert
-                    Assert.Equal(TaskStatus.RanToCompletion, writeTask.Status);
-                    byte[] actualData = memStream.ToArray();
-                    Assert.Equal(expectedData, actualData);
-                });
         }
 
         public static Encoding CreateOrGetSupportedEncoding(MediaTypeFormatter formatter, string encoding, bool isDefaultEncoding)
@@ -479,17 +379,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return enc;
         }
 
-        public static Task ReadContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
+        protected static Task ReadContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
         {
             // Arrange
             Encoding enc = CreateOrGetSupportedEncoding(formatter, encoding, isDefaultEncoding);
             byte[] sourceData = enc.GetBytes(formattedContent);
 
             // Further Arrange, Act & Assert
-            return ReadContentUsingCorrectCharacterEncodingHelper(formatter, content, sourceData, mediaType);
+            return ReadContentusingCorrectCharacterEncodingHelper(formatter, content, sourceData, mediaType);
         }
 
-        public static Task ReadContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, byte[] sourceData, string mediaType)
+        protected static Task ReadContentusingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, byte[] sourceData, string mediaType)
         {
             // Arrange
             MemoryStream memStream = new MemoryStream(sourceData);
@@ -504,9 +404,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Act & Assert
             return formatter.ReadFromStreamAsync(typeof(string), memStream, dummyContent, mockFormatterLogger).ContinueWith(
-                (readTask) =>
+                async (readTask) =>
                 {
-                    string result = readTask.Result as string;
+                    string result = (await readTask) as string;
 
                     // Assert
                     Assert.Equal(TaskStatus.RanToCompletion, readTask.Status);
@@ -514,7 +414,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 });
         }
 
-        public static Task WriteContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
+        protected static Task WriteContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, string formattedContent, string mediaType, string encoding, bool isDefaultEncoding)
         {
             // Arrange
             Encoding enc = CreateOrGetSupportedEncoding(formatter, encoding, isDefaultEncoding);
@@ -526,11 +426,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Buffer.BlockCopy(data, 0, expectedData, preamble.Length, data.Length);
 
             // Further Arrange, Act & Assert
-            return WriteContentUsingCorrectCharacterEncodingHelper(formatter, content, expectedData, mediaType);
+            return WriteContentusingCorrectCharacterEncodingHelper(formatter, content, expectedData, mediaType);
         }
 
-
-        public static Task WriteContentUsingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, byte[] expectedData, string mediaType)
+        protected static Task WriteContentusingCorrectCharacterEncodingHelper(MediaTypeFormatter formatter, string content, byte[] expectedData, string mediaType)
         {
             // Arrange
             MemoryStream memStream = new MemoryStream();

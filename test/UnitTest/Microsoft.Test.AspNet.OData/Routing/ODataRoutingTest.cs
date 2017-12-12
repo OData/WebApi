@@ -16,6 +16,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -60,14 +61,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 return new TheoryDataSet<string, string, string>
                 {
                     // service document
-                    { "GET", "", null },
-                    { "GET", "?hello=goodbye", null },
-                    { "GET", "?hello= good bye", null },
-                    { "GET", "?hello= good+bye", null },
-                    { "GET", "?hello = good%20bye", null },
+                    { "GET", "", "" },
+                    { "GET", "?hello=goodbye", "" },
+                    { "GET", "?hello= good bye", "" },
+                    { "GET", "?hello= good+bye", "" },
+                    { "GET", "?hello = good%20bye", "" },
                     // metadata document
-                    { "GET", "$metadata", null },
-                    { "GET", "$metadata?hello = good%20bye", null },
+                    { "GET", "$metadata", "" },
+                    { "GET", "$metadata?hello = good%20bye", "" },
                 };
             }
         }
@@ -311,11 +312,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("ControllerRoutes")]
+        [MemberData(nameof(ControllerRoutes))]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/Products(5)",
             "DeleteRef(1)(5)(Products)")]
-        [PropertyData("MoreFunctionRouteData")]
+        [MemberData(nameof(MoreFunctionRouteData))]
         [InlineData("GET", "RoutingCustomers(11)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.id\":\"http://localhost/Products(5)\"}",
             "EntityTypeFunctionWithEntityReference(ID=5,Name=--)")]
         [InlineData("GET", "RoutingCustomers(11)/Default.CollectionEntityTypeFunction(products=@p)" +
@@ -328,7 +329,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 new HttpMethod(httpMethod), "http://localhost/" + uri));
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
         }
 
@@ -346,7 +347,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [PropertyData("ServiceAndMetadataRoutes")]
+        [MemberData(nameof(ServiceAndMetadataRoutes))]
         public async Task RoutesCorrectly_WithServiceAndMetadataRoutes(string httpMethod, string uri, string unused)
         {
             // Arrange & Act
@@ -354,13 +355,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 new HttpMethod(httpMethod), "http://localhost/" + uri));
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Theory]
-        [PropertyData("ServiceAndMetadataRoutes")]
-        [PropertyData("ControllerRoutes")]
-        [PropertyData("MoreFunctionRouteData")]
+        [MemberData(nameof(ServiceAndMetadataRoutes))]
+        [MemberData(nameof(ControllerRoutes))]
+        [MemberData(nameof(MoreFunctionRouteData))]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/MyRoot/odata/Products(5)",
             "DeleteRef(1)(5)(Products)")]
@@ -376,7 +378,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 new HttpMethod(httpMethod), "http://localhost/MyRoot/odata/" + uri));
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Theory]
@@ -388,13 +391,13 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 new HttpMethod(httpMethod), "http://localhost/MyRoot/odata/" + uri));
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Theory]
-        [PropertyData("ServiceAndMetadataRoutes")]
-        [PropertyData("ControllerRoutes")]
-        [PropertyData("MoreFunctionRouteData")]
+        [MemberData(nameof(ServiceAndMetadataRoutes))]
+        [MemberData(nameof(ControllerRoutes))]
+        [MemberData(nameof(MoreFunctionRouteData))]
         [InlineData("DELETE",
             "RoutingCustomers(1)/Products/$ref?$id=http://localhost/parameter/Products(5)",
             "DeleteRef(1)(5)(Products)")]
@@ -410,7 +413,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 new HttpMethod(httpMethod), "http://localhost/parameter/" + uri));
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            Assert.NotNull(unused);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Theory]
@@ -426,7 +430,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             HttpResponseMessage response = await _parameterizedPrefixClient.GetAsync("http://localhost/" + uri);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 
         [Theory]
@@ -440,7 +444,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectedError, responseString);
         }
 

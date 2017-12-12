@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Mock<IODataResponseMessage> mockResponseMessage = new Mock<IODataResponseMessage>();
             mockResponseMessage.Setup(response => response.GetStream()).Returns(new MemoryStream());
 
-            Assert.DoesNotThrow(() => serializer.WriteObject(error, typeof(ODataError), new ODataMessageWriter(mockResponseMessage.Object), 
+            ExceptionAssert.DoesNotThrow(() => serializer.WriteObject(error, typeof(ODataError), new ODataMessageWriter(mockResponseMessage.Object), 
                 new ODataSerializerContext()));
         }
 
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             ODataErrorSerializer serializer = new ODataErrorSerializer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: null, type: typeof(ODataError),messageWriter: null, writeContext: null),
                 "graph");
         }
@@ -41,7 +42,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             ODataErrorSerializer serializer = new ODataErrorSerializer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => serializer.WriteObject(graph: 42, type: typeof(ODataError), messageWriter: null, writeContext: null),
                 "messageWriter");
         }
@@ -50,7 +51,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_Throws_ErrorTypeMustBeODataErrorOrHttpError()
         {
             ODataErrorSerializer serializer = new ODataErrorSerializer();
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => serializer.WriteObject(42, typeof(ODataError), ODataTestUtil.GetMockODataMessageWriter(), new ODataSerializerContext()),
                 "The type 'System.Int32' is not supported by the ODataErrorSerializer. The type must be ODataError or HttpError.");
         }

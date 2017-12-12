@@ -10,13 +10,13 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -160,7 +160,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -177,7 +177,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             Assert.True(sendEmail.IsBindable);
             Assert.NotNull(sendEmail.Parameters);
-            Assert.Equal(1, sendEmail.Parameters.Count());
+            Assert.Single(sendEmail.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, sendEmail.Parameters.Single().Name);
             Assert.Equal(string.Format("Collection({0})", typeof(Customer).FullName), sendEmail.Parameters.Single().TypeConfiguration.FullName);
         }
@@ -359,7 +359,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.True(action.IsBound);
             Assert.Equal("ActionName", action.Name);
             Assert.Null(action.ReturnType);
-            Assert.Equal(1, action.Parameters.Count());
+            Assert.Single(action.Parameters);
             Assert.Equal(BindingParameterConfiguration.DefaultBindingParameterName, action.Parameters.Single().Name);
             Assert.Equal(typeof(Customer).FullName, action.Parameters.Single().Type.FullName());
         }
@@ -379,8 +379,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Assert
             IEdmEntityContainer container = model.EntityContainer;
             Assert.NotNull(container);
-            Assert.Equal(1, container.Elements.OfType<IEdmActionImport>().Count());
-            Assert.Equal(1, container.Elements.OfType<IEdmEntitySet>().Count());
+            Assert.Single(container.Elements.OfType<IEdmActionImport>());
+            Assert.Single(container.Elements.OfType<IEdmEntitySet>());
             IEdmActionImport action = container.Elements.OfType<IEdmActionImport>().Single();
             Assert.False(action.Action.IsBound);
             Assert.Equal("ActionName", action.Name);
@@ -399,7 +399,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             builder.Action("ActionName").Returns<string>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
                 "Found more than one unbound action with name 'ActionName'. " +
                 "Each unbound action must have an unique action name.");
         }
@@ -416,7 +416,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             customer.Action("ActionOnCustomer").Returns<string>();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
                 "Found more than one action with name 'ActionOnCustomer' " +
                 "bound to the same type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Customer'. " +
                 "Each bound action must have a different binding type or name.");
@@ -430,7 +430,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ActionConfiguration action = builder.Action("NoBindableAction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => action.HasActionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register an action link factory, actions must be bindable to a single entity. " +
                 "Action 'NoBindableAction' does not meet this requirement.");
@@ -445,7 +445,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ActionConfiguration action = customer.Collection.Action("CollectionAction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => action.HasActionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register an action link factory, actions must be bindable to a single entity. " +
                 "Action 'CollectionAction' does not meet this requirement.");
@@ -459,7 +459,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ActionConfiguration action = builder.Action("NoBindableAction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => action.HasFeedActionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register an action link factory, actions must be bindable to the collection of entity. " +
                 "Action 'NoBindableAction' does not meet this requirement.");
@@ -474,7 +474,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ActionConfiguration action = customer.Action("NonCollectionAction");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => action.HasFeedActionLink(ctx => new Uri("http://any"), followsConventions: false),
                 "To register an action link factory, actions must be bindable to the collection of entity. " +
                 "Action 'NonCollectionAction' does not meet this requirement.");
@@ -823,7 +823,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var action = builder.Action("action");
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => action.ReturnsFromEntitySet<Movie>(entitySetConfiguration: null),
+            ExceptionAssert.ThrowsArgumentNull(() => action.ReturnsFromEntitySet<Movie>(entitySetConfiguration: null),
                 "entitySetConfiguration");
         }
 
@@ -852,7 +852,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var action = builder.Action("action");
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => action.ReturnsCollectionFromEntitySet<Movie>(entitySetConfiguration: null),
+            ExceptionAssert.ThrowsArgumentNull(() => action.ReturnsCollectionFromEntitySet<Movie>(entitySetConfiguration: null),
                 "entitySetConfiguration");
         }
 
@@ -865,7 +865,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var action = builder.Action("action");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
                 "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsFromEntitySet' if the return type is an entity.");
         }
@@ -879,7 +879,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var action = builder.Action("action");
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
+            ExceptionAssert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
                 "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsCollectionFromEntitySet' if the return type is an entity collection.");
         }

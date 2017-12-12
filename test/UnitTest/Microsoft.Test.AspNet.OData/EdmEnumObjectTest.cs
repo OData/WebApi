@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -12,13 +13,13 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmTypeOfTypeIEdmEnumType()
         {
-            Assert.ThrowsArgumentNull(() => new TestEdmEnumObject((IEdmEnumType)null, "test"), "edmType");
+            ExceptionAssert.ThrowsArgumentNull(() => new TestEdmEnumObject((IEdmEnumType)null, "test"), "edmType");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmTypeOfTypeIEdmEnumTypeReference()
         {
-            Assert.ThrowsArgumentNull(() => new TestEdmEnumObject((IEdmEnumTypeReference)null, "test"), "type");
+            ExceptionAssert.ThrowsArgumentNull(() => new TestEdmEnumObject((IEdmEnumTypeReference)null, "test"), "type");
         }
 
         [Fact]
@@ -26,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             TestEdmEnumObject edmObject = new TestEdmEnumObject(new EdmEnumType("NS", "Enum"), "test");
 
-            Assert.Reflection.BooleanProperty(edmObject, e => e.IsNullable, expectedDefaultValue: false);
+            ReflectionAssert.BooleanProperty(edmObject, e => e.IsNullable, expectedDefaultValue: false);
         }
 
         [Fact]

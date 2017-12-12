@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -16,6 +17,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -141,25 +143,25 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Theory]
-        [PropertyData("BoundFunctionRouteData")]
-        public void FunctionWorks_WithParameters_ForUnTyped(string odataPath)
+        [MemberData(nameof(BoundFunctionRouteData))]
+        public async Task FunctionWorks_WithParameters_ForUnTyped(string odataPath)
         {
             // Arrange
             string requestUri = BaseAddress + "odata/" + odataPath;
 
             // Act
-            var response = _client.GetAsync(requestUri).Result;
+            var response = await _client.GetAsync(requestUri);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result["value"]);
         }
 
         [Theory]
-        [PropertyData("BoundFunctionRouteData")]
-        [PropertyData("UnboundFunctionRouteData")]
-        public void FunctionWorks_WithParameters_OnlyWithAttributeRouting_ForUnTyped(string odataPath)
+        [MemberData(nameof(BoundFunctionRouteData))]
+        [MemberData(nameof(UnboundFunctionRouteData))]
+        public async Task FunctionWorks_WithParameters_OnlyWithAttributeRouting_ForUnTyped(string odataPath)
         {
             // Arrange
             string requestUri = BaseAddress + "attribute/" + odataPath;
@@ -169,16 +171,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
 
             // Act
-            var response = _client.GetAsync(requestUri).Result;
+            var response = await _client.GetAsync(requestUri);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result["value"]);
         }
 
         [Fact]
-        public void Response_Includes_FunctionLinkForFeed_WithAcceptHeader()
+        public async Task Response_Includes_FunctionLinkForFeed_WithAcceptHeader()
         {
             // Arrange
             string editLink = BaseAddress + "odata/FCustomers";
@@ -187,8 +189,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            string responseString = await response.Content.ReadAsStringAsync();
             dynamic result = JObject.Parse(responseString);
             dynamic function = result["#NS.BoundToCollectionFunction"];
 

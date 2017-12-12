@@ -14,6 +14,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -31,7 +32,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, message),
                 "context", "The entity type 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
         }
@@ -46,7 +47,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEdmType elementType = EdmCoreModel.Instance.GetPrimitiveType(EdmPrimitiveTypeKind.Int32);
             ODataQueryContext context = new ODataQueryContext(model, elementType);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, message),
                 "context", "The property 'ElementClrType' of ODataQueryContext cannot be null.");
         }
@@ -147,7 +148,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "query",
                 "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
@@ -166,7 +167,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<KirklandCustomer>().AsQueryable()));
         }
 
@@ -183,7 +184,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()));
         }
 
@@ -200,7 +201,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
                 "query",
                 "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' to IQueryable of 'System.Int32'.");
@@ -219,7 +220,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<KirklandCustomer>().AsQueryable(), new ODataQuerySettings()));
         }
 
@@ -236,7 +237,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, message);
 
-            Assert.DoesNotThrow(
+            ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<Customer>().AsQueryable(), new ODataQuerySettings()));
         }
     }

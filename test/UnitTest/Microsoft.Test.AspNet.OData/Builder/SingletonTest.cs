@@ -12,6 +12,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var entityType = new Mock<EntityTypeConfiguration>().Object;
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => builder.AddSingleton(null, entityType),
+            ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton(null, entityType),
                 "The argument 'name' is null or empty.\r\nParameter name: name");
         }
 
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => builder.AddSingleton("OsCorp", entityType: null),
+            ExceptionAssert.ThrowsArgumentNull(() => builder.AddSingleton("OsCorp", entityType: null),
                 "entityType");
         }
 
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var entityType = new Mock<EntityTypeConfiguration>().Object;
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(() => builder.AddSingleton("My.Singleton", entityType),
+            ExceptionAssert.Throws<NotSupportedException>(() => builder.AddSingleton("My.Singleton", entityType),
                 "'My.Singleton' is not a valid singleton name. The singleton name cannot contain '.'.");
         }
 
@@ -63,7 +64,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var otherType = new Mock<EntityTypeConfiguration>().Object;
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => builder.AddSingleton("OsCorp", otherType),
+            ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton("OsCorp", otherType),
                 "The singleton 'OsCorp' was already configured with a different EntityType ('Company').\r\nParameter name: entityType");
         }
 
@@ -80,7 +81,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             Assert.Same(config1, config2);
-            Assert.Equal(1, builder.Singletons.Count());
+            Assert.Single(builder.Singletons);
         }
 
         [Fact]
@@ -93,7 +94,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var singletonType = builder.Singleton<Company>("OsCorp");
 
             // Assert
-            Assert.IsType(typeof(SingletonConfiguration<Company>), singletonType);
+            Assert.IsType<SingletonConfiguration<Company>>(singletonType);
             var singleton = Assert.Single(builder.Singletons);
             Assert.Equal("OsCorp", singleton.Name);
             Assert.Equal(typeof(Company), singleton.ClrType);
@@ -364,7 +365,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var myVehicle = builder.AddSingleton("MyVehicle", vehicleType);
 
             // Act & Assert
-            Assert.DoesNotThrow(() => myVehicle.AddBinding(navProperty, fordo));
+            ExceptionAssert.DoesNotThrow(() => myVehicle.AddBinding(navProperty, fordo));
         }
 
         [Fact]
@@ -382,7 +383,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var myVehicle = builder.AddSingleton("MyVehicle", vehicleType);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => myVehicle.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
                 "The declaring entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Car' of the given navigation property is not a part of the " +

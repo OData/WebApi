@@ -18,6 +18,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
@@ -50,14 +51,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         [Fact]
         public void Ctor_ThrowsArgumentNull_DeserializerProvider()
         {
-            Assert.ThrowsArgumentNull(() => new ODataResourceDeserializer(deserializerProvider: null), "deserializerProvider");
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataResourceDeserializer(deserializerProvider: null), "deserializerProvider");
         }
 
         [Fact]
         public void Read_ThrowsArgumentNull_MessageReader()
         {
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, type: typeof(Product), readContext: _readContext),
                 "messageReader");
         }
@@ -66,7 +67,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void Read_ThrowsArgumentNull_ReadContext()
         {
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: ODataTestUtil.GetMockODataMessageReader(), type: typeof(Product), readContext: null),
                 "readContext");
         }
@@ -83,7 +84,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             };
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), readContext),
                 "readContext",
                 "The operation cannot be completed because no ODataPath is available for the request.");
@@ -102,7 +103,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             };
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.Read(ODataTestUtil.GetMockODataMessageReader(), typeof(Product), readContext),
                 "The related entity set or singleton cannot be found from the OData path. The related entity set or singleton is required to deserialize the payload.");
         }
@@ -114,7 +115,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadInline(item: null, edmType: _productEdmType, readContext: new ODataDeserializerContext()),
                 "item");
         }
@@ -126,7 +127,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadInline(item: new object(), edmType: null, readContext: new ODataDeserializerContext()),
                 "edmType");
         }
@@ -138,7 +139,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => deserializer.ReadInline(item: 42, edmType: _productEdmType, readContext: new ODataDeserializerContext()),
                 "item",
                 "The argument must be of type 'ODataResource'");
@@ -170,7 +171,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadResource(resourceWrapper: null, structuredType: _productEdmType, readContext: _readContext),
                 "resourceWrapper");
         }
@@ -183,7 +184,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(new ODataResource());
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ReadResource(resourceWrapper, structuredType: _productEdmType, readContext: null),
                 "readContext");
         }
@@ -196,7 +197,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(new ODataResource { TypeName = _supplierEdmType.FullName() });
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => deserializer.ReadResource(resourceWrapper, _productEdmType, new ODataDeserializerContext()),
                 "readContext",
                 "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
@@ -210,7 +211,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper entry = new ODataResourceWrapper(new ODataResource { TypeName = "MissingType" });
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ReadResource(entry, _productEdmType, _readContext),
                 "Cannot find the resource type 'MissingType' in the model.");
         }
@@ -230,7 +231,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 });
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ReadResource(resourceWrapper, _productEdmType, new ODataDeserializerContext { Model = model }),
                 "An instance of the abstract resource type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.BaseType' was found. " +
                 "Abstract resource types cannot be instantiated.");
@@ -246,7 +247,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(new ODataResource { TypeName = _supplierEdmType.FullName() });
 
             // Act & Assert
-            Assert.Throws<SerializationException>(
+            ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.ReadResource(resourceWrapper, _productEdmType, _readContext),
                 "'ODataDemo.Supplier' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
@@ -515,7 +516,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             // Verify the dynamic properties
             Assert.NotNull(customer.CustomerProperties);
-            Assert.Equal(1, customer.CustomerProperties.Count());
+            Assert.Single(customer.CustomerProperties);
             Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), customer.CustomerProperties["GuidProperty"]);
         }
 
@@ -573,7 +574,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.CreateResourceInstance(_productEdmType, readContext: null),
                 "readContext");
         }
@@ -585,7 +586,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => deserializer.CreateResourceInstance(_productEdmType, new ODataDeserializerContext()),
                 "readContext",
                 "The EDM model is missing on the read context. The model is required on the read context to deserialize the payload.");
@@ -598,7 +599,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.CreateResourceInstance(_productEdmType, new ODataDeserializerContext { Model = EdmCoreModel.Instance }),
                 "The provided mapping does not contain a resource for the resource type 'ODataDemo.Product'.");
         }
@@ -698,7 +699,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyNestedProperties(42, resourceWrapper: null, structuredType: _productEdmType, readContext: _readContext),
                 "resourceWrapper");
         }
@@ -730,7 +731,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper: null, structuredType: _productEdmType,
                     readContext: _readContext),
                 "resourceInfoWrapper");
@@ -744,7 +745,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo());
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyNestedProperty(resource: null, resourceInfoWrapper: resourceInfoWrapper,
                     structuredType: _productEdmType, readContext: _readContext),
                 "resource");
@@ -758,7 +759,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "SomeProperty" });
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext),
                 "Cannot find nested property 'SomeProperty' on the resource type 'ODataDemo.Product'.");
         }
@@ -773,7 +774,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             _readContext.ResourceType = typeof(Delta<Supplier>);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext),
                 "Cannot apply PATCH to navigation property 'Supplier' on entity type 'ODataDemo.Product'.");
         }
@@ -788,7 +789,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             _readContext.ResourceType = typeof(Delta<Supplier>);
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _supplierEdmType, _readContext),
                 "Cannot apply PATCH to navigation property 'Products' on entity type 'ODataDemo.Supplier'.");
         }
@@ -819,7 +820,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 .ApplyNestedProperty(customer, resourceInfoWrapper, model.Customer.AsReference(), context);
 
             // Assert
-            Assert.Equal(1, customer.AliasedOrders.Count());
+            Assert.Single(customer.AliasedOrders);
             Assert.Equal(42, customer.AliasedOrders[0].ID);
         }
 
@@ -847,7 +848,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 .ApplyNestedProperty(order, resourceInfoWrapper, model.Order.AsReference(), context);
 
             // Assert
-            Assert.Equal(order.AliasedCustomer.ID, 42);
+            Assert.Equal(42, order.AliasedCustomer.ID);
         }
 
         [Fact]
@@ -857,7 +858,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyStructuralProperties(42, resourceWrapper: null, structuredType: _productEdmType, readContext: _readContext),
                 "resourceWrapper");
         }
@@ -885,7 +886,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void ApplyStructuralProperty_ThrowsArgumentNull_Resource()
         {
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyStructuralProperty(resource: null, structuralProperty: new ODataProperty(),
                     structuredType: _productEdmType, readContext: _readContext),
                 "resource");
@@ -895,7 +896,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void ApplyStructuralProperty_ThrowsArgumentNull_StructuralProperty()
         {
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.ApplyStructuralProperty(42, structuralProperty: null, structuredType: _productEdmType, readContext: _readContext),
                 "structuralProperty");
         }
@@ -927,9 +928,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 typeof(Product), _readContext) as Product;
 
             // Assert
-            Assert.Equal(product.ID, 0);
-            Assert.Equal(product.Rating, 4);
-            Assert.Equal(product.Price, 2.5m);
+            Assert.Equal(0, product.ID);
+            Assert.Equal(4, product.Rating);
+            Assert.Equal(2.5m, product.Price);
             Assert.Equal(product.ReleaseDate, new DateTimeOffset(new DateTime(1992, 1, 1, 0, 0, 0), TimeSpan.Zero));
             Assert.Equal(product.PublishDate, new Date(1997, 7, 1));
             Assert.Null(product.DiscontinuedDate);
@@ -954,7 +955,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 typeof(Supplier), readContext) as Supplier;
 
             // Assert
-            Assert.Equal(supplier.Name, "Supplier Name");
+            Assert.Equal("Supplier Name", supplier.Name);
 
             Assert.NotNull(supplier.Products);
             Assert.Equal(6, supplier.Products.Count);
@@ -988,7 +989,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             Assert.NotNull(supplier);
             Assert.Equal(supplier.GetChangedPropertyNames(), new string[] { "ID", "Name", "Address" });
 
-            Assert.Equal((supplier as dynamic).Name, "Supplier Name");
+            Assert.Equal("Supplier Name", (supplier as dynamic).Name);
             Assert.Equal("Supplier City", (supplier as dynamic).Address.City);
             Assert.Equal("123456", (supplier as dynamic).Address.ZipCode);
         }
@@ -1001,7 +1002,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceDeserializer deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+            ExceptionAssert.Throws<ODataException>(() => deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
                 typeof(Product), _readContext), "The property 'Concurrency' does not exist on type 'ODataDemo.Product'. Make sure to only use property names that are defined by the type or mark the type as open type.");
         }
 

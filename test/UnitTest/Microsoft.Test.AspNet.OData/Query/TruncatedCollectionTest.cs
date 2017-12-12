@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -11,13 +12,13 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void Ctor_ThrowsArgumentNull_Collection()
         {
-            Assert.ThrowsArgumentNull(() => new TruncatedCollection<int>(source: null, pageSize: 10), "source");
+            ExceptionAssert.ThrowsArgumentNull(() => new TruncatedCollection<int>(source: null, pageSize: 10), "source");
         }
 
         [Fact]
         public void Ctor_ThrowsArgumentGreater_Collection()
         {
-            Assert.ThrowsArgumentGreaterThanOrEqualTo(
+            ExceptionAssert.ThrowsArgumentGreaterThanOrEqualTo(
                 () => new TruncatedCollection<int>(source: new int[0], pageSize: 0), "pageSize", "1", "0");
         }
 

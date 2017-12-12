@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData;
@@ -15,8 +16,8 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -35,17 +36,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsNothing_EqualZero()
+        public async Task Levels_ExpandsNothing_EqualZero()
         {
             // Arrange
             string uri = "LevelsEntities?$expand=Parent($levels=0)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken entities = result["value"];
             Assert.Equal(10, entities.Count());
             AssertEntity(entities[0], 1);
@@ -55,17 +56,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Throws_ExcceedsMaxExpandLevel()
+        public async Task Levels_Throws_ExcceedsMaxExpandLevel()
         {
             // Arrange
             string uri = "LevelsEntities?$expand=Parent($levels=20)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-            string result = response.Content.ReadAsStringAsync().Result;
+            string result = await response.Content.ReadAsStringAsync();
             Assert.Equal(
                 "The query specified in the URI is not valid. The request includes a $expand path which is too deep. " +
                 "The maximum depth allowed is 5. To increase the limit, set the 'MaxExpansionDepth' property on " +
@@ -74,17 +75,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsAllLevels_DollarLevelEqualToActualLevel()
+        public async Task Levels_ExpandsAllLevels_DollarLevelEqualToActualLevel()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=5)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             // Level 1
             AssertEntity(result["Parent"], 5);
             // Level 2
@@ -100,17 +101,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsToNull_DollarLevelGreaterThanActualLevel()
+        public async Task Levels_ExpandsToNull_DollarLevelGreaterThanActualLevel()
         {
             // Arrange
             string uri = "LevelsEntities?$expand=Parent($levels=5)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken entities = result["value"];
             // Level 1
             AssertDerivedEntity(entities[2]["Parent"], 2);
@@ -121,17 +122,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsToLevels_DollarLevelLessThanActualLevel()
+        public async Task Levels_ExpandsToLevels_DollarLevelLessThanActualLevel()
         {
             // Arrange
             string uri = "LevelsEntities(5)?$expand=Parent($levels=2)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 4);
             // Level 2
@@ -141,17 +142,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_MaxDollarLevel()
+        public async Task Levels_Works_MaxDollarLevel()
         {
             // Arrange
             string uri = "LevelsEntities(5)?$expand=Parent($levels=max)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 4);
             // Level 2
@@ -165,17 +166,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsToLevels_LoopExists()
+        public async Task Levels_ExpandsToLevels_LoopExists()
         {
             // Arrange
             string uri = "LevelsEntities(9)?$expand=Parent($expand=Parent($levels=2))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 10);
             // Level 2
@@ -187,17 +188,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_ExpandsToMaxExpandLevel_LoopExists()
+        public async Task Levels_ExpandsToMaxExpandLevel_LoopExists()
         {
             // Arrange
             string uri = "LevelsEntities(9)?$expand=Parent($levels=max)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 10);
             // Level 2
@@ -213,22 +214,22 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_ExpandsBaseTypeProperty()
+        public async Task Levels_Works_ExpandsBaseTypeProperty()
         {
             // Arrange
             string uri = "LevelsEntities(2)?$expand=BaseEntities($levels=3)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken baseEntities = result["BaseEntities"];
             Assert.Equal(2, baseEntities.Count());
             // Level 1
             AssertEntity(baseEntities[0], 1);
-            Assert.Equal(1, baseEntities[0]["BaseEntities"].Count());
+            Assert.Single(baseEntities[0]["BaseEntities"]);
             // Level 2
             AssertEntity(baseEntities[0]["BaseEntities"][0], 11);
             // No further expanding
@@ -240,17 +241,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_ExpandsDerivedTypeProperty()
+        public async Task Levels_Works_ExpandsDerivedTypeProperty()
         {
             // Arrange
             string uri = "LevelsEntities(5)?$expand=DerivedAncestors($levels=3)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken derivedEntities = result["DerivedAncestors"];
             Assert.Equal(2, derivedEntities.Count());
             // Level 1
@@ -260,24 +261,24 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Level 1
             AssertDerivedEntity(derivedEntities[1], 4);
             // Level 2
-            Assert.Equal(1, derivedEntities[1]["DerivedAncestors"].Count());
+            Assert.Single(derivedEntities[1]["DerivedAncestors"]);
             AssertDerivedEntity(derivedEntities[1]["DerivedAncestors"][0], 2);
             // Level 3
             AssertDerivedEntity(derivedEntities[1]["DerivedAncestors"][0]["DerivedAncestors"][0], 4);
         }
 
         [Fact]
-        public void Levels_Works_WithTypeCast()
+        public async Task Levels_Works_WithTypeCast()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Microsoft.Test.AspNet.OData.Routing.LevelsDerivedEntity/AncestorsInDerivedEntity($levels=2)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken derivedEntities = result["AncestorsInDerivedEntity"];
             Assert.Equal(5, derivedEntities.Count());
             // Level 1
@@ -287,7 +288,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Level 1
             AssertDerivedEntity(derivedEntities[1], 2);
             // Level 2
-            Assert.Equal(1, derivedEntities[1]["AncestorsInDerivedEntity"].Count());
+            Assert.Single(derivedEntities[1]["AncestorsInDerivedEntity"]);
             AssertEntity(derivedEntities[1]["AncestorsInDerivedEntity"][0], 1);
             // No further expanding.
             Assert.Null(derivedEntities[1]["AncestorsInDerivedEntity"][0]["AncestorsInDerivedEntity"]);
@@ -313,17 +314,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_AppliesSameSelectForEachLevel()
+        public async Task Levels_AppliesSameSelectForEachLevel()
         {
             // Arrange
             string uri = "LevelsEntities(5)?$select=ID&$expand=Parent($levels=2;$select=Name)";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             Assert.Equal(5, result["ID"]);
             Assert.Null(result["Name"]);
             // Level 1
@@ -338,17 +339,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithNestedLevels()
+        public async Task Levels_Works_WithNestedLevels()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=2;$expand=DerivedAncestors($levels=2))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
             // Level 1
             AssertEntity(parent, 5);
@@ -368,24 +369,24 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // No further expanding.
             Assert.Null(parent["DerivedAncestors"][1]["DerivedAncestors"][0]["DerivedAncestors"]);
             // Level 1
-            Assert.Equal(1, parent["Parent"]["DerivedAncestors"].Count());
+            Assert.Single(parent["Parent"]["DerivedAncestors"]);
             AssertDerivedEntity(parent["Parent"]["DerivedAncestors"][0], 2);
             // Level 2
-            Assert.Equal(1, parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"].Count());
+            Assert.Single(parent["Parent"]["DerivedAncestors"][0]["DerivedAncestors"]);
         }
 
         [Fact]
-        public void Levels_Works_WithMaxLevelInNestedExpand()
+        public async Task Levels_Works_WithMaxLevelInNestedExpand()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=3;$expand=DerivedAncestors($levels=max))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
             
             // Level 3
@@ -403,17 +404,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithMaxLevelInEveryExpand()
+        public async Task Levels_Works_WithMaxLevelInEveryExpand()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=max))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             // Level 5
@@ -434,21 +435,21 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_SelectWithNestedMaxLevels()
+        public async Task Levels_Works_SelectWithNestedMaxLevels()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($select=ID;$levels=3;$expand=DerivedAncestors($levels=max;$select=DerivedName))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             // Level 3
-            Assert.Equal(parent["Parent"]["Parent"]["ID"], 3);
+            Assert.Equal(3, parent["Parent"]["Parent"]["ID"]);
             Assert.Null(parent["Parent"]["Parent"]["Name"]);
             // No furthur expanding for "Parent"
             Assert.Null(parent["Parent"]["Parent"]["Parent"]);
@@ -466,17 +467,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithMaxOptionInOuterExpand()
+        public async Task Levels_Works_WithMaxOptionInOuterExpand()
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
@@ -485,17 +486,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithMultiParallelExpand() 
+        public async Task Levels_Works_WithMultiParallelExpand() 
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2),BaseEntities($levels=3))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 2, "BaseEntities" => 3, "DerivedAncestors" => 2
@@ -508,17 +509,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithMaxLevelInMultiParallelExpand() 
+        public async Task Levels_Works_WithMaxLevelInMultiParallelExpand() 
         {
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2),BaseEntities($levels=max))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 3, "BaseEntities" => 2, "DerivedAncestors" => 2
@@ -535,17 +536,17 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Fact]
-        public void Levels_Works_WithMultiLevelsExpand()
+        public async Task Levels_Works_WithMultiLevelsExpand()
         { 
             // Arrange
             string uri = "LevelsEntities(6)?$expand=Parent($levels=max;$expand=DerivedAncestors($levels=2;$expand=BaseEntities($levels=max)))";
 
             // Act
-            HttpResponseMessage response = _client.GetAsync("http://localhost/odata/" + uri).Result;
+            HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = response.Content.ReadAsAsync<JObject>().Result;
+            JObject result = await response.Content.ReadAsAsync<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 3, "DerivedAncestors" => 2, max("BaseEntities") => 1

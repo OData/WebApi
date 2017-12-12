@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -28,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Resource) { CallBase = true };
 
             // Act & Assert
-            Assert.Throws<NotSupportedException>(
+            ExceptionAssert.Throws<NotSupportedException>(
                 () => deserializer.Object.Read(messageReader: null, type: null, readContext: null),
                 "'ODataDeserializerProxy' does not support Read.");
         }

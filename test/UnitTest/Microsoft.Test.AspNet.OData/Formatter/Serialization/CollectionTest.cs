@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -29,29 +30,29 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ArrayOfIntsSerializesAsOData()
+        public async Task ArrayOfIntsSerializesAsOData()
         {
             // Arrange
             ObjectContent<int[]> content = new ObjectContent<int[]>(new int[] { 10, 20, 30, 40, 50 }, _formatter,
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(Resources.ArrayOfInt32, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.ArrayOfInt32, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ArrayOfBooleansSerializesAsOData()
+        public async Task ArrayOfBooleansSerializesAsOData()
         {
             // Arrange
             ObjectContent<bool[]> content = new ObjectContent<bool[]>(new bool[] { true, false, true, false },
                 _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(Resources.ArrayOfBoolean, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.ArrayOfBoolean, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfStringsSerializesAsOData()
+        public async Task ListOfStringsSerializesAsOData()
         {
             // Arrange
             List<string> listOfStrings = new List<string>();
@@ -64,11 +65,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(Resources.ListOfString, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(Resources.ListOfString, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfDatesSerializesAsOData()
+        public async Task ListOfDatesSerializesAsOData()
         {
             // Arrange
             const string expect =
@@ -87,11 +88,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(expect, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfNullableDatesSerializesAsOData()
+        public async Task ListOfNullableDatesSerializesAsOData()
         {
             // Arrange
             const string expect =
@@ -111,11 +112,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(expect, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfTimeOfDaysSerializesAsOData()
+        public async Task ListOfTimeOfDaysSerializesAsOData()
         {
             // Arrange
             const string expect =
@@ -134,11 +135,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(expect, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfNullableTimeOfDaysSerializesAsOData()
+        public async Task ListOfNullableTimeOfDaysSerializesAsOData()
         {
             // Arrange
             const string expect =
@@ -158,11 +159,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(expect, await content.ReadAsStringAsync());
         }
 
         [Fact]
-        public void ListOfDateTimeSerializesAsOData()
+        public async Task ListOfDateTimeSerializesAsOData()
         {
             // Arrange
             DateTime dt1 = new DateTime(1978, 11, 15, 01, 12, 13, DateTimeKind.Local);
@@ -173,7 +174,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            dynamic result = JObject.Parse(content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await content.ReadAsStringAsync());
 
             Assert.Equal(2, result["value"].Count);
             DateTimeOffset dto = (DateTimeOffset)result["value"][0];
@@ -184,7 +185,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ListOfNullableDateTimeSerializesAsOData()
+        public async Task ListOfNullableDateTimeSerializesAsOData()
         {
             // Arrange
             DateTime dt1 = new DateTime(1978, 11, 15, 01, 12, 13, DateTimeKind.Local);
@@ -195,7 +196,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            dynamic result = JObject.Parse(content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await content.ReadAsStringAsync());
 
             Assert.Equal(3, result["value"].Count);
             DateTimeOffset? dto = (DateTimeOffset?)result["value"][0];
@@ -209,7 +210,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         }
 
         [Fact]
-        public void ListOfDateTimeSerializesAsOData_CustomTimeZone()
+        public async Task ListOfDateTimeSerializesAsOData_CustomTimeZone()
         {
             // Arrange
             const string expect =
@@ -229,7 +230,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
 
             // Act & Assert
-            JsonAssert.Equal(expect, content.ReadAsStringAsync().Result);
+            JsonAssert.Equal(expect, await content.ReadAsStringAsync());
         }
 
         private static HttpRequestMessage GetSampleRequest()

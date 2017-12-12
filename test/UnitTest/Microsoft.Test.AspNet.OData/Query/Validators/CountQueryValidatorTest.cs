@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void Validate_Throws_NullOption()
         {
             // Arrange & Act & Assert
-            Assert.Throws<ArgumentNullException>(() =>
+            ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(null, new ODataValidationSettings()));
         }
 
@@ -34,7 +35,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var option = new CountQueryOption("Name eq 'abc'", context);
 
             // Act & Assert
-            Assert.Throws<ArgumentNullException>(() => _validator.Validate(option, null));
+            ExceptionAssert.Throws<ArgumentNullException>(() => _validator.Validate(option, null));
         }
 
         [Theory]
@@ -65,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             var settings = new ODataValidationSettings();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => _validator.Validate(option, settings), message);
+            ExceptionAssert.Throws<InvalidOperationException>(() => _validator.Validate(option, settings), message);
         }
 
         private static IEdmModel GetEdmModel()

@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -33,49 +34,49 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Property_ResourceInstance_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.ResourceInstance, null, allowNull: true, roundTripTestValue: _entityInstance);
+            ReflectionAssert.Property(_context, (c) => c.ResourceInstance, null, allowNull: true, roundTripTestValue: _entityInstance);
         }
 
         [Fact]
         public void Property_EdmModel_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.EdmModel, null, allowNull: true, roundTripTestValue: EdmCoreModel.Instance);
+            ReflectionAssert.Property(_context, (c) => c.EdmModel, null, allowNull: true, roundTripTestValue: EdmCoreModel.Instance);
         }
 
         [Fact]
         public void Property_NavigationSource_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.NavigationSource, null, allowNull: true, roundTripTestValue: new Mock<IEdmEntitySet>().Object);
+            ReflectionAssert.Property(_context, (c) => c.NavigationSource, null, allowNull: true, roundTripTestValue: new Mock<IEdmEntitySet>().Object);
         }
 
         [Fact]
         public void Property_StructuredType_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.StructuredType, null, allowNull: true, roundTripTestValue: _entityType);
+            ReflectionAssert.Property(_context, (c) => c.StructuredType, null, allowNull: true, roundTripTestValue: _entityType);
         }
 
         [Fact]
         public void Property_Request_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.Request, null, allowNull: true, roundTripTestValue: new HttpRequestMessage());
+            ReflectionAssert.Property(_context, (c) => c.Request, null, allowNull: true, roundTripTestValue: new HttpRequestMessage());
         }
 
         [Fact]
         public void Property_SerializerContext_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.SerializerContext, _context.SerializerContext, allowNull: true, roundTripTestValue: new ODataSerializerContext());
+            ReflectionAssert.Property(_context, (c) => c.SerializerContext, _context.SerializerContext, allowNull: true, roundTripTestValue: new ODataSerializerContext());
         }
 
         [Fact]
         public void Property_SkipExpensiveAvailabilityChecks_RoundTrips()
         {
-            Assert.Reflection.BooleanProperty(_context, (c) => c.SkipExpensiveAvailabilityChecks, false);
+            ReflectionAssert.BooleanProperty(_context, (c) => c.SkipExpensiveAvailabilityChecks, false);
         }
 
         [Fact]
         public void Property_Url_RoundTrips()
         {
-            Assert.Reflection.Property(_context, (c) => c.Url, null, allowNull: true, roundTripTestValue: new UrlHelper(new HttpRequestMessage()));
+            ReflectionAssert.Property(_context, (c) => c.Url, null, allowNull: true, roundTripTestValue: new UrlHelper(new HttpRequestMessage()));
         }
 
         [Fact]
@@ -88,7 +89,7 @@ namespace Microsoft.Test.AspNet.OData
             ResourceContext instanceContext = new ResourceContext(_serializerContext, entityType, edmObject.Object);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("NotPresentProperty"),
                 "The EDM instance of type '[NS.Name Nullable=False]' is missing the property 'NotPresentProperty'.");
         }
@@ -100,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData
             ResourceContext instanceContext = new ResourceContext();
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => instanceContext.GetPropertyValue("SomeProperty"),
                 "The property 'EdmObject' of ResourceContext cannot be null.");
         }
@@ -117,9 +118,8 @@ namespace Microsoft.Test.AspNet.OData
             context.EdmObject = mock.Object;
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() => context.GetPropertyValue("SomeProperty"),
-                exceptionMessage: "The EDM type of the object of type 'Castle.Proxies.IEdmEntityObjectProxy' is null. " +
-                "The EDM type of an IEdmObject cannot be null.");
+            ExceptionAssert.Throws<InvalidOperationException>(() => context.GetPropertyValue("SomeProperty"),
+                "The EDM type of an IEdmObject cannot be null.", partialMatch: true);
             mock.Verify();
         }
 
@@ -263,7 +263,7 @@ namespace Microsoft.Test.AspNet.OData
             ResourceContext entityContext = new ResourceContext { StructuredType = entityType, EdmModel = model, EdmObject = instance };
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => entityContext.ResourceInstance, "The provided mapping does not contain a resource for the resource type 'NS.Name'.");
         }
 

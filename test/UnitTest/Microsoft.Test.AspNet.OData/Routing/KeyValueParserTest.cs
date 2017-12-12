@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [Fact]
         public void ParseKeys_ThrowsODataException_UnterminatedStringLiteral()
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys("id1='123"),
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys("id1='123"),
                 "Unterminated string literal at 4 in segment 'id1='123'.");
         }
 
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("id1=123,id2=12''3", "The literal '12''3' has a bad format in segment 'id1=123,id2=12''3'.")]
         public void ParseKeys_ThrowsODataException_HasABadFormatForSingleQuote(string segment, string expectedError)
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
         [Theory]
@@ -58,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("id=1,'='", "No key name was found at 5 in segment 'id=1,'=''.")]
         public void ParseKeys_ThrowsODataException_SegmentHasNoKeyName(string segment, string expectedError)
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
         [Theory]
@@ -67,7 +68,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("id1=1,id2= ", "No value for key 'id2' was found at 10 in segment 'id1=1,id2= '.")]
         public void ParseKeys_ThrowsODataException_NoValueWasFound(string segment, string expectedError)
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
         [Theory]
@@ -76,13 +77,13 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("id1=123,id2=123''abc''", "The count of single quotes in non-string literal '123''abc''' must be 0 or 2 in segment 'id1=123,id2=123''abc'''.")]
         public void ParseKeys_ThrowsODataException_InvalidCountOfSingleQuoteForNonStringLiteral(string segment, string expectedError)
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys(segment), expectedError);
         }
 
         [Fact]
         public void ParseKeys_ThrowsODataException_DuplicateKey()
         {
-            Assert.Throws<ODataException>(() => KeyValueParser.ParseKeys("id=1,id=2"),
+            ExceptionAssert.Throws<ODataException>(() => KeyValueParser.ParseKeys("id=1,id=2"),
                 "Duplicate key 'id' found in segment 'id=1,id=2'.");
         }
     }

@@ -3,7 +3,7 @@
 
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Query.Expressions;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {

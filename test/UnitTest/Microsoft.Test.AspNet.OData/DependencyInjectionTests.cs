@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -12,8 +13,8 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.Test.AspNet.OData
@@ -21,7 +22,7 @@ namespace Microsoft.Test.AspNet.OData
     public class DependencyInjectionTests
     {
         [Fact]
-        public void CanAccessContainer_InODataController()
+        public async Task CanAccessContainer_InODataController()
         {
             // Arrange
             const string Uri = "http://localhost/odata/DependencyInjectionModels";
@@ -30,12 +31,12 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = GetClient(instance);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(Uri).Result;
+            HttpResponseMessage response = await client.GetAsync(Uri);
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.Equal("http://localhost/odata/$metadata#DependencyInjectionModels/$entity", result["@odata.context"]);
             Assert.Equal(randomId, result["Id"]);
         }

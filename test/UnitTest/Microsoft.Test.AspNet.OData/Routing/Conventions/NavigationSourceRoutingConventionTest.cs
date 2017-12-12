@@ -7,6 +7,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
@@ -20,7 +21,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new MockNavigationSourceRoutingConvention().SelectController(null, request.Object),
                 "odataPath");
         }
@@ -33,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new MockNavigationSourceRoutingConvention().SelectController(odataPath, null),
                 "request");
         }

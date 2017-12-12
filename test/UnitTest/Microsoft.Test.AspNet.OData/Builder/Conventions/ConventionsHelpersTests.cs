@@ -11,6 +11,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 {
@@ -121,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             var properties = ConventionsHelpers.GetAllProperties(edmType.Object, includeReadOnly: true).Select(p => p.Name);
 
-            Assert.Equal(1, properties.Count());
+            Assert.Single(properties);
             Assert.Equal("NestProperty", properties.First());
         }
 
@@ -163,7 +164,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var ignoredProperties = derivedEntity.Object.IgnoredProperties();
 
             // Assert
-            Assert.Equal(1, ignoredProperties.Count());
+            Assert.Single(ignoredProperties);
             Assert.Contains("IgnoredBaseProperty", ignoredProperties.Select(p => p.Name));
         }
 
@@ -185,7 +186,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         }
 
         [Theory]
-        [PropertyData("GetEntityKeyValue_SingleKey_DifferentDataTypes_Data")]
+        [MemberData(nameof(GetEntityKeyValue_SingleKey_DifferentDataTypes_Data))]
         public void GetEntityKeyValue_SingleKey_DifferentDataTypes(object value, object expectedValue)
         {
             // Arrange
@@ -251,7 +252,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             ResourceContext entityContext = new ResourceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => ConventionsHelpers.GetEntityKeyValue(entityContext),
                 "Key property 'Key' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
@@ -269,7 +270,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             ResourceContext entityContext = new ResourceContext(_writeContext, entityType.AsReference(), entityInstance);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => ConventionsHelpers.GetEntityKeyValue(entityContext),
                 "Key property 'Key3' of type 'NS.Name' is null. Key properties cannot have null values.");
         }
@@ -333,7 +334,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         }
 
         [Theory]
-        [PropertyData("GetUriRepresentationForValue_DataSet")]
+        [MemberData(nameof(GetUriRepresentationForValue_DataSet))]
         public void GetUriRepresentationForValue_Works(object value, string result)
         {
             Assert.Equal(

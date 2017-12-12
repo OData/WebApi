@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -20,6 +21,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Newtonsoft.Json.Linq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -48,72 +50,72 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         [Fact]
-        public void Action_Can_Return_Entity_In_Inheritance()
+        public async Task Action_Can_Return_Entity_In_Inheritance()
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest("http://localhost/GetMotorcycleAsVehicle");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateMotorcycle(result);
         }
 
         [Fact]
-        public void Action_Can_Return_Car_As_vehicle()
+        public async Task Action_Can_Return_Car_As_vehicle()
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest("http://localhost/GetCarAsVehicle");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateCar(result);
         }
 
         [Fact]
-        public void Action_Can_Return_ClrType_NotInModel()
+        public async Task Action_Can_Return_ClrType_NotInModel()
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest("http://localhost/GetSportBikeAsVehicle");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateSportbike(result);
         }
 
         [Fact]
-        public void Action_Can_Return_CollectionOfEntities()
+        public async Task Action_Can_Return_CollectionOfEntities()
         {
             // Arrange
             HttpRequestMessage request = GetODataRequest("http://localhost/GetVehicles");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateMotorcycle(result.value[0]);
             ValidateCar(result.value[1]);
             ValidateSportbike(result.value[2]);
         }
 
         [Fact]
-        public void Action_Can_Take_Entity_In_Inheritance()
+        public async Task Action_Can_Take_Entity_In_Inheritance()
         {
             // Arrange
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
+            Stream body = await GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Motorcycle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
@@ -122,17 +124,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateMotorcycle(result);
         }
 
         [Fact]
-        public void Can_Patch_Entity_In_Inheritance()
+        public async Task Can_Patch_Entity_In_Inheritance()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle");
@@ -142,20 +144,20 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.False((bool)result.CanDoAWheelie);
         }
 
         [Fact]
-        public void Can_Post_DerivedType_To_Action_Expecting_BaseType()
+        public async Task Can_Post_DerivedType_To_Action_Expecting_BaseType()
         {
             // Arrange
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
+            Stream body = await GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
@@ -164,20 +166,20 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateMotorcycle(result);
         }
 
         [Fact]
-        public void Can_Post_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
+        public async Task Can_Post_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
         {
             // Arrange
-            Stream body = GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json;odata.metadata=minimal");
+            Stream body = await GetResponseStream("http://localhost/GetMotorcycleAsVehicle", "application/json;odata.metadata=minimal");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/PostMotorcycle_When_Expecting_Vehicle");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
@@ -186,17 +188,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             ValidateMotorcycle(result);
         }
 
         [Fact]
-        public void Can_Patch_DerivedType_To_Action_Expecting_BaseType()
+        public async Task Can_Patch_DerivedType_To_Action_Expecting_BaseType()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
@@ -206,17 +208,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.False((bool)result.CanDoAWheelie);
         }
 
         [Fact]
-        public void Can_Patch_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
+        public async Task Can_Patch_DerivedType_To_Action_Expecting_BaseType_ForJsonLight()
         {
             //Arrange
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Vehicle");
@@ -226,22 +228,22 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal");
 
             // Act
-            HttpResponseMessage response = _client.SendAsync(request).Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
 
             // Assert
-            response.EnsureSuccessStatusCode();
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
-            dynamic result = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.False((bool)result.CanDoAWheelie);
         }
 
         [Fact]
-        public void Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
+        public async Task Posting_NonDerivedType_To_Action_Expecting_BaseType_Throws()
         {
             // Arrange
             StringContent content = new StringContent("{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' }");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            IODataRequestMessage oDataRequest = ODataMessageWrapperHelper.Create(content.ReadAsStreamAsync().Result, content.Headers);
+            IODataRequestMessage oDataRequest = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), content.Headers);
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
 
             ODataDeserializerProvider deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
@@ -256,21 +258,21 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             context.Path = new ODataPath(new OperationImportSegment(new[] { action }, actionEntitySet, null));
 
             // Act & Assert
-            Assert.Throws<ODataException>(
+            ExceptionAssert.Throws<ODataException>(
                 () => new ODataResourceDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
                 "An resource with type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' was found, " +
                 "but it is not assignable to the expected type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Car'. " +
                 "The type specified in the resource must be equal to either the expected type or a derived type.");
         }
 
-        private Stream GetResponseStream(string uri, string contentType)
+        private async Task<Stream> GetResponseStream(string uri, string contentType)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(contentType));
             AddRequestInfo(request);
-            HttpResponseMessage response = _client.SendAsync(request).Result;
-            response.EnsureSuccessStatusCode();
-            Stream stream = response.Content.ReadAsStreamAsync().Result;
+            HttpResponseMessage response = await _client.SendAsync(request);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            Stream stream = await response.Content.ReadAsStreamAsync();
 
             return stream;
         }
@@ -281,7 +283,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal("sample motorcycle", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);
-            Assert.Equal(true, (bool)result.CanDoAWheelie);
+            Assert.True((bool)result.CanDoAWheelie);
         }
 
         private static void ValidateCar(dynamic result)
@@ -299,7 +301,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal("sample sportsbike", (string)result.Name);
             Assert.Equal("2009", (string)result.Model);
             Assert.Equal(2, (int)result.WheelCount);
-            Assert.Equal(true, (bool)result.CanDoAWheelie);
+            Assert.True((bool)result.CanDoAWheelie);
             Assert.Null(result.SportBikeProperty_NotVisible);
         }
 
@@ -382,7 +384,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         private static string GetODataPath(string url)
         {
             string serverBaseUri = "http://localhost/";
-            Assert.True(url.StartsWith(serverBaseUri)); // Guard
+            Assert.StartsWith(serverBaseUri, url); // Guard
             return url.Substring(serverBaseUri.Length);
         }
     }

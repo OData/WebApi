@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -12,7 +13,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_EntityTypeReference()
         {
-            Assert.ThrowsArgumentNull(() => new EdmDeltaCollectionType((IEdmTypeReference)null), "entityTypeReference");
+            ExceptionAssert.ThrowsArgumentNull(() => new EdmDeltaCollectionType((IEdmTypeReference)null), "entityTypeReference");
         }
 
 

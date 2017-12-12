@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
@@ -23,6 +24,7 @@ using Microsoft.Test.AspNet.OData.Query.Validators;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Newtonsoft.Json.Linq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
@@ -176,7 +178,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void ConstructorNullContextThrows()
         {
-            Assert.Throws<ArgumentNullException>(
+            ExceptionAssert.Throws<ArgumentNullException>(
                 () => new ODataQueryOptions(null, new HttpRequestMessage())
             );
         }
@@ -185,7 +187,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void ConstructorNullRequestThrows()
         {
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
-            Assert.Throws<ArgumentNullException>(
+            ExceptionAssert.Throws<ArgumentNullException>(
                 () => new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), null)
             );
         }
@@ -207,7 +209,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message),
+            ExceptionAssert.Throws<ODataException>(() => new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message),
                 "The value for OData query '" + queryName + "' cannot be empty.");
         }
 
@@ -254,7 +256,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null), "query");
+            ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null), "query");
         }
 
         [Fact]
@@ -272,7 +274,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, new ODataQuerySettings()), "query");
+            ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, new ODataQuerySettings()), "query");
         }
 
         [Fact]
@@ -290,11 +292,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(() => queryOptions.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
+            ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
         }
 
         [Theory]
-        [PropertyData("SkipTopOrderByUsingKeysTestData")]
+        [MemberData(nameof(SkipTopOrderByUsingKeysTestData))]
         public void ApplyTo_Adds_Missing_Keys_To_OrderBy(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             // Arrange
@@ -324,7 +326,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("SkipTopOrderByWithNoKeysTestData")]
+        [MemberData(nameof(SkipTopOrderByWithNoKeysTestData))]
         public void ApplyTo_Adds_Missing_NonKey_Properties_To_OrderBy(string oDataQuery, bool ensureStableOrdering, string expectedExpression)
         {
             // Arrange
@@ -374,7 +376,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IQueryable finalQuery = queryOptions.ApplyTo(new Customer[0].AsQueryable(), querySettings);
 
             // Assert
-            Assert.ReferenceEquals(originalOption, queryOptions.OrderBy);
+            Assert.Same(originalOption, queryOptions.OrderBy);
         }
 
         [Fact]
@@ -411,7 +413,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("QueryTestData")]
+        [MemberData(nameof(QueryTestData))]
         public void QueryTest(string queryName, string queryValue)
         {
             // Arrange
@@ -438,7 +440,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             // Act && Assert
             if (String.IsNullOrWhiteSpace(queryValue))
             {
-                Assert.Throws<ODataException>(() =>
+                ExceptionAssert.Throws<ODataException>(() =>
                     new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message));
             }
             else
@@ -504,7 +506,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             var option = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
             {
                 option.ApplyTo(new List<Customer>().AsQueryable());
             });
@@ -522,7 +524,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value 'NotANumber' for $top query option found. " +
                  "The $top query option requires a non-negative integer value.");
@@ -534,7 +536,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value '''' for $top query option found. " +
                  "The $top query option requires a non-negative integer value.");
@@ -552,7 +554,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value 'NotANumber' for $skip query option found. " +
                  "The $skip query option requires a non-negative integer value.");
@@ -564,7 +566,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             message.EnableHttpDependencyInjectionSupport();
 
             options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
-            Assert.Throws<ODataException>(() =>
+            ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value '''' for $skip query option found. " +
                  "The $skip query option requires a non-negative integer value.");
@@ -719,12 +721,12 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataValidationSettings validationSettings = new ODataValidationSettings { MaxOrderByNodeCount = 1 };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => options.Validate(validationSettings),
+            ExceptionAssert.Throws<ODataException>(() => options.Validate(validationSettings),
                 "The number of clauses in $orderby query option exceeded the maximum number allowed. The maximum number of $orderby clauses allowed is 1.");
         }
 
         [Theory]
-        [PropertyData("SystemQueryOptionNames")]
+        [MemberData(nameof(SystemQueryOptionNames))]
         public void IsSystemQueryOption_Returns_True_For_All_Supported_Query_Names(string queryName)
         {
             // Arrange & Act & Assert
@@ -779,11 +781,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             };
 
             // Act & Assert
-            Assert.Throws<ODataException>(() => option.Validate(settings),
+            ExceptionAssert.Throws<ODataException>(() => option.Validate(settings),
                 "Query option 'Filter' is not allowed. To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.");
 
             option.Validator = null;
-            Assert.DoesNotThrow(() => option.Validate(settings));
+            ExceptionAssert.DoesNotThrow(() => option.Validate(settings));
 
         }
 
@@ -833,7 +835,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("Querying_Primitive_Collections_Data")]
+        [MemberData(nameof(Querying_Primitive_Collections_Data))]
         public void Querying_Primitive_Collections(IQueryable queryable, string query, object result)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + query);
@@ -849,7 +851,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("Querying_Enum_Collections_Data")]
+        [MemberData(nameof(Querying_Enum_Collections_Data))]
         public void Querying_Enum_Collections(IQueryable queryable, string query, object result)
         {
             // Arrange
@@ -893,7 +895,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             ODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => queryOptions.ApplyTo(entity: null, querySettings: new ODataQuerySettings()),
                 "entity");
         }
@@ -925,7 +927,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
             ODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => queryOptions.ApplyTo(entity: 42, querySettings: null),
                 "querySettings");
         }
@@ -945,7 +947,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ODataQueryContext context = new ODataQueryContext(model.Model, typeof(Customer));
             ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
 
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => queryOptions.ApplyTo(42, new ODataQuerySettings()),
                 "The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.");
         }
@@ -1030,7 +1032,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             // Assert
             Assert.Equal(nextPageLink, request.ODataProperties().NextLink);
-            Assert.Equal(1, (result as IQueryable<int>).Count());
+            Assert.Single((result as IQueryable<int>));
         }
 
         [Fact]
@@ -1056,7 +1058,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Fact]
-        public void ODataQueryOptions_SetToApplied()
+        public async Task ODataQueryOptions_SetToApplied()
         {
             // Arrange
             string url = "http://localhost/odata/EntityModels?$filter=ID eq 1&$skip=1&$select=A&$expand=ExpandProp";
@@ -1064,8 +1066,8 @@ namespace Microsoft.Test.AspNet.OData.Query
             HttpClient client = new HttpClient(server);
 
             // Act
-            HttpResponseMessage response = client.GetAsync(url).Result;
-            var responseString = response.Content.ReadAsStringAsync().Result;
+            HttpResponseMessage response = await client.GetAsync(url);
+            var responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -1077,7 +1079,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Theory]
         [InlineData("ExpandProp1")]
         [InlineData("ExpandProp2")]
-        public void ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize(string propName)
+        public async Task ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize(string propName)
         {
             // Arrange
             string url = "http://localhost/odata/Products?$expand=" + propName;
@@ -1088,23 +1090,23 @@ namespace Microsoft.Test.AspNet.OData.Query
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            HttpResponseMessage response = await client.SendAsync(request);
+            var responseObject = JObject.Parse(await response.Content.ReadAsStringAsync());
             var result = responseObject["value"] as JArray;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(result);
             var expandProp = result[0][propName] as JArray;
-            Assert.Equal(expandProp.Count, 2);
-            Assert.Equal(expandProp[0]["ID"], 1);
-            Assert.Equal(expandProp[1]["ID"], 2);
+            Assert.Equal(2, expandProp.Count);
+            Assert.Equal(1, expandProp[0]["ID"]);
+            Assert.Equal(2, expandProp[1]["ID"]);
         }
 
         [Theory]
         [InlineData("ExpandProp3")]
         [InlineData("ExpandProp4")]
-        public void ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize_MultiplyKeys(string propName)
+        public async Task ODataQueryOptions_ApplyOrderByInExpandResult_WhenSetPageSize_MultiplyKeys(string propName)
         {
             // Arrange
             string url = "http://localhost/odata/Products?$expand=" + propName;
@@ -1114,19 +1116,19 @@ namespace Microsoft.Test.AspNet.OData.Query
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
-            var responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            HttpResponseMessage response = await client.SendAsync(request);
+            var responseObject = JObject.Parse(await response.Content.ReadAsStringAsync());
             var result = responseObject["value"] as JArray;
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(result);
             var expandProp = result[0][propName] as JArray;
-            Assert.Equal(expandProp.Count, 2);
-            Assert.Equal(expandProp[0]["ID1"], 1);
-            Assert.Equal(expandProp[0]["ID2"], 1);
-            Assert.Equal(expandProp[1]["ID1"], 2);
-            Assert.Equal(expandProp[1]["ID2"], 1);
+            Assert.Equal(2, expandProp.Count);
+            Assert.Equal(1, expandProp[0]["ID1"]);
+            Assert.Equal(1, expandProp[0]["ID2"]);
+            Assert.Equal(2, expandProp[1]["ID1"]);
+            Assert.Equal(1, expandProp[1]["ID2"]);
         }
 
         [Fact]
@@ -1147,11 +1149,11 @@ namespace Microsoft.Test.AspNet.OData.Query
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
             // Assert
-            Assert.Equal(queryOptions.RawValues.Top, "10");
+            Assert.Equal("10", queryOptions.RawValues.Top);
         }
 
         [Fact]
-        public void DuplicateUnsupportedQueryParametersIgnoredWithNoException()
+        public async Task DuplicateUnsupportedQueryParametersIgnoredWithNoException()
         {
             // Arrange
             string url = "http://localhost/odata/Products?$top=1&test=1&test=2";
@@ -1161,7 +1163,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
-            HttpResponseMessage response = client.SendAsync(request).Result;
+            HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

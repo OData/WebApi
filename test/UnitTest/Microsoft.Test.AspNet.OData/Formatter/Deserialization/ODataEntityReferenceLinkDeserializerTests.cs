@@ -10,6 +10,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
@@ -21,7 +22,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             var deserializer = new ODataEntityReferenceLinkDeserializer();
 
-            Assert.Equal(deserializer.ODataPayloadKind, ODataPayloadKind.EntityReferenceLink);
+            Assert.Equal(ODataPayloadKind.EntityReferenceLink, deserializer.ODataPayloadKind);
         }
 
         [Fact]
@@ -29,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             var deserializer = new ODataEntityReferenceLinkDeserializer();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader: null, type: null, readContext: new ODataDeserializerContext()),
                 "messageReader");
         }
@@ -40,7 +41,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             var deserializer = new ODataEntityReferenceLinkDeserializer();
             ODataMessageReader messageReader = ODataTestUtil.GetMockODataMessageReader();
 
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => deserializer.Read(messageReader, type: null, readContext: null),
                 "readContext");
         }

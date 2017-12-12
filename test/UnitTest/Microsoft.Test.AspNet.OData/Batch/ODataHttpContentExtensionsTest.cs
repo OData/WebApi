@@ -4,28 +4,29 @@
 using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Batch
 {
     public class ODataHttpContentExtensionsTest
     {
         [Fact]
-        public void GetODataMessageReaderAsync_NullContent_Throws()
+        public async Task GetODataMessageReaderAsync_NullContent_Throws()
         {
-            Assert.ThrowsArgumentNull(
-                () => ODataHttpContentExtensions.GetODataMessageReaderAsync(null, new ODataMessageReaderSettings(), CancellationToken.None)
-                    .Wait(),
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => ODataHttpContentExtensions.GetODataMessageReaderAsync(null, new ODataMessageReaderSettings(), CancellationToken.None),
                 "content");
         }
 
         [Fact]
-        public void GetODataMessageReaderAsync_ReturnsMessageReader()
+        public async Task GetODataMessageReaderAsync_ReturnsMessageReader()
         {
             StringContent content = new StringContent("foo", Encoding.UTF8, "multipart/mixed");
 
-            Assert.NotNull(content.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None).Result);
+            Assert.NotNull(await content.GetODataMessageReaderAsync(new ODataMessageReaderSettings(), CancellationToken.None));
         }
     }
 }

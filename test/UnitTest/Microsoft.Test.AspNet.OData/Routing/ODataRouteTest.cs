@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -84,7 +84,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void ODataVersionConstraint_DefaultValue()
         {
             ODataRoute odataRoute = new ODataRoute(routePrefix: null, pathConstraint: null);
-            Assert.Equal(true, ((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
+            Assert.True(((ODataVersionConstraint)odataRoute.Constraints[ODataRouteConstants.VersionConstraintName]).IsRelaxedMatch);
         }
 
         [Theory]

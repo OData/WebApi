@@ -14,6 +14,7 @@ using System.Web.Http.Metadata;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_Formatters()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new PerRequestParameterBinding(descriptor: new Mock<HttpParameterDescriptor>().Object, formatters: null),
                 "formatters");
         }

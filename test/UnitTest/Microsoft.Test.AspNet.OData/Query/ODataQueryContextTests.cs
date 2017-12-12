@@ -11,6 +11,7 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -47,7 +48,6 @@ namespace Microsoft.Test.AspNet.OData.Query
                     // but which we permit in $skip and $top
                     typeof(int?),
                     typeof(char),
-                    typeof(sbyte),
                     typeof(ushort),
                     typeof(uint),
                     typeof(ulong),
@@ -70,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("QueryPrimitiveTypes")]
+        [MemberData(nameof(QueryPrimitiveTypes))]
         public void Constructor_TakingClrType_WithPrimitiveTypes(Type type)
         {
             // Arrange & Act
@@ -81,7 +81,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
 
         [Theory]
-        [PropertyData("QueryEnumTypes")]
+        [MemberData(nameof(QueryEnumTypes))]
         public void Constructor_TakingClrType_WithEnumTypes(Type type)
         {
             // Arrange
@@ -102,7 +102,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void Constructor_TakingClrType_Throws_With_Null_Model()
         {
             // Arrange & Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataQueryContext(model: null, elementClrType: typeof(int)),
                     "model");
         }
@@ -111,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void Constructor_TakingClrType_Throws_With_Null_Type()
         {
             // Arrange & Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataQueryContext(EdmCoreModel.Instance, elementClrType: null),
                     "elementClrType");
         }
@@ -143,7 +143,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             IEdmModel model = odataModel.GetEdmModel();
 
             // Act && Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => new ODataQueryContext(model, elementType),
                 "elementClrType",
                 Error.Format("The given model does not contain the type '{0}'.", elementType.FullName));
@@ -152,14 +152,14 @@ namespace Microsoft.Test.AspNet.OData.Query
         [Fact]
         public void Ctor_TakingEdmType_ThrowsArgumentNull_Model()
         {
-            Assert.ThrowsArgumentNull(() => new ODataQueryContext(model: null, elementType: new Mock<IEdmType>().Object),
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataQueryContext(model: null, elementType: new Mock<IEdmType>().Object),
                 "model");
         }
 
         [Fact]
         public void Ctor_TakingEdmType_ThrowsArgumentNull_ElementType()
         {
-            Assert.ThrowsArgumentNull(() => new ODataQueryContext(EdmCoreModel.Instance, elementType: null),
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataQueryContext(EdmCoreModel.Instance, elementType: null),
                 "elementType");
         }
 

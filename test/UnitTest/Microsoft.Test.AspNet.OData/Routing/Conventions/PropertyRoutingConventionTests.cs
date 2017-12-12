@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ILookup<string, HttpActionDescriptor> emptyMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new PropertyRoutingConvention().SelectAction(null, controllerContext.Object, emptyMap),
                 "odataPath");
         }
@@ -38,7 +39,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ILookup<string, HttpActionDescriptor> emptyMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new PropertyRoutingConvention().SelectAction(odataPath, null, emptyMap),
                 "controllerContext");
         }
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             Mock<HttpControllerContext> controllerContext = new Mock<HttpControllerContext>();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new PropertyRoutingConvention().SelectAction(odataPath, controllerContext.Object, null),
                 "actionMap");
         }
@@ -82,7 +83,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "NameFromCustomer", selectedAction);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Single(controllerContext.Request.GetRouteData().Values);
             Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
@@ -111,7 +112,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Single(controllerContext.Request.GetRouteData().Values);
             Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 
@@ -139,7 +140,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal("GetEnumCollectionPropFromDollarCountEntity", selectedAction);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Single(controllerContext.Request.GetRouteData().Values);
             Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
         }
 

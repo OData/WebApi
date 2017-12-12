@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -33,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             var deserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Unsupported) { CallBase = true };
 
-            Assert.Throws<NotSupportedException>(
+            ExceptionAssert.Throws<NotSupportedException>(
                 () => deserializer.Object.ReadInline(item: null, edmType: null, readContext: null),
                 "Type 'ODataEdmTypeDeserializerProxy' does not support ReadInline.");
         }

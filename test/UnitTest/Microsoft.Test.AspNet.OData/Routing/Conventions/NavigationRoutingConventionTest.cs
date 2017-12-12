@@ -14,6 +14,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
@@ -54,7 +55,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             }
             else
             {
-                Assert.Equal(1, controllerContext.RouteData.Values.Count);
+                Assert.Single(controllerContext.RouteData.Values);
                 Assert.Equal(42, controllerContext.RouteData.Values["key"]);
             }
         }
@@ -125,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             }
             else
             {
-                Assert.Equal(1, controllerContext.RouteData.Values.Count);
+                Assert.Single(controllerContext.RouteData.Values);
                 Assert.Equal(42, controllerContext.RouteData.Values["key"]);
             }
         }
@@ -256,7 +257,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Equal(1, controllerContext.RouteData.Values.Count);
+            Assert.Single(controllerContext.RouteData.Values);
             Assert.Equal(42, controllerContext.RouteData.Values["key"]);
         }
 
@@ -286,7 +287,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Equal(1, controllerContext.RouteData.Values.Count);
+            Assert.Single(controllerContext.RouteData.Values);
             Assert.Equal(42, controllerContext.RouteData.Values["key"]);
         }
 

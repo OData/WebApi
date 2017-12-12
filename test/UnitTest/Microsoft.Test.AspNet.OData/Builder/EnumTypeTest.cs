@@ -15,6 +15,7 @@ using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
 {
@@ -80,7 +81,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
 
             // Assert
-            Assert.Equal(1, complexType.Properties().Count());
+            Assert.Single(complexType.Properties());
             var nullableColor = complexType.Properties().SingleOrDefault(p => p.Name == "NullableColor");
             Assert.NotNull(nullableColor);
             Assert.True(nullableColor.Type.IsEnum());
@@ -100,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
 
             // Assert
-            Assert.Equal(1, complexType.Properties().Count());
+            Assert.Single(complexType.Properties());
             var colors = complexType.Properties().SingleOrDefault(p => p.Name == "Colors");
             Assert.NotNull(colors);
             Assert.True(colors.Type.IsCollection());
@@ -148,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var complexType = model.SchemaElements.OfType<IEdmStructuredType>().Single();
 
             // Assert
-            Assert.Equal(1, complexType.Properties().Count());
+            Assert.Single(complexType.Properties());
             var requiredColor = complexType.Properties().SingleOrDefault(p => p.Name == "RequiredColor");
             Assert.NotNull(requiredColor);
             Assert.True(requiredColor.Type.IsEnum());
@@ -214,14 +215,14 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var color = builder.EnumType<Color>();
 
             // Act & Assert
-            Assert.Equal(0, color.Members.Count());
+            Assert.Empty(color.Members);
 
             color.Member(Color.Red);
             color.Member(Color.Green);
             Assert.Equal(2, color.Members.Count());
 
             color.RemoveMember(Color.Red);
-            Assert.Equal(1, color.Members.Count());
+            Assert.Single(color.Members);
         }
 
         [Fact]
@@ -272,7 +273,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
             Assert.NotNull(properties);
 
-            Assert.Equal(1, properties.Elements.Count());
+            Assert.Single(properties.Elements);
             var element = properties.Elements.First() as IEdmPathExpression;
             Assert.NotNull(element);
 
@@ -287,7 +288,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder.EnumType<ComplexTypeWithEnumTypePropertyTestModel>(),
                 "type",
                 "The type 'Microsoft.Test.AspNet.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel' cannot be configured as an enum type.");
@@ -305,7 +306,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var entityTypeConfiguration = builder.ComplexType<EntityTypeWithEnumTypePropertyTestModel>();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => entityTypeConfiguration.EnumProperty(e => e.ID),
                 "propertyInfo",
                 "The property 'ID' on type 'Microsoft.Test.AspNet.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
@@ -320,7 +321,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             color.Member(ValueOutOfRangeEnum.Member);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder.GetServiceModel(),
                 "value",
                 "The value of enum member 'Member' cannot be converted to a long type.");
@@ -335,7 +336,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 .Property(b => b.Color);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder.EntityType<DerivedTypeWithEnumTypePropertyTestModel>()
                     .DerivesFrom<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(d => d.Color),
@@ -353,7 +354,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 .Property(d => d.Color);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder.EntityType<BaseTypeWithEnumTypePropertyTestModel>()
                     .Property(b => b.Color),
                 "propertyInfo",
@@ -369,7 +370,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration declaringType = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EnumMemberConfiguration(null, declaringType),
                 "member");
         }
@@ -381,7 +382,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Enum member = Color.Red;
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EnumMemberConfiguration(member, null),
                 "declaringType");
         }
@@ -397,7 +398,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var enumMemberConfiguration = new EnumMemberConfiguration(member, declaringType);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => enumMemberConfiguration.Name = null,
                 "value");
         }
@@ -410,7 +411,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Type clrType = typeof(Color);
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EnumTypeConfiguration(null, clrType),
                 "builder");
         }
@@ -422,7 +423,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new EnumTypeConfiguration(builder, null),
                 "clrType");
         }
@@ -436,7 +437,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => enumTypeConfiguration.Namespace = null,
                 "value");
         }
@@ -450,7 +451,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => enumTypeConfiguration.Name = null,
                 "value");
         }
@@ -464,7 +465,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => enumTypeConfiguration.AddMember(null),
                 "member");
         }
@@ -478,7 +479,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => enumTypeConfiguration.AddMember(SimpleEnum.First),
                 "member",
                 "The property 'First' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Color'.");
@@ -493,7 +494,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => enumTypeConfiguration.RemoveMember(null),
                 "member");
         }
@@ -507,7 +508,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EnumTypeConfiguration enumTypeConfiguration = builder.EnumTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => enumTypeConfiguration.RemoveMember(SimpleEnum.First),
                 "member",
                 "The property 'First' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Color'.");
@@ -520,7 +521,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => builder.AddEnumType(null),
                 "type");
         }
@@ -533,7 +534,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Type type = typeof(Int32);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => builder.AddEnumType(type),
                 "type",
                 "The type 'System.Int32' cannot be configured as an enum type.");
@@ -546,7 +547,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             var builder = new ODataModelBuilder();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => builder.RemoveEnumType(null),
                 "type");
         }
@@ -560,7 +561,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             StructuralTypeConfiguration structuralTypeConfiguration = builder.StructuralTypes.Single();
 
             // Act & Assert
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => structuralTypeConfiguration.AddEnumProperty(null),
                 "propertyInfo");
         }
@@ -576,7 +577,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => structuralTypeConfiguration.AddEnumProperty(propertyInfo),
                 "propertyInfo",
                 "The property 'RequiredColor' does not belong to the type 'Microsoft.Test.AspNet.OData.Builder.ComplexTypeWithEnumTypePropertyTestModel'.");
@@ -593,7 +594,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
 
             // Act & Assert
-            Assert.ThrowsArgument(
+            ExceptionAssert.ThrowsArgument(
                 () => structuralTypeConfiguration.AddEnumProperty(propertyInfo),
                 "propertyInfo",
                 "The property 'ID' on type 'Microsoft.Test.AspNet.OData.Builder.EntityTypeWithEnumTypePropertyTestModel' must be an Enum property.");
@@ -608,7 +609,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             complexTypeConfiguration.EnumProperty(c => c.RequiredColor);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.GetServiceModel(),
                 "The enum type 'Color' does not exist.");
         }
@@ -622,7 +623,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             complexTypeConfiguration.CollectionProperty(c => c.Colors);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(
+            ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.GetServiceModel(),
                 "The enum type 'Color' does not exist.");
         }
@@ -1085,9 +1086,9 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(3, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("KeepDefaultName")));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("happy"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("sad"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("KeepDefaultName"));
         }
 
         [Fact]
@@ -1119,10 +1120,10 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(4, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("happy")));
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("sad")));
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("JustSoSo")));
-            Assert.True(enumType.Members.Any(m => m.Name.Equals("KeepDefaultName")));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("happy"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("sad"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("JustSoSo"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("KeepDefaultName"));
         }
 
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()

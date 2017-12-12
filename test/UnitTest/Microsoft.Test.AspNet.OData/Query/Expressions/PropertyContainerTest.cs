@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
@@ -216,7 +217,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             mapperMock.Setup(m => m.MapProperty("PropA")).Returns(mappedName);
 
             // Act & Assert
-            Assert.Throws<InvalidOperationException>(() =>
+            ExceptionAssert.Throws<InvalidOperationException>(() =>
                 container.ToDictionary(mapperMock.Object), "The key mapping for the property 'PropA' can't be null or empty.");
         }
 

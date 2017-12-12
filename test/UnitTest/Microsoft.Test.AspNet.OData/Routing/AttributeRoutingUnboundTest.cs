@@ -15,6 +15,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -47,7 +48,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -72,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.NotNull(expectedCustomer);
@@ -97,7 +98,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -115,7 +116,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.GetAsync(requestUri);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -130,7 +131,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.GetAsync(requestUri);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -146,7 +147,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -169,7 +170,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -187,7 +188,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act
             var response = await _client.SendAsync(request);
-            string responseString = response.Content.ReadAsStringAsync().Result;
+            string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);

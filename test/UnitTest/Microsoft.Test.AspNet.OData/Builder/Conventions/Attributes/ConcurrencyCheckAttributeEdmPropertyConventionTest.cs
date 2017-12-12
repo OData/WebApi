@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -18,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         [Fact]
         public void Empty_Ctor_DoesnotThrow()
         {
-            Assert.DoesNotThrow(() => new ConcurrencyCheckAttributeEdmPropertyConvention());
+            ExceptionAssert.DoesNotThrow(() => new ConcurrencyCheckAttributeEdmPropertyConvention());
         }
 
         [Fact]

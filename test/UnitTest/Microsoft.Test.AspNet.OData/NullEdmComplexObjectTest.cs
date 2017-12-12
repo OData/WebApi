@@ -5,6 +5,7 @@ using System;
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -13,7 +14,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Ctor_ThrowsArgumentNull_EdmType()
         {
-            Assert.ThrowsArgumentNull(() => new NullEdmComplexObject(edmType: null), "edmType");
+            ExceptionAssert.ThrowsArgumentNull(() => new NullEdmComplexObject(edmType: null), "edmType");
         }
 
         [Fact]
@@ -34,7 +35,7 @@ namespace Microsoft.Test.AspNet.OData
             NullEdmComplexObject nullComplexObject = new NullEdmComplexObject(edmType);
             object propertyValue;
 
-            Assert.Throws<InvalidOperationException>(() => nullComplexObject.TryGetPropertyValue("property", out propertyValue),
+            ExceptionAssert.Throws<InvalidOperationException>(() => nullComplexObject.TryGetPropertyValue("property", out propertyValue),
                 "Cannot get property 'property' of a null EDM object of type '[NS.ComplexType Nullable=True]'.");
         }
     }

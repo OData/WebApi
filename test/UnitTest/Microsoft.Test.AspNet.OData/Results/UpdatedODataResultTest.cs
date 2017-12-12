@@ -10,6 +10,7 @@ using System.Web.Http.Results;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Results
 {
@@ -24,21 +25,21 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(entity: null, controller: _controller), "entity");
         }
 
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Controller()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(_entity, controller: null), "controller");
         }
 
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Entity()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(entity: null, contentNegotiator: _contentNegotiator,
                     request: _request, formatters: _formatters), "entity");
         }
@@ -46,7 +47,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_ContentNegotiator()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(_entity, contentNegotiator: null,
                     request: _request, formatters: _formatters), "contentNegotiator");
         }
@@ -54,7 +55,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Request()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(_entity, _contentNegotiator,
                     request: null, formatters: _formatters), "request");
         }
@@ -62,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         [Fact]
         public void Ctor_DirectDependency_ThrowsArgumentNull_Formatters()
         {
-            Assert.ThrowsArgumentNull(
+            ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(_entity, _contentNegotiator,
                     _request, formatters: null), "formatters");
         }

@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.TestCommon;
+using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [Fact]
         public void Ctor_ThrowsArgumentNull_IfMissModel()
         {
-            Assert.ThrowsArgumentNull(() => new ODataPathSegmentTranslator(model: null, 
+            ExceptionAssert.ThrowsArgumentNull(() => new ODataPathSegmentTranslator(model: null, 
                 parameterAliasNodes: null), "model");
         }
     }

@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData
     public partial class ResourceContext
     {
         /// <summary>
-        /// Gets or sets the HTTP request that causes this instance to be generated.
+        /// Gets or sets the HTTP request that caused this instance to be generated.
         /// </summary>
         /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public HttpRequestMessage Request

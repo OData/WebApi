@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="isQueryCompositionMode">If the model is being built for only querying.</param>
         /// <remarks>The model built if <paramref name="isQueryCompositionMode"/> is <c>true</c> has more relaxed
         /// inference rules and also treats all types as entity types. This constructor is intended for use by unit testing only.</remarks>
-        /// <remarks>This function uses types that are AspNet-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataConventionModelBuilder(HttpConfiguration configuration, bool isQueryCompositionMode)
         {
             if (configuration == null)

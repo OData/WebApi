@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -25,6 +26,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 _request = value;
                 InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
+                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.HttpContext.GetUrlHelper()) : null;
             }
         }
     }

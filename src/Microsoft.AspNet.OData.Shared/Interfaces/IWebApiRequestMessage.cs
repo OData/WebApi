@@ -105,5 +105,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// </summary>
         /// <returns></returns>
         ODataMessageReaderSettings ReaderSettings { get; }
+
+        /// <summary>
+        /// Gets the writer settings associated with the request.
+        /// </summary>
+        /// <returns></returns>
+        ODataMessageWriterSettings WriterSettings { get; }
     }
 }

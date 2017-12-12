@@ -42,23 +42,28 @@ namespace Microsoft.AspNet.OData.Extensions
             services.AddSingleton<ODataOptions>();
             services.AddSingleton<DefaultQuerySettings>();
 
-            // Configure MvcCore to use formatters.
+            // Configure MvcCore to use formatters. The OData formatters do go into the global service
+            // provider and get picked up by the AspNetCore MVC framework. However, they ignore non-OData
+            // requests so they won't be used for non-OData formatting.
             services.AddMvcCore(options =>
             {
                 // Add OData input formatters at index 0, which overrides the built-in json and xml formatters.
-                foreach (ODataInputFormatter inputFormatter in ODataInputFormatterFactory.Create())
+                // Add in reverse order at index 0 to preserve order from the factory in the final list.
+                foreach (ODataInputFormatter inputFormatter in ODataInputFormatterFactory.Create().Reverse())
                 {
                     options.InputFormatters.Insert(0, inputFormatter);
                 }
 
                 // Add OData output formatters at index 0, which overrides the built-in json and xml formatters.
-                foreach (ODataOutputFormatter outputFormatter in ODataOutputFormatterFactory.Create())
+                // Add in reverse order at index 0 to preserve order from the factory in the final list.
+                foreach (ODataOutputFormatter outputFormatter in ODataOutputFormatterFactory.Create().Reverse())
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);
                 }
             });
 
-            // Add our action selector.
+            // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor
+            // and pass all non-OData calls to this inner selector.
             services.AddSingleton<IActionSelector, ODataActionSelector>();
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed

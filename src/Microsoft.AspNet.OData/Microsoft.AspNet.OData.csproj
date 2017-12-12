@@ -75,7 +75,6 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
-    <Compile Include="Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProvider.cs" />
@@ -86,7 +85,6 @@
     <Compile Include="ETagMessageHandler.cs" />
     <Compile Include="Formatter\EdmLibHelpers.cs" />
     <Compile Include="Formatter\ODataCountMediaTypeMapping.cs" />
-    <Compile Include="Formatter\ODataEnumValueMediaTypeMapping.cs" />
     <Compile Include="Formatter\Serialization\DefaultODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProvider.cs" />
@@ -106,8 +104,6 @@
     <Compile Include="Batch\ODataBatchContent.cs" />
     <Compile Include="Batch\DefaultODataBatchHandler.cs" />
     <Compile Include="Formatter\QueryStringMediaTypeMapping.cs" />
-    <Compile Include="Formatter\ODataBinaryValueMediaTypeMapping.cs" />
-    <Compile Include="Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="Formatter\ODataRawValueMediaTypeMapping.cs" />
     <Compile Include="ODataMessageWrapperHelper.cs" />
     <Compile Include="ODataNullValueMessageHandler.cs" />

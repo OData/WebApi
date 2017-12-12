@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Gets the EntityTagHeaderValue ETag>.
         /// </summary>
-        /// <remarks>This function uses types that are AspNetCore-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         internal override ETag GetETag(EntityTagHeaderValue etagHeaderValue)
         {
             return InternalRequest.GetETag<TEntity>(etagHeaderValue);

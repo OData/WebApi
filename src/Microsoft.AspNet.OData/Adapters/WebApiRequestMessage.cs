@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public bool IsCountRequest()
         {
-            return ODataCountMediaTypeMapping.IsCountRequest(this.innerRequest);
+            return ODataCountMediaTypeMapping.IsCountRequest(this.innerRequest.ODataProperties().Path);
         }
 
         /// <summary>
@@ -203,6 +203,15 @@ namespace Microsoft.AspNet.OData.Adapters
         public ODataMessageReaderSettings ReaderSettings
         {
             get { return this.innerRequest.GetReaderSettings(); }
+        }
+
+        /// <summary>
+        /// Gets the writer settings associated with the request.
+        /// </summary>
+        /// <returns></returns>
+        public ODataMessageWriterSettings WriterSettings
+        {
+            get { return this.innerRequest.GetWriterSettings(); }
         }
     }
 }

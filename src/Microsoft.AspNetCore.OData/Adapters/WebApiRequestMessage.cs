@@ -213,5 +213,14 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerRequest.GetReaderSettings(); }
         }
+
+        /// <summary>
+        /// Gets the writer settings associated with the request.
+        /// </summary>
+        /// <returns></returns>
+        public ODataMessageWriterSettings WriterSettings
+        {
+            get { return this.innerRequest.GetWriterSettings(); }
+        }
     }
 }

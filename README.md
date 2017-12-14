@@ -1,8 +1,8 @@
 ## OData Web API
  Build  | Status
 --------|---------
-Rolling | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/108/badge"/>
-Nightly | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/109/badge"/>
+Rolling | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/396/badge"/>
+Nightly | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/397/badge"/>
 
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).
@@ -17,6 +17,10 @@ This is the active development branch for OData WebApi and it is currently most 
 **[release](https://github.com/OData/Webapi/tree/release) branch**
 
 This is the release branch for OData WebApi, contains code base up to most recently stable WebApi release. The latest release version is [6.0](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.0.0).
+
+**[feature/netcore](https://github.com/OData/Webapi/tree/feature/netcore) branch**
+
+This is the feature development branch for OData WebApi for AspNet and AspNetCore. The package names are Microsoft.AspNet.OData and Microsoft.AspNetCore.OData. The is the OData WebApi 7.0 release which contain breaking changes against OData WebApi 6.0.
 
 **[gh-pages](https://github.com/OData/WebApi/tree/gh-pages) branch**
 

@@ -22,7 +22,12 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
         /// <param name="request">The incoming request message.</param>
-        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
+        /// <remarks>
+        /// This signature uses types that are AspNetCore-specific.
+        /// While the AspNet version of this class makes the HttpRequest available, AspNetCore
+        /// is unhappy when it sees the HttpRequest during validation so HttpRequest is not part
+        /// of the public Api for ODataQueryOptions.
+        /// </remarks>
         public ODataQueryOptions(ODataQueryContext context, HttpRequest request)
         {
             if (context == null)
@@ -35,24 +40,14 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("request");
             }
 
-            // Set the request container into context
             Contract.Assert(context.RequestContainer == null);
             context.RequestContainer = request.GetRequestContainer();
 
-            // Remember the context and request
             Context = context;
-            Request = request;
             InternalRequest = new WebApiRequestMessage(request);
             InternalHeaders = new WebApiRequestHeaders(request.Headers);
 
-            // Complete initialization.
             Initialize(context);
         }
-
-        /// <summary>
-        /// Gets the request message associated with this instance.
-        /// </summary>
-        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        public HttpRequest Request { get; private set; }
     }
 }

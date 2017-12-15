@@ -35,17 +35,14 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("request");
             }
 
-            // Set the request container into context
             Contract.Assert(context.RequestContainer == null);
             context.RequestContainer = request.GetRequestContainer();
 
-            // Remember the context and request
             Context = context;
             Request = request;
             InternalRequest = new WebApiRequestMessage(request);
             InternalHeaders = new WebApiRequestHeaders(request.Headers);
 
-            // Complete initialization.
             Initialize(context);
         }
 

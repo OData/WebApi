@@ -1067,7 +1067,7 @@ namespace Microsoft.AspNet.OData.Builder
         private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IWebApiAssembliesResolver assemblyResolver)
         {
             IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => TypeHelper.IsVisible(t) && TypeHelper.IsClass(t) && t != typeof(object));
-            Dictionary<Type, List<Type>> allTypeMapping = allTypes.ToDictionary(k => k, k => new List<Type>());
+            Dictionary<Type, List<Type>> allTypeMapping = allTypes.Distinct().ToDictionary(k => k, k => new List<Type>());
 
             foreach (Type type in allTypes)
             {

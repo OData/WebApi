@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Adapters
                 if (this.innerManager != null)
                 {
                     IList<ApplicationPart> parts = this.innerManager.ApplicationParts;
-                    return parts.Where(p => p is AssemblyPart).Select(p => (p as AssemblyPart).Assembly);
+                    return parts.Where(p => p is AssemblyPart).Select(p => (p as AssemblyPart).Assembly).Distinct();
                 }
 
                 // Cannot get the list of assemblies without an innerManager.

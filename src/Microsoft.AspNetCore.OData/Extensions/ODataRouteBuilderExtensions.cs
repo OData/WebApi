@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -470,6 +471,10 @@ namespace Microsoft.AspNet.OData.Extensions
             Action<IContainerBuilder> builderAction = ConfigureDefaultServices(builder, configureAction);
             IServiceProvider serviceProvider = perRouteContainer.CreateODataRootContainer(routeName, builderAction);
 
+            // Make sure the MetadataController is registered with the ApplicationPartManager.
+            ApplicationPartManager applicationPartManager = builder.ServiceProvider.GetRequiredService<ApplicationPartManager>();
+            applicationPartManager.ApplicationParts.Add(new AssemblyPart(typeof(MetadataController).Assembly));
+
             // Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = serviceProvider.GetRequiredService<IODataPathHandler>();
 
@@ -533,6 +538,43 @@ namespace Microsoft.AspNet.OData.Extensions
                 containerBuilder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model)
                        .AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => pathHandler)
                        .AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => routingConventions.ToList().AsEnumerable()));
+        }
+
+        /// <summary>
+        /// Enables dependency injection support for HTTP routes.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/> to add the container to.</param>
+        public static void EnableDependencyInjection(this IRouteBuilder builder)
+        {
+            builder.EnableDependencyInjection(null);
+        }
+
+        /// <summary>
+        /// Enables dependency injection support for HTTP routes.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/> to add the container to.</param>
+        /// <param name="configureAction">The configuring action to add the services to the root container.</param>
+        public static void EnableDependencyInjection(this IRouteBuilder builder,
+            Action<IContainerBuilder> configureAction)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            IPerRouteContainer perRouteContainer = builder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
+            if (perRouteContainer == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
+            if (perRouteContainer.GetODataRootContainer(null) != null)
+            {
+                throw Error.InvalidOperation(SRResources.CannotReEnableDependencyInjection);
+            }
+
+            // Get the per-route container and create a new non-route container.
+            perRouteContainer.CreateODataRootContainer(null, ConfigureDefaultServices(builder, configureAction));
         }
 
         /// <summary>

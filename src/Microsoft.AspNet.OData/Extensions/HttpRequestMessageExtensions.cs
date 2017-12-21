@@ -413,11 +413,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.Argument("request", SRResources.RequestMustContainConfiguration);
             }
 
-            // Requests from OData routes will have RouteName set.
-            IServiceProvider rootContainer = (routeName != null)
-                ? configuration.GetODataRootContainer(routeName)
-                : configuration.GetNonODataRootContainer();
-
+            IServiceProvider rootContainer = configuration.GetODataRootContainer(routeName);
             return rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
         }
     }

@@ -11,6 +11,7 @@ namespace Microsoft.AspNet.OData
     internal class PerRouteContainer : PerRouteContainerBase
     {
         private ConcurrentDictionary<string, IServiceProvider> _perRouteContainers;
+        private IServiceProvider _nonODataRouteContainer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
@@ -29,7 +30,7 @@ namespace Microsoft.AspNet.OData
         {
             if (String.IsNullOrEmpty(routeName))
             {
-                throw Error.ArgumentNull("routeName");
+                return _nonODataRouteContainer;
             }
 
             IServiceProvider rootContainer;
@@ -49,17 +50,19 @@ namespace Microsoft.AspNet.OData
         /// <remarks>Used by unit tests to insert root containers.</remarks>
         internal override void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
         {
-            if (String.IsNullOrEmpty(routeName))
-            {
-                throw Error.ArgumentNull("routeName");
-            }
-
             if (rootContainer == null)
             {
                 throw Error.InvalidOperation(SRResources.NullContainer);
             }
 
-            this._perRouteContainers.AddOrUpdate(routeName, rootContainer, (k, v) => rootContainer);
+            if (String.IsNullOrEmpty(routeName))
+            {
+                _nonODataRouteContainer = rootContainer;
+            }
+            else
+            {
+                this._perRouteContainers.AddOrUpdate(routeName, rootContainer, (k, v) => rootContainer);
+            }
         }
     }
 }

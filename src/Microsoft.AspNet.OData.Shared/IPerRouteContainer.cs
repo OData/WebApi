@@ -27,12 +27,5 @@ namespace Microsoft.AspNet.OData
         /// <param name="routeName">The route name.</param>
         /// <returns>The root container for the route name.</returns>
         IServiceProvider GetODataRootContainer(string routeName);
-
-        /// <summary>
-        /// Create a root container not associated with a route.
-        /// </summary>
-        /// <param name="configureAction">The configuration actions to apply to the container.</param>
-        /// <returns>An instance of <see cref="IServiceProvider"/> to manage services for a route.</returns>
-        IServiceProvider CreateODataRootContainer(Action<IContainerBuilder> configureAction);
     }
 }

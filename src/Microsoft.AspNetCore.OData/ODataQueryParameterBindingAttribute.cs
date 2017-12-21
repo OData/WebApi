@@ -63,7 +63,9 @@ namespace Microsoft.AspNet.OData
                 // Fall back to the return type if not. Also, note that the entity type from the return type and ODataQueryOptions<T>
                 // can be different (example implementing $select or $expand).
                 Type entityClrType = null;
-                ParameterDescriptor paramDescriptor = bindingContext.ActionContext.ActionDescriptor.Parameters.FirstOrDefault();
+                ParameterDescriptor paramDescriptor = bindingContext.ActionContext.ActionDescriptor.Parameters
+                    .Where(p => p.Name == bindingContext.FieldName)
+                    .FirstOrDefault();
                 if (paramDescriptor != null)
                 {
                     entityClrType = GetEntityClrTypeFromParameterType(paramDescriptor.ParameterType);

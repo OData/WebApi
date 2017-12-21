@@ -388,26 +388,16 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns></returns>
         private static IServiceScope CreateRequestScope(this HttpRequest request, string routeName)
         {
-            IServiceProvider rootContainer;
-            if (string.IsNullOrEmpty(routeName))
+            IPerRouteContainer perRouteContainer = request.HttpContext.RequestServices.GetRequiredService<IPerRouteContainer>();
+            if (perRouteContainer == null)
             {
-                // For HTTP routes, use the default request services.
-                rootContainer = request.HttpContext.RequestServices;
+                throw Error.ArgumentNull("routeName");
             }
-            else
-            {
-                // For OData routes, create a scoped requested from the per-route container.
-                IPerRouteContainer perRouteContainer = request.HttpContext.RequestServices.GetRequiredService<IPerRouteContainer>();
-                if (perRouteContainer == null)
-                {
-                    throw Error.ArgumentNull("routeName");
-                }
 
-                rootContainer = perRouteContainer.GetODataRootContainer(routeName);
-                if (perRouteContainer == null)
-                {
-                    throw Error.ArgumentNull("routeName");
-                }
+            IServiceProvider rootContainer = perRouteContainer.GetODataRootContainer(routeName);
+            if (rootContainer == null)
+            {
+                throw Error.ArgumentNull("routeName");
             }
 
             return rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();

@@ -499,8 +499,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
             // Get the per-route container and create a new non-route container.
             IPerRouteContainer perRouteContainer = GetPerRouteContainer(configuration);
-            IServiceProvider rootContainer = perRouteContainer.CreateODataRootContainer(ConfigureDefaultServices(configuration, configureAction));
-            configuration.Properties[NonODataRootContainerKey] = rootContainer;
+            perRouteContainer.CreateODataRootContainer(null, ConfigureDefaultServices(configuration, configureAction));
         }
 
         /// <summary>
@@ -786,6 +785,32 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             throw Error.InvalidOperation(SRResources.NoNonODataHttpRouteRegistered);
+        }
+
+        /// <summary>
+        /// Enables dependency injection support for HTTP routes.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="rootContainer">The root container.</param>
+        internal static void SetNonODataRootContainer(this HttpConfiguration configuration,
+            IServiceProvider rootContainer)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            if (rootContainer == null)
+            {
+                throw Error.ArgumentNull("rootContainer");
+            }
+
+            if (configuration.Properties.ContainsKey(NonODataRootContainerKey))
+            {
+                throw Error.InvalidOperation(SRResources.CannotReEnableDependencyInjection);
+            }
+
+            configuration.Properties[NonODataRootContainerKey] = rootContainer;
         }
 
         /// <summary>

@@ -104,9 +104,14 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
+            // Ignore non-OData requests.
+            if (request.ODataFeature().Path == null)
+            {
+                return false;
+            }
+
             // Allow the base class to make its determination, which includes
             // checks for SupportedMediaTypes.
-            bool contentTypeSpecified = context.ContentType.HasValue;
             bool suportedMediaTypeFound = false;
             if (SupportedMediaTypes.Any())
             {
@@ -115,13 +120,11 @@ namespace Microsoft.AspNet.OData.Formatter
 
             // See if the request satisfies any mappings.
             IEnumerable<MediaTypeMapping> matchedMappings = (MediaTypeMappings == null) ? null : MediaTypeMappings
-                //.Where(m => (m.TryMatchMediaType(request) > 0) && (m.MediaType.ToString() == context.ContentType.Value))
                 .Where(m => (m.TryMatchMediaType(request) > 0));
 
-            // Now pick the bets content type. If the media type was specified, use that. If not, use the
-            // media type from the matched mapping if there is one. Otherwise, let the base class make the
-            // determination.
-            if (!contentTypeSpecified && matchedMappings != null && matchedMappings.Any())
+            // Now pick the best content type. If a media mapping was found, use that and override the
+            // value specified by the controller, if any. Otherwise, let the base class decide.
+            if (matchedMappings != null && matchedMappings.Any())
             {
                 context.ContentType = matchedMappings.First().MediaType.ToString();
             }
@@ -134,7 +137,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Type type = context.ObjectType ?? context.Object?.GetType();
             if (type == null)
             {
-                throw Error.ArgumentNull("type");
+                return false;
             }
 
             // Ensure the _serializerProvider has the services form the request and see if

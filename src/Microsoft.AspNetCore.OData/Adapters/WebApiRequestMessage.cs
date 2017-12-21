@@ -81,7 +81,7 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get
             {
-                string method = this.innerRequest.Method.ToString().ToUpperInvariant();
+                string method = this.innerRequest.Method.ToUpperInvariant();
 
                 bool ignoreCase = true;
                 ODataRequestMethod methodEnum = ODataRequestMethod.Unknown;

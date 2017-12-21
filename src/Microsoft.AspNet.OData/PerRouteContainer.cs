@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData
@@ -32,7 +33,7 @@ namespace Microsoft.AspNet.OData
         {
             if (String.IsNullOrEmpty(routeName))
             {
-                throw Error.ArgumentNull("routeName");
+                return configuration.GetNonODataRootContainer();
             }
 
             IServiceProvider rootContainer;
@@ -53,17 +54,19 @@ namespace Microsoft.AspNet.OData
         /// <remarks>Used by unit tests to insert root containers.</remarks>
         internal override void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
         {
-            if (String.IsNullOrEmpty(routeName))
-            {
-                throw Error.ArgumentNull("routeName");
-            }
-
             if (rootContainer == null)
             {
                 throw Error.InvalidOperation(SRResources.NullContainer);
             }
 
-            this.GetRootContainerMappings()[routeName] = rootContainer;
+            if (String.IsNullOrEmpty(routeName))
+            {
+                configuration.SetNonODataRootContainer(rootContainer);
+            }
+            else
+            {
+                this.GetRootContainerMappings()[routeName] = rootContainer;
+            }
         }
 
         /// <summary>

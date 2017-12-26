@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
@@ -54,18 +55,22 @@ namespace Microsoft.AspNet.OData.Formatter
             QueryString queryString = request.QueryString;
             if (queryString.HasValue)
             {
-                IDictionary<string, string> queryValues = QueryHelpers.ParseNullableQuery(queryString.Value)
-                    .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value.FirstOrDefault()))
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-                quality = DoesQueryStringMatch(queryValues) ? 1 : 0;
-                if (quality < 1)
+                Dictionary<string, StringValues> pasedQuery = QueryHelpers.ParseNullableQuery(queryString.Value);
+                if (pasedQuery != null)
                 {
-                    string queryValue = queryValues.Where(kvp => kvp.Key == QueryStringParameterName)
-                        .FirstOrDefault()
-                        .Value;
+                    IDictionary<string, string> queryValues =pasedQuery
+                        .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value.FirstOrDefault()))
+                        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-                    quality = (!string.IsNullOrEmpty(queryValue) && (queryValue == QueryStringParameterValue)) ? 1 : 0;
+                    quality = DoesQueryStringMatch(queryValues) ? 1 : 0;
+                    if (quality < 1)
+                    {
+                        string queryValue = queryValues.Where(kvp => kvp.Key == QueryStringParameterName)
+                            .FirstOrDefault()
+                            .Value;
+
+                        quality = (!string.IsNullOrEmpty(queryValue) && (queryValue == QueryStringParameterValue)) ? 1 : 0;
+                    }
                 }
             }
 

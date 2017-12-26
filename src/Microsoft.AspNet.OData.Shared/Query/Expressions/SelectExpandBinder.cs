@@ -495,9 +495,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression keysNullCheckExpression = null;
             foreach (var key in propertyToExpand.ToEntityType().Key())
             {
+                var propertyValueExpression = CreatePropertyValueExpressionWithFilter(propertyToExpand.ToEntityType(), key, propertyValue, null);
                 var keyExpression = Expression.Equal(
-                    CreatePropertyValueExpressionWithFilter(propertyToExpand.ToEntityType(), key, propertyValue, null),
-                    Expression.Constant(null));
+                    propertyValueExpression,
+                    Expression.Constant(null, propertyValueExpression.Type));
 
                 keysNullCheckExpression = keysNullCheckExpression == null
                     ? keyExpression

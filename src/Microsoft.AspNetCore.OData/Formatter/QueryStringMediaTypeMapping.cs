@@ -55,10 +55,10 @@ namespace Microsoft.AspNet.OData.Formatter
             QueryString queryString = request.QueryString;
             if (queryString.HasValue)
             {
-                Dictionary<string, StringValues> pasedQuery = QueryHelpers.ParseNullableQuery(queryString.Value);
-                if (pasedQuery != null)
+                Dictionary<string, StringValues> parsedQuery = QueryHelpers.ParseNullableQuery(queryString.Value);
+                if (parsedQuery != null)
                 {
-                    IDictionary<string, string> queryValues =pasedQuery
+                    IDictionary<string, string> queryValues =parsedQuery
                         .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value.FirstOrDefault()))
                         .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 

@@ -269,6 +269,19 @@ namespace System.Web.OData.Formatter
             Assert.Equal(new string[] { expectedDataServiceVersion }, headervalues);
         }
 
+        [Fact]
+        public void SetBaseAddressFactory_WhenCloneFormatter()
+        {
+            var formatter = CreateFormatterWithoutRequest();
+            formatter.BaseAddressFactory = r => new Uri("http://localhost");
+            HttpRequestMessage request = new HttpRequestMessage();
+            request.EnableODataDependencyInjectionSupport();
+
+            var actual = formatter.GetPerRequestFormatterInstance(typeof(int), request, null) as ODataMediaTypeFormatter;
+
+            Assert.Equal(formatter.BaseAddressFactory, actual.BaseAddressFactory);
+        }
+
         [Theory]
         [InlineData(null, null, "application/json; odata.metadata=minimal")]
         [InlineData(null, "utf-8", "application/json; odata.metadata=minimal; charset=utf-8")]

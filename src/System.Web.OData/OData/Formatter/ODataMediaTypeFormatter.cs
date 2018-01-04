@@ -134,6 +134,8 @@ namespace System.Web.OData.Formatter
                     RequestContainer = request.GetRequestContainer()
                 };
             }
+
+            BaseAddressFactory = formatter.BaseAddressFactory;
         }
 
         /// <summary>

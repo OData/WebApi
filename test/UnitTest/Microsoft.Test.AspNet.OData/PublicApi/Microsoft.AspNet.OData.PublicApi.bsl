@@ -399,6 +399,12 @@ public class Microsoft.AspNet.OData.ETagMessageHandler : System.Net.Http.Delegat
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 }
 
+public class Microsoft.AspNet.OData.HttpRequestScope {
+	public HttpRequestScope ()
+
+	System.Net.Http.HttpRequestMessage HttpRequest  { public get; public set; }
+}
+
 public class Microsoft.AspNet.OData.MetadataController : ODataController, IDisposable, IHttpController {
 	public MetadataController ()
 

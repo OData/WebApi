@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
@@ -80,6 +81,9 @@ namespace Microsoft.AspNet.OData.Extensions
             builder.AddService<ODataQuerySettings>(ServiceLifetime.Scoped);
             builder.AddService<FilterBinder>(ServiceLifetime.Transient);
 
+            // HttpRequestScope.
+            builder.AddService<HttpRequestScope>(ServiceLifetime.Scoped);
+            builder.AddService(ServiceLifetime.Scoped, sp => sp.GetRequiredService<HttpRequestScope>().HttpRequest);
             return builder;
         }
     }

@@ -414,7 +414,15 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             IServiceProvider rootContainer = configuration.GetODataRootContainer(routeName);
-            return rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            IServiceScope scope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            // Bind scoping request into the OData container.
+            if (routeName != null)
+            {
+                scope.ServiceProvider.GetRequiredService<HttpRequestScope>().HttpRequest = request;
+            }
+
+            return scope;
         }
     }
 }

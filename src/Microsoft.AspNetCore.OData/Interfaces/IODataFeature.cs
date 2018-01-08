@@ -18,11 +18,6 @@ namespace Microsoft.AspNet.OData.Interfaces
     public interface IODataFeature
     {
         /// <summary>
-        /// Gets or sets the EDM model.
-        /// </summary>
-        IEdmModel Model { get; set; }
-
-        /// <summary>
         /// Gets or sets the OData path.
         /// </summary>
         ODataPath Path { get; set; }
@@ -41,11 +36,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the request container.
         /// </summary>
         IServiceProvider RequestContainer { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the request is the valid OData request.
-        /// </summary>
-        bool IsValidODataRequest { get; }
 
         /// <summary>
         /// Gets or sets the next link for the OData response.

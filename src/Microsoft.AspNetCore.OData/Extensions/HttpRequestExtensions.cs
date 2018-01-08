@@ -400,7 +400,15 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("routeName");
             }
 
-            return rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            IServiceScope scope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
+
+            // Bind scoping request into the OData container.
+            if (!string.IsNullOrEmpty(routeName))
+            {
+                scope.ServiceProvider.GetRequiredService<HttpRequestScope>().HttpRequest = request;
+            }
+
+            return scope;
         }
     }
 }

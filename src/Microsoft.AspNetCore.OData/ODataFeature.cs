@@ -32,14 +32,8 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public ODataFeature()
         {
-            Model = EdmCoreModel.Instance; // default Edm model
             totalCountSet = false;
         }
-
-        /// <summary>
-        /// Gets or sets the EDM model.
-        /// </summary>
-        public IEdmModel Model { get; set; }
 
         /// <summary>
         /// Gets or sets the OData path.
@@ -60,14 +54,6 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the request container.
         /// </summary>
         public IServiceProvider RequestContainer { get; set; }
-
-        /// <summary>
-        /// Gets or sets whether the request is the valid OData request.
-        /// </summary>
-        public bool IsValidODataRequest
-        {
-            get { return this.Path != null; }
-        }
 
         /// <summary>
         /// Gets or sets the next link for the OData response.

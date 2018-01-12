@@ -8,12 +8,8 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -21,35 +17,39 @@ namespace Microsoft.AspNet.OData.Batch
     /// <summary>
     /// Encapsulates a collection of OData batch responses.
     /// </summary>
-    public class ODataBatchContent : HttpContent
+    /// <remarks>
+    /// In AspNet, <see cref="ODataBatchContent"/> derives from <see cref="HttpContent"/>.
+    /// </remarks>
+    public partial class ODataBatchContent : HttpContent
     {
-        private readonly IServiceProvider _requestContainer;
-        private readonly ODataMessageWriterSettings _writerSettings;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataBatchContent"/> class.
         /// </summary>
         /// <param name="responses">The batch responses.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataBatchContent(IEnumerable<ODataBatchResponseItem> responses, IServiceProvider requestContainer)
         {
-            if (responses == null)
-            {
-                throw Error.ArgumentNull("responses");
-            }
-
-            Responses = responses;
-            _requestContainer = requestContainer;
-            _writerSettings = requestContainer.GetRequiredService<ODataMessageWriterSettings>();
+            this.Initialize(responses, requestContainer);
             Headers.ContentType = MediaTypeHeaderValue.Parse(String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
             ODataVersion version = _writerSettings.Version ?? ODataVersionConstraint.DefaultODataVersion;
             Headers.TryAddWithoutValidation(ODataVersionConstraint.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));
         }
 
-        /// <summary>
-        /// Gets the batch responses.
-        /// </summary>
-        public IEnumerable<ODataBatchResponseItem> Responses { get; private set; }
+        /// <inheritdoc/>
+        /// <remarks>This function uses types that are AspNet-specific.</remarks>
+        protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
+        {
+            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(stream, this.Headers, _requestContainer);
+            return WriteToResponseMessageAsync(responseMessage);
+        }
+
+        /// <inheritdoc/>
+        protected override bool TryComputeLength(out long length)
+        {
+            length = -1;
+            return false;
+        }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -64,31 +64,8 @@ namespace Microsoft.AspNet.OData.Batch
                     }
                 }
             }
+
             base.Dispose(disposing);
-        }
-
-        /// <inheritdoc/>
-        protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
-        {
-            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(stream, this.Headers, _requestContainer);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, _writerSettings);
-            ODataBatchWriter writer = messageWriter.CreateODataBatchWriter();
-
-            writer.WriteStartBatch();
-
-            foreach (ODataBatchResponseItem response in Responses)
-            {
-                await response.WriteResponseAsync(writer, CancellationToken.None);
-            }
-
-            writer.WriteEndBatch();
-        }
-
-        /// <inheritdoc/>
-        protected override bool TryComputeLength(out long length)
-        {
-            length = -1;
-            return false;
         }
     }
 }

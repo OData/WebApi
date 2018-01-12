@@ -73,6 +73,8 @@
     <Compile Include="Adapters\WebApiRequestHeaders.cs" />
     <Compile Include="Adapters\WebApiRequestMessage.cs" />
     <Compile Include="Adapters\WebApiUrlHelper.cs" />
+    <Compile Include="Batch\LazyStreamContent.cs" />
+    <Compile Include="Batch\ODataBatchContent.cs" />
     <Compile Include="Extensions\HttpConfigurationExtensions.cs" />
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
@@ -96,12 +98,10 @@
     <Compile Include="Batch\ODataBatchRequestItem.cs" />
     <Compile Include="Batch\OperationResponseItem.cs" />
     <Compile Include="Batch\ODataBatchReaderExtensions.cs" />
-    <Compile Include="Batch\LazyStreamContent.cs" />
     <Compile Include="Batch\ChangeSetRequestItem.cs" />
     <Compile Include="Batch\OperationRequestItem.cs" />
     <Compile Include="Batch\ChangeSetResponseItem.cs" />
     <Compile Include="Batch\ODataHttpContentExtensions.cs" />
-    <Compile Include="Batch\ODataBatchContent.cs" />
     <Compile Include="Batch\DefaultODataBatchHandler.cs" />
     <Compile Include="Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="Formatter\ODataRawValueMediaTypeMapping.cs" />

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter
@@ -129,7 +130,13 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 Action<Exception> logErrorAction = (ex) =>
                 {
-                    throw ex;
+                    ILogger logger = context.HttpContext.RequestServices.GetService<ILogger>();
+                    if (logger == null)
+                    {
+                        throw ex;
+                    }
+
+                    logger.LogError(ex, String.Empty);
                 };
 
                 List<IDisposable> toDispose = new List<IDisposable>();

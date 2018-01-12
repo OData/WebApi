@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.OData.Adapters
 
             this.NullDynamicPropertyIsEnabled = options.NullDynamicPropertyIsEnabled;
             this.UrlKeyDelimiter = options.UrlKeyDelimiter;
+            this.EnableContinueOnErrorHeader = options.EnableContinueOnErrorHeader;
         }
 
         /// <summary>
@@ -37,5 +38,11 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Gets or Sets a value indicating if value should be emitted for dynamic properties which are null.
         /// </summary>
         public bool NullDynamicPropertyIsEnabled { get; private set; }
+
+        /// <summary>
+        /// Check the continue-on-error header is enable or not.
+        /// </summary>
+        /// <returns>True if continue-on-error header is enable; false otherwise</returns>
+        public bool EnableContinueOnErrorHeader { get; private set; }
     }
 }

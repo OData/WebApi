@@ -364,7 +364,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <summary>
         /// Check the continue-on-error header is enable or not.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>True if continue-on-error header is enable; false otherwise</returns>
         internal static bool HasEnabledContinueOnErrorHeader(this HttpConfiguration configuration)
         {
             if (configuration == null)

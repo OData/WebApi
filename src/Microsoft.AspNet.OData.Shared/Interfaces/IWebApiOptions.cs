@@ -25,5 +25,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or Sets a value indicating if value should be emitted for dynamic properties which are null.
         /// </summary>
         bool NullDynamicPropertyIsEnabled { get; }
+
+        /// <summary>
+        /// Check the continue-on-error header is enable or not.
+        /// </summary>
+        /// <returns>True if continue-on-error header is enable; false otherwise</returns>
+        bool EnableContinueOnErrorHeader { get; }
     }
 }

@@ -9,6 +9,8 @@
     <Import_RootNamespace>Microsoft.AspNet.OData</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />

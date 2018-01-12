@@ -41,6 +41,28 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Extension method to return the <see cref="IODataBatchFeature"/> from the <see cref="HttpContext"/>.
+        /// </summary>
+        /// <param name="httpContext">The Http context.</param>
+        /// <returns>The <see cref="IODataBatchFeature"/>.</returns>
+        public static IODataBatchFeature ODataBatchFeature(this HttpContext httpContext)
+        {
+            if (httpContext == null)
+            {
+                throw Error.ArgumentNull("httpContext");
+            }
+
+            IODataBatchFeature odataBatchFeature = httpContext.Features.Get<IODataBatchFeature>();
+            if (odataBatchFeature == null)
+            {
+                odataBatchFeature = new ODataBatchFeature();
+                httpContext.Features.Set<IODataBatchFeature>(odataBatchFeature);
+            }
+
+            return odataBatchFeature;
+        }
+
+        /// <summary>
         /// Extension method to return the <see cref="IUrlHelper"/> from the <see cref="HttpContext"/>.
         /// </summary>
         /// <param name="httpContext">The Http context.</param>

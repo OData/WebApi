@@ -815,11 +815,7 @@ public class Microsoft.AspNet.OData.Batch.ODataBatchContent : System.Net.Http.Ht
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 
 	protected virtual void Dispose (bool disposing)
-	[
-	AsyncStateMachineAttribute(),
-	]
 	protected virtual System.Threading.Tasks.Task SerializeToStreamAsync (System.IO.Stream stream, System.Net.TransportContext context)
-
 	protected virtual bool TryComputeLength (out System.Int64& length)
 }
 

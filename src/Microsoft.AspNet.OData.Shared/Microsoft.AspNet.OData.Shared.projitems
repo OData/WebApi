@@ -41,6 +41,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DataContractAttributeEnumTypeConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\BindingPathHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ConcurrencyPropertiesAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CustomAggregateMethodAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
@@ -65,6 +66,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">
+      <AutoGen>True</AutoGen> 
+      <DesignTime>True</DesignTime> 
+      <DependentUpon>PropertyContainer.generated.tt</DependentUpon> 
+    </Compile> 
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestMethod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionDescriptor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionMap.cs" />
@@ -419,4 +427,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\FilterBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PropertySelectorVisitor.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.tt"> 
+      <Generator>TextTemplatingFileGenerator</Generator> 
+      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput> 
+    </Content> 
+  </ItemGroup> 
 </Project>

@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     {
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
-            Justification = "These are simple conversion function and cannot be split up.")]
+            Justification = "These is simple conversion function based on context and OData path value and cannot be split up.")]
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
             IWebApiActionMap actionMap)
         {
@@ -65,7 +65,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         actionName = GetFunction(function).SelectAction(actionMap, isCollection: false);
                         break;
                 }
-                
+
                 if (actionName != null)
                 {
                     controllerContext.AddFunctionParameterToRouteData(function);

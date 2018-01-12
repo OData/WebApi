@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
@@ -17,8 +18,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// EntityFramework understands only member initializations in Select expressions. Also, it doesn't understand type casts for non-primitive types. So, 
     /// SelectExpandBinder has to generate strongly types expressions that involve only property access. This class represents the base class for a bunch of 
     /// generic derived types that are used in the expressions that SelectExpandBinder generates.
+    /// Also, Expression.Compile() could fail with stack overflow if expression is to deep and causes too many levels of recursion. To avoid that we are b-tree property container.
     /// </remarks>
-    internal abstract class PropertyContainer
+    internal abstract partial class PropertyContainer
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyContainer"/> class.
@@ -55,29 +57,52 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         //          Name = properties[0].Key, 
         //          Value = properties[0].Value,
         //
-        //          Next = new NamedProperty<> { ..... } 
+        //          Next0 = new NamedProperty<> { ..... } 
+        //          Next1 = new NamedProperty<> { ..... },
+        //          ...
         //      }
         public static Expression CreatePropertyContainer(IList<NamedPropertyExpression> properties)
         {
             Expression container = null;
 
             // build the linked list of properties.
-            foreach (NamedPropertyExpression property in properties)
+            if (properties.Count >= 1)
             {
-                container = CreateNamedPropertyCreationExpression(property, container);
+                NamedPropertyExpression property = properties.First();
+                int count = properties.Count - 1;
+                List<Expression> nextExpressions = new List<Expression>();
+                int parts = SingleExpandedPropertyTypes.Count - 1;
+                int offset = 0;
+                for (int step = parts; step > 0; step--)
+                {
+                    int leftSize = GetLeftSize(count - offset, step);
+                    nextExpressions.Add(CreatePropertyContainer(properties.Skip(1 + offset).Take(leftSize).ToList()));
+                    offset += leftSize;
+                }
+
+                container = CreateNamedPropertyCreationExpression(property, nextExpressions.Where(e => e != null).ToList());
             }
 
             return container;
         }
 
+        private static int GetLeftSize(int count, int parts)
+        {
+            if (count % parts != 0)
+            {
+                return (count / parts) + 1;
+            }
+            return count / parts;
+        }
+
         // Expression:
-        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next = next }.
-        private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, Expression next)
+        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next0 = next0, Next1 = next1, .... }.
+        private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, IList<Expression> expressions)
         {
             Contract.Assert(property != null);
             Contract.Assert(property.Value != null);
 
-            Type namedPropertyType = GetNamedPropertyType(property, next);
+            Type namedPropertyType = GetNamedPropertyType(property, expressions);
             List<MemberBinding> memberBindings = new List<MemberBinding>();
 
             memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Name"), property.Name));
@@ -102,10 +127,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Value"), property.Value));
             }
 
-            if (next != null)
+            for (int i = 0; i < expressions.Count; i++)
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next"), next));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next" + i), expressions[i]));
             }
+
             if (property.NullCheck != null)
             {
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
@@ -114,47 +140,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
-        private static Type GetNamedPropertyType(NamedPropertyExpression property, Expression next)
+        private static Type GetNamedPropertyType(NamedPropertyExpression property, IList<Expression> expressions)
         {
             Type namedPropertyGenericType;
 
-            if (next == null)
+            if (property.NullCheck != null)
             {
-                if (property.NullCheck != null)
-                {
-                    namedPropertyGenericType = typeof(SingleExpandedProperty<>);
-                }
-                else if (property.PageSize != null || property.CountOption != null)
-                {
-                    namedPropertyGenericType = typeof(CollectionExpandedProperty<>);
-                }
-                else if (property.AutoSelected)
-                {
-                    namedPropertyGenericType = typeof(AutoSelectedNamedProperty<>);
-                }
-                else
-                {
-                    namedPropertyGenericType = typeof(NamedProperty<>);
-                }
+                namedPropertyGenericType = SingleExpandedPropertyTypes[expressions.Count];
+            }
+            else if (property.PageSize != null || property.CountOption != null)
+            {
+                namedPropertyGenericType = CollectionExpandedPropertyTypes[expressions.Count];
+            }
+            else if (property.AutoSelected)
+            {
+                namedPropertyGenericType = AutoSelectedNamedPropertyTypes[expressions.Count];
             }
             else
             {
-                if (property.NullCheck != null)
-                {
-                    namedPropertyGenericType = typeof(SingleExpandedPropertyWithNext<>);
-                }
-                else if (property.PageSize != null || property.CountOption != null)
-                {
-                    namedPropertyGenericType = typeof(CollectionExpandedPropertyWithNext<>);
-                }
-                else if (property.AutoSelected)
-                {
-                    namedPropertyGenericType = typeof(AutoSelectedNamedPropertyWithNext<>);
-                }
-                else
-                {
-                    namedPropertyGenericType = typeof(NamedPropertyWithNext<>);
-                }
+                namedPropertyGenericType = NamedPropertyTypes[expressions.Count];
             }
 
             Type elementType = (property.PageSize == null && property.CountOption == null)
@@ -230,61 +234,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 {
                     return new TruncatedCollection<T>(Collection, PageSize, TotalCount);
                 }
-            }
-        }
-
-        // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
-        // A $select=Prop1,Prop2 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,
-        //      c => new NamedProperty<int> { Name = "Prop1", Value = c.Prop1, Next = new NamedProperty<int> { Name = "Prop2", Value = c.Prop2 } };
-        // Entityframework cannot translate this expression as the first NamedProperty<int> initialization has Next and the second one doesn't. Also, Entityframework cannot 
-        // create null's of NamedProperty<T>. So, you cannot generate an expression like new NamedProperty<int> { Next = null }. The exception that EF throws looks like this,
-        // "The type 'NamedProperty`1[SystemInt32...]' appears in two structurally incompatible initializations within a single LINQ to Entities query. 
-        // A type can be initialized in two places in the same query, but only if the same properties are set in both places and those properties are set in the same order."
-        internal class NamedPropertyWithNext<T> : NamedProperty<T>
-        {
-            public PropertyContainer Next { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class AutoSelectedNamedPropertyWithNext<T> : AutoSelectedNamedProperty<T>
-        {
-            public PropertyContainer Next { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class SingleExpandedPropertyWithNext<T> : SingleExpandedProperty<T>
-        {
-            public PropertyContainer Next { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-            }
-        }
-
-        private class CollectionExpandedPropertyWithNext<T> : CollectionExpandedProperty<T>
-        {
-            public PropertyContainer Next { get; set; }
-
-            public override void ToDictionaryCore(Dictionary<string, object> dictionary, IPropertyMapper propertyMapper,
-                bool includeAutoSelected)
-            {
-                base.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
-                Next.ToDictionaryCore(dictionary, propertyMapper, includeAutoSelected);
             }
         }
     }

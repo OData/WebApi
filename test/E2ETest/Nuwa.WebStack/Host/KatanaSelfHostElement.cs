@@ -38,9 +38,6 @@ namespace Nuwa.WebStack.Host
 
         protected override bool InitializeServer(RunFrame frame)
         {
-            string baseAddress;
-            string port;
-
             var sandbox = CreateFullTrustAppDomain();
             frame.SetState(KeySandbox, sandbox);
 
@@ -50,9 +47,34 @@ namespace Nuwa.WebStack.Host
                 sandbox.Load(TypeDescriptor.TestAssembly.GetName());
             }
 
-            // setup security strategy and base address
-            port = _portArranger.Reserve();
             SecurityHelper.AddIpListen();
+
+            // retry three times using port scan with three port types.
+            int repeat = 3;
+
+            bool result = false;
+            for (int i = 1; i <= repeat; ++i)
+            {
+                if (TrySetupServer(i, sandbox, frame))
+                {
+                    result = true;
+                    break;
+                }
+            }
+
+            if (result == false)
+            {
+                throw new Exception(string.Format("Cannot setup host server. See Event log for details"));
+            }
+
+            return true;
+        }
+
+        private bool TrySetupServer(int tryIndex, AppDomain sandbox, RunFrame frame)
+        {
+            string baseAddress;
+            string port = _portArranger.Reserve();
+
             SecurityOptionElement securityElem = frame.GetFirstElement<SecurityOptionElement>();
             if (securityElem != null)
             {
@@ -75,8 +97,8 @@ namespace Nuwa.WebStack.Host
                 traceType = traceElem.TracerType;
             }
 
-            // create initiator in the sandbox
             KatanaSelfHostServerInitiator serverInitiator;
+            // create initiator in the sandbox
             if (sandbox != null)
             {
                 serverInitiator = sandbox.CreateInstanceAndUnwrap(
@@ -101,14 +123,15 @@ namespace Nuwa.WebStack.Host
             {
                 EventLog appLog = new System.Diagnostics.EventLog();
                 appLog.Source = "Nuwa Katana Self Host Test";
-                appLog.WriteEntry(string.Format("base address: {0}\n message: {1}\n stack trace: {2}\n", baseAddress, ex.Message, ex.StackTrace),
+                appLog.WriteEntry(string.Format("try index: {0}\nbase address: {1}\n message: {2}\n stack trace: {3}\n", tryIndex, baseAddress, ex.Message, ex.StackTrace),
                     EventLogEntryType.Error);
-                throw ex;
+
+                return false;
             }
+
             frame.SetState(KeyReservedPort, port);
             frame.SetState(KeyBaseAddresss, baseAddress);
             frame.SetState(KeyServerInitiator, serverInitiator);
-
             return true;
         }
 

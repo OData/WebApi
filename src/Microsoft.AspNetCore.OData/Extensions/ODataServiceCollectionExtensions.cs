@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -41,6 +42,9 @@ namespace Microsoft.AspNet.OData.Extensions
             // fluent extensions APIs to IRouteBuilder.
             services.AddSingleton<ODataOptions>();
             services.AddSingleton<DefaultQuerySettings>();
+
+            // Add the batch path mapping class to store batch route names and prefixes.
+            services.AddSingleton<ODataBatchPathMapping>();
 
             // Configure MvcCore to use formatters. The OData formatters do go into the global service
             // provider and get picked up by the AspNetCore MVC framework. However, they ignore non-OData

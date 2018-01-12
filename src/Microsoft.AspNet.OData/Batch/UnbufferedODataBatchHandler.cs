@@ -51,15 +51,8 @@ namespace Microsoft.AspNet.OData.Batch
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
 
-            string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(new WebApiRequestHeaders(request.Headers));
-            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!request.GetConfiguration().HasEnabledContinueOnErrorHeader()))
-            {
-                ContinueOnError = true;
-            }
-            else
-            {
-                ContinueOnError = false;
-            }
+            SetContinueOnError(new WebApiRequestMessage(request), new WebApiRequestHeaders(request.Headers));
+
             try
             {
                 while (batchReader.Read())

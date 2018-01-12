@@ -89,6 +89,21 @@ namespace Microsoft.AspNet.OData.Batch
         public abstract Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Writes the response.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        /// <remarks>
+        /// This method exists to provide a consistent API to <see cref="ODataBatchContent"/>.
+        /// The AspNetCore call does not need the CancellationToken passed in and instead of
+        /// adding an internal call on that side, I opted to add the internal call here since
+        /// the AspNetCore call would ignore the parameter and this one just assumes one.
+        /// </remarks>
+        internal Task WriteResponseAsync(ODataBatchWriter writer)
+        {
+            return WriteResponseAsync(writer, CancellationToken.None);
+        }
+
+        /// <summary>
         /// Gets a value that indicates if the responses in this item are successful.
         /// </summary>
         internal virtual bool IsResponseSuccessful()

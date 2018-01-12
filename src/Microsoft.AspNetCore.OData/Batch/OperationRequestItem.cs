@@ -1,0 +1,52 @@
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+
+namespace Microsoft.AspNet.OData.Batch
+{
+    /// <summary>
+    /// Represents an Operation request.
+    /// </summary>
+    public class OperationRequestItem : ODataBatchRequestItem
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OperationRequestItem"/> class.
+        /// </summary>
+        /// <param name="context">The Operation request context.</param>
+        public OperationRequestItem(HttpContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("context");
+            }
+
+            Context = context;
+        }
+
+        /// <summary>
+        /// Gets the Operation request context.
+        /// </summary>
+        public HttpContext Context { get; private set; }
+
+        /// <summary>
+        /// Sends the Operation request.
+        /// </summary>
+        /// <param name="handler">The handler for processing a message.</param>
+        /// <returns>A <see cref="OperationResponseItem"/>.</returns>
+        public override async Task<ODataBatchResponseItem> SendRequestAsync(RequestDelegate handler)
+        {
+            if (handler == null)
+            {
+                throw Error.ArgumentNull("handler");
+            }
+
+            await SendRequestAsync(handler, Context, null);
+            return new OperationResponseItem(Context);
+        }
+    }
+}

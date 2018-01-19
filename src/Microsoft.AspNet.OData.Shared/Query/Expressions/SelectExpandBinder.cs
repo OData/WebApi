@@ -21,6 +21,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// <summary>
     /// Applies the given <see cref="SelectExpandQueryOption"/> to the given <see cref="IQueryable"/>.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+        Justification = "Class coupling acceptable.")]
     internal class SelectExpandBinder
     {
         private SelectExpandQueryOption _selectExpandQuery;
@@ -187,9 +189,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Type nullablePropertyType = TypeHelper.ToNullable(propertyValue.Type);
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 
-            if (filterClause != null && property.Type.IsCollection())
+            if (filterClause != null)
             {
-                IEdmTypeReference edmElementType = property.Type.AsCollection().ElementType();
+                bool isCollection = property.Type.IsCollection();
+
+                IEdmTypeReference edmElementType = (isCollection ? property.Type.AsCollection().ElementType() : property.Type);
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
                 if (clrElementType == null)
                 {
@@ -197,23 +201,48 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         edmElementType.FullName()));
                 }
 
-                Expression filterSource =
-                    typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
-                        ? Expression.Call(
-                            ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
-                            nullablePropertyValue)
-                        : nullablePropertyValue;
-                // TODO: Implement proper support for $select/$expand after $apply
-                Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer);
-                MethodCallExpression filterResult = Expression.Call(
-                    ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
-                    filterSource,
-                    filterPredicate);
+                Expression filterResult = nullablePropertyValue;
 
-                nullablePropertyType = filterResult.Type;
+                if (isCollection)
+                {
+                    Expression filterSource =
+                        typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
+                            ? Expression.Call(
+                                ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
+                                nullablePropertyValue)
+                            : nullablePropertyValue;
+
+                    // TODO: Implement proper support for $select/$expand after $apply
+                    Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer);
+                    filterResult = Expression.Call(
+                        ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
+                        filterSource,
+                        filterPredicate);
+
+                    nullablePropertyType = filterResult.Type;
+                }
+                else if (_settings.HandleReferenceNavigationPropertyExpandFilter)
+                {
+                    LambdaExpression filterLambdaExpression = FilterBinder.Bind(null, filterClause, clrElementType, _context.RequestContainer) as LambdaExpression;
+                    if (filterLambdaExpression == null)
+                    {
+                        throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionNotLambdaExpression,
+                            property.Name, "LambdaExpression"));
+                    }
+
+                    ParameterExpression filterParameter = filterLambdaExpression.Parameters.First();
+                    Expression predicateExpression = new ReferenceNavigationPropertyExpandFilterVisitor(filterParameter, nullablePropertyValue).Visit(filterLambdaExpression.Body);
+
+                    // create expression similar to: 'predicateExpression == true ? nullablePropertyValue : null'
+                    filterResult = Expression.Condition(
+                        test: predicateExpression,
+                        ifTrue: nullablePropertyValue,
+                        ifFalse: Expression.Constant(value: null, type: nullablePropertyType));
+                }
+
                 if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
                 {
-                    // nullablePropertyValue == null ? null : filterResult
+                    // create expression similar to: 'nullablePropertyValue == null ? null : filterResult'
                     nullablePropertyValue = Expression.Condition(
                         test: Expression.Equal(nullablePropertyValue, Expression.Constant(value: null)),
                         ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
@@ -227,7 +256,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
-                // source == null ? null : propertyValue
+                // create expression similar to: 'source == null ? null : propertyValue'
                 propertyValue = Expression.Condition(
                     test: Expression.Equal(source, Expression.Constant(value: null)),
                     ifTrue: Expression.Constant(value: null, type: nullablePropertyType),
@@ -240,6 +269,28 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return propertyValue;
+        }
+
+        private class ReferenceNavigationPropertyExpandFilterVisitor : ExpressionVisitor
+        {
+            private Expression _source;
+            private ParameterExpression _parameterExpression;
+
+            public ReferenceNavigationPropertyExpandFilterVisitor(ParameterExpression parameterExpression, Expression source)
+            {
+                _source = source;
+                _parameterExpression = parameterExpression;
+            }
+
+            protected override Expression VisitParameter(ParameterExpression node)
+            {
+                if (node != _parameterExpression)
+                {
+                    throw new ODataException(Error.Format(SRResources.ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter, node.Name));
+                }
+
+                return _source;
+            }
         }
 
         // Generates the expression
@@ -262,13 +313,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             wrapperProperty = wrapperType.GetProperty("ModelID");
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
 
+            // Initialize property 'Instance' on the wrapper class
+            // source => new Wrapper { Instance = element }
+            wrapperProperty = wrapperType.GetProperty("Instance");
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+
             if (IsSelectAll(selectExpandClause))
             {
-                // Initialize property 'Instance' on the wrapper class
-                // source => new Wrapper { Instance = element }
-                wrapperProperty = wrapperType.GetProperty("Instance");
-                Contract.Assert(wrapperProperty != null);
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+                wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;
             }
             else
@@ -277,9 +330,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Expression typeName = CreateTypeNameExpression(source, entityType, _model);
                 if (typeName != null)
                 {
-                    wrapperProperty = wrapperType.GetProperty("TypeName");
-                    Contract.Assert(wrapperProperty != null);
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, typeName));
                     isTypeNamePropertySet = true;
                 }
             }

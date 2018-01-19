@@ -110,6 +110,13 @@ namespace Microsoft.AspNet.OData.Query
             }
         }
 
+        /// <summary>
+        /// Honor $filter inside $expand of non-collection navigation property.
+        /// The expanded property is only populated when the filter evaluates to true.
+        /// This setting is false by default.
+        /// </summary>
+        public bool HandleReferenceNavigationPropertyExpandFilter { get; set; }
+
         internal void CopyFrom(ODataQuerySettings settings)
         {
             EnsureStableOrdering = settings.EnsureStableOrdering;
@@ -117,6 +124,7 @@ namespace Microsoft.AspNet.OData.Query
             HandleNullPropagation = settings.HandleNullPropagation;
             PageSize = settings.PageSize;
             ModelBoundPageSize = settings.ModelBoundPageSize;
+            HandleReferenceNavigationPropertyExpandFilter = settings.HandleReferenceNavigationPropertyExpandFilter;
         }
     }
 }

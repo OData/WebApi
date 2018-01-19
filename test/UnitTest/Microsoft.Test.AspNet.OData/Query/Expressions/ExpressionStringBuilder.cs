@@ -54,7 +54,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (node.Expression.NodeType == ExpressionType.Constant)
+            // If it is a static member expression the Expression is null.
+            if (node.Expression == null && node.NodeType == ExpressionType.MemberAccess)
+            {
+                Visit(node.Expression);
+                Out(node.Member.DeclaringType.Name + "." + node.Member.Name);
+            }
+            else if (node.Expression.NodeType == ExpressionType.Constant)
             {
                 Visit(node.Expression);
             }

@@ -868,6 +868,12 @@
   <data name="PropertyOrPathWasRemovedFromContext" xml:space="preserve">
     <value>Property or path {0} isn't available in the current context. It was removed in earlier transformation.</value>
   </data>
+  <data name="ExpandFilterExpressionNotLambdaExpression" xml:space="preserve">
+    <value>$filter in $expand of reference navigation property '{0}' is not expected type '{1}'</value>
+  </data>
+  <data name="ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter" xml:space="preserve">
+    <value>Found unexpected parameter '{0}'.</value>
+  </data>
   <data name="MissingODataServices" xml:space="preserve">
     <value>Cannot find '{0}'. The OData services have not been configured. Are you missing a call to AddOData()?</value>
   </data>

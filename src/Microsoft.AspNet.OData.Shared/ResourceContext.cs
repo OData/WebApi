@@ -10,6 +10,8 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -219,6 +221,12 @@ namespace Microsoft.AspNet.OData
             if (edmStructruredObject != null)
             {
                 return edmStructruredObject.Instance;
+            }
+
+            SelectExpandWrapper selectExpandWrapper = EdmObject as SelectExpandWrapper;
+            if (selectExpandWrapper != null && selectExpandWrapper.UntypedInstance != null)
+            {
+                return selectExpandWrapper.UntypedInstance;
             }
 
             Type clrType = EdmLibHelpers.GetClrType(StructuredType, EdmModel);

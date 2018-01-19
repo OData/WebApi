@@ -152,6 +152,23 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Honor $filter inside $expand of non-collection navigation property.
+        /// The expanded property is only populated when the filter evaluates to true.
+        /// This setting is false by default.
+        /// </summary>
+        public bool HandleReferenceNavigationPropertyExpandFilter
+        {
+            get
+            {
+                return _querySettings.HandleReferenceNavigationPropertyExpandFilter;
+            }
+            set
+            {
+                _querySettings.HandleReferenceNavigationPropertyExpandFilter = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the query parameters that are allowed in queries.
         /// </summary>
         /// <value>The default includes all query options: $filter, $skip, $top, $orderby, $expand, $select, $count,

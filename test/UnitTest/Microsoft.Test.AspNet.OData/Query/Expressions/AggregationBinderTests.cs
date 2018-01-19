@@ -60,6 +60,15 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
+        [Fact]
+        public void SingleDynamicGroupBy()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "groupby((ProductProperty))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = ProductProperty, Value = Convert(IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null)), }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+
 
         [Fact]
         public void SingleSum()
@@ -71,12 +80,30 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Fact]
+        public void SingleDynamicSum()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "aggregate(ProductProperty with sum as ProductProperty)",
+                ".GroupBy($it => new NoGroupByWrapper())"
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = ProductProperty, Value = Convert(Convert($it.AsQueryable().Sum($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null).SafeConvertToDecimal()))), }, })");
+        }
+
+        [Fact]
         public void SingleMin()
         {
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with min as SupplierID)",
                 ".GroupBy($it => new NoGroupByWrapper())"
                 + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Min($it => $it.SupplierID)), }, })");
+        }
+
+        [Fact]
+        public void SingleDynamicMin()
+        {
+            var filters = VerifyQueryDeserialization<DynamicProduct>(
+                "aggregate(ProductProperty with min as MinProductProperty)",
+                ".GroupBy($it => new NoGroupByWrapper())"
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = MinProductProperty, Value = Convert($it.AsQueryable().Min($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null))), }, })");
         }
 
         [Fact]

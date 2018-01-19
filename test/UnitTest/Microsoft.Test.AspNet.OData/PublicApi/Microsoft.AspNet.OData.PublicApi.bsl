@@ -186,6 +186,10 @@ public class Microsoft.AspNet.OData.ClrTypeAnnotation {
 	System.Type ClrType  { public get; }
 }
 
+public class Microsoft.AspNet.OData.ConcurrencyPropertiesAnnotation : System.Collections.Concurrent.ConcurrentDictionary`2[[Microsoft.OData.Edm.IEdmNavigationSource],[System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Edm.IEdmStructuralProperty]]]], ICollection, IDictionary, IEnumerable, IDictionary`2, IReadOnlyDictionary`2, ICollection`1, IEnumerable`1, IReadOnlyCollection`1 {
+	public ConcurrencyPropertiesAnnotation ()
+}
+
 public class Microsoft.AspNet.OData.CustomAggregateMethodAnnotation {
 	public CustomAggregateMethodAnnotation ()
 
@@ -375,6 +379,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : System.Web.Http.Filte
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
+	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	int MaxAnyAllExpressionDepth  { public get; public set; }
 	int MaxExpansionDepth  { public get; public set; }
 	int MaxNodeCount  { public get; public set; }
@@ -980,6 +985,7 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	bool NotFilterable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }
@@ -2330,6 +2336,7 @@ public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
+	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
 }
 
@@ -3214,6 +3221,7 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
 
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
+	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
 }
 

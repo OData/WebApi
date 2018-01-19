@@ -178,6 +178,68 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                             new Dictionary<string, object> { { "Website", null} },
                         }
                     },
+                    {
+                        "aggregate(IntProp with max as MaxIntProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxIntProp", 2} }
+                        }
+                    },
+                    {
+                        "aggregate(IntProp with min as MinIntProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MinIntProp", 1} }
+                        }
+                    },
+                    {
+                        "aggregate(IntProp with countdistinct as DistinctIntProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "DistinctIntProp", 3L} }
+                        }
+                    },
+                    {
+                        "aggregate(IntProp with sum as TotalIntProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalIntProp", 3M} }
+                        }
+                    },
+                    {
+                        "aggregate(IntProp with average as TotalIntProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalIntProp", 1.5M} }
+                        }
+                    },
+                    {
+                        "aggregate(MixedProp with sum as TotalMixedProp)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalMixedProp", 1M} }
+                        }
+                    },
+                    {
+                        "groupby((StringProp), aggregate(IntProp with min as MinIntProp))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "StringProp", "Test1" }, { "MinIntProp", 1} },
+                            new Dictionary<string, object> { { "StringProp", "Test2" }, { "MinIntProp", 2} },
+                            new Dictionary<string, object> { { "StringProp", "Test3" }, { "MinIntProp", null} },
+                            new Dictionary<string, object> { { "StringProp", null }, { "MinIntProp", null} },
+                        }
+                    },
+                    {
+                        "groupby((StringProp), aggregate(IntProp with min as MinIntProp))/groupby((StringProp))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "StringProp", "Test1" } },
+                            new Dictionary<string, object> { { "StringProp", "Test2" } },
+                            new Dictionary<string, object> { { "StringProp", "Test3" } },
+                            new Dictionary<string, object> { { "StringProp", null } },
+                        }
+                    },
                 };
             }
         }
@@ -537,6 +599,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                     Name = "Lowest",
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } }
                 };
                 c.Orders = new List<Order>
                 {
@@ -551,7 +614,8 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                     Name = "Highest",
                     SharePrice = 2.5M,
                     Address = new Address { City = "seattle", State = "WA" },
-                    Aliases = new List<string> { "alias2", "alias2" }
+                    Aliases = new List<string> { "alias2", "alias2" },
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } }
                 };
                 customerList.Add(c);
 
@@ -560,7 +624,8 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                     CustomerId = 3,
                     Name = "Middle",
                     Address = new Address { City = "hobart" },
-                    Aliases = new List<string> { "alias2", "alias34", "alias31" }
+                    Aliases = new List<string> { "alias2", "alias34", "alias31" },
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } }
                 };
                 customerList.Add(c);
 
@@ -568,7 +633,7 @@ namespace Microsoft.Test.AspNet.OData.OData.Query
                 {
                     CustomerId = 4,
                     Name = "Lowest",
-                    Aliases = new List<string> { "alias34", "alias4" }
+                    Aliases = new List<string> { "alias34", "alias4" },
                 };
                 customerList.Add(c);
 

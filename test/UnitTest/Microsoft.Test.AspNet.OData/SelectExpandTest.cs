@@ -41,6 +41,7 @@ namespace Microsoft.Test.AspNet.OData
                     typeof(SelectExpandTestSpecialCustomer), typeof(SelectExpandTestCustomerWithAlias),
                     typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
                     typeof(SelectExpandTestSpecialOrderWithAlias),
+                    typeof(ReferenceNavigationPropertyExpandFilterController),
                 }.GetHttpConfiguration();
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -53,6 +54,7 @@ namespace Microsoft.Test.AspNet.OData
                 "odata-alias2-inheritance",
                 GetModelWithCustomerAliasAndInheritance());
             _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
+            _configuration.MapODataServiceRoute("odata-expandfilter", "odata-expandfilter", GetModelWithReferenceNavigationPropertyFilter());
             _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
             _configuration.EnableDependencyInjection();
 
@@ -99,7 +101,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
-        public async Task SelectExpand_Works_WithNestedFilter()
+        public async Task SelectExpand_Works_Collection_WithNestedFilter()
         {
             // Arrange
             var uri = "/odata/SelectExpandTestCustomers?$expand=Orders($filter=ID eq 28)";
@@ -114,6 +116,42 @@ namespace Microsoft.Test.AspNet.OData
             var orders = customer.Orders;
             Assert.Single(orders);
             Assert.Equal(10, (int)orders[0].Amount);
+        }
+
+        [Fact]
+        public async Task SelectExpand_Works_Single_NavigationPropertyExpandFilterFalse_WithNestedFilter()
+        {
+            // Arrange
+            var uri = "/odata/SelectExpandTestCustomers?$expand=PreviousCustomer($filter=ID ne 43)&$filter=ID eq 44";
+
+            // Act
+            var response = await GetResponse(uri, AcceptJson);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            dynamic result = JObject.Parse(content);
+            var customer = result.value[0];
+            Assert.Equal(44, (int)customer.ID);
+            Assert.Equal(43, (int)customer.PreviousCustomer.ID);
+        }
+
+        [Fact]
+        public async Task SelectExpand_Works_Single_NavigationPropertyExpandFilterTrue_WithNestedFilter()
+        {
+            // Arrange
+            var uri = "/odata-expandfilter/ReferenceNavigationPropertyExpandFilter?$expand=PreviousCustomer($filter=ID ne 43)&$filter=ID eq 44";
+
+            // Act
+            var response = await GetResponse(uri, AcceptJson);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            dynamic result = JObject.Parse(content);
+            var customer = result.value[0] as JObject;
+            Assert.Equal(44, (int)customer["ID"]);
+            Assert.False(customer["PreviousCustomer"].HasValues);
         }
 
         [Fact]
@@ -431,6 +469,13 @@ namespace Microsoft.Test.AspNet.OData
 
             return builder.GetEdmModel();
         }
+
+        private IEdmModel GetModelWithReferenceNavigationPropertyFilter()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntitySet<SelectExpandTestCustomer>("ReferenceNavigationPropertyExpandFilter");
+            return builder.GetEdmModel();
+        }
     }
 
     public class SelectExpandTestCustomer
@@ -653,6 +698,15 @@ namespace Microsoft.Test.AspNet.OData
             IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers
                 .Where(c => c.ID == id).AsQueryable();
             return SingleResult.Create(singleCustomer);
+        }
+    }
+
+    public class ReferenceNavigationPropertyExpandFilterController : ODataController
+    {
+        [EnableQuery(HandleReferenceNavigationPropertyExpandFilter = true)]
+        public IHttpActionResult Get()
+        {
+            return Ok(SelectExpandTestCustomer.Customers);
         }
     }
 

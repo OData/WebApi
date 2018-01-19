@@ -28,8 +28,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     {
         private const string ODataItParameterName = "$it";
 
-        private static readonly string _dictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
-
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
         private Dictionary<string, ParameterExpression> _lambdaParameters;
         private Type _filterType;
@@ -266,7 +264,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             var propertyAccessExpression = BindPropertyAccessExpression(openNode, prop);
             var readDictionaryIndexerExpression = Expression.Property(propertyAccessExpression,
-                _dictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
+                DictionaryStringObjectIndexerName, Expression.Constant(openNode.Name));
             var containsKeyExpression = Expression.Call(propertyAccessExpression,
                 propertyAccessExpression.Type.GetMethod("ContainsKey"), Expression.Constant(openNode.Name));
             var nullExpression = Expression.Constant(null);
@@ -303,26 +301,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 propertyAccessExpression = Expression.Property(source, prop.Name);
             }
             return propertyAccessExpression;
-        }
-
-        private PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
-        {
-            IEdmStructuredType edmStructuredType;
-            var edmTypeReference = openNode.Source.TypeReference;
-            if (edmTypeReference.IsEntity())
-            {
-                edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
-            }
-            else if (edmTypeReference.IsComplex())
-            {
-                edmStructuredType = edmTypeReference.AsComplex().ComplexDefinition();
-            }
-            else
-            {
-                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
-            }
-            var prop = EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
-            return prop;
         }
 
         /// <summary>
@@ -723,8 +701,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
-            Justification = "These are simple conversion function and cannot be split up.")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 
+            Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
             switch (node.Name)
@@ -792,6 +770,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 case ClrCanonicalFunctions.TimeFunctionName:
                     return BindTime(node);
+
+                case ClrCanonicalFunctions.NowFunctionName:
+                    return BindNow(node);
 
                 default:
                     // Get Expression of custom binded method.
@@ -1048,6 +1029,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // EF doesn't support new Date(int, int, int), also doesn't support other property access, for example DateTime.Date.
             // Therefore, we just return the source (DateTime or DateTimeOffset).
             return arguments[0];
+        }
+
+        private Expression BindNow(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert("now" == node.Name);
+
+            // Function Now() does not take any arguemnts.
+            Expression[] arguments = BindArguments(node.Parameters);
+            Contract.Assert(arguments.Length == 0);
+
+            return Expression.Property(null, typeof(DateTimeOffset), "UtcNow");
         }
 
         private Expression BindTime(SingleValueFunctionCallNode node)

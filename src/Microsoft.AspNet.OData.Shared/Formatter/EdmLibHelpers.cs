@@ -31,8 +31,6 @@ namespace Microsoft.AspNet.OData.Formatter
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 
-        private static ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> _concurrencyProperties;
-
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]
             {
@@ -789,8 +787,16 @@ namespace Microsoft.AspNet.OData.Formatter
             Contract.Assert(model != null);
             Contract.Assert(navigationSource != null);
 
+            // Ensure that concurrency properties cache is attached to model as an annotation to avoid expensive calculations each time
+            ConcurrencyPropertiesAnnotation concurrencyProperties = model.GetAnnotationValue<ConcurrencyPropertiesAnnotation>(model);
+            if (concurrencyProperties == null)
+            {
+                concurrencyProperties = new ConcurrencyPropertiesAnnotation();
+                model.SetAnnotationValue(model, concurrencyProperties);
+            }
+
             IEnumerable<IEdmStructuralProperty> cachedProperties;
-            if (_concurrencyProperties != null && _concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
+            if (concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
             {
                 return cachedProperties;
             }
@@ -827,12 +833,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 }
             }
 
-            if (_concurrencyProperties == null)
-            {
-                _concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
-            }
-
-            _concurrencyProperties[navigationSource] = results;
+            concurrencyProperties[navigationSource] = results;
             return results;
         }
 

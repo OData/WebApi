@@ -2,8 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Query;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
@@ -44,6 +46,11 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
             }
 
             var columnAttribute = attribute as ColumnAttribute;
+            if (columnAttribute != null && columnAttribute.Order > 0)
+            {
+                primitiveProperty.Order = columnAttribute.Order;
+            }
+
             if (columnAttribute == null || columnAttribute.TypeName == null)
             {
                 return; // ignore the column type

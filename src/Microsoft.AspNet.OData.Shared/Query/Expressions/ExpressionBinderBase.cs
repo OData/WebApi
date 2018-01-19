@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public abstract class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+        internal static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         internal static readonly Expression NullConstant = Expression.Constant(null);
         internal static readonly Expression FalseConstant = Expression.Constant(false);
@@ -503,6 +504,31 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return path;
         }
 
+        /// <summary>
+        /// Gets property for dynamic properties dictionary.
+        /// </summary>
+        /// <param name="openNode"></param>
+        /// <returns>Returns CLR property for dynamic properties container.</returns>
+        protected PropertyInfo GetDynamicPropertyContainer(SingleValueOpenPropertyAccessNode openNode)
+        {
+            IEdmStructuredType edmStructuredType;
+            IEdmTypeReference edmTypeReference = openNode.Source.TypeReference;
+            if (edmTypeReference.IsEntity())
+            {
+                edmStructuredType = edmTypeReference.AsEntity().EntityDefinition();
+            }
+            else if (edmTypeReference.IsComplex())
+            {
+                edmStructuredType = edmTypeReference.AsComplex().ComplexDefinition();
+            }
+            else
+            {
+                throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, openNode.Kind, typeof(FilterBinder).Name);
+            }
+
+            return EdmLibHelpers.GetDynamicPropertyDictionary(edmStructuredType, Model);
+        }
+
         private static Expression CheckIfArgumentsAreNull(Expression[] arguments)
         {
             if (arguments.Any(arg => arg == NullConstant))
@@ -852,6 +878,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 MemberExpression memberAccess = expression as MemberExpression;
                 Contract.Assert(memberAccess != null);
+
+                PropertyInfo propertyInfo = memberAccess.Member as PropertyInfo;
+                if (propertyInfo != null && propertyInfo.GetMethod.IsStatic)
+                {
+                    return propertyInfo.GetValue(new object());
+                }
+
                 if (memberAccess.Expression.NodeType == ExpressionType.Constant)
                 {
                     ConstantExpression constant = memberAccess.Expression as ConstantExpression;

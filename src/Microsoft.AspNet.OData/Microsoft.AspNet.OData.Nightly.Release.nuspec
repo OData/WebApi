@@ -10,7 +10,7 @@
     <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Web API.</summary>
     <language>en-US</language>
     <projectUrl>http://odata.github.io</projectUrl>
-    <licenseUrl>http://www.microsoft.com/web/webpi/eula/net_library_eula_ENU.htm</licenseUrl>
+    <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
     <dependencies>

@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Runtime>
+    <edmx:ConceptualModels>
+      <Schema Namespace="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+        <EntityType Name="Window">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Name" Type="Edm.String" />
+          <Property Name="CurrentShape" Type="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape" />
+          <Property Name="OptionalShapes" Type="Collection(Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape)" />
+          <NavigationProperty Name="Parent" Type="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Window" />
+        </EntityType>
+        <ComplexType Name="Shape" Abstract="true">
+          <Property Name="HasBorder" Type="Edm.Boolean" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Polygon" BaseType="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape">
+          <Property Name="Vertexes" Type="Collection(Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Point)" />
+        </ComplexType>
+        <ComplexType Name="Rectangle" BaseType="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon">
+          <Property Name="TopLeft" Type="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Point" />
+          <Property Name="Width" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Height" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Point">
+          <Property Name="X" Type="Edm.Int32" Nullable="false" />
+          <Property Name="Y" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <ComplexType Name="Circle" BaseType="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape">
+          <Property Name="Center" Type="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Point" />
+          <Property Name="Radius" Type="Edm.Int32" Nullable="false" />
+        </ComplexType>
+        <EntityContainer Name="Container">
+          <EntitySet Name="Windows" EntityType="Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Window">
+            <NavigationPropertyBinding Path="Parent" Target="Windows" />
+          </EntitySet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+  </edmx:Runtime>
+</edmx:Edmx>

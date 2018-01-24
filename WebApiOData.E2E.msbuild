@@ -14,7 +14,7 @@
     <NuGetExeFile>$(MSBuildThisFileDirectory)sln\.nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
 
-  <UsingTask AssemblyFile=".\sln\packages\xunit.1.9.2\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+  <UsingTask AssemblyFile=".\sln\packages\xunit.runner.msbuild.2.3.1\build\net452\xunit.runner.msbuild.net452.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
   
   <ItemGroup>
     <SolutionsToBuild Include=".\sln\WebApiOData.E2E.sln">
@@ -24,7 +24,7 @@
 
   <!-- Test assemblies -->
   <ItemGroup>
-    <TestAssembiles Include="$(OutputPath)\WebStack.QA.Test.OData.dll" />
+    <TestAssembiles Include="$(OutputPath)Microsoft.Test.E2E.AspNet.OData.dll" />
   </ItemGroup>
   
   <Target Name="DownloadNuGet">

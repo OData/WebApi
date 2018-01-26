@@ -255,7 +255,7 @@ namespace System.Web.OData.Formatter
             // Act & Assert
             Assert.Throws<ODataException>(
                 () => new ODataResourceDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
-                "An resource with type 'System.Web.OData.Builder.TestModels.Motorcycle' was found, " +
+                "A resource with type 'System.Web.OData.Builder.TestModels.Motorcycle' was found, " +
                 "but it is not assignable to the expected type 'System.Web.OData.Builder.TestModels.Car'. " +
                 "The type specified in the resource must be equal to either the expected type or a derived type.");
         }

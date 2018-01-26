@@ -284,7 +284,7 @@ namespace System.Web.OData.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
                 "http://localhost/{0}({1}={2})",
                 action,
@@ -316,9 +316,9 @@ namespace System.Web.OData.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
-                "http://localhost/GetNullableFlagsEnum(flagsEnum={0})", 
+                "http://localhost/GetNullableFlagsEnum(flagsEnum={0})",
                 value == null ? "null" : Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
             HttpResponseMessage response = client.GetAsync(url).Result;
 
@@ -330,8 +330,15 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
+        // This test case uses an invalid string that cannot be resolved to any values in the specified enum type.
+        // For WebApi consuming ODL 7.4, error code is HTTP BadRequest due to exception thrown during WebApi's attempt to
+        // materialize the enum from string for action invocation. Note that WebApi's request path processing doesn't throw.
+        //
+        // For WebApi consuming ODL <7.4, error code is HTTP NotFound due to exception thrown from ODL during
+        // WebApi's request path processing.
+        // to process
         [InlineData("abc", "GetEnum", "simpleEnum")]
-        public void ResourceIsNotFound_IfContainsInvalidEnum(object value, string action, string parameterName)
+        public void IsBadRequest_ForODL74_IfContainsInvalidStringAsEnum(object value, string action, string parameterName)
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
@@ -345,7 +352,7 @@ namespace System.Web.OData.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
                 "http://localhost/{0}({1}={2})",
                 action,
@@ -354,7 +361,37 @@ namespace System.Web.OData.Formatter
             HttpResponseMessage response = client.GetAsync(url).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        }
+
+        [Theory]
+        // This test case works for WebApi consuming ODL-7.4 which supports string to Enum conversion (https://github.com/OData/odata.net/pull/968).
+        // But for WebApi consuming ODL <7.4, the response is HTTP NotFound.
+        [InlineData("First", "GetEnum", "simpleEnum")]
+        public void DefaultODataPathHandler_WorksForODL74_IfContainsStringAsEnum(object value, string action, string parameterName)
+        {
+            // Arrange
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            string url = String.Format(
+                "http://localhost/{0}({1}={2})",
+                action,
+                parameterName,
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
@@ -374,7 +411,7 @@ namespace System.Web.OData.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format("http://localhost/{0}({1}=@p)?@p={2}", action, parameterName, parameterValue);
             HttpResponseMessage response = client.GetAsync(url).Result;
 

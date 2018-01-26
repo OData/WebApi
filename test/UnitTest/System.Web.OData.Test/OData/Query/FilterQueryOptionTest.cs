@@ -742,7 +742,6 @@ namespace System.Web.OData.Query
         [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataException))]
-        [InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
         [InlineData("cast(Edm.Int32) eq '123'", typeof(ODataException))]
         public void ApplyWithCast_Throws_WithInvalidFilter(string filter, Type exceptionType)
         {
@@ -753,11 +752,30 @@ namespace System.Web.OData.Query
             IEnumerable<DataTypes> castModels = CastModelTestData;
 
             // Act & Assert
-            Assert.Throws(
-                exceptionType,
-                () => filterOption.ApplyTo(
+            if (exceptionType != null)
+            {
+                Assert.Throws(
+                    exceptionType,
+                    () => filterOption.ApplyTo(
+                        castModels.AsQueryable(),
+                        new ODataQuerySettings {HandleNullPropagation = HandleNullPropagationOption.True}));
+            }
+        }
+
+        [Fact]
+        public void ApplyWithCast_ShouldWork_WithStringToEnumConversionFilter()
+        {
+            // Arrange
+            string filter = "cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'";
+            var model = GetCastModel();
+            var context = new ODataQueryContext(model, typeof(DataTypes)) { RequestContainer = new MockContainer() };
+            var filterOption = new FilterQueryOption(filter, context);
+            IEnumerable<DataTypes> castModels = CastModelTestData;
+
+            // Act & Assert
+            filterOption.ApplyTo(
                     castModels.AsQueryable(),
-                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True }));
+                    new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
         }
 
         [Theory]

@@ -227,10 +227,10 @@ namespace System.Web.OData
 
         [Theory]
         [InlineData("gender='Male'", true, HttpStatusCode.OK)]
-        [InlineData("gender='Male'", false, HttpStatusCode.NotFound)]
+        [InlineData("gender='Male'", false, HttpStatusCode.OK)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK)]
-        [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.NotFound)]
+        [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.BadRequest)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
         public void ExtensionResolver_Works_EnumPrefixFree(string parameter, bool enableEnumPrefix, HttpStatusCode statusCode)
         {
@@ -267,9 +267,9 @@ namespace System.Web.OData
 
         [Theory]
         [InlineData("$filter=Gender eq 'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
-        [InlineData("$filter=Gender eq 'Male'", false, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq 'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
         [InlineData("$filter=Gender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=Gender eq 'Female'", false, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq 'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
         [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
         [InlineData("$filter=Gender eq System.Web.OData.TestCommon.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]

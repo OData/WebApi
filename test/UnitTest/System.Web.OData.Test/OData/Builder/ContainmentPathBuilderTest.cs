@@ -71,6 +71,36 @@ namespace System.Web.OData.Builder
             Assert.Equal(expectedContainingPath, uri.ToString());
         }
 
+        [Theory]
+        // No $-prefix query options
+        [InlineData("People(123)?expand=MyPermanentAccount(select=Id,MyPaymentInstruments)")]
+        // Mixed $-prefix query options
+        [InlineData("People(123)?$expand=MyPermanentAccount(select=Id,MyPaymentInstruments)")]
+        // $-prefix query options; key as segment in path
+        [InlineData("People/123?$expand=MyPermanentAccount($select=Id,MyPaymentInstruments)")]
+        public void TryEnableNoDollarSignSystemQueryOption(string relativeUri)
+        {
+            // Create parser specifying optional-$-sign setting.
+            var parser = new ODataUriParser(GetModel(), new Uri(relativeUri, UriKind.Relative))
+            {
+                EnableNoDollarQueryOptions = true
+            };
+
+            // Verify path is parsed correctly.
+            Microsoft.OData.UriParser.ODataPath path = parser.ParsePath();
+            Xunit.Assert.NotNull(path);
+            Xunit.Assert.Equal(path.Count, 2);
+
+            // Verify expand & select clause is parsed correctly.
+            SelectExpandClause result = parser.ParseSelectAndExpand();
+            Xunit.Assert.NotNull(result);
+            Xunit.Assert.Equal(result.SelectedItems.Count(), 1);
+            ExpandedNavigationSelectItem selectItems = (result.SelectedItems.First() as ExpandedNavigationSelectItem);
+            Xunit.Assert.NotNull(selectItems);
+            Assert.Equal(selectItems.NavigationSource.Name, "PermanentAccount");
+            Xunit.Assert.Equal(selectItems.SelectAndExpand.SelectedItems.Count(), 2);
+        }
+
         private IEdmModel GetModel()
         {
             if (_model != null)
@@ -129,7 +159,7 @@ namespace System.Web.OData.Builder
             var accounts = container.AddEntitySet("Accounts", account);
 
             var paymentInstruments = accounts.FindNavigationTarget(myPaymentInstruments) as EdmNavigationSource;
-            Assert.NotNull(paymentInstruments);
+            Xunit.Assert.NotNull(paymentInstruments);
             paymentInstruments.AddNavigationTarget(billingAddresses, addresses);
 
             // EntityType: Person

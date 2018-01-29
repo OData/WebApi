@@ -99,6 +99,32 @@ namespace System.Web.OData.Query
             Assert.Contains("[{\"Name\":\"Highest\",\"Add", response.Content.ReadAsStringAsync().Result);
         }
 
+        [Theory]
+        [InlineData("?filter=id eq 33", true)]
+        [InlineData("?filter=Id eq 33", false)]
+        public void QueryComposition_WorkAsExpect_ForOptionalDollarSignPrefixForSystemQuery(
+            string noDollarSignSystemQuery, bool enableCaseInsensitive)
+        {
+            // Arrange
+            ODataUriResolver resolver = new ODataUriResolver
+            {
+//TODO biaol add the EnableNoDollarSignPrefixSystemQueryOption setting the after wiring in required ODL update.
+//                EnableNoDollarSignPrefixSystemQueryOption = true
+                EnableCaseInsensitive = enableCaseInsensitive
+
+            };
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", true, resolver));
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomer" + noDollarSignSystemQuery);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("[{\"Name\":\"Highest\",\"Add", response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public void ODataQueryOptionsOfT_Works()
         {
@@ -214,7 +240,7 @@ namespace System.Web.OData.Query
             Assert.Equal(expectedResults, results);
         }
 
-        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel, 
+        private static HttpConfiguration InitializeConfiguration(string controllerName, bool useCustomEdmModel,
             ODataUriResolver resolver = null)
         {
             var controllers = new[]

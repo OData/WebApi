@@ -44,6 +44,8 @@ namespace System.Web.OData.Query
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
+        private bool _enableNoDollarSignQueryOption = false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -70,22 +72,38 @@ namespace System.Web.OData.Query
             Context = context;
             Request = request;
 
+            ODataUriResolver uriResolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
+
+            //TODO biaol remove the hard coding after wiring in required ODL update.
+            _enableNoDollarSignQueryOption = true/*uriResolver.EnableNoDollarSignPrefixSystemQueryOption*/;
+
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
+            // OData query parameters are normalized with the $-sign prefixes when the
+            // <code>EnableNoDollarSignPrefixSystemQueryOption</code> option is used.
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters = GetODataQueryParameters();
+            IDictionary<string, string> normalizedqueryParameters = GetODataQueryParameters();
 
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                queryParameters);
+                normalizedqueryParameters);
 
-            _queryOptionParser.Resolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
+            _queryOptionParser.Resolver = uriResolver;
 
-            BuildQueryOptions(queryParameters);
+            BuildQueryOptions(normalizedqueryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }
+
+//        /// <summary>
+//        ///  Option for optional $-sign for system query options <see cref="ODataQueryContext"/>
+//        /// </summary>
+//        public bool EnableNoDollarSignQueryOption
+//        {
+//            get { return _enableNoDollarSignQueryOption; }
+//            set { this._enableNoDollarSignQueryOption = value; }
+//        }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>
@@ -184,23 +202,40 @@ namespace System.Web.OData.Query
         }
 
         /// <summary>
-        /// Check if the given query option is an OData system query option.
+        /// Check if the given query option is an OData system query option using $-prefix-required theme.
         /// </summary>
         /// <param name="queryOptionName">The name of the query option.</param>
         /// <returns>Returns <c>true</c> if the query option is an OData system query option.</returns>
         public static bool IsSystemQueryOption(string queryOptionName)
         {
-            return queryOptionName == "$orderby" ||
-                 queryOptionName == "$filter" ||
-                 queryOptionName == "$top" ||
-                 queryOptionName == "$skip" ||
-                 queryOptionName == "$count" ||
-                 queryOptionName == "$expand" ||
-                 queryOptionName == "$select" ||
-                 queryOptionName == "$format" ||
-                 queryOptionName == "$skiptoken" ||
-                 queryOptionName == "$deltatoken" ||
-                 queryOptionName == "$apply";
+            return IsSystemQueryOption(queryOptionName, false);
+        }
+
+        /// <summary>
+        /// Check if the given query option is an OData system query option.
+        /// </summary>
+        /// <param name="queryOptionName">The name of the query option.</param>
+        /// <param name="isDollarSignOptional">Whether the optional-$-prefix scheme is used for OData system query.</param>
+        /// <returns>Returns <c>true</c> if the query option is an OData system query option.</returns>
+        public static bool IsSystemQueryOption(string queryOptionName, bool isDollarSignOptional)
+        {
+            string fixedQueryOptionName = queryOptionName;
+            if (isDollarSignOptional && !queryOptionName.StartsWith("$", StringComparison.Ordinal))
+            {
+                fixedQueryOptionName = "$" + queryOptionName;
+            }
+
+            return fixedQueryOptionName.Equals("$orderby", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$filter", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$top", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$skip", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$count", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$expand", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$select", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$format", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$skiptoken", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$deltatoken", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$apply", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -212,13 +247,17 @@ namespace System.Web.OData.Query
             Justification = "Need lower case string here.")]
         public bool IsSupportedQueryOption(string queryOptionName)
         {
-            if (!_queryOptionParser.Resolver.EnableCaseInsensitive)
+            ODataUriResolver resolver = _queryOptionParser != null
+                ? _queryOptionParser.Resolver
+                : Request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
+
+            if (!resolver.EnableCaseInsensitive)
             {
-                return IsSystemQueryOption(queryOptionName);
+                return IsSystemQueryOption(queryOptionName, this._enableNoDollarSignQueryOption);
             }
 
             string lowcaseQueryOptionName = queryOptionName.ToLowerInvariant();
-            return IsSystemQueryOption(lowcaseQueryOptionName);
+            return IsSystemQueryOption(lowcaseQueryOptionName, this._enableNoDollarSignQueryOption);
         }
 
         /// <summary>
@@ -704,10 +743,38 @@ namespace System.Web.OData.Query
 
         private IDictionary<string, string> GetODataQueryParameters()
         {
-            return Request.GetQueryNameValuePairs()
-                .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal) ||
-                    p.Key.StartsWith("@", StringComparison.Ordinal))
-                .ToDictionary(p => p.Key, p => p.Value);
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string> kvp in Request.GetQueryNameValuePairs())
+            {
+                // Check supported system query options per optional $-sign option.
+                if (!_enableNoDollarSignQueryOption)
+                {
+                    // This is the original case for required $-sign prefix.
+                    if (kvp.Key.StartsWith("$", StringComparison.Ordinal))
+                    {
+                        result.Add(kvp.Key, kvp.Value);
+                    }
+                }
+                else
+                {
+                    if (IsSupportedQueryOption(kvp.Key))
+                    {
+                        // Normalized the supported system query key by adding the $-prefix if needed.
+                        result.Add(
+                            !kvp.Key.StartsWith("$", StringComparison.Ordinal) ? "$" + kvp.Key : kvp.Key,
+                            kvp.Value);
+                    }
+                }
+
+                // check parameter alias
+                if (kvp.Key.StartsWith("@", StringComparison.Ordinal))
+                {
+                    result.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return result;
         }
 
         private string GetAutoSelectRawValue()

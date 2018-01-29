@@ -511,7 +511,17 @@ namespace System.Web.OData.Query.Expressions
                 Contract.Assert(strValue != null);
 
                 constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-                value = Enum.Parse(constantType, strValue);
+
+                try
+                {
+                    value = Enum.Parse(constantType, strValue);
+                }
+                catch (ArgumentException e)
+                {
+                    throw new NotSupportedException(
+                        Error.Format(SRResources.ModelBinderUtil_ValueCannotBeEnum, strValue, constantType),
+                        e);
+                }
             }
 
             if (constantNode.TypeReference != null &&
@@ -697,7 +707,7 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {

@@ -73,9 +73,7 @@ namespace System.Web.OData.Query
             Request = request;
 
             ODataUriResolver uriResolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
-
-            //TODO biaol remove the hard coding after wiring in required ODL update.
-            _enableNoDollarSignQueryOption = true/*uriResolver.EnableNoDollarSignPrefixSystemQueryOption*/;
+            _enableNoDollarSignQueryOption = uriResolver.EnableNoDollarSignPrefixSystemQueryOption;
 
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             // OData query parameters are normalized with the $-sign prefixes when the
@@ -95,15 +93,6 @@ namespace System.Web.OData.Query
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }
-
-//        /// <summary>
-//        ///  Option for optional $-sign for system query options <see cref="ODataQueryContext"/>
-//        /// </summary>
-//        public bool EnableNoDollarSignQueryOption
-//        {
-//            get { return _enableNoDollarSignQueryOption; }
-//            set { this._enableNoDollarSignQueryOption = value; }
-//        }
 
         /// <summary>
         ///  Gets the given <see cref="ODataQueryContext"/>
@@ -747,7 +736,7 @@ namespace System.Web.OData.Query
 
             foreach (KeyValuePair<string, string> kvp in Request.GetQueryNameValuePairs())
             {
-                // Check supported system query options per optional $-sign option.
+                // Check supported system query options per $-sign-prefix option.
                 if (!_enableNoDollarSignQueryOption)
                 {
                     // This is the original case for required $-sign prefix.

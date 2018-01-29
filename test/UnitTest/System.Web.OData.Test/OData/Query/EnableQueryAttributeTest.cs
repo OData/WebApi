@@ -320,16 +320,17 @@ namespace System.Web.OData.Query
             Assert.Equal(3L, ((ObjectContent)context.Response.Content).Value);
         }
 
-        //TODO biaol restore this after we can set the <code>ODataQueryOptions._enableNoDollarSignQueryOption</code> using
-        // uriResolver.EnableNoDollarSignPrefixSystemQueryOption, which depends on this TODO:
-        //TODO biaol remove the hard coding after wiring in required ODL update.
-//        [Fact]
+        [Fact]
         public void UnknownQueryNotStartingWithDollarSignWorks()
         {
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
-            request.EnableODataDependencyInjectionSupport();
+
+            // Enable DI with default resolver.
+            request.EnableODataDependencyInjectionSupport("default",
+                b => b.AddService(ServiceLifetime.Singleton, sp => new ODataUriResolver()));
+
             HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));

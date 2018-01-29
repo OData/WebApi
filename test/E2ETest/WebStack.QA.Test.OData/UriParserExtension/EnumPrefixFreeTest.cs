@@ -58,28 +58,32 @@ namespace WebStack.QA.Test.OData.UriParserExtension
             webConfig.AddRAMFAR(true);
         }
 
-        public static TheoryDataSet<string, string, HttpStatusCode> EnumPrefixFreeCases
+        public static TheoryDataSet<string, string, HttpStatusCode, HttpStatusCode> EnumPrefixFreeCases
         {
             get
             {
-                return new TheoryDataSet<string, string, HttpStatusCode>()
+                return new TheoryDataSet<string, string, HttpStatusCode, HttpStatusCode>()
                 {
-                    { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'Male'", "gender='Male'", HttpStatusCode.OK },
-                    { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'UnknownValue'", "gender='UnknownValue'", HttpStatusCode.NotFound },
+                    { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'Male'", "gender='Male'", HttpStatusCode.OK, HttpStatusCode.OK },
+
+                    // a). Enum value with fully-qualified-name-space is binded by <code>DottedIdentifierBinder</code>, which throws ODataException --> path not found.
+                    // b). Enum value w/o name space is binded by <code>LiteralBinder</code>, which results in non-null path with <code>ConstantNode</code>.
+                    // But subsequent action invocation fails to lookup constant (unknown value) to Enum --> bad request.
+                    { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'UnknownValue'", "gender='UnknownValue'", HttpStatusCode.NotFound, HttpStatusCode.BadRequest },
                 };
             }
         }
 
         [Theory]
         [PropertyData("EnumPrefixFreeCases")]
-        public async Task EnableEnumPrefixFreeTest(string prefix, string prefixFree, HttpStatusCode statusCode)
+        public async Task EnableEnumPrefixFreeTest(string prefix, string prefixFree, HttpStatusCode statusCodeWithPrefix, HttpStatusCode statusCodePrefixFree)
         {
             // Enum with prefix
             var prefixUri = string.Format("{0}/odata/Customers/Default.GetCustomerByGender({1})", this.BaseAddress, prefix);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, prefixUri);
             HttpResponseMessage response = await Client.SendAsync(request);
 
-            Assert.Equal(statusCode, response.StatusCode);
+            Assert.Equal(statusCodeWithPrefix, response.StatusCode);
             string prefixResponse = await response.Content.ReadAsStringAsync();
 
             // Enum prefix free
@@ -87,10 +91,10 @@ namespace WebStack.QA.Test.OData.UriParserExtension
             request = new HttpRequestMessage(HttpMethod.Get, prefixFreeUri);
             response = await Client.SendAsync(request);
 
-            Assert.Equal(statusCode, response.StatusCode);
+            Assert.Equal(statusCodePrefixFree, response.StatusCode);
             string prefixFreeResponse = await response.Content.ReadAsStringAsync();
 
-            if (statusCode == HttpStatusCode.OK)
+            if (statusCodeWithPrefix == HttpStatusCode.OK && statusCodePrefixFree == HttpStatusCode.OK)
             {
                 Assert.Equal(prefixResponse, prefixFreeResponse);
             }

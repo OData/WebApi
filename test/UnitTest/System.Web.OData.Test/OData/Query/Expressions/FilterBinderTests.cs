@@ -193,7 +193,7 @@ namespace System.Web.OData.Query.Expressions
             // There's currently a bug here. For now, the test checks for the presence of the bug (as a reminder to fix
             // the test once the bug is fixed).
             // The following assert shows the behavior with the bug and should be removed once the bug is fixed.
-            Assert.Throws<ODataException>(() => Bind("" + clause));
+            Assert.Throws<ODataException>(() => Bind("" + clause), true);
 
             // TODO: Enable once ODataUriParser handles DateTimeOffsets
             // The following call shows the behavior without the bug, and should be enabled once the bug is fixed.
@@ -1856,7 +1856,7 @@ namespace System.Web.OData.Query.Expressions
         public void Cast_UndefinedSource_ThrowsODataException(string filter, string errorMessage)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage, true);
         }
 
         public static TheoryDataSet<string, string> CastToUnquotedUndefinedTarget
@@ -2297,7 +2297,7 @@ namespace System.Web.OData.Query.Expressions
         public void IsOfUndefinedSource_ThrowsODataException(string filter, string errorMessage)
         {
             // Arrange & Act & Assert
-            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage);
+            Assert.Throws<ODataException>(() => Bind<DataTypes>(filter), errorMessage, true);
         }
 
         [Theory]

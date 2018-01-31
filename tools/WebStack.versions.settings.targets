@@ -11,8 +11,8 @@
 
   <!-- For NuGet Package Dependencies -->
   <PropertyGroup>
-    <WebApiClientPackageDependency>[5.2.2, 5.3.0)</WebApiClientPackageDependency>
-    <WebApiCorePackageDependency>[5.2.2, 5.3.0)</WebApiCorePackageDependency>
+    <WebApiClientPackageDependency>[5.2.3, 5.3.0)</WebApiClientPackageDependency>
+    <WebApiCorePackageDependency>[5.2.3, 5.3.0)</WebApiCorePackageDependency>
     <DependencyInjectionPackageDependency>[1.0.0, 2.0.0)</DependencyInjectionPackageDependency>
     <ODataLibPackageDependency>[7.0.0, 8.0.0)</ODataLibPackageDependency>
   </PropertyGroup>

@@ -73,7 +73,7 @@ namespace System.Web.OData.Query
             Request = request;
 
             ODataUriResolver uriResolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
-            _enableNoDollarSignQueryOption = uriResolver.EnableNoDollarSignPrefixSystemQueryOption;
+            _enableNoDollarSignQueryOption = uriResolver.EnableNoDollarQueryOptions;
 
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             // OData query parameters are normalized with the $-sign prefixes when the

@@ -108,7 +108,7 @@ namespace System.Web.OData.Query
             // Arrange
             ODataUriResolver resolver = new ODataUriResolver
             {
-                EnableNoDollarSignPrefixSystemQueryOption = true,
+                EnableNoDollarQueryOptions = true,
                 EnableCaseInsensitive = enableCaseInsensitive
 
             };

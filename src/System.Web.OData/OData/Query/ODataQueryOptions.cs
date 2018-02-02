@@ -44,7 +44,7 @@ namespace System.Web.OData.Query
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
-        private bool _enableNoDollarSignQueryOption = false;
+        private bool _enableNoDollarSignQueryOptions = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
@@ -73,7 +73,10 @@ namespace System.Web.OData.Query
             Request = request;
 
             ODataUriResolver uriResolver = request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
-            _enableNoDollarSignQueryOption = uriResolver.EnableNoDollarQueryOptions;
+            if (uriResolver != null)
+            {
+                _enableNoDollarSignQueryOptions = uriResolver.EnableNoDollarQueryOptions;
+            }
 
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             // OData query parameters are normalized with the $-sign prefixes when the
@@ -242,11 +245,11 @@ namespace System.Web.OData.Query
 
             if (!resolver.EnableCaseInsensitive)
             {
-                return IsSystemQueryOption(queryOptionName, this._enableNoDollarSignQueryOption);
+                return IsSystemQueryOption(queryOptionName, this._enableNoDollarSignQueryOptions);
             }
 
             string lowcaseQueryOptionName = queryOptionName.ToLowerInvariant();
-            return IsSystemQueryOption(lowcaseQueryOptionName, this._enableNoDollarSignQueryOption);
+            return IsSystemQueryOption(lowcaseQueryOptionName, this._enableNoDollarSignQueryOptions);
         }
 
         /// <summary>
@@ -737,7 +740,7 @@ namespace System.Web.OData.Query
             foreach (KeyValuePair<string, string> kvp in Request.GetQueryNameValuePairs())
             {
                 // Check supported system query options per $-sign-prefix option.
-                if (!_enableNoDollarSignQueryOption)
+                if (!_enableNoDollarSignQueryOptions)
                 {
                     // This is the original case for required $-sign prefix.
                     if (kvp.Key.StartsWith("$", StringComparison.Ordinal))

@@ -424,6 +424,22 @@ namespace System.Web.OData.Query.Expressions
                 : expression;
         }
 
+        public override Expression Bind(QueryNode node)
+        {
+            SingleValueNode singleValueNode = node as SingleValueNode;
+            if (node != null)
+            {
+                return BindAccessor(singleValueNode);
+            }
+
+            throw new ArgumentException("Only SigleValueNode supported", "node");
+        }
+
+        protected override ParameterExpression GetParameter()
+        {
+            return this._lambdaParameter;
+        }
+
         private Expression BindAccessor(SingleValueNode node)
         {
             switch (node.Kind)
@@ -454,6 +470,10 @@ namespace System.Web.OData.Query.Expressions
                 case QueryNodeKind.Convert:
                     var convertNode = node as ConvertNode;
                     return CreateConvertExpression(convertNode, BindAccessor(convertNode.Source));
+                case QueryNodeKind.SingleValueFunctionCall:
+                    return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
+                case QueryNodeKind.Constant:
+                    return BindConstantNode(node as ConstantNode);
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind,
                         typeof(AggregationBinder).Name);

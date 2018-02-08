@@ -44,6 +44,13 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "aggregate(cast(CustomerId, Edm.Int64) with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 15L} }
+                        }
+                    },
+                    {
                         "aggregate(SharePrice with sum as SharePrice)",
                         new List<Dictionary<string, object>>
                         {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -18,6 +19,7 @@ using Microsoft.OData.UriParser.Aggregation;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     internal class AggregationBinder : ExpressionBinderBase
     {
         private const string GroupByContainerProperty = "GroupByContainer";
@@ -598,6 +600,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 : Expression.Convert(expression, typeof(object));
         }
 
+        public override Expression Bind(QueryNode node)
+        {
+            SingleValueNode singleValueNode = node as SingleValueNode;
+            if (node != null)
+            {
+                return BindAccessor(singleValueNode);
+            }
+
+            throw new ArgumentException("Only SigleValueNode supported", "node");
+        }
+
+        protected override ParameterExpression Parameter
+        {
+            get
+            {
+                return this._lambdaParameter;
+            }
+        }
+
         private Expression BindAccessor(QueryNode node, Expression baseElement = null)
         {
             switch (node.Kind)
@@ -633,6 +654,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     return CreateConvertExpression(convertNode, BindAccessor(convertNode.Source, baseElement));
                 case QueryNodeKind.CollectionNavigationNode:
                     return baseElement ?? this._lambdaParameter;
+                case QueryNodeKind.SingleValueFunctionCall:
+                    return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
+                case QueryNodeKind.Constant:
+                    return BindConstantNode(node as ConstantNode);
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind,
                         typeof(AggregationBinder).Name);

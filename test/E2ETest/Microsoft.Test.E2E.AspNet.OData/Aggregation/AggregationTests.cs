@@ -316,6 +316,54 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         [Fact]
+        public async Task AggregateWithCastWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(cast(Order/Price, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public async Task AggregateWithConstantWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(Order/Price div 10 with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("450", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
         public async Task AggregateAggregatedPropertyWorks()
         {
             // Arrange
@@ -330,6 +378,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Act
             HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public async Task AggregateAggregatedWitCastPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=groupby((Name), aggregate(cast(Order/Price, Edm.Int64) with sum as TotalPrice))/aggregate(cast(TotalPrice, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();

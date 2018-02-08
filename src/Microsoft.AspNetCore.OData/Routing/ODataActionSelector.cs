@@ -47,25 +47,28 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             HttpRequest request = context.HttpContext.Request;
-            IEnumerable<IODataRoutingConvention> routingConventions = request.GetRoutingConventions();
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
             RouteData routeData = context.RouteData;
 
-            if (odataPath == null || routingConventions == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))
+            if (odataPath == null || routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
                 // If there is no path, no routing conventions or there is already and indication we routed it,
                 // let the _innerSelector handle the request.
                 return _innerSelector.SelectCandidates(context);
             }
 
-            foreach (IODataRoutingConvention convention in routingConventions)
+            IEnumerable<IODataRoutingConvention> routingConventions = request.GetRoutingConventions();
+            if (routingConventions != null)
             {
-                IEnumerable<ControllerActionDescriptor> actionDescriptor = convention.SelectAction(context);
-                if (actionDescriptor != null && actionDescriptor.Any())
+                foreach (IODataRoutingConvention convention in routingConventions)
                 {
-                    // All actions have the same name but may differ by number of parameters.
-                    context.RouteData.Values[ODataRouteConstants.Action] = actionDescriptor.First().ActionName;
-                    return actionDescriptor.ToList();
+                    IEnumerable<ControllerActionDescriptor> actionDescriptor = convention.SelectAction(context);
+                    if (actionDescriptor != null && actionDescriptor.Any())
+                    {
+                        // All actions have the same name but may differ by number of parameters.
+                        context.RouteData.Values[ODataRouteConstants.Action] = actionDescriptor.First().ActionName;
+                        return actionDescriptor.ToList();
+                    }
                 }
             }
 

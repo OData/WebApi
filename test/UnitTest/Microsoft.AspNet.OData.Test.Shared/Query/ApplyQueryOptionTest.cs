@@ -226,6 +226,27 @@ namespace Microsoft.AspNet.OData.Test.Query
                         }
                     },
                     {
+                        "aggregate(hour(StartDate) with max as MaxHour, hour(StartDate) with min as MinHour)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxHour", 5 }, { "MinHour", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(minute(StartDate) with max as MaxMinute, minute(StartDate) with min as MinMinute)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMinute", 6}, { "MinMinute", 2} },
+                        }
+                    },
+                    {
+                        "aggregate(second(StartDate) with max as MaxSecond, second(StartDate) with min as MinSecond)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxSecond", 7}, { "MinSecond", 3} },
+                        }
+                    },
+                    {
                         "groupby((Address/State), aggregate(concat(Address/City,Address/State) with max as MaxCity))",
                         new List<Dictionary<string, object>>
                         {
@@ -701,7 +722,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } },
-                    StartDate = new DateTimeOffset(new DateTime(2018, 02, 07)),
+                    StartDate = new DateTimeOffset(new DateTime(2018, 02, 07, 1, 2, 3)),
                 };
                 c.Orders = new List<Order>
                 {
@@ -718,7 +739,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Address = new Address { City = "seattle", State = "WA" },
                     Aliases = new List<string> { "alias2", "alias2" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } },
-                    StartDate = new DateTimeOffset(new DateTime(2017, 03, 07)),
+                    StartDate = new DateTimeOffset(new DateTime(2017, 03, 07, 5, 6, 7))
                 };
                 customerList.Add(c);
 
@@ -729,7 +750,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Address = new Address { City = "hobart" },
                     Aliases = new List<string> { "alias2", "alias34", "alias31" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } },
-                    StartDate = new DateTimeOffset(new DateTime(2018, 01, 01)),
+                    StartDate = new DateTimeOffset(new DateTime(2018, 01, 01, 2, 3, 4)),
                 };
                 customerList.Add(c);
 
@@ -738,7 +759,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" },
-                    StartDate = new DateTimeOffset(new DateTime(2016, 05, 07)),
+                    StartDate = new DateTimeOffset(new DateTime(2016, 05, 07, 2, 3, 4)),
                 };
                 customerList.Add(c);
 

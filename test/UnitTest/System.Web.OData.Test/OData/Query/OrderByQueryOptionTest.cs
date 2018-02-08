@@ -104,7 +104,7 @@ namespace System.Web.OData.Query
             var orderby = new OrderByQueryOption(orderbyValue, context);
 
             Assert.Throws<ODataException>(() =>
-                orderby.ApplyTo(ODataQueryOptionTest.Customers));
+                orderby.ApplyTo(ODataQueryOptionTest.Customers), allowDerivedExceptions: true);
         }
 
         [Fact]

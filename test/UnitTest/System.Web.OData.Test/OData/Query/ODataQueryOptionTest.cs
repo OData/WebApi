@@ -506,7 +506,7 @@ namespace System.Web.OData.Query
             Assert.Throws<ODataException>(() =>
             {
                 option.ApplyTo(new List<Customer>().AsQueryable());
-            });
+            }, allowDerivedExceptions: true);
         }
 
         [Fact]

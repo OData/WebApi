@@ -198,9 +198,7 @@ namespace System.Web.OData.Query
             SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act
-            Assert.Throws<ODataException>(
-                () => option.SelectExpandClause.ToString(),
-                error);
+            Assert.Throws<ODataException>(() => option.SelectExpandClause.ToString(),error, allowDerivedExceptions: true);
         }
 
         [Fact]

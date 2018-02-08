@@ -170,6 +170,67 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "groupby((Address/State), aggregate(startswith(Address/City, 's') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(endswith(Address/City, 't') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(contains(Address/City, 'o') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(length(Address/City) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", 7}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", 6}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "aggregate(year(StartDate) with max as MaxYear, year(StartDate) with min as MinYear)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxYear", 2018}, { "MinYear", 2016} },
+                        }
+                    },
+                    {
+                        "aggregate(month(StartDate) with max as MaxMonth, month(StartDate) with min as MinMonth)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMonth", 5}, { "MinMonth", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(day(StartDate) with max as MaxDay, day(StartDate) with min as MinDay)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxDay", 7}, { "MinDay", 1} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(concat(Address/City,Address/State) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattleWA"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", null}, { "Address/State", null} },
+                        }
+                    },
+                    {
                         "groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity))",
                         new List<Dictionary<string, object>>
                         {
@@ -601,6 +662,7 @@ namespace System.Web.OData.Test.OData.Query
                     Name = "Lowest",
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
+                    StartDate =  new DateTimeOffset(new DateTime(2018,02,07))
                 };
                 c.Orders = new List<Order>
                 {
@@ -615,7 +677,8 @@ namespace System.Web.OData.Test.OData.Query
                     Name = "Highest",
                     SharePrice = 2.5M,
                     Address = new Address { City = "seattle", State = "WA" },
-                    Aliases = new List<string> { "alias2", "alias2" }
+                    Aliases = new List<string> { "alias2", "alias2" },
+                    StartDate = new DateTimeOffset(new DateTime(2017, 03, 07))
                 };
                 customerList.Add(c);
 
@@ -624,7 +687,8 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 3,
                     Name = "Middle",
                     Address = new Address { City = "hobart" },
-                    Aliases = new List<string> { "alias2", "alias34", "alias31" }
+                    Aliases = new List<string> { "alias2", "alias34", "alias31" },
+                    StartDate = new DateTimeOffset(new DateTime(2018, 01, 01))
                 };
                 customerList.Add(c);
 
@@ -632,7 +696,8 @@ namespace System.Web.OData.Test.OData.Query
                 {
                     CustomerId = 4,
                     Name = "Lowest",
-                    Aliases = new List<string> { "alias34", "alias4" }
+                    Aliases = new List<string> { "alias34", "alias4" },
+                    StartDate = new DateTimeOffset(new DateTime(2016, 05, 07))
                 };
                 customerList.Add(c);
 

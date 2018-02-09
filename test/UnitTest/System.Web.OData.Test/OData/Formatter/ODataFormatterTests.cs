@@ -307,7 +307,7 @@ namespace System.Web.OData.Formatter
                     Assert.Equal("Could not find a property named 'abc' on type 'System.Web.OData.Formatter.FormatterPerson'.",
                         json["error"]["innererror"]["message"].Value);
 
-                    Assert.Equal("Microsoft.OData.ODataException",
+                    Assert.Equal("Microsoft.OData.ODataErrorException",
                         json["error"]["innererror"]["type"].Value);
                 }
             }

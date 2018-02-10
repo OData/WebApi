@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -15,6 +16,20 @@ namespace Microsoft.AspNet.OData.Builder
     /// </summary>
     public partial class ODataConventionModelBuilder
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
+        /// </summary>
+        /// <remarks>
+        /// This constructor will work stand-alone scenarios but it does require using the
+        /// <see cref="AppDomain"/> to get a list of assemblies in the domain to build
+        /// the model. In contrast, this constructor will not work in ASP.NET Core 1.x
+        /// due to the lack of AppDomain.
+        /// </remarks>
+        private ODataConventionModelBuilder()
+            : this(WebApiAssembliesResolver.Default)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>

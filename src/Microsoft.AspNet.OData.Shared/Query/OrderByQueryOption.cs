@@ -300,10 +300,10 @@ namespace Microsoft.AspNet.OData.Query
         private IQueryable AddOrderByQueryForProperty(IQueryable query, ODataQuerySettings querySettings,
             OrderByClause orderbyClause, IQueryable querySoFar, OrderByDirection direction, bool alreadyOrdered)
         {
-            Context.UpdateQuerySettings(querySettings, query);
+            ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
 
             LambdaExpression orderByExpression =
-                FilterBinder.Bind(query, orderbyClause, Context.ElementClrType, Context.RequestContainer);
+                FilterBinder.Bind(query, orderbyClause, Context.ElementClrType, Context, updatedSettings);
             querySoFar = ExpressionHelpers.OrderBy(querySoFar, orderByExpression, direction, Context.ElementClrType,
                 alreadyOrdered);
             return querySoFar;

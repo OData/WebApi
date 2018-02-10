@@ -51,6 +51,8 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>
         private void Initialize(ODataQueryContext context)
         {
+            Contract.Assert(context != null);
+
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
             RawValues = new ODataRawQueryOptions();
             IDictionary<string, string> queryParameters = GetODataQueryParameters();
@@ -61,6 +63,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.NavigationSource,
                 queryParameters);
 
+            // Note: the context.RequestContainer must be set by the ODataQueryOptions constructor.
+            Contract.Assert(context.RequestContainer != null);
             _queryOptionParser.Resolver = context.RequestContainer.GetRequiredService<ODataUriResolver>();
 
             BuildQueryOptions(queryParameters);

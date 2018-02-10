@@ -630,6 +630,31 @@ namespace Microsoft.Test.AspNet.OData.Query
                 actualCustomers.Select(customer => customer.CustomerId));
         }
 
+        [Fact]
+        public void ApplyTo_Returns_Correct_Queryable_Without_Services()
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer), null);
+            var filterOption = new FilterQueryOption("CustomerId eq 1", context);
+            IEnumerable<Customer> customers = CustomerFilterTestData;
+
+            // Act
+            IQueryable queryable = filterOption.ApplyTo(customers.AsQueryable(), new ODataQuerySettings());
+
+            // Assert
+            Assert.NotNull(queryable);
+            IEnumerable<Customer> actualCustomers = Assert.IsAssignableFrom<IEnumerable<Customer>>(queryable);
+            Assert.Single(actualCustomers);
+            Assert.Equal(1, actualCustomers.First().CustomerId);
+        }
+
         [Theory]
         [MemberData(nameof(EnumModelTestFilters))]
         public void ApplyToEnums_ReturnsCorrectQueryable(string filter, int[] enumModelIds)

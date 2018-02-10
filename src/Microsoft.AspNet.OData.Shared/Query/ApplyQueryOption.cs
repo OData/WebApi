@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
@@ -118,7 +119,18 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
 
-            IWebApiAssembliesResolver assembliesResolver = Context.RequestContainer.GetRequiredService<IWebApiAssembliesResolver>();
+            // The IWebApiAssembliesResolver service is internal and can only be injected by WebApi.
+            // This code path may be used in cases when the service container is not available
+            // and the service container is available but may not contain an instance of IWebApiAssembliesResolver.
+            IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolver.Default;
+            if (Context.RequestContainer != null)
+            { 
+                IWebApiAssembliesResolver injectedResolver = Context.RequestContainer.GetService<IWebApiAssembliesResolver>();
+                if (injectedResolver != null)
+                {
+                    assembliesResolver = injectedResolver;
+                }
+            }
 
             foreach (var transformation in applyClause.Transformations)
             {
@@ -131,7 +143,7 @@ namespace Microsoft.AspNet.OData.Query
                 else if (transformation.Kind == TransformationNodeKind.Filter)
                 {
                     var filterTransformation = transformation as FilterTransformationNode;
-                    Expression filter = FilterBinder.Bind(query, filterTransformation.FilterClause, ResultClrType, Context.RequestContainer);
+                    Expression filter = FilterBinder.Bind(query, filterTransformation.FilterClause, ResultClrType, Context, querySettings);
                     query = ExpressionHelpers.Where(query, filter, ResultClrType);
                 }
             }

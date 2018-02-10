@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -27,7 +28,7 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Formatter
 {
-    internal static partial class EdmLibHelpers
+    internal static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
 
@@ -220,7 +221,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel)
         {
-            return GetClrType(edmTypeReference, edmModel, _defaultAssemblyResolver);
+            return GetClrType(edmTypeReference, edmModel, WebApiAssembliesResolver.Default);
         }
 
         public static Type GetClrType(IEdmTypeReference edmTypeReference, IEdmModel edmModel, IWebApiAssembliesResolver assembliesResolver)
@@ -253,7 +254,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
         {
-            return GetClrType(edmType, edmModel, _defaultAssemblyResolver);
+            return GetClrType(edmType, edmModel, WebApiAssembliesResolver.Default);
         }
 
         public static Type GetClrType(IEdmType edmType, IEdmModel edmModel, IWebApiAssembliesResolver assembliesResolver)

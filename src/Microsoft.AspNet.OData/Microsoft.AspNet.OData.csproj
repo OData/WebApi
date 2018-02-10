@@ -85,7 +85,6 @@
     <Compile Include="Batch\ODataBatchHandler.cs" />
     <Compile Include="Batch\ODataBatchHttpRequestMessageExtensions.cs" />
     <Compile Include="ETagMessageHandler.cs" />
-    <Compile Include="Formatter\EdmLibHelpers.cs" />
     <Compile Include="Formatter\ODataCountMediaTypeMapping.cs" />
     <Compile Include="Formatter\Serialization\DefaultODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerContext.cs" />

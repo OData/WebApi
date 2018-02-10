@@ -29,6 +29,10 @@ namespace Microsoft.AspNet.OData
         /// the given <paramref name="elementClrType"/>.</param>
         /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
         /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        /// <remarks>
+        /// This is a public constructor used for stand-alone scenario; in this case, the services
+        /// container may not be present.
+        /// </remarks>
         public ODataQueryContext(IEdmModel model, Type elementClrType, ODataPath path)
         {
             if (model == null)
@@ -99,9 +103,9 @@ namespace Microsoft.AspNet.OData
             {
                 if (_defaultQuerySettings == null)
                 {
-                    _defaultQuerySettings = RequestContainer != null
-                        ? RequestContainer.GetRequiredService<DefaultQuerySettings>()
-                        : new DefaultQuerySettings();
+                    _defaultQuerySettings = RequestContainer == null
+                        ? new DefaultQuerySettings()
+                        : RequestContainer.GetRequiredService<DefaultQuerySettings>();
                 }
 
                 return _defaultQuerySettings;
@@ -136,6 +140,10 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets the request container.
         /// </summary>
+        /// <remarks>
+        /// The services container may not be present. See the constructor in this file for
+        /// use in stand-alone scenarios.
+        /// </remarks>
         public IServiceProvider RequestContainer { get; internal set; }
 
         internal IEdmProperty TargetProperty { get; private set; }

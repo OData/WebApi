@@ -17,9 +17,13 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataConventionModelBuilder"/> class.
         /// </summary>
-        /// <remarks>This function uses types that are AspNet-specific.</remarks>
+        /// <remarks>
+        /// This constructor will work stand-alone scenarios but it does require using the
+        /// <see cref="DefaultAssembliesResolver"/> to get a list of assemblies to build
+        /// the model.
+        /// </remarks>
         public ODataConventionModelBuilder()
-            : this(new WebApiAssembliesResolver(new DefaultAssembliesResolver()))
+            : this(WebApiAssembliesResolver.Default)
         {
         }
 

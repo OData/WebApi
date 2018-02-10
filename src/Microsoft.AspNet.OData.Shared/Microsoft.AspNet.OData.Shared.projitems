@@ -68,10 +68,10 @@
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">
-      <AutoGen>True</AutoGen> 
-      <DesignTime>True</DesignTime> 
-      <DependentUpon>PropertyContainer.generated.tt</DependentUpon> 
-    </Compile> 
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PropertyContainer.generated.tt</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestMethod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionDescriptor.cs" />
@@ -426,11 +426,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ClrCanonicalFunctions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\FilterBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PropertySelectorVisitor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)WebApiAssembliesResolver.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.tt"> 
-      <Generator>TextTemplatingFileGenerator</Generator> 
-      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput> 
-    </Content> 
-  </ItemGroup> 
+    <Content Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
 </Project>

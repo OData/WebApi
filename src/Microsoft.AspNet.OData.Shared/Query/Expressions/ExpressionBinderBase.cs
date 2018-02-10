@@ -13,6 +13,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -83,7 +84,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             QuerySettings = requestContainer.GetRequiredService<ODataQuerySettings>();
             Model = requestContainer.GetRequiredService<IEdmModel>();
-            InternalAssembliesResolver = requestContainer.GetRequiredService<IWebApiAssembliesResolver>();
+
+            // The IWebApiAssembliesResolver service is internal and can only be injected by WebApi.
+            // This code path may be used in the cases when the service container available
+            // but may not contain an instance of IWebApiAssembliesResolver.
+            IWebApiAssembliesResolver injectedResolver = requestContainer.GetService<IWebApiAssembliesResolver>();
+            InternalAssembliesResolver = (injectedResolver != null) ? injectedResolver : WebApiAssembliesResolver.Default;
         }
 
         internal ExpressionBinderBase(IEdmModel model, IWebApiAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)

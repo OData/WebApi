@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData.Interfaces
     internal interface IWebApiAssembliesResolver
     {
         /// <summary>
-        /// Gets a list of assemblies available for the application. 
+        /// Gets a list of assemblies available for the application.
         /// </summary>
         /// <returns>A list of assemblies available for the application. </returns>
         IEnumerable<Assembly> Assemblies { get; }

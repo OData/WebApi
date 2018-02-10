@@ -138,9 +138,9 @@ namespace Microsoft.AspNet.OData.Query
             FilterClause filterClause = FilterClause;
             Contract.Assert(filterClause != null);
 
-            Context.UpdateQuerySettings(querySettings, query);
+            ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
 
-            Expression filter = FilterBinder.Bind(query, filterClause, Context.ElementClrType, Context.RequestContainer);
+            Expression filter = FilterBinder.Bind(query, filterClause, Context.ElementClrType, Context, updatedSettings);
             query = ExpressionHelpers.Where(query, filter, Context.ElementClrType);
             return query;
         }

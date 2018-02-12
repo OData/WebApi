@@ -3215,8 +3215,13 @@ public abstract class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
 
+	public abstract System.Linq.Expressions.Expression Bind (Microsoft.OData.UriParser.QueryNode node)
+	protected System.Linq.Expressions.Expression[] BindArguments (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.UriParser.QueryNode]] nodes)
+	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
+	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
+	protected abstract System.Linq.Expressions.ParameterExpression GetParameter ()
 }
 
 public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
@@ -3229,7 +3234,6 @@ public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderB
 	public virtual System.Linq.Expressions.Expression BindCollectionComplexNode (Microsoft.OData.UriParser.CollectionComplexNode collectionComplexNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionPropertyAccessNode (Microsoft.OData.UriParser.CollectionPropertyAccessNode propertyAccessNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionResourceCastNode (Microsoft.OData.UriParser.CollectionResourceCastNode node)
-	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode)
 	public virtual System.Linq.Expressions.Expression BindDynamicPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	public System.Linq.Expressions.LambdaExpression BindExpression (Microsoft.OData.UriParser.SingleValueNode expression, Microsoft.OData.UriParser.RangeVariable rangeVariable, System.Type elementType)
@@ -3239,8 +3243,8 @@ public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderB
 	public virtual System.Linq.Expressions.Expression BindSingleComplexNode (Microsoft.OData.UriParser.SingleComplexNode singleComplexNode)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceCastNode (Microsoft.OData.UriParser.SingleResourceCastNode node)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
-	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
+	protected virtual System.Linq.Expressions.ParameterExpression GetParameter ()
 }
 
 public class System.Web.OData.Query.Validators.CountQueryValidator {

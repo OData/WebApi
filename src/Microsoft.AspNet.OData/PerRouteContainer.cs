@@ -10,7 +10,10 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData
 {
-    internal class PerRouteContainer : PerRouteContainerBase
+    /// <summary>
+    /// A class for managing per-route service containers.
+    /// </summary>
+    public class PerRouteContainer : PerRouteContainerBase
     {
         private const string RootContainerMappingsKey = "Microsoft.AspNet.OData.RootContainerMappingsKey";
 
@@ -29,7 +32,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="routeName">The route name.</param>
         /// <returns>The root container for the route name.</returns>
-        public override IServiceProvider GetODataRootContainer(string routeName)
+        protected override IServiceProvider GetContainer(string routeName)
         {
             if (String.IsNullOrEmpty(routeName))
             {
@@ -52,7 +55,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="rootContainer">The root container to set.</param>
         /// <returns>The root container for the route name.</returns>
         /// <remarks>Used by unit tests to insert root containers.</remarks>
-        internal override void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
+        protected override void SetContainer(string routeName, IServiceProvider rootContainer)
         {
             if (rootContainer == null)
             {

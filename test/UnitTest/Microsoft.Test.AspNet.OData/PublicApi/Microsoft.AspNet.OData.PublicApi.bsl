@@ -53,6 +53,14 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 	bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
+public interface Microsoft.AspNet.OData.IPerRouteContainer {
+	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
+
+	System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+	System.IServiceProvider GetODataRootContainer (string routeName)
+	bool HasODataRootContainer (string routeName)
+}
+
 [
 NonValidatingParameterBindingAttribute(),
 ]
@@ -119,6 +127,20 @@ public abstract class Microsoft.AspNet.OData.PageResult {
 	DataMemberAttribute(),
 	]
 	System.Uri NextPageLink  { public get; }
+}
+
+public abstract class Microsoft.AspNet.OData.PerRouteContainerBase : IPerRouteContainer {
+	protected PerRouteContainerBase ()
+
+	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public virtual get; public virtual set; }
+
+	protected Microsoft.OData.IContainerBuilder CreateContainerBuilderWithCoreServices ()
+	public System.IServiceProvider CreateODataRootContainer (System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+	public virtual System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+	protected abstract System.IServiceProvider GetContainer (string routeName)
+	public virtual System.IServiceProvider GetODataRootContainer (string routeName)
+	public virtual bool HasODataRootContainer (string routeName)
+	protected abstract void SetContainer (string routeName, System.IServiceProvider rootContainer)
 }
 
 public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObjectProvider, IDelta {
@@ -507,6 +529,13 @@ public class Microsoft.AspNet.OData.PageResult`1 : PageResult, IEnumerable`1, IE
 
 	public virtual IEnumerator`1 GetEnumerator ()
 	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
+}
+
+public class Microsoft.AspNet.OData.PerRouteContainer : PerRouteContainerBase, IPerRouteContainer {
+	public PerRouteContainer (System.Web.Http.HttpConfiguration configuration)
+
+	protected virtual System.IServiceProvider GetContainer (string routeName)
+	protected virtual void SetContainer (string routeName, System.IServiceProvider rootContainer)
 }
 
 public class Microsoft.AspNet.OData.QueryableRestrictions {

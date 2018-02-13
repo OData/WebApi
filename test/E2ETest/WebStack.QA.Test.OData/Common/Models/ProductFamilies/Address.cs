@@ -13,6 +13,6 @@ namespace WebStack.QA.Test.OData.Common.Models.ProductFamilies
 
         public string ZipCode { get; set; }
 
-        public string Country { get; set; }
+        public string CountryOrRegion { get; set; }
     }
 }

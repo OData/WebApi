@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
@@ -57,7 +58,8 @@ namespace System.Web.OData.Query.Expressions
         //          Value = properties[0].Value,
         //
         //          Next0 = new NamedProperty<> { ..... } 
-        //          Next2 = new NamedProperty<> { ..... } 
+        //          Next1 = new NamedProperty<> { ..... },
+        //          ...
         //      }
         public static Expression CreatePropertyContainer(IList<NamedPropertyExpression> properties)
         {
@@ -78,9 +80,9 @@ namespace System.Web.OData.Query.Expressions
                     offset += leftSize;
                 }
 
-                container = CreateNamedPropertyCreationExpression(property, nextExpressions.Where(e => e!= null).ToList());
+                container = CreateNamedPropertyCreationExpression(property, nextExpressions.Where(e => e != null).ToList());
             }
-
+           
             return container;
         }
 
@@ -88,13 +90,13 @@ namespace System.Web.OData.Query.Expressions
         {
             if (count % parts != 0)
             {
-                return count / parts + 1;
+                return (count / parts) + 1;
             }
             return count / parts;
         }
 
         // Expression:
-        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next0 = leftNext, Next2 = Next2 }.
+        // new NamedProperty<T> { Name = property.Name, Value = property.Value, Next0 = next0, Next1 = next1, .... }.
         private static Expression CreateNamedPropertyCreationExpression(NamedPropertyExpression property, IList<Expression> expressions)
         {
             Contract.Assert(property != null);

@@ -113,6 +113,14 @@
       <Project>{989a83cc-b864-4a75-8bf3-5eda99203a86}</Project>
       <Name>Microsoft.OData.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.OData.Core\Microsoft.OData.Core.csproj">
+      <Project>{989a83cc-b864-4a75-8bf3-5eda99203a86}</Project>
+      <Name>Microsoft.OData.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.csproj">
+      <Project>{7d921888-fe03-4c3f-80fe-2f624505461c}</Project>
+      <Name>Microsoft.OData.Edm</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.csproj">
       <Project>{7d921888-fe03-4c3f-80fe-2f624505461c}</Project>
       <Name>Microsoft.OData.Edm</Name>
@@ -128,6 +136,10 @@
     <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.csproj">
       <Project>{7d921888-fe03-4c3f-80fe-2f624505461c}</Project>
       <Name>Microsoft.OData.Edm</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.Spatial\Microsoft.Spatial.csproj">
+      <Project>{5d921888-fe03-4c3f-40fe-2f624505461d}</Project>
+      <Name>Microsoft.Spatial</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\odata.net\src\Microsoft.Spatial\Microsoft.Spatial.csproj">
       <Project>{5d921888-fe03-4c3f-40fe-2f624505461d}</Project>

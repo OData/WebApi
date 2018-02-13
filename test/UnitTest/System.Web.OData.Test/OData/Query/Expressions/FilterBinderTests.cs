@@ -1,4 +1,4 @@
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
@@ -1771,8 +1771,7 @@ namespace System.Web.OData.Query.Expressions
 
         [Theory]
         [InlineData("Edm.Int32 eq 123", "A binary operator with incompatible types was detected. Found operand types 'Edm.String' and 'Edm.Int32' for operator kind 'Equal'.")]
-        [InlineData("ProductName/Edm.String eq 123", "Can only bind segments that are Navigation, Structural, Complex, or Collections. We found a segment " +
-            "'ProductName' that isn't any of those. Please revise the query.")]
+        [InlineData("ProductName/Edm.String eq 123", "A binary operator with incompatible types was detected. Found operand types 'Edm.String' and 'Edm.Int32' for operator kind 'Equal'.")]
         public void CastToNonEntityType_Throws(string filter, string error)
         {
             Assert.Throws<ODataException>(

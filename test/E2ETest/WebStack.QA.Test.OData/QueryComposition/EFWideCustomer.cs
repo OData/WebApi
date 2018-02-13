@@ -1,22 +1,18 @@
 ﻿namespace WebStack.QA.Test.OData.QueryComposition
 {
-	public interface IContinuation
+	public interface IEFCastTest
     {
-        int SkipToken { get; set; }
     }
 
-    public class EFWideCustomer : IContinuation
+    public class EFWideCustomer : IEFCastTest
     {
         public int Id { get; set; }
 
-        public int PartitionId { get; set; }
-
-		        public CustomProperties1 Custom1 {get;set;}
+        public CustomProperties1 Custom1 {get;set;}
         public CustomProperties2 Custom2 {get;set;}
         public CustomProperties3 Custom3 {get;set;}
         public CustomProperties4 Custom4 {get;set;}
         public CustomProperties5 Custom5 {get;set;}
-        public int SkipToken { get; set; }
     }
 
 	public class CustomProperties1

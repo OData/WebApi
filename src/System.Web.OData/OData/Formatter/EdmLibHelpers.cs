@@ -791,15 +791,15 @@ namespace System.Web.OData.Formatter
             Contract.Assert(navigationSource != null);
 
             // Ensure that concurrency properties cache is attached to model as an annotation to avoid expensive calculations each time
-            ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>> concurrencyProperties = model.GetAnnotationValue<ConcurrencyPropertiesAnnotation>(model);
+            ConcurrencyPropertiesAnnotation concurrencyProperties = model.GetAnnotationValue<ConcurrencyPropertiesAnnotation>(model);
             if (concurrencyProperties == null)
             {
-                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
+                concurrencyProperties = new ConcurrencyPropertiesAnnotation();
                 model.SetAnnotationValue(model, concurrencyProperties);
             }
 
             IEnumerable<IEdmStructuralProperty> cachedProperties;
-            if (concurrencyProperties != null && concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
+            if (concurrencyProperties.TryGetValue(navigationSource, out cachedProperties))
             {
                 return cachedProperties;
             }
@@ -836,15 +836,7 @@ namespace System.Web.OData.Formatter
                 }
             }
 
-            if (concurrencyProperties == null)
-            {
-                concurrencyProperties = new ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>();
-            }
-
-            if (results.Any())
-            {
-                concurrencyProperties[navigationSource] = results;
-            }
+            concurrencyProperties[navigationSource] = results;
             return results;
         }
 

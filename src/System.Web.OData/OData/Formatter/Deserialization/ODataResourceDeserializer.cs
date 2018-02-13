@@ -77,6 +77,11 @@ namespace System.Web.OData.Formatter.Deserialization
         /// <inheritdoc />
         public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
             if (edmType.IsComplex() && item == null)
             {
                 return null;
@@ -85,11 +90,6 @@ namespace System.Web.OData.Formatter.Deserialization
             if (item == null)
             {
                 throw Error.ArgumentNull("item");
-            }
-
-            if (edmType == null)
-            {
-                throw Error.ArgumentNull("edmType");
             }
 
             if (!edmType.IsStructured())
@@ -308,6 +308,21 @@ namespace System.Web.OData.Formatter.Deserialization
 
             foreach (ODataItemBase childItem in resourceInfoWrapper.NestedItems)
             {
+                // it maybe null.
+                if (childItem == null)
+                {
+                    if (edmProperty == null)
+                    {
+                        // for the dynamic, OData.net has a bug. see https://github.com/OData/odata.net/issues/977
+                        ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
+                            structuredType, null, readContext);
+                    }
+                    else
+                    {
+                        ApplyResourceInNestedProperty(edmProperty, resource, null, readContext);
+                    }
+                }
+
                 ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
                 if (entityReferenceLink != null)
                 {
@@ -429,10 +444,14 @@ namespace System.Web.OData.Formatter.Deserialization
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.Resource.TypeName);
-            IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
+            object value = null;
+            if (resourceWrapper != null)
+            {
+                IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.Resource.TypeName);
+                IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
-            object value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
+                value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
+            }
 
             DeserializationHelpers.SetDynamicProperty(resource, propertyName, value,
                 resourceStructuredType.StructuredDefinition(), readContext.Model);
@@ -440,9 +459,13 @@ namespace System.Web.OData.Formatter.Deserialization
 
         private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
-            Contract.Assert(resourceWrapper != null);
             Contract.Assert(edmType != null);
             Contract.Assert(readContext != null);
+
+            if (resourceWrapper == null)
+            {
+                return null;
+            }
 
             ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(edmType);
             if (deserializer == null)

@@ -16,6 +16,7 @@ using Newtonsoft.Json.Linq;
 using Nuwa;
 using WebStack.QA.Test.OData.Common;
 using Xunit;
+using System.Web.OData.Query;
 using System.Reflection;
 
 namespace WebStack.QA.Test.OData.QueryComposition
@@ -30,8 +31,8 @@ namespace WebStack.QA.Test.OData.QueryComposition
                   new TestAssemblyResolver(
                       typeof(SelectCustomerController),
                       typeof(EFSelectCustomersController),
-                      typeof(EFWideCustomersController),
-                      typeof(EFSelectOrdersController)));
+                      typeof(EFSelectOrdersController),
+                      typeof(EFWideCustomersController)));
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -57,21 +58,13 @@ namespace WebStack.QA.Test.OData.QueryComposition
             builder.Action("ResetDataSource-Order");
 
             IEdmModel model = builder.GetEdmModel();
-            var wideType = model.EntityContainer.EntitySets().First(e => e.Name == "EFWideCustomers").EntityType() as EdmEntityType;
-            for (var idx = 1; idx <= 5; idx++)
+            for (int idx = 1; idx <= 5; idx++)
             {
-                var containerProperty = typeof(EFWideCustomer).GetProperty($"Custom{idx}");
-                for (int i = (idx-1)*400 + 1; i <= idx*400; i++)
+                IEdmSchemaType nestedType = model.FindDeclaredType("WebStack.QA.Test.OData.QueryComposition.CustomProperties" + idx);
+                model.SetAnnotationValue(nestedType, new System.Web.OData.Query.ModelBoundQuerySettings()
                 {
-                    var prop = wideType.AddStructuralProperty($"Prop{i:0000}", EdmPrimitiveTypeKind.String);
-                    model.SetAnnotationValue(prop, new ClrPropertyInfoAnnotation(containerProperty.PropertyType.GetProperty($"Prop{i:0000}"))
-                    {
-                        PropertiesPath = new List<PropertyInfo>()
-                        {
-                            containerProperty
-                        }
-                    });
-                }
+                    DefaultSelectType = SelectExpandType.Automatic
+                });               
             }
 
             return model;
@@ -385,7 +378,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                 string queryUrl = url;
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
                 request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-                
+
                 // Act
                 response = client.SendAsync(request).Result;
 
@@ -644,8 +637,10 @@ namespace WebStack.QA.Test.OData.QueryComposition
         {
             // Arrange
             RestoreData();
-            string queryUrl = string.Format("{0}/selectexpand/EFWideCustomers?" +
-                "$select=Id,"+ string.Join(",", Enumerable.Range(1,1999).Select(i => string.Format("Prop{0:0000}", i))), BaseAddress);
+            // Create long $slect/$expand Custom1-4 will be autoexpanded to avoid maxUrl error
+            string queryUrl = string.Format("{0}/selectexpand/EFWideCustomers?$select=Id&$expand=Custom1,Custom2,Custom3,Custom4,Custom5($select="
+                + string.Join(",", Enumerable.Range(1601, 399).Select(i => string.Format("Prop{0:0000}", i))) + ")",
+                BaseAddress);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
@@ -657,27 +652,26 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
             // Assert
             Assert.NotNull(response);
-            //Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
-            var resp = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(resp);
-            var responseObject = JObject.Parse(resp);
-            var result = responseObject["value"] as JArray;
+            
+            JObject responseObject = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+            JArray result = responseObject["value"] as JArray;
             Assert.Equal(result.Count, 1);
-            Assert.Equal(result[0]["Prop0001"], "Prop0001");
-            Assert.Equal(result[0]["Prop0099"], "Prop0099");
-            Assert.Equal(result[0]["Prop0199"], "Prop0199");
-            Assert.Equal(result[0]["Prop0298"], "Prop0298");
-            Assert.Equal(result[0]["Prop0798"], "Prop0798");
-            Assert.Equal(result[0]["Prop1198"], "Prop1198");
-            Assert.Equal(result[0]["Prop1598"], "Prop1598");
-            Assert.Equal(result[0]["Prop1998"], "Prop1998");
-            Assert.Null(result[0]["Prop2000"]);
+            Assert.Equal(result[0]["Custom1"]["Prop0001"], "Prop0001");
+            Assert.Equal(result[0]["Custom1"]["Prop0099"], "Prop0099");
+            Assert.Equal(result[0]["Custom1"]["Prop0199"], "Prop0199");
+            Assert.Equal(result[0]["Custom1"]["Prop0298"], "Prop0298");
+            Assert.Equal(result[0]["Custom2"]["Prop0798"], "Prop0798");
+            Assert.Equal(result[0]["Custom3"]["Prop1198"], "Prop1198");
+            Assert.Equal(result[0]["Custom4"]["Prop1598"], "Prop1598");
+            Assert.Equal(result[0]["Custom5"]["Prop1998"], "Prop1998");
+            Assert.Null(result[0]["Custom5"]["Prop2000"]);
         }
 
         private void RestoreData(string suffix = null)
         {
-            string requestUri = BaseAddress + $"/selectexpand/ResetDataSource{suffix}";
+            string requestUri = BaseAddress + string.Format("/selectexpand/ResetDataSource{0}", suffix);
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(requestUri).Result;
             Console.WriteLine(response.Content.ReadAsStringAsync().Result);
@@ -706,7 +700,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         ZipCode = j * -100,
                         City = string.Format("City {0}", j),
                         State = string.Format("State {0}", j),
-                        Country = string.Format("Country {0}", j),
+                        Country = string.Format("CountryOrRegion {0}", j),
                     },
                     OrderDetails = Enumerable.Range(0, j).Select(k => new SelectOrderDetail
                     {
@@ -749,7 +743,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
                         ZipCode = j * 100,
                         City = string.Format("City {0}", j),
                         State = string.Format("State {0}", j),
-                        Country = string.Format("Country {0}", j),
+                        Country = string.Format("CountryOrRegion {0}", j),
                     },
                     OrderDetails = new List<SelectOrderDetail>().AsQueryable()
                 }).ToList(),
@@ -813,8 +807,6 @@ namespace WebStack.QA.Test.OData.QueryComposition
             var wideCustomer = new EFWideCustomer
             {
                 Id = 1,
-                PartitionId = 1,
-                SkipToken = 1,
                 Custom1 = new CustomProperties1
                 {
                     Prop0001 = "Prop0001",
@@ -854,12 +846,7 @@ namespace WebStack.QA.Test.OData.QueryComposition
         [EnableQuery(PageSize =2)]
         public IQueryable<EFWideCustomer> Get()
         {
-            var p = 1;
-            var query = _db.WideCustomers.Where(c => c.PartitionId == p);
-            var contQuery = query as IQueryable<IContinuation>;
-            contQuery = contQuery.Where(c => c.SkipToken >= 1);
-            query = contQuery.Cast<EFWideCustomer>();
-            return query;
+            return (_db.WideCustomers as IQueryable<IEFCastTest>).Cast<EFWideCustomer>();
         }
     }
 
@@ -915,9 +902,9 @@ namespace WebStack.QA.Test.OData.QueryComposition
 
         public DbSet<SelectCustomer> SelectCustomers { get; set; }
 
-        public DbSet<EFWideCustomer> WideCustomers { get; set; }
-
         public DbSet<EFSelectOrder> Orders { get; set; }
+
+        public DbSet<EFWideCustomer> WideCustomers { get; set; }
     }
 
     public class EFSelectCustomer

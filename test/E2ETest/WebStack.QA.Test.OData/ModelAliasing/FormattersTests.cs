@@ -64,7 +64,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
             ComplexTypeConfiguration<ModelAliasingMetadataAddress> address = builder.ComplexType<ModelAliasingMetadataAddress>();
             address.Name = "Direction";
             address.Namespace = "Location";
-            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.Country).Name = "Reign";
+            address.ComplexProperty<ModelAliasingMetadataRegion>(c => c.CountryOrRegion).Name = "Reign";
             return builder.GetEdmModel();
         }
 
@@ -94,7 +94,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                 ZipCode = 333,
                 Reign = new Location.PoliticalRegion
                 {
-                    Country = "Convention country",
+                    CountryOrRegion = "Convention country",
                     State = "Convention state"
                 }
             };
@@ -107,7 +107,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                 ZipCode = 3333,
                 Reign = new Location.PoliticalRegion
                 {
-                    Country = "DefaultShippingAddress Convention country",
+                    CountryOrRegion = "DefaultShippingAddress Convention country",
                     State = "DefaultShippingAddress Convention state"
                 }
             };
@@ -125,7 +125,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                         ZipCode = 3333,
                         Reign = new Location.PoliticalRegion
                         {
-                            Country = "ShippingAddress Convention country",
+                            CountryOrRegion = "ShippingAddress Convention country",
                             State = "ShippingAddress Convention state"
                         }
                     },
@@ -140,11 +140,11 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                 AvailableRegions = new Collection<Location.PoliticalRegion>{
                                     new Location.PoliticalRegion
                                     {
-                                        Country = "Country 1",
+                                        CountryOrRegion = "CountryOrRegion 1",
                                         State = "State 1"
                                     },
                                     new Location.PoliticalRegion{
-                                        Country = "Country 2",
+                                        CountryOrRegion = "CountryOrRegion 2",
                                         State = "State 2"
                                     }
                                 }
@@ -162,11 +162,11 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                 AvailableRegions = new Collection<Location.PoliticalRegion>{
                                     new Location.PoliticalRegion
                                     {
-                                        Country = "Country 1",
+                                        CountryOrRegion = "CountryOrRegion 1",
                                         State = "State 1"
                                     },
                                     new Location.PoliticalRegion{
-                                        Country = "Country 2",
+                                        CountryOrRegion = "CountryOrRegion 2",
                                         State = "State 2"
                                     }
                                 }                            
@@ -183,11 +183,11 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                                 AvailableRegions = new Collection<Location.PoliticalRegion>{
                                     new Location.PoliticalRegion
                                     {
-                                        Country = "Country 1",
+                                        CountryOrRegion = "CountryOrRegion 1",
                                         State = "State 1"
                                     },
                                     new Location.PoliticalRegion{
-                                        Country = "Country 2",
+                                        CountryOrRegion = "CountryOrRegion 2",
                                         State = "State 2"
                                     }
                                 }
@@ -206,7 +206,7 @@ namespace WebStack.QA.Test.OData.ModelAliasing
                         ZipCode = 3333,
                         Reign = new Location.PoliticalRegion
                         {
-                            Country = "ShippingAddress Convention country",
+                            CountryOrRegion = "ShippingAddress Convention country",
                             State = "ShippingAddress Convention state"
                         }
                     },

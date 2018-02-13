@@ -8,16 +8,10 @@ using System.Web.OData.Formatter;
 using System.Web.OData.Formatter.Serialization;
 using System.Web.OData.Properties;
 using Microsoft.OData.Edm;
-using Newtonsoft.Json;
 
 namespace System.Web.OData.Query.Expressions
 {
-    /// <summary>
-    /// Represents a container class that contains properties that are either selected or expanded using $select and $expand.
-    /// </summary>
-    /// <typeparam name="TElement">The element being selected and expanded.</typeparam>
-    [JsonConverter(typeof(SelectExpandWrapperConverter))]
-    internal class SelectExpandWrapper<TElement> : IEdmEntityObject, ISelectExpandWrapper
+    internal abstract class SelectExpandWrapper : IEdmEntityObject, ISelectExpandWrapper
     {
         private static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
         private static readonly Func<IEdmModel, IEdmStructuredType, IPropertyMapper> _mapperProvider =
@@ -27,21 +21,17 @@ namespace System.Web.OData.Query.Expressions
         private TypedEdmEntityObject _typedEdmEntityObject;
 
         /// <summary>
-        /// Gets or sets the instance of the element being selected and expanded.
-        /// </summary>
-        public TElement Instance { get; set; }
-
-        /// <summary>
-        /// Gets or sets the EDM type name of the element being selected and expanded. 
-        /// </summary>
-        /// <remarks>This is required by the <see cref="ODataMediaTypeFormatter"/> during serialization. If the instance property is not
-        /// null, the type name will not be set as the type name can be figured from the instance runtime type.</remarks>
-        public string TypeName { get; set; }
-
-        /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
         /// </summary>
         public PropertyContainer Container { get; set; }
+
+        /// <inheritdoc />
+        public object UntypedInstance { get; set; }
+
+        /// <summary>
+        /// Indicates whether the underlying instance can be used to obtain property values.
+        /// </summary>
+        public bool UseInstanceForProperties { get; set; }
 
         public IEdmModel Model {get; set;}
 
@@ -49,22 +39,8 @@ namespace System.Web.OData.Query.Expressions
         public IEdmTypeReference GetEdmType()
         {
             IEdmModel model = GetModel();
-
-            if (TypeName != null)
-            {
-                IEdmEntityType entityType = model.FindDeclaredType(TypeName) as IEdmEntityType;
-                if (entityType == null)
-                {
-                    throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, TypeName);
-                }
-
-                return new EdmEntityTypeReference(entityType, isNullable: false);
-            }
-            else
-            {
-                Type elementType = GetElementType();
-                return model.GetEdmTypeReference(elementType);
-            }
+            Type elementType = GetElementType();
+            return model.GetEdmTypeReference(elementType);
         }
 
         /// <inheritdoc />
@@ -82,10 +58,10 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // fall back to the instance.
-            if (Instance != null)
+            if (UseInstanceForProperties && UntypedInstance != null)
             {
                 _typedEdmEntityObject = _typedEdmEntityObject ??
-                    new TypedEdmEntityObject(Instance, GetEdmType() as IEdmEntityTypeReference, GetModel());
+                    new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, GetModel());
 
                 return _typedEdmEntityObject.TryGetPropertyValue(propertyName, out value);
             }
@@ -122,7 +98,7 @@ namespace System.Web.OData.Query.Expressions
             }
 
             // The user asked for all the structural properties on this instance.
-            if (Instance != null)
+            if (UseInstanceForProperties && UntypedInstance != null)
             {
                 foreach (IEdmStructuralProperty property in type.StructuralProperties())
                 {
@@ -143,10 +119,7 @@ namespace System.Web.OData.Query.Expressions
             return dictionary;
         }
 
-        private Type GetElementType()
-        {
-            return Instance == null ? typeof(TElement) : Instance.GetType();
-        }
+        protected abstract Type GetElementType();
 
         private IEdmModel GetModel()
         {

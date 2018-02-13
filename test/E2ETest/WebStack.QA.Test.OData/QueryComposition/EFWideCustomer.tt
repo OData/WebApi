@@ -10,25 +10,21 @@ int propertiesPerLevel = 400;
 #>
 namespace WebStack.QA.Test.OData.QueryComposition
 {
-	public interface IContinuation
+	public interface IEFCastTest
     {
-        int SkipToken { get; set; }
     }
 
-    public class EFWideCustomer : IContinuation
+    public class EFWideCustomer : IEFCastTest
     {
         public int Id { get; set; }
 
-        public int PartitionId { get; set; }
-
-		<# for(int level=1; level<=levels; level++)
+<# for(int level=1; level<=levels; level++)
 {
 #>
         public CustomProperties<#= level #> Custom<#= level #> {get;set;}
 <#
 }
 #>
-        public int SkipToken { get; set; }
     }
 
 <# for(int level=1; level<=levels; level++)

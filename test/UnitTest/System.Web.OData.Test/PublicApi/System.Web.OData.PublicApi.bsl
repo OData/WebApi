@@ -189,6 +189,10 @@ public class System.Web.OData.ClrTypeAnnotation {
 	System.Type ClrType  { public get; }
 }
 
+public class System.Web.OData.ConcurrencyPropertiesAnnotation : System.Collections.Concurrent.ConcurrentDictionary`2[[Microsoft.OData.Edm.IEdmNavigationSource],[System.Collections.Generic.IEnumerable`1[[Microsoft.OData.Edm.IEdmStructuralProperty]]]], ICollection, IDictionary, IEnumerable, IDictionary`2, IReadOnlyDictionary`2, ICollection`1, IEnumerable`1, IReadOnlyCollection`1 {
+	public ConcurrencyPropertiesAnnotation ()
+}
+
 public class System.Web.OData.CustomAggregateMethodAnnotation {
 	public CustomAggregateMethodAnnotation ()
 
@@ -979,6 +983,7 @@ public abstract class System.Web.OData.Builder.PropertyConfiguration {
 	bool NotFilterable  { public get; public set; }
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
+	int Order  { public get; public set; }
 	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }
@@ -3220,6 +3225,7 @@ public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
+	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
 	protected abstract System.Linq.Expressions.ParameterExpression GetParameter ()
 }

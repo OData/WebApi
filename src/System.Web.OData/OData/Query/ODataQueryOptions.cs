@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
 using System.Web.Http;
+using System.Web.OData.Builder;
 using System.Web.OData.Extensions;
 using System.Web.OData.Formatter;
 using System.Web.OData.Properties;
@@ -176,6 +177,7 @@ namespace System.Web.OData.Query
                     {
                         _etagIfNoneMatch.IsIfNoneMatch = true;
                     }
+
                     _etagIfNoneMatchChecked = true;
                 }
 
@@ -473,6 +475,7 @@ namespace System.Web.OData.Query
             {
                 throw Error.ArgumentNull("entity");
             }
+
             if (querySettings == null)
             {
                 throw Error.ArgumentNull("querySettings");
@@ -530,23 +533,23 @@ namespace System.Web.OData.Query
         {
             Contract.Assert(context != null);
 
-            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
-            if (entityType != null)
-            {
-                IEnumerable<IEdmStructuralProperty> properties =
-                    entityType.Key().Any()
-                        ? entityType.Key()
-                        : entityType
-                            .StructuralProperties()
-                            .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
-
-                // Sort properties alphabetically for stable sort
-                return properties.OrderBy(property => property.Name);
-            }
-            else
+            var entityType = context.ElementType as IEdmEntityType;
+            if (entityType == null)
             {
                 return Enumerable.Empty<IEdmStructuralProperty>();
             }
+            var properties =
+                entityType.Key().Any()
+                    ? entityType.Key()
+                    : entityType
+                        .StructuralProperties()
+                        .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
+
+            return properties.OrderBy(o =>
+            {
+                var value = o.DeclaringType as PrimitivePropertyConfiguration;
+                return value == null ? 0 : value.Order;
+            }).ThenBy(o => o.Name).ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top
@@ -803,11 +806,14 @@ namespace System.Web.OData.Query
                     expandRawValue = autoExpandRawValue;
                 }
             }
+
             return expandRawValue;
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase",
             Justification = "Need lower case string here.")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "These are simple and flat processing functions based on parameter key value and cannot be split up.")]
         private void BuildQueryOptions(IDictionary<string, string> queryParameters)
         {
             foreach (KeyValuePair<string, string> kvp in queryParameters)
@@ -926,6 +932,7 @@ namespace System.Web.OData.Query
                     result = (T)newSelectExpand.ApplyTo(entity, querySettings);
                 }
             }
+
             return result;
         }
     }

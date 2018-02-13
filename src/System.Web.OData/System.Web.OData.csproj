@@ -98,6 +98,7 @@
     <Compile Include="OData\Builder\Conventions\Attributes\MediaTypeAttributeConvention.cs" />
     <Compile Include="OData\Builder\BindingPathHelper.cs" />
     <Compile Include="OData\Builder\PrecisionPropertyConfiguration.cs" />
+    <Compile Include="OData\ConcurrencyPropertiesAnnotation.cs" />
     <Compile Include="OData\EdmDeltaComplexObject.cs" />
     <Compile Include="OData\Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="OData\Formatter\ODataModelBinderConverter.cs" />
@@ -105,6 +106,8 @@
     <Compile Include="OData\ODataQueryContextExtensions.cs" />
     <Compile Include="OData\Query\CountAttribute.cs" />
     <Compile Include="OData\Query\Expressions\AggregationPropertyContainer.cs" />
+    <Compile Include="OData\Query\Expressions\DynamicTypeWrapperConverter.cs" />
+    <Compile Include="OData\Query\Expressions\SelectExpandWrapperOfT.cs" />
     <Compile Include="OData\Query\Expressions\PropertyContainer.generated.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -533,6 +536,14 @@
       <Project>{989a83cc-b864-4a75-8bf3-5eda99203a86}</Project>
       <Name>Microsoft.OData.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.OData.Core\Microsoft.OData.Core.csproj">
+      <Project>{989a83cc-b864-4a75-8bf3-5eda99203a86}</Project>
+      <Name>Microsoft.OData.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.csproj">
+      <Project>{7d921888-fe03-4c3f-80fe-2f624505461c}</Project>
+      <Name>Microsoft.OData.Edm</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\odata.net\src\Microsoft.OData.Edm\Microsoft.OData.Edm.csproj">
       <Project>{7d921888-fe03-4c3f-80fe-2f624505461c}</Project>
       <Name>Microsoft.OData.Edm</Name>
@@ -553,6 +564,19 @@
       <Project>{5d921888-fe03-4c3f-40fe-2f624505461d}</Project>
       <Name>Microsoft.Spatial</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\odata.net\src\Microsoft.Spatial\Microsoft.Spatial.csproj">
+      <Project>{5d921888-fe03-4c3f-40fe-2f624505461d}</Project>
+      <Name>Microsoft.Spatial</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="OData\Query\Expressions\PropertyContainer.generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="OData\Query\Expressions\PropertyContainer.generated.tt">

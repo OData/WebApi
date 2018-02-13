@@ -8,7 +8,10 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 
 namespace Microsoft.AspNet.OData
 {
-    internal class PerRouteContainer : PerRouteContainerBase
+    /// <summary>
+    /// A class for managing per-route service containers.
+    /// </summary>
+    public class PerRouteContainer : PerRouteContainerBase
     {
         private ConcurrentDictionary<string, IServiceProvider> _perRouteContainers;
         private IServiceProvider _nonODataRouteContainer;
@@ -22,11 +25,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets the root container for a given route name.
+        /// Gets the container for a given route name.
         /// </summary>
         /// <param name="routeName">The route name.</param>
         /// <returns>The root container for the route name.</returns>
-        public override IServiceProvider GetODataRootContainer(string routeName)
+        protected override IServiceProvider GetContainer(string routeName)
         {
             if (String.IsNullOrEmpty(routeName))
             {
@@ -39,16 +42,16 @@ namespace Microsoft.AspNet.OData
                 return rootContainer;
             }
 
-            throw Error.InvalidOperation(SRResources.NullContainer);
+            return null;
         }
 
         /// <summary>
-        /// Sets the root container for a given route name.
+        /// Sets the container for a given route name.
         /// </summary>
         /// <param name="routeName">The route name.</param>
         /// <param name="rootContainer">The root container to set.</param>
         /// <remarks>Used by unit tests to insert root containers.</remarks>
-        internal override void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
+        protected override void SetContainer(string routeName, IServiceProvider rootContainer)
         {
             if (rootContainer == null)
             {

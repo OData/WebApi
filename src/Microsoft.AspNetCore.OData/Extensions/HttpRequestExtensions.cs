@@ -391,15 +391,10 @@ namespace Microsoft.AspNet.OData.Extensions
             IPerRouteContainer perRouteContainer = request.HttpContext.RequestServices.GetRequiredService<IPerRouteContainer>();
             if (perRouteContainer == null)
             {
-                throw Error.ArgumentNull("routeName");
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
             }
 
             IServiceProvider rootContainer = perRouteContainer.GetODataRootContainer(routeName);
-            if (rootContainer == null)
-            {
-                throw Error.ArgumentNull("routeName");
-            }
-
             IServiceScope scope = rootContainer.GetRequiredService<IServiceScopeFactory>().CreateScope();
 
             // Bind scoping request into the OData container.

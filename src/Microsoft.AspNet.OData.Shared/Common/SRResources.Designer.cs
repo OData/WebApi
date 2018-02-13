@@ -1079,6 +1079,15 @@ namespace Microsoft.AspNet.OData.Common {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Member &apos;{0}.{1}&apos; is not a property..
+        /// </summary>
+        internal static string MemberExpressionsMustBeProperties {
+            get {
+                return ResourceManager.GetString("MemberExpressionsMustBeProperties", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Cannot find '{0}'. OData services have not been configured. Are you missing a call to AddOData()?.
         /// </summary>
         internal static string MissingODataServices
@@ -1090,14 +1099,27 @@ namespace Microsoft.AspNet.OData.Common {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Member &apos;{0}.{1}&apos; is not a property..
+        ///   Looks up a localized string similar to Cannot find the services container for route '{0}'. This should not happen and represents a bug.
         /// </summary>
-        internal static string MemberExpressionsMustBeProperties {
-            get {
-                return ResourceManager.GetString("MemberExpressionsMustBeProperties", resourceCulture);
+        internal static string MissingODataContainer
+        {
+            get
+            {
+                return ResourceManager.GetString("MissingODataContainer", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the services container for the non-OData route. This can occur when using OData components on the non-OData route and is usually a configuration issue. Call EnableDependencyInjection() to enable OData components on non-OData routes. This may also occur when a request was mistakenly handled by the ASP.NET Core routing layer instead of the OData routing layer, for instance the URL does not include the OData route prefix configured via a call to MapODataServiceRoute().
+        /// </summary>
+        internal static string MissingNonODataContainer
+        {
+            get
+            {
+                return ResourceManager.GetString("MissingNonODataContainer", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The binding context cannot have a null ModelMetadata..
         /// </summary>

@@ -7,7 +7,10 @@ using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData
 {
-    internal abstract class PerRouteContainerBase : IPerRouteContainer
+    /// <summary>
+    /// A base class for for managing per-route service containers.
+    /// </summary>
+    public abstract class PerRouteContainerBase : IPerRouteContainer
     {
         /// <summary>
         /// Gets or sets a function to build an <see cref="IContainerBuilder"/>
@@ -23,7 +26,7 @@ namespace Microsoft.AspNet.OData
         public IServiceProvider CreateODataRootContainer(string routeName, Action<IContainerBuilder> configureAction)
         {
             IServiceProvider rootContainer = this.CreateODataRootContainer(configureAction);
-            this.SetODataRootContainer(routeName, rootContainer);
+            this.SetContainer(routeName, rootContainer);
 
             return rootContainer;
         }
@@ -52,25 +55,74 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Get the root container for a given route name.
+        /// Check if the root container for a given route name exists.
         /// </summary>
         /// <param name="routeName">The route name.</param>
-        /// <returns>The root container for the route name.</returns>
-        public abstract IServiceProvider GetODataRootContainer(string routeName);
+        /// <returns>true if root container for the route name exists, false otherwise.</returns>
+        public bool HasODataRootContainer(string routeName)
+        {
+            IServiceProvider rootContainer = this.GetContainer(routeName);
+            return rootContainer != null;
+        }
 
         /// <summary>
         /// Get the root container for a given route name.
         /// </summary>
         /// <param name="routeName">The route name.</param>
+        /// <returns>The root container for the route name.</returns>
+        /// <remarks>
+        /// This function will throw an exception if no container is found
+        /// in order to localize the failure and provide a consistent error
+        /// message. Use <see cref="HasODataRootContainer"/> to test of a container
+        /// exists without throwing an exception.
+        /// </remarks>
+        public IServiceProvider GetODataRootContainer(string routeName)
+        {
+            IServiceProvider rootContainer = this.GetContainer(routeName);
+            if (rootContainer == null)
+            {
+                if (String.IsNullOrEmpty(routeName))
+                {
+                    throw Error.InvalidOperation(SRResources.MissingNonODataContainer);
+                }
+                else
+                {
+                    throw Error.InvalidOperation(SRResources.MissingODataContainer, routeName);
+                }
+            }
+
+            return rootContainer;
+        }
+
+        /// <summary>
+        /// Set the root container for a given route name.
+        /// </summary>
+        /// <param name="routeName">The route name.</param>
         /// <param name="rootContainer">The root container to set.</param>
         /// <remarks>Used by unit tests to insert root containers.</remarks>
-        internal abstract void SetODataRootContainer(string routeName, IServiceProvider rootContainer);
+        internal void SetODataRootContainer(string routeName, IServiceProvider rootContainer)
+        {
+            this.SetContainer(routeName, rootContainer);
+        }
+
+        /// <summary>
+        /// Get the root container for a given route name.
+        /// </summary>
+        /// <param name="routeName">The route name.</param>
+        protected abstract IServiceProvider GetContainer(string routeName);
+
+        /// <summary>
+        /// Set the root container for a given route name.
+        /// </summary>
+        /// <param name="routeName">The route name.</param>
+        /// <param name="rootContainer">The root container to set.</param>
+        protected abstract void SetContainer(string routeName, IServiceProvider rootContainer);
 
         /// <summary>
         /// Create a container builder with the default OData services.
         /// </summary>
         /// <returns>An instance of <see cref="IContainerBuilder"/> to manage services.</returns>
-        private IContainerBuilder CreateContainerBuilderWithCoreServices()
+        protected IContainerBuilder CreateContainerBuilderWithCoreServices()
         {
             IContainerBuilder builder;
             if (this.BuilderFactory != null)

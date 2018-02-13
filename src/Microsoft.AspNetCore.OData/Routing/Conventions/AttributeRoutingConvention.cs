@@ -60,15 +60,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 IPerRouteContainer perRouteContainer = _serviceProvider.GetRequiredService<IPerRouteContainer>();
                 if (perRouteContainer == null)
                 {
-                    throw Error.ArgumentNull("routeName");
+                    throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
                 }
 
                 IServiceProvider rootContainer = perRouteContainer.GetODataRootContainer(routeName);
-                if (perRouteContainer == null)
-                {
-                    throw Error.ArgumentNull("routeName");
-                }
-
                 ODataPathTemplateHandler = rootContainer.GetRequiredService<IODataPathTemplateHandler>();
             }
         }
@@ -235,6 +230,11 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 controllerAction.MethodInfo.GetCustomAttributes<ODataRouteAttribute>(inherit: false);
 
             IPerRouteContainer perRouteContainer = _serviceProvider.GetRequiredService<IPerRouteContainer>();
+            if (perRouteContainer == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
+            }
+
             IServiceProvider requestContainer = perRouteContainer.GetODataRootContainer(_routeName);
 
             string controllerName = controllerAction.ControllerName;

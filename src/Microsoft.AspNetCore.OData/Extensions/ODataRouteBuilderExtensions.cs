@@ -464,7 +464,7 @@ namespace Microsoft.AspNet.OData.Extensions
             IPerRouteContainer perRouteContainer = builder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
             if (perRouteContainer == null)
             {
-                throw Error.ArgumentNull("routeName");
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
             }
 
             // Create an service provider for this route. Add the default services to the custom configuration actions.
@@ -565,10 +565,10 @@ namespace Microsoft.AspNet.OData.Extensions
             IPerRouteContainer perRouteContainer = builder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
             if (perRouteContainer == null)
             {
-                throw Error.ArgumentNull("routeName");
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
             }
 
-            if (perRouteContainer.GetODataRootContainer(null) != null)
+            if (perRouteContainer.HasODataRootContainer(null))
             {
                 throw Error.InvalidOperation(SRResources.CannotReEnableDependencyInjection);
             }

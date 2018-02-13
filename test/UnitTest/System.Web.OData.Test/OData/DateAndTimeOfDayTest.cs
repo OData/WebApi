@@ -42,7 +42,7 @@ namespace System.Web.OData
             Assert.Contains("<Property Name=\"ResumeTime\" Type=\"Edm.Duration\" Nullable=\"false\" />", payload);
         }
 
-        [Fact(Skip = "VSTS AX: Null elimination")]
+        [Fact]
         public void CanQueryEntity_WithDateAndTimeOfDayProperties()
         {
             // Arrange

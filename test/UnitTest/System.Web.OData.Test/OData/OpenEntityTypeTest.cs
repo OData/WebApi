@@ -20,7 +20,7 @@ namespace System.Web.OData
     {
         private const string _untypedCustomerRequestRooturl = "http://localhost/odata/UntypedSimpleOpenCustomers";
 
-        [Theory(Skip = "VSTS AX: Null elimination")]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void Get_OpenEntityType(bool enableNullDynamicProperty)

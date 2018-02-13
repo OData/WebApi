@@ -18,7 +18,7 @@ namespace System.Web.OData
 {
     public class OpenComplexTypeTest
     {
-        [Theory(Skip = "VSTS AX: Null elimination")]
+        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void OpenComplexType_SimpleSerialization(bool enableNullDynamicProperty)

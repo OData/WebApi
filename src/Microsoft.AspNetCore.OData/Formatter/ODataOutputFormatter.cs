@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Formatter
         /// </summary>
         /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(ODataSerializerProviderProxy.Instance, payloadKinds)
+            : this(new ODataSerializerProviderProxy(), payloadKinds)
         {
         }
 

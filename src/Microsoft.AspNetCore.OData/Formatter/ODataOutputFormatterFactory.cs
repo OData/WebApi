@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.OData.Formatter
         /// <returns>A list of media type formatters to handle OData.</returns>
         public static IList<ODataOutputFormatter> Create()
         {
-            return Create(ODataSerializerProviderProxy.Instance);
+            return Create(new ODataSerializerProviderProxy());
         }
 
         /// <summary>

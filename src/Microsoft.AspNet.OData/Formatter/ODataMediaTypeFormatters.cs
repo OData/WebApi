@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Formatter
         /// <returns>A list of media type formatters to handle OData.</returns>
         public static IList<ODataMediaTypeFormatter> Create()
         {
-            return Create(ODataSerializerProviderProxy.Instance, ODataDeserializerProviderProxy.Instance);
+            return Create(new ODataSerializerProviderProxy(), new ODataDeserializerProviderProxy());
         }
 
         /// <summary>

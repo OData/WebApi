@@ -11,22 +11,18 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// The default <see cref="ODataDeserializerProviderProxy"/>.
     /// </summary>
+    /// <remarks>
+    /// This class is used to delay load the ODataDeserializerProvider from
+    /// the service container. The proxy is used by the formatter, which is
+    /// created outside of the container and therefore can’t use the 
+    /// container directly. At run-time, the container from the active
+    /// request is saved on a property on the proxy before the formatter
+    /// asks for the ODataDeserializerProvider; once it does ask, the proxy
+    /// loads the ODataDeserializerProvider from services container.
+    /// </remarks>
     internal partial class ODataDeserializerProviderProxy : ODataDeserializerProvider
     {
-        private static readonly ODataDeserializerProviderProxy _instance = new ODataDeserializerProviderProxy();
-
         private IServiceProvider _requestContainer;
-
-        /// <summary>
-        /// Gets the default instance of the <see cref="ODataDeserializerProviderProxy"/>.
-        /// </summary>
-        public static ODataDeserializerProviderProxy Instance
-        {
-            get
-            {
-                return _instance;
-            }
-        }
 
         public IServiceProvider RequestContainer
         {

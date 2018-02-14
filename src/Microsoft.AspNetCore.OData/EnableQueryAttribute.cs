@@ -68,45 +68,52 @@ namespace Microsoft.AspNet.OData
 
             HttpResponse response = actionExecutedContext.HttpContext.Response;
 
-            if (response != null && response.IsSuccessStatusCode() && actionExecutedContext.Result != null)
+            // Check is the response is set and successful.
+            if (response != null && IsSuccessStatusCode(response.StatusCode) && actionExecutedContext.Result != null)
             {
-                ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
-                if (responseContent == null)
+                // actionExecutedContext.Result might also indicate a status code that has not yet
+                // been applied to the result; make sure it's also successful.
+                StatusCodeResult statusCodeResult = actionExecutedContext.Result as StatusCodeResult;
+                if (statusCodeResult == null || IsSuccessStatusCode(statusCodeResult.StatusCode))
                 {
-                    throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
-                        actionExecutedContext.Result.GetType().FullName);
-                }
+                    ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
+                    if (responseContent == null)
+                    {
+                        throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                            actionExecutedContext.Result.GetType().FullName);
+                    }
 
-                // Get collection from SingleResult.
-                IQueryable singleResultCollection = null;
-                SingleResult singleResult = responseContent.Value as SingleResult;
-                if (singleResult != null)
-                {
-                    // This could be a SingleResult, which has the property Queryable.
-                    // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
-                    // on the property and get the one with the most parameters.
-                    PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
-                        .OrderBy(p => p.GetIndexParameters().Count())
-                        .Where(p => p.Name.Equals("Queryable"))
-                        .LastOrDefault();
+                    // Get collection from SingleResult.
+                    IQueryable singleResultCollection = null;
+                    SingleResult singleResult = responseContent.Value as SingleResult;
+                    if (singleResult != null)
+                    {
+                        // This could be a SingleResult, which has the property Queryable.
+                        // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
+                        // on the property and get the one with the most parameters.
+                        PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
+                            .OrderBy(p => p.GetIndexParameters().Count())
+                            .Where(p => p.Name.Equals("Queryable"))
+                            .LastOrDefault();
 
-                    singleResultCollection = propInfo.GetValue(singleResult) as IQueryable;
-                }
+                        singleResultCollection = propInfo.GetValue(singleResult) as IQueryable;
+                    }
 
-                // Execution the action.
-                object queryResult = OnActionExecuted(
-                    responseContent.Value,
-                    singleResultCollection,
-                    new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor),
-                    new WebApiRequestMessage(request),
-                    (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
-                    (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
-                    (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
-                    (statusCode, message, exception) => actionExecutedContext.Result = new BadRequestObjectResult(message));
+                    // Execution the action.
+                    object queryResult = OnActionExecuted(
+                        responseContent.Value,
+                        singleResultCollection,
+                        new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor),
+                        new WebApiRequestMessage(request),
+                        (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
+                        (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
+                        (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
+                        (statusCode, message, exception) => actionExecutedContext.Result = new BadRequestObjectResult(message));
 
-                if (queryResult != null)
-                {
-                    responseContent.Value = queryResult;
+                    if (queryResult != null)
+                    {
+                        responseContent.Value = queryResult;
+                    }
                 }
             }
         }
@@ -123,6 +130,16 @@ namespace Microsoft.AspNet.OData
             ValidateQuery(request, queryOptions);
 
             return queryOptions;
+        }
+
+        /// <summary>
+        /// Determine if the status code indicates success.
+        /// </summary>
+        /// <param name="statusCode">The status code.</param>
+        /// <returns>True if the response has a success status code; false otherwise.</returns>
+        private static bool IsSuccessStatusCode(int statusCode)
+        {
+            return statusCode >= 200 && statusCode < 300;
         }
 
         /// <summary>

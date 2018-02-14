@@ -54,12 +54,12 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 throw Error.ArgumentNull("member");
             }
 
-
             ICollection<Attribute> attributes;
             bool cacheHit = false;
 
-            lock(attributesCache) // isolate access to cache
+            lock (attributesCache) 
             {
+                // isolate access to cache
                 cacheHit = attributesCache.TryGetValue(member, out attributes);
             }
 
@@ -70,8 +70,9 @@ namespace System.Web.OData.Builder.Conventions.Attributes
                 .OfType<Attribute>()
                 .ToList();
 
-                lock(attributesCache) // isolate access to cache
+                lock (attributesCache)
                 {
+                    // isolate access to cache
                     // It's OK to replace it someone else already added 
                     attributesCache[member] = attributes; 
                 }

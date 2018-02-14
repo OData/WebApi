@@ -24,6 +24,7 @@ namespace System.Web.OData.Query.Expressions
     /// <summary>
     /// The base class for all expression binders.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     public abstract class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
@@ -1020,9 +1021,9 @@ namespace System.Web.OData.Query.Expressions
         {
             string[] propertyNameParts = propertyPath.Split('\\');
             Expression propertyValue = source;
-            foreach (var pName in propertyNameParts)
+            foreach (var propertyName in propertyNameParts)
             {
-                propertyValue = Expression.Property(propertyValue, pName);
+                propertyValue = Expression.Property(propertyValue, propertyName);
             }
             return propertyValue;
         }
@@ -1041,6 +1042,7 @@ namespace System.Web.OData.Query.Expressions
         /// Gets $it parameter
         /// </summary>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Meant to be abstract.")]
         protected abstract ParameterExpression GetParameter();
 
         /// <summary>
@@ -1180,7 +1182,6 @@ namespace System.Web.OData.Query.Expressions
             }
         }
 
-
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)
         {
             Contract.Assert(ClrCanonicalFunctions.CastFunctionName == node.Name);
@@ -1249,8 +1250,6 @@ namespace System.Web.OData.Query.Expressions
                 }
             }
         }
-
-
 
         private static Expression BindCastToStringType(Expression source)
         {
@@ -1725,7 +1724,6 @@ namespace System.Web.OData.Query.Expressions
                 throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, functionName));
             }
         }
-
 
         private Expression BindCustomMethodExpressionOrNull(SingleValueFunctionCallNode node)
         {

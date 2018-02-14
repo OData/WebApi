@@ -140,9 +140,9 @@ namespace System.Web.OData.Formatter.Serialization
         {
             var propertyNameParts = propertyName.Split('\\');
             Func<object, object> result = null;
-            foreach(var pName in propertyNameParts)
+            foreach (var propName in propertyNameParts)
             {
-                PropertyInfo property = type.GetProperty(pName);
+                PropertyInfo property = type.GetProperty(propName);
                 if (property == null)
                 {
                     return null;

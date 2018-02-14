@@ -16,13 +16,11 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
 using System.Xml.Linq;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.OData.UriParser;
 using Microsoft.Spatial;
-using System.Linq.Expressions;
 
 namespace System.Web.OData.Formatter
 {
@@ -699,7 +697,7 @@ namespace System.Web.OData.Formatter
                     propertyName = propertyInfo.Name;
                     if (annotation.PropertiesPath != null && annotation.PropertiesPath.Any())
                     {
-                        propertyName = string.Join("", annotation.PropertiesPath.Select(p => p.Name + "\\") ) + propertyName;
+                        propertyName = String.Join(String.Empty, annotation.PropertiesPath.Select(p => p.Name + "\\")) + propertyName;
                     }
                 }
             }

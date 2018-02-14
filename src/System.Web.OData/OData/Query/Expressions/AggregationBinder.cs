@@ -186,8 +186,7 @@ namespace System.Web.OData.Query.Expressions
                 && _aggregateExpressions.Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
                 && _groupingProperties != null
                 && _groupingProperties.Any()
-                && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any())
-                )
+                && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any()))
             {
                 var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this._elementType);
                 var sourceProperty = wrapperType.GetProperty("Source");

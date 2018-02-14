@@ -125,7 +125,6 @@ namespace System.Web.OData.Query
             get; set;
         }
 
-
         internal void CopyFrom(ODataQuerySettings settings)
         {
             EnsureStableOrdering = settings.EnsureStableOrdering;

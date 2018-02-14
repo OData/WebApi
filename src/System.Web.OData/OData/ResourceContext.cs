@@ -118,8 +118,8 @@ namespace System.Web.OData
         /// </summary>
         public IEdmStructuredType StructuredType { get; set; }
 
-
         private IEdmStructuredObject edmObject;
+
         /// <summary>
         /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
         /// </summary>

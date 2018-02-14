@@ -32,7 +32,6 @@ namespace System.Web.OData.Query.Expressions
         private Dictionary<string, ParameterExpression> _lambdaParameters;
         private Type _filterType;
 
-
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterBinder"/> class.
         /// </summary>
@@ -146,6 +145,7 @@ namespace System.Web.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "These are simple conversion function and cannot be split up.")]
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
         public override Expression Bind(QueryNode node)
         {
             // Recursion guard to avoid stack overflows
@@ -509,6 +509,7 @@ namespace System.Web.OData.Query.Expressions
         /// <param name="rangeVariable"></param>
         /// <param name="elementType"></param>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "More specific type is more clear")]
         public LambdaExpression BindExpression(SingleValueNode expression, RangeVariable rangeVariable, Type elementType)
         {
             ParameterExpression filterParameter = Expression.Parameter(elementType, rangeVariable.Name);

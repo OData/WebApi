@@ -398,12 +398,12 @@ namespace System.Web.OData.Query
             return result;
         }
 
-        private bool IsAggregated(ApplyClause apply)
+        private static bool IsAggregated(ApplyClause apply)
         {
             return apply != null && apply.Transformations.Any(_aggregateTransformPredicate);
         }
 
-        private List<string> GetApplySortOptions(ApplyClause apply)
+        private static List<string> GetApplySortOptions(ApplyClause apply)
         {
             if (!IsAggregated(apply))
             {
@@ -611,7 +611,7 @@ namespace System.Web.OData.Query
                 var propertyPathsToAdd = applySortOptions.Where(p => !usedPropertyNames.Contains(p)).OrderBy(p => p);
                 if (propertyPathsToAdd.Any())
                 {
-                    var orderByRaw = orderBy.RawValue + "," + string.Join(",", propertyPathsToAdd);
+                    var orderByRaw = orderBy.RawValue + "," + String.Join(",", propertyPathsToAdd);
                     orderBy = new OrderByQueryOption(orderByRaw, context, Apply.RawValue);
                 }
             }
@@ -902,7 +902,6 @@ namespace System.Web.OData.Query
             bool expandAvailable = IsAvailableODataQueryOption(SelectExpand.RawExpand, AllowedQueryOptions.Expand);
             if (selectAvailable || expandAvailable)
             {
-
                 if ((!selectAvailable && SelectExpand.RawSelect != null) ||
                     (!expandAvailable && SelectExpand.RawExpand != null))
                 {
@@ -911,7 +910,6 @@ namespace System.Web.OData.Query
                         expandAvailable ? RawValues.Expand : null,
                         SelectExpand.Context);
                 }
-
 
                 SelectExpandClause processedClause = SelectExpand.ProcessLevels();
                 SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(

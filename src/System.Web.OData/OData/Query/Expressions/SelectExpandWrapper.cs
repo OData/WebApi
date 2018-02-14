@@ -33,7 +33,7 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         public bool UseInstanceForProperties { get; set; }
 
-        public IEdmModel Model {get; set;}
+        public IEdmModel Model { get; set; }
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()

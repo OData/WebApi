@@ -11,11 +11,12 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
+
 using Address = System.Web.OData.Builder.TestModels.Address;
-using Microsoft.OData.Edm;
 
 namespace System.Web.OData.Test.OData.Query
 {
@@ -746,7 +747,7 @@ namespace System.Web.OData.Test.OData.Query
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } },
-                    StartDate =  new DateTimeOffset(new DateTime(2018,02,07, 1, 2, 3))
+                    StartDate = new DateTimeOffset(new DateTime(2018,02,07, 1, 2, 3))
                 };
                 c.Orders = new List<Order>
                 {

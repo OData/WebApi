@@ -548,7 +548,7 @@ namespace System.Web.OData
             builder.EntitySet<SelectExpandTestOrder>("SelectExpandTestOrders");
             builder.Ignore<SelectExpandTestSpecialCustomer>();
             builder.Ignore<SelectExpandTestSpecialOrder>();
-            var model =  builder.GetEdmModel();
+            var model = builder.GetEdmModel();
             Action<string> enableAutoSelect = (string entityName) =>
             {
                 var entityType = model.EntityContainer.FindEntitySet(entityName).EntityType();
@@ -558,7 +558,6 @@ namespace System.Web.OData
                     MaxTop = null // Ensure that system wide settings are respected
                 };
                 model.SetAnnotationValue(entityType, modelBound);
-
             };
             enableAutoSelect("SelectExpandTestCustomers");
             enableAutoSelect("SelectExpandTestOrders");

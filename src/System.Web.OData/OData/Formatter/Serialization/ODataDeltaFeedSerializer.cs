@@ -59,7 +59,9 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference entityType = GetResourceType(feedType).AsEntity();
+#pragma warning disable CS0618 // Type or member is obsolete
             ODataDeltaWriter writer = messageWriter.CreateODataDeltaWriter(entitySet, entityType.EntityDefinition());
+#pragma warning restore CS0618 // Type or member is obsolete
 
             WriteDeltaFeedInline(graph, feedType, writer, writeContext);
         }

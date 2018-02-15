@@ -49,7 +49,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataBinaryValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataCountMediaTypeMapping.cs" />
@@ -61,17 +60,16 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataRawValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">
-      <AutoGen>True</AutoGen> 
-      <DesignTime>True</DesignTime> 
-      <DependentUpon>PropertyContainer.generated.tt</DependentUpon> 
-    </Compile> 
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PropertyContainer.generated.tt</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestMethod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionDescriptor.cs" />
@@ -428,9 +426,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PropertySelectorVisitor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.tt"> 
-      <Generator>TextTemplatingFileGenerator</Generator> 
-      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput> 
-    </Content> 
-  </ItemGroup> 
+    <Content Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PropertyContainer.generated.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
 </Project>

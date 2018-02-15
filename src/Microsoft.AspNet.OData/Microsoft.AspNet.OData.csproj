@@ -80,7 +80,6 @@
     <Compile Include="Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProvider.cs" />
-    <Compile Include="Formatter\Deserialization\ODataDeserializerProviderProxy.cs" />
     <Compile Include="Extensions\UrlHelperExtensions.cs" />
     <Compile Include="Batch\ODataBatchHandler.cs" />
     <Compile Include="Batch\ODataBatchHttpRequestMessageExtensions.cs" />
@@ -90,7 +89,6 @@
     <Compile Include="Formatter\Serialization\DefaultODataSerializerProvider.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProvider.cs" />
-    <Compile Include="Formatter\Serialization\ODataSerializerProviderProxy.cs" />
     <Compile Include="HttpRequestScope.cs" />
     <Compile Include="PerRouteContainer.cs" />
     <Compile Include="GetNextPageHelper.cs" />

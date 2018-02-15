@@ -16,6 +16,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData;
@@ -35,47 +36,19 @@ namespace Microsoft.AspNet.OData.Formatter
         /// </summary>
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
 
-        private readonly ODataSerializerProvider _serializerProvider;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataOutputFormatter"/> class.
         /// </summary>
         /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
         public ODataOutputFormatter(IEnumerable<ODataPayloadKind> payloadKinds)
-            : this(new ODataSerializerProviderProxy(), payloadKinds)
         {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ODataOutputFormatter"/> class.
-        /// </summary>
-        /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use.</param>
-        /// <param name="payloadKinds">The kind of payloads this formatter supports.</param>
-        public ODataOutputFormatter(ODataSerializerProvider serializerProvider, IEnumerable<ODataPayloadKind> payloadKinds)
-        {
-            if (serializerProvider == null)
-            {
-                throw Error.ArgumentNull("serializerProvider");
-            }
             if (payloadKinds == null)
             {
                 throw Error.ArgumentNull("payloadKinds");
             }
 
-            _serializerProvider = serializerProvider;
             _payloadKinds = payloadKinds;
             _version = ODataVersionConstraint.DefaultODataVersion;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="ODataSerializerProvider"/> that will be used by this formatter instance.
-        /// </summary>
-        public ODataSerializerProvider SerializerProvider
-        {
-            get
-            {
-                return _serializerProvider;
-            }
         }
 
         /// <summary>
@@ -140,16 +113,15 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            // Ensure the _serializerProvider has the services form the request and see if
-            // the type can be written using the serializer.
-            EnsureRequestContainer(request);
+            ODataSerializerProvider serializerProvider = request.ODataFeature()
+                .RequestContainer.GetRequiredService<ODataSerializerProvider>();
 
             return ODataOutputFormatterHelper.CanWriteType(
                 type,
                 _payloadKinds,
                 type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>),
                 new WebApiRequestMessage(request),
-                (objectType) => _serializerProvider.GetODataPayloadSerializer(objectType, request));
+                (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request));
         }
 
         /// <inheritdoc/>
@@ -233,7 +205,8 @@ namespace Microsoft.AspNet.OData.Formatter
                     };
                 };
 
-                EnsureRequestContainer(request);
+                ODataSerializerProvider serializerProvider = request.ODataFeature()
+                    .RequestContainer.GetRequiredService<ODataSerializerProvider>();
 
                 ODataOutputFormatterHelper.WriteToStream(
                     type,
@@ -246,8 +219,8 @@ namespace Microsoft.AspNet.OData.Formatter
                     new WebApiRequestMessage(request),
                     new WebApiRequestHeaders(request.Headers),
                     (services) => ODataMessageWrapperHelper.Create(response.Body, response.Headers, services),
-                    (edmType) => _serializerProvider.GetEdmTypeSerializer(edmType),
-                    (objectType) => _serializerProvider.GetODataPayloadSerializer(objectType, request),
+                    (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
+                    (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
                     getODataSerializerContext);
 
                 return TaskHelpers.Completed();
@@ -296,15 +269,6 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
-        }
-
-        private void EnsureRequestContainer(HttpRequest request)
-        {
-            ODataSerializerProviderProxy serializerProviderProxy = _serializerProvider as ODataSerializerProviderProxy;
-            if (serializerProviderProxy != null && serializerProviderProxy.RequestContainer == null)
-            {
-                serializerProviderProxy.RequestContainer = request.GetRequestContainer();
-            }
         }
 
         private MediaTypeHeaderValue GetContentType(string contentTypeValue)

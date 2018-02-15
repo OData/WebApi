@@ -1996,7 +1996,6 @@ ExtensionAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatters {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatter]] Create ()
-	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatter]] Create (ODataSerializerProvider serializerProvider, ODataDeserializerProvider deserializerProvider)
 }
 
 public sealed class Microsoft.AspNet.OData.Formatter.ODataModelBinderConverter {
@@ -2047,12 +2046,9 @@ public class Microsoft.AspNet.OData.Formatter.ODataEnumValueMediaTypeMapping : O
 
 public class Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatter : System.Net.Http.Formatting.MediaTypeFormatter {
 	public ODataMediaTypeFormatter (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.ODataPayloadKind]] payloadKinds)
-	public ODataMediaTypeFormatter (ODataDeserializerProvider deserializerProvider, ODataSerializerProvider serializerProvider, System.Collections.Generic.IEnumerable`1[[Microsoft.OData.ODataPayloadKind]] payloadKinds)
 
 	System.Func`2[[System.Net.Http.HttpRequestMessage],[System.Uri]] BaseAddressFactory  { public get; public set; }
-	ODataDeserializerProvider DeserializerProvider  { public get; }
 	System.Net.Http.HttpRequestMessage Request  { public get; public set; }
-	ODataSerializerProvider SerializerProvider  { public get; }
 
 	public virtual bool CanReadType (System.Type type)
 	public virtual bool CanWriteType (System.Type type)

@@ -57,7 +57,7 @@ namespace WebStack.QA.Test.OData
             return builder.GetEdmModel();
         }
 
-        [Fact(Skip = "VSTS AX: Null elimination")]
+        [Fact]
         public void DeltaVerifyReslt()
         {
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/TestCustomers?$deltaToken=abc");

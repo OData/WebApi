@@ -129,7 +129,7 @@ namespace WebStack.QA.Test.OData.DateAndTimeOfDay
             }
         }
 
-        [Theory(Skip = "VSTS AX: Null elimination")]
+        [Theory]
         [PropertyData("MediaTypes")]
         public async Task QueryDCustomerEntityTest(string mode, string mime)
         {

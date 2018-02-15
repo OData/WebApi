@@ -46,7 +46,7 @@ namespace WebStack.QA.Test.OData.ETags
             return builder.GetEdmModel();
         }
 
-        [Fact(Skip = "VSTS AX: Null elimination")]
+        [Fact]
         public async Task NestedDollarSelectWorksOnCurrencyTokenProperty()
         {
             string expect = "{\r\n" +

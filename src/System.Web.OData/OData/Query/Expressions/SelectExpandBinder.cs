@@ -308,13 +308,14 @@ namespace System.Web.OData.Query.Expressions
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
 
-            // Initialize property 'Instance' on the wrapper class
-            // source => new Wrapper { Instance = element }
-            wrapperProperty = wrapperType.GetProperty("Instance");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
-
             if (IsSelectAll(selectExpandClause))
             {
+                // Moved here to fix EF regression intorduced with PR #1026
+                // Initialize property 'Instance' on the wrapper class
+                // source => new Wrapper { Instance = element }
+                wrapperProperty = wrapperType.GetProperty("Instance");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+
                 wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;

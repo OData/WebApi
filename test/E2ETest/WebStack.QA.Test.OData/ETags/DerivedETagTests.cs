@@ -72,7 +72,7 @@ namespace WebStack.QA.Test.OData.ETags
             Assert.True(String.Concat(jsonETags) == String.Concat(derivedEtags), "Derived Types has different etags than base type");
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Model Container removed")]
         public void SingletonsHaveSameETagsTest()
         {
             string requestUri = this.BaseAddress + "/odata/ETagsCustomers?$select=Id";

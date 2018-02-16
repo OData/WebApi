@@ -44,6 +44,8 @@ namespace System.Web.OData.Query
 
         private AllowedQueryOptions _ignoreQueryOptions = AllowedQueryOptions.None;
 
+        private static readonly Func<TransformationNode, bool> _aggregateTransformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -354,7 +356,10 @@ namespace System.Web.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
-            AddAutoSelectExpandProperties();
+            if (!IsAggregated(apply))
+            {
+                AddAutoSelectExpandProperties();
+            }
 
             if (SelectExpand != null)
             {
@@ -365,41 +370,48 @@ namespace System.Web.OData.Query
                 }
             }
 
-            int pageSize = -1;
-            if (querySettings.PageSize.HasValue)
+            if (!querySettings.PostponePaging)
             {
-                pageSize = querySettings.PageSize.Value;
-            }
-            else if (querySettings.ModelBoundPageSize.HasValue)
-            {
-                pageSize = querySettings.ModelBoundPageSize.Value;
-            }
-
-            if (pageSize > 0)
-            {
-                bool resultsLimited;
-                result = LimitResults(result, pageSize, out resultsLimited);
-                if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
-                    Request.ODataProperties().NextLink == null)
+                int pageSize = -1;
+                if (querySettings.PageSize.HasValue)
                 {
-                    Uri nextPageLink = Request.GetNextPageLink(pageSize);
-                    Request.ODataProperties().NextLink = nextPageLink;
+                    pageSize = querySettings.PageSize.Value;
+                }
+                else if (querySettings.ModelBoundPageSize.HasValue)
+                {
+                    pageSize = querySettings.ModelBoundPageSize.Value;
+                }
+
+                if (pageSize > 0)
+                {
+                    bool resultsLimited;
+                    result = LimitResults(result, pageSize, out resultsLimited);
+                    if (resultsLimited && Request.RequestUri != null && Request.RequestUri.IsAbsoluteUri &&
+                        Request.ODataProperties().NextLink == null)
+                    {
+                        Uri nextPageLink = Request.GetNextPageLink(pageSize);
+                        Request.ODataProperties().NextLink = nextPageLink;
+                    }
                 }
             }
 
             return result;
         }
 
+        private static bool IsAggregated(ApplyClause apply)
+        {
+            return apply != null && apply.Transformations.Any(_aggregateTransformPredicate);
+        }
+
         private static List<string> GetApplySortOptions(ApplyClause apply)
         {
-            Func<TransformationNode, bool> transformPredicate = t => t.Kind == TransformationNodeKind.Aggregate || t.Kind == TransformationNodeKind.GroupBy;
-            if (apply == null || !apply.Transformations.Any(transformPredicate))
+            if (!IsAggregated(apply))
             {
                 return null;
             }
 
             var result = new List<string>();
-            var lastTransform = apply.Transformations.Last(transformPredicate);
+            var lastTransform = apply.Transformations.Last(_aggregateTransformPredicate);
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;
@@ -695,6 +707,10 @@ namespace System.Web.OData.Query
                     autoExpandRawValue,
                     Context,
                     _queryOptionParser);
+
+                var typeLevelModelSettings = EdmLibHelpers.GetModelBoundQuerySettings(this.Context.ElementType, this.Context.Model, this.Context.DefaultQuerySettings);
+                SelectExpand.SelectExpandClause.AllAutoSelected = (typeLevelModelSettings != null && typeLevelModelSettings.DefaultSelectType == SelectExpandType.Automatic);
+
                 if (originalSelectExpand != null && originalSelectExpand.LevelsMaxLiteralExpansionDepth > 0)
                 {
                     SelectExpand.LevelsMaxLiteralExpansionDepth = originalSelectExpand.LevelsMaxLiteralExpansionDepth;

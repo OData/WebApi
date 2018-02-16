@@ -739,10 +739,10 @@ namespace System.Web.OData.Query
         }
 
         [Theory]
-        [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataException))]
-        [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataException))]
-        [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataException))]
-        [InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
+        [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataErrorException))]
+        [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataErrorException))]
+        [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataErrorException))]
+        //[InlineData("cast('123',Microsoft.TestCommon.Types.SimpleEnum) ne 'First'", typeof(ODataException))] // Supported in ODL 7.4
         [InlineData("cast(Edm.Int32) eq '123'", typeof(ODataException))]
         public void ApplyWithCast_Throws_WithInvalidFilter(string filter, Type exceptionType)
         {

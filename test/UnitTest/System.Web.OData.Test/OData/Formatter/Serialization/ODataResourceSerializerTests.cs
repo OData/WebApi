@@ -203,7 +203,7 @@ namespace System.Web.OData.Formatter.Serialization
             writer.Verify();
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void WriteObjectInline_Calls_CreateNavigationLink_ForEachSelectedNavigationProperty()
         {
             // Arrange
@@ -230,7 +230,7 @@ namespace System.Web.OData.Formatter.Serialization
             serializer.Verify();
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void WriteObjectInline_WritesNavigationLinksReturnedBy_CreateNavigationLink_ForEachSelectedNavigationProperty()
         {
             // Arrange
@@ -588,7 +588,7 @@ namespace System.Web.OData.Formatter.Serialization
                 "resourceContext");
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: Null elimination")]
         public void CreateResource_Calls_CreateStructuralProperty_ForEachSelectedStructuralProperty()
         {
             // Arrange

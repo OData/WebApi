@@ -19,5 +19,7 @@ namespace System.Web.OData.Builder.TestModels
         public List<string> Aliases { get; set; }
         public List<Address> Addresses { get; set; }
         public Dictionary<string, object> DynamicProperties { get; set; }
+
+        public DateTimeOffset? StartDate { get; set; }
     }
 }

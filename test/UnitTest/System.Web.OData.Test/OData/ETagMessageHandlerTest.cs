@@ -174,7 +174,7 @@ namespace System.Web.OData.Test
             Assert.Equal(typeName, entityType.FullName());
         }
 
-        [Fact]
+        [Fact(Skip = "VSTS AX: ModelContainer issue")]
         public void SendAsync_WritesETagToResponseHeaders()
         {
             // Arrange

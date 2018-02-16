@@ -50,6 +50,7 @@ public interface System.Web.OData.IEdmObject {
 }
 
 public interface System.Web.OData.IEdmStructuredObject : IEdmObject {
+	void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
@@ -85,6 +86,7 @@ public abstract class System.Web.OData.EdmStructuredObject : Delta, IDynamicMeta
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
+	public virtual void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	public System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] TryGetDynamicProperties ()
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
@@ -178,6 +180,7 @@ public class System.Web.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 
 	System.Reflection.PropertyInfo ClrPropertyInfo  { public get; }
+	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] PropertiesPath  { public get; public set; }
 }
 
 public class System.Web.OData.ClrTypeAnnotation {
@@ -399,7 +402,6 @@ public class System.Web.OData.ETagMessageHandler : System.Net.Http.DelegatingHan
 	public ETagMessageHandler ()
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -416,6 +418,7 @@ public class System.Web.OData.NullEdmComplexObject : IEdmComplexObject, IEdmObje
 	public NullEdmComplexObject (Microsoft.OData.Edm.IEdmComplexTypeReference edmType)
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
+	public virtual void SetModel (Microsoft.OData.Edm.IEdmModel model)
 	public virtual bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
@@ -440,7 +443,6 @@ public class System.Web.OData.ODataNullValueMessageHandler : System.Net.Http.Del
 	public ODataNullValueMessageHandler ()
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -609,7 +611,6 @@ public abstract class System.Web.OData.Batch.ODataBatchRequestItem : IDisposable
 	protected abstract void Dispose (bool disposing)
 	public abstract System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendMessageAsync (System.Net.Http.HttpMessageInvoker invoker, System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken, System.Collections.Generic.Dictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
@@ -625,7 +626,6 @@ public abstract class System.Web.OData.Batch.ODataBatchResponseItem : IDisposabl
 	internal virtual bool IsResponseSuccessful ()
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response, System.Threading.CancellationToken cancellationToken)
@@ -700,7 +700,6 @@ public sealed class System.Web.OData.Batch.ODataBatchReaderExtensions {
 	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Net.Http.HttpRequestMessage]]]] ReadChangeSetRequestAsync (Microsoft.OData.ODataBatchReader reader, System.Guid batchId)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
@@ -728,7 +727,6 @@ public sealed class System.Web.OData.Batch.ODataHttpContentExtensions {
 	public static System.Threading.Tasks.Task`1[[Microsoft.OData.ODataMessageReader]] GetODataMessageReaderAsync (System.Net.Http.HttpContent content, System.IServiceProvider requestContainer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	ExtensionAttribute(),
 	]
@@ -743,7 +741,6 @@ public class System.Web.OData.Batch.ChangeSetRequestItem : ODataBatchRequestItem
 	protected virtual void Dispose (bool disposing)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (System.Net.Http.HttpMessageInvoker invoker, System.Threading.CancellationToken cancellationToken)
@@ -757,7 +754,6 @@ public class System.Web.OData.Batch.ChangeSetResponseItem : ODataBatchResponseIt
 	protected virtual void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
@@ -767,19 +763,16 @@ public class System.Web.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler
 	public DefaultODataBatchHandler (System.Web.Http.HttpServer httpServer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Web.OData.Batch.ODataBatchResponseItem]]]] ExecuteRequestMessagesAsync (System.Collections.Generic.IEnumerable`1[[System.Web.OData.Batch.ODataBatchRequestItem]] requests, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[System.Web.OData.Batch.ODataBatchRequestItem]]]] ParseBatchRequestsAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ProcessBatchAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -792,7 +785,6 @@ public class System.Web.OData.Batch.ODataBatchContent : System.Net.Http.HttpCont
 
 	protected virtual void Dispose (bool disposing)
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	protected virtual System.Threading.Tasks.Task SerializeToStreamAsync (System.IO.Stream stream, System.Net.TransportContext context)
@@ -808,7 +800,6 @@ public class System.Web.OData.Batch.OperationRequestItem : ODataBatchRequestItem
 	protected virtual void Dispose (bool disposing)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (System.Net.Http.HttpMessageInvoker invoker, System.Threading.CancellationToken cancellationToken)
@@ -828,19 +819,16 @@ public class System.Web.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHand
 	public UnbufferedODataBatchHandler (System.Web.Http.HttpServer httpServer)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteChangeSetAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Web.OData.Batch.ODataBatchResponseItem]] ExecuteOperationAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, System.Net.Http.HttpRequestMessage originalRequest, System.Threading.CancellationToken cancellationToken)
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ProcessBatchAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
@@ -1079,6 +1067,7 @@ public abstract class System.Web.OData.Builder.StructuralTypeConfiguration : IEd
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
 	internal virtual void DerivesFromNothingImpl ()
+	protected bool HasProperty (string propertyName)
 	public virtual void RemoveProperty (System.Reflection.PropertyInfo propertyInfo)
 }
 
@@ -2348,6 +2337,7 @@ public class System.Web.OData.Query.ODataQuerySettings {
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
 	System.Nullable`1[[System.Int32]] PageSize  { public get; public set; }
+	bool PostponePaging  { public get; public set; }
 }
 
 public class System.Web.OData.Query.ODataRawQueryOptions {
@@ -2631,7 +2621,6 @@ public class System.Web.OData.Results.CreatedODataResult`1 : IHttpActionResult {
 	System.Net.Http.HttpRequestMessage Request  { public get; }
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ExecuteAsync (System.Threading.CancellationToken cancellationToken)
@@ -2647,7 +2636,6 @@ public class System.Web.OData.Results.UpdatedODataResult`1 : IHttpActionResult {
 	System.Net.Http.HttpRequestMessage Request  { public get; }
 
 	[
-	DebuggerStepThroughAttribute(),
 	AsyncStateMachineAttribute(),
 	]
 	public virtual System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] ExecuteAsync (System.Threading.CancellationToken cancellationToken)
@@ -3232,9 +3220,14 @@ public abstract class System.Web.OData.Query.Expressions.DynamicTypeWrapper {
 public abstract class System.Web.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
 
+	public abstract System.Linq.Expressions.Expression Bind (Microsoft.OData.UriParser.QueryNode node)
+	protected System.Linq.Expressions.Expression[] BindArguments (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.UriParser.QueryNode]] nodes)
+	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
+	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
+	protected abstract System.Linq.Expressions.ParameterExpression GetParameter ()
 }
 
 public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
@@ -3247,17 +3240,17 @@ public class System.Web.OData.Query.Expressions.FilterBinder : ExpressionBinderB
 	public virtual System.Linq.Expressions.Expression BindCollectionComplexNode (Microsoft.OData.UriParser.CollectionComplexNode collectionComplexNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionPropertyAccessNode (Microsoft.OData.UriParser.CollectionPropertyAccessNode propertyAccessNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionResourceCastNode (Microsoft.OData.UriParser.CollectionResourceCastNode node)
-	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode)
 	public virtual System.Linq.Expressions.Expression BindDynamicPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
+	public System.Linq.Expressions.LambdaExpression BindExpression (Microsoft.OData.UriParser.SingleValueNode expression, Microsoft.OData.UriParser.RangeVariable rangeVariable, System.Type elementType)
 	public virtual System.Linq.Expressions.Expression BindNavigationPropertyNode (Microsoft.OData.UriParser.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
 	public virtual System.Linq.Expressions.Expression BindPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValuePropertyAccessNode propertyAccessNode)
 	public virtual System.Linq.Expressions.Expression BindRangeVariable (Microsoft.OData.UriParser.RangeVariable rangeVariable)
 	public virtual System.Linq.Expressions.Expression BindSingleComplexNode (Microsoft.OData.UriParser.SingleComplexNode singleComplexNode)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceCastNode (Microsoft.OData.UriParser.SingleResourceCastNode node)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
-	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
+	protected virtual System.Linq.Expressions.ParameterExpression GetParameter ()
 }
 
 public class System.Web.OData.Query.Validators.CountQueryValidator {

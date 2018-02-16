@@ -70,7 +70,7 @@ namespace WebStack.QA.Test.OData.UriParserExtension
             }
         }
 
-        [Theory]
+        [Theory(Skip = "Enum to string comparison supported in ODL 7.4")]
         [PropertyData("EnumPrefixFreeCases")]
         public async Task EnableEnumPrefixFreeTest(string prefix, string prefixFree, HttpStatusCode statusCode)
         {

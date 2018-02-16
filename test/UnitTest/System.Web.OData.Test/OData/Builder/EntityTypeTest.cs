@@ -22,7 +22,7 @@ namespace System.Web.OData.Builder
             Assert.Equal("Customer", customerType.Name);
             Assert.Equal(typeof(Customer).Namespace, customerType.Namespace);
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
-            Assert.Equal(5, customerType.DeclaredProperties.Count());
+            Assert.Equal(6, customerType.DeclaredProperties.Count());
         }
 
         [Fact]
@@ -50,7 +50,7 @@ namespace System.Web.OData.Builder
             Assert.Equal("Customer", customerType.Name);
             Assert.Equal(typeof(Customer).Namespace, customerType.Namespace);
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
-            Assert.Equal(5, customerType.DeclaredProperties.Count());
+            Assert.Equal(6, customerType.DeclaredProperties.Count());
         }
 
         [Fact]

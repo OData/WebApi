@@ -25,11 +25,6 @@ namespace System.Web.OData.Query.Expressions
         /// </summary>
         public PropertyContainer Container { get; set; }
 
-        /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
-        /// </summary>
-        public string ModelID { get; set; }
-
         /// <inheritdoc />
         public object UntypedInstance { get; set; }
 
@@ -37,6 +32,8 @@ namespace System.Web.OData.Query.Expressions
         /// Indicates whether the underlying instance can be used to obtain property values.
         /// </summary>
         public bool UseInstanceForProperties { get; set; }
+
+        public IEdmModel Model { get; set; }
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
@@ -126,9 +123,13 @@ namespace System.Web.OData.Query.Expressions
 
         private IEdmModel GetModel()
         {
-            Contract.Assert(ModelID != null);
+            return this.Model;
+        }
 
-            return ModelContainer.GetModel(ModelID);
+        /// <inheritdoc/>
+        public void SetModel(IEdmModel model)
+        {
+            this.Model = model;
         }
     }
 }

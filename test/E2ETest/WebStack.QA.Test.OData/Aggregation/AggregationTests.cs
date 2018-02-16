@@ -15,6 +15,9 @@ using Nuwa;
 using Xunit;
 using Xunit.Extensions;
 using WebStack.QA.Test.OData.Common;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebStack.QA.Test.OData.Aggregation
 {
@@ -59,12 +62,14 @@ namespace WebStack.QA.Test.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
             Assert.Equal("0", results[0]["TotalPrice"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
+            Assert.Equal("", results[0]["Name"].ToString());
             Assert.Equal("2000", results[1]["TotalPrice"].ToString());
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
         }
+
+
 
         [Fact]
         public void GroupByNavigationPropertyWorks()
@@ -154,6 +159,59 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("Order1", order2["Name"].ToString());
         }
 
+
+        [Fact]
+        public void AggregateWithCastWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(cast(Order/Price, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(1, results.Count);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public void AggregateWithConstantWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(Order/Price div 10 with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(1, results.Count);
+            Assert.Equal("450", results[0]["TotalAmount"].ToString());
+        }
+
         [Fact]
         public void AggregateAggregatedPropertyWorks()
         {
@@ -172,6 +230,32 @@ namespace WebStack.QA.Test.OData.Aggregation
 
             // Assert
             
+            var result = response.Content.ReadAsAsync<JObject>().Result;
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(1, results.Count);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public void AggregateAggregatedWitCastPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=groupby((Name), aggregate(cast(Order/Price, Edm.Int64) with sum as TotalPrice))/aggregate(cast(TotalPrice, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
             var result = response.Content.ReadAsAsync<JObject>().Result;
             System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -265,7 +349,7 @@ namespace WebStack.QA.Test.OData.Aggregation
             Assert.Equal("0", results[0]["TotalAmount"].ToString());
             Assert.Equal("2000", results[1]["TotalAmount"].ToString());
             Assert.Equal("2500", results[2]["TotalAmount"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
+            Assert.Equal("", results[0]["Name"].ToString());
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
         }
@@ -320,6 +404,7 @@ namespace WebStack.QA.Test.OData.Aggregation
 
             // Act
             HttpResponseMessage response = client.SendAsync(request).Result;
+            System.Console.WriteLine(response.Content.ReadAsStringAsync().Result);
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);

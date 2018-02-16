@@ -238,7 +238,7 @@ namespace System.Web.OData.Query.Validators
         }
 
         private void ValidateLevelsOption(LevelsClause levelsClause, int depth, int currentDepth,
-            IEdmModel edmModel, IEdmNavigationProperty property)
+            IEdmModel edmModel, IEdmNavigationProperty property, bool isRoot)
         {
             ExpandConfiguration expandConfiguration;
             bool isExpandable = EdmLibHelpers.IsExpandable(property.Name,
@@ -257,7 +257,7 @@ namespace System.Web.OData.Query.Validators
                 if ((depth == 0 && levelsClause.IsMaxLevel) || (depth < levelsClause.Level))
                 {
                     throw new ODataException(
-                        Error.Format(SRResources.MaxExpandDepthExceeded, currentDepth + depth, "MaxExpansionDepth"));
+                        Error.Format(SRResources.MaxExpandDepthExceeded, currentDepth + depth - (isRoot ? 1 : 0), "MaxExpansionDepth"));
                 }
             }
             else
@@ -357,12 +357,12 @@ namespace System.Web.OData.Query.Validators
 
                     if (remainDepth.HasValue)
                     {
-                        remainDepth--;
                         if (expandItem.LevelsOption != null)
                         {
                             ValidateLevelsOption(expandItem.LevelsOption, remainDepth.Value, currentDepth + 1, edmModel,
-                                property);
+                                property, isRoot: depth == null);
                         }
+                        remainDepth--;
                     }
 
                     ValidateRestrictions(remainDepth, currentDepth + 1, expandItem.SelectAndExpand, property,

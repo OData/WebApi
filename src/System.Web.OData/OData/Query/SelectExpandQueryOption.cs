@@ -280,7 +280,7 @@ namespace System.Web.OData.Query
             }
             else if (levelsEncountered)
             {
-                return new SelectExpandClause(selectItems, selectExpandClause.AllSelected);
+                return new SelectExpandClause(selectItems, selectExpandClause.AllSelected, selectExpandClause.AllAutoSelected);
             }
             else
             {
@@ -532,6 +532,8 @@ namespace System.Web.OData.Query
             List<SelectItem> autoExpandItems = new List<SelectItem>(originAutoExpandItems);
             bool hasAutoSelectExpandInExpand = (originAutoSelectItems.Count() + originAutoExpandItems.Count() != 0);
             bool allSelected = originAutoSelectItems.Count == 0 && selectExpandClause.AllSelected;
+            var typeLevelSettings = EdmLibHelpers.GetModelBoundQuerySettings(entityType, this.Context.Model, this.Context.DefaultQuerySettings);
+            bool allAutoSelected = (typeLevelSettings != null && typeLevelSettings.DefaultSelectType == SelectExpandType.Automatic);
 
             while (level > 0)
             {
@@ -543,7 +545,8 @@ namespace System.Web.OData.Query
                         currentSelectExpandClause = new SelectExpandClause(
                             new SelectItem[] { }.Concat(selectExpandClause.SelectedItems)
                                 .Concat(originAutoSelectItems).Concat(autoExpandItems),
-                            allSelected);
+                            allSelected,
+                            allAutoSelected);
                     }
                     else
                     {
@@ -556,7 +559,8 @@ namespace System.Web.OData.Query
                     currentSelectExpandClause = new SelectExpandClause(
                         new SelectItem[] { item }.Concat(selectExpandClause.SelectedItems)
                             .Concat(originAutoSelectItems).Concat(autoExpandItems),
-                        allSelected);
+                        allSelected,
+                        allAutoSelected);
                 }
                 else
                 {
@@ -570,7 +574,8 @@ namespace System.Web.OData.Query
                         new SelectItem[] { }.Concat(selectExpandClause.SelectedItems)
                             .Concat(items)
                             .Concat(originAutoSelectItems).Concat(autoExpandItems),
-                        allSelected);
+                        allSelected,
+                        allAutoSelected);
                 }
 
                 // Construct a new ExpandedNavigationSelectItem with current SelectExpandClause.

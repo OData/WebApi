@@ -16,7 +16,6 @@ using System.Web.OData.Properties;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
 using System.Xml.Linq;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
@@ -696,6 +695,10 @@ namespace System.Web.OData.Formatter
                 if (propertyInfo != null)
                 {
                     propertyName = propertyInfo.Name;
+                    if (annotation.PropertiesPath != null && annotation.PropertiesPath.Any())
+                    {
+                        propertyName = String.Join(String.Empty, annotation.PropertiesPath.Select(p => p.Name + "\\")) + propertyName;
+                    }
                 }
             }
 
@@ -901,7 +904,7 @@ namespace System.Web.OData.Formatter
             return mergedQuerySettings;
         }
 
-        private static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
+        internal static ModelBoundQuerySettings GetModelBoundQuerySettings<T>(T key, IEdmModel edmModel,
             DefaultQuerySettings defaultQuerySettings = null)
             where T : IEdmElement
         {
@@ -986,6 +989,13 @@ namespace System.Web.OData.Formatter
                     type.Name.Replace('`', '_'),
                     String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
             }
+        }
+
+        /// <summary>
+        /// Annotation to store cache for concurrency properties
+        /// </summary>
+        private class ConcurrencyPropertiesAnnotation : ConcurrentDictionary<IEdmNavigationSource, IEnumerable<IEdmStructuralProperty>>
+        {
         }
     }
 }

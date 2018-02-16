@@ -354,7 +354,7 @@ namespace System.Web.OData.Formatter
             HttpResponseMessage response = client.GetAsync(url).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode); // ODL 7.4
         }
 
         [Theory]

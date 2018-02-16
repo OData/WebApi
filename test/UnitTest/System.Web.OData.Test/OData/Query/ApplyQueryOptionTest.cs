@@ -11,9 +11,11 @@ using System.Web.OData.Extensions;
 using System.Web.OData.Query;
 using System.Web.OData.Query.Expressions;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.TestCommon;
 using Newtonsoft.Json.Linq;
+
 using Address = System.Web.OData.Builder.TestModels.Address;
 
 namespace System.Web.OData.Test.OData.Query
@@ -40,6 +42,13 @@ namespace System.Web.OData.Test.OData.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "CustomerId", 15} }
+                        }
+                    },
+                    {
+                        "aggregate(cast(CustomerId, Edm.Int64) with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 15L} }
                         }
                     },
                     {
@@ -154,6 +163,120 @@ namespace System.Web.OData.Test.OData.Query
                         }
                     },
                     {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(startswith(Address/City, 's') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(endswith(Address/City, 't') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(contains(Address/City, 'o') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(length(Address/City) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", 7}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", 6}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "aggregate(year(StartDate) with max as MaxYear, year(StartDate) with min as MinYear)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxYear", 2018}, { "MinYear", 2016} },
+                        }
+                    },
+                    {
+                        "aggregate(month(StartDate) with max as MaxMonth, month(StartDate) with min as MinMonth)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMonth", 5}, { "MinMonth", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(day(StartDate) with max as MaxDay, day(StartDate) with min as MinDay)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxDay", 7}, { "MinDay", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(hour(StartDate) with max as MaxHour, hour(StartDate) with min as MinHour)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxHour", 5 }, { "MinHour", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(minute(StartDate) with max as MaxMinute, minute(StartDate) with min as MinMinute)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMinute", 6}, { "MinMinute", 2} },
+                        }
+                    },
+                    {
+                        "aggregate(second(StartDate) with max as MaxSecond, second(StartDate) with min as MinSecond)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxSecond", 7}, { "MinSecond", 3} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(concat(Address/City,Address/State) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattleWA"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", null}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, CustomerId mul CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "CustomerId", 30}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "CustomerId", 25 }, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(CustomerId mul CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 30}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "CustomerId", 25}, { "Address/State", null} },
+                        }
+                    },
+                    {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
@@ -265,6 +388,33 @@ namespace System.Web.OData.Test.OData.Query
                     },
                     {
                         "$apply=groupby((Name))&$orderby=Name",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}},
+                            new Dictionary<string, object> {{"Name", "Middle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total, CustomerId with sum as Total2))&$orderby=Total, Total2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2}},
+                            new Dictionary<string, object> {{"Name", "Middle"}, {"Total", 3}},
+                            new Dictionary<string, object> {{"Name", "Lowest"}, {"Total", 10}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))&$orderby=Name, Total",
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Name", "Highest"}},
@@ -596,7 +746,8 @@ namespace System.Web.OData.Test.OData.Query
                     Name = "Lowest",
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } },
+                    StartDate = new DateTimeOffset(new DateTime(2018,02,07, 1, 2, 3))
                 };
                 c.Orders = new List<Order>
                 {
@@ -612,7 +763,8 @@ namespace System.Web.OData.Test.OData.Query
                     SharePrice = 2.5M,
                     Address = new Address { City = "seattle", State = "WA" },
                     Aliases = new List<string> { "alias2", "alias2" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } },
+                    StartDate = new DateTimeOffset(new DateTime(2017, 03, 07, 5,6,7))
                 };
                 customerList.Add(c);
 
@@ -622,7 +774,8 @@ namespace System.Web.OData.Test.OData.Query
                     Name = "Middle",
                     Address = new Address { City = "hobart" },
                     Aliases = new List<string> { "alias2", "alias34", "alias31" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } },
+                    StartDate = new DateTimeOffset(new DateTime(2018, 01, 01, 2, 3, 4))
                 };
                 customerList.Add(c);
 
@@ -631,6 +784,7 @@ namespace System.Web.OData.Test.OData.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" },
+                    StartDate = new DateTimeOffset(new DateTime(2016, 05, 07, 2, 3, 4))
                 };
                 customerList.Add(c);
 
@@ -749,33 +903,6 @@ namespace System.Web.OData.Test.OData.Query
         }
 
         [Theory]
-        [PropertyData("AppliesWithReferencesOnGroupedOut")]
-        public void ClausesWithGroupedOutReferences_Throw_ODataException(string clause)
-        {
-            // Arrange
-            var model = new ODataModelBuilder()
-                            .Add_Order_EntityType()
-                            .Add_Customer_EntityType_With_Address()
-                            .Add_CustomerOrders_Relationship()
-                            .Add_Customer_EntityType_With_CollectionProperties()
-                            .Add_Customers_EntitySet()
-                            .GetEdmModel();
-            var context = new ODataQueryContext(model, typeof(Customer));
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + clause);
-            request.EnableHttpDependencyInjectionSupport();
-
-            var options = new ODataQueryOptions(context, request);
-
-            IEnumerable<Customer> customers = CustomerApplyTestData;
-
-            // Act & Assert
-            Assert.Throws<ODataException>(() =>
-            {
-                IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
-            });
-        }
-
-        [Theory]
         [PropertyData("CustomerTestAppliesForPaging")]
         public void StableSortingAndPagingApplyTo_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
         {
@@ -815,6 +942,78 @@ namespace System.Web.OData.Test.OData.Query
                     Assert.Equal(expected[key], value);
                 }
             }
+        }
+
+        [Theory]
+        [PropertyData("CustomerTestAppliesForPaging")]
+        public void StableSortingAndPagingApplyToWithAutoSelect_Returns_Correct_Queryable(string filter, List<Dictionary<string, object>> aggregation)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var customerEdmType = (EdmEntityType)(((IEdmCollectionType)model.EntityContainer.FindEntitySet("Customers").Type).ElementType.Definition);
+            model.SetAnnotationValue(customerEdmType, new ModelBoundQuerySettings() { DefaultSelectType = SelectExpandType.Automatic });
+
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + filter);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+            // Act
+            IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True, PageSize = 2 });
+
+            // Assert
+            Assert.NotNull(queryable);
+            var actualCustomers = Assert.IsAssignableFrom<IEnumerable<DynamicTypeWrapper>>(queryable).ToList();
+
+            Assert.Equal(aggregation.Count(), actualCustomers.Count());
+
+            var aggEnum = actualCustomers.GetEnumerator();
+
+            foreach (var expected in aggregation)
+            {
+                aggEnum.MoveNext();
+                var agg = aggEnum.Current;
+                foreach (var key in expected.Keys)
+                {
+                    object value = GetValue(agg, key);
+                    Assert.Equal(expected[key], value);
+                }
+            }
+        }
+
+        [Theory]
+        [PropertyData("AppliesWithReferencesOnGroupedOut")]
+        public void ClausesWithGroupedOutReferences_Throw_ODataException(string clause)
+        {
+            // Arrange
+            var model = new ODataModelBuilder()
+                            .Add_Order_EntityType()
+                            .Add_Customer_EntityType_With_Address()
+                            .Add_CustomerOrders_Relationship()
+                            .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Customers_EntitySet()
+                            .GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer));
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?" + clause);
+            request.EnableHttpDependencyInjectionSupport();
+
+            var options = new ODataQueryOptions(context, request);
+
+            IEnumerable<Customer> customers = CustomerApplyTestData;
+
+            // Act & Assert
+            Assert.Throws<ODataException>(() =>
+            {
+                IQueryable queryable = options.ApplyTo(customers.AsQueryable(), new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.True });
+            });
         }
 
         [Theory]

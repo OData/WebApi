@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Web.Http;
 using Microsoft.OData.Edm;
@@ -29,6 +31,12 @@ namespace System.Web.OData
         /// <summary>
         /// Gets the backing CLR property info for the EDM property.
         /// </summary>
-        public PropertyInfo ClrPropertyInfo { get; private set; }
+        public PropertyInfo ClrPropertyInfo { get; }
+
+        /// <summary>
+        /// Gets or sets PropertiesPath
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "We want to allow the same instance annotation collection instance to be shared across ODataLib OM instances.")]
+        public IList<PropertyInfo> PropertiesPath { get; set; }
     }
 }

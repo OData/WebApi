@@ -29,7 +29,6 @@ namespace System.Web.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
-        private string _modelID;
 
         public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
         {
@@ -42,7 +41,6 @@ namespace System.Web.OData.Query.Expressions
             _selectExpandQuery = selectExpandQuery;
             _context = selectExpandQuery.Context;
             _model = _context.Model;
-            _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
         }
 
@@ -185,7 +183,9 @@ namespace System.Web.OData.Query.Expressions
             }
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
-            Expression propertyValue = Expression.Property(source, propertyName);
+
+            Expression propertyValue = ExpressionBinderBase.GetPropertyExpression(source, propertyName);
+
             Type nullablePropertyType = propertyValue.Type.ToNullable();
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 
@@ -308,18 +308,14 @@ namespace System.Web.OData.Query.Expressions
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
 
-            // Initialize property 'ModelID' on the wrapper class.
-            // source = new Wrapper { ModelID = 'some-guid-id' }
-            wrapperProperty = wrapperType.GetProperty("ModelID");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
-
-            // Initialize property 'Instance' on the wrapper class
-            // source => new Wrapper { Instance = element }
-            wrapperProperty = wrapperType.GetProperty("Instance");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
-
             if (IsSelectAll(selectExpandClause))
             {
+                // Moved here to fix EF regression intorduced with PR #1026
+                // Initialize property 'Instance' on the wrapper class
+                // source => new Wrapper { Instance = element }
+                wrapperProperty = wrapperType.GetProperty("Instance");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+
                 wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;

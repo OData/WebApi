@@ -648,11 +648,14 @@ namespace System.Web.OData.Formatter.Serialization
         {
             Contract.Assert(resourceContext != null);
 
-            IEnumerable<ODataNestedResourceInfo> navigationLinks = CreateNavigationLinks(navigationProperties, resourceContext);
-            foreach (ODataNestedResourceInfo navigationLink in navigationLinks)
+            if (resourceContext.SerializerContext.MetadataLevel == ODataMetadataLevel.FullMetadata)
             {
-                writer.WriteStart(navigationLink);
-                writer.WriteEnd();
+                IEnumerable<ODataNestedResourceInfo> navigationLinks = CreateNavigationLinks(navigationProperties, resourceContext);
+                foreach (ODataNestedResourceInfo navigationLink in navigationLinks)
+                {
+                    writer.WriteStart(navigationLink);
+                    writer.WriteEnd();
+                }
             }
         }
 
@@ -881,7 +884,7 @@ namespace System.Web.OData.Formatter.Serialization
             Contract.Assert(structuralProperties != null);
             Contract.Assert(resourceContext != null);
 
-            List<ODataProperty> properties = new List<ODataProperty>();
+            //List<ODataProperty> properties = new List<ODataProperty>();
 
             if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
             {
@@ -895,11 +898,9 @@ namespace System.Web.OData.Formatter.Serialization
                 ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
                 if (property != null)
                 {
-                    properties.Add(property);
+                    yield return property;
                 }
             }
-
-            return properties;
         }
 
         /// <summary>

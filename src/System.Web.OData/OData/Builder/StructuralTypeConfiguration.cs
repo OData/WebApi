@@ -168,6 +168,16 @@ namespace System.Web.OData.Builder
         }
 
         /// <summary>
+        /// Fast check that property was added to the list
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        protected internal bool HasProperty(string propertyName)
+        {
+            return this.explicitPropertyNames.Contains(propertyName);
+        }
+
+        /// <summary>
         /// Gets the properties from the backing CLR type that are to be ignored on this edm type.
         /// </summary>
         public ReadOnlyCollection<PropertyInfo> IgnoredProperties
@@ -214,6 +224,8 @@ namespace System.Web.OData.Builder
         /// Gets the collection of explicitly added properties.
         /// </summary>
         protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
+
+        private HashSet<string> explicitPropertyNames = new HashSet<string>();
 
         /// <summary>
         /// Gets the base type of this structural type.
@@ -312,10 +324,23 @@ namespace System.Web.OData.Builder
                         propertyConfiguration = new PrecisionPropertyConfiguration(propertyInfo, this);
                     }
                 }
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+              
+                AddExplicitProperty(propertyInfo, propertyConfiguration);
             }
 
             return propertyConfiguration;
+        }
+
+        private void AddExplicitProperty(PropertyInfo propertyInfo, PropertyConfiguration propertyConfiguration)
+        {
+            ExplicitProperties[propertyInfo] = propertyConfiguration;
+            this.explicitPropertyNames.Add(propertyConfiguration.Name);
+        }
+
+        private void RemoveExplicitProperty(PropertyInfo propertyInfo)
+        {
+            ExplicitProperties.Remove(ExplicitProperties.Keys.First(key => key.Name.Equals(propertyInfo.Name)));
+            this.explicitPropertyNames.Remove(propertyInfo.Name);
         }
 
         /// <summary>
@@ -355,7 +380,7 @@ namespace System.Web.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new EnumPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                AddExplicitProperty(propertyInfo, propertyConfiguration);
             }
 
             return propertyConfiguration;
@@ -399,7 +424,7 @@ namespace System.Web.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new ComplexPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                AddExplicitProperty(propertyInfo, propertyConfiguration);
                 // Make sure the complex type is in the model.
 
                 ModelBuilder.AddComplexType(propertyInfo.PropertyType);
@@ -440,7 +465,7 @@ namespace System.Web.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                AddExplicitProperty(propertyInfo, propertyConfiguration);
 
                 // If the ElementType is the same as this type this is recursive complex type nesting
                 if (propertyConfiguration.ElementType == ClrType)
@@ -520,7 +545,7 @@ namespace System.Web.OData.Builder
 
             if (ExplicitProperties.Keys.Any(key => key.Name.Equals(propertyInfo.Name)))
             {
-                ExplicitProperties.Remove(ExplicitProperties.Keys.First(key => key.Name.Equals(propertyInfo.Name)));
+                RemoveExplicitProperty(propertyInfo);
             }
 
             if (!RemovedProperties.Any(prop => prop.Name.Equals(propertyInfo.Name)))
@@ -599,7 +624,7 @@ namespace System.Web.OData.Builder
                     navigationPropertyConfig = navigationPropertyConfig.Contained();
                 }
 
-                ExplicitProperties[navigationProperty] = navigationPropertyConfig;
+                AddExplicitProperty(navigationProperty, navigationPropertyConfig);
                 // make sure the related type is configured
                 ModelBuilder.AddEntityType(navigationPropertyConfig.RelatedClrType);
             }
@@ -637,9 +662,14 @@ namespace System.Web.OData.Builder
         {
             foreach (StructuralTypeConfiguration derivedType in ModelBuilder.DerivedTypes(this))
             {
-                PropertyConfiguration propertyInDerivedType =
-                    derivedType.Properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
-                if (propertyInDerivedType != null)
+                //PropertyConfiguration propertyInDerivedType =
+                //    derivedType.Properties.FirstOrDefault(p => p.Name == propertyInfo.Name);
+                //if (propertyInDerivedType != null)
+                //{
+                //    throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType,
+                //        propertyInfo.Name, FullName, derivedType.FullName);
+                //}
+                if (derivedType.HasProperty(propertyInfo.Name))
                 {
                     throw Error.Argument("propertyInfo", SRResources.PropertyAlreadyDefinedInDerivedType,
                         propertyInfo.Name, FullName, derivedType.FullName);

@@ -31,7 +31,7 @@ namespace System.Web.OData
             SetupGet(t => t.Assembly).Returns(typeof(object).Assembly);
             Setup(t => t.GetProperties(It.IsAny<BindingFlags>()))
                 .Returns(() => _propertyInfos.Union(_baseType != null ? _baseType._propertyInfos : Enumerable.Empty<MockPropertyInfo>()).Select(p => p.Object).ToArray());
-            Setup(t => t.Equals(It.IsAny<object>())).Returns<Type>(t => ReferenceEquals(Object, t));
+            Setup(t => t.Equals(It.IsAny<object>())).Returns<object>(t => ReferenceEquals(Object, t));
             Setup(t => t.ToString()).Returns(typeName);
             Setup(t => t.Namespace).Returns(@namespace);
             Setup(t => t.IsAssignableFrom(It.IsAny<Type>())).Returns(true);
@@ -84,6 +84,7 @@ namespace System.Web.OData
             var mockPropertyInfo = new MockPropertyInfo(propertyType, propertyName);
             mockPropertyInfo.SetupGet(p => p.DeclaringType).Returns(this);
             mockPropertyInfo.SetupGet(p => p.ReflectedType).Returns(this);
+            mockPropertyInfo.Setup(t => t.Equals(It.IsAny<object>())).Returns<object>(p => ReferenceEquals(mockPropertyInfo.Object, p));
             mockPropertyInfo.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(attributes);
 
             _propertyInfos.Add(mockPropertyInfo);

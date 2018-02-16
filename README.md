@@ -22,17 +22,21 @@ This is the release branch for OData WebApi, contains code base up to most recen
 
 The gh-pages branch contains documentation source for OData WebApi - tutorials, guides, etc.  The documention source is in Markdown format. It is hosted at [ODataLib Pages](http://odata.github.io/WebApi/ "ODataLib Pages").
 
+**[maintenance-6.x](https://github.com/OData/Webapi/tree/maintenance-6.x) branch**
+
+This is the maintenance branch for OData WebApi 6.x based on ODL 7.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData, with latest maintenance release version [6.2](https://www.nuget.org/packages/Microsoft.AspNet.OData/6.2.0).
+
 **[maintenance-aspnetcore](https://github.com/OData/Webapi/tree/maintenance-aspnetcore)**
 
 This is the maintenance branch for OData WebApi with ASP.NET Core support. The package name is Microsoft.AspNetCore.OData.
 
 **[maintenance-V4](https://github.com/OData/Webapi/tree/maintenance-V4) branch**
 
-This is the maintenance branch for OData WebApi based on ODL 6.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData, with latest maintenance release version [5.10](https://www.nuget.org/packages/Microsoft.AspNet.OData/5.10.0).
+This is the maintenance branch for OData WebApi 5.8 and up based on ODL 6.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData, with latest maintenance release version [5.10](https://www.nuget.org/packages/Microsoft.AspNet.OData/5.10.0).
 
 **[maintenance-V3](https://github.com/OData/Webapi/tree/maintenance-V3) branch** 
 
-This is the maintenance branch for OData WebApi based on ODL 5.x, which implements the ODataV3 protocol. The package name is Microsoft.AspNet.WebApi.OData, with latest maintenance release version [5.7](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.OData/5.7.0).
+This is the maintenance branch for OData WebApi 5.7 and below based on ODL 5.x, which implements the ODataV3 protocol. The package name is Microsoft.AspNet.WebApi.OData, with latest maintenance release version [5.7](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.OData/5.7.0).
 
 **[maintenance-dnx](https://github.com/OData/Webapi/tree/maintenance-dnx) branch**
 

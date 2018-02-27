@@ -2,9 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
@@ -16,7 +15,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     {
         /// <inheritdoc/>
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        internal override string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors)
+        public override string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors)
         {
             return SelectActionImpl(new WebApiActionMap(actionDescriptors));
         }

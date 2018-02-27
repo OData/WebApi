@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
     {
         /// <inheritdoc/>
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        internal override string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors)
+        public override string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors)
         {
             return SelectActionImpl(
                 routeContext.HttpContext.ODataFeature().Path,

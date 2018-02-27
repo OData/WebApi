@@ -3421,6 +3421,13 @@ public class Microsoft.AspNet.OData.Routing.Conventions.RefRoutingConvention : N
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
 }
 
+public class Microsoft.AspNet.OData.Routing.Conventions.SelectControllerResult {
+	public SelectControllerResult (string controllerName, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
+
+	string ControllerName  { public get; }
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] Values  { public get; }
+}
+
 public class Microsoft.AspNet.OData.Routing.Conventions.SingletonRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public SingletonRoutingConvention ()
 

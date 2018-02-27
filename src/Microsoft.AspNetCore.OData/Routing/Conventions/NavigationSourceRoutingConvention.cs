@@ -76,6 +76,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         ///   <c>null</c> if the request isn't handled by this convention; otherwise, the action descriptor of the selected action.
         /// </returns>
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        internal abstract string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors);
+        public abstract string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors);
     }
 }

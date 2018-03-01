@@ -46,16 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
                        .AddService<ODataResourceSerializer, AnnotatingEntitySerializer>(ServiceLifetime.Singleton));
         }
 
-        /// <remarks>
-        /// This test is failing due to ODataSerializerProviderProxy.Instance and
-        /// ODataDeserializerProviderProxy.Instance, which are internal classes (not access to
-        /// them here) and they create a static instance. Those instances cache the service collection
-        /// from an earlier test so when this is run with other tests, the container with MyODataSerializerProvider
-        /// and AnnotatingEntitySerializer is never inspected. They test pass fine as long as they are not
-        /// run with another test.
-        /// TODO: https://github.com/OData/WebApi/issues/1228
-        /// </remarks>
-        [Fact(Skip ="See remark")]
+        [Fact]
         public async Task CutomizeSerializerProvider()
         {
             string queryUrl =
@@ -73,7 +64,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
             Assert.Contains(MyODataSerializerProvider.EnumNotSupportError, result);
         }
 
-        [Fact(Skip = "See remark")]
+        [Fact]
         public async Task CutomizeSerializer()
         {
             string queryUrl =

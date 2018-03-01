@@ -6,7 +6,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Moq;
@@ -19,7 +21,11 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Negotiate_CallGetPerRequestFormatterInstanceFirst()
         {
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.EnableDependencyInjection();
+
             HttpRequestMessage request = new HttpRequestMessage();
+            request.SetConfiguration(configuration);
             MediaTypeFormatter perRequestFormatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>()) { Request = request };
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
             formatter

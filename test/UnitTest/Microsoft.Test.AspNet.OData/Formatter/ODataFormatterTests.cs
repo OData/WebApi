@@ -20,6 +20,7 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
@@ -33,8 +34,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
     public class ODataFormatterTests
     {
         private const string baseAddress = "http://localhost:8081/";
-        private readonly ODataDeserializerProvider _deserializerProvider =
-            DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
 
         [Theory]
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
@@ -321,11 +320,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task CustomSerializerWorks()
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
+            Type[] controllers = new[] { typeof(PeopleController) };
+            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
             {
-                configuration.Formatters.InsertRange(
-                    0,
-                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(), _deserializerProvider));
+                configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
+                configuration.MapODataServiceRoute("IgnoredRouteName", null, builder =>
+                    builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => ODataTestUtil.GetEdmModel())
+                        .AddService<ODataSerializerProvider>(ServiceLifetime.Singleton, sp => new CustomSerializerProvider())
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", configuration)));
+
                 using (HttpServer host = new HttpServer(configuration))
                 using (HttpClient client = new HttpClient(host))
                 using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
@@ -354,10 +358,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             expect = Regex.Replace(Resources.GetString(expect), @"\r\n\s*([""{}\]])", "$1");
 
             // Arrange
-            HttpConfiguration configuration = CreateConfiguration();
-            configuration.Formatters.InsertRange(0,
-                    ODataMediaTypeFormatters.Create(new CustomSerializerProvider(),
-                    _deserializerProvider));
+            Type[] controllers = new[] { typeof(PeopleController) };
+            HttpConfiguration configuration = controllers.GetHttpConfiguration();
+            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
+            configuration.MapODataServiceRoute("IgnoredRouteName", null, builder =>
+                builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => ODataTestUtil.GetEdmModel())
+                    .AddService<ODataSerializerProvider>(ServiceLifetime.Singleton, sp => new CustomSerializerProvider())
+                    .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                        ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", configuration)));
+
             HttpClient client = new HttpClient(new HttpServer(configuration));
 
             HttpRequestMessage request = CreateRequestWithAnnotationFilter("People(2)",

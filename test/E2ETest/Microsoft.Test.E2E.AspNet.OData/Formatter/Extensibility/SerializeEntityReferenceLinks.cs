@@ -172,16 +172,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         protected override void UpdateConfiguration(HttpConfiguration configuration)
         {
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.InsertRange(0,
-                ODataMediaTypeFormatters.Create(
-                    new CustomODataSerializerProvider(new MockContainer()),
-                    new DefaultODataDeserializerProvider(new MockContainer())));
+            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             var routingConventions = ODataRoutingConventions.CreateDefault();
             routingConventions.Insert(4, new GetRefRoutingConvention());
-            configuration.MapODataServiceRoute(
-                "EntityReferenceLinks",
-                "EntityReferenceLinks",
-                GetEdmModel(configuration), new DefaultODataPathHandler(), routingConventions);
+            configuration.MapODataServiceRoute("EntityReferenceLinks", "EntityReferenceLinks", builder =>
+                builder.AddService(ServiceLifetime.Singleton, sp => GetEdmModel(configuration))
+                       .AddService(ServiceLifetime.Singleton, sp => new DefaultODataPathHandler())
+                       .AddService(ServiceLifetime.Singleton, sp => routingConventions.ToList().AsEnumerable())
+                       .AddService(ServiceLifetime.Singleton, sp => new CustomODataSerializerProvider(new MockContainer())));
         }
 
         protected static IEdmModel GetEdmModel(HttpConfiguration configuration)

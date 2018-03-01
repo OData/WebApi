@@ -652,22 +652,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), mediaType);
         }
 
-        [Fact]
-        public void Create_UsesODataSerializerProviderProxyInstance()
-        {
-            var formatters = ODataMediaTypeFormatters.Create();
-
-            Assert.Same(formatters.First().SerializerProvider, ODataSerializerProviderProxy.Instance);
-        }
-
-        [Fact]
-        public void Create_UsesODataDeserializerProviderProxyInstance()
-        {
-            var formatters = ODataMediaTypeFormatters.Create();
-
-            Assert.Same(formatters.First().DeserializerProvider, ODataDeserializerProviderProxy.Instance);
-        }
-
         private static IEdmModel CreateModel()
         {
             return new Mock<IEdmModel>().Object;

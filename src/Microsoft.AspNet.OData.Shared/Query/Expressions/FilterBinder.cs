@@ -609,34 +609,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return CreatePropertyAccessExpression(source, singleComplexNode.Property, GetFullPropertyPath(singleComplexNode));
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
-        {
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
-            propertyPath = propertyPath ?? propertyName;
-
-            if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) && source != _lambdaParameters[ODataItParameterName])
-            {
-                var cleanSource = RemoveInnerNullPropagation(source);
-                Expression propertyAccessExpression = null;
-
-                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
-
-                // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
-                // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
-
-                Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
-                return
-                    Expression.Condition(
-                        test: Expression.Equal(source, NullConstant),
-                        ifTrue: Expression.Constant(null, ifFalse.Type),
-                        ifFalse: ifFalse);
-            }
-            else
-            {
-                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
-            }
-        }
-
         /// <summary>
         /// Binds a <see cref="UnaryOperatorNode"/> to create a LINQ <see cref="Expression"/> that
         /// represents the semantics of the <see cref="UnaryOperatorNode"/>.

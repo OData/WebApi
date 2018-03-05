@@ -3,7 +3,12 @@
 
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 [module: SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", Justification = "Extra needed to workaorund EF issue with expression shape.")]
 
@@ -35,7 +40,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     [JsonConverter(typeof(DynamicTypeWrapperConverter))]
     internal class GroupByWrapper : DynamicTypeWrapper
     {
-        private Dictionary<string, object> _values;
+        protected Dictionary<string, object> _values;
         protected static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
 
         /// <summary>
@@ -83,7 +88,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return (int)hash;
         }
 
-        private void EnsureValues()
+        protected virtual void EnsureValues()
         {
             if (_values == null)
             {
@@ -98,7 +103,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 if (this.Container != null)
                 {
-                    _values = _values.Concat(this.Container.ToDictionary(DefaultPropertyMapper)).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    _values.MergeWithReplace(this.Container.ToDictionary(DefaultPropertyMapper));
                 }
             }
         }
@@ -123,5 +128,65 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
     internal class EntitySetAggregationWrapper : GroupByWrapper
     {
-    }    
+    }
+
+    internal class ComputeWrapper<T> : GroupByWrapper, IEdmEntityObject
+    {
+        public T Instance { get; set; }
+
+        /// <summary>
+        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
+        /// </summary>
+        public string ModelID { get; set; }
+
+        private bool _merged;
+        protected override void EnsureValues()
+        {
+            base.EnsureValues();
+            if (!this._merged)
+            {
+                // Base properties availbale via Instance can be real OData properties or generated in previous transformations
+
+                var instanceContainer = this.Instance as DynamicTypeWrapper;
+                if (instanceContainer != null)
+                {
+                    // Add proeprties generated in previous transformations to the collection
+                    _values.MergeWithReplace(instanceContainer.Values);
+                }
+                else
+                {
+                    // Add real OData properties to the collection
+                    // We need to use injected Model to real proeprty names
+                    var edmType = GetEdmType() as IEdmEntityTypeReference;
+                    _typedEdmEntityObject = _typedEdmEntityObject ??
+                        new TypedEdmEntityObject(Instance, edmType, GetModel());
+
+                    var props = edmType.DeclaredStructuralProperties().Where(p => p.Type.IsPrimitive()).Select(p => p.Name);
+                    foreach (var propertyName in props)
+                    {
+                        object value;
+                        if (_typedEdmEntityObject.TryGetPropertyValue(propertyName, out value))
+                        {
+                            _values[propertyName] = value;
+                        }
+                    }
+                }
+                this._merged = true;
+            }
+        }
+        private TypedEdmEntityObject _typedEdmEntityObject;
+
+        private IEdmModel GetModel()
+        {
+            Contract.Assert(ModelID != null);
+
+            return ModelContainer.GetModel(ModelID);
+        }
+
+        public IEdmTypeReference GetEdmType()
+        {
+            IEdmModel model = GetModel();
+            return model.GetEdmTypeReference(typeof(T));
+        }
+    }
 }

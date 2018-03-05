@@ -362,6 +362,83 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> { { "StringProp", null } },
                         }
                     },
+                    {
+                        "aggregate($count as Count)/compute(Count add Count as DoubleCount)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Count", 5L}, { "DoubleCount", 10L } }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total add Total as DoubleTotal, length(Name) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"},  { "Total", 10}, { "DoubleTotal", 20}, { "NameLen", 6},},
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} , { "DoubleTotal", 4} , { "NameLen", 7} ,},
+                            new Dictionary<string, object> { { "Name", "Middle"},  { "Total", 3 }, { "DoubleTotal", 6 }, { "NameLen", 6 }, }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 1},},
+                            new Dictionary<string, object> { { "Name", "Highest"},  { "NameLen", 7}, { "CustomerId", 2},},
+                            new Dictionary<string, object> { { "Name", "Middle" },  { "NameLen", 6}, { "CustomerId", 3},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 4},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 5},},
+                        }
+                    },
+                    {
+                        "compute(length(ShareSymbol) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 1},},
+                            new Dictionary<string, object> { { "Name", "Highest"},  { "NameLen", null}, { "CustomerId", 2},},
+                            new Dictionary<string, object> { { "Name", "Middle" },  { "NameLen", null}, { "CustomerId", 3},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 4},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 5},},
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/aggregate(NameLen with sum as TotalLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalLen", 31} }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/aggregate(NameLen add CustomerId with sum as TotalLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalLen", 46} }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/groupby((Name),aggregate( CustomerId with sum as Total, NameLen with max as MaxNameLen))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"},  { "Total", 10},  { "MaxNameLen", 6},},
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} ,  { "MaxNameLen", 7} ,},
+                            new Dictionary<string, object> { { "Name", "Middle"},  { "Total", 3 },  { "MaxNameLen", 6 }, }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/groupby((NameLen),aggregate( CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Total", 13},  { "NameLen", 6},},
+                            new Dictionary<string, object> { { "Total", 2} ,  { "NameLen", 7} ,},
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity))/compute(length(MaxCity) as MaxCityLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"}, {"MaxCityLen", 7 } },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null}, {"MaxCityLen", 6 } },
+                        }
+                    },
                 };
             }
         }
@@ -464,6 +541,22 @@ namespace Microsoft.AspNet.OData.Test.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Address/City", "redmond"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total mul 2 as NewTotal)&$orderby=Name, NewTotal",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2},  {"NewTotal", 4}, },
+                            new Dictionary<string, object> {{"Name", "Lowest"},  {"Total", 10}, {"NewTotal", 20},},
+                            new Dictionary<string, object> {{"Name", "Middle"},  {"Total", 3},  {"NewTotal", 6}, },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total mul 2 as NewTotal)/filter(NewTotal gt 6)&$orderby=Name, NewTotal",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"},  {"Total", 10}, {"NewTotal", 20},},
                         }
                     },
                     //{

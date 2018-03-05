@@ -77,6 +77,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         internal IDictionary<string, Expression> FlattenedPropertyContainer;
 
+        internal bool HasInstancePropertyContainer;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpressionBinderBase"/> class.
         /// </summary>
@@ -624,6 +626,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             if (this.BaseQuery != null)
             {
+                this.HasInstancePropertyContainer = this.BaseQuery.ElementType.IsGenericType
+                    && this.BaseQuery.ElementType.GetGenericTypeDefinition() == typeof(ComputeWrapper<>);
+
                 this.FlattenedPropertyContainer = this.FlattenedPropertyContainer ?? this.GetFlattenedProperties(source);
             }
         }
@@ -648,10 +653,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             // After $apply we could have other clauses, like $filter, $orderby etc.
             // Skip of filter expressions
-            while (expression.Method.Name == "Where")
-            {
-                expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
-            }
+            expression = SkipFilters(expression);
 
             if (expression == null)
             {
@@ -659,14 +661,47 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             var result = new Dictionary<string, Expression>();
-            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments.FirstOrDefault() as MethodCallExpression, "GroupByContainer"));
-            CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
+            CollectContainerAssugments(source, expression, result);
+            if (this.HasInstancePropertyContainer)
+            {
+                var instanceProperty = Expression.Property(source, "Instance");
+                if (typeof(DynamicTypeWrapper).IsAssignableFrom(instanceProperty.Type))
+                {
+                    var computeExpression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+                    computeExpression = SkipFilters(computeExpression);
+                    if (computeExpression != null)
+                    {
+                        CollectContainerAssugments(instanceProperty, computeExpression, result);
+                    }
+                }
+            }
 
             return result;
         }
 
+        private static MethodCallExpression SkipFilters(MethodCallExpression expression)
+        {
+            while (expression.Method.Name == "Where")
+            {
+                expression = expression.Arguments.FirstOrDefault() as MethodCallExpression;
+            }
+
+            return expression;
+        }
+
+        private static void CollectContainerAssugments(Expression source, MethodCallExpression expression, Dictionary<string, Expression> result)
+        {
+            CollectAssigments(result, Expression.Property(source, "GroupByContainer"), ExtractContainerExpression(expression.Arguments.FirstOrDefault() as MethodCallExpression, "GroupByContainer"));
+            CollectAssigments(result, Expression.Property(source, "Container"), ExtractContainerExpression(expression, "Container"));
+        }
+
         private static MemberInitExpression ExtractContainerExpression(MethodCallExpression expression, string containerName)
         {
+            if (expression == null || expression.Arguments.Count < 2)
+            {
+                return null;
+            }
+
             var memberInitExpression = ((expression.Arguments[1] as UnaryExpression).Operand as LambdaExpression).Body as MemberInitExpression;
             if (memberInitExpression != null)
             {
@@ -759,6 +794,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (FlattenedPropertyContainer.TryGetValue(propertyPath, out expression))
             {
                 return expression;
+            }
+
+            if (this.HasInstancePropertyContainer)
+            {
+                return null;
             }
 
             throw new ODataException(Error.Format(SRResources.PropertyOrPathWasRemovedFromContext, propertyPath));
@@ -1080,6 +1120,61 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return 0;
+        }
+
+        /// <summary>
+        /// Recognize $it.Source where $it is FlatteningWrapper
+        /// Using that do avoid wrapping it redundant into Null propagation 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
+        private bool IsFlatteningSource(Expression source)
+        {
+            var member = source as MemberExpression;
+            return member != null
+                && this.Parameter.Type.IsGenericType() 
+                && this.Parameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
+                && member.Expression == this.Parameter;
+        }
+
+        internal Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
+        {
+            string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            propertyPath = propertyPath ?? propertyName;
+            if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
+                source != this.Parameter &&
+                !IsFlatteningSource(source))
+            {
+                Expression cleanSource = RemoveInnerNullPropagation(source);
+                Expression propertyAccessExpression = null;
+                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
+
+                // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
+                // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
+
+                Expression ifFalse = ToNullable(ConvertNonStandardPrimitives(propertyAccessExpression));
+                return
+                    Expression.Condition(
+                        test: Expression.Equal(source, NullConstant),
+                        ifTrue: Expression.Constant(null, ifFalse.Type),
+                        ifFalse: ifFalse);
+            }
+            else
+            {
+                return GetFlattenedPropertyExpression(propertyPath)
+                    ?? ConvertNonStandardPrimitives(ExpressionBinderBase.GetPropertyExpression(source, (this.HasInstancePropertyContainer && !propertyPath.Contains("\\") ? "Instance\\" : String.Empty) + propertyName));
+            }
+        }
+
+        internal static Expression GetPropertyExpression(Expression source, string propertyPath)
+        {
+            string[] propertyNameParts = propertyPath.Split('\\');
+            Expression propertyValue = source;
+            foreach (var propertyName in propertyNameParts)
+            {
+                propertyValue = Expression.Property(propertyValue, propertyName);
+            }
+            return propertyValue;
         }
 
         /// <summary>
@@ -1790,7 +1885,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 throw new ODataException(Error.Format(SRResources.FunctionNotSupportedOnEnum, functionName));
             }
         }
-
 
         private Expression BindCustomMethodExpressionOrNull(SingleValueFunctionCallNode node)
         {

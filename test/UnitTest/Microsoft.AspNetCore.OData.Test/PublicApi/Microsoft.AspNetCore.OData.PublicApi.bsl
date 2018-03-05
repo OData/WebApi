@@ -3474,7 +3474,7 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.DynamicTypeWrappe
 
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] Values  { public abstract get; }
 
-	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
+	public virtual bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
 public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderBase {

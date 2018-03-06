@@ -3,7 +3,7 @@
 
 using Microsoft.AspNet.OData.Builder;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon.Models
+namespace Microsoft.Test.AspNet.OData.Common.Models
 {
     public class Customer
     {

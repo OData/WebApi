@@ -9,10 +9,11 @@ using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builderer
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class LowerCamelCaserTest
     {
@@ -50,8 +51,13 @@ namespace Microsoft.Test.AspNet.OData.Builderer
             string nameResolvedByLowerCamelCaser = lowerCamelCaser.ToLowerCamelCase(propertyName);
             string nameResolveByJsonNet = camelCasePropertyNamesContractResolver.GetResolvedPropertyName(propertyName);
 
+            // Newtonsoft appears to have changed from v6 to v10 here. Some cases that used to pass 
+            // and were changed are:
+            // [InlineData("MyPI", "mypi")] => [InlineData("MyPI", "myPI")]
+            // [InlineData("U_ID", "u_id")] => [InlineData("U_ID", "u_ID")]
+            //Assert.Equal(nameResolveByJsonNet, nameResolvedByLowerCamelCaser);
+
             // Assert
-            Assert.Equal(nameResolveByJsonNet, nameResolvedByLowerCamelCaser);
             Assert.Equal(expectName, nameResolvedByLowerCamelCaser);
         }
 
@@ -59,7 +65,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         public void LowerCamelCaser_ProcessReflectedAndExplicitPropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(
+            var builder = ODataConventionModelBuilderFactory.Create().EnableLowerCamelCase(
                 NameResolverOptions.ProcessReflectedPropertyNames | NameResolverOptions.ProcessExplicitPropertyNames);
             builder.EntitySet<LowerCamelCaserModelAliasEntity>("Entities");
             
@@ -80,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         public void LowerCamelCaser_ProcessReflectedAndDataMemberAttributePropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(
+            var builder = ODataConventionModelBuilderFactory.Create().EnableLowerCamelCase(
                 NameResolverOptions.ProcessReflectedPropertyNames | NameResolverOptions.ProcessDataMemberAttributePropertyNames);
             EntityTypeConfiguration<LowerCamelCaserEntity> entityTypeConfiguration = builder.EntitySet<LowerCamelCaserEntity>("Entities").EntityType;
             entityTypeConfiguration.Property(b => b.ID).Name = "iD";
@@ -112,7 +118,7 @@ namespace Microsoft.Test.AspNet.OData.Builderer
         public void LowerCamelCaser_ProcessReflectedPropertyNames()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder().EnableLowerCamelCase(NameResolverOptions.ProcessReflectedPropertyNames);
+            var builder = ODataConventionModelBuilderFactory.Create().EnableLowerCamelCase(NameResolverOptions.ProcessReflectedPropertyNames);
             EntityTypeConfiguration<LowerCamelCaserModelAliasEntity> entity = builder.EntitySet<LowerCamelCaserModelAliasEntity>("Entities").EntityType;
             entity.HasKey(e => e.ID).Property(e => e.ID).Name = "IDExplicitly"; 
             entity.Property(d => d.Price).Name = "Price";

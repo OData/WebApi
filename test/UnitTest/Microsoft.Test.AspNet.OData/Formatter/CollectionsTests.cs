@@ -1,6 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Newtonsoft.Json.Linq;
+using Xunit;
+using System.Threading.Tasks;
+#else
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,12 +33,13 @@ using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -27,18 +49,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         public CollectionsTests()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<CollectionsTestsModel>("CollectionsTests");
             builder.EntitySet<Vehicle>("vehicles");
             IEdmModel model = builder.GetEdmModel();
 
-            HttpConfiguration configuration = new[] { typeof(CollectionsTestsController) }.GetHttpConfiguration();
-            configuration.Formatters.Clear();
-            configuration.Formatters.AddRange(ODataMediaTypeFormatters.Create());
-            configuration.MapODataServiceRoute(model);
+            var controllers = new[] { typeof(CollectionsTestsController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("IgnoredRouteName", null, model);
+            });
 
-            HttpServer server = new HttpServer(configuration);
-            _client = new HttpClient(server);
+            _client = TestServerFactory.CreateClient(server);
         }
 
         [Theory]
@@ -130,18 +152,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             request.Content = new StringContent(message);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
-            HttpResponseMessage response = await _client.SendAsync(request);
-            Assert.Equal(HttpStatusCode.ExpectationFailed, response.StatusCode);
+            try
+            {
+                // AspNet will not throw, validate the response code.
+                HttpResponseMessage response = await _client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.ExpectationFailed, response.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                // AspNetCore will throw, validate the exception.
+                Assert.Equal(typeof(AggregateException), ex.GetType());
+                Assert.Equal(typeof(InvalidOperationException), ex.InnerException.GetType());
+            }
         }
     }
 
     public class CollectionsTestsController : ODataController
     {
-        public CollectionsTestsModel Post(CollectionsTestsModel model)
+        public CollectionsTestsModel Post([FromBody]CollectionsTestsModel model)
         {
             if (!ModelState.IsValid)
             {
+#if NETCORE
+                throw new InvalidOperationException();
+#else
                 throw new HttpResponseException(HttpStatusCode.ExpectationFailed);
+#endif
             }
 
             // 44 => posting vehicles

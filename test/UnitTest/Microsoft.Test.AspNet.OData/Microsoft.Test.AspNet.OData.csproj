@@ -17,6 +17,7 @@
     </NuGetPackageImportStamp>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
+    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETFX;NETFX45</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Castle.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
@@ -40,16 +41,16 @@
       <HintPath>..\..\..\sln\packages\Moq.4.7.137\lib\net45\Moq.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sln\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Extensions.DependencyInjection, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Microsoft.Extensions.DependencyInjection.1.0.0\lib\netstandard1.1\Microsoft.Extensions.DependencyInjection.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Microsoft.Extensions.DependencyInjection.Abstractions.1.0.0\lib\netstandard1.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -98,6 +99,14 @@
       <HintPath>..\..\..\sln\packages\xunit.extensibility.execution.2.3.1\lib\net452\xunit.execution.desktop.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="xunit.core, Version=2.3.1.3858, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\xunit.extensibility.core.2.3.1\lib\netstandard1.1\xunit.core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="xunit.execution.dotnet, Version=2.3.1.3858, Culture=neutral, PublicKeyToken=8d05b1bb7a6fdb6c, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\xunit.extensibility.execution.2.3.1\lib\netstandard1.1\xunit.execution.dotnet.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -106,7 +115,51 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApplyTest.cs" />
-    <Compile Include="Formatter\MediaTypeFormatterTestBase.cs" />
+    <Compile Include="Common\CultureReplacer.cs" />
+    <Compile Include="Common\DataAttribute.cs" />
+    <Compile Include="Common\EnumHelperTestBase.cs" />
+    <Compile Include="Common\ExceptionAssert.cs" />
+    <Compile Include="Common\MediaTypeHeaderValueComparer.cs" />
+    <Compile Include="Common\MemberHelper.cs" />
+    <Compile Include="Common\ParsedMediaTypeHeaderValue.cs" />
+    <Compile Include="Common\Platform.cs" />
+    <Compile Include="Common\PlatformInfo.cs" />
+    <Compile Include="Common\PortReserver.cs" />
+    <Compile Include="Common\PreAppStartTestHelper.cs" />
+    <Compile Include="Common\ReflectionAssert.cs" />
+    <Compile Include="Common\ReplaceCultureAttribute.cs" />
+    <Compile Include="Common\StreamAssert.cs" />
+    <Compile Include="Common\TaskExtensions.cs" />
+    <Compile Include="Common\TestFile.cs" />
+    <Compile Include="Common\TestHelper.cs" />
+    <Compile Include="Common\TheoryDataSet.cs" />
+    <Compile Include="Common\TypeAssert.cs" />
+    <Compile Include="Common\Types\ByteEnum.cs" />
+    <Compile Include="Common\Types\FlagsEnum.cs" />
+    <Compile Include="Common\Types\INameAndIdContainer.cs" />
+    <Compile Include="Common\Types\LongEnum.cs" />
+    <Compile Include="Common\Types\SByteEnum.cs" />
+    <Compile Include="Common\Types\ShortEnum.cs" />
+    <Compile Include="Common\Types\SimpleEnum.cs" />
+    <Compile Include="Common\Types\UIntEnum.cs" />
+    <Compile Include="Common\Types\UShortEnum.cs" />
+    <Compile Include="Common\VersionTestHelper.cs" />
+    <Compile Include="Extensions\HttpContentExtensions.cs" />
+    <Compile Include="Extensions\HttpRequestExtensions.cs" />
+    <Compile Include="Extensions\IHeaderDictionaryExtensions.cs" />
+    <Compile Include="Extensions\RoutingConfigurationExtensions.cs" />
+    <Compile Include="Factories\ControllerDescriptorFactory.cs" />
+    <Compile Include="Factories\ODataConventionModelBuilderFactory.cs" />
+    <Compile Include="Factories\ODataDeserializerProviderFactory.cs" />
+    <Compile Include="Factories\ODataSerializerContextFactory.cs" />
+    <Compile Include="Factories\ODataSerializerProviderFactory.cs" />
+    <Compile Include="Factories\RequestFactory.cs" />
+    <Compile Include="Factories\ResourceSetContextFactory.cs" />
+    <Compile Include="Factories\ResponseFactory.cs" />
+    <Compile Include="Factories\RoutingConfigurationFactory.cs" />
+    <Compile Include="Factories\ServerFactory.cs" />
+    <Compile Include="Factories\WebApiAssembliesResolverFactory.cs" />
+    <Compile Include="Formatter\FormatterTestHelper.cs" />
     <Compile Include="ContextUtil.cs" />
     <Compile Include="EdmDeltaCollectionTypeTest.cs" />
     <Compile Include="EdmDeltaTypeTest.cs" />
@@ -235,7 +288,6 @@
     <Compile Include="FunctionActionAdvertisedTest.cs" />
     <Compile Include="PerRequestContentNegotiatorTest.cs" />
     <Compile Include="ODataRoutingAttributeTest.cs" />
-    <Compile Include="Formatter\HttpRequestMessageExtensions.cs" />
     <Compile Include="Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="PerRequestParameterBindingTest.cs" />
     <Compile Include="ODataSingletonTest.cs" />
@@ -254,6 +306,7 @@
     <Compile Include="Results\ResultHelpersTest.cs" />
     <Compile Include="Results\UpdatedODataResultTest.cs" />
     <Compile Include="Routing\AttributeRoutingOnSingletonTest.cs" />
+    <Compile Include="Routing\Conventions\SelectActionHelper.cs" />
     <Compile Include="Routing\ODataPathSegmentTranslatorTest.cs" />
     <Compile Include="Routing\Conventions\DynamicPropertyRoutingConventionTest.cs" />
     <Compile Include="Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
@@ -378,6 +431,7 @@
     <Compile Include="Resources.cs" />
     <Compile Include="TestCommon\CustomersModelWithInheritance.cs" />
     <Compile Include="TestCommon\CaseInsensitiveResolver.cs" />
+    <Compile Include="TestCommon\TestControllerBase.cs" />
     <Compile Include="TestCommon\UnqualifiedCaseInsensitiveResolver.cs" />
     <Compile Include="TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="TestCommon\ODataModelBuilderMocks.cs" />
@@ -463,14 +517,16 @@
     <Compile Include="TestCommon\ReferenceDepthContext.cs" />
     <Compile Include="TestCommon\SupportedTypes.cs" />
     <Compile Include="TestCommon\TypeInitializer.cs" />
-    <Compile Include="TypeExtensions.cs" />
+    <Compile Include="TestControllers.cs" />
     <Compile Include="TypeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Builder\Conventions\Attributes\KeyAttributeEdmPropertyConventionTests.cs" />
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
+    <EmbeddedResource Include="PublicApi\Microsoft.AspNet.OData.PublicApi.bsl" />
     <EmbeddedResource Include="Resources\ArrayOfBoolean.json" />
     <EmbeddedResource Include="Resources\ArrayOfByteFullMetadata.json" />
     <EmbeddedResource Include="Resources\ArrayOfInt32.json" />
@@ -522,16 +578,11 @@
     <EmbeddedResource Include="Resources\PeopleWithMultipleAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithoutAnnotations.json" />
     <EmbeddedResource Include="Resources\PeopleWithSpecialAnnotations.json" />
-    <EmbeddedResource Include="PublicApi\Microsoft.AspNet.OData.PublicApi.bsl" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj">
       <Project>{a6f9775d-f7e2-424e-8363-79644a73038f}</Project>
       <Name>Microsoft.AspNet.OData</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.Test.AspNet.OData.TestCommon\Microsoft.Test.AspNet.OData.TestCommon.csproj">
-      <Project>{74a22c68-168d-4492-9a43-fd7fb9c04cc5}</Project>
-      <Name>Microsoft.Test.AspNet.OData.TestCommon</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

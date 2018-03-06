@@ -1,6 +1,31 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Primitives;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +40,11 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -27,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void TestCreate_CombinedFormatters_SupportedEncodings()
         {
             // Arrange
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest();
+            var formatters = CreateOutputFormatters();
             Assert.NotNull(formatters); // Guard assertion
 
             // Act
@@ -47,30 +74,30 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void TestCreate_CombinedFormatters_SupportedMediaTypes()
         {
             // Arrange
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest();
+            var formatters = CreateOutputFormatters();
             Assert.NotNull(formatters); // Guard assertion
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = formatters.SelectMany(
+            var supportedMediaTypes = formatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json"),
-                MediaTypeHeaderValue.Parse("application/xml")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+                "application/xml"
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -80,31 +107,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> feedFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(IEnumerable<SampleType>)));
+            var feedFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(IEnumerable<SampleType>), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = feedFormatters.SelectMany(
+            var supportedMediaTypes = feedFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -114,31 +142,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> entryFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(SampleType)));
+            var entryFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(SampleType), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = entryFormatters.SelectMany(
+            var supportedMediaTypes = entryFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -148,31 +177,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> propertyFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(int)));
+            var propertyFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(int), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = propertyFormatters.SelectMany(
+            var supportedMediaTypes = propertyFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -182,31 +212,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> entityReferenceLinkFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(Uri)));
+            var entityReferenceLinkFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(Uri), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = entityReferenceLinkFormatters.SelectMany(
+            var supportedMediaTypes = entityReferenceLinkFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -216,31 +247,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> collectionFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(IEnumerable<int>)));
+            var collectionFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(IEnumerable<int>), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = collectionFormatters.SelectMany(
+            var supportedMediaTypes = collectionFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -250,31 +282,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> serviceDocumentFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(ODataServiceDocument)));
+            var serviceDocumentFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(ODataServiceDocument), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = serviceDocumentFormatters.SelectMany(
+            var supportedMediaTypes = serviceDocumentFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -284,20 +317,21 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> metadataDocumentFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(IEdmModel)));
+            var metadataDocumentFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(IEdmModel), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = metadataDocumentFormatters.SelectMany(
+            var supportedMediaTypes = metadataDocumentFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/xml")
-            };
+                "application/xml",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -307,31 +341,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateOutputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> errorFormatters = formatters.Where(
-                f => f.CanWriteType(typeof(ODataError)));
+            var errorFormatters = formatters.Where(
+                f => CanWriteType(f, typeof(ODataError), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = errorFormatters.SelectMany(
+            var supportedMediaTypes = errorFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -341,31 +376,32 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             IEdmModel model = CreateModelWithEntity<SampleType>();
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            var formatters = CreateInputFormatters(model);
             Assert.NotNull(formatters); // Guard assertion
-            IEnumerable<ODataMediaTypeFormatter> parameterFormatters = formatters.Where(
-                f => f.CanReadType(typeof(ODataActionParameters)));
+            var parameterFormatters = formatters.Where(
+                f => CanReadType(f, typeof(ODataActionParameters), request));
 
             // Act
-            IEnumerable<MediaTypeHeaderValue> supportedMediaTypes = parameterFormatters.SelectMany(
+            var supportedMediaTypes = parameterFormatters.SelectMany(
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            IEnumerable<MediaTypeHeaderValue> expectedMediaTypes = new MediaTypeHeaderValue[]
+            var expectedMediaTypes = GetMediaTypes(new string[]
             {
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=full"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json;odata.metadata=none"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=true"),
-                MediaTypeHeaderValue.Parse("application/json;odata.streaming=false"),
-                MediaTypeHeaderValue.Parse("application/json")
-            };
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false",
+                "application/json",
+            });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -664,37 +700,156 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return model.GetEdmModel();
         }
 
+#if NETCORE
+        private static IEnumerable<ODataOutputFormatter> CreateOutputFormatters(IEdmModel model = null)
+        {
+            // Model is not used in AspNetCore.
+            return ODataOutputFormatterFactory.Create();
+        }
+
+        private static IEnumerable<ODataInputFormatter> CreateInputFormatters(IEdmModel model = null)
+        {
+            // Model is not used in AspNetCore.
+            return ODataInputFormatterFactory.Create();
+        }
+
+        private static IEnumerable<string> GetMediaTypes(string[] mediaTypes)
+        {
+            return mediaTypes;
+        }
+
+        private static bool CanWriteType(ODataOutputFormatter formatter, Type type, HttpRequest request)
+        {
+            var context = new OutputFormatterWriteContext(
+                request.HttpContext,
+                new TestHttpResponseStreamWriterFactory().CreateWriter,
+                objectType: type,
+                @object: null);
+
+            return formatter.CanWriteResult(context);
+        }
+
+        private static bool CanReadType(ODataInputFormatter formatter, Type type, HttpRequest request)
+        {
+            var context = new InputFormatterContext(
+                request.HttpContext,
+                "modelName",
+                new ModelStateDictionary(),
+                new EmptyModelMetadataProvider().GetMetadataForType(typeof(object)),
+                (stream, encoding) => new StreamReader(stream, encoding));
+
+            return formatter.CanRead(context);
+        }
+
         private static MediaTypeHeaderValue GetDefaultContentType(IEdmModel model, Type type)
         {
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
-            IEnumerable<ODataMediaTypeFormatter> feedFormatters = formatters.Where(f => f.CanWriteType(type));
-            IContentNegotiator negotiator = new DefaultContentNegotiator(false);
-            MediaTypeHeaderValue mediaType;
-
-            using (HttpRequestMessage request = new HttpRequestMessage())
-            {
-                request.RequestUri = new Uri("http://any");
-                request.EnableODataDependencyInjectionSupport(model);
-                ContentNegotiationResult result = negotiator.Negotiate(type, request, formatters);
-                mediaType = result.MediaType;
-            }
-
-            // We don't care what the charset is for these tests.
-            mediaType.Parameters.Remove(mediaType.Parameters.Single(p => p.Name == "charset"));
-
-            return mediaType;
+            return GetContentTypeFromQueryString(model, type, null);
         }
 
         private static MediaTypeHeaderValue GetContentTypeFromQueryString(IEdmModel model, Type type, string dollarFormat)
         {
-            IEnumerable<ODataMediaTypeFormatter> formatters = CreateProductUnderTest(model);
-            IEnumerable<ODataMediaTypeFormatter> feedFormatters = formatters.Where(f => f.CanWriteType(type));
+            var formatters = CreateOutputFormatters(model);
+
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = string.IsNullOrEmpty(dollarFormat)
+                ? RequestFactory.CreateFromModel(model, "http://any", "OData")
+                : RequestFactory.CreateFromModel(model, "http://any/?$format=" + dollarFormat, "OData");
+
+            var context = new OutputFormatterWriteContext(
+                request.HttpContext,
+                new TestHttpResponseStreamWriterFactory().CreateWriter,
+                type,
+                new MemoryStream());
+
+            foreach (var formatter in formatters)
+            {
+                context.ContentType = new StringSegment();
+                context.ContentTypeIsServerDefined = false;
+
+                if (formatter.CanWriteResult(context))
+                {
+                    MediaTypeHeaderValue mediaType = MediaTypeHeaderValue.Parse(context.ContentType.ToString());
+
+                    // We don't care what the charset is for these tests.
+                    if (mediaType.Parameters.Where(p => p.Name == "charset").Any())
+                    {
+                        mediaType.Parameters.Remove(mediaType.Parameters.Single(p => p.Name == "charset"));
+                    }
+
+                    return mediaType;
+                }
+            }
+
+            return null;
+        }
+
+        private class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory
+        {
+            public const int DefaultBufferSize = 16 * 1024;
+
+            public TextWriter CreateWriter(Stream stream, Encoding encoding)
+            {
+                return new HttpResponseStreamWriter(stream, encoding, DefaultBufferSize);
+            }
+        }
+#else
+        private static IEnumerable<ODataMediaTypeFormatter> CreateOutputFormatters()
+        {
+            IEdmModel model = CreateModel();
+            return CreateOutputFormatters(model);
+        }
+
+        private static IEnumerable<ODataMediaTypeFormatter> CreateOutputFormatters(IEdmModel model)
+        {
+            var request = RequestFactory.CreateFromModel(model, "http://any");
+            return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
+        }
+
+        private static IEnumerable<ODataMediaTypeFormatter> CreateInputFormatters()
+        {
+            return CreateOutputFormatters();
+        }
+
+        private static IEnumerable<ODataMediaTypeFormatter> CreateInputFormatters(IEdmModel model)
+        {
+            return CreateOutputFormatters(model);
+        }
+
+        private static IEnumerable<MediaTypeHeaderValue> GetMediaTypes(string[] mediaTypes)
+        {
+            return mediaTypes.Select(m => MediaTypeHeaderValue.Parse(m));
+        }
+
+        private static bool CanWriteType(ODataMediaTypeFormatter formatter, Type type, HttpRequestMessage request)
+        {
+            // request is not used in AspNet.
+            return formatter.CanWriteType(type);
+        }
+
+        private static bool CanReadType(ODataMediaTypeFormatter formatter, Type type, HttpRequestMessage request)
+        {
+            // request is not used in AspNet.
+            return formatter.CanReadType(type);
+        }
+
+        private static MediaTypeHeaderValue GetDefaultContentType(IEdmModel model, Type type)
+        {
+            return GetContentTypeFromQueryString(model, type, null);
+        }
+
+        private static MediaTypeHeaderValue GetContentTypeFromQueryString(IEdmModel model, Type type, string dollarFormat)
+        {
+            var formatters = CreateOutputFormatters(model);
+            var feedFormatters = formatters.Where(f => f.CanWriteType(type));
             IContentNegotiator negotiator = new DefaultContentNegotiator(false);
             MediaTypeHeaderValue mediaType;
 
             using (HttpRequestMessage request = new HttpRequestMessage())
             {
-                request.RequestUri = new Uri("http://any/?$format=" + dollarFormat);
+                request.RequestUri = string.IsNullOrEmpty(dollarFormat)
+                    ? request.RequestUri = new Uri("http://any")
+                    : new Uri("http://any/?$format=" + dollarFormat);
+
                 request.EnableODataDependencyInjectionSupport(model);
                 ContentNegotiationResult result = negotiator.Negotiate(type, request, formatters);
                 mediaType = result.MediaType;
@@ -705,19 +860,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             return mediaType;
         }
-
-        private static IEnumerable<ODataMediaTypeFormatter> CreateProductUnderTest()
-        {
-            IEdmModel model = CreateModel();
-            return CreateProductUnderTest(model);
-        }
-
-        private static IEnumerable<ODataMediaTypeFormatter> CreateProductUnderTest(IEdmModel model)
-        {
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.RequestUri = new Uri("http://any");
-            request.EnableODataDependencyInjectionSupport(model);
-            return ODataMediaTypeFormatters.Create().Select(f => f.GetPerRequestFormatterInstance(typeof(void), request, null) as ODataMediaTypeFormatter);
-        }
+#endif
     }
 }

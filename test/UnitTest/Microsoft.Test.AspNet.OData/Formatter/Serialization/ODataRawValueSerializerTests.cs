@@ -3,13 +3,13 @@
 
 using System;
 using System.IO;
-using System.Net.Http;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -71,7 +71,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 DateTimeOffset dto = new DateTimeOffset(dt).ToLocalTime();
                 return new TheoryDataSet<object, DateTimeOffset>
                 {
-                    { dt, dto},
+                    { dt, dto },
                     { new DateTime?(dt), dto}
                 };
             }
@@ -124,8 +124,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Stream stream = new MemoryStream();
             mockRequest.Setup(r => r.GetStream()).Returns(stream);
             var messageWriter = new ODataMessageWriter(mockRequest.Object);
-            var request = new HttpRequestMessage();
-            request.ODataProperties().Path = new ODataPath(CountSegment.Instance);
+            var request = RequestFactory.Create();
+            request.ODataContext().Path = new ODataPath(CountSegment.Instance);
             var context = new ODataSerializerContext { Request = request };
 
             // Act

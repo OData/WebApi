@@ -8,8 +8,9 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void ODataMetadataSerializer_Works_ForSingleton()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<Customer>("Me");
             builder.EntitySet<Order>("MyOrders");
             IEdmModel model = builder.GetEdmModel();

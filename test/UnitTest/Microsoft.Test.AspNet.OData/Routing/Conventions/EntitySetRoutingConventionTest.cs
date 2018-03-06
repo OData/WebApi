@@ -1,15 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -20,18 +18,19 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         [Theory]
         [InlineData("GET")]
         [InlineData("POST")]
-        public void SelectAction_ReturnsNull_IfActionIsMissing(string httpMethod)
+        public void SelectAction_ReturnsNull_IfActionIsMissing(string method)
         {
+            // Arrange
             ODataPath odataPath = new DefaultODataPathHandler().Parse(ODataRoutingModel.GetModel(), "http://any/", "RoutingCustomers");
-            ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
-            HttpControllerContext controllerContext = new HttpControllerContext();
-            controllerContext.Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/");
-            controllerContext.Request.SetRouteData(new HttpRouteData(new HttpRoute()));
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var emptyActionMap = SelectActionHelper.CreateActionMap();
 
-            string selectedAction = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
+            // Act
+            string selectedAction = SelectActionHelper.SelectAction(new EntitySetRoutingConvention(), odataPath, request, emptyActionMap);
 
+            // Assert
             Assert.Null(selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Theory]
@@ -47,19 +46,14 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers),
                 new TypeSegment(collection, model.Customers));
 
-            var controllerContext = new HttpControllerContext()
-            {
-                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => expected);
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(expected);
 
             // Act
-            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new EntitySetRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal(expected, actionName);
+            Assert.Equal(expected, selectedAction);
         }
 
         [Theory]
@@ -70,20 +64,14 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             var model = new CustomersModelWithInheritance();
             var odataPath = new ODataPath(new EntitySetSegment(model.Customers), CountSegment.Instance);
-
-            HttpControllerContext controllerContext = new HttpControllerContext()
-            {
-                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => expected);
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(expected);
 
             // Act
-            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new EntitySetRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal(expected, actionName);
+            Assert.Equal(expected, selectedAction);
         }
 
         [Theory]
@@ -96,20 +84,14 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             var model = new CustomersModelWithInheritance();
             var odataPath = new ODataPath(new EntitySetSegment(model.Customers), CountSegment.Instance);
-
-            HttpControllerContext controllerContext = new HttpControllerContext()
-            {
-                Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/"),
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "PostCustomer");
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("PostCustomer");
 
             // Act
-            string actionName = new EntitySetRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new EntitySetRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Null(actionName);
+            Assert.Null(selectedAction);
         }
     }
 }

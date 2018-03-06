@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common.Types;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization.Models
 {

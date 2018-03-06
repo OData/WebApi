@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -341,8 +343,8 @@ namespace Microsoft.Test.AspNet.OData
 
         private static HttpClient GetClient(TimeZoneInfo timeZoneInfo)
         {
-            HttpConfiguration config =
-                new[] { typeof(MetadataController), typeof(DateTimeModelsController) }.GetHttpConfiguration();
+            HttpConfiguration config = RoutingConfigurationFactory.CreateWithTypes(
+                new[] { typeof(MetadataController), typeof(DateTimeModelsController) });
             if (timeZoneInfo != null)
             {
                 config.SetTimeZoneInfo(timeZoneInfo);
@@ -359,7 +361,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<DateTimeModel>("DateTimeModels");
 
             FunctionConfiguration function = builder.EntityType<DateTimeModel>().Function("CalcBirthday");
@@ -465,3 +467,4 @@ namespace Microsoft.Test.AspNet.OData
         public IEnumerable<DateTimeModel> DateTimes { get { return _dateTimes; } }
     }
 }
+#endif

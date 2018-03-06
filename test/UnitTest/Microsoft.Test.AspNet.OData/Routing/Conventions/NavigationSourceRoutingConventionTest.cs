@@ -1,19 +1,60 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Net.Http;
+#if NETCORE
+using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
+using System.Net.Http;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
     public class NavigationSourceRoutingConventionTest
     {
+#if NETCORE
+        [Fact]
+        public void SelectController_ThrowsArgmentNull_IfMissRouteContext()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new MockNavigationSourceRoutingConvention().SelectAction(null),
+                "routeContext");
+        }
+
+        [Fact]
+        public void SelectController_ThrowsArgmentNull_IfMissOdataPath()
+        {
+            // Arrange
+            var request = RequestFactory.Create();
+            var routeContext = new RouteContext(request.HttpContext);
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new MockNavigationSourceRoutingConvention().SelectAction(routeContext),
+                "odataPath");
+        }
+#else
         [Fact]
         public void SelectController_ThrowsArgmentNull_IfMissOdataPath()
         {
@@ -38,19 +79,20 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 () => new MockNavigationSourceRoutingConvention().SelectController(odataPath, null),
                 "request");
         }
+#endif
 
         [Fact]
         public void SelectController_RetrunsNull_IfNotNavigationSourceRequest()
         {
             // Arrange
-            Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
+            var request = RequestFactory.Create();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             var ordersProperty = model.Customer.FindProperty("Orders") as IEdmNavigationProperty;
             NavigationPropertyLinkSegment navigationLinkSegment = new NavigationPropertyLinkSegment(ordersProperty, model.Orders);
             ODataPath odataPath = new ODataPath(navigationLinkSegment);
 
             // Act
-            string controller = new MockNavigationSourceRoutingConvention().SelectController(odataPath, request.Object);
+            string controller = SelectController(new MockNavigationSourceRoutingConvention(), odataPath, request);
 
             // Assert
             Assert.Null(controller);
@@ -60,12 +102,12 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         public void SelectController_RetrunsEntitySetName_ForEntitySetRequest()
         {
             // Arrange
-            Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
+            var request = RequestFactory.Create();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", "Customers");
 
             // Act
-            string controller = new MockNavigationSourceRoutingConvention().SelectController(odataPath, request.Object);
+            string controller = SelectController(new MockNavigationSourceRoutingConvention(), odataPath, request);
 
             // Assert
             Assert.Equal("Customers", controller);
@@ -75,15 +117,31 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         public void SelectController_RetrunsSingletonName_ForSingletonRequest()
         {
             // Arrange
-            Mock<HttpRequestMessage> request = new Mock<HttpRequestMessage>();
+            var request = RequestFactory.Create();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", "VipCustomer");
 
             // Act
-            string controller = new MockNavigationSourceRoutingConvention().SelectController(odataPath, request.Object);
+            string controller = SelectController(new MockNavigationSourceRoutingConvention(), odataPath, request);
 
             // Assert
             Assert.Equal("VipCustomer", controller);
         }
+
+#if NETCORE
+        private string SelectController(NavigationSourceRoutingConvention convention, ODataPath odataPath, HttpRequest request)
+        {
+            RouteContext routeContext = new RouteContext(request.HttpContext);
+            routeContext.HttpContext.ODataFeature().Path = odataPath;
+
+            ControllerActionDescriptor descriptor = convention.SelectAction(routeContext).FirstOrDefault();
+            return descriptor?.ControllerName;
+        }
+#else
+        private string SelectController(NavigationSourceRoutingConvention convention, ODataPath odataPath, HttpRequestMessage request)
+        {
+            return convention.SelectController(odataPath, request);
+        }
+#endif
     }
 }

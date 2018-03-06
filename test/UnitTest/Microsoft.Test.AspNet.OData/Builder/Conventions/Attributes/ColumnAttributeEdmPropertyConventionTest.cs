@@ -7,7 +7,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -43,7 +44,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             primitiveProperty.Object.AddedExplicitly = false;
 
             // Act
-            new ColumnAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
+            new ColumnAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, structuralType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             if (expect)
@@ -79,7 +80,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 
             // Act
             new ColumnAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, structuralType.Object,
-                new ODataConventionModelBuilder());
+                ODataConventionModelBuilderFactory.Create());
 
             // Assert
             if (expect)

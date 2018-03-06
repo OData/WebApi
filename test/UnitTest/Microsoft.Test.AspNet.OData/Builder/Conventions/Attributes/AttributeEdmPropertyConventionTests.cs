@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -46,7 +47,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
 
             // build the type
             Mock<EntityTypeConfiguration> structuralType = new Mock<EntityTypeConfiguration>(MockBehavior.Strict);
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             structuralType.Setup(s => s.ModelBuilder).Returns(builder);
 
             // build the property

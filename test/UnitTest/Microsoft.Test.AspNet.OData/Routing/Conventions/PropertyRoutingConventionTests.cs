@@ -1,16 +1,29 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Linq;
+using System.Net.Http;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+#else
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
@@ -18,6 +31,29 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
     {
         private const string _serviceRoot = "http://any/";
 
+#if NETCORE
+        [Fact]
+        public void SelectAction_ThrowsArgumentNull_IfMissRouteContext()
+        {
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new PropertyRoutingConvention().SelectAction(null),
+                "routeContext");
+        }
+
+        [Fact]
+        public void SelectAction_ThrowsArgumentNull_IfMissOdataPath()
+        {
+            // Arrange
+            var request = RequestFactory.Create();
+            var routeContext = new RouteContext(request.HttpContext);
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new PropertyRoutingConvention().SelectAction(routeContext),
+                "odataPath");
+        }
+#else
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfMissOdataPath()
         {
@@ -56,6 +92,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 () => new PropertyRoutingConvention().SelectAction(odataPath, controllerContext.Object, null),
                 "actionMap");
         }
+#endif
 
         [Theory]
         [InlineData("Get", "Get")]
@@ -67,24 +104,17 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(7)/Name");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "NameFromCustomer");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(new HttpMethod(httpMethod), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(prefix + "NameFromCustomer");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "NameFromCustomer", selectedAction);
-            Assert.Single(controllerContext.Request.GetRouteData().Values);
-            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
         }
 
         [Theory]
@@ -96,24 +126,17 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(7)/Account/NS.SpecialAccount");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "AccountOfSpecialAccountFromCustomer");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(new HttpMethod(httpMethod), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(prefix + "AccountOfSpecialAccountFromCustomer");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
-            Assert.Single(controllerContext.Request.GetRouteData().Values);
-            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
         }
 
         [Fact]
@@ -123,25 +146,18 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             IEdmModel model = ODataCountTest.GetEdmModel();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(
                 model, _serviceRoot, "DollarCountEntities(7)/EnumCollectionProp/$count");
-            ILookup<string, HttpActionDescriptor> actionMap =
-                new HttpActionDescriptor[1].ToLookup(desc => "GetEnumCollectionPropFromDollarCountEntity");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("GetEnumCollectionPropFromDollarCountEntity");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal("GetEnumCollectionPropFromDollarCountEntity", selectedAction);
-            Assert.Single(controllerContext.Request.GetRouteData().Values);
-            Assert.Equal(7, controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
         }
 
         [Theory]
@@ -154,23 +170,16 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/Address");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "Address");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(new HttpMethod(httpMethod), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(prefix + "Address");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "Address", selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Theory]
@@ -182,23 +191,16 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/Account/NS.SpecialAccount");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => prefix + "AccountOfSpecialAccountFromCustomer");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(new HttpMethod(httpMethod), "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(new HttpMethod(httpMethod), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(prefix + "AccountOfSpecialAccountFromCustomer");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Fact]
@@ -207,22 +209,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(10)/Name");
-            ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var emptyActionMap = SelectActionHelper.CreateActionMap();
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, emptyActionMap);
 
             // Assert
             Assert.Null(selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Fact]
@@ -231,22 +226,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             IEdmModel model = ODataCountTest.GetEdmModel();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model, _serviceRoot, "DollarCountEntities(7)/EnumCollectionProp");
-            ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => "PatchToEnumCollectionProp");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("PatchToEnumCollectionProp");
 
             // Act
-            string selectedAction = new PropertyRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new PropertyRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.Null(selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
     }
 }

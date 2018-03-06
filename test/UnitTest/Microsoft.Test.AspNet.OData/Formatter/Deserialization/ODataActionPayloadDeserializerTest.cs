@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
@@ -15,8 +13,9 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -34,7 +33,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         {
             _model = GetModel();
             _container = _model.EntityContainer;
-            _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+            _deserializerProvider = ODataDeserializerProviderFactory.Create();
             _deserializer = new ODataActionPayloadDeserializer(_deserializerProvider);
         }
 
@@ -501,7 +500,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         private const string EntityPayload =
             "{" +
                 "\"Id\": 1, " +
-                "\"Customer\": {\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
+                "\"Customer\": {\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
                 // null can't work here, see: https://github.com/OData/odata.net/issues/99
                 // ",\"NullableCustomer\" : null " +  //
             "}";
@@ -569,10 +568,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             "{" +
                 "\"Id\": 1, " +
                 "\"Customers\": [" +
-                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
+                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
                     // null can't work. see: https://github.com/OData/odata.net/issues/100
                     // "null," +
-                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.TestCommon.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
+                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
                  "]" +
             "}";
 
@@ -693,9 +692,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private static IEdmModel GetModel()
         {
-            HttpConfiguration config = new HttpConfiguration();
-            config.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(Customer)));
-            ODataModelBuilder builder = new ODataConventionModelBuilder(config);
+            var config = RoutingConfigurationFactory.CreateWithTypes(typeof(Customer));
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create(config);
             builder.ContainerName = "C";
             builder.Namespace = "A.B";
             EntityTypeConfiguration<Customer> customer = builder.EntitySet<Customer>("Customers").EntityType;

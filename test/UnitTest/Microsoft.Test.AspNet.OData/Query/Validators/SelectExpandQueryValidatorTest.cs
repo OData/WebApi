@@ -5,14 +5,14 @@ using System;
 using System.Globalization;
 using System.Linq;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Microsoft.Test.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
@@ -99,7 +99,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         {
             // Arrange
             var validator = new SelectExpandQueryValidator(new DefaultQuerySettings {EnableExpand = true});
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
@@ -129,7 +129,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Arrange
             string expand = "Parent($expand=Parent($expand=Parent($levels=10)))";
             var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
@@ -149,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Arrange
             string expand = "Parent($levels=2)";
             var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
@@ -174,7 +174,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Arrange
             string expand = "Parent($levels=1)";
             var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
@@ -194,7 +194,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             int maxExpansionDepth = -1;
             // Arrange
             string expand = "Parent($levels=1)";
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));
@@ -221,7 +221,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
             // Arrange
             string expand = "Parent($levels=2)";
             var validator = new SelectExpandQueryValidator(new DefaultQuerySettings { EnableExpand = true });
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataLevelsTest.LevelsEntity>("Entities");
             IEdmModel model = builder.GetEdmModel();
             var context = new ODataQueryContext(model, typeof(ODataLevelsTest.LevelsEntity));

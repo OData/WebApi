@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -190,8 +192,8 @@ namespace Microsoft.Test.AspNet.OData
 
         private static HttpClient GetClient()
         {
-            HttpConfiguration config =
-                new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) }.GetHttpConfiguration();
+            HttpConfiguration config = RoutingConfigurationFactory.CreateWithTypes(
+                new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) });
             config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());
             return new HttpClient(new HttpServer(config));
@@ -199,7 +201,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<DateAndTimeOfDayModel>("DateAndTimeOfDayModels");
             return builder.GetEdmModel();
         }
@@ -293,3 +295,4 @@ namespace Microsoft.Test.AspNet.OData
         public TimeSpan ResumeTime { get; set; }
     }
 }
+#endif

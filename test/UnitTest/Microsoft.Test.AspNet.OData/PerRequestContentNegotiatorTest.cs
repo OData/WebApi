@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -11,6 +12,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -21,11 +23,8 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Negotiate_CallGetPerRequestFormatterInstanceFirst()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.EnableDependencyInjection();
-
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(configuration);
+            HttpConfiguration config = RoutingConfigurationFactory.CreateWithRootContainer("odata");
+            HttpRequestMessage request = RequestFactory.Create(config, "odata");
             MediaTypeFormatter perRequestFormatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>()) { Request = request };
             Mock<MediaTypeFormatter> formatter = new Mock<MediaTypeFormatter>();
             formatter
@@ -43,3 +42,4 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
+#endif

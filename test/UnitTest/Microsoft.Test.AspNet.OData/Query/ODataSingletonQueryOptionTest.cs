@@ -6,11 +6,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 
@@ -18,23 +18,23 @@ namespace Microsoft.Test.AspNet.OData.Query
 {
     public class ODataSingletonQueryOptionTest
     {
-        private HttpConfiguration _configuration;
         private HttpClient _client;
 
         public ODataSingletonQueryOptionTest()
         {
             var controllers = new[] { typeof(MeController) };
-            _configuration = controllers.GetHttpConfiguration();
-            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
-            
-            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
+            var server = TestServerFactory.Create(controllers, (configuration) =>
+            {
+                configuration.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+                configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+
+            _client = TestServerFactory.CreateClient(server);
         }
 
         private static IEdmModel GetEdmModel()
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<Customer>("Me");
             builder.EntitySet<Order>("Orders");
             builder.EntitySet<Customer>("Customers");
@@ -102,7 +102,7 @@ namespace Microsoft.Test.AspNet.OData.Query
     }
 
     // Controller
-    public class MeController : ODataController
+    public class MeController : TestODataController
     {
         private Customer me = new SpecialCustomer
         {
@@ -114,7 +114,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Birthday = new DateTimeOffset(1991, 1, 12, 9, 3, 40, new TimeSpan(0, -5, 0)),
             Level = 60,
             Bonus = 999.19m,
-            SimpleEnum = Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum.Third,
+            SimpleEnum = Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum.Third,
             Orders = Enumerable.Range(0, 10).Select(j =>
                 new Order
                 {
@@ -124,13 +124,13 @@ namespace Microsoft.Test.AspNet.OData.Query
         };
 
         [EnableQuery]
-        public IHttpActionResult GetFromSpecialCustomer()
+        public ITestActionResult GetFromSpecialCustomer()
         {
             return Ok((SpecialCustomer)me);
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(me);
         }

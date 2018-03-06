@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+#if NETFX // Binary only supported on Net Framework
 using System.Data.Linq;
+#endif
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Builder;
@@ -12,8 +14,9 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -41,10 +44,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData(typeof(uint?), typeof(long?))]
         [InlineData(typeof(ulong?), typeof(long?))]
         [InlineData(typeof(char[]), typeof(string))]
-        [InlineData(typeof(Binary), typeof(byte[]))]
         [InlineData(typeof(XElement), typeof(string))]
         [InlineData(typeof(DateTime), typeof(DateTimeOffset))]
         [InlineData(typeof(DateTime?), typeof(DateTimeOffset?))]
+#if NETFX // Binary only supported on Net Framework
+        [InlineData(typeof(Binary), typeof(byte[]))]
+#endif
         public void IsNonstandardEdmPrimitive_Returns_True(Type primitiveType, Type mappedType)
         {
             bool isNonstandardEdmPrimtive;
@@ -234,7 +239,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void GetConcurrencyProperties_CachesCollection(string entitySetName)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<TypeWithoutConcurrencyProperties>("WithoutCP");
             builder.EntitySet<TypeWithConcurrencyProperties>("WithCP");
             IEdmModel model = builder.GetEdmModel();
@@ -255,7 +260,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public void ConcurrencyPropertiesAnnotation_NotSerializedToMetadata(string entitySetName)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<TypeWithoutConcurrencyProperties>("WithoutCP");
             builder.EntitySet<TypeWithConcurrencyProperties>("WithCP");
             IEdmModel model = builder.GetEdmModel();

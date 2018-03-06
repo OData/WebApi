@@ -10,10 +10,15 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
 {
     public class PublicApiTest
     {
+#if NETCORE
+        private const string AssemblyName = "Microsoft.AspNetCore.OData.dll";
+        private const string OutputFileName = "Microsoft.AspNetCore.OData.PublicApi.out";
+        private const string BaseLineFileName = "Microsoft.AspNetCore.OData.PublicApi.bsl";
+#else
         private const string AssemblyName = "Microsoft.AspNet.OData.dll";
         private const string OutputFileName = "Microsoft.AspNet.OData.PublicApi.out";
         private const string BaseLineFileName = "Microsoft.AspNet.OData.PublicApi.bsl";
-
+#endif
         [Fact]
         public void TestPublicApi()
         {
@@ -44,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.PublicApi
                 String.Format("Base line file {1} and output file {2} do not match, please check.{0}" +
                 "To update the baseline, please run:{0}{0}" +
                 "copy /y \"{2}\" \"{1}\"", Environment.NewLine,
-                @"test\UnitTest\Microsoft.Test.AspNet.OData\PublicApi\Microsoft.AspNet.OData.PublicApi.bsl",
+                @"test\UnitTest\Microsoft.Test.AspNet.OData\PublicApi\" + BaseLineFileName,
                 outputFile));
         }
 

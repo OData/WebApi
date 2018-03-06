@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETFX
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Moq;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -18,7 +20,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 return "OData";
             }
         }
-
+#if NETFX
         public static void MapFakeODataRoute(this HttpRouteCollection routes)
         {
             Mock<IHttpRoute> mockRoute = new Mock<IHttpRoute>();
@@ -30,5 +32,6 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 mockVirtualPath.Object);
             routes.Add(RouteName, mockRoute.Object);
         }
+#endif
     }
 }

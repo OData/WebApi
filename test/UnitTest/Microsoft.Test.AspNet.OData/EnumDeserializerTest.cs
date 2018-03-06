@@ -9,7 +9,8 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace Microsoft.Test.AspNet.OData
     public class EnumDeserializerTest
     {
         private readonly ODataDeserializerProvider _deserializerProvider =
-            DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+            ODataDeserializerProviderFactory.Create();
 
         [Fact]
         public void GetEdmTypeDeserializer_ReturnODataEnumDeserializer_ForEnumType()
@@ -231,7 +232,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<EnumComplexWithRequiredEnum>();
             builder.ComplexType<EnumComplexWithNullableEnum>();
             return builder.GetEdmModel();

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.Serialization;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon.Models
+namespace Microsoft.Test.AspNet.OData.Common.Models
 {
     [DataContract]
     public class Employee : Person

@@ -3,7 +3,7 @@
 
 using System.Runtime.Serialization;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon.Models
+namespace Microsoft.Test.AspNet.OData.Common.Models
 {
     [DataContract]
     public class Person

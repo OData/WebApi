@@ -1,6 +1,25 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,14 +29,16 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -28,11 +49,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public ODataLevelsTest()
         {
             IEdmModel model = GetEdmModel();
-            HttpConfiguration configuration = new[] { typeof(LevelsEntitiesController) }.GetHttpConfiguration();
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("odata", "odata", model);
-            var server = new HttpServer(configuration);
-            _client = new HttpClient(server);
+            Type[] controllers = new[] { typeof(LevelsEntitiesController) };
+            var _nullPrefixServer = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+                config.MapODataServiceRoute("odata", "odata", model);
+            });
+
+            _client = TestServerFactory.CreateClient(_nullPrefixServer);
         }
 
         [Fact]
@@ -46,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken entities = result["value"];
             Assert.Equal(10, entities.Count());
             AssertEntity(entities[0], 1);
@@ -85,7 +109,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             // Level 1
             AssertEntity(result["Parent"], 5);
             // Level 2
@@ -111,7 +135,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken entities = result["value"];
             // Level 1
             AssertDerivedEntity(entities[2]["Parent"], 2);
@@ -132,7 +156,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 4);
             // Level 2
@@ -152,7 +176,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 4);
             // Level 2
@@ -176,7 +200,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 10);
             // Level 2
@@ -198,7 +222,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             // Level 1
             AssertDerivedEntity(result["Parent"], 10);
             // Level 2
@@ -224,7 +248,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken baseEntities = result["BaseEntities"];
             Assert.Equal(2, baseEntities.Count());
             // Level 1
@@ -251,7 +275,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken derivedEntities = result["DerivedAncestors"];
             Assert.Equal(2, derivedEntities.Count());
             // Level 1
@@ -278,7 +302,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken derivedEntities = result["AncestorsInDerivedEntity"];
             Assert.Equal(5, derivedEntities.Count());
             // Level 1
@@ -324,7 +348,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(5, result["ID"]);
             Assert.Null(result["Name"]);
             // Level 1
@@ -349,7 +373,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
             // Level 1
             AssertEntity(parent, 5);
@@ -386,7 +410,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
             
             // Level 3
@@ -414,7 +438,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             // Level 5
@@ -445,7 +469,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             // Level 3
@@ -477,7 +501,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             Assert.Null(parent["DerivedAncestors"][0]["DerivedAncestors"][0]["DerivedAncestors"]);
@@ -496,7 +520,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 2, "BaseEntities" => 3, "DerivedAncestors" => 2
@@ -519,7 +543,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 3, "BaseEntities" => 2, "DerivedAncestors" => 2
@@ -546,7 +570,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             JToken parent = result["Parent"];
 
             // "Parent" => 3, "DerivedAncestors" => 2, max("BaseEntities") => 1
@@ -587,14 +611,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         public static IEdmModel GetEdmModel()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<LevelsBaseEntity>("LevelsBaseEntities");
             builder.EntitySet<LevelsEntity>("LevelsEntities");
             builder.EntitySet<LevelsDerivedEntity>("LevelsDerivedEntities");
             return builder.GetEdmModel();
         }
 
-        public class LevelsEntitiesController : ODataController
+        public class LevelsEntitiesController : TestODataController
         {
             public IList<LevelsEntity> Entities;
 
@@ -645,9 +669,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     }
                 }
                 Entities[8].Parent = Entities[9];
-                Entities[1].DerivedAncestors = new LevelsDerivedEntity[] { (LevelsDerivedEntity)Entities[3] }; 
+                Entities[1].DerivedAncestors = new LevelsDerivedEntity[] { (LevelsDerivedEntity)Entities[3] };
             }
 
+#if !NETCORE // TODO #939: Fix Get method to return non-null.
             public IHttpActionResult Get(ODataQueryOptions<LevelsEntity> queryOptions)
             {
                 var validationSettings = new ODataValidationSettings { MaxExpansionDepth = 5 };
@@ -668,18 +693,48 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 var result = queryOptions.ApplyTo(Entities.AsQueryable(), querySettings).AsQueryable();
                 return Ok(result, result.GetType());
             }
+#else
+            public ITestActionResult Get(ODataQueryOptions<LevelsEntity> queryOptions)
+            {
+                var validationSettings = new ODataValidationSettings { MaxExpansionDepth = 5 };
+
+                try
+                {
+                    queryOptions.Validate(validationSettings);
+                }
+                catch (ODataException e)
+                {
+                    var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
+                    responseMessage.Content = new StringContent(
+                        Error.Format("The query specified in the URI is not valid. {0}", e.Message));
+                    return null; // ResponseMessage(responseMessage);
+                }
+
+                var querySettings = new ODataQuerySettings();
+                var result = queryOptions.ApplyTo(Entities.AsQueryable(), querySettings).AsQueryable();
+                return Ok(result, result.GetType());
+            }
+#endif
 
             [EnableQuery(MaxExpansionDepth = 5)]
-            public IHttpActionResult Get(int key)
+            public ITestActionResult Get(int key)
             {
                 return Ok(Entities.Single(e => e.ID == key));
             }
 
+#if !NETCORE // TODO #939: Fix Ok method to return non-null.
             private IHttpActionResult Ok(object content, Type type)
             {
                 var resultType = typeof(OkNegotiatedContentResult<>).MakeGenericType(type);
                 return Activator.CreateInstance(resultType, content, this) as IHttpActionResult;
             }
+#else
+            private ITestActionResult Ok(object content, Type type)
+            {
+                //var resultType = typeof(OkNegotiatedContentResult<>).MakeGenericType(type);
+                return null; // Activator.CreateInstance(resultType, content, this) as IActionResult;
+            }
+#endif
         }
 
         public class LevelsBaseEntity

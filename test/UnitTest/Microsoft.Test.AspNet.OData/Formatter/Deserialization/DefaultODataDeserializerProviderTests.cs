@@ -3,12 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -16,14 +16,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
     public class DefaultODataDeserializerProviderTests
     {
-        ODataDeserializerProvider _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+        ODataDeserializerProvider _deserializerProvider = ODataDeserializerProviderFactory.Create();
         IEdmModel _edmModel = EdmTestHelpers.GetModel();
 
         [Fact]
         public void GetODataDeserializer_Uri()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            var request = RequestFactory.Create();
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(typeof(Uri), request);
@@ -49,8 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_Primitive(Type type)
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport();
+            var request = RequestFactory.Create();
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(type, request);
@@ -65,8 +64,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_Resource_ForEntity()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(_edmModel);
+            var request = RequestFactory.CreateFromModel(_edmModel);
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(
@@ -83,8 +81,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_Resource_ForComplex()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(_edmModel);
+            var request = RequestFactory.CreateFromModel(_edmModel);
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(
@@ -107,8 +104,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_ResourceSet_ForEntityCollection(Type collectionType)
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(_edmModel);
+            var request = RequestFactory.CreateFromModel(_edmModel);
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(collectionType, request);
@@ -130,8 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_ResourceSet_ForComplexCollection(Type collectionType)
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(_edmModel);
+            var request = RequestFactory.CreateFromModel(_edmModel);
 
             // Act
             ODataDeserializer deserializer = _deserializerProvider.GetODataDeserializer(collectionType, request);
@@ -147,8 +142,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_ReturnsSameDeserializer_ForSameType()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(_edmModel);
+            var request = RequestFactory.CreateFromModel(_edmModel);
 
             // Act
             ODataDeserializer firstCallDeserializer = _deserializerProvider.GetODataDeserializer(
@@ -166,7 +160,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_ActionPayload(Type resourceType)
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            var request = RequestFactory.Create();
 
             // Act
             ODataActionPayloadDeserializer basicActionPayload = _deserializerProvider.GetODataDeserializer(
@@ -180,7 +174,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         public void GetODataDeserializer_Throws_ArgumentNullForType()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            var request = RequestFactory.Create();
 
             // Act & Assert
             ExceptionAssert.ThrowsArgumentNull(

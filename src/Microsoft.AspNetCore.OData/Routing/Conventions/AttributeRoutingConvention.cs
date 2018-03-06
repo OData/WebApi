@@ -73,7 +73,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// </summary>
         /// <param name="routeName">The name of the route.</param>
         /// <param name="controllers">The collection of controllers to search for a match.</param>
-        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNetCore-specific and is only used for unit tests.</remarks>
         internal AttributeRoutingConvention(string routeName,
             IEnumerable<ControllerActionDescriptor> controllers)
             : this(routeName, controllers, (IODataPathTemplateHandler)null)
@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <param name="routeName">The name of the route.</param>
         /// <param name="controllers">The collection of controllers to search for a match.</param>
         /// <param name="pathTemplateHandler">The path template handler to be used for parsing the path templates.</param>
-        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNetCore-specific and is only used for unit tests.</remarks>
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors",
             Justification = "See note on <see cref=\"ShouldMapController()\"> method.")]
         internal AttributeRoutingConvention(string routeName,
@@ -105,6 +105,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             }
 
             ODataPathTemplateHandler = pathTemplateHandler;
+
+            // Look for a service provider on the ControllerActionDescriptor, which the unit test will setup
+            // so the BuildAttributeMappings can find the perRouteContainer.
+            _serviceProvider = controllers.FirstOrDefault()?.Properties["serviceProvider"] as IServiceProvider;
 
             _attributeMappings = BuildAttributeMappings(controllers);
         }

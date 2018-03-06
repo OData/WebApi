@@ -11,7 +11,8 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -30,7 +31,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
             _edmIntType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
 
-            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+            _serializerProvider = ODataSerializerProviderFactory.Create();
             _collectionType = new EdmCollectionTypeReference(new EdmCollectionType(_edmIntType));
             _serializer = new ODataCollectionSerializer(_serializerProvider);
         }

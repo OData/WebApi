@@ -8,7 +8,8 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -121,7 +122,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CreateCollection_PropertyAliased_IfEnabled(bool modelAliasing, string typeName, string propertyName)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
             builder.EntitySet<PropertyAlias>("entityset");
 
             IEdmModel model = builder.GetEdmModel();

@@ -8,9 +8,9 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
@@ -226,6 +226,20 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
+        [InlineData(typeof(IEnumerable), false)]
+        [InlineData(typeof(IQueryable), true)]
+        [InlineData(typeof(IEnumerable<CustomInternalClass>), false)]
+        [InlineData(typeof(IQueryable<CustomInternalClass>), true)]
+        [InlineData(typeof(object), false)]
+        [InlineData(typeof(string), false)]
+        [InlineData(typeof(List<CustomInternalClass>), false)]
+        [InlineData(typeof(CustomInternalClass[]), false)]
+        public void IsIQueryable(Type type, bool isIQueryable)
+        {
+            Assert.Equal(isIQueryable, TypeHelper.IsIQueryable(type));
+        }
+
+        [Theory]
         [InlineData(typeof(object), false)]
         [InlineData(typeof(ICollection), false)]
         [InlineData(typeof(IEnumerable), false)]
@@ -284,7 +298,7 @@ namespace Microsoft.Test.AspNet.OData
                 .BaseType(baseType);
 
             MockAssembly assembly = new MockAssembly(baseType, derivedType);
-            IWebApiAssembliesResolver resolver = new WebApiAssembliesResolver(new TestAssemblyResolver(assembly));
+            IWebApiAssembliesResolver resolver = WebApiAssembliesResolverFactory.Create(assembly);
             IEnumerable<Type> foundTypes = TypeHelper.GetLoadedTypes(resolver);
 
             IEnumerable<string> definedNames = assembly.GetTypes().Select(t => t.FullName);
@@ -292,10 +306,10 @@ namespace Microsoft.Test.AspNet.OData
 
             foreach (string name in definedNames)
             {
-                Assert.Contains(foundNames, s => s == name);
+                Assert.Contains(name, foundNames);
             }
 
-            Assert.DoesNotContain(foundTypes, t => t == typeof(TypeHelperTest));
+            Assert.DoesNotContain(typeof(TypeHelperTest), foundTypes);
         }
 
         /// <summary>

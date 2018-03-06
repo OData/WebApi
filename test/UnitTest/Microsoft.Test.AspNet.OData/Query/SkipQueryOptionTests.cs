@@ -9,8 +9,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Query.Validators;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 using Xunit;
 

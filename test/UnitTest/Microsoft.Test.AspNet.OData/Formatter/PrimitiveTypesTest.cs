@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable this test on AspNetCore.
 using System;
 using System.IO;
 using System.Linq;
@@ -15,11 +16,11 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
-
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -65,7 +66,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             string expectedEntity = Resources.GetString(resourceName);
             Assert.NotNull(expectedEntity);
 
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
@@ -106,7 +107,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             object expectedValue = value;
 
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
@@ -160,7 +161,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.NotNull(valueType);
             Assert.NotNull(unused);
 
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
@@ -197,7 +198,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             object expectedValue = value;
 
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
@@ -242,3 +243,4 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
     }
 }
+#endif

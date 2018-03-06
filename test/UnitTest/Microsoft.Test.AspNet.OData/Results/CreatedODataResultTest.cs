@@ -1,38 +1,69 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Net;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
-using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Query.Results
 {
     public class CreatedODataResultTest
     {
         private readonly TestEntity _entity = new TestEntity();
+#if NETFX // Only needed for AspNet
         private readonly HttpRequestMessage _request = new HttpRequestMessage();
         private readonly IContentNegotiator _contentNegotiator = new Mock<IContentNegotiator>().Object;
         private readonly IEnumerable<MediaTypeFormatter> _formatters = new MediaTypeFormatter[0];
         private readonly Uri _locationHeader = new Uri("http://location_header");
         private readonly TestController _controller = new TestController();
+#endif
 
+#if NETCORE
+        [Fact]
+        public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
+        {
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new CreatedODataResult<TestEntity>(entity: null), "entity");
+        }
+#else
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
         {
@@ -131,72 +162,81 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
 
             Assert.Same(_locationHeader, result.LocationHeader);
         }
+#endif
 
         [Fact]
         public void GetInnerActionResult_ReturnsNegotiatedContentResult_IfRequestHasNoPreferenceHeader()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            CreatedODataResult<TestEntity> createdODataResult =
-                new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
+            var request = CreateRequest();
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
+            var result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
+#if NETCORE
+            ObjectResult objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Same(typeof(TestEntity), objectResult.Value.GetType());
+            Assert.Equal(HttpStatusCode.Created, (HttpStatusCode)objectResult.StatusCode);
+#else
             NegotiatedContentResult<TestEntity> negotiatedResult = Assert.IsType<NegotiatedContentResult<TestEntity>>(result);
             Assert.Equal(HttpStatusCode.Created, negotiatedResult.StatusCode);
             Assert.Same(request, negotiatedResult.Request);
             Assert.Same(_contentNegotiator, negotiatedResult.ContentNegotiator);
             Assert.Same(_entity, negotiatedResult.Content);
             Assert.Same(_formatters, negotiatedResult.Formatters);
+#endif
         }
 
         [Fact]
         public void GetInnerActionResult_ReturnsNoContentStatusCodeResult_IfRequestAsksForNoContent()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return=minimal");
-            CreatedODataResult<TestEntity> createdODataResult =
-                new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
+            var request = CreateRequest("return=minimal");
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
+            var result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
             StatusCodeResult statusCodeResult = Assert.IsType<StatusCodeResult>(result);
-            Assert.Equal(HttpStatusCode.NoContent, statusCodeResult.StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, (HttpStatusCode)statusCodeResult.StatusCode);
+#if NETFX // Only needed for AspNet
             Assert.Same(request, statusCodeResult.Request);
+#endif
         }
 
         [Fact]
         public void GetInnerActionResult_ReturnsNegotiatedContentResult_IfRequestAsksForContent()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
-            CreatedODataResult<TestEntity> createdODataResult =
-                new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
+            var request = CreateRequest("return=representation");
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act
-            IHttpActionResult result = createdODataResult.GetInnerActionResult(request);
+            var result = createdODataResult.GetInnerActionResult(request);
 
             // Assert
+#if NETCORE
+            ObjectResult objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Same(typeof(TestEntity), objectResult.Value.GetType());
+            Assert.Equal(HttpStatusCode.Created, (HttpStatusCode)objectResult.StatusCode);
+#else
             NegotiatedContentResult<TestEntity> negotiatedResult = Assert.IsType<NegotiatedContentResult<TestEntity>>(result);
             Assert.Equal(HttpStatusCode.Created, negotiatedResult.StatusCode);
             Assert.Same(request, negotiatedResult.Request);
             Assert.Same(_contentNegotiator, negotiatedResult.ContentNegotiator);
             Assert.Same(_entity, negotiatedResult.Content);
             Assert.Same(_formatters, negotiatedResult.Formatters);
+#endif
         }
 
         [Fact]
         public void GenerateLocationHeader_ThrowsODataPathMissing_IfRequestDoesNotHaveODataPath()
         {
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.EnableHttpDependencyInjectionSupport(EdmCoreModel.Instance);
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var request = RequestFactory.CreateFromModel(EdmCoreModel.Instance);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
@@ -208,10 +248,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         {
             // Arrange
             ODataPath path = new ODataPath();
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(EdmCoreModel.Instance);
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var request = RequestFactory.CreateFromModel(EdmCoreModel.Instance, path: path);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
@@ -224,10 +262,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
@@ -239,11 +275,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
             model.Model.SetAnnotationValue(model.Address, new ClrTypeAnnotation(typeof(TestEntity)));
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
@@ -265,10 +299,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act
             var locationHeader = createdODataResult.GenerateLocationHeader(request);
@@ -287,15 +319,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 model.Model,
                 "http://localhost/",
                 "MyOrders(1)/OrderLines");
-            var request = GetODataRequest(model.Model);
-            request.ODataProperties().Path = path;
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
             var orderLine = new OrderLine { ID = 2 };
-            var createdODataResult = new CreatedODataResult<OrderLine>(
-                orderLine,
-                _contentNegotiator,
-                request,
-                _formatters,
-                _locationHeader);
+            var createdODataResult = GetCreatedODataResult<OrderLine>(orderLine, request);
 
             // Act
             var locationHeader = createdODataResult.GenerateLocationHeader(request);
@@ -313,10 +339,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            CreatedODataResult<TestEntity> createdODataResult = GetCreatedODataResult(request);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request);
 
             // Act
             ExceptionAssert.Throws<InvalidOperationException>(() => createdODataResult.GenerateLocationHeader(request),
@@ -336,16 +360,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            TestController controller = new TestController();
-            controller.Configuration = request.GetConfiguration();
-            CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            TestController controller = CreateController(request);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request, controller);
 
             // Act
-            controller.Request = request;
-            Uri locationHeader = createdODataResult.LocationHeader;
+            Uri locationHeader = createdODataResult.GenerateLocationHeader(request);
 
             // Assert
             Assert.Same(editLink, locationHeader);
@@ -364,14 +384,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            TestController controller = new TestController { Request = request, Configuration = request.GetConfiguration() };
-            CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            TestController controller = CreateController(request);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request, controller);
 
             // Act
-            Uri locationHeader = createdODataResult.LocationHeader;
+            Uri locationHeader = createdODataResult.GenerateLocationHeader(request);
 
             // Assert
             linkBuilder.Verify(
@@ -393,14 +411,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             ODataPath path = new ODataPath(new EntitySetSegment(model.Customers));
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
-            TestController controller = new TestController { Configuration = request.GetConfiguration() };
-            CreatedODataResult<TestEntity> createdODataResult = new CreatedODataResult<TestEntity>(_entity, controller);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
+            TestController controller = CreateController(request);
+            var createdODataResult = GetCreatedODataResult<TestEntity>(_entity, request, controller);
 
             // Act
-            controller.Request = request;
             Uri entityIdHeader = createdODataResult.GenerateEntityId(request);
 
             // Assert
@@ -410,29 +425,68 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
                 Times.Once());
         }
 
-        private CreatedODataResult<TestEntity> GetCreatedODataResult(HttpRequestMessage request)
-        {
-            return new CreatedODataResult<TestEntity>(_entity, _contentNegotiator, request, _formatters, _locationHeader);
-        }
-
-        private static HttpRequestMessage GetODataRequest(IEdmModel model)
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.MapODataServiceRoute(routeName, null, model);
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
-            return request;
-        }
-
         private class TestEntity
         {
         }
 
-        private class TestController : ApiController
+        private class TestController : ODataController
         {
         }
+
+#if NETCORE
+        private CreatedODataResult<T> GetCreatedODataResult<T>(T entity, HttpRequest request, TestController controller = null)
+        {
+            return new CreatedODataResult<T>(entity);
+        }
+
+        private HttpRequest CreateRequest(string preferHeaderValue = null)
+        {
+            var request = RequestFactory.Create();
+            if (!string.IsNullOrEmpty(preferHeaderValue))
+            {
+                request.Headers.Add("Prefer", new StringValues(preferHeaderValue));
+            }
+
+            return request;
+        }
+
+        private TestController CreateController(AspNetCore.Http.HttpRequest request)
+        {
+            TestController controller = new TestController();
+            return controller;
+        }
+#else
+        private CreatedODataResult<T> GetCreatedODataResult<T>(T entity, HttpRequestMessage request, TestController controller = null)
+        {
+            if (controller != null)
+            {
+                return new CreatedODataResult<T>(entity, controller);
+            }
+            else
+            {
+                return new CreatedODataResult<T>(entity, _contentNegotiator, request, _formatters, _locationHeader);
+            }
+        }
+
+        private HttpRequestMessage CreateRequest(string preferHeaderValue = null)
+        {
+            var request = RequestFactory.Create();
+            if (!string.IsNullOrEmpty(preferHeaderValue))
+            {
+                request = new HttpRequestMessage();
+                request.Headers.TryAddWithoutValidation("Prefer", preferHeaderValue);
+            }
+
+            return request;
+        }
+
+        private TestController CreateController(HttpRequestMessage request)
+        {
+            TestController controller = new TestController();
+            controller.Configuration = request.GetConfiguration();
+            controller.Request = request;
+            return controller;
+        }
+#endif
     }
 }

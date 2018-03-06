@@ -12,8 +12,8 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
 using Moq;
 using Xunit;
 using BuilderTestModels = Microsoft.Test.AspNet.OData.Builder.TestModels;
@@ -809,7 +809,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.EntityType<ForeignEntity>().HasRequired(c => c.Principal,
                     (c, r) => c.InvalidForeignKey == r.InvalidPrincipalKey),
-                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.TestCommon.MockType"));
+                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.Common.MockType"));
         }
 
         class ForeignPrincipal

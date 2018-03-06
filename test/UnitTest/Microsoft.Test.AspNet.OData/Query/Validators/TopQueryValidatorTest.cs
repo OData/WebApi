@@ -7,7 +7,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators

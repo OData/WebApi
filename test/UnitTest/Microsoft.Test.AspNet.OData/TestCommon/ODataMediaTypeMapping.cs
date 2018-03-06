@@ -1,15 +1,25 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Linq;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
+#else
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
-using System.Web;
+#endif
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s for OData from query strings.
@@ -24,19 +34,17 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// ODataMediaTypeMapping constructor.
         /// </summary>
         /// <param name="mediaType">The media type to use if the query parameter for OData is present </param>
-        public ODataMediaTypeMapping(string mediaType)
-            : base(mediaType)
+#if NETCORE
+        public ODataMediaTypeMapping(MediaTypeHeaderValue mediaType)
+            : base(mediaType.ToString())
         {
         }
-
-        /// <summary>
-        /// ODataMediaTypeMapping constructor.
-        /// </summary>
-        /// <param name="mediaType">The media type to use if the query parameter for OData is present </param>
+#else
         public ODataMediaTypeMapping(MediaTypeHeaderValue mediaType)
             : base(mediaType)
         {
         }
+#endif
 
         /// <summary>
         /// Returns a value indicating the quality of the media type match for the current <see cref="ODataMediaTypeMapping"/>
@@ -45,10 +53,20 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
         /// <param name="request">The <see cref="HttpRequestMessage"/> to check.</param>
         /// <returns>If this instance can produce a <see cref="MediaTypeHeaderValue"/> from <paramref name="request"/>
         /// it returns <c>1.0</c> otherwise <c>false</c>.</returns>
+#if NETCORE
+        public override sealed double TryMatchMediaType(HttpRequest request)
+        {
+            IDictionary<string, string> queryString = QueryHelpers.ParseNullableQuery(request.QueryString.Value)
+                .Select(kvp => new KeyValuePair<string, string>(kvp.Key, kvp.Value.FirstOrDefault()))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            MediaTypeHeaderValue responseMediaType = request.GetTypedHeaders().Accept.FirstOrDefault();
+#else
         public override sealed double TryMatchMediaType(HttpRequestMessage request)
         {
-            NameValueCollection queryString = GetQueryString(request.RequestUri);
+            FormDataCollection queryString = new FormDataCollection(request.RequestUri);
             MediaTypeWithQualityHeaderValue responseMediaType = request.Headers.Accept.FirstOrDefault();
+#endif
             if (responseMediaType == null)
             {
                 return 0.0;
@@ -61,21 +79,18 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
                         : 0.0;
         }
 
-        private static NameValueCollection GetQueryString(Uri uri)
-        {
-            if (uri == null)
-            {
-                throw new InvalidOperationException(String.Format("Uri cannot be null for {0}", typeODataMediaTypeMapping.Name));
-            }
-
-            return HttpUtility.ParseQueryString(uri.Query);
-        }
-
-        private bool DoesQueryStringMatch(NameValueCollection queryString)
+        private bool DoesQueryStringMatch(IEnumerable<KeyValuePair<string, string>> queryString)
         {
             if (queryString != null)
             {
-                return queryString[ODataMediaTypeMapping.QueryStringFormatParameter] == ODataMediaTypeMapping.QueryFormatODataValue;
+                string queryValue = queryString.Where(kvp => kvp.Key == ODataMediaTypeMapping.QueryStringFormatParameter)
+                      .FirstOrDefault()
+                      .Value;
+
+                if (queryValue != null)
+                {
+                    return queryValue == ODataMediaTypeMapping.QueryFormatODataValue;
+                }
             }
 
             return false;

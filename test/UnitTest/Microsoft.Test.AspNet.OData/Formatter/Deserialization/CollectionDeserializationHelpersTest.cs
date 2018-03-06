@@ -10,8 +10,8 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization

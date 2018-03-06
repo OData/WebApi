@@ -2,16 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Moq;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -46,23 +43,23 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers), new KeySegment(keys, model.Customer, model.Customers),
                 new NavigationPropertyLinkSegment(ordersProperty, model.Orders));
 
-            HttpControllerContext controllerContext = CreateControllerContext(method);
-            var actionMap = GetMockActionMap(methodsInController);
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(methodsInController);
 
             // Act
-            string selectedAction = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             if (expectedSelectedAction == null)
             {
-                Assert.Empty(controllerContext.RouteData.Values);
+                Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
             }
             else
             {
-                Assert.Equal(2, controllerContext.RouteData.Values.Count);
-                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
-                Assert.Equal(ordersProperty.Name, controllerContext.RouteData.Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(ordersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
             }
         }
 
@@ -96,23 +93,23 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 new TypeSegment(model.SpecialCustomer, model.Customers),
                 new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders));
 
-            HttpControllerContext controllerContext = CreateControllerContext(method);
-            var actionMap = GetMockActionMap(methodsInController);
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(methodsInController);
 
             // Act
-            string selectedAction = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             if (expectedSelectedAction == null)
             {
-                Assert.Empty(controllerContext.RouteData.Values);
+                Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
             }
             else
             {
-                Assert.Equal(2, controllerContext.RouteData.Values.Count);
-                Assert.Equal(42, controllerContext.RouteData.Values["key"]);
-                Assert.Equal(specialOrdersProperty.Name, controllerContext.RouteData.Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(specialOrdersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
             }
         }
 
@@ -132,17 +129,16 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders),
                 new KeySegment(relatedKeys, model.Order, model.Orders));
 
-            HttpControllerContext controllerContext = CreateControllerContext("DELETE");
-            var actionMap = GetMockActionMap("DeleteRef");
+            var request = RequestFactory.Create(HttpMethod.Delete, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("DeleteRef");
 
             // Act
-            new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
-            var routeData = controllerContext.RouteData;
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal(42, routeData.Values["key"]);
-            Assert.Equal("SpecialOrders", routeData.Values["navigationProperty"]);
-            Assert.Equal(24, routeData.Values["relatedKey"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal("SpecialOrders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+            Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKey"]);
         }
 
         [Theory]
@@ -153,18 +149,17 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, "http://any/", uri);
-            HttpControllerContext controllerContext = CreateControllerContext("DELETE");
-            var actionMap = GetMockActionMap("DeleteRef");
+            var request = RequestFactory.Create(HttpMethod.Delete, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("DeleteRef");
 
             // Act
-            var actionName = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
-            var routeData = controllerContext.RouteData;
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("DeleteRef", actionName);
-            Assert.Equal(42, routeData.Values["key"]);
-            Assert.Equal("Orders", routeData.Values["navigationProperty"]);
-            Assert.Equal(24, routeData.Values["relatedKey"]);
+            Assert.Equal("DeleteRef", selectedAction);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal("Orders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+            Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKey"]);
         }
 
         [Theory]
@@ -181,14 +176,14 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 "http://any/",
                 "http://any/Customers(42)/Orders/$ref?$id=http://any/Orders(24)");
 
-            HttpControllerContext controllerContext = CreateControllerContext(method);
-            var actionMap = GetMockActionMap("DeleteRef", "CreateRef", "GetRef", "PutRef", "PostRef");
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("DeleteRef", "CreateRef", "GetRef", "PutRef", "PostRef");
 
             // Act
-            string actionName = new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Null(actionName);
+            Assert.Null(selectedAction);
         }
 
         [Theory]
@@ -207,36 +202,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 new TypeSegment(model.SpecialCustomer, model.Customers),
                 new NavigationPropertyLinkSegment(specialOrdersProperty, model.Orders));
 
-            HttpControllerContext controllerContext = CreateControllerContext(method);
-            var actionMap = new[] { GetMockActionDescriptor(actionName) }.ToLookup(a => a.ActionName);
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(actionName);
 
             // Act
-            new RefRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
-            var routeData = controllerContext.RouteData;
+            string selectedAction = SelectActionHelper.SelectAction(new RefRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal(42, routeData.Values["key"]);
-            Assert.Equal("SpecialOrders", routeData.Values["navigationProperty"]);
-        }
-
-        private static HttpControllerContext CreateControllerContext(string method)
-        {
-            HttpControllerContext controllerContext = new HttpControllerContext();
-            controllerContext.Request = new HttpRequestMessage(new HttpMethod(method), "http://localhost/");
-            controllerContext.RouteData = new HttpRouteData(new HttpRoute());
-            return controllerContext;
-        }
-
-        private static HttpActionDescriptor GetMockActionDescriptor(string name)
-        {
-            Mock<HttpActionDescriptor> actionDescriptor = new Mock<HttpActionDescriptor> { CallBase = true };
-            actionDescriptor.Setup(a => a.ActionName).Returns(name);
-            return actionDescriptor.Object;
-        }
-
-        private static ILookup<string, HttpActionDescriptor> GetMockActionMap(params string[] actionNames)
-        {
-            return actionNames.Select(name => GetMockActionDescriptor(name)).ToLookup(a => a.ActionName);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal("SpecialOrders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
         }
     }
 }

@@ -3,13 +3,13 @@
 
 using System;
 using System.IO;
-using System.Net.Http;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -123,10 +123,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void ODataEntityReferenceLinkSerializer_Serializes_UrisAndEntityReferenceLinks_WithCount(object uris)
         {
             // Arrange
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(config, "OData");
             ODataEntityReferenceLinksSerializer serializer = new ODataEntityReferenceLinksSerializer();
             ODataSerializerContext writeContext = new ODataSerializerContext();
-            writeContext.Request = new HttpRequestMessage();
-            writeContext.Request.ODataProperties().TotalCount = 1;
+            writeContext.Request = request;
+            writeContext.Request.ODataContext().TotalCount = 1;
 
             MemoryStream stream = new MemoryStream();
             IODataResponseMessage message = new ODataMessageWrapper(stream);

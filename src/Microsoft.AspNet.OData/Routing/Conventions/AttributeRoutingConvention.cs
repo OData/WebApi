@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// </summary>
         /// <param name="routeName">The name of the route.</param>
         /// <param name="controllers">The collection of controllers to search for a match.</param>
-        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNet-specific and is only used for unit tests.</remarks>
         public AttributeRoutingConvention(string routeName,
             IEnumerable<HttpControllerDescriptor> controllers)
             : this(routeName, controllers, _defaultPathHandler)
@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <param name="routeName">The name of the route.</param>
         /// <param name="controllers">The collection of controllers to search for a match.</param>
         /// <param name="pathTemplateHandler">The path template handler to be used for parsing the path templates.</param>
-        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
+        /// <remarks>This signature uses types that are AspNet-specific and is only used for unit tests.</remarks>
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors",
             Justification = "See note on <see cref=\"ShouldMapController()\"> method.")]
         public AttributeRoutingConvention(string routeName,

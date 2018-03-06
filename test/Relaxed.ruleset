@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RuleSet Name="WebApi" ToolsVersion="14.0">
+  <Include Path="allrules.ruleset" Action="Error" />
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA1062" Action="None" />
+    <Rule Id="MW1200" Action="None" />
+    <Rule Id="CA1001" Action="None" />
+    <Rule Id="CA2213" Action="None" />
+  </Rules>
+</RuleSet>

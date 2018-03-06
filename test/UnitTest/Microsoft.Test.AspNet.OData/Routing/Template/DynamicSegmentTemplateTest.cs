@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Template

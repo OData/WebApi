@@ -6,7 +6,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions
@@ -29,7 +30,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Apply_TypeNameConventions_Works(string propertyName, EdmMultiplicity multiplicity, bool optional)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             EntityTypeConfiguration principalEntity = builder.AddEntityType(typeof(DiscoveryPrincipalEntity));
             PropertyInfo propertyInfo = typeof(DiscoveryPrincipalEntity).GetProperty(propertyName);
@@ -59,7 +60,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Apply_KeyNameConventions_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             EntityTypeConfiguration principalEntity = builder.AddEntityType(typeof(DiscoveryPrincipalEntity));
             PropertyInfo propertyInfo = typeof(DiscoveryPrincipalEntity).GetProperty("DiscoveryPrincipalEntityId");

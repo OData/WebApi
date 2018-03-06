@@ -1,9 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common.Models;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     internal class DataSource
     {

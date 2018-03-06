@@ -5,13 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Factories;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -19,9 +17,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
     {
         public static IEdmModel GetModel()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver());
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration);
             builder.EntitySet<RoutingCustomer>("RoutingCustomers");
             builder.EntitySet<Product>("Products");
             builder.EntitySet<SalesPerson>("SalesPeople");

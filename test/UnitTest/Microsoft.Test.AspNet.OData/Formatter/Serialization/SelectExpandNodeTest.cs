@@ -8,7 +8,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 

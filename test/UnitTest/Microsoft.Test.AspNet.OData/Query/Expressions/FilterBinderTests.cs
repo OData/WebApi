@@ -3,22 +3,24 @@
 
 using System;
 using System.Collections.Generic;
+#if NETFX // Binary only supported on Net Framework
 using System.Data.Linq;
+#endif
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Web.Http.Dispatcher;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
@@ -70,7 +72,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             }
         }
 
-        #region Inequalities
+#region Inequalities
         [Theory]
         [InlineData(null, true, true)]
         [InlineData("", false, false)]
@@ -219,9 +221,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 expectedExpression);
         }
 
-        #endregion
+#endregion
 
-        #region Logical Operators
+#region Logical Operators
 
         [Fact]
         [ReplaceCulture]
@@ -322,9 +324,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 "$it => Convert(Not(Not(Not($it.Discontinued))))",
                 "$it => (Not(Not(Not($it.Discontinued))) == True)");
         }
-        #endregion
+#endregion
 
-        #region Arithmetic Operators
+#region Arithmetic Operators
         [Theory]
         [InlineData(null, false, false)]
         [InlineData(5.0, true, true)]
@@ -376,9 +378,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice % Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
-        #endregion
+#endregion
 
-        # region NULL  handling
+#region NULL  handling
         [Theory]
         [InlineData("UnitsInStock eq UnitsOnOrder", null, null, false, true)]
         [InlineData("UnitsInStock ne UnitsOnOrder", null, null, false, false)]
@@ -422,7 +424,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 NotTesting,
                 "$it => (IIF((($it.ProductName == null) OrElse (\"Abc\" == null)), null, Convert($it.ProductName.StartsWith(\"Abc\"))) == True)");
         }
-        #endregion
+#endregion
 
         [Theory]
         [InlineData("StringProp gt 'Middle'", "Middle", false)]
@@ -522,7 +524,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
-        #region Any/All
+#region Any/All
 
         [Fact]
         public void AnyOnNavigationEnumerableCollections()
@@ -795,9 +797,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                NotTesting);
         }
 
-        #endregion
+#endregion
 
-        #region String Functions
+#region String Functions
 
         [Theory]
         [InlineData("Abcd", -1, "Abcd", true, typeof(ArgumentOutOfRangeException))]
@@ -1023,9 +1025,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
               new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
         }
 
-        #endregion
+#endregion
 
-        #region Date Functions
+#region Date Functions
         [Fact]
         public void DateDay()
         {
@@ -1226,7 +1228,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             VerifyQueryDeserialization(filter, expression);
         }
 
-        #endregion
+#endregion
 
         #region Math Functions
         [Theory, MemberData(nameof(MathRoundDecimal_DataSet))]
@@ -1379,9 +1381,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             var filters = VerifyQueryDeserialization<DataTypes>(filter);
             RunFilters(filters, new DataTypes(), new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
-        #endregion
+#endregion
 
-        #region Custom Functions
+#region Custom Functions
 
         [Fact]
         public void CustomMethod_InstanceMethodOfDeclaringType()
@@ -1554,9 +1556,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             }
         }
 
-        #endregion
+#endregion
 
-        #region Data Types
+#region Data Types
         [Fact]
         public void GuidExpression()
         {
@@ -1691,9 +1693,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
-        #endregion
+#endregion
 
-        #region Casts
+#region Casts
 
         [Fact]
         public void NSCast_OnEnumerableEntityCollection_GeneratesExpression_WithOfTypeOnEnumerable()
@@ -1796,9 +1798,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 "The child type 'Edm.NonExistentType' in a cast was not an entity type. Casts can only be performed on entity types.");
         }
 
-        #endregion
+#endregion
 
-        #region cast in query option
+#region cast in query option
 
         [Theory]
         [InlineData("cast(null,Edm.Int16) eq null", "$it => (null == null)")]
@@ -1813,8 +1815,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast(null,Edm.String) ne '123'", "$it => (null != \"123\")")]
         [InlineData("cast(null,Edm.DateTimeOffset) eq 2001-01-01T12:00:00.000+08:00", "$it => (null == Convert(01/01/2001 12:00:00 +08:00))")]
         [InlineData("cast(null,Edm.Duration) eq duration'P8DT23H59M59.9999S'", "$it => (null == Convert(8.23:59:59.9999000))")]
-        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq null", "$it => (null == null)")]
-        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum') eq null", "$it => (null == null)")]
+        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null", "$it => (null == null)")]
+        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') eq null", "$it => (null == null)")]
         [InlineData("cast(IntProp,Edm.String) eq '123'", "$it => (Convert($it.IntProp.ToString()) == \"123\")")]
         [InlineData("cast(LongProp,Edm.String) eq '123'", "$it => (Convert($it.LongProp.ToString()) == \"123\")")]
         [InlineData("cast(SingleProp,Edm.String) eq '123'", "$it => (Convert($it.SingleProp.ToString()) == \"123\")")]
@@ -1843,9 +1845,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast(IntProp,Edm.Int64) eq 123", "$it => (Convert($it.IntProp) == 123)")]
         [InlineData("cast(NullableLongProp,Edm.Double) eq 1.23", "$it => (Convert($it.NullableLongProp) == Convert(1.23))")]
         [InlineData("cast(2147483647,Edm.Int16) ne null", "$it => (Convert(Convert(2147483647)) != null)")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
         [InlineData("cast(cast(cast(IntProp,Edm.Int64),Edm.Int16),Edm.String) eq '123'", "$it => (Convert(Convert(Convert($it.IntProp)).ToString()) == \"123\")")]
-        [InlineData("cast('123',Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null", "$it => (Convert(123) != null)")]
+        [InlineData("cast('123',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null", "$it => (Convert(123) != null)")]
         public void CastMethod_Succeeds(string filter, string expectedResult)
         {
             // Arrange & Act & Assert
@@ -1927,36 +1929,36 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) ne null")]
-        [InlineData("cast(0,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(0,Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'0',Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'0',Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) ne null")]
-        [InlineData("cast(SimpleEnumProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(FlagsEnumProp,Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) ne null")]
-        [InlineData("cast(NullableSimpleEnumProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(IntProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(DateTimeOffsetProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1',Edm.Int32) eq 1")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'1',Edm.Int32) eq 1")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(0,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(0,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'0',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'0',Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(SimpleEnumProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(FlagsEnumProp,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(IntProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(DateTimeOffsetProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',Edm.Int32) eq 1")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'1',Edm.Int32) eq 1")]
         [InlineData("cast(SimpleEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(FlagsEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,Edm.Guid) ne null")]
 
-        [InlineData("cast('Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast('Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum') ne null")]
-        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'0','Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'0','Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum') ne null")]
-        [InlineData("cast(SimpleEnumProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(FlagsEnumProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum') ne null")]
-        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(IntProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(DateTimeOffsetProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1','Edm.Int32') eq 1")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'1','Edm.Int32') eq 1")]
+        [InlineData("cast('Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast('Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'0','Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'0','Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(SimpleEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(FlagsEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(IntProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(DateTimeOffsetProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1','Edm.Int32') eq 1")]
+        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'1','Edm.Int32') eq 1")]
         [InlineData("cast(SimpleEnumProp,'Edm.Int32') eq 123")]
         [InlineData("cast(FlagsEnumProp,'Edm.Int32') eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,'Edm.Guid') ne null")]
@@ -1979,8 +1981,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast($it,Edm.String) eq null")]
         [InlineData("cast(ComplexProp,Edm.Double) eq null")]
         [InlineData("cast(ComplexProp,Edm.String) eq null")]
-        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum) eq null")]
-        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum) eq null")]
+        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) eq null")]
+        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) eq null")]
         public void Cast_UnsupportedTarget_ReturnsNull(string filter)
         {
             // Arrange & Act & Assert
@@ -2004,14 +2006,14 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         [Theory]
         [InlineData("cast(null,'Edm.Int32') ne null")]
-        [InlineData("cast(StringProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq null")]
+        [InlineData("cast(StringProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null")]
         [InlineData("cast(IntProp,'Edm.String') eq '123'")]
         [InlineData("cast('Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes') eq null")]
         [InlineData("cast($it,'Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes') eq null")]
         public void SingleQuotesOnTypeNameOfCast_WorksForNow(string filter)
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<DataTypes>("Customers");
             IEdmModel model = builder.GetEdmModel();
             IEdmEntitySet entitySet = model.FindDeclaredEntitySet("Customers");
@@ -2028,7 +2030,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void SingleQuotesOnEnumTypeNameOfCast_WorksForNow()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<DataTypes>("Customers");
             IEdmModel model = builder.GetEdmModel();
             IEdmEntitySet entitySet = model.FindDeclaredEntitySet("Customers");
@@ -2036,7 +2038,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             var parser = new ODataQueryOptionParser(model, entityType, entitySet,
                 new Dictionary<string, string>
                 {
-                    { "$filter", "cast(StringProp,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum') eq null" }
+                    { "$filter", "cast(StringProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null" }
                 });
 
             // Act
@@ -2047,7 +2049,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             Assert.NotNull(filterClause);
             var castNode = Assert.IsType<SingleValueFunctionCallNode>(((BinaryOperatorNode)filterClause.Expression).Left);
             Assert.Equal("cast", castNode.Name);
-            Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
+            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
         }
 
         public static TheoryDataSet<string> CastToQuotedPrimitiveType
@@ -2250,7 +2252,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 typeof(object).FullName);
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage);
+            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
+            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
         }
 
         [Theory]
@@ -2263,12 +2266,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 "Instance property 'DerivedCategoryName' is not defined for type 'System.Object'";
 
             // Act & Assert
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage);
+            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
+            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
         }
 
-        #endregion
+#endregion
 
-        #region 'isof' in query option
+#region 'isof' in query option
 
         [Theory]
         [InlineData("isof(Edm.Int16)", "$it => IIF(($it Is System.Int16), True, False)")]
@@ -2276,7 +2280,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof(ProductName,Edm.String)", "$it => IIF(($it.ProductName Is System.String), True, False)")]
         [InlineData("isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.Category')", "$it => IIF(($it.Category Is Microsoft.Test.AspNet.OData.Query.Expressions.Category), True, False)")]
         [InlineData("isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "$it => IIF(($it.Category Is Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory), True, False)")]
-        [InlineData("isof(Ranking, 'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')", "$it => IIF(($it.Ranking Is Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum), True, False)")]
+        [InlineData("isof(Ranking, 'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')", "$it => IIF(($it.Ranking Is Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum), True, False)")]
         public void IsofMethod_Succeeds(string filter, string expectedResult)
         {
             // Arrange & Act & Assert
@@ -2321,11 +2325,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof(null,Edm.Single)")]
         [InlineData("isof(null,Edm.Stream)")]
         [InlineData("isof(null,Edm.String)")]
-        [InlineData("isof(null,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum)")]
-        [InlineData("isof(null,Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum)")]
+        [InlineData("isof(null,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum)")]
+        [InlineData("isof(null,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum)")]
 
         [InlineData("isof(ByteArrayProp,Edm.Binary)")] // ByteArrayProp == null
-        [InlineData("isof(IntProp,Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum)")]
+        [InlineData("isof(IntProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum)")]
         [InlineData("isof(NullableShortProp,'Edm.Int16')")] // NullableShortProp == null
 
         [InlineData("isof('Edm.Binary')")]
@@ -2343,8 +2347,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof('Edm.Single')")]
         [InlineData("isof('Edm.Stream')")]
         [InlineData("isof('Edm.String')")]
-        [InlineData("isof('Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')")]
-        [InlineData("isof('Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum')")]
+        [InlineData("isof('Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
+        [InlineData("isof('Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
 
         [InlineData("isof(23,'Edm.Byte')")]
         [InlineData("isof(23,'Edm.Decimal')")]
@@ -2354,8 +2358,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof(23,'Edm.SByte')")]
         [InlineData("isof(23,'Edm.Single')")]
         [InlineData("isof('hello','Edm.Stream')")]
-        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum')")]
-        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')")]
+        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
+        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
 
         [InlineData("isof('2001-01-01T12:00:00.000+08:00','Edm.DateTimeOffset')")] // source is string
         [InlineData("isof('00000000-0000-0000-0000-000000000000','Edm.Guid')")] // source is string
@@ -2366,8 +2370,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof('OData','Edm.Binary')")]
         [InlineData("isof('PT12H','Edm.Duration')")]
         [InlineData("isof(23,'Edm.String')")]
-        [InlineData("isof('0','Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum')")]
-        [InlineData("isof('0','Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum')")]
+        [InlineData("isof('0','Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
+        [InlineData("isof('0','Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
         public void IsOfPrimitiveType_Succeeds_WithFalse(string filter)
         {
             // Arrange
@@ -2570,9 +2574,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             RunFilters<Product>(filters, model, expectedValue: new { WithNullPropagation = false, WithoutNullPropagation = false });
         }
 
-        #endregion
+#endregion
 
-        #region parameter alias for filter query option
+#region parameter alias for filter query option
 
         [Theory]
         // Parameter alias value is not null.
@@ -2585,7 +2589,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("DateTimeOffsetProp eq @p", "2001-01-01T12:00:00.000+08:00", "$it => ($it.DateTimeOffsetProp == 01/01/2001 12:00:00 +08:00)")]
         [InlineData("TimeSpanProp eq @p", "duration'P8DT23H59M59.9999S'", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
         [InlineData("GuidProp eq @p", "00000000-0000-0000-0000-000000000000", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
-        [InlineData("SimpleEnumProp eq @p", "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        [InlineData("SimpleEnumProp eq @p", "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'", "$it => (Convert($it.SimpleEnumProp) == 0)")]
         // Parameter alias value is null.
         [InlineData("NullableIntProp eq @p", "null", "$it => ($it.NullableIntProp == null)")]
         [InlineData("NullableBoolProp eq @p", "null", "$it => ($it.NullableBoolProp == null)")]
@@ -2607,7 +2611,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("@p eq 2001-01-01T12:00:00.000+08:00", "DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp == 01/01/2001 12:00:00 +08:00)")]
         [InlineData("@p eq duration'P8DT23H59M59.9999S'", "TimeSpanProp", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
         [InlineData("@p eq 00000000-0000-0000-0000-000000000000", "GuidProp", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
-        [InlineData("@p eq Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First'", "SimpleEnumProp", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        [InlineData("@p eq Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'", "SimpleEnumProp", "$it => (Convert($it.SimpleEnumProp) == 0)")]
         // Parameter alias value has built-in functions.
         [InlineData("@p eq 'abc'", "substring(StringProp,5)", "$it => ($it.StringProp.Substring(5) == \"abc\")")]
         [InlineData("2 eq @p", "IntProp add 1", "$it => (2 == ($it.IntProp + 1))")]
@@ -2630,7 +2634,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 filterClause,
                 typeof(DataTypes),
                 model,
-                new WebApiAssembliesResolver(CreateFakeAssembliesResolver()),
+                WebApiAssembliesResolverFactory.Create(),
                 new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
 
             // Assert
@@ -2662,7 +2666,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 filterClause,
                 typeof(DataTypes),
                 model,
-                new WebApiAssembliesResolver(CreateFakeAssembliesResolver()),
+                WebApiAssembliesResolverFactory.Create(),
                 new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
 
             // Assert
@@ -2692,7 +2696,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 filterClause,
                 typeof(DataTypes),
                 model,
-                new WebApiAssembliesResolver(CreateFakeAssembliesResolver()),
+                WebApiAssembliesResolverFactory.Create(),
                 new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
 
             // Assert
@@ -2719,8 +2723,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 "Syntax error: character '#' is not valid at position 11 in 'IntProp eq #p'.");
         }
 
-        #endregion
+#endregion
 
+#if NETFX // Binary only supported on Net Framework
         [Theory]
         [InlineData("UShortProp eq 12", "$it => (Convert($it.UShortProp) == 12)")]
         [InlineData("ULongProp eq 12L", "$it => (Convert($it.ULongProp) == 12)")]
@@ -2746,10 +2751,13 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 },
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
+#endif
 
         [Theory]
+#if NETFX // Binary only supported on Net Framework
         [InlineData("BinaryProp eq binary'I6v/'", "$it => ($it.BinaryProp.ToArray() == System.Byte[])", true, true)]
         [InlineData("BinaryProp ne binary'I6v/'", "$it => ($it.BinaryProp.ToArray() != System.Byte[])", false, false)]
+#endif
         [InlineData("ByteArrayProp eq binary'I6v/'", "$it => ($it.ByteArrayProp == System.Byte[])", true, true)]
         [InlineData("ByteArrayProp ne binary'I6v/'", "$it => ($it.ByteArrayProp != System.Byte[])", false, false)]
         [InlineData("binary'I6v/' eq binary'I6v/'", "$it => (System.Byte[] == System.Byte[])", true, true)]
@@ -2766,7 +2774,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             RunFilters(filters,
                 new DataTypes
                 {
+#if NETFX // Binary only supported on Net Framework
                     BinaryProp = new Binary(new byte[] { 35, 171, 255 }),
+#endif
                     ByteArrayProp = new byte[] { 35, 171, 255 }
                 },
                 new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
@@ -2829,7 +2839,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 "$it => (Convert(IIF((($it.ProductProperties != null) AndAlso $it.ProductProperties.ContainsKey(Token)), $it.ProductPropertiesToken, null)) == \"1\")");
         }
 
-        #region Negative Tests
+#region Negative Tests
 
         [Fact]
         public void TypeMismatchInComparison()
@@ -2837,7 +2847,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             ExceptionAssert.Throws<ODataException>(() => Bind("length(123) eq 12"));
         }
 
-        #endregion
+#endregion
 
         private Expression<Func<Product, bool>> Bind(string filter, ODataQuerySettings querySettings = null)
         {
@@ -2854,17 +2864,12 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 querySettings = CreateSettings();
             }
 
-            return Bind<T>(filterNode, model, CreateFakeAssembliesResolver(), querySettings);
+            return Bind<T>(filterNode, model, WebApiAssembliesResolverFactory.Create(), querySettings);
         }
 
-        private static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterNode, IEdmModel model, IAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
+        private static Expression<Func<TEntityType, bool>> Bind<TEntityType>(FilterClause filterNode, IEdmModel model, IWebApiAssembliesResolver assembliesResolver, ODataQuerySettings querySettings)
         {
-            return FilterBinder.Bind<TEntityType>(filterNode, model, new WebApiAssembliesResolver(assembliesResolver), querySettings);
-        }
-
-        private IAssembliesResolver CreateFakeAssembliesResolver()
-        {
-            return new NoAssembliesResolver();
+            return FilterBinder.Bind<TEntityType>(filterNode, model, assembliesResolver, querySettings);
         }
 
         private FilterClause CreateFilterNode(string filter, IEdmModel model, Type entityType)
@@ -2926,7 +2931,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             IEdmModel model = GetModel<T>();
             FilterClause filterNode = CreateFilterNode(filter, model, typeof(T));
-            IAssembliesResolver assembliesResolver = CreateFakeAssembliesResolver();
+            IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolverFactory.Create();
 
             Func<ODataQuerySettings, ODataQuerySettings> customizeSettings = (settings) =>
             {
@@ -2985,7 +2990,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
             if (!_modelCache.TryGetValue(key, out value))
             {
-                ODataModelBuilder model = new ODataConventionModelBuilder();
+                ODataModelBuilder model = ODataConventionModelBuilderFactory.Create();
                 model.EntitySet<T>("Products");
                 if (key == typeof(Product))
                 {
@@ -3014,15 +3019,6 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             return str.PadRight(number);
         }
-
-        private class NoAssembliesResolver : IAssembliesResolver
-        {
-            public ICollection<Assembly> GetAssemblies()
-            {
-                return new Assembly[0];
-            }
-        }
-
     }
 
     // Used by Custom Method binder tests - by reflection

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder

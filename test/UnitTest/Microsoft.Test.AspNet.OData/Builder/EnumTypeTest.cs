@@ -13,8 +13,9 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -716,7 +717,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_CreateArrayEnumTypeCollectionPropertyWithInComplexType()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<ArrayEnumTypePropertyTestModel>();
             IEdmModel model = builder.GetEdmModel();
             IEdmComplexType complexType = model.SchemaElements.OfType<IEdmComplexType>().Single();
@@ -740,7 +741,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_CreateArrayEnumTypeCollectionPropertyWithInEntityType()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<ArrayEnumTypePropertyTestModel>();
             IEdmModel model = builder.GetEdmModel();
             IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().Single();
@@ -896,7 +897,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void UnboundAction_ForEnumTypeInODataConventionModelBuilder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             ActionConfiguration actionConfiguration = builder.Action("UnboundAction");
             actionConfiguration.CollectionParameter<Color>("Colors");
             actionConfiguration.Returns<Color?>();
@@ -920,7 +921,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void UnboundFunction_ForEnumTypeInODataConventionModelBuilder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             FunctionConfiguration functionConfiguration = builder.Function("UnboundFunction");
             functionConfiguration.Parameter<Color>("Color");
             functionConfiguration.ReturnsCollection<Color>();
@@ -942,7 +943,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void BoundAction_ForEnumTypeInODataConventionModelBuilder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             ActionConfiguration actionConfiguration = entityTypeConfiguration.Action("BoundAction");
             actionConfiguration.Parameter<Color>("Color");
@@ -965,7 +966,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void BoundFunction_ForEnumTypeInODataConventionModelBuilder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EntityTypeConfiguration<EnumModel> entityTypeConfiguration = builder.EntityType<EnumModel>();
             FunctionConfiguration functionConfiguration = entityTypeConfiguration.Function("BoundFunction");
             functionConfiguration.CollectionParameter<Color?>("Colors");
@@ -1012,7 +1013,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void UnboundAction_ForEnumWithShortUnderlyingTypeInODataConventionModelBuilder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             ActionConfiguration actionConfiguration = builder.Action("UnboundAction");
             actionConfiguration.Returns<ShortEnum>();
 
@@ -1031,7 +1032,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_HasCorrectEnumMember_AddUnboundFunctionAfterEntitySet()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities");
             builder.Function("UnboundFunction").Returns<Color>();
 
@@ -1052,7 +1053,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_HasCorrectEnumMember_AddBoundActionAfterEntitySet()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EntityTypeConfiguration<EntityTypeWithEnumTypePropertyTestModel> entity =
                 builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities").EntityType;
             entity.Action("BoundAction").Parameter<Color?>("Color");
@@ -1074,7 +1075,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_DataContractAttribute_WorksOnEnumType()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EnumType<Life>();
 
             // Act
@@ -1095,7 +1096,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_DataContractAttribute_AllowsReferencingSameEnumTwice()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EnumType<Life>();
         
             // Act
@@ -1107,7 +1108,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void ODataConventionModelBuilder_DataContractAttribute_WithAddedExplicitlyMember()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EnumType<Life>();
             builder.EnumTypes.Single(e => e.Name == "Feelings").AddMember(Life.JustSoSo);
 
@@ -1128,7 +1129,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<ComplexTypeWithEnumTypePropertyTestModel>();
             IEdmModel model = builder.GetEdmModel();
             return model.SchemaElements.OfType<IEdmStructuredType>().Single();
@@ -1136,7 +1137,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
         private IEdmEntityType AddEntityTypeWithODataConventionModelBuilder()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EntityTypeWithEnumTypePropertyTestModel>("Entities");
             IEdmModel model = builder.GetEdmModel();
             IEdmEntitySet entitySet = model.EntityContainer.FindEntitySet("Entities");

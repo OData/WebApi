@@ -3,16 +3,14 @@
 
 using System;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -280,8 +278,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            HttpRequestMessage request = GetODataRequest(model.Model);
-            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
+            var request = RequestFactory.CreateFromModel(model.Model);
+            ODataSerializerContext serializerContext = ODataSerializerContextFactory.Create(model.Model, model.Customers, request);
             ResourceContext instanceContext = new ResourceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
 
             // Act
@@ -298,8 +296,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             IEdmEntitySet specialCustomers = new EdmEntitySet(model.Container, "SpecialCustomers", model.SpecialCustomer);
-            HttpRequestMessage request = GetODataRequest(model.Model);
-            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = specialCustomers, Url = request.GetUrlHelper() };
+            var request = RequestFactory.CreateFromModel(model.Model);
+            ODataSerializerContext serializerContext = ODataSerializerContextFactory.Create(model.Model, specialCustomers, request);
             ResourceContext instanceContext = new ResourceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
 
             // Act
@@ -315,8 +313,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            HttpRequestMessage request = GetODataRequest(model.Model);
-            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
+            var request = RequestFactory.CreateFromModel(model.Model);
+            ODataSerializerContext serializerContext = ODataSerializerContextFactory.Create(model.Model, model.Customers, request);
             ResourceContext instanceContext = new ResourceContext(serializerContext, model.Customer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First(p => p.Name == "Orders");
 
@@ -334,8 +332,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
         {
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            HttpRequestMessage request = GetODataRequest(model.Model);
-            ODataSerializerContext serializerContext = new ODataSerializerContext { Model = model.Model, NavigationSource = model.Customers, Url = request.GetUrlHelper() };
+            var request = RequestFactory.CreateFromModel(model.Model);
+            ODataSerializerContext serializerContext = ODataSerializerContextFactory.Create(model.Model, model.Customers, request);
             ResourceContext instanceContext = new ResourceContext(serializerContext, model.SpecialCustomer.AsReference(), new { ID = 42 });
             IEdmNavigationProperty ordersProperty = model.SpecialCustomer.NavigationProperties().First(p => p.Name == "SpecialOrders");
 
@@ -346,18 +344,6 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             Assert.Equal("http://localhost/Customers(42)/NS.SpecialCustomer/SpecialOrders", result.AbsoluteUri);
-        }
-
-        private static HttpRequestMessage GetODataRequest(IEdmModel model)
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            string routeName = "Route";
-            configuration.MapODataServiceRoute(routeName, null, model);
-
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
-            return request;
         }
     }
 }

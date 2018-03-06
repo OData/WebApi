@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 ResourceType = typeof(EmployeeModel)
             };
 
-            _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+            _deserializerProvider = ODataDeserializerProviderFactory.Create();
         }
 
         [Fact]

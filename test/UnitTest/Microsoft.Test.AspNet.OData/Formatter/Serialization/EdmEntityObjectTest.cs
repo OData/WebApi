@@ -5,7 +5,7 @@ using System;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 

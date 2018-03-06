@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Net.Http;
-using System.Web.Http.Routing;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Xunit;
@@ -27,10 +26,10 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
         {
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
 
             // Act
-            bool result = constraint.Match(request, null, null, null, HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.True(result);
@@ -44,11 +43,11 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
         {
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation(headerName, "2.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add(headerName, "2.0");
 
             // Act
-            bool result = constraint.Match(request, null, null, null, HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.False(result);
@@ -65,12 +64,11 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation(headerName, "3.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add(headerName, "3.0");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.False(result);
@@ -87,13 +85,12 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation(headerName, "3.0");
-            request.Headers.TryAddWithoutValidation("OData-Version", "4.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add(headerName, "3.0");
+            request.Headers.Add("OData-Version", "4.0");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.False(result);
@@ -107,13 +104,12 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation("MaxDataServiceVersion", "3.0");
-            request.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add("MaxDataServiceVersion", "3.0");
+            request.Headers.Add("OData-MaxVersion", "4.0");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.True(result);
@@ -127,14 +123,13 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation("MaxDataServiceVersion", "3.0");
-            request.Headers.TryAddWithoutValidation("DataServiceVersion", "3.0");
-            request.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add("MaxDataServiceVersion", "3.0");
+            request.Headers.Add("DataServiceVersion", "3.0");
+            request.Headers.Add("OData-MaxVersion", "4.0");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.False(result);
@@ -149,11 +144,10 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.True(result);
@@ -167,12 +161,11 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
             {
                 IsRelaxedMatch = true
             };
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation("OData-Version", "4.0");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add("OData-Version", "4.0");
 
             // Act
-            bool result = constraint.Match(request, route: null, parameterName: null, values: null,
-                routeDirection: HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.True(result);
@@ -183,11 +176,11 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
         {
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
-            request.Headers.TryAddWithoutValidation("OData-Version", "invalid");
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add("OData-Version", "invalid");
 
             // Act
-            bool result = constraint.Match(request, null, null, null, HttpRouteDirection.UriGeneration);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriGeneration);
 
             // Assert
             Assert.True(result);
@@ -209,23 +202,91 @@ namespace Microsoft.Test.AspNet.OData.Routing.Test
         {
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint();
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            var request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
             if (dataServiceVersion != null)
             {
                 string versionHeaderName = ODataVersionConstraint.ODataServiceVersionHeader;
-                request.Headers.TryAddWithoutValidation(versionHeaderName, dataServiceVersion);
+                request.Headers.Add(versionHeaderName, dataServiceVersion);
             }
             if (maxDataServiceVersion != null)
             {
                 string maxVersionHeaderName = ODataVersionConstraint.ODataMaxServiceVersionHeader;
-                request.Headers.TryAddWithoutValidation(maxVersionHeaderName, maxDataServiceVersion);
+                request.Headers.Add(maxVersionHeaderName, maxDataServiceVersion);
             }
 
             // Act
-            bool result = constraint.Match(request, null, null, null, HttpRouteDirection.UriResolution);
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
 
             // Assert
             Assert.Equal(expectedResult, result);
+        }
+
+        /// <summary>
+        /// Test class for abstracting the version request.
+        /// </summary>
+        private class TestVersionRequest
+        {
+            public TestVersionRequest(HttpMethod method, string uri)
+            {
+                this.Method = method;
+                this.Uri = uri;
+                this.Headers = new Dictionary<string, string>();
+            }
+
+            public HttpMethod Method { get; private set; }
+            public string Uri { get; private set; }
+            public Dictionary<string, string> Headers { get; private set; }
+        }
+
+        /// <summary>
+        /// Abstraction for route direction.
+        /// </summary>
+        private enum RouteDirection
+        {
+            UriResolution = 0,
+            UriGeneration
+        }
+
+        /// <summary>
+        /// Test method to call constraint.Match using the proper arguments for each platform.
+        /// </summary>
+        /// <param name="constraint">The constraint object.</param>
+        /// <param name="versionRequest">The abstracted request.</param>
+        /// <param name="direction">The abstracted route direction.</param>
+        /// <returns>Result from constraint.Match,</returns>
+        private bool ConstraintMatch(ODataVersionConstraint constraint, TestVersionRequest versionRequest, RouteDirection direction)
+        {
+#if NETCORE
+            AspNetCore.Http.HttpContext context = new AspNetCore.Http.DefaultHttpContext();
+            AspNetCore.Http.HttpRequest request = context.Request;
+            foreach (KeyValuePair<string,string> kvp in versionRequest.Headers)
+            {
+                request.Headers.Add(kvp.Key, kvp.Value);
+            }
+
+            System.Uri requestUri = new System.Uri(versionRequest.Uri);
+            request.Method = versionRequest.Method.ToString();
+            request.Host = new AspNetCore.Http.HostString(requestUri.Host, requestUri.Port);
+            request.Scheme = requestUri.Scheme;
+
+            AspNetCore.Routing.RouteDirection routeDirection = (direction == RouteDirection.UriResolution)
+                ? AspNetCore.Routing.RouteDirection.IncomingRequest
+                : AspNetCore.Routing.RouteDirection.UrlGeneration;
+
+            return constraint.Match(context, null, null, null, routeDirection);
+#else
+            HttpRequestMessage request = new HttpRequestMessage(versionRequest.Method, versionRequest.Uri);
+            foreach (KeyValuePair<string,string> kvp in versionRequest.Headers)
+            {
+                request.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
+            }
+
+            System.Web.Http.Routing.HttpRouteDirection routeDirection = (direction == RouteDirection.UriResolution)
+                ? System.Web.Http.Routing.HttpRouteDirection.UriResolution
+                : System.Web.Http.Routing.HttpRouteDirection.UriGeneration;
+
+            return constraint.Match(request, null, null, null, routeDirection);
+#endif
         }
     }
 }

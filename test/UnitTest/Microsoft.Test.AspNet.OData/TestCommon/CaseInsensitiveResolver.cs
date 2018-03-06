@@ -3,7 +3,7 @@
 
 using Microsoft.OData.UriParser;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     /// <summary>
     /// Add this class for ODL's issue #695, should remove it and use ODataUriResolver after the issue fix.

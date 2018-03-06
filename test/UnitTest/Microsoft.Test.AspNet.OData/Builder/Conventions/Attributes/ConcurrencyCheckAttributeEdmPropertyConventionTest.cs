@@ -8,7 +8,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -36,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             primitiveProperty.Object.AddedExplicitly = false;
 
             // Act
-            new ConcurrencyCheckAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, entityType.Object, new ODataConventionModelBuilder());
+            new ConcurrencyCheckAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, entityType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.True(primitiveProperty.Object.ConcurrencyToken);
@@ -51,7 +52,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(typeof(int?), "Count", new ConcurrencyCheckAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var entityType = builder.AddEntityType(type);
             builder.AddEntitySet("EntitySet", entityType);
 
@@ -82,7 +83,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(typeof(int), "Count", new ConcurrencyCheckAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var entityType = builder.AddEntityType(type);
             entityType.AddProperty(type.GetProperty("Count")).IsOptional();
             builder.AddEntitySet("EntitySet", entityType);

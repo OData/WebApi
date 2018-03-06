@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -22,8 +23,10 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -235,7 +238,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(
-                await response.Content.ReadAsAsync<string[]>(),
+                await response.Content.ReadAsObject<string[]>(),
                 new[] { error });
         }
 
@@ -249,7 +252,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(
-                await response.Content.ReadAsAsync<string[]>(),
+                await response.Content.ReadAsObject<string[]>(),
                 new[] { error });
         }
 
@@ -266,7 +269,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             Assert.Equal(
                 "name-2009",
-                await response.Content.ReadAsAsync<string>());
+                await response.Content.ReadAsObject<string>());
         }
 
         [Theory]
@@ -388,7 +391,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         private IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Customer>().Namespace = "NS";
             builder.ComplexType<Address>().Namespace = "NS";
 
@@ -683,3 +686,4 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
     }
 }
+#endif

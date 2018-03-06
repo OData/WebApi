@@ -7,7 +7,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_SingleForeignKeyOnNavigationProperty_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             builder.EntityType<PrincipalEntity>().HasKey(p => p.PrincipalStringId);
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(SingleDependentEntity));
@@ -71,7 +72,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_SingleNullableForeignKeyOnNavigationProperty_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             builder.EntityType<PrincipalEntity>().HasKey(p => p.PrincipalIntId);
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(SingleNullableDependentEntity));
@@ -110,7 +111,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_SingleForeignKeyOnForeignKeyProperty_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<PrincipalEntity>().HasKey(p => p.PrincipalStringId);
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(SingleDependentEntity2));
 
@@ -148,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_MultiForeignKeysOnNavigationProperty_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<PrincipalEntity>().HasKey(p => new { p.PrincipalStringId, p.PrincipalIntId });
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(MultiDependentEntity));
 
@@ -190,7 +191,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_MultiForeignKeysOnForeignKeyProperty_Works()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<PrincipalEntity>().HasKey(p => new { p.PrincipalStringId, p.PrincipalIntId });
             EntityTypeConfiguration dependentEntity = builder.AddEntityType(typeof(MultiDependentEntity2));
 

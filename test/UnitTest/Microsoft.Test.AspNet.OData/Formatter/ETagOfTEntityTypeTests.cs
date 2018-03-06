@@ -6,8 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter

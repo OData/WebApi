@@ -4,12 +4,13 @@
     <!-- This is a separate MSBuild file so that we can survive upgrades of the xunit NuGet package
          and also still work with NuGet Package Restore. -->
     <ItemGroup>
-        <XunitMsBuildRunner Include="..\sln\packages\**\xunit.runner.msbuild.dll"/>
+        <XunitMsBuildRunner Include="..\sln\packages\**\xunit.runner.msbuild.net452.dll"/>
     </ItemGroup>
     <UsingTask TaskName="Xunit.Runner.MSBuild.xunit" AssemblyFile="@(XunitMsBuildRunner)"/>
 
     <Target Name="Xunit">
-        <xunit Assembly="$(TestAssembly)" Xml="$(XmlPath)"/>
+    <Message Text="TestAssembly: $(TestAssembly)" Importance="High" />
+        <xunit Assemblies="$(TestAssembly)" Xml="$(XmlPath)"/>
         <!-- Replace potentially illegal escaped characters -->
         <RegexReplace
             Files="$(XmlPath)"

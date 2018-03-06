@@ -1,6 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Globalization;
+using System.Net;
+using System.Net.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+using System.Threading.Tasks;
+#else
 using System;
 using System.Globalization;
 using System.Net;
@@ -8,24 +22,29 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataSingletonRoutingTest
     {
-        private HttpServer _server;
+        //private HttpServer _server;
         private HttpClient _client;
 
         public ODataSingletonRoutingTest()
         {
             var controllers = new[] { typeof(VipCustomerController) };
-            var configuration = controllers.GetHttpConfiguration();
-            configuration.MapODataServiceRoute(new CustomersModelWithInheritance().Model);
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "", new CustomersModelWithInheritance().Model);
+            });
 
-            _server = new HttpServer(configuration);
-            _client = new HttpClient(_server);
+            _client = TestServerFactory.CreateClient(server);
         }
 
         [Theory]
@@ -41,7 +60,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -57,6 +76,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             Assert.Contains("No HTTP resource was found that matches the request URI 'http://localhost/VipCustomer'.",
                 await response.Content.ReadAsStringAsync());
+
+            // AspNetCore: Fails since SelectCandidates does not return error.
         }
 
         [Theory]
@@ -72,7 +93,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -86,7 +107,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -103,7 +124,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -125,7 +146,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -138,7 +159,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -153,13 +174,13 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
     }
 
     public class VipCustomerController : ODataController
     {
-        #region Singleton access
+#region Singleton access
         public string Get()
         {
             return "Get";
@@ -206,9 +227,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             return "PatchFromSpecialCustomer";
         }
-        #endregion
+#endregion
 
-        #region Navigation property
+#region Navigation property
         public string GetOrders()
         {
             return "GetOrders";
@@ -235,9 +256,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
             return "DeleteOrders";
         }
 
-        #endregion
+#endregion
 
-        #region Property access
+#region Property access
         public string GetName()
         {
             return "GetName";
@@ -257,9 +278,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             return "GetSpecialAddress";
         }
-        #endregion
+#endregion
 
-        #region $ref
+#region $ref
         [AcceptVerbs("POST", "PUT")]
         public string CreateRef(string navigationProperty)
         {
@@ -275,9 +296,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             return String.Format(CultureInfo.InvariantCulture, "DeleteRef({0})ByKey({1})", navigationProperty, relatedKey);
         }
-        #endregion
+#endregion
 
-        #region actions
+#region actions
         public string upgrade()
         {
             return "Upgrade";
@@ -287,9 +308,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             return "SpecialUpgrade";
         }
-        #endregion
+#endregion
 
-        #region functions
+#region functions
         [HttpGet]
         public string IsUpgraded()
         {
@@ -313,6 +334,6 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             return "OrderByCityAndAmount(" + city + ", " + amount + ")";
         }
-        #endregion
+#endregion
     }
 }

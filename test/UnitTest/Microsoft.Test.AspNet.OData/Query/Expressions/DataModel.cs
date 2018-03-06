@@ -3,12 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+#if NETFX // Binary only supported on Net Framework
 using System.Data.Linq;
+#endif
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common.Types;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
@@ -120,7 +122,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public char? NullableCharProp { get; set; }
 
         public char[] CharArrayProp { get; set; }
+#if NETFX // Binary only supported on Net Framework
         public Binary BinaryProp { get; set; }
+#endif
         public XElement XElementProp { get; set; }
 
         public SimpleEnum SimpleEnumProp { get; set; }

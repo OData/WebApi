@@ -4,10 +4,10 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
@@ -18,7 +18,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         public ODataEnumDeserializerTests()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EnumType<Color>().Namespace = "NS";
             _edmModel = builder.GetEdmModel();
         }
@@ -76,6 +76,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private static IODataRequestMessage GetODataMessage(string content)
         {
+            // While NetCore does not use this for AspNet, it can be used here to create
+            // an HttpRequestODataMessage, which is a Test type that implments IODataRequestMessage
+            // wrapped around an HttpRequestMessage.
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address");
 
             request.Content = new StringContent(content);

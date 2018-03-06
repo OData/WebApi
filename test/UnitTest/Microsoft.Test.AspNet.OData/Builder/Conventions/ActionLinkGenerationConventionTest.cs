@@ -4,14 +4,13 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -23,7 +22,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Apply_SetOperationLinkBuilder_ForActionBoundToEntity()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var action = builder.EntityType<Customer>().Action("MyAction");
 
             // Act
@@ -45,23 +44,21 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Convention_GeneratesUri_ForActionBoundToEntity()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             var action = builder.EntityType<Customer>().Action("MyAction");
             action.Parameter<string>("param");
             IEdmModel model = builder.GetEdmModel();
 
             // Act
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             configuration.MapODataServiceRoute("odata", "odata", model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport("odata");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost:123", configuration, "odata");
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
             var edmType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = customers, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, customers, request);
             var resourceContext = new ResourceContext(serializerContext, edmType.AsReference(), new Customer { Id = 109 });
 
             // Assert
@@ -78,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Apply_WorksFor_ActionBoundToCollectionOfEntity()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var action = builder.EntityType<Customer>().Collection.Action("MyFunction").Returns<int>();
             action.Parameter<string>("param");
 
@@ -97,26 +94,25 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Null(action.GetActionLink());
         }
 
+#if !NETCORE // TODO 939: This crashes on AspNetCore
         [Fact]
         public void Convention_GeneratesUri_ForActionBoundToCollectionOfEntity()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             var action = builder.EntityType<Customer>().Collection.Action("MyAction").Returns<int>();
             action.Parameter<string>("param");
             IEdmModel model = builder.GetEdmModel();
 
             // Act
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             configuration.MapODataServiceRoute("odata", "odata", model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:123");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport("odata");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost:123", configuration, "odata");
 
             IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
-            var entityContext = new ResourceSetContext { EntitySetBase = customers, Request = request, Url = request.GetUrlHelper() };
+            var entityContext = ResourceSetContextFactory.Create(customers, request);
 
             // Assert
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(f => f.Name == "MyAction");
@@ -127,12 +123,13 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             Assert.Equal("http://localhost:123/odata/Customers/Default.MyAction", link.AbsoluteUri);
         }
+#endif
 
         [Fact]
         public void Apply_Doesnot_Override_UserConfiguration()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var customers = builder.EntitySet<Customer>("Customers");
             var paintAction = customers.EntityType.Action("Paint");
             paintAction.HasActionLink(ctxt => new Uri("http://localhost/ActionTestWorks"), followsConventions: false);
@@ -147,15 +144,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var edmAction = model.SchemaElements.OfType<IEdmAction>().First(a => a.Name == "Paint");
             Assert.NotNull(edmAction);
 
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataServiceRoute(model);
+            string routeName = "OData";
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer(routeName);
+            configuration.MapODataServiceRoute(routeName, null, model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost", configuration, routeName);
 
             OperationLinkBuilder actionLinkBuilder = model.GetOperationLinkBuilder(edmAction);
 
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = edmCustomers, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, edmCustomers, request);
             var entityContext = new ResourceContext(serializerContext, edmCustomer.AsReference(), new Customer { Id = 2009 });
 
             // Assert
@@ -167,7 +164,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void Apply_SetsOperationLinkBuilder_OnlyIfActionIsBindable()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             var paintAction = builder.Action("Paint");
             ActionLinkGenerationConvention convention = new ActionLinkGenerationConvention();

@@ -9,8 +9,8 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators

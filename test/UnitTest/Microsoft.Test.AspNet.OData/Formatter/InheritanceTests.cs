@@ -8,18 +8,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -28,25 +28,22 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 {
     public class InheritanceTests
     {
-        HttpServer _server;
         HttpClient _client;
         IEdmModel _model;
 
         public InheritanceTests()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
             _model = GetEdmModel();
-            IEnumerable<ODataMediaTypeFormatter> formatters = ODataMediaTypeFormatters.Create();
+            var server = TestServerFactory.Create(null, (configuration) =>
+            {
+                configuration.MapNonODataRoute("default", "{action}", new { Controller = "Inheritance" });
+#if !NETCORE // TODO #939: Enable these functions on AspNetCore.
+                configuration.Routes.MapFakeODataRoute();
+                configuration.EnableODataDependencyInjectionSupport();
+#endif
+            });
 
-            configuration.Formatters.Clear();
-            configuration.Formatters.AddRange(formatters);
-
-            configuration.Routes.MapHttpRoute("default", "{action}", new { Controller = "Inheritance" });
-            configuration.Routes.MapFakeODataRoute();
-            configuration.EnableODataDependencyInjectionSupport();
-
-            _server = new HttpServer(configuration);
-            _client = new HttpClient(_server);
+            _client = TestServerFactory.CreateClient(server);
         }
 
         [Fact]
@@ -242,11 +239,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             StringContent content = new StringContent("{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' }");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            IODataRequestMessage oDataRequest = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), content.Headers);
+            var headers = FormatterTestHelper.GetContentHeaders("application/json");
+            IODataRequestMessage oDataRequest = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), headers);
             ODataMessageReader reader = new ODataMessageReader(oDataRequest, new ODataMessageReaderSettings(), _model);
 
-            ODataDeserializerProvider deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+            ODataDeserializerProvider deserializerProvider = ODataDeserializerProviderFactory.Create();
 
             ODataDeserializerContext context = new ODataDeserializerContext { Model = _model };
             IEdmActionImport action = _model.EntityContainer
@@ -315,9 +312,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         private void AddRequestInfo(HttpRequestMessage request)
         {
+#if !NETCORE
+            // TODO #939: Using HttpRequestMessage which is fine except the extensions
+            // for it are defined in the AspNet project.
             request.ODataProperties().Path = new DefaultODataPathHandler()
                 .Parse(_model, "http://any/", GetODataPath(request.RequestUri.AbsoluteUri));
             request.EnableODataDependencyInjectionSupport(_model);
+#endif
         }
 
         private static IEdmModel GetEdmModel()

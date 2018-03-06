@@ -1,19 +1,35 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
+using System;
+using System.Linq;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -41,6 +57,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void Ctor_ThatBuildsNestedContext_CopiesProperties()
         {
             // Arrange
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(config, "OData");
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataSerializerContext context = new ODataSerializerContext
             {
@@ -48,11 +66,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 MetadataLevel = ODataMetadataLevel.FullMetadata,
                 Model = model.Model,
                 Path = new ODataPath(),
-                Request = new HttpRequestMessage(),
+                Request = request,
                 RootElementName = "somename",
                 SelectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true),
                 SkipExpensiveAvailabilityChecks = true,
+#if NETFX // Url is only in AspNet
                 Url = new UrlHelper()
+#endif
             };
             ResourceContext resource = new ResourceContext { SerializerContext = context };
             SelectExpandClause selectExpand = new SelectExpandClause(new SelectItem[0], allSelected: true);
@@ -68,7 +88,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Assert.Same(context.Request, nestedContext.Request);
             Assert.Equal(context.RootElementName, nestedContext.RootElementName);
             Assert.Equal(context.SkipExpensiveAvailabilityChecks, nestedContext.SkipExpensiveAvailabilityChecks);
+#if NETFX // Url is only in AspNet
             Assert.Same(context.Url, nestedContext.Url);
+#endif
         }
 
         [Fact]
@@ -125,13 +147,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             // Arrange (this code path does not use ODataSerializerContext fields or properties)
             var context = new ODataSerializerContext();
-            Mock<IEdmObject> mock = new Mock<IEdmObject>(MockBehavior.Strict);
-            mock.Setup(edmObject => edmObject.GetEdmType()).Returns<IEdmTypeReference>(null).Verifiable();
+            NullEdmType edmObject = new NullEdmType();
 
             // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => context.GetEdmType(mock.Object, null),
-                "The EDM type of an IEdmObject cannot be null.", partialMatch: true);
-            mock.Verify();
+            ExceptionAssert.Throws<InvalidOperationException>(() => context.GetEdmType(edmObject, null),
+                exceptionMessage: "The EDM type of the object of type 'Microsoft.Test.AspNet.OData.Formatter.Serialization.ODataSerializerContextTest+NullEdmType'" +
+                " is null. The EDM type of an IEdmObject cannot be null.");
+        }
+
+        /// <summary>
+        /// An instance of IEdmObject with no EdmType.
+        /// </summary>
+        private class NullEdmType : IEdmObject
+        {
+            public IEdmTypeReference GetEdmType()
+            {
+                return null;
+            }
         }
     }
 }

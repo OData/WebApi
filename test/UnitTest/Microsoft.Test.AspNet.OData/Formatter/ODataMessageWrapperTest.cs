@@ -4,10 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -36,8 +35,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Fact]
         public void ResolveUrl_ReturnsOriginalUri_IfContentIdCannotBeResolved()
         {
-            StringContent content = new StringContent(String.Empty);
-            var message = ODataMessageWrapperHelper.Create(new MemoryStream(), content.Headers);
+            var headers = FormatterTestHelper.GetContentHeaders();
+            var message = ODataMessageWrapperHelper.Create(new MemoryStream(), headers);
 
             Uri uri = message.ConvertPayloadUri(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
 
@@ -47,13 +46,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [Fact]
         public void ResolveUrl_ResolvesUriWithContentId()
         {
-            StringContent content = new StringContent(String.Empty);
             Dictionary<string, string> contentIdMapping = new Dictionary<string, string>
             {
                 {"1", "http://localhost/values(1)"},
                 {"11", "http://localhost/values(11)"},
             };
-            var message = ODataMessageWrapperHelper.Create(new MemoryStream(), content.Headers, contentIdMapping);
+
+            var headers = FormatterTestHelper.GetContentHeaders();
+            var message = ODataMessageWrapperHelper.Create(new MemoryStream(), headers, contentIdMapping);
 
             Uri uri = message.ConvertPayloadUri(new Uri("http://localhost"), new Uri("$1", UriKind.Relative));
 

@@ -6,7 +6,8 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_Calls_RemovesProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
             property.Setup(p => p.PropertyType).Returns(typeof(int));
@@ -49,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotRemoveProperty_TypeIsDataContractAndPropertyHasDataMember()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
@@ -83,7 +84,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);

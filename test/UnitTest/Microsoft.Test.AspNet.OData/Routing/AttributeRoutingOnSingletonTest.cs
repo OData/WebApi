@@ -1,15 +1,29 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
+using Microsoft.Test.AspNet.OData.Extensions;
+#else
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -33,16 +47,12 @@ namespace Microsoft.Test.AspNet.OData.Routing
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             var controllers = new[] { typeof(MaryController), typeof(MaryOrdersController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "", model.Model);
+            });
 
-            HttpConfiguration config = new HttpConfiguration();
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            config.Services.Replace(typeof(IAssembliesResolver), resolver);
-            config.MapODataServiceRoute("odata", "", model.Model);
-            HttpServer server = new HttpServer(config);
-            config.EnsureInitialized();
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = TestServerFactory.CreateClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), requestUri);
 
             // Act
@@ -53,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             {
                 Assert.False(true, await response.Content.ReadAsStringAsync());
             }
-            var result = await response.Content.ReadAsAsync<AttributeRoutingTestODataResponse>();
+            var result = await response.Content.ReadAsObject<AttributeRoutingTestODataResponse>();
             Assert.Equal(expectedResult, result.Value);
         }
 

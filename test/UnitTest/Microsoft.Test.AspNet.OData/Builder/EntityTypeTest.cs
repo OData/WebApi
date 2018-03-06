@@ -7,7 +7,7 @@ using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -114,7 +114,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Single(entityType.DeclaredKey);
             IEdmStructuralProperty key = entityType.DeclaredKey.First();
             Assert.Equal(EdmTypeKind.Enum, key.Type.TypeKind());
-            Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum", key.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum", key.Type.Definition.FullTypeName());
         }
 
         [Fact]
@@ -137,11 +137,11 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(2, entityType.DeclaredKey.Count());
             IEdmStructuralProperty simpleKey = entityType.DeclaredKey.First(k => k.Name == "Simple");
             Assert.Equal(EdmTypeKind.Enum, simpleKey.Type.TypeKind());
-            Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum", simpleKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum", simpleKey.Type.Definition.FullTypeName());
 
             IEdmStructuralProperty longKey = entityType.DeclaredKey.First(k => k.Name == "Long");
             Assert.Equal(EdmTypeKind.Enum, longKey.Type.TypeKind());
-            Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum", longKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.LongEnum", longKey.Type.Definition.FullTypeName());
         }
 
         [Fact]
@@ -164,7 +164,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             Assert.Equal(2, entityType.DeclaredKey.Count());
             IEdmStructuralProperty enumKey = entityType.DeclaredKey.First(k => k.Name == "Simple");
             Assert.Equal(EdmTypeKind.Enum, enumKey.Type.TypeKind());
-            Assert.Equal("Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum", enumKey.Type.Definition.FullTypeName());
 
             IEdmStructuralProperty primitiveKey = entityType.DeclaredKey.First(k => k.Name == "Id");
             Assert.Equal(EdmTypeKind.Primitive, primitiveKey.Type.TypeKind());

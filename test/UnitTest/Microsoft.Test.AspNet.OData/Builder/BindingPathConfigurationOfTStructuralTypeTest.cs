@@ -4,8 +4,8 @@
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 using Xunit;
 

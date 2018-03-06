@@ -1,6 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Newtonsoft.Json.Linq;
+using Xunit;
+using System.Threading.Tasks;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,9 +35,11 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -52,21 +74,27 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public ODataFunctionTests()
         {
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            HttpConfiguration configuration =
-                new[] { typeof(MetadataController), typeof(FCustomersController) }.GetHttpConfiguration();
+            var controllers = new[] { typeof(MetadataController), typeof(FCustomersController) };
             var model = GetUnTypedEdmModel();
-
-            // without attribute routing
-            configuration.MapODataServiceRoute("odata1", "odata", model, pathHandler, ODataRoutingConventions.CreateDefault());
-
-            // only with attribute routing
-            IList<IODataRoutingConvention> routingConventions = new List<IODataRoutingConvention>
+            var server = TestServerFactory.Create(controllers, (configuration) =>
             {
-                new AttributeRoutingConvention("odata2", configuration)
-            };
-            configuration.MapODataServiceRoute("odata2", "attribute", model, pathHandler, routingConventions);
+                // without attribute routing
+                configuration.MapODataServiceRoute("odata1", "odata", model, pathHandler, ODataRoutingConventions.CreateDefault());
 
-            _client = new HttpClient(new HttpServer(configuration));
+                // only with attribute routing
+                IList<IODataRoutingConvention> routingConventions = new List<IODataRoutingConvention>
+                {
+#if NETCORE
+                    new AttributeRoutingConvention("odata2", configuration.ServiceProvider, pathHandler)
+#else
+                    new AttributeRoutingConvention("odata2", configuration)
+#endif
+                };
+
+                configuration.MapODataServiceRoute("odata2", "attribute", model, pathHandler, routingConventions);
+            });
+
+            _client = TestServerFactory.CreateClient(server);
         }
 
         public static TheoryDataSet<string> BoundFunctionRouteData
@@ -318,10 +346,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
     }
 
-    public class FCustomersController : ODataController
+    public class FCustomersController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             IEdmModel model = Request.GetModel();
             IEdmEntityType customerType = model.SchemaElements.OfType<IEdmEntityType>().First(e => e.Name == "Customer");

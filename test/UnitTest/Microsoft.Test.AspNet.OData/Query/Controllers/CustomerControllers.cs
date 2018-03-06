@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common.Models;
 
 namespace Microsoft.Test.AspNet.OData.Query.Controllers
 {

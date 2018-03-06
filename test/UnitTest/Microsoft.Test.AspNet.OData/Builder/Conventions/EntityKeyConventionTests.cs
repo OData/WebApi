@@ -6,7 +6,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -29,10 +30,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             mockEntityType.Setup(entityType => entityType.HasKey(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName))).Returns(mockEntityType.Object).Verifiable();
             mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
 
-            var mockModelBuilder = new Mock<ODataConventionModelBuilder>(MockBehavior.Strict);
-
             // Act
-            new EntityKeyConvention().Apply(mockEntityType.Object, mockModelBuilder.Object);
+            new EntityKeyConvention().Apply(mockEntityType.Object, null);
 
             // Assert
             mockEntityType.Verify();
@@ -56,10 +55,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
 
-            var mockModelBuilder = new Mock<ODataConventionModelBuilder>(MockBehavior.Strict);
-
             // Act
-            new EntityKeyConvention().Apply(mockEntityType.Object, mockModelBuilder.Object);
+            new EntityKeyConvention().Apply(mockEntityType.Object, null);
 
             // Assert
             mockEntityType.Verify();
@@ -72,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 new MockType("BaseType")
                 .Property<uint>("ID");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(baseType);
 
             IEdmModel model = builder.GetEdmModel();
@@ -89,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 new MockType("BaseType")
                 .Property<Color>("ID");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(baseType);
 
             // Act
@@ -118,7 +115,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("DerivedTypeID")
                 .BaseType(baseType);
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(derivedType).DerivesFrom(builder.AddEntityType(baseType));
 
             IEdmModel model = builder.GetEdmModel();

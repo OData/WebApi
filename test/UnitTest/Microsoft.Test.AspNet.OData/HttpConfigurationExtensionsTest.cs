@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -18,8 +19,8 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Query;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
@@ -428,3 +429,4 @@ namespace Microsoft.Test.AspNet.OData
         private class TestService2 : ITestService { }
     }
 }
+#endif

@@ -7,7 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 

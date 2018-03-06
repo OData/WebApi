@@ -4,7 +4,7 @@
 using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 

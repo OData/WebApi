@@ -7,8 +7,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using System.Web.Http;
+#if NETFX // Only AspNet version has UrlHelper
 using System.Web.Http.Routing;
+#endif
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -18,10 +19,10 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Batch;
 using Microsoft.Test.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -72,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 ID = 20,
             };
 
-            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+            _serializerProvider = ODataSerializerProviderFactory.Create();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _orderType = _model.GetEdmTypeReference(typeof(Order)).AsEntity();
             _specialCustomerType = _model.GetEdmTypeReference(typeof(SpecialCustomer)).AsEntity();
@@ -678,8 +679,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityContext))
                 .Returns(properties[1]);
 
-            MockHttpRequestMessage request = new MockHttpRequestMessage();
-            request.SetConfiguration(new HttpConfiguration());
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("Route");
+            var request = RequestFactory.Create(config, "Route");
             _entityContext.Request = request;
 
             // Act
@@ -709,14 +710,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 .Setup(s => s.CreateStructuralProperty(selectExpandNode.SelectedStructuralProperties.ElementAt(1), _entityContext))
                 .Returns(properties[1]);
 
-            MockHttpRequestMessage request = new MockHttpRequestMessage();
-            HttpConfiguration configuration = new HttpConfiguration();
             Mock<IETagHandler> mockETagHandler = new Mock<IETagHandler>();
             string tag = "\"'anycity'\"";
             EntityTagHeaderValue etagHeaderValue = new EntityTagHeaderValue(tag, isWeak: true);
             mockETagHandler.Setup(e => e.CreateETag(It.IsAny<IDictionary<string, object>>())).Returns(etagHeaderValue);
+
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("Route", (config) =>
+            {
+#if NETCORE
+                config.AddService<IETagHandler>(ServiceLifetime.Singleton, (services) => mockETagHandler.Object);
+            });
+#else
+            });
+
             configuration.SetETagHandler(mockETagHandler.Object);
-            request.SetConfiguration(configuration);
+#endif
+
+            var request = RequestFactory.Create(configuration, "Route");
             _entityContext.Request = request;
 
             // Act
@@ -893,10 +903,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
 
-            HttpConfiguration config = new HttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("Route");
             config.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(config);
+            var request = RequestFactory.Create(config, "Route");
             SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
             ODataSerializerContext writeContext = new ODataSerializerContext
             {
@@ -1030,7 +1039,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Assert.Equal(writeContext.NavigationSource, instanceContext.NavigationSource);
             Assert.Equal(writeContext.Request, instanceContext.Request);
             Assert.Equal(writeContext.SkipExpensiveAvailabilityChecks, instanceContext.SkipExpensiveAvailabilityChecks);
+#if NETFX // Only AspNet version has Url property
             Assert.Equal(writeContext.Url, instanceContext.Url);
+#endif
             return true;
         }
 
@@ -1296,9 +1307,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(action);
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, expectedMetadataPrefix);
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1355,9 +1365,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, expectedMetadataPrefix);
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.MinimalMetadata;
 
             // Act
@@ -1407,9 +1416,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)TestODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1434,9 +1442,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
@@ -1460,9 +1467,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)TestODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1487,9 +1493,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(action, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
@@ -1515,9 +1520,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(function, linkBuilder);
             annotationsManager.SetIsAlwaysBindable(function);
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory(expectedMetadataPrefix);
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, expectedMetadataPrefix);
             context.SerializerContext.MetadataLevel = ODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1550,9 +1554,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(function, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)TestODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1578,9 +1581,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(function, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
@@ -1604,9 +1606,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(function, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)TestODataMetadataLevel.FullMetadata;
 
             // Act
@@ -1632,9 +1633,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             annotationsManager.SetOperationLinkBuilder(function, linkBuilder);
 
             IEdmModel model = CreateFakeModel(annotationsManager);
-            UrlHelper url = CreateMetadataLinkFactory("http://IgnoreMetadataPath");
 
-            ResourceContext context = CreateContext(model, url);
+            ResourceContext context = CreateContext(model, "http://IgnoreMetadataPath");
             context.SerializerContext.MetadataLevel = (ODataMetadataLevel)metadataLevel;
 
             // Act
@@ -1852,13 +1852,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             };
         }
 
-        private static ResourceContext CreateContext(IEdmModel model, UrlHelper url)
+        private static ResourceContext CreateContext(IEdmModel model, string expectedMetadataPrefix)
         {
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
             return new ResourceContext
             {
                 EdmModel = model,
-                Url = url,
-            };
+                Request = RequestFactory.Create(HttpMethod.Get, expectedMetadataPrefix, config, "OData"),
+#if NETFX // Only AspNet version has Url property
+                Url = CreateMetadataLinkFactory(expectedMetadataPrefix)
+#endif
+        };
         }
 
         private static IEdmEntityType CreateEntityTypeWithName(string typeName)
@@ -1950,6 +1954,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             return model.Object;
         }
 
+#if NETFX // Only AspNet version has UrlHelper
         private static UrlHelper CreateMetadataLinkFactory(string metadataPath)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, metadataPath);
@@ -1957,6 +1962,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             request.GetConfiguration().Routes.MapFakeODataRoute();
             return new UrlHelper(request);
         }
+#endif
 
         private class Customer
         {

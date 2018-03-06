@@ -5,7 +5,8 @@ using System;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -23,7 +24,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         [Fact]
         public void Ctor_SetsProperty_SerializerProvider()
         {
-            ODataSerializerProvider serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+            ODataSerializerProvider serializerProvider = ODataSerializerProviderFactory.Create();
             var serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Unsupported, serializerProvider).Object;
 
             Assert.Same(serializerProvider, serializer.SerializerProvider);

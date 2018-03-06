@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
@@ -14,7 +14,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         public void CreateDefaultWithAttributeRouting_ContainsAttributeRoutingConvention()
         {
             // Arrange
-            var config = new HttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("odata");
 
             // Act
             var conventions = ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config);

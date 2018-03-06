@@ -1,18 +1,33 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+using Microsoft.Test.AspNet.OData.Extensions;
+#else
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
@@ -50,20 +65,15 @@ namespace Microsoft.Test.AspNet.OData.Routing
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
             var controllers = new[] { typeof(CustomersController), typeof(MetadataAndServiceController), typeof(OrdersController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "", model.Model);
+            });
 
-            HttpConfiguration config = new HttpConfiguration();
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            config.Services.Replace(typeof(IAssembliesResolver), resolver);
+            HttpClient client = TestServerFactory.CreateClient(server);
 
-            config.MapODataServiceRoute("odata", "", model.Model);
-
-            HttpServer server = new HttpServer(config);
-            config.EnsureInitialized();
-
-            HttpClient client = new HttpClient(server);
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), requestUri);
-            request.SetFakeODataRouteName();
+            //request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
 
             // Act
             var response = await client.SendAsync(request);
@@ -73,7 +83,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             {
                 Assert.False(true, await response.Content.ReadAsStringAsync());
             }
-            var result = await response.Content.ReadAsAsync<AttributeRoutingTestODataResponse>();
+            var result = await response.Content.ReadAsObject<AttributeRoutingTestODataResponse>();
             Assert.Equal(expectedResult, result.Value);
         }
 
@@ -84,16 +94,15 @@ namespace Microsoft.Test.AspNet.OData.Routing
             const string RequestUri = @"http://localhost/Customers(12)/NS.GetOrder(orderId=4)/Amount";
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
 
-            HttpConfiguration config = new[] { typeof(CustomersController) }.GetHttpConfiguration();
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            config.MapODataServiceRoute("odata", "", model.Model);
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "", model.Model);
+            });
 
-            HttpServer server = new HttpServer(config);
-            config.EnsureInitialized();
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = TestServerFactory.CreateClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
-            request.SetFakeODataRouteName();
+            //request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
 
             // Act
             HttpResponseMessage response = await client.SendAsync(request);
@@ -171,26 +180,26 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             [HttpGet]
             [ODataRoute("Customers({id})/NS.IsUpgradedWithParam(city={city})")]
-            public string IsUpgradedWithParam([FromODataUri] int id, [FromODataUri]string city)
+            public string GetIsUpgradedWithParam([FromODataUri] int id, [FromODataUri]string city)
             {
                 return "IsUpgradedWithParam_" + city;
             }
 
             [HttpGet]
             [ODataRoute("Customers/NS.IsAnyUpgraded()")]
-            public string IsAnyUpgraded()
+            public string GetIsAnyUpgraded()
             {
                 return "IsAnyUpgraded";
             }
 
             [HttpGet]
             [ODataRoute("Customers({id})/NS.SpecialCustomer/NS.IsSpecialUpgraded()")]
-            public string IsSpecialUpgraded([FromODataUri] int id)
+            public string GetIsSpecialUpgraded([FromODataUri] int id)
             {
                 return "IsSpecialUpgraded_" + id;
             }
 
-            [HttpGet]
+            //[HttpGet]
             [ODataRoute("Customers({id})/NS.GetSalary()")]
             public string GetSalary([FromODataUri] int id)
             {
@@ -206,14 +215,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             [HttpGet]
             [ODataRoute("Customers({id})/NS.GetOrder(orderId={orderId})/Amount")]
-            public IHttpActionResult GetAmountFromOrder(int id, int orderId)
+            public int GetAmountFromOrder(int id, int orderId)
             {
-                return Ok(id + (orderId * 11));
+                return id + (orderId * 11);
             }
 
             [HttpGet]
             [ODataRoute("Customers({key})/NS.GetCustomer(customer={customer})")]
-            public IHttpActionResult GetCustomer(int key, [FromODataUri]EdmEntityObject customer)
+            public string GetCustomer(int key, [FromODataUri]EdmEntityObject customer)
             {
                 Assert.NotNull(customer);
 
@@ -226,7 +235,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     sb.Append(name + "=").Append(value).Append(",");
                 }
 
-                return Ok("GetCustomer(" + sb.ToString() + ")");
+                return "GetCustomer(" + sb.ToString() + ")";
             }
 
             [HttpGet]

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -16,7 +16,7 @@ namespace Microsoft.Test.AspNet.OData
 
         public ODataSwaggerConverterTest()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             builder.Function("UnboundFunction").Returns<string>().Parameter<int>("param");

@@ -1,10 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Net;
+using Microsoft.AspNet.OData;
+using Microsoft.Test.AspNet.OData.Extensions;
+#else
 using System;
 using System.Net;
 using System.Net.Http;
 using Microsoft.AspNet.OData;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -28,9 +35,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return president;
         }
 
-        public HttpResponseMessage Post(FormatterPerson person)
+#if NETCORE
+        public AspNetCore.Http.HttpResponse Post(FormatterPerson person)
         {
             return Request.CreateResponse(HttpStatusCode.Created, person);
         }
+#else
+        public System.Net.Http.HttpResponseMessage Post(FormatterPerson person)
+        {
+            return Request.CreateResponse(HttpStatusCode.Created, person);
+        }
+#endif
     }
 }

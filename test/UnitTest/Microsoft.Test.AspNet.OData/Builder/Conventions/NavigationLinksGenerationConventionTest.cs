@@ -3,16 +3,15 @@
 
 using System;
 using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -72,7 +71,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void NavigationLinksGenerationConvention_GeneratesLinksWithCast_ForDerivedProperties()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("vehicles");
             builder.EntitySet<Manufacturer>("manufacturers");
 
@@ -81,17 +80,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost", configuration, routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: true), false));
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, vehiclesEdmEntitySet, request);
             var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
@@ -131,7 +128,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void NavigationLinksGenerationConvention_GeneratesLinksWithoutCast_ForDeclaredProperties()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Car>("vehicles");
             builder.EntitySet<Manufacturer>("manufacturers");
 
@@ -140,17 +137,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost", configuration, routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, vehiclesEdmEntitySet, request);
             var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2009, Name = "Accord" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
@@ -161,7 +156,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void NavigationLinksGenerationConvention_GeneratesLinksWithoutCast_ForDeclaredProperties_OnSingleton()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<Car>("Contoso");
             builder.EntitySet<Manufacturer>("manufacturers");
 
@@ -170,17 +165,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmEntityType carType = model.AssertHasEntityType(typeof(Car));
             IEdmNavigationProperty carManufacturerProperty = carType.AssertHasNavigationProperty(model, "Manufacturer", typeof(CarManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost", configuration, routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehicleEdmSingleton);
             linkBuilder.AddNavigationPropertyLinkBuilder(carManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehicleEdmSingleton, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, vehicleEdmSingleton, request);
             var entityContext = new ResourceContext(serializerContext, carType.AsReference(), new Car { Model = 2014, Name = "Contoso2014" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
@@ -191,7 +184,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void NavigationLinksGenerationConvention_GeneratesLinksWithoutCast_ForBaseProperties()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<SportBike>("vehicles");
             builder.EntitySet<Manufacturer>("manufacturers");
 
@@ -200,17 +193,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             IEdmEntityType sportbikeType = model.AssertHasEntityType(typeof(SportBike));
             IEdmNavigationProperty motorcycleManufacturerProperty = sportbikeType.AssertHasNavigationProperty(model, "Manufacturer", typeof(MotorcycleManufacturer), isNullable: true, multiplicity: EdmMultiplicity.ZeroOrOne);
 
-            HttpConfiguration configuration = new HttpConfiguration();
+            var configuration = RoutingConfigurationFactory.Create();
             string routeName = "Route";
             configuration.MapODataServiceRoute(routeName, null, model);
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost");
-            request.SetConfiguration(configuration);
-            request.EnableODataDependencyInjectionSupport(routeName);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost", configuration, routeName);
 
             NavigationSourceLinkBuilderAnnotation linkBuilder = model.GetNavigationSourceLinkBuilder(vehiclesEdmEntitySet);
             linkBuilder.AddNavigationPropertyLinkBuilder(motorcycleManufacturerProperty, new NavigationLinkBuilder((context, property) => context.GenerateNavigationPropertyLink(property, includeCast: false), false));
-            var serializerContext = new ODataSerializerContext { Model = model, NavigationSource = vehiclesEdmEntitySet, Url = request.GetUrlHelper() };
+            var serializerContext = ODataSerializerContextFactory.Create(model, vehiclesEdmEntitySet, request);
             var entityContext = new ResourceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.MinimalMetadata);

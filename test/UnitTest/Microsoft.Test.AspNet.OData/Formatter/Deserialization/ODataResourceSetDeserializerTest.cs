@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
@@ -18,8 +17,9 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 //using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -38,8 +38,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             _model = GetEdmModel();
             _customerType = _model.GetEdmTypeReference(typeof(Customer)).AsEntity();
             _customersType = new EdmCollectionTypeReference(new EdmCollectionType(_customerType));
-            _serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
-            _deserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+            _serializerProvider = ODataSerializerProviderFactory.Create();
+            _deserializerProvider = ODataDeserializerProviderFactory.Create();
         }
 
         [Fact]
@@ -100,7 +100,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.ReadResourceSet(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
-                "'Microsoft.Test.AspNet.OData.TestCommon.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
+                "'Microsoft.Test.AspNet.OData.Common.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]
@@ -135,9 +135,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmCollectionTypeReference addressCollectionType =
                 new EdmCollectionTypeReference(new EdmCollectionType(addressType));
 
-            HttpContent content = new StringContent("{ 'value': [ {'@odata.type':'Microsoft.Test.AspNet.OData.TestCommon.Models.Address', 'City' : 'Redmond' } ] }");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            IODataRequestMessage request = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), content.Headers);
+            HttpContent content = new StringContent("{ 'value': [ {'@odata.type':'Microsoft.Test.AspNet.OData.Common.Models.Address', 'City' : 'Redmond' } ] }");
+            var headers = FormatterTestHelper.GetContentHeaders("application/json");
+            IODataRequestMessage request = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), headers);
             ODataMessageReader reader = new ODataMessageReader(request, new ODataMessageReaderSettings(), _model);
             var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
             ODataDeserializerContext readContext = new ODataDeserializerContext
@@ -210,7 +210,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("customers");
             builder.ComplexType<Address>();
             return builder.GetEdmModel();

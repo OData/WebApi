@@ -4,12 +4,11 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
@@ -254,23 +253,20 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
         private static IODataRequestMessage CreateRequest()
         {
-            HttpContentHeaders headers;
+            //HttpContentHeaders headers;
+            //using (HttpContent content = new StreamContent(Stream.Null))
+            //{
+            //    headers = content.Headers;
+            //}
 
-            using (HttpContent content = new StreamContent(Stream.Null))
-            {
-                headers = content.Headers;
-            }
-
-            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
-
+            var headers = FormatterTestHelper.GetContentHeaders("application/json;odata.metadata=full");
             return ODataMessageWrapperHelper.Create(Stream.Null, headers);
         }
 
         private static async Task<IODataRequestMessage> CreateRequest(string body)
         {
             HttpContent content = new StringContent(body);
-            HttpContentHeaders headers = content.Headers;
-            headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
+            var headers = FormatterTestHelper.GetContentHeaders("application/json;odata.metadata=full");
 
             return ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), headers);
         }

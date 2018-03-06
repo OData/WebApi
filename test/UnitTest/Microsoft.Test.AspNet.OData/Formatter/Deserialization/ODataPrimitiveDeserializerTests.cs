@@ -1,11 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
-using System.Data.Linq;
 using System.IO;
 using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -13,11 +12,29 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
+#else
+using System;
+using System.Data.Linq;
+using System.IO;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
+using Moq;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -37,7 +54,35 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                     { (UInt32)1, (long)1 },
                     { (UInt64)1, (long)1 },
                     //(Stream) new MemoryStream(new byte[] { 1 }), // TODO: Enable once we have support for streams
+#if NETFX // Binary only supported on Net Framework
                     { new Binary(new byte[] {1}), new byte[] {1} }
+#endif
+                };
+            }
+        }
+
+        public static TheoryDataSet<object, string, string> EdmPrimitiveData
+        {
+            get
+            {
+                return new TheoryDataSet<object, string, string>
+                {
+                    { "1", "Edm.String", "\"1\"" },
+                    { true, "Edm.Boolean", "true" },
+                    { (Byte)1, "Edm.Byte", "1" },
+                    { (Decimal)1, "Edm.Decimal", "1" },
+                    { (Double)1, "Edm.Double", "1.0" },
+                    { (Guid)Guid.Empty, "Edm.Guid", "\"00000000-0000-0000-0000-000000000000\"" },
+                    { (Int16)1, "Edm.Int16", "1" },
+                    { (Int32)1, "Edm.Int32", "1" },
+                    { (Int64)1, "Edm.Int64", "1" },
+                    { (SByte)1, "Edm.SByte", "1" },
+                    { (Single)1, "Edm.Single", "1" },
+                    { new byte[] { 1 }, "Edm.Binary", "\"AQ==\"" },
+                    { new TimeSpan(), "Edm.Duration", "\"PT0S\"" },
+                    { new DateTimeOffset(), "Edm.DateTimeOffset", "\"0001-01-01T00:00:00Z\"" },
+                    { new Date(2014, 10, 13), "Edm.Date", "\"2014-10-13\"" },
+                    { new TimeOfDay(15, 38, 25, 109), "Edm.TimeOfDay", "\"15:38:25.1090000\"" },
                 };
             }
         }
@@ -124,7 +169,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         }
 
         [Theory]
-        [TestDataSet(typeof(ODataPrimitiveSerializerTests), "EdmPrimitiveData")]
+        [MemberData(nameof(EdmPrimitiveData))]
         public void Read_Primitive(object obj, string edmType, string value)
         {
             // Arrange
@@ -194,15 +239,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             // Arrange
             IEdmModel model = CreateModel();
 
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(new HttpConfiguration());
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(config, "OData");
             if (timeZoneInfo != null)
             {
-                request.GetConfiguration().SetTimeZoneInfo(timeZoneInfo);
+                config.SetTimeZoneInfo(timeZoneInfo);
             }
             else
             {
-                request.GetConfiguration().SetTimeZoneInfo(TimeZoneInfo.Local);
+                config.SetTimeZoneInfo(TimeZoneInfo.Local);
             }
 
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
@@ -231,7 +276,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private static IEdmModel CreateModel()
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             return builder.GetEdmModel();
         }

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common.Models;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     public static class TypeInitializer
     {

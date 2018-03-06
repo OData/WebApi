@@ -19,9 +19,14 @@
   </PropertyGroup>
 	
   <ItemGroup>
-    <SolutionsToBuild Include=".\sln\WebApiOData.sln">
+    <SolutionsToBuild Include=".\sln\WebApiOData.AspNet.sln">
       <BuildInParallel>$(BuildInParallel)</BuildInParallel>
     </SolutionsToBuild>
+  </ItemGroup>
+
+  <!-- Test assemblies -->
+  <ItemGroup>
+    <TestAssembiles Include="$(OutputPath)Microsoft.Test.AspNet.OData.dll" />
   </ItemGroup>
 
   <Target Name="EnableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">
@@ -83,9 +88,8 @@
 
   <Target Name="RunTests" DependsOnTargets="CheckSkipStrongNames">
     <ItemGroup>
-      <TestAssembiles Include="bin\$(Configuration)\UnitTest\*.Test.dll;bin\$(Configuration)\UnitTest\*.Test.*.dll;bin\$(Configuration)\UnitTest\NetCore\*.Test.dll" />
-	  <XunitProject Include="tools\WebStack.xunit.targets">
-		<Properties>TestAssembly=%(TestAssembiles.FullPath);XmlPath=$(TestResultsDirectory)%(TestAssembiles.FileName)-XunitResults.xml</Properties>
+      <XunitProject Include="tools\WebStack.xunit.targets">
+        <Properties>TestAssembly=%(TestAssembiles.FullPath);XmlPath=$(TestResultsDirectory)%(TestAssembiles.FileName)-XunitResults.xml</Properties>
       </XunitProject>
     </ItemGroup>
 	

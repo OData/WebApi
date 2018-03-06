@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -32,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData
 
         public SelectExpandTest()
         {
-            _configuration =
+            _configuration = RoutingConfigurationFactory.CreateWithTypes(
                 new[]
                 {
                     typeof(SelectExpandTestCustomersController), typeof(SelectExpandTestCustomersAliasController),
@@ -42,7 +44,8 @@ namespace Microsoft.Test.AspNet.OData
                     typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
                     typeof(SelectExpandTestSpecialOrderWithAlias),
                     typeof(ReferenceNavigationPropertyExpandFilterController),
-                }.GetHttpConfiguration();
+                });
+
             _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
@@ -419,7 +422,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private IEdmModel GetModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<SelectExpandTestCustomer>("SelectExpandTestCustomers");
             builder.EntitySet<SelectExpandTestOrder>("SelectExpandTestOrders");
             builder.Ignore<SelectExpandTestSpecialCustomer>();
@@ -429,7 +432,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private IEdmModel GetModelWithInheritance()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<SelectExpandTestCustomer>("SelectExpandTestCustomers");
             builder.EntitySet<SelectExpandTestOrder>("SelectExpandTestOrders");
             return builder.GetEdmModel();
@@ -455,7 +458,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private IEdmModel GetModelWithOperations()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Player>("Players");
 
             // Actions
@@ -755,3 +758,4 @@ namespace Microsoft.Test.AspNet.OData
         public string Address { get; set; }
     }
 }
+#endif

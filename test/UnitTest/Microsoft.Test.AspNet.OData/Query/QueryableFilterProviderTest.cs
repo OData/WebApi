@@ -5,18 +5,22 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+#if !NETCORE
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Filters;
+#endif
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
     public class QueryableFilterProviderTest
     {
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Theory]
         [InlineData("GetQueryable")]
         [InlineData("GetGenericQueryable")]
@@ -24,7 +28,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("GetSingleResultOfT")]
         public void GetFilters_ReturnsQueryableFilter_ForQueryableActions(string actionName)
         {
-            HttpConfiguration config = new HttpConfiguration();
+            var config = RoutingConfigurationFactory.Create();
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
@@ -46,7 +50,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("GetGenericQueryableWithODataQueryOption2")]
         public void GetFilters_ReturnsEmptyCollection_ForNonQueryableActions(string actionName)
         {
-            HttpConfiguration config = new HttpConfiguration();
+            var config = RoutingConfigurationFactory.Create();
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(config, "FilterProviderTest", typeof(FilterProviderTestController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(FilterProviderTestController).GetMethod(actionName));
 
@@ -137,5 +141,6 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             return null;
         }
+#endif
     }
 }

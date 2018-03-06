@@ -4,14 +4,13 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -32,9 +31,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder.Object);
             var path = new ODataPath(new EntitySetSegment(model.Customers));
-            var request = new HttpRequestMessage();
-            request.ODataProperties().Path = path;
-            request.EnableHttpDependencyInjectionSupport(model.Model);
+            var request = RequestFactory.CreateFromModel(model.Model, path: path);
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(
@@ -46,13 +43,17 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         public void AddEntityId_AddsEntityId_IfResponseStatusCodeIsNoContent()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.NoContent);
+            var response = ResponseFactory.Create(HttpStatusCode.NoContent);
 
             // Act
             ResultHelpers.AddEntityId(response, () => _entityId);
 
             // Assert
+#if NETCORE
+            var entityIdHeaderValues = response.Headers[ResultHelpers.EntityIdHeaderName].ToList();
+#else
             var entityIdHeaderValues = response.Headers.GetValues(ResultHelpers.EntityIdHeaderName).ToList();
+#endif
             Assert.Single(entityIdHeaderValues);
             Assert.Equal(_entityId.ToString(), entityIdHeaderValues.Single());
         }
@@ -61,13 +62,17 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
         public void AddEntityId_DoesNotAddEntityId_IfResponseStatusCodeIsOtherThanNoContent()
         {
             // Arrange
-            var response = new HttpResponseMessage(HttpStatusCode.OK);
+            var response = ResponseFactory.Create(HttpStatusCode.OK);
 
             // Act
             ResultHelpers.AddEntityId(response, () => _entityId);
 
             // Assert
+#if NETCORE
+            Assert.False(response.Headers.ContainsKey(ResultHelpers.EntityIdHeaderName));
+#else
             Assert.False(response.Headers.Contains(ResultHelpers.EntityIdHeaderName));
+#endif
         }
 
         private class TestEntity

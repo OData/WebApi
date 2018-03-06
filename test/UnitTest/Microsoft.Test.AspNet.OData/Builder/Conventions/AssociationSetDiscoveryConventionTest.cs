@@ -8,7 +8,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -17,6 +18,11 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
     public class AssociationSetDiscoveryConventionTest
     {
         private AssociationSetDiscoveryConvention _convention = new AssociationSetDiscoveryConvention();
+
+        /// <summary>
+        /// Sample property used to obtain a property info.
+        /// </summary>
+        public Vehicle SamplePropertyName { get { return new Car(); } }
 
         [Fact]
         public void AssociationSetDiscoveryConvention_AddsBindingForBaseAndDerivedNavigationProperties()
@@ -62,13 +68,10 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetTargetNavigationSource_Throws_IfTargetEntityTypeIsMissing()
         {
             // Arrange
-            Mock<PropertyInfo> property = new Mock<PropertyInfo>();
-            property.Setup(p => p.PropertyType).Returns(typeof(Vehicle));
-            property.Setup(p => p.ReflectedType).Returns(typeof(AssociationSetDiscoveryConventionTest));
-            property.Setup(p => p.Name).Returns("SamplePropertyName");
+            PropertyInfo propertyInfo = this.GetType().GetProperty(nameof(SamplePropertyName));
 
             Mock<EntityTypeConfiguration> entityTypeConfiguration = new Mock<EntityTypeConfiguration>();
-            NavigationPropertyConfiguration config = new NavigationPropertyConfiguration(property.Object, EdmMultiplicity.ZeroOrOne, entityTypeConfiguration.Object);
+            NavigationPropertyConfiguration config = new NavigationPropertyConfiguration(propertyInfo, EdmMultiplicity.ZeroOrOne, entityTypeConfiguration.Object);
 
             Mock<ODataModelBuilder> modelBuilder = new Mock<ODataModelBuilder>();
 
@@ -186,7 +189,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetTargetNavigationSource_Returns_Model_WithoutStackOverflow()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ContainerName = "ThisContainer";
             builder.Namespace = "ThisNamespace";
 

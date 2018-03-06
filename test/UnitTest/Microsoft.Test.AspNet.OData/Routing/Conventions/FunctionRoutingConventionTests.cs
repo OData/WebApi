@@ -1,14 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http.Controllers;
-using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
+#else
+using System.Net.Http;
+using System.Web.Http.Controllers;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions
 {
@@ -16,6 +26,33 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
     {
         private const string _serviceRoot = "http://any/";
 
+#if NETCORE
+        [Fact]
+        public void SelectAction_ThrowsArgumentNull_IfMissRouteContext()
+        {
+            // Arrange
+            FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => functionConvention.SelectAction(null),
+                "routeContext");
+        }
+
+        [Fact]
+        public void SelectAction_ThrowsArgumentNull_IfMissOdataPath()
+        {
+            // Arrange
+            var request = RequestFactory.Create();
+            var routeContext = new RouteContext(request.HttpContext);
+            FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgumentNull(
+                () => functionConvention.SelectAction(routeContext),
+                "odataPath");
+        }
+#else
         [Fact]
         public void SelectAction_ThrowsArgumentNull_IfODataPathIsNull()
         {
@@ -54,6 +91,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
                 () => functionConvention.SelectAction(odataPath, controllerContext, actionMap: null),
                 "actionMap");
         }
+#endif
 
         [Theory]
         [InlineData("POST")]
@@ -66,12 +104,11 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             ODataPath odataPath = new ODataPath();
-            HttpControllerContext controllerContext = new HttpControllerContext();
-            controllerContext.Request = new HttpRequestMessage(new HttpMethod(requestMethod), "http://localhost/");
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
+            var request = RequestFactory.Create(new HttpMethod(requestMethod), "http://localhost/");
+            var emptyActionMap = SelectActionHelper.CreateActionMap();
 
             // Act
-            string selectedAction = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, emptyActionMap);
 
             // Assert
             Assert.Null(selectedAction);
@@ -84,23 +121,16 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgraded");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-                {
-                    Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                    RequestContext = requestContext,
-                    RouteData = new HttpRouteData(new HttpRoute())
-                };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgraded");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("IsUpgraded");
 
             // Act
-            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("IsUpgraded", function);
-            Assert.Single(controllerContext.Request.GetRouteData().Values);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
+            Assert.Equal("IsUpgraded", selectedAction);
+            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
         }
 
         [Fact]
@@ -110,22 +140,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/NS.IsUpgraded");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgraded");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("IsUpgraded");
 
             // Act
-            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("IsUpgraded", function);
-            Assert.Equal(0, controllerContext.Request.GetRouteData().Values.Count);
+            Assert.Equal("IsUpgraded", selectedAction);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Fact]
@@ -135,22 +158,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers/NS.IsAnyUpgraded");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-                {
-                    Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                    RequestContext = requestContext,
-                    RouteData = new HttpRouteData(new HttpRoute())
-                };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsAnyUpgraded");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("IsAnyUpgraded");
 
             // Act
-            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("IsAnyUpgraded", function);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Equal("IsAnyUpgraded", selectedAction);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Fact]
@@ -160,24 +176,17 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgradedWithParam(city='any')");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-                {
-                    Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                    RequestContext = requestContext,
-                    RouteData = new HttpRouteData(new HttpRoute())
-                };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgradedWithParam");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("IsUpgradedWithParam");
 
             // Act
-            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("IsUpgradedWithParam", function);
-            Assert.Equal(2, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
-            Assert.Equal("any", controllerContext.Request.GetRouteData().Values["city"]);
+            Assert.Equal("IsUpgradedWithParam", selectedAction);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal("any", SelectActionHelper.GetRouteData(request).Values["city"]);
         }
 
         [Fact]
@@ -187,23 +196,16 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             FunctionRoutingConvention functionConvention = new FunctionRoutingConvention();
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "VipCustomer/NS.IsUpgradedWithParam(city='any')");
-            HttpRequestContext requestContext = new HttpRequestContext();
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "IsUpgradedWithParam");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("IsUpgradedWithParam");
 
             // Act
-            string function = functionConvention.SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(functionConvention, odataPath, request, actionMap);
 
             // Assert
-            Assert.Equal("IsUpgradedWithParam", function);
-            Assert.Single(controllerContext.Request.GetRouteData().Values);
-            Assert.Equal("any", controllerContext.Request.GetRouteData().Values["city"]);
+            Assert.Equal("IsUpgradedWithParam", selectedAction);
+            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal("any", SelectActionHelper.GetRouteData(request).Values["city"]);
         }
 
         [Fact]
@@ -212,19 +214,15 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Arrange
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(model.Model, _serviceRoot, "Customers(1)/NS.IsUpgraded");
-            ILookup<string, HttpActionDescriptor> emptyActionMap = new HttpActionDescriptor[0].ToLookup(desc => (string)null);
-            HttpControllerContext controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/")
-            };
-            controllerContext.Request.SetRouteData(new HttpRouteData(new HttpRoute()));
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var emptyActionMap = SelectActionHelper.CreateActionMap();
 
             // Act
-            string selectedAction = new FunctionRoutingConvention().SelectAction(odataPath, controllerContext, emptyActionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new FunctionRoutingConvention(), odataPath, request, emptyActionMap);
 
             // Assert
             Assert.Null(selectedAction);
-            Assert.Empty(controllerContext.Request.GetRouteData().Values);
+            Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
         [Fact]
@@ -234,24 +232,17 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             var model = new CustomersModelWithInheritance();
             var handler = new DefaultODataPathHandler();
             ODataPath odataPath = handler.Parse(model.Model, _serviceRoot, "Customers(1)/NS.GetOrders(parameter=5)/$count");
-            var requestContext = new HttpRequestContext();
-            var controllerContext = new HttpControllerContext
-            {
-                Request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/"),
-                RequestContext = requestContext,
-                RouteData = new HttpRouteData(new HttpRoute())
-            };
-            controllerContext.Request.SetRequestContext(requestContext);
-            ILookup<string, HttpActionDescriptor> actionMap = new HttpActionDescriptor[1].ToLookup(desc => "GetOrders");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap("GetOrders");
 
             // Act
-            string selectedAction = new FunctionRoutingConvention().SelectAction(odataPath, controllerContext, actionMap);
+            string selectedAction = SelectActionHelper.SelectAction(new FunctionRoutingConvention(), odataPath, request, actionMap);
 
             // Assert
             Assert.Equal("GetOrders", selectedAction);
-            Assert.Equal(2, controllerContext.Request.GetRouteData().Values.Count);
-            Assert.Equal(1, controllerContext.Request.GetRouteData().Values["key"]);
-            Assert.Equal(5, controllerContext.Request.GetRouteData().Values["parameter"]);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(5, SelectActionHelper.GetRouteData(request).Values["parameter"]);
         }
     }
 }

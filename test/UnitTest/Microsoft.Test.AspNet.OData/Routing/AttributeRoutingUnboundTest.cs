@@ -1,6 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,35 +25,34 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class AttributeRoutingUnboundTest
     {
-        private HttpConfiguration _configuration;
-        private HttpServer _server;
         private HttpClient _client;
 
         public AttributeRoutingUnboundTest()
         {
-            _configuration = new HttpConfiguration();
-            _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            _configuration.MapODataServiceRoute("odata", "", GetEdmModel(_configuration));
+            Type[] controllers = new[] { typeof(ConventionCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(config);
+                IEdmModel model = GetEdmModel(builder);
 
-            var controllers = new[] { typeof(ConventionCustomersController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
-            _configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-            _server = new HttpServer(_configuration);
-            _configuration.EnsureInitialized();
-            _client = new HttpClient(_server);
+                config.MapODataServiceRoute("odata", "", model);
+            });
+
+            _client = TestServerFactory.CreateClient(server);
         }
 
         [Fact]
@@ -195,9 +211,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Equal(ExpectPayload, responseString);
         }
 
-        private IEdmModel GetEdmModel(HttpConfiguration configuration)
+        private IEdmModel GetEdmModel(ODataConventionModelBuilder builder)
         {
-            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
             builder.EntitySet<ConventionCustomer>("ConventionCustomers");
             builder.EntitySet<ConventionOrder>("ConventionOrders");
             builder.ComplexType<ConventionPerson>();
@@ -242,7 +257,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
     }
 
-    public class ConventionCustomersController : ODataController
+    public class ConventionCustomersController : TestODataController
     {
         // It's a top level function without parameters
         [HttpGet]
@@ -260,7 +275,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [ODataRoute("GetConventionCustomerById(CustomerId={CustomerId})/Name")]
-        public IHttpActionResult GetNameById([FromODataUri]int CustomerId)
+        public ITestActionResult GetNameById([FromODataUri]int CustomerId)
         {
             ConventionCustomer customer = ModelDataBase.Instance.Customers.Where(c => c.ID == CustomerId).FirstOrDefault();
             if (customer == null)

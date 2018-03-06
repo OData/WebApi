@@ -12,7 +12,8 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -22,9 +23,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
     {
         private static readonly IEdmModel Model = GetEdmModel();
 
-        private static readonly ODataSerializerProvider SerializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+        private static readonly ODataSerializerProvider SerializerProvider = ODataSerializerProviderFactory.Create();
 
-        private static readonly ODataDeserializerProvider DeserializerProvider = DependencyInjectionHelper.GetDefaultODataDeserializerProvider();
+        private static readonly ODataDeserializerProvider DeserializerProvider = ODataDeserializerProviderFactory.Create();
 
         private static readonly IEdmEnumTypeReference ColorType =
             new EdmEnumTypeReference(Model.SchemaElements.OfType<IEdmEnumType>().First(c => c.Name == "Color"),
@@ -221,7 +222,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private static IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EnumType<Color>().Namespace = "NS";
             return builder.GetEdmModel();
         }

@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Web.Http;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -21,30 +21,28 @@ namespace Microsoft.Test.AspNet.OData
         private const string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
         private const string AcceptJson = "application/json";
 
-        private HttpConfiguration _configuration;
         private HttpClient _client;
 
         public ApplyTest()
         {
-            _configuration =
-                new[]
-                {
-                    typeof(ApplyTestCustomersController),
-                    typeof(NonODataApplyTestCustomersController),
-                }.GetHttpConfiguration();
-            _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+            Type[] controllers = new[] { typeof(ApplyTestCustomersController), typeof(NonODataApplyTestCustomersController), };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<ApplyTestCustomer>("ApplyTestCustomers");
 
-            _configuration.MapODataServiceRoute("odata", "odata", GetModel());
-            _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataApplyTestCustomers" });
-            _configuration.EnableDependencyInjection();
+                config.MapODataServiceRoute("odata", "odata", builder.GetEdmModel());
+                config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
+                config.MapNonODataRoute("api", "api/{controller}", new { controller = "NonODataApplyTestCustomers" });
+                config.EnableDependencyInjection();
+            });
+
+            _client = TestServerFactory.CreateClient(server);
         }
 
         [Fact]
-        public void Apply_Works_WithODataJson()
+        public async Task Apply_Works_WithODataJson()
         {
             // Arrange
             string uri = "/odata/ApplyTestCustomers?$apply=groupby((Name), aggregate($count as Cnt))";
@@ -53,15 +51,14 @@ namespace Microsoft.Test.AspNet.OData
             HttpResponseMessage response = GetResponse(uri, AcceptJson);
 
             // Assert
-            var r = response.Content.ReadAsStringAsync().Result;
-            Console.WriteLine(r);
-            JArray result = JObject.Parse(response.Content.ReadAsStringAsync().Result)["value"] as JArray;
+            var content = await response.Content.ReadAsStringAsync();
+            JArray result = JObject.Parse(content)["value"] as JArray;
             Assert.Equal("Name", result[0]["Name"]);
             Assert.Equal(3, result[0]["Cnt"]);
         }
 
         [Fact]
-        public void Apply_Works_WithNonODataJson()
+        public async Task Apply_Works_WithNonODataJson()
         {
             // Arrange
             string uri = "/api/?$apply=groupby((Name), aggregate($count as Cnt))";
@@ -70,7 +67,8 @@ namespace Microsoft.Test.AspNet.OData
             HttpResponseMessage response = GetResponse(uri, AcceptJson);
 
             // Assert
-            JArray result = JArray.Parse(response.Content.ReadAsStringAsync().Result);
+            var content = await response.Content.ReadAsStringAsync();
+            JArray result = JArray.Parse(content);
             Assert.Equal("Name", result[0]["Name"]);
             Assert.Equal(3, result[0]["Cnt"]);
         }
@@ -79,14 +77,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
-            request.SetConfiguration(_configuration);
             return _client.SendAsync(request).Result;
-        }
-        private IEdmModel GetModel()
-        {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntitySet<ApplyTestCustomer>("ApplyTestCustomers");
-            return builder.GetEdmModel();
         }
     }
 
@@ -158,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData
     }
 
 
-    public class ApplyTestCustomersController : ODataController
+    public class ApplyTestCustomersController : TestODataController
     {
         [EnableQuery]
         public IEnumerable<ApplyTestCustomer> Get()
@@ -167,7 +158,7 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class NonODataApplyTestCustomersController : ApiController
+    public class NonODataApplyTestCustomersController : TestNonODataController
     {
         [EnableQuery]
         public IEnumerable<ApplyTestCustomer> Get()

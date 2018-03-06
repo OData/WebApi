@@ -5,10 +5,10 @@ using System;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builderer
+namespace Microsoft.Test.AspNet.OData.Builder
 {
     public class EntitySetConfigurationTest
     {

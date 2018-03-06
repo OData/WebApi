@@ -8,7 +8,8 @@ using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder
@@ -152,7 +153,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenComplexType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<BadOpenComplexType>();
 
             // Act & Assert
@@ -187,7 +188,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void GetEdmModel_WorksOnConventionModelBuilder_ForOpenComplexType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<SimpleOpenComplexType>();
 
             // Act
@@ -205,7 +206,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
         public void GetEdmModel_Works_ForOpenComplexTypeWithDerivedDynamicProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<OpenComplexTypeWithDerivedDynamicProperty>();
 
             // Act

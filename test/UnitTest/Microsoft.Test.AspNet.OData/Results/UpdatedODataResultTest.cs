@@ -1,27 +1,52 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Collections.Generic;
+using System.Net;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+#else
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Results;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Results;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Query.Results
 {
     public class UpdatedODataResultTest
     {
         private readonly TestEntity _entity = new TestEntity();
+#if NETFX // Only needed for AspNet
         private readonly HttpRequestMessage _request = new HttpRequestMessage();
         private readonly IContentNegotiator _contentNegotiator = new Mock<IContentNegotiator>().Object;
         private readonly IEnumerable<MediaTypeFormatter> _formatters = new MediaTypeFormatter[0];
         private readonly TestController _controller = new TestController();
+#endif
 
+#if NETCORE
+        [Fact]
+        public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
+        {
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new UpdatedODataResult<TestEntity>(entity: null), "entity");
+        }
+#else
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()
         {
@@ -103,68 +128,111 @@ namespace Microsoft.Test.AspNet.OData.Query.Results
 
             Assert.Same(_formatters, result.Formatters);
         }
+#endif
 
         [Fact]
         public void GetActionResult_ReturnsNoContentStatusCodeResult_IfRequestHasNoPreferenceHeader()
         {
             // Arrange
-            UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(
-                _entity, _contentNegotiator, _request, _formatters);
+            var request = CreateRequest();
 
             // Act
-            IHttpActionResult result = updatedODataResult.GetInnerActionResult();
+            var result = CreateActionResult(request);
 
             // Assert
             StatusCodeResult statusCodeResult = Assert.IsType<StatusCodeResult>(result);
-            Assert.Equal(HttpStatusCode.NoContent, statusCodeResult.StatusCode);
-            Assert.Same(_request, statusCodeResult.Request);
+            Assert.Equal(HttpStatusCode.NoContent, (HttpStatusCode)statusCodeResult.StatusCode);
+#if NETFX // Only needed for AspNet
+            Assert.Same(request, statusCodeResult.Request);
+#endif
         }
 
         [Fact]
         public void GetActionResult_ReturnsNoContentStatusCodeResult_IfRequestAsksForNoContent()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return=minimal");
-            UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity,
-                _contentNegotiator, request, _formatters);
+            var request = CreateRequest("return=minimal");
 
             // Act
-            IHttpActionResult result = updatedODataResult.GetInnerActionResult();
+            var result = CreateActionResult(request);
 
             // Assert
             StatusCodeResult statusCodeResult = Assert.IsType<StatusCodeResult>(result);
-            Assert.Equal(HttpStatusCode.NoContent, statusCodeResult.StatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, (HttpStatusCode)statusCodeResult.StatusCode);
+#if NETFX // Only needed for AspNet
             Assert.Same(request, statusCodeResult.Request);
+#endif
         }
 
         [Fact]
         public void GetActionResult_ReturnsNegotiatedContentResult_IfRequestAsksForContent()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.Headers.TryAddWithoutValidation("Prefer", "return=representation");
-            UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity,
-                _contentNegotiator, request, _formatters);
+            var request = CreateRequest("return=representation");
 
             // Act
-            IHttpActionResult result = updatedODataResult.GetInnerActionResult();
+            var result = CreateActionResult(request);
 
             // Assert
+#if NETCORE
+            ObjectResult objectResult = Assert.IsType<ObjectResult>(result);
+            Assert.Same(typeof(TestEntity), objectResult.Value.GetType());
+            Assert.Equal(HttpStatusCode.OK, (HttpStatusCode)objectResult.StatusCode);
+#else
             NegotiatedContentResult<TestEntity> negotiatedResult = Assert.IsType<NegotiatedContentResult<TestEntity>>(result);
-            Assert.Equal(HttpStatusCode.OK, negotiatedResult.StatusCode);
+            Assert.Equal(HttpStatusCode.OK, (HttpStatusCode)negotiatedResult.StatusCode);
             Assert.Same(request, negotiatedResult.Request);
             Assert.Same(_contentNegotiator, negotiatedResult.ContentNegotiator);
             Assert.Same(_entity, negotiatedResult.Content);
             Assert.Same(_formatters, negotiatedResult.Formatters);
+#endif
         }
 
         private class TestEntity
         {
         }
 
-        private class TestController : ApiController
+        private class TestController : ODataController
         {
         }
+
+#if NETCORE
+        private HttpRequest CreateRequest(string preferHeaderValue = null)
+        {
+            var request = RequestFactory.Create();
+            if (!string.IsNullOrEmpty(preferHeaderValue))
+            {
+                request.Headers.Add("Prefer", new StringValues(preferHeaderValue));
+            }
+
+            return request;
+        }
+
+        private IActionResult CreateActionResult(AspNetCore.Http.HttpRequest request)
+        {
+            UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity);
+            return updatedODataResult.GetInnerActionResult(request);
+        }
+#else
+        private HttpRequestMessage CreateRequest(string preferHeaderValue = null)
+        {
+            var request = RequestFactory.Create();
+            if (!string.IsNullOrEmpty(preferHeaderValue))
+            {
+                request = new HttpRequestMessage();
+                request.Headers.TryAddWithoutValidation("Prefer", preferHeaderValue);
+            }
+
+            return request;
+        }
+
+        private IHttpActionResult CreateActionResult(HttpRequestMessage request)
+        {
+            UpdatedODataResult<TestEntity> updatedODataResult = new UpdatedODataResult<TestEntity>(_entity,
+                _contentNegotiator, request, _formatters);
+
+            return updatedODataResult.GetInnerActionResult();
+        }
+#endif
     }
 }

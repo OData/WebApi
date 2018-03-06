@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
+            convention.Apply(primitiveProperty, entityType, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.True(primitiveProperty.ConcurrencyToken);
@@ -41,7 +42,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, complexType, new ODataConventionModelBuilder());
+            convention.Apply(primitiveProperty, complexType, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);
@@ -60,7 +61,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
+            convention.Apply(primitiveProperty, entityType, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);
@@ -72,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             // Arrange
             PropertyInfo property = CreateMockPropertyInfo("TestProperty");
             PropertyInfo otherProperty = CreateMockPropertyInfo("OtherTestProperty");
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             EntityTypeConfiguration baseEntityType = new EntityTypeConfiguration(modelBuilder, typeof(object));
 
             EntityTypeConfiguration entityType = new EntityTypeConfiguration(modelBuilder, typeof(Int32));
@@ -84,7 +85,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
-            convention.Apply(primitiveProperty, entityType, new ODataConventionModelBuilder());
+            convention.Apply(primitiveProperty, entityType, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.False(primitiveProperty.ConcurrencyToken);

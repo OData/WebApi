@@ -1,6 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,10 +34,11 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -469,6 +485,7 @@ namespace Microsoft.Test.AspNet.OData
             }
         }
 
+#if !NETCORE // TODO #939: Enable this test on AspNetCore.
         [Theory]
         [MemberData(nameof(ODataFormatter_Can_Read_Delta_DataSet))]
         public async Task ODataFormatter_Can_Read_Delta(string propertyName, string propertyJsonValue, object expectedValue)
@@ -505,6 +522,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.True(delta.TryGetPropertyValue(propertyName, out value));
             Assert.Equal(expectedValue, value);
         }
+#endif
 
         public static TheoryDataSet<string, string, string, object> ODataFormatter_Can_Read_Delta_DataSet_WithAlias
         {
@@ -520,6 +538,7 @@ namespace Microsoft.Test.AspNet.OData
             }
         }
 
+#if !NETCORE // TODO #939: Enable this test on AspNetCore.
         [Theory]
         [MemberData(nameof(ODataFormatter_Can_Read_Delta_DataSet_WithAlias))]
         public async Task ODataFormatter_CanReadDelta_WithAlias(string propertyName, string propertyNameAlias, string propertyJsonValue, object expectedValue)
@@ -557,6 +576,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.True(delta.TryGetPropertyValue(propertyName, out value));
             Assert.Equal(expectedValue, value);
         }
+#endif
 
         public static TheoryDataSet<Type> TypedDelta_Returns_Correct_ExpectedClrType_And_ActualType_DataSet
         {

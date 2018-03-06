@@ -1,13 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Query.Expressions;
-using Microsoft.Test.AspNet.OData.TestCommon;
 
 namespace Microsoft.Test.AspNet.OData.Query.Validators
 {
@@ -46,9 +44,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
 
         private static IEdmModel GetCustomersModel()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(QueryCompositionCustomer)));
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(typeof(QueryCompositionCustomer));
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration);
             builder.EntitySet<QueryCompositionCustomer>("Customer");
             builder.EntityType<QueryCompositionCustomerBase>();
             return builder.GetEdmModel();
@@ -71,9 +68,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
 
         private static ODataConventionModelBuilder GetProductsBuilder()
         {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(typeof(Product)));
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(typeof(Product));
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration);
             builder.EntitySet<Product>("Product");
             return builder;
         }

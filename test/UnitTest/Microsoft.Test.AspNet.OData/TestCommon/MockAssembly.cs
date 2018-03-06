@@ -2,10 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     internal sealed class MockAssembly : Assembly
     {
@@ -25,9 +26,20 @@ namespace Microsoft.Test.AspNet.OData.TestCommon
             _types = types.Select(t => t.Object).ToArray();
         }
 
+        /// <remarks>
+        /// AspNet uses GetTypes as opposed to DefinedTypes()
+        /// </remarks>
         public override Type[] GetTypes()
         {
             return _types;
+        }
+
+        /// <remarks>
+        /// AspNetCore uses DefinedTypes as opposed to GetTypes()
+        /// </remarks>
+        public override IEnumerable<TypeInfo> DefinedTypes
+        {
+            get { return _types.AsEnumerable().Select(a => a.GetTypeInfo()); }
         }
     }
 }

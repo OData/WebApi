@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -15,9 +16,10 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
@@ -25,7 +27,7 @@ namespace Microsoft.Test.AspNet.OData
     public class EnumSerializerTest
     {
         private readonly ODataSerializerProvider _serializerProvider =
-            DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+            ODataSerializerProviderFactory.Create();
 
         [Fact]
         public void GetEdmTypeSerializer_ReturnODataEnumSerializer_ForEnumType()
@@ -139,7 +141,7 @@ namespace Microsoft.Test.AspNet.OData
                 "\"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":true" +
                 "}";
 
-            HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(NullableEnumValueController) });
             config.MapODataServiceRoute("odata", "odata", GetSampleModel());
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -162,7 +164,7 @@ namespace Microsoft.Test.AspNet.OData
                 "\"@odata.context\":\"http://localhost/odata/$metadata#Edm.Boolean\",\"value\":false" +
                 "}";
 
-            HttpConfiguration config = new[] { typeof(NullableEnumValueController) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(NullableEnumValueController) });
             config.MapODataServiceRoute("odata", "odata", GetSampleModel());
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -197,7 +199,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetSampleModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<EnumComplex>();
 
             FunctionConfiguration function = builder.Function("NullableEnumFunction").Returns<bool>();
@@ -231,3 +233,4 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
+#endif

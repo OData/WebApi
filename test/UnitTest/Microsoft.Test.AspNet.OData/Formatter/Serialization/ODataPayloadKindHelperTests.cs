@@ -3,7 +3,7 @@
 
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {

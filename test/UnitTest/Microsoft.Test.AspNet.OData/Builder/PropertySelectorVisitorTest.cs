@@ -5,8 +5,8 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -10,8 +11,37 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Newtonsoft.Json.Linq;
+using Xunit;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
+#else
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Tracing;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -24,10 +54,12 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Moq;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
@@ -42,9 +74,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task GetEntryInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = CreateClient())
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
                 MediaTypeWithQualityHeaderValue.Parse(metadata)))
 
@@ -63,9 +93,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task GetSingletonInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = CreateClient())
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("President",
                 MediaTypeWithQualityHeaderValue.Parse(metadata)))
 
@@ -95,12 +123,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             builder2.EntitySet<FormatterPerson>("People").HasIdLink(p => new Uri("http://link/"), false);
             var model2 = builder2.GetEdmModel();
 
-            var config = new[] { typeof(PeopleController) }.GetHttpConfiguration();
-            config.MapODataServiceRoute("OData1", "v1", model1);
-            config.MapODataServiceRoute("OData2", "v2", model2);
+            var controllers = new[] { typeof(PeopleController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("OData1", "v1", model1);
+                config.MapODataServiceRoute("OData2", "v2", model2);
+            });
 
-            using (HttpServer host = new HttpServer(config))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = TestServerFactory.CreateClient(server))
             {
                 using (HttpResponseMessage response = await client.GetAsync("http://localhost/v1/People(10)"))
                 {
@@ -130,9 +160,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Arrange
             IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
 
-            using (HttpConfiguration configuration = CreateConfiguration(model))
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = CreateClient(model))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full")))
             // Act
@@ -150,9 +178,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Arrange
             IEdmModel model = CreateModelForFullMetadata(sameLinksForIdAndEdit: false, sameLinksForEditAndRead: false);
 
-            using (HttpConfiguration configuration = CreateConfiguration(model))
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = CreateClient(model))
             using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("MainEntity",
                 MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none")))
             // Act
@@ -167,31 +193,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task SupportOnlyODataFormat()
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
+            using (HttpClient client = CreateClient(null, (supportedMediaTypes, mediaTypeMappings) =>
             {
-                foreach (ODataMediaTypeFormatter odataFormatter in
-                    configuration.Formatters.OfType<ODataMediaTypeFormatter>())
-                {
-                    odataFormatter.SupportedMediaTypes.Remove(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJson));
-                }
+                supportedMediaTypes.Remove(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJson));
+            }))
 
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                {
-                    using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
-                        ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
+            using (HttpRequestMessage request = CreateRequestWithDataServiceVersionHeaders("People(10)",
+                ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
 
-                    // Act
-                    using (HttpResponseMessage response = await client.SendAsync(request))
-                    {
-                        // Assert
-                        Assert.NotNull(response);
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
-                            response.Content.Headers.ContentType.MediaType);
-                        await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
-                    }
-                }
+            // Act
+            using (HttpResponseMessage response = await client.SendAsync(request))
+            {
+                // Assert
+                Assert.NotNull(response);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
+                    response.Content.Headers.ContentType.MediaType);
+                await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
             }
         }
 
@@ -199,55 +217,50 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task ConditionallySupportODataIfQueryStringPresent()
         {
             // Arrange #1, #2 and #3
-            using (HttpConfiguration configuration = CreateConfiguration())
+            Action<IList<MediaTypeHeaderValue>, IList<MediaTypeMapping>> modifyMediaTypes = ((supportedMediaTypes, mediaTypeMappings) =>
             {
-                foreach (ODataMediaTypeFormatter odataFormatter in
-                    configuration.Formatters.OfType<ODataMediaTypeFormatter>())
+                supportedMediaTypes.Clear();
+                mediaTypeMappings.Add(ODataTestUtil.ApplicationJsonMediaTypeWithQualityMapping);
+            });
+
+            using (HttpClient client = CreateClient(null, modifyMediaTypes))
+            {
+                // Arrange #1: this request should return response in OData json format
+                using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                    CreateAbsoluteUri("People(10)?$format=application/json")))
+                // Act #1
+                using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
                 {
-                    odataFormatter.SupportedMediaTypes.Clear();
-                    odataFormatter.MediaTypeMappings.Add(new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality));
+                    // Assert #1
+                    await AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
                 }
 
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
+                // Arrange #2: when the query string is not present, request should be handled by the regular Json
+                // Formatter
+                using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                    CreateAbsoluteUri("People(10)")))
+                // Act #2
+                using (HttpResponseMessage response = await client.SendAsync(requestWithNonODataJsonHeader))
                 {
-                    // Arrange #1: this request should return response in OData json format
-                    using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)?$format=application/json")))
-                    // Act #1
-                    using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
-                    {
-                        // Assert #1
-                        await AssertODataVersion4JsonResponse(Resources.PersonEntryInJsonLight, response);
-                    }
+                    // Assert #2
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
+                        response.Content.Headers.ContentType.MediaType);
+                    Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
-                    // Arrange #2: when the query string is not present, request should be handled by the regular Json
-                    // Formatter
-                    using (HttpRequestMessage requestWithNonODataJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("People(10)")))
-                    // Act #2
-                    using (HttpResponseMessage response = await client.SendAsync(requestWithNonODataJsonHeader))
-                    {
-                        // Assert #2
-                        Assert.NotNull(response);
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
-                            response.Content.Headers.ContentType.MediaType);
-                        Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
+                    await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+                }
 
-                        await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
-                    }
-
-                    // Arrange #3: this request should return response in OData json format
-                    using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
-                        CreateAbsoluteUri("President?$format=application/json")))
-                    // Act #3
-                    using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
-                    {
-                        // Assert #3
-                        await AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
-                            response);
-                    }
+                // Arrange #3: this request should return response in OData json format
+                using (HttpRequestMessage requestWithJsonHeader = ODataTestUtil.GenerateRequestMessage(
+                    CreateAbsoluteUri("President?$format=application/json")))
+                // Act #3
+                using (HttpResponseMessage response = await client.SendAsync(requestWithJsonHeader))
+                {
+                    // Assert #3
+                    await AssertODataVersion4JsonResponse(Resources.GetString("PresidentInJsonLightMinimalMetadata.json"),
+                        response);
                 }
             }
         }
@@ -256,9 +269,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task GetFeedInODataJsonFormat_LimitsResults()
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpServer host = new HttpServer(configuration))
-            using (HttpClient client = new HttpClient(host))
+            using (HttpClient client = CreateClient())
             using (HttpRequestMessage request = CreateRequest("People?$orderby=Name&$count=true",
                     ODataTestUtil.ApplicationJsonMediaTypeWithQuality))
             // Act
@@ -286,64 +297,60 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task HttpErrorInODataFormat_GetsSerializedCorrectly()
         {
             // Arrange
-            using (HttpConfiguration configuration = CreateConfiguration())
-            {
-                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
+            //using (HttpConfiguration configuration = CreateConfiguration())
+            //{
+            //    configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            using (HttpClient client = CreateClient())
+            using (HttpRequestMessage request = CreateRequest("People?$filter=abc+eq+null",
                     MediaTypeWithQualityHeaderValue.Parse("application/json")))
-                // Act
-                using (HttpResponseMessage response = await client.SendAsync(request))
-                {
-                    // Assert
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            // Act
+            using (HttpResponseMessage response = await client.SendAsync(request))
+            {
+                // Assert
+                Assert.NotNull(response);
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-                    string result = await response.Content.ReadAsStringAsync();
-                    dynamic json = JToken.Parse(result);
+                string result = await response.Content.ReadAsStringAsync();
+                dynamic json = JToken.Parse(result);
 
-                    Assert.Equal("The query specified in the URI is not valid. " +
-                        "Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
-                        json["error"]["message"].Value);
+                Assert.Equal("The query specified in the URI is not valid. " +
+                    "Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
+                    json["error"]["message"].Value);
 
-                    Assert.Equal("Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
-                        json["error"]["innererror"]["message"].Value);
+                Assert.Equal("Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
+                    json["error"]["innererror"]["message"].Value);
 
-                    Assert.Equal("Microsoft.OData.ODataException",
-                        json["error"]["innererror"]["type"].Value);
-                }
+                Assert.Equal("Microsoft.OData.ODataException",
+                    json["error"]["innererror"]["type"].Value);
             }
+            //}
         }
 
         [Fact]
         public async Task CustomSerializerWorks()
         {
-            // Arrange
-            Type[] controllers = new[] { typeof(PeopleController) };
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var controllers = new[] { typeof(PeopleController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
             {
-                configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
-                configuration.MapODataServiceRoute("IgnoredRouteName", null, builder =>
+                config.MapODataServiceRoute("IgnoredRouteName", null, builder =>
                     builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => ODataTestUtil.GetEdmModel())
                         .AddService<ODataSerializerProvider>(ServiceLifetime.Singleton, sp => new CustomSerializerProvider())
-                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", configuration)));
+                        .AddService<IEnumerable<IODataRoutingConvention>>(Microsoft.OData.ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", config)));
+            });
 
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
-                // Act
-                using (HttpResponseMessage response = await client.SendAsync(request))
-                {
-                    // Assert
-                    Assert.NotNull(response);
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    string payload = await response.Content.ReadAsStringAsync();
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = CreateRequestWithAnnotationFilter("People", "odata.include-annotations=\"*\""))
+            // Act
+            using (HttpResponseMessage response = client.SendAsync(request).Result)
+            {
+                // Assert
+                Assert.NotNull(response);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                string payload = await response.Content.ReadAsStringAsync();
 
-                    Assert.Contains("\"@Custom.Int32Annotation\":321", payload);
-                    Assert.Contains("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
-                }
+                Assert.Contains("\"@Custom.Int32Annotation\":321", payload);
+                Assert.Contains("\"@Custom.StringAnnotation\":\"My amazing feed\"", payload);
             }
         }
 
@@ -358,16 +365,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             expect = Regex.Replace(Resources.GetString(expect), @"\r\n\s*([""{}\]])", "$1");
 
             // Arrange
-            Type[] controllers = new[] { typeof(PeopleController) };
-            HttpConfiguration configuration = controllers.GetHttpConfiguration();
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
-            configuration.MapODataServiceRoute("IgnoredRouteName", null, builder =>
-                builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => ODataTestUtil.GetEdmModel())
-                    .AddService<ODataSerializerProvider>(ServiceLifetime.Singleton, sp => new CustomSerializerProvider())
-                    .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                        ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", configuration)));
+            var controllers = new[] { typeof(PeopleController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("IgnoredRouteName", null, builder =>
+                    builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => ODataTestUtil.GetEdmModel())
+                        .AddService<ODataSerializerProvider>(ServiceLifetime.Singleton, sp => new CustomSerializerProvider())
+                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("IgnoredRouteName", config)));
+            });
 
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             HttpRequestMessage request = CreateRequestWithAnnotationFilter("People(2)",
                 String.Format("odata.include-annotations=\"{0}\"", filter));
@@ -387,16 +395,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task EnumKeySimpleSerializerTest(string entitySet)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>(entitySet);
             builder.EntityType<EnumCustomer>().HasKey(c => c.Color);
             IEdmModel model = builder.GetEdmModel();
-            var controllers = new[] {typeof(EnumKeyCustomersController), typeof(EnumKeyCustomers2Controller) };
+            var controllers = new[] { typeof(EnumKeyCustomersController), typeof(EnumKeyCustomers2Controller) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-            HttpConfiguration configuration = controllers.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-            HttpServer host = new HttpServer(configuration);
-            HttpClient client = new HttpClient(host);
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
@@ -405,7 +414,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(9, customer["ID"]);
             Assert.Equal(Color.Red, Enum.Parse(typeof(Color), customer["Color"].ToString()));
             var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
@@ -418,37 +427,36 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task EnumTypeRoundTripTest()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
             var controllers = new[] { typeof(EnumCustomersController) };
-
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var server = TestServerFactory.Create(controllers, (config) =>
             {
-                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
-                {
-                    request.Content = new StringContent(
-                        string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
-                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
-                    request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-                    request.Headers.Accept.ParseAdd("application/json");
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-                    // Act
-                    using (HttpResponseMessage response = await client.SendAsync(request))
-                    {
-                        // Assert
-                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-                        var customer = await response.Content.ReadAsAsync<JObject>();
-                        Assert.Equal(0, customer["ID"]);
-                        Assert.Equal(Color.Green | Color.Blue, Enum.Parse(typeof(Color), customer["Color"].ToString()));
-                        var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
-                        Assert.Equal(2, colors.Count());
-                        Assert.Contains(Color.Red, colors);
-                        Assert.Contains(Color.Red | Color.Blue, colors);
-                    }
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
+            {
+                request.Content = new StringContent(
+                    string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Headers.Accept.ParseAdd("application/json");
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                    var customer = await response.Content.ReadAsObject<JObject>();
+                    Assert.Equal(0, customer["ID"]);
+                    Assert.Equal(Color.Green | Color.Blue, Enum.Parse(typeof(Color), customer["Color"].ToString()));
+                    var colors = customer["Colors"].Select(c => Enum.Parse(typeof(Color), c.ToString()));
+                    Assert.Equal(2, colors.Count());
+                    Assert.Contains(Color.Red, colors);
+                    Assert.Contains(Color.Red | Color.Blue, colors);
                 }
             }
         }
@@ -462,7 +470,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            JObject customer = await response.Content.ReadAsAsync<JObject>();
+            JObject customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color",
                 customer.GetValue("Color@odata.type"));
             Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)",
@@ -479,21 +487,24 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            JObject customer = await response.Content.ReadAsAsync<JObject>();
+            JObject customer = await response.Content.ReadAsObject<JObject>();
             Assert.Contains("Color@odata.type", customer.Values());
             Assert.Contains("Colors@odata.type", customer.Values());
         }
 
         private async Task<HttpResponseMessage> GetEnumResponse(string acceptHeader)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
 
-            HttpConfiguration configuration = new[] { typeof(EnumCustomersController) }.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-            HttpServer host = new HttpServer(configuration);
-            HttpClient client = new HttpClient(host);
+            var controllers = new[] { typeof(EnumCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
             request.Content = new StringContent(
@@ -510,34 +521,33 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task EnumSerializer_HasMetadataType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
             var controllers = new[] { typeof(EnumCustomersController) };
-
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var server = TestServerFactory.Create(controllers, (config) =>
             {
-                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
-                {
-                    request.Content = new StringContent(
-                        string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
-                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
-                    request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-                    request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-                    // Act
-                    using (HttpResponseMessage response = await client.SendAsync(request))
-                    {
-                        // Assert
-                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-                        dynamic payload = JToken.Parse(await response.Content.ReadAsStringAsync());
-                        Assert.Equal("#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer", payload["@odata.type"].Value);
-                        Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color", payload["Color@odata.type"].Value);
-                        Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
-                    }
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
+            {
+                request.Content = new StringContent(
+                    string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+                    dynamic payload = JToken.Parse(await response.Content.ReadAsStringAsync());
+                    Assert.Equal("#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer", payload["@odata.type"].Value);
+                    Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color", payload["Color@odata.type"].Value);
+                    Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
                 }
             }
         }
@@ -546,17 +556,17 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task RequestProperty_HasCorrectContextUrl()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
             var controllers = new[] { typeof(EnumCustomersController) };
-
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var server = TestServerFactory.Create(controllers, (config) =>
             {
-                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            {
                 // Act
                 using (HttpResponseMessage response = await client.GetAsync("http://localhost/EnumCustomers(5)/Color"))
                 {
@@ -572,24 +582,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<CollectionSerializerCustomer>("CollectionSerializerCustomers");
             IEdmModel model = builder.GetEdmModel();
             var controllers = new[] { typeof(CollectionSerializerCustomersController) };
-
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var server = TestServerFactory.Create(controllers, (config) =>
             {
-                configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
-                using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CollectionSerializerCustomers?$select=ID"))
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/CollectionSerializerCustomers?$select=ID"))
+            {
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
                 {
-                    // Act
-                    using (HttpResponseMessage response = await client.SendAsync(request))
-                    {
-                        // Assert
-                        ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-                    }
+                    // Assert
+                    ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
                 }
             }
         }
@@ -607,17 +616,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter
     ""Green""
   ]
 }";
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<EnumCustomer>("EnumCustomers");
             IEdmModel model = builder.GetEdmModel();
             var controllers = new[] { typeof(EnumCustomersController) };
-
-            using (HttpConfiguration configuration = controllers.GetHttpConfiguration())
+            var server = TestServerFactory.Create(controllers, (configuration) =>
             {
+                configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
                 configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-                using (HttpServer host = new HttpServer(configuration))
-                using (HttpClient client = new HttpClient(host))
+            });
 
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            {
                 // Act
                 using (HttpResponseMessage response = await client.GetAsync("http://localhost/EnumCustomers(5)/Colors?$count=true"))
                 {
@@ -636,29 +646,29 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             public List<Color> Colors { get; set; }
         }
 
-        public class EnumCustomersController : ODataController
+        public class EnumCustomersController : TestODataController
         {
-            public IHttpActionResult Post(EnumCustomer customer)
+            public ITestActionResult Post(EnumCustomer customer)
             {
                 return Ok(customer);
             }
 
-            public IHttpActionResult GetColor(int key)
+            public ITestActionResult GetColor(int key)
             {
                 return Ok(Color.Green);
             }
 
             [EnableQuery(PageSize = 2)]
-            public IHttpActionResult GetColors(int key)
+            public ITestActionResult GetColors(int key)
             {
-                IList<Color> colors = new[] {Color.Blue, Color.Green, Color.Red};
+                IList<Color> colors = new[] { Color.Blue, Color.Green, Color.Red };
                 return Ok(colors);
             }
         }
 
-        public class EnumKeyCustomersController : ODataController
+        public class EnumKeyCustomersController : TestODataController
         {
-            public IHttpActionResult Get([FromODataUri]Color key)
+            public ITestActionResult Get([FromODataUri]Color key)
             {
                 EnumCustomer customer = new EnumCustomer
                 {
@@ -671,9 +681,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
         }
 
-        public class EnumKeyCustomers2Controller : ODataController
+        public class EnumKeyCustomers2Controller : TestODataController
         {
-            public IHttpActionResult Get([FromODataUri]EdmEnumObject key)
+            public ITestActionResult Get([FromODataUri]EdmEnumObject key)
             {
                 EnumCustomer customer = new EnumCustomer
                 {
@@ -696,11 +706,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
             var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller), typeof(KeyCustomerOrderController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-            HttpConfiguration configuration = controllers.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-            HttpServer host = new HttpServer(configuration);
-            HttpClient client = new HttpClient(host);
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
@@ -709,7 +720,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(5, customer["value"]);
         }
 
@@ -723,11 +734,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
             var controllers = new[] { typeof(KeyOrders1Controller), typeof(KeyOrders2Controller), typeof(KeyCustomerOrderController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-            HttpConfiguration configuration = controllers.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-            HttpServer host = new HttpServer(configuration);
-            HttpClient client = new HttpClient(host);
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
@@ -736,7 +748,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal("my", customer["value"]);
         }
 
@@ -750,11 +762,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Arrange
             IEdmModel model = GetKeyCustomerOrderModel();
             var controllers = new[] { typeof(KeyCustomers1Controller), typeof(KeyCustomers2Controller), typeof(KeyCustomerOrderController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
 
-            HttpConfiguration configuration = controllers.GetHttpConfiguration();
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
-            HttpServer host = new HttpServer(configuration);
-            HttpClient client = new HttpClient(host);
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete,
@@ -763,16 +776,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal("6+my", customer["value"]);
         }
 
         private static IEdmModel GetKeyCustomerOrderModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             builder.EntityType<KeyCustomer>().HasKey(c => c.Id);
-            builder.EntityType<KeyOrder>().HasKey(c =>new { c.StringKey, c.DateKey, c.GuidKey});
+            builder.EntityType<KeyOrder>().HasKey(c => new { c.StringKey, c.DateKey, c.GuidKey });
 
             // without [FromODataUri]
             builder.EntitySet<KeyCustomer>("KeyCustomers1").HasManyBinding(c => c.Orders, "KeyOrders1");
@@ -802,19 +815,19 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             public Date DateKey { get; set; }
 
-           // public TimeOfDay TimeKey { get; set; }
+            // public TimeOfDay TimeKey { get; set; }
 
             public Guid GuidKey { get; set; }
         }
 
-        public class KeyCustomers1Controller : ODataController
+        public class KeyCustomers1Controller : TestODataController
         {
-            public IHttpActionResult Get(int key)
+            public ITestActionResult Get(int key)
             {
                 return Ok(key);
             }
 
-            public IHttpActionResult DeleteRef(int key, string navigationProperty, string relatedKeyStringKey, Guid relatedKeyGuidKey,
+            public ITestActionResult DeleteRef(int key, string navigationProperty, string relatedKeyStringKey, Guid relatedKeyGuidKey,
                 [FromODataUri]Date relatedKeyDateKey)
             {
                 AssertMultipleKey(relatedKeyStringKey, relatedKeyDateKey, relatedKeyGuidKey);
@@ -823,14 +836,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
         }
 
-        public class KeyCustomers2Controller : ODataController
+        public class KeyCustomers2Controller : TestODataController
         {
-            public IHttpActionResult Get([FromODataUri]int key)
+            public ITestActionResult Get([FromODataUri]int key)
             {
                 return Ok(key);
             }
 
-            public IHttpActionResult DeleteRef([FromODataUri]int key, [FromODataUri]string navigationProperty,
+            public ITestActionResult DeleteRef([FromODataUri]int key, [FromODataUri]string navigationProperty,
                 [FromODataUri]string relatedKeyStringKey, [FromODataUri]Guid relatedKeyGuidKey, [FromODataUri]Date relatedKeyDateKey)
             {
                 AssertMultipleKey(relatedKeyStringKey, relatedKeyDateKey, relatedKeyGuidKey);
@@ -839,10 +852,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
         }
 
-        public class KeyOrders1Controller : ODataController
+        public class KeyOrders1Controller : TestODataController
         {
             // [FromODataUri] before Date type is necessary, otherwise it will use the content binding.
-            public IHttpActionResult Get(string keyStringKey, [FromODataUri]Date keyDateKey, Guid keyGuidKey)
+            public ITestActionResult Get(string keyStringKey, [FromODataUri]Date keyDateKey, Guid keyGuidKey)
             {
                 AssertMultipleKey(keyStringKey, keyDateKey, keyGuidKey);
 
@@ -850,9 +863,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
         }
 
-        public class KeyOrders2Controller : ODataController
+        public class KeyOrders2Controller : TestODataController
         {
-            public IHttpActionResult Get([FromODataUri]string keyStringKey, [FromODataUri]Date keyDateKey, [FromODataUri]Guid keyGuidKey)
+            public ITestActionResult Get([FromODataUri]string keyStringKey, [FromODataUri]Date keyDateKey, [FromODataUri]Guid keyGuidKey)
             {
                 AssertMultipleKey(keyStringKey, keyDateKey, keyGuidKey);
 
@@ -860,25 +873,25 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             }
         }
 
-        public class KeyCustomerOrderController : ODataController
+        public class KeyCustomerOrderController : TestODataController
         {
             [HttpGet]
             [ODataRoute("KeyCustomers3({customerKey})")]
-            public IHttpActionResult Customers3WithKey(int customerKey)
+            public ITestActionResult Customers3WithKey(int customerKey)
             {
                 return Ok(customerKey);
             }
 
             [HttpGet]
             [ODataRoute("KeyCustomers4({customerKey})")]
-            public IHttpActionResult Customers4WithKey([FromODataUri]int customerKey)
+            public ITestActionResult Customers4WithKey([FromODataUri]int customerKey)
             {
                 return Ok(customerKey);
             }
 
             [HttpGet]
             [ODataRoute("KeyOrders3(StringKey={key1},DateKey={key2},GuidKey={key3})")]
-            public IHttpActionResult Orders3WithKey(string key1, [FromODataUri]Date key2, Guid key3)
+            public ITestActionResult Orders3WithKey(string key1, [FromODataUri]Date key2, Guid key3)
             {
                 AssertMultipleKey(key1, key2, key3);
 
@@ -887,7 +900,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             [HttpGet]
             [ODataRoute("KeyOrders4(StringKey={key1},DateKey={key2},GuidKey={key3})")]
-            public IHttpActionResult Orders4WithKey([FromODataUri]string key1, [FromODataUri]Date key2, [FromODataUri]Guid key3)
+            public ITestActionResult Orders4WithKey([FromODataUri]string key1, [FromODataUri]Date key2, [FromODataUri]Guid key3)
             {
                 AssertMultipleKey(key1, key2, key3);
 
@@ -896,7 +909,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             [HttpDelete]
             [ODataRoute("KeyCustomers3({customerKey})/Orders(StringKey={key1},DateKey={key2},GuidKey={key3})/$ref")]
-            public IHttpActionResult DeleteOrderFromCustomer3(int customerKey, string key1, [FromODataUri]Date key2, Guid key3)
+            public ITestActionResult DeleteOrderFromCustomer3(int customerKey, string key1, [FromODataUri]Date key2, Guid key3)
             {
                 AssertMultipleKey(key1, key2, key3);
 
@@ -905,7 +918,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             [HttpDelete]
             [ODataRoute("KeyCustomers4({customerKey})/Orders(StringKey={key1},DateKey={key2},GuidKey={key3})/$ref")]
-            public IHttpActionResult DeleteOrderFromCustomer4([FromODataUri]int customerKey, [FromODataUri]string key1,
+            public ITestActionResult DeleteOrderFromCustomer4([FromODataUri]int customerKey, [FromODataUri]string key1,
                 [FromODataUri]Date key2, [FromODataUri]Guid key3)
             {
                 AssertMultipleKey(key1, key2, key3);
@@ -927,9 +940,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             public string Name { get; set; }
         }
 
-        public class CollectionSerializerCustomersController : ODataController
+        public class CollectionSerializerCustomersController : TestODataController
         {
-            public IHttpActionResult Get(ODataQueryOptions<CollectionSerializerCustomer> options)
+            public ITestActionResult Get(ODataQueryOptions<CollectionSerializerCustomer> options)
             {
                 IQueryable<CollectionSerializerCustomer> customers = new[]
                 {
@@ -966,32 +979,93 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return new Uri(new Uri(baseAddress), relativeUri);
         }
 
-        private static HttpConfiguration CreateConfiguration(bool tracingEnabled = false)
+#if NETCORE
+        private static HttpClient CreateClient(IEdmModel model = null,
+            Action<IList<MediaTypeHeaderValue>, IList<MediaTypeMapping>> modifyMediaTypes = null)
         {
-            IEdmModel model = ODataTestUtil.GetEdmModel();
-            HttpConfiguration configuration = CreateConfiguration(model);
-
-            if (tracingEnabled)
+            var controllers = new[]
             {
-                configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
+                typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
+                typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+            };
+
+            var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>
+            {
+                config.MapODataServiceRoute("IgnoredRouteName", null, model != null ? model : ODataTestUtil.GetEdmModel());
+
+                if (modifyMediaTypes != null)
+                {
+                    foreach (var odataFormatter in config.ServiceProvider.GetServices<ODataOutputFormatter>())
+                    {
+                        var supportedMediaTypes = new List<MediaTypeHeaderValue>(
+                            odataFormatter.SupportedMediaTypes
+                            .ToList()
+                            .Select(v => MediaTypeHeaderValue.Parse(v)));
+
+                        var mediaTypeMappings = new List<MediaTypeMapping>(odataFormatter.MediaTypeMappings);
+                        modifyMediaTypes(supportedMediaTypes, mediaTypeMappings);
+
+                        odataFormatter.SupportedMediaTypes.Clear();
+                        foreach (var mediaType in supportedMediaTypes)
+                        {
+                            odataFormatter.SupportedMediaTypes.Add(mediaType.ToString());
+                        }
+
+                        odataFormatter.MediaTypeMappings.Clear();
+                        foreach (var mediaTypeMapping in mediaTypeMappings)
+                        {
+                            odataFormatter.MediaTypeMappings.Add(mediaTypeMapping);
+                        }
+                    }
+                }
+            });
+
+            return TestServerFactory.CreateClient(server);
+        }
+#else
+        private static HttpClient CreateClient(IEdmModel model = null,
+            Action<IList<MediaTypeHeaderValue>, IList<MediaTypeMapping>> modifyMediaTypes = null)
+        {
+            IEdmModel useModel = model != null ? model : ODataTestUtil.GetEdmModel();
+
+            var controllers = new[]
+            {
+                typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
+                typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+            };
+
+            var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+                config.MapODataServiceRoute("IgnoredRouteName", null, useModel);
+            });
+
+
+            if (modifyMediaTypes != null)
+            {
+                foreach (var odataFormatter in server.Configuration.Formatters.OfType<ODataMediaTypeFormatter>())
+                {
+                    var supportedMediaTypes = new List<MediaTypeHeaderValue>(odataFormatter.SupportedMediaTypes);
+                    var mediaTypeMappings = new List<MediaTypeMapping>(odataFormatter.MediaTypeMappings);
+                    modifyMediaTypes(supportedMediaTypes, mediaTypeMappings);
+
+                    odataFormatter.SupportedMediaTypes.Clear();
+                    foreach (var mediaType in supportedMediaTypes)
+                    {
+                        odataFormatter.SupportedMediaTypes.Add(mediaType);
+                    }
+
+                    odataFormatter.MediaTypeMappings.Clear();
+                    foreach (var mediaTypeMapping in mediaTypeMappings)
+                    {
+                        odataFormatter.MediaTypeMappings.Add(mediaTypeMapping);
+                    }
+                }
             }
 
-            return configuration;
+            return TestServerFactory.CreateClient(server);
         }
-
-        private static HttpConfiguration CreateConfiguration(IEdmModel model)
-        {
-            HttpConfiguration configuration =
-                new[]
-                {
-                    typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
-                    typeof(CollectionSerializerCustomersController), typeof(PresidentController)
-                }.GetHttpConfiguration();
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute(model);
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
-            return configuration;
-        }
+#endif
 
         private static IEdmModel CreateModelForFullMetadata(bool sameLinksForIdAndEdit, bool sameLinksForEditAndRead)
         {
@@ -1155,28 +1229,27 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 return property;
             }
         }
-    }
 
-    public class MainEntity
-    {
-        public int Id { get; set; }
-
-        public short Int16 { get; set; }
-
-        public RelatedEntity Related { get; set; }
-    }
-
-    public class RelatedEntity
-    {
-        public int Id { get; set; }
-    }
-
-    public class MainEntityController : ODataController
-    {
-        public IEnumerable<MainEntity> Get()
+        public class MainEntity
         {
-            MainEntity[] entities = new MainEntity[]
+            public int Id { get; set; }
+
+            public short Int16 { get; set; }
+
+            public RelatedEntity Related { get; set; }
+        }
+
+        public class RelatedEntity
+        {
+            public int Id { get; set; }
+        }
+
+        public class MainEntityController : ODataController
+        {
+            public IEnumerable<MainEntity> Get()
             {
+                MainEntity[] entities = new MainEntity[]
+                {
                 new MainEntity
                 {
                     Id = 1,
@@ -1195,9 +1268,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                         Id = 102
                     }
                 }
-            };
+                };
 
-            return new PageResult<MainEntity>(entities, new Uri("aa:b"), 3);
+                return new PageResult<MainEntity>(entities, new Uri("aa:b"), 3);
+            }
         }
     }
 }

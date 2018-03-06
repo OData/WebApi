@@ -3,13 +3,13 @@
 
 using System;
 using System.Linq;
-using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -62,11 +62,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataMessageWriter messageWriter = new ODataMessageWriter(requestMessage, settings);
             messageWriter.WriteEntityReferenceLink(new ODataEntityReferenceLink { Url = new Uri("http://localhost/samplelink") });
 
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(config, "OData");
             ODataMessageReaderSettings readSettings = new ODataMessageReaderSettings();
             ODataMessageReader messageReader = new ODataMessageReader(new MockODataRequestMessage(requestMessage), readSettings, model);
             ODataDeserializerContext context = new ODataDeserializerContext
             {
-                Request = new HttpRequestMessage(),
+                Request = request,
                 Path = new ODataPath(new NavigationPropertySegment(GetNavigationProperty(model), navigationSource: null))
             };
 
@@ -94,9 +96,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             IEdmNavigationProperty navigationProperty = GetNavigationProperty(model);
 
+            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(config, "OData");
             ODataDeserializerContext context = new ODataDeserializerContext
             {
-                Request = new HttpRequestMessage(),
+                Request = request,
                 Path = new ODataPath(new NavigationPropertySegment(navigationProperty, navigationSource: null))
             };
 

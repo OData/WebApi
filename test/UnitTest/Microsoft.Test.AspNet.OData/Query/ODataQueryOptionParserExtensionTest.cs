@@ -3,12 +3,12 @@
 
 using System.Linq;
 using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Routing;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -91,15 +91,13 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             string uri = "Http://localhost/RoutingCustomers?" + queryOption;
 
-            HttpConfiguration configuration = new HttpConfiguration();
             ODataUriResolver resolver = new ODataUriResolver
             {
                 EnableCaseInsensitive = true
             };
 
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.SetConfiguration(configuration);
-            request.EnableHttpDependencyInjectionSupport(b => b.AddService(ServiceLifetime.Singleton, sp => resolver));
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData", b => b.AddService(ServiceLifetime.Singleton, sp => resolver));
+            var request = RequestFactory.Create(HttpMethod.Get, uri, configuration, "OData");
 
             IEdmModel model = ODataRoutingModel.GetModel();
 

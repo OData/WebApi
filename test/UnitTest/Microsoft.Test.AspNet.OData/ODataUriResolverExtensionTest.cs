@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,9 +17,10 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -100,12 +102,12 @@ namespace Microsoft.Test.AspNet.OData
         private static HttpConfiguration GetConfiguration(bool caseInsensitive, bool unqualifiedNameCall)
         {
             IEdmModel model = ODataRoutingModel.GetModel();
-            HttpConfiguration config = new[]
+            HttpConfiguration config = RoutingConfigurationFactory.CreateWithTypes(new[]
             {
                 typeof(MetadataController),
                 typeof(ProductsController),
                 typeof(RoutingCustomersController),
-            }.GetHttpConfiguration();
+            });
 
             ODataUriResolver resolver = new ODataUriResolver();
             if (unqualifiedNameCall)
@@ -215,7 +217,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static HttpConfiguration GetQueryOptionConfiguration(bool caseInsensitive)
         {
-            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(ParserExtenstionCustomersController) });
             ODataUriResolver resolver = new ODataUriResolver();
             if (caseInsensitive)
             {
@@ -235,15 +237,15 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("gender='Male'", true, HttpStatusCode.OK)]
         [InlineData("gender='Male'", false, HttpStatusCode.NotFound)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK)]
+        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK)]
+        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", false, HttpStatusCode.OK)]
         [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.NotFound)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
+        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
         public async Task ExtensionResolver_Works_EnumPrefixFree(string parameter, bool enableEnumPrefix, HttpStatusCode statusCode)
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(ParserExtenstionCustomersController) });
             ODataUriResolver resolver = new ODataUriResolver();
             if (enableEnumPrefix)
             {
@@ -277,22 +279,22 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("$filter=Gender eq 'Male'", false, HttpStatusCode.BadRequest, null)]
         [InlineData("$filter=Gender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq 'Female'", false, HttpStatusCode.BadRequest, null)]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq 'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
         [InlineData("$filter=NullableGender eq 'Male'", true, HttpStatusCode.OK, "")]
-        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK, "")]
+        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "")]
         [InlineData("$filter=NullableGender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.TestCommon.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=NullableGender eq null", true, HttpStatusCode.OK, "0,2,4,6,8")]
         public async Task ExtensionResolver_Works_EnumPrefixFree_QueryOption(string query, bool enableEnumPrefix, HttpStatusCode statusCode, string output)
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomersController) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(ParserExtenstionCustomersController) });
             ODataUriResolver resolver = new ODataUriResolver();
             if (enableEnumPrefix)
             {
@@ -328,7 +330,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             IEdmModel model = GetEdmModel();
-            HttpConfiguration config = new[] { typeof(ParserExtenstionCustomers2Controller) }.GetHttpConfiguration();
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(ParserExtenstionCustomers2Controller) });
             config.MapODataServiceRoute("odata", "odata", model);
             HttpClient client = new HttpClient(new HttpServer(config));
 
@@ -348,7 +350,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ParserExtenstionCustomer>("ParserExtenstionCustomers");
             builder.EntitySet<ParserExtenstionCustomer>("ParserExtenstionCustomers2");
             builder.EntitySet<ParserExtenstionOrder>("ParserExtenstionOrders");
@@ -431,3 +433,4 @@ namespace Microsoft.Test.AspNet.OData
         public decimal Price { get; set; }
     }
 }
+#endif

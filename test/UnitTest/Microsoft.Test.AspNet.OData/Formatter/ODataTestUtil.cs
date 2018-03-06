@@ -10,12 +10,12 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 using Moq;
 
@@ -28,6 +28,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public const string Version4NumberString = "4.0";
         public static MediaTypeHeaderValue ApplicationJsonMediaType = MediaTypeHeaderValue.Parse("application/json");
         public static MediaTypeWithQualityHeaderValue ApplicationJsonMediaTypeWithQuality = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+        internal static ODataMediaTypeMapping ApplicationJsonMediaTypeWithQualityMapping =
+#if NETCORE
+            new ODataMediaTypeMapping(Microsoft.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json"));
+#else
+            new ODataMediaTypeMapping(ODataTestUtil.ApplicationJsonMediaTypeWithQuality);
+#endif
 
         public static async Task VerifyResponse(HttpContent actualContent, string expected)
         {
@@ -68,12 +75,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
                 var people = model.EntitySet<FormatterPerson>("People");
 
-                people.HasFeedSelfLink(context => new Uri(context.Url.CreateODataLink(new EntitySetSegment(
+                people.HasFeedSelfLink(context => new Uri(context.InternalUrlHelper.CreateODataLink(new EntitySetSegment(
                     context.EntitySetBase as IEdmEntitySet))));
                 people.HasIdLink(context =>
                 {
                     var keys = new[] {new KeyValuePair<string, object>("PerId", context.GetPropertyValue("PerId"))};
-                        return new Uri(context.Url.CreateODataLink(
+                        return new Uri(context.InternalUrlHelper.CreateODataLink(
                             new EntitySetSegment(context.NavigationSource as IEdmEntitySet),
                             new KeySegment(keys, context.StructuredType as IEdmEntityType, context.NavigationSource)));
                     },
@@ -147,7 +154,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 var president = model.Singleton<FormatterPerson>("President");
                 president.HasIdLink(context =>
                     {
-                        return new Uri(context.Url.CreateODataLink(new SingletonSegment((IEdmSingleton)context.NavigationSource)));
+                        return new Uri(context.InternalUrlHelper.CreateODataLink(new SingletonSegment((IEdmSingleton)context.NavigationSource)));
                     },
                     followsConventions: false);
 
@@ -391,7 +398,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public DateTimeOffset Birthday { get; set; }
     }
 
-    #region Navigation property binding
+#region Navigation property binding
 
     public class BindingCustomer
     {
@@ -430,5 +437,5 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public ICollection<BindingCity> UsCities { get; set; }
     }
 
-    #endregion
+#endregion
 }

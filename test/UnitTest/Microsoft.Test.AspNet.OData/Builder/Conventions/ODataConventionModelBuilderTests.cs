@@ -9,8 +9,6 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
@@ -18,8 +16,9 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Moq;
 using Xunit;
 
@@ -32,15 +31,21 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void Ctor_ThrowsForNullConfiguration()
         {
+#if NETCORE
+            ExceptionAssert.ThrowsArgumentNull(
+                () => new ODataConventionModelBuilder(provider: null),
+                "provider");
+#else
             ExceptionAssert.ThrowsArgumentNull(
                 () => new ODataConventionModelBuilder(configuration: null),
                 "configuration");
+#endif 
         }
 
         [Fact]
         public void Ignore_Should_AddToListOfIgnoredTypes()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.Ignore(typeof(object));
 
             Assert.True(builder.IsIgnoredType(typeof(object)));
@@ -49,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void IgnoreOfT_Should_AddToListOfIgnoredTypes()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.Ignore<object>();
 
             Assert.True(builder.IsIgnoredType(typeof(object)));
@@ -58,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void CanCallIgnore_MultipleTimes_WithDuplicates()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.Ignore<object>();
             builder.Ignore<object>();
             builder.Ignore(typeof(object), typeof(object), typeof(object));
@@ -71,11 +76,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         {
             var mockType1 = new MockType("Foo");
             var mockType2 = new MockType("Bar").BaseType(mockType1);
-            var mockAssembly = new MockAssembly(mockType1, mockType2);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(mockType1, mockType2);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             var entity1 = builder.AddEntityType(mockType1);
             var entity2 = builder.AddEntityType(mockType2);
@@ -92,11 +94,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var mockType2 = new MockType("Bar").BaseType(mockType1);
             var mockType3 = new MockType("ThirdLevel").BaseType(mockType2);
 
-            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(mockType1, mockType2, mockType3);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             var entity1 = builder.AddEntityType(mockType1);
             var entity3 = builder.AddEntityType(mockType3);
@@ -113,11 +112,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var mockType2 = new MockType("Bar").BaseType(mockType1).Property<int>("P1").Property<int>("P2");
             var mockType3 = new MockType("ThirdLevel").BaseType(mockType2).Property<int>("P1").Property<int>("P2");
 
-            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(mockType1, mockType2, mockType3);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             var entity1 = builder.AddEntityType(mockType1);
             entity1.AddProperty(mockType1.GetProperty("P1"));
@@ -142,11 +138,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var mockType3 = new MockType("Fo").BaseType(mockType2);
             var mockType4 = new MockType("Bar").BaseType(mockType1);
 
-            var mockAssembly = new MockAssembly(mockType1, mockType2, mockType3, mockType4);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(mockType1, mockType2, mockType3, mockType4);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             var entity1 = builder.AddEntityType(mockType1);
             builder.MapDerivedTypes(entity1);
@@ -160,7 +153,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Products()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<Product>("Products");
             modelBuilder.Singleton<Product>("Book"); // singleton
 
@@ -203,7 +196,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithCategoryComplexTypeAttribute()
         {
             // Arrange
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithCategoryComplexTypeAttribute>("Products");
 
             // Act
@@ -217,7 +210,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_ProductsWithKeyAttribute()
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithKeyAttribute>("Products");
 
             var model = modelBuilder.GetEdmModel();
@@ -252,7 +245,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithEnumKeyAttribute()
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntityType<ProductWithEnumKeyAttribute>();
 
             // Act
@@ -284,7 +277,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_ProductsWithFilterSortable()
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             var entityTypeConf = modelBuilder.EntityType<ProductWithFilterSortable>();
             modelBuilder.EntitySet<ProductWithFilterSortable>("Products");
             var model = modelBuilder.GetEdmModel();
@@ -321,7 +314,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_ProductsWithFilterSortableExplicitly()
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             var entityTypeConf = modelBuilder.AddEntityType(typeof(ProductWithFilterSortable));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NotFilterableProperty"));
             entityTypeConf.AddProperty(typeof(ProductWithFilterSortable).GetProperty("NotSortableProperty"));
@@ -356,7 +349,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithConcurrencyCheckAttribute()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithConcurrencyCheckAttribute>("Products");
 
             // Act
@@ -386,7 +379,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductsWithConcurrencyCheckAttribute_HasVocabuaryAnnotation()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithConcurrencyCheckAttribute>("Products");
 
             // Act
@@ -416,7 +409,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductWithTimestampAttribute()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithTimestampAttribute>("Products");
 
             // Act
@@ -440,7 +433,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ProductWithTimestampAttribute_HasVocabuaryAnnotation()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<ProductWithTimestampAttribute>("Products");
 
             // Act
@@ -472,7 +465,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [InlineData(typeof(List<Version>))]
         public void ModelBuilder_SupportsComplexCollectionWhenNotToldElementTypeIsComplex(Type complexCollectionPropertyType)
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             Type entityType =
                 new MockType("SampleType")
                 .Property<int>("ID")
@@ -497,7 +490,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [InlineData(typeof(List<Version>))]
         public void ModelBuilder_SupportsComplexCollectionWhenToldElementTypeIsComplex(Type complexCollectionPropertyType)
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             Type entityType =
                 new MockType("SampleType")
                 .Property<int>("ID")
@@ -522,7 +515,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [InlineData(typeof(string[]))]
         public void ModelBuilder_SupportsPrimitiveCollection(Type primitiveCollectionPropertyType)
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             Type entityType =
                 new MockType("SampleType")
                 .Property<int>("ID")
@@ -547,7 +540,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [InlineData(typeof(List<Product>))]
         public void ModelBuilder_DoesnotThrow_ForEntityCollection(Type collectionType)
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             Type entityType =
                 new MockType("SampleType")
                 .Property<int>("ID")
@@ -562,7 +555,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_CanBuild_ModelWithInheritance()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("Vehicles");
 
             IEdmModel model = builder.GetEdmModel();
@@ -604,7 +597,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_CanAddEntitiesInAnyOrder()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<SportBike>();
             builder.EntityType<Car>();
             builder.EntityType<Vehicle>();
@@ -617,7 +610,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Ignores_IgnoredTypeAndTheirDerivedTypes()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("Vehicles");
             builder.Ignore<Motorcycle>();
 
@@ -646,7 +639,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Can_Add_DerivedTypeOfAnIgnoredType()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("Vehicles");
             builder.Ignore<Motorcycle>();
             builder.EntityType<SportBike>();
@@ -681,7 +674,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Patches_BaseType_IfBaseTypeIsNotExplicitlySet()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
             builder.EntityType<Car>();
             builder.EntityType<Motorcycle>();
@@ -713,7 +706,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_DoesnotPatch_BaseType_IfBaseTypeIsExplicitlySet()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
             builder.EntityType<Car>().DerivesFromNothing();
             builder.EntityType<Motorcycle>().DerivesFromNothing();
@@ -746,7 +739,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Figures_AbstractnessOfEntityTypes()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
 
             IEdmModel model = builder.GetEdmModel();
@@ -764,7 +757,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_AbstractnessOfComplexTypes()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Vehicle>();
 
             // Act
@@ -787,7 +780,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_IfOnlyMappedTheEntityTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
 
             // Act
@@ -809,7 +802,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_IfOnlyMappedTheComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
 
             // Act
@@ -831,7 +824,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_IfOnlyMappedTheEntityTypeExplicitly_WithBaseAndDerivedTypeProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Park>();
 
             // Act
@@ -853,7 +846,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_IfOnlyMappedTheComplexTypeExplicitly_WithBaseAndDerivedTypeProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Park>();
 
             // Act
@@ -871,7 +864,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Null(creatureType);
         }
 
-        #region ClassInheritance
+#region ClassInheritance
         //    Zoo {  Id (int), SpecialAnimal (Animal) }
         //
         //                 Creature
@@ -879,13 +872,13 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         //                  Animal
         //                   /  \
         //               Human   Horse
-        #endregion
+#endregion
 
         [Fact]
         public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsEntityTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.EntityType<Creature>();
 
@@ -905,7 +898,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.ComplexType<Creature>();
 
@@ -925,7 +918,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsComplexTypeExplicitly_InReverseOrder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Creature>();
             builder.EntityType<Zoo>();
 
@@ -945,7 +938,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_Complex_AndBaseTypeMappedAsEntityTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
             builder.EntityType<Creature>();
 
@@ -965,7 +958,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_Complex_AndBaseTypeMappedAsEntityTypeExplicitly_InReverseOrder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Creature>();
             builder.ComplexType<Zoo>();
 
@@ -985,7 +978,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_Complex_AndBaseTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
             builder.ComplexType<Creature>();
 
@@ -1005,7 +998,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.EntityType<Human>();
 
@@ -1024,7 +1017,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly_InReverseOrder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Human>();
             builder.EntityType<Zoo>();
 
@@ -1043,7 +1036,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsEntityTypeExplicitly_DerivedTypeWithoutKey()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.EntityType<Human>().Ignore(c => c.HumanId);
 
@@ -1062,7 +1055,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.ComplexType<Human>();
 
@@ -1085,7 +1078,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityType_AndDerivedTypeMappedAsComplexTypeExplicitly_InReverseOrder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Human>();
             builder.EntityType<Zoo>();
 
@@ -1108,7 +1101,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_ComplexType_AndDerivedTypeMappedAsEntityTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
             builder.EntityType<Human>();
 
@@ -1127,7 +1120,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_ComplexType_AndDerivedTypeMappedAsEntityTypeExplicitly_InReverseOrder()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Human>();
             builder.ComplexType<Zoo>();
 
@@ -1146,7 +1139,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_ComplexType_AndDerivedTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
             builder.ComplexType<Human>();
 
@@ -1165,7 +1158,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_ComplexType_AndBaseTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Zoo>();
             builder.ComplexType<Creature>();
 
@@ -1185,7 +1178,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityTypeWithBaseAndDerivedProperties_AndDerivedTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<ZooHorse>();
             builder.ComplexType<Human>();
 
@@ -1216,7 +1209,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ThrowsException_EntityType_AndDerivedTypesMappedDifferentTypesExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Zoo>();
             builder.ComplexType<Human>();
             builder.EntityType<Horse>();
@@ -1232,7 +1225,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_EntityTypeWithBaseAndSilbingProperties_AndDerivedTypeMappedAsComplexTypeExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<PlantParkWithOceanPlantAndJasmine>();
             builder.ComplexType<Mangrove>();
             builder.EntityType<Flower>();
@@ -1282,7 +1275,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ThrowsException_EntityType_AndSubDerivedTypesMappedDifferentTypesExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<PlantPark>();
             builder.ComplexType<Phycophyta>();
             builder.EntityType<Jasmine>();
@@ -1297,7 +1290,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_Doesnot_Override_AbstractnessOfEntityTypes_IfSet()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
             builder.EntityType<Motorcycle>().Abstract();
 
@@ -1312,7 +1305,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Doesnot_Override_AbstractnessOfComplexTypes_IfSet()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Vehicle>();
             builder.ComplexType<Motorcycle>().Abstract();
 
@@ -1328,7 +1321,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_CanHaveAnAbstractDerivedTypeOfConcreteBaseType()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
             builder.EntityType<SportBike>().Abstract();
 
@@ -1345,7 +1338,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_TypesInInheritanceCanHaveComplexTypes()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("vehicles");
 
             // Act
@@ -1362,7 +1355,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_TypesInInheritance_CanSetBaseComplexTypes()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<ManufacturerAddress>();
 
             // Act
@@ -1379,7 +1372,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ModelAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
             builder.EntitySet<ModelAlias>("ModelAliases");
 
             // Act
@@ -1400,7 +1393,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_PropertyAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
             builder.EntitySet<PropertyAlias>("PropertyAliases");
 
             // Act
@@ -1421,7 +1414,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DerivedClassPropertyAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
             builder.EntitySet<PropertyAlias>("PropertyAliases");
 
             // Act
@@ -1443,7 +1436,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_PropertyNotAliased_IfPropertyAddedExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
             EntitySetConfiguration<PropertyAlias> entitySet = builder.EntitySet<PropertyAlias>("PropertyAliases");
             entitySet.EntityType.Property(p => p.FirstName).Name = "GivenName";
             entitySet.EntityType.Property(p => p.Points).Name = "Score";
@@ -1462,7 +1455,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DerivedClassPropertyNotAliased_IfPropertyAddedExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = true };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
             EntityTypeConfiguration<PropertyAliasDerived> derived = builder.EntityType<PropertyAliasDerived>()
                 .DerivesFrom<PropertyAlias>();
             derived.Property(p => p.LastName).Name = "FamilyName";
@@ -1482,7 +1475,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_Figures_Bindings_For_DerivedNavigationProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("vehicles");
             builder.Singleton<Vehicle>("MyVehicle");
             builder.EntitySet<Manufacturer>("manufacturers");
@@ -1530,7 +1523,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_BindsToTheClosestEntitySet_ForNavigationProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Vehicle>("vehicles");
             builder.Singleton<Vehicle>("MyVehicle");
             builder.EntitySet<CarManufacturer>("car_manufacturers");
@@ -1579,7 +1572,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_BindsToAllEntitySets()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             builder.EntitySet<Vehicle>("vehicles");
             builder.EntitySet<Car>("cars");
@@ -1626,7 +1619,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_OnSingleton_BindsToAllEntitySets()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<CarManufacturer>("CarManfacturers");
             builder.EntitySet<MotorcycleManufacturer>("MotoerCycleManfacturers");
             builder.Singleton<Vehicle>("MyVehicle");
@@ -1674,7 +1667,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_BindingsTo_WithComplexTypePath()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<ManufacturerAddress>().HasKey(a => a.City);
             builder.ComplexType<Manufacturer>(); // Manufacturer is a complex type
 
@@ -1717,7 +1710,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_BindingsTo_WithComplexTypePath_BindAllPathToEntitySet()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<BindingCustomer>("Customers");
             builder.EntitySet<BindingCity>("Cities");
 
@@ -1777,7 +1770,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_OnSingleton_OnlyHasOneBinding_WithoutAnyEntitySets()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<Employee>("Gibs");
 
             // Act
@@ -1796,7 +1789,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_OnSingleton_HasBindings_WithEntitySet()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<Employee>("Gates");
             builder.EntitySet<Customer>("Customers");
 
@@ -1831,11 +1824,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(typeof(int), "DerivedTypeId")
                 .BaseType(baseType);
 
-            MockAssembly assembly = new MockAssembly(baseType, derivedType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseType, derivedType);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
@@ -1850,7 +1840,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_CanDeclareAbstractEntityTypeWithoutKey()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(typeof(AbstractEntityType));
 
             // Act
@@ -1870,7 +1860,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_CanDeclareKeyOnDerivedType_IfBaseEntityTypeWithoutKey()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BaseAbstractEntityType>();
 
             // Act
@@ -1899,7 +1889,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DeclareKeyOnDerivedTypeAndSubDerivedType_Throws()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BaseAbstractEntityType2>();
 
             // Act & Assert
@@ -1913,7 +1903,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DeclareNavigationSourceOnAbstractEntityTypeWithKeyThrows()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<AbstractEntityType>("entitySet");
 
             // Act & Assert
@@ -1935,11 +1925,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(typeof(int), "DerivedTypeId")
                 .BaseType(baseType);
 
-            MockAssembly assembly = new MockAssembly(baseType, derivedType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
-            var builder = new ODataConventionModelBuilder(configuration, isQueryCompositionMode: true);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseType, derivedType);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration, isQueryCompositionMode: true);
 
             builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
@@ -1965,11 +1952,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(typeof(Color), "DerivedTypeId")
                 .BaseType(baseType);
 
-            MockAssembly assembly = new MockAssembly(baseType, derivedType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
-            var builder = new ODataConventionModelBuilder(configuration, isQueryCompositionMode: true);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseType, derivedType);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration, isQueryCompositionMode: true);
 
             builder.AddEntitySet("bases", builder.AddEntityType(baseType));
 
@@ -2007,11 +1991,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(typeof(int), "ID")
                 .Property(baseComplexType.Object, "ComplexProperty");
 
-            MockAssembly assembly = new MockAssembly(baseComplexType, derivedComplexType, entityType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseComplexType, derivedComplexType, entityType);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             builder.AddEntitySet("entities", builder.AddEntityType(entityType));
 
@@ -2037,11 +2018,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(typeof(int), "ID")
                 .Property(baseComplexType.Object, "ComplexProperty");
 
-            MockAssembly assembly = new MockAssembly(baseComplexType, derivedComplexType, entityType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
-            var builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseComplexType, derivedComplexType, entityType);
+            var builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             builder.AddEntitySet("entities", builder.AddEntityType(entityType));
             builder.AddComplexType(baseComplexType);
@@ -2088,7 +2066,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [MemberData(nameof(ModelBuilder_PrunesUnReachableTypes_Data))]
         public void ModelBuilder_PrunesUnReachableTypes(MockType type)
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddEntityType(type);
 
             var model = modelBuilder.GetEdmModel();
@@ -2098,7 +2076,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         [Fact]
         public void ModelBuilder_DeepChainOfComplexTypes()
         {
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
 
             MockType entityType =
                 new MockType("SampleType")
@@ -2141,7 +2119,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 complexType.Property(entityType, "NavProperty", new RequiredAttribute());
             }
 
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddEntityType(entityType);
             modelBuilder.AddComplexType(complexType);
 
@@ -2177,7 +2155,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             MockType entityType = new MockType("EntityType").Property<int>("Id");
             MockType complexType = new MockType("ComplexType").Property(entityType.AsCollection(), "CollectionProperty");
 
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddEntityType(entityType);
             modelBuilder.AddComplexType(complexType);
 
@@ -2213,7 +2191,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 new MockType("ComplexTypeWithComplexCollection")
                 .Property<Version[]>("CollectionProperty");
 
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddComplexType(complexType);
 
             var model = modelBuilder.GetEdmModel();
@@ -2234,7 +2212,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property<Version[]>("CollectionProperty");
 
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddEntityType(entityType);
 
             var model = modelBuilder.GetEdmModel();
@@ -2259,7 +2237,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(complexTypeWithComplexCollection, "ComplexProperty");
 
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.AddEntityType(entityType);
 
             var model = modelBuilder.GetEdmModel();
@@ -2286,7 +2264,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(type1, "Relation");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type2).AddNavigationProperty(type2.GetProperty("Relation"), EdmMultiplicity.One);
 
             IEdmModel model = builder.GetEdmModel();
@@ -2305,7 +2283,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             MockPropertyInfo pi = type.GetProperty("Item");
             pi.Setup(p => p.GetIndexParameters()).Returns(new[] { new Mock<ParameterInfo>().Object }); // make it indexer
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddComplexType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -2325,7 +2303,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 }
             }.GetType();
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(new HttpConfiguration(), isQueryCompositionMode: true);
+            var configuration = RoutingConfigurationFactory.Create();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration, isQueryCompositionMode: true);
             builder.AddEntitySet("entityset", builder.AddEntityType(entityType));
 
             IEdmModel model = builder.GetEdmModel();
@@ -2346,7 +2325,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property(propertyType, "Collection");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var entityType = builder.AddEntityType(type);
             builder.AddEntitySet("entityset", entityType);
 
@@ -2363,7 +2342,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property<int>("ID")
                 .Property<object[]>("Collection");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             var entityType = builder.AddEntityType(type);
             entityType.AddCollectionProperty(type.GetProperty("Collection"));
             builder.AddEntitySet("entityset", entityType);
@@ -2394,7 +2373,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(complexBase, "ComplexBase")
                 .Property(complexDerived, "ComplexDerived");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(entity);
 
             // Act
@@ -2419,10 +2398,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             MockType complexBase = new MockType("ComplexBase").Property<string>("BaseProperty");
             MockType complexDerived = new MockType("ComplexBase").BaseType(complexBase).Property<int>("DerivedProperty");
 
-            MockAssembly mockAssembly = new MockAssembly(complexBase, complexDerived);
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(complexBase, complexDerived);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration);
             builder.AddComplexType(complexBase);
 
             // Act
@@ -2447,7 +2424,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 new MockType("entity")
                 .Property<int>("ID");
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntitySet("entities", builder.AddEntityType(entity));
             builder.OnModelCreating = (modelBuilder) =>
                 {
@@ -2480,10 +2457,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .BaseType(baseType)
                 .Property<int>("DerivedTypeProperty");
 
-            var mockAssembly = new MockAssembly(baseType, derivedType);
-
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseType, derivedType);
             var builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>(configuration);
 
             // Act
@@ -2505,10 +2479,8 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             MockType baseType = new MockType("BaseType").Property<int>("BaseProperty");
             MockType derivedType = new MockType("DerivedType").BaseType(baseType).Property<int>("DerivedProperty");
 
-            MockAssembly mockAssembly = new MockAssembly(baseType, derivedType);
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(mockAssembly));
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(baseType, derivedType);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create(configuration);
 
             // Act
             ComplexTypeConfiguration baseComplex = builder.AddComplexType(baseType);
@@ -2548,7 +2520,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                 .Property(relatedEntity.AsCollection(), "ExplicitlyAddedNavigationCollection")
                 .Property(relatedEntity.AsCollection(), "InferredNavigationCollection");
 
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             var entity = builder.AddEntityType(type);
             entity.AddProperty(type.GetProperty("ExplicitlyAddedPrimitive"));
             entity.AddCollectionProperty(type.GetProperty("ExplicitlyAddedPrimitiveCollection"));
@@ -2582,7 +2554,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_GetEdmModel_HasContainment()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<MyOrder>("MyOrders");
 
             // Act & Assert
@@ -2602,7 +2574,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_GetEdmModel_DerivedTypeHasContainment()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<MySpecialOrder>("MySpecialOrders");
 
             // Act & Assert
@@ -2623,7 +2595,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_SetIdWithTypeNamePrefixAsKey_IfNoKeyAttribute()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<EntityKeyConventionTests_Album1>();
 
             // Act
@@ -2640,7 +2612,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_SetIdAsKey_IfNoKeyAttribute()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<EntityKeyConventionTests_Album2>();
 
             // Act
@@ -2657,7 +2629,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_EntityKeyConvention_DoesNothing_IfKeyAttribute()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<EntityKeyConventionTests_AlbumWithKey>();
 
             // Act
@@ -2674,7 +2646,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_MappedDerivedTypeHasNoAliasedBaseProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EntitySetConfiguration<BaseEmployee> employees = builder.EntitySet<BaseEmployee>("Employees");
             EntityTypeConfiguration<BaseEmployee> employee = employees.EntityType;
             employee.EnumProperty<Gender>(e => e.Sex).Name = "gender";
@@ -2693,7 +2665,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_MediaTypeAttribute()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<Vehicle>();
 
             // Act
@@ -2707,7 +2679,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_RequiredAttribute_WorksOnComplexTypeProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<RequiredEmployee>("Employees");
 
             // Act
@@ -2723,7 +2695,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_QueryLimitAttributes_WorksOnComplexTypeProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<QueryLimitEmployee>("Employees");
 
             // Act
@@ -2741,7 +2713,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ForeignKeyCustomer>("Customers");
 
             // Act
@@ -2765,7 +2737,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ForeignKeyCustomer>("Customers");
 
             // Act
@@ -2791,7 +2763,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_ForeignKeyAttribute_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(entityType);
 
             // Act
@@ -2817,7 +2789,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ODataConventionModelBuilder_ForeignKeyDiscovery_WorksOnNavigationProperty_PrincipalOnBaseType(Type entityType)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(entityType);
 
             // Act
@@ -2841,7 +2813,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void AddDynamicDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInOpenEntityType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BadOpenEntityType>();
 
             // Act & Assert
@@ -2856,7 +2828,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void AddDynamicDictionary_ThrowsException_IfBaseAndDerivedHasDynamicPropertyDictionary()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BadBaseOpenEntityType>();
 
             // Act & Assert
@@ -2871,7 +2843,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_Works_ForDateTime()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<DateTimeModel>();
 
             // Act
@@ -2903,7 +2875,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_WorksOnConventionModelBuilder_ForOpenEntityType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<EntityTypeTest.SimpleOpenEntityType>();
 
             // Act
@@ -2923,7 +2895,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_WorksOnConventionModelBuilder_ForDerivedOpenEntityType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BaseOpenEntityType>();
 
             // Act
@@ -2954,7 +2926,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_WorksOnConventionModelBuilder_ForBaseEntityType_DerivedOpenEntityType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<BaseEntityType>();
 
             // Act
@@ -2977,7 +2949,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_Works_ForOpenEntityTypeWithDerivedDynamicProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<OpenEntityTypeWithDerivedDynamicProperty>();
 
             // Act
@@ -2995,7 +2967,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void GetEdmModel_ThrowsExpcetion_ForRecursiveLoopOfComplexType()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<RecursiveEmployee>();
 
             // Act & Assert
@@ -3009,7 +2981,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ConventionModelBuilder_Work_With_ExpilitPropertyDeclare()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
 
             // Act 
             var user = builder.EntitySet<IdentityUser>("IdentityUsers");
@@ -3035,7 +3007,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ConventionModelBuild_Work_With_AutoExpandEdmTypeAttribute()
         {
             // Arrange
-            var modelBuilder = new ODataConventionModelBuilder();
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
             var entityTypeConf = modelBuilder.EntityType<Product>();
 
             // Act 
@@ -3053,7 +3025,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void CanConfig_SystemCultureInfo_AsEntityType()
         {
             // Arrange
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntityType<CultureInfo>().HasKey(c => c.LCID);
 
             // Act
@@ -3089,7 +3061,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void CanConfig_SystemCultureInfo_AsComplexType()
         {
             // Arrange
-            ODataModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.ComplexType<CultureInfo>();
 
             // Act
@@ -3145,7 +3117,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void CanConfig_DateTimeRelatedProperties_Correctly()
         {
             // Arrange
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntityType<DateTimeRelatedModel>();
 
             // Act
@@ -3193,7 +3165,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void CanConfig_MaxLengthOfStringAndBinaryType()
         {
             // Arrange
-            ODataModelBuilder modelBuidler = new ODataConventionModelBuilder();
+            ODataModelBuilder modelBuidler = ODataConventionModelBuilderFactory.Create();
             modelBuidler.EntitySet<MaxLengthEntity>("MaxLengthEntity");
             var entityType = modelBuidler.EntityType<MaxLengthEntity>();
 

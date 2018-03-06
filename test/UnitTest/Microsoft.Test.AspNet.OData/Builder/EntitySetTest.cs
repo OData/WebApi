@@ -10,8 +10,8 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.TestCommon;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builderr

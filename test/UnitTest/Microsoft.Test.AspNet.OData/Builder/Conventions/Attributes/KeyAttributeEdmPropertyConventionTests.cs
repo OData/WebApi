@@ -6,7 +6,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AddsKey_EntityTypeConfiguration()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_IgnoresKey_NonEntityTypeConfiguration()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
@@ -71,7 +72,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_IgnoresKey_ComplexProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
@@ -95,7 +96,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_IgnoresKey_NavigationProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");
@@ -119,7 +120,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AddsEnumKey_EntityTypeConfiguration()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             Mock<PropertyInfo> property = new Mock<PropertyInfo>();
             property.Setup(p => p.Name).Returns("Property");

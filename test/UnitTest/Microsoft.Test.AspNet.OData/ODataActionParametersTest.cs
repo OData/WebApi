@@ -9,7 +9,8 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
@@ -120,7 +121,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetModel()
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ContainerName = "Container";
             builder.Namespace = "org.odata";
             // Action with no overloads

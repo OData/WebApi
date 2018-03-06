@@ -6,7 +6,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -34,7 +35,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             structuralProperty.Object.AddedExplicitly = false;
 
             // Act
-            new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
+            new RequiredAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(typeof(int?), "Count", new RequiredAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -68,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(anotherType, "RelatedEntity", new RequiredAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -84,7 +85,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(typeof(int), "Count", new RequiredAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
 
             IEdmModel model = builder.GetEdmModel();
@@ -104,7 +105,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "ID")
                 .Property(anotherType, "RelatedEntity", new RequiredAttribute());
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type).AddNavigationProperty(type.GetProperty("RelatedEntity"), EdmMultiplicity.ZeroOrOne);
 
             IEdmModel model = builder.GetEdmModel();

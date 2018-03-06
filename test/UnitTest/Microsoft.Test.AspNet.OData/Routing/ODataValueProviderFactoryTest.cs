@@ -1,6 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Net.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Xunit;
+#else
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -10,9 +19,13 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
+#endif
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataValueProviderFactoryTest
@@ -28,7 +41,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void GetValueProvider_ReturnsValueProvider_BackedByRoutingStore()
         {
             // Arrange
-            HttpRequestMessage request = new HttpRequestMessage();
+            var request = RequestFactory.Create();
             request.ODataProperties().RoutingConventionsStore["ID"] = 42;
             HttpActionContext actionContext = new HttpActionContext { ControllerContext = new HttpControllerContext { Request = request } };
             ODataValueProviderFactory factory = new ODataValueProviderFactory();
@@ -49,7 +62,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             MockAssembly assembly = new MockAssembly(typeof(TestController));
             server.Configuration.Services.Replace(typeof(IAssembliesResolver), new TestAssemblyResolver(assembly));
 
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<TestClass>("Test");
             server.Configuration.MapODataServiceRoute("odata", "", builder.GetEdmModel());
             HttpClient client = new HttpClient(server);
@@ -60,7 +73,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             var response = await client.SendAsync(request);
 
             // Assert
-            TestClass result = await response.Content.ReadAsAsync<TestClass>();
+            TestClass result = await response.Content.ReadAsObject<TestClass>();
             Assert.Equal(42, result.Id);
         }
 
@@ -78,3 +91,4 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
     }
 }
+#endif

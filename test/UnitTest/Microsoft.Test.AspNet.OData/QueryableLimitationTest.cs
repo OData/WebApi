@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
@@ -27,12 +29,12 @@ namespace Microsoft.Test.AspNet.OData
 
         public QueryableLimitationTest()
         {
-            _configuration = new[]
+            _configuration = RoutingConfigurationFactory.CreateWithTypes(new[]
             {
                 typeof(QueryLimitCustomersController),
                 typeof(OpenCustomersController),
                 typeof(MetadataController)
-            }.GetHttpConfiguration();
+            });
 
             _model = GetEdmModel();
 
@@ -44,7 +46,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private static IEdmModel GetEdmModel()
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EntitySetConfiguration<QueryLimitCustomer> customers = builder.EntitySet<QueryLimitCustomer>("QueryLimitCustomers");
             EntitySetConfiguration<QueryLimitOrder> orders = builder.EntitySet<QueryLimitOrder>("QueryLimitOrders");
 
@@ -557,3 +559,4 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
+#endif

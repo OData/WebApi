@@ -5,10 +5,10 @@ using System;
 using System.Reflection;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.OData.Query.Expressions
+namespace Microsoft.Test.AspNet.OData.Query.Expressions
 {
     /// <summary>
     /// Tests to UriFunctions binder.

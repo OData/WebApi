@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes

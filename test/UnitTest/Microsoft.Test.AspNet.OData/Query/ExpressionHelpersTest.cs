@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query

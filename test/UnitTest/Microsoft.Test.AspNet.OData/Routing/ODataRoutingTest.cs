@@ -1,6 +1,25 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -9,49 +28,61 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {
     public class ODataRoutingTest
     {
-        private readonly HttpServer _nullPrefixServer;
         private readonly HttpClient _nullPrefixClient;
-        private readonly HttpServer _fixedPrefixServer;
         private readonly HttpClient _fixedPrefixClient;
-        private readonly HttpServer _parameterizedPrefixServer;
         private readonly HttpClient _parameterizedPrefixClient;
 
         public ODataRoutingTest()
         {
             var model = ODataRoutingModel.GetModel();
 
-            // Separate clients and servers so routes are not ambiguous.
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.MapODataServiceRoute("NullPrefixRoute", null, model);
+            var controllers = new[]
+            {
+                typeof(DateTimeOffsetKeyCustomersController),
+                typeof(MetadataController),
+                typeof(RoutingCustomersController),
+                typeof(ProductsController),
+                typeof(EnumCustomersController),
+                typeof(DestinationsController),
+            };
 
-            _nullPrefixServer = CreateServer(configuration);
-            _nullPrefixClient = new HttpClient(_nullPrefixServer);
+            // Separate clients and servers so routes are not ambiguous.
+            var nullPrefixServer = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("NullPrefixRoute", null, model);
+            });
+
+            _nullPrefixClient = TestServerFactory.CreateClient(nullPrefixServer);
 
             // FixedPrefixRoute has both a non-empty virtual path root and a fixed route prefix.
-            configuration = new HttpConfiguration(new HttpRouteCollection("MyRoot"));
-            configuration.MapODataServiceRoute("FixedPrefixRoute", "odata", model);
+            var fixedPrefixServer = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("FixedPrefixRoute", "MyRoot/odata", model);
+            });
 
-            _fixedPrefixServer = CreateServer(configuration);
-            _fixedPrefixClient = new HttpClient(_fixedPrefixServer);
+            _fixedPrefixClient = TestServerFactory.CreateClient(fixedPrefixServer);
 
-            configuration = new HttpConfiguration();
-            configuration.MapODataServiceRoute("ParameterizedPrefixRoute", "{a}", model);
+            var parameterizedPrefixServer = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("ParameterizedPrefixRoute", "{a}", model);
+            });
 
-            _parameterizedPrefixServer = CreateServer(configuration);
-            _parameterizedPrefixClient = new HttpClient(_parameterizedPrefixServer);
+            _parameterizedPrefixClient = TestServerFactory.CreateClient(parameterizedPrefixServer);
         }
 
         public static TheoryDataSet<string, string, string> ServiceAndMetadataRoutes
@@ -216,31 +247,31 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     // functions with enum type parameter
                     { "GET",
                         "RoutingCustomers/Default.BoundFuncWithEnumParameters(" +
-                            "SimpleEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Four')",
+                            "SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1'," +
+                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Four')",
                         "BoundFuncWithEnumParameters(Second,One, Four)" },
                     { "GET",
                         "RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(" +
-                            "SimpleEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First')",
+                            "SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First')",
                         "BoundFuncWithEnumParameterForAttributeRouting(First)" },
                     { "GET",
-                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'ThirdLong'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'7')",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7')",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     // The OData ABNF doesn't allow spaces within enum literals. But ODL _requires_ spaces after commas.
                     { "GET",
-                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'ThirdLong'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Two, Four')",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Two, Four')",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     { "GET",
                         "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
-                            "@long=Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'ThirdLong'&" +
-                            "@flags=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'7'",
+                            "@long=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7'",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     { "GET",
                         "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
-                            "@long=Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'ThirdLong'&" +
-                            "@flags=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'One, Two, Four'",
+                            "@long=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Two, Four'",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     // unmapped requests
                     { "GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key" },
@@ -330,7 +361,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
-            Assert.Equal(expectedResponse, (response.Content as ObjectContent<string>).Value);
+            Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
         [Theory]
@@ -446,25 +477,6 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             string responseString = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectedError, responseString);
-        }
-
-        private static HttpServer CreateServer(HttpConfiguration configuration)
-        {
-            // Need the MetadataController to resolve the service document as well as $metadata.
-            var controllers = new[]
-            {
-                typeof(DateTimeOffsetKeyCustomersController),
-                typeof(MetadataController),
-                typeof(RoutingCustomersController),
-                typeof(ProductsController),
-                typeof(EnumCustomersController),
-                typeof(DestinationsController),
-            };
-
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-
-            return new HttpServer(configuration);
         }
     }
 
@@ -800,10 +812,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
     }
 
-    public class EnumCustomersController : ODataController
+    public class EnumCustomersController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(new[]
             {

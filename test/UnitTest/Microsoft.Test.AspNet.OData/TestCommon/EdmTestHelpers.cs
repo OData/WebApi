@@ -15,7 +15,7 @@ using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 
-namespace Microsoft.Test.AspNet.OData.TestCommon
+namespace Microsoft.Test.AspNet.OData.Common
 {
     internal static class EdmTestHelpers
     {

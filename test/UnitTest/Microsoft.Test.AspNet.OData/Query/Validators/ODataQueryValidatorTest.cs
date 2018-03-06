@@ -9,7 +9,8 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -67,8 +68,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         [Fact]
         public void ValidateThrowsOnNullSettings()
         {
-            HttpRequestMessage message = new HttpRequestMessage();
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create();
 
             ExceptionAssert.Throws<ArgumentNullException>(() =>
                 _validator.Validate(new ODataQueryOptions(_context, message), null));
@@ -114,8 +114,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void AllowedQueryOptions_SucceedIfAllowed(AllowedQueryOptions allow, string query, string unused)
         {
             // Arrange
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?$" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
@@ -133,8 +132,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void AllowedQueryOptions_ThrowIfNotAllowed(AllowedQueryOptions exclude, string query, string optionName)
         {
             // Arrange
-            var message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
             var option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
@@ -155,8 +153,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void AllowedQueryOptions_ThrowIfNoneAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
-            var message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
             var option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
@@ -177,8 +174,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void SupportedQueryOptions_SucceedIfGroupAllowed(AllowedQueryOptions unused, string query, string unusedName)
         {
             // Arrange
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?$" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
@@ -196,8 +192,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void SupportedQueryOptions_ThrowIfGroupNotAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
-            var message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
             var option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
@@ -218,8 +213,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void UnsupportedQueryOptions_SucceedIfGroupAllowed(AllowedQueryOptions unused, string query, string unusedName)
         {
             // Arrange
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?$" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
@@ -237,8 +231,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void UnsupportedQueryOptions_ThrowIfGroupNotAllowed(AllowedQueryOptions unused, string query, string optionName)
         {
             // Arrange
-            var message = new HttpRequestMessage(HttpMethod.Get, new Uri("http://localhost/?" + query));
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
             var option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
@@ -258,8 +251,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Validators
         public void Validate_ValidatesSelectExpandQueryOption_IfItIsNotNull()
         {
             // Arrange
-            HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$expand=Contacts/Contacts");
-            message.EnableHttpDependencyInjectionSupport();
+            var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$expand=Contacts/Contacts");
             ODataQueryOptions option = new ODataQueryOptions(_context, message);
 
             Mock<SelectExpandQueryValidator> selectExpandValidator = new Mock<SelectExpandQueryValidator>(new DefaultQuerySettings());

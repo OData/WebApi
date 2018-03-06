@@ -2,51 +2,38 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Models;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
     public class ComplexTypeTest
     {
-        private readonly ODataMediaTypeFormatter _formatter;
-
-        public ComplexTypeTest()
-        {
-            _formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Resource }) { Request = GetSampleRequest() };
-            _formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
-            _formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationXml));
-        }
-
         [Fact]
         public async Task ComplexTypeSerializesAsOData()
         {
             // Arrange
-            ObjectContent<Person> content = new ObjectContent<Person>(new Person(0, new ReferenceDepthContext(7)),
-                _formatter, MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
+            var config = RoutingConfigurationFactory.Create();
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config);
+            var payload = new ODataPayloadKind[] { ODataPayloadKind.Resource };
+            var formatter = FormatterTestHelper.GetFormatter(payload, request, GetSampleModel());
+            var content = FormatterTestHelper.GetContent(new Person(0, new ReferenceDepthContext(7)), formatter,
+                ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 
             // Act & Assert
-            JsonAssert.Equal(Resources.PersonComplexType, await content.ReadAsStringAsync());
-        }
-
-        private static HttpRequestMessage GetSampleRequest()
-        {
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/property");
-            request.EnableODataDependencyInjectionSupport(GetSampleModel());
-            request.GetConfiguration().Routes.MapFakeODataRoute();
-            return request;
+            JsonAssert.Equal(Resources.PersonComplexType, await FormatterTestHelper.GetContentResult(content, request));
         }
 
         private static IEdmModel GetSampleModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<Person>();
 
             // Employee is derived from Person. Employee has a property named manager it's Employee type.

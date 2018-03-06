@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query
@@ -21,7 +21,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
         public ParameterAliasNodeTranslatorTest()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ParameterAliasCustomer>("Customers");
             builder.EntitySet<ParameterAliasOrder>("Orders");
 

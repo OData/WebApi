@@ -12,8 +12,9 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.TestCommon;
-using Microsoft.Test.AspNet.OData.TestCommon.Types;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -1094,14 +1095,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'123'")]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'-9999'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'999'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'-12345'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'123'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'-9999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'-12345'")]
         public void CanParseUndefinedEnumValue(Type enumerationType, string enumerationExpression)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EnumTypeConfiguration enumTypeConfiguration = builder.AddEnumType(enumerationType);
             FunctionConfiguration functionConfiguration = builder.Function("FunctionWithEnumParam");
             functionConfiguration.AddParameter("Enum", enumTypeConfiguration);
@@ -1114,14 +1115,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'First, Second'")]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'UnknownValue'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'UnknownValue'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'abc'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First, Second'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'abc'")]
         public void CannotParseInvalidEnumValue(Type enumerationType, string enumerationExpression)
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             EnumTypeConfiguration enumTypeConfiguration = builder.AddEnumType(enumerationType);
             FunctionConfiguration functionConfiguration = builder.Function("FunctionWithEnumParam");
             functionConfiguration.AddParameter("Enum", enumTypeConfiguration);
@@ -1371,7 +1372,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParse_FunctionParametersAlias_WithUnresolvedPathSegment()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ConventionCustomer>("Customers");
             FunctionConfiguration function = builder.Function("UnboundFunction");
             function.Parameter<int>("P1");
@@ -1399,7 +1400,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParse_UntouchedFunctionParametersAlias_WithUnresolvedPathSegment()
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ConventionCustomer>("Customers");
             FunctionConfiguration function = builder.Function("UnboundFunction");
             function.Parameter<int>("P1");
@@ -2077,7 +2078,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void DefaultODataPathHandler_Throws_NotNavigablePropertyInPath(string path)
         {
             // Arrange
-            var builder = new ODataConventionModelBuilder();
+            var builder = ODataConventionModelBuilderFactory.Create();
             var customer = builder.EntitySet<ODataRoutingModel.RoutingCustomer>("Customers").EntityType;
             customer.HasMany(c => c.Products).IsNotNavigable();
             builder.EntitySet<ODataRoutingModel.Product>("Products");
@@ -2333,11 +2334,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 {
                     { "UnboundFuncWithEnumParameters(LongEnum='ThirdLong', FlagsEnum='7')",
                       "~/unboundfunction",
-                      "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.LongEnum'2',FlagsEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'7')" },
+                      "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'2',FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7')" },
 
                     { "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum='1', FlagsEnum='One, Four')",
                       "~/entityset/function",
-                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.SimpleEnum'1',FlagsEnum=Microsoft.Test.AspNet.OData.TestCommon.Types.FlagsEnum'5')"}
+                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'5')"}
                 };
             }
         }

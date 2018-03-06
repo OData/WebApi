@@ -7,6 +7,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
@@ -16,15 +17,12 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
     {
         [Theory]
         [InlineData(typeof(StructuralTypeConfiguration), typeof(StructuralTypeConfiguration), true)]
-        //[InlineData(typeof(StructuralTypeConfiguration), typeof(StructuralTypeConfiguration), false)]
         [InlineData(typeof(StructuralTypeConfiguration), typeof(ComplexTypeConfiguration), false)]
         [InlineData(typeof(StructuralTypeConfiguration), typeof(EntityTypeConfiguration), false)]
         [InlineData(typeof(ComplexTypeConfiguration), typeof(StructuralTypeConfiguration), true)]
-        //[InlineData(typeof(ComplexTypeConfiguration), typeof(StructuralTypeConfiguration), false)]
         [InlineData(typeof(ComplexTypeConfiguration), typeof(ComplexTypeConfiguration), true)]
         [InlineData(typeof(ComplexTypeConfiguration), typeof(EntityTypeConfiguration), false)]
         [InlineData(typeof(EntityTypeConfiguration), typeof(StructuralTypeConfiguration), true)]
-        //[InlineData(typeof(EntityTypeConfiguration), typeof(StructuralTypeConfiguration), false)]
         [InlineData(typeof(EntityTypeConfiguration), typeof(ComplexTypeConfiguration), false)]
         [InlineData(typeof(EntityTypeConfiguration), typeof(EntityTypeConfiguration), true)]
         public void Apply_AppliesOnly_ForMatchingTEdmTypeConfiguration(Type tEdmTypeConfiguration, Type tConventionType, bool shouldbeApplied)
@@ -39,7 +37,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         {
             Func<Attribute, bool> matchAllFilter = a => true;
 
-            ODataConventionModelBuilder builder = new Mock<ODataConventionModelBuilder>().Object;
+            ODataConventionModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataConventionModelBuilder>();
             Attribute attribute = new Mock<Attribute>().Object;
 
             // build the type

@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 

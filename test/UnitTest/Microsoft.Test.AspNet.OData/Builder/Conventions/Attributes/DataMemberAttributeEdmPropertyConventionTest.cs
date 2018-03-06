@@ -7,7 +7,8 @@ using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 
@@ -38,7 +39,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             structuralProperty.Object.AddedExplicitly = false;
 
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.False(structuralProperty.Object.OptionalProperty);
@@ -48,7 +49,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotSetRequiredProperty()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             MockType type =
                 new MockType("Mocktype")
                 .Property(typeof(string), "Property", new[] { new DataMemberAttribute { IsRequired = false } });
@@ -85,7 +86,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             structuralProperty.Object.AddedExplicitly = false;
 
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.True(structuralProperty.Object.OptionalProperty);
@@ -97,7 +98,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasSetIfEnabled_ValidPropertyAlias(string propertyAlias, bool modelAliasing, string expectedProptertyName)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -128,7 +129,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_InvalidPropertyAlias(string propertyAlias, bool modelAliasing)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -155,7 +156,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_NoPropertyAlias(bool modelAliasing)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder() { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -185,7 +186,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(string), "Name", new DataMemberAttribute { IsRequired = true });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -208,7 +209,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(relatedType, "RelatedEntity", new DataMemberAttribute { IsRequired = isRequired });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -226,7 +227,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "Count", new DataMemberAttribute());
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type);
 
             IEdmModel model = builder.GetEdmModel();
@@ -244,7 +245,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Property(typeof(int), "Count", new DataMemberAttribute { IsRequired = true });
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.AddEntityType(type).AddProperty(type.GetProperty("Count")).IsOptional();
 
             IEdmModel model = builder.GetEdmModel();
@@ -271,7 +272,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
             structuralType.Setup(t => t.ClrType).Returns(derivedType);
 
             // Act
-            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, new ODataConventionModelBuilder());
+            new DataMemberAttributeEdmPropertyConvention().Apply(structuralProperty.Object, structuralType.Object, ODataConventionModelBuilderFactory.Create());
 
             // Assert
             Assert.True(structuralProperty.Object.OptionalProperty);
@@ -281,7 +282,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void DerivedType_DataMemberRequired_IsHonored_IfDerivedtypeIsDataContract()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
 
             MockType baseType = new MockType("BaseMocktype");
             baseType.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
@@ -321,7 +322,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Returns(new[] { new DataContractAttribute() });
 
             // Act
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
             builder.AddEntityType(type);
             IEdmModel model = builder.GetEdmModel();
 
@@ -359,7 +360,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Returns(new[] { new DataContractAttribute() });
 
             // Act
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder { ModelAliasingEnabled = modelAliasing };
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
             builder.AddEntityType(derivedType);
             IEdmModel model = builder.GetEdmModel();
 

@@ -1,15 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.IO;
+using System.Runtime.Serialization;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+#else
 using System.IO;
 using System.Runtime.Serialization;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -19,7 +31,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public void WriteObject_SupportsHttpError()
         {
             var serializer = new ODataErrorSerializer();
+#if NETCORE
+            var error = new SerializableError();
+#else
             var error = new HttpError("bad stuff");
+#endif
+
             Mock<IODataResponseMessage> mockResponseMessage = new Mock<IODataResponseMessage>();
             mockResponseMessage.Setup(response => response.GetStream()).Returns(new MemoryStream());
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -9,7 +10,8 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData
@@ -25,8 +27,8 @@ namespace Microsoft.Test.AspNet.OData
             MediaTypeHeaderValue expected = MediaTypeHeaderValue.Parse(mediaTypeFormat);
             string url = string.Format("http://localhost/{0}?$format={1}", path, mediaTypeFormat);
             IEdmModel model = GetEdmModel();
-            var configuration =
-                new[] { typeof(FormatCustomersController), typeof(ThisController) }.GetHttpConfiguration();
+            var configuration = RoutingConfigurationFactory.CreateWithTypes(
+                new[] { typeof(FormatCustomersController), typeof(ThisController) });
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
             configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
@@ -43,7 +45,7 @@ namespace Microsoft.Test.AspNet.OData
 
         private IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("FormatCustomers");
             builder.Singleton<Customer>("This"); // Singleton
             return builder.GetEdmModel();
@@ -73,3 +75,4 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
+#endif

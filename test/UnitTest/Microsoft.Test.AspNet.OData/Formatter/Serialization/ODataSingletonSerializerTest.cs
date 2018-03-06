@@ -1,13 +1,31 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Web.Http;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.IO;
+using System.Net.Http;
+using System.Text;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -16,8 +34,11 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 {
@@ -33,16 +54,18 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             IEdmModel model = GetEdmModel();
             IEdmSingleton singleton = model.EntityContainer.FindSingleton("Boss");
-            HttpRequestMessage request = GetRequest(model, singleton);
+            var request = GetRequest(model, singleton);
             ODataSerializerContext readContext = new ODataSerializerContext()
             {
+#if NETFX // Url is only in AspNet
                 Url = new UrlHelper(request),
-                Path = request.ODataProperties().Path,
+#endif
+                Path = request.ODataContext().Path,
                 Model = model,
                 NavigationSource = singleton
             };
 
-            ODataSerializerProvider serializerProvider = DependencyInjectionHelper.GetDefaultODataSerializerProvider();
+            ODataSerializerProvider serializerProvider = ODataSerializerProviderFactory.Create();
             EmployeeModel boss = new EmployeeModel {EmployeeId = 987, EmployeeName = "John Mountain"};
             MemoryStream bufferedStream = new MemoryStream();
 
@@ -57,28 +80,26 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
         private IEdmModel GetEdmModel()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.Singleton<EmployeeModel>("Boss");
             return builder.GetEdmModel();
         }
 
+#if NETCORE
+        private HttpRequest GetRequest(IEdmModel model, IEdmSingleton singleton)
+#else
         private HttpRequestMessage GetRequest(IEdmModel model, IEdmSingleton singleton)
+#endif
         {
-            HttpConfiguration config = new HttpConfiguration();
+            var config = RoutingConfigurationFactory.Create();
             config.MapODataServiceRoute("odata", "odata", model);
-            HttpRequestMessage request = new HttpRequestMessage();
-            request.SetConfiguration(config);
-            request.ODataProperties().RouteName = "odata";
-            request.ODataProperties().Path = new ODataPath(new[] { new SingletonSegment(singleton) });
-            request.RequestUri = new Uri("http://localhost/odata/Boss");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/odata/Boss", config, "odata");
+            request.ODataContext().Path = new ODataPath(new[] { new SingletonSegment(singleton) });
             return request;
         }
 
         private ODataMessageWriter GetODataMessageWriter(IEdmModel model, MemoryStream bufferedStream)
         {
-            HttpContent content = new StringContent("");
-            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-
             ODataMessageWriterSettings writerSettings = new ODataMessageWriterSettings()
             {
                 BaseUri = new Uri("http://localhost/odata"),
@@ -86,7 +107,8 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
                 ODataUri = new ODataUri { ServiceRoot = new Uri("http://localhost/odata") }
             };
 
-            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(bufferedStream, content.Headers);
+            var headers = FormatterTestHelper.GetContentHeaders("application/json");
+            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(bufferedStream, headers);
             return new ODataMessageWriter(responseMessage, writerSettings, model);
         }
 

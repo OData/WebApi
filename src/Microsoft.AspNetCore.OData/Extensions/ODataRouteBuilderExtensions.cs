@@ -401,7 +401,7 @@ namespace Microsoft.AspNet.OData.Extensions
             ODataOptions defaultOptions = builder.GetDefaultODataOptions();
             return defaultOptions.UrlKeyDelimiter;
         }
-        
+
         /// <summary>
         /// Sets the <see cref="TimeZoneInfo"/> in route builder.
         /// </summary>

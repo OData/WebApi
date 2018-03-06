@@ -5,15 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Web.Http.Dispatcher;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Query.Expressions
@@ -160,7 +159,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             IEdmModel model = GetModel<T>();
             ApplyClause clause = CreateApplyNode(clauseString, model, typeof(T));
-            IAssembliesResolver assembliesResolver = CreateFakeAssembliesResolver();
+            IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolverFactory.Create();
 
             Func<ODataQuerySettings, ODataQuerySettings> customizeSettings = (settings) =>
             {
@@ -174,7 +173,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
             var binder = new AggregationBinder(
                 customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }),
-                new WebApiAssembliesResolver(assembliesResolver),
+                assembliesResolver,
                 typeof(T),
                 model,
                 clause.Transformations.First());
@@ -215,11 +214,6 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             return parser.ParseApply();
         }
 
-        private IAssembliesResolver CreateFakeAssembliesResolver()
-        {
-            return new NoAssembliesResolver();
-        }
-
         private IEdmModel GetModel<T>() where T : class
         {
             Type key = typeof(T);
@@ -227,7 +221,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
             if (!_modelCache.TryGetValue(key, out value))
             {
-                ODataModelBuilder model = new ODataConventionModelBuilder();
+                ODataModelBuilder model = ODataConventionModelBuilderFactory.Create();
                 model.EntitySet<T>("Products");
                 if (key == typeof(Product))
                 {
@@ -238,14 +232,6 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 value = _modelCache[key] = model.GetEdmModel();
             }
             return value;
-        }
-
-        private class NoAssembliesResolver : IAssembliesResolver
-        {
-            public ICollection<Assembly> GetAssemblies()
-            {
-                return new Assembly[0];
-            }
         }
     }
 }

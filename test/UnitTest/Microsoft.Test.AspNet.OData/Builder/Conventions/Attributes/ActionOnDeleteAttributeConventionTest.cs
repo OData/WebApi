@@ -6,7 +6,8 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.TestCommon;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
@@ -24,7 +25,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         {
             // Arrange
             Type orderType = typeof(TestOrder);
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             PropertyInfo propertyInfo = orderType.GetProperty("Customer");
             EntityTypeConfiguration entity = builder.AddEntityType(orderType);
             NavigationPropertyConfiguration navProperty = entity.AddNavigationProperty(propertyInfo, EdmMultiplicity.One);
@@ -43,7 +44,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotModifiy_ExplicitlyAddedAction()
         {
             // Arrange
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             PropertyInfo propertyInfo = typeof(TestOrder).GetProperty("Customer");
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestOrder));
             NavigationPropertyConfiguration navProperty = entity.AddNavigationProperty(propertyInfo, EdmMultiplicity.One);

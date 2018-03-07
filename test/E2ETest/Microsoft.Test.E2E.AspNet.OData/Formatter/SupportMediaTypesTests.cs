@@ -1,15 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
@@ -19,25 +14,11 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    [ODataJsonOnlyFormatting]
     public class JsonLight_BlogPostsController : InMemoryODataController<BlogPost, int>
     {
         public JsonLight_BlogPostsController()
             : base("Id")
         {
-        }
-    }
-
-    public class ODataJsonOnlyFormattingAttribute : Attribute, IControllerConfiguration
-    {
-        public void Initialize(HttpControllerSettings controllerSettings, HttpControllerDescriptor controllerDescriptor)
-        {
-            controllerSettings.Formatters.Clear();
-            var odataFormatters = ODataMediaTypeFormatters.Create();
-            odataFormatters = odataFormatters.Where(f =>
-                f.SupportedMediaTypes.Any(t =>
-                    string.Equals(t.MediaType, "application/json", StringComparison.InvariantCultureIgnoreCase))).ToList();
-            controllerSettings.Formatters.InsertRange(0, odataFormatters);
         }
     }
 
@@ -48,17 +29,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             configuration.EnableODataSupport(GetEdmModel(configuration));
         }
 
-        private static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder(configuration);
+            var builder = configuration.CreateConventionModelBuilder();
             var post = builder.EntitySet<BlogPost>("JsonLight_BlogPosts").EntityType;
             post.Ignore(p => p.BlogComments);
             post.Ignore(p => p.Language);

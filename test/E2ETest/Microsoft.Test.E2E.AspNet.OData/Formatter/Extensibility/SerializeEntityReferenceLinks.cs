@@ -1,21 +1,41 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Newtonsoft.Json.Linq;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using System.Web.Http.Controllers;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -23,10 +43,12 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
 {
@@ -41,7 +63,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         public int Id { get; set; }
     }
 
-    public class ParentEntityController : ODataController
+    public class ParentEntityController : TestODataController
     {
         private static readonly ParentEntity PARENT_ENTITY;
 
@@ -54,13 +76,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
             };
         }
 
-        public HttpResponseMessage GetLinksForChildren(int key)
+        public ITestActionResult GetLinksForChildren(int key)
         {
             IEdmModel model = Request.GetModel();
             IEdmEntitySet childEntity = model.EntityContainer.FindEntitySet("ChildEntity");
 
-            return Request.CreateResponse(HttpStatusCode.OK,
-                PARENT_ENTITY.Children.Select(x => Url.CreateODataLink(
+            return Ok(PARENT_ENTITY.Children.Select(x => Url.CreateODataLink(
                     new EntitySetSegment(childEntity),
                     new KeySegment(new[] { new KeyValuePair<string, object>("Id", x.Id)}, childEntity.EntityType(), null)
                 )).ToArray());
@@ -109,7 +130,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         {
         }
 
+#if NETCORE
+        public override ODataSerializer GetODataPayloadSerializer(Type type, Microsoft.AspNetCore.Http.HttpRequest request)
+#else
         public override ODataSerializer GetODataPayloadSerializer(Type type, HttpRequestMessage request)
+#endif
         {
             if (type == null)
             {
@@ -129,28 +154,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
 
     public class GetRefRoutingConvention : RefRoutingConvention
     {
+#if NETCORE
+        /// <inheritdoc/>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
+        public override string SelectAction(RouteContext routeContext, SelectControllerResult controllerResult, IEnumerable<ControllerActionDescriptor> actionDescriptors)
+        {
+            string requestMethod = routeContext.HttpContext.Request.Method;
+            ODataPath odataPath = routeContext.HttpContext.ODataFeature().Path;
+            TestControllerContext context = new TestControllerContext(routeContext);
+            IList<string> actionMap = actionDescriptors.Select(a => a.ActionName).Distinct().ToList();
+
+#else
         public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
         {
-            if (odataPath == null)
-            {
-                throw new ArgumentNullException("odataPath");
-            }
-
-            if (controllerContext == null)
-            {
-                throw new ArgumentNullException("controllerContext");
-            }
-
-            if (actionMap == null)
-            {
-                throw new ArgumentNullException("actionMap");
-            }
-
-            HttpMethod requestMethod = controllerContext.Request.Method;
-            if (odataPath.PathTemplate == "~/entityset/key/navigation/$ref" && requestMethod == HttpMethod.Get)
+            string requestMethod = controllerContext.Request.Method.ToString().ToUpperInvariant();
+            TestControllerContext context = new TestControllerContext(controllerContext);
+#endif
+            if (odataPath.PathTemplate == "~/entityset/key/navigation/$ref" && requestMethod == "GET")
             {
                 KeySegment keyValueSegment = odataPath.Segments[1] as KeySegment;
-                controllerContext.AddKeyValueToRouteData(keyValueSegment);
+                context.AddKeyValueToRouteData(keyValueSegment);
                 NavigationPropertyLinkSegment navigationLinkSegment = odataPath.Segments[2] as NavigationPropertyLinkSegment;
                 IEdmNavigationProperty navigationProperty = navigationLinkSegment.NavigationProperty;
                 IEdmEntityType declaredType = navigationProperty.DeclaringType as IEdmEntityType;
@@ -158,7 +181,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
                 string action = requestMethod + "LinksFor" + navigationProperty.Name + "From" + declaredType.Name;
                 return actionMap.Contains(action) ? action : requestMethod + "LinksFor" + navigationProperty.Name;
             }
+
+#if NETCORE
+            return base.SelectAction(routeContext, controllerResult, actionDescriptors);
+#else
             return base.SelectAction(odataPath, controllerContext, actionMap);
+#endif
         }
     }
 
@@ -169,10 +197,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.InsertRange(0, ODataMediaTypeFormatters.Create());
             var routingConventions = ODataRoutingConventions.CreateDefault();
             routingConventions.Insert(4, new GetRefRoutingConvention());
             configuration.MapODataServiceRoute("EntityReferenceLinks", "EntityReferenceLinks", builder =>
@@ -182,9 +208,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
                        .AddService(ServiceLifetime.Singleton, sp => new CustomODataSerializerProvider(new MockContainer())));
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var parentSet = builder.EntitySet<ParentEntity>("ParentEntity");
             var childSet = builder.EntitySet<ChildEntity>("ChildEntity");
 

@@ -3,15 +3,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Products;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Controllers
 {
-    public class TopSkipOrderByTestsController : ApiController
+    public class TopSkipOrderByTestsController : TestNonODataController
     {
         [EnableQuery(PageSize = 999999)]
         public IEnumerable<Customer> GetByQuerableAttribute()
@@ -32,9 +31,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Controllers
         }
 
         [EnableQuery(PageSize = 999999)]
-        public HttpResponseMessage GetHttpResponseByQuerableAttribute()
+        public ITestActionResult GetHttpResponseByQuerableAttribute()
         {
-            return this.Request.CreateResponse<IEnumerable<Customer>>(System.Net.HttpStatusCode.OK, GetByQuerableAttribute());
+            return Ok<IEnumerable<Customer>>(GetByQuerableAttribute());
         }
 
         [EnableQuery(PageSize = 999999)]

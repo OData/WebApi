@@ -5,10 +5,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
@@ -23,21 +20,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(HeroesController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof (IAssembliesResolver), resolver);
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
-            HttpServer httpServer = configuration.GetHttpServer();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(
                 routeName: "odata",
                 routePrefix: "odata",
-                model: CountEdmModel.GetModel());
+                model: CountEdmModel.GetModel(configuration));
 
             configuration.EnsureInitialized();
         }
@@ -74,7 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(expectedCount, result["@odata.count"]);
         }
 

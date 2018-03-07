@@ -6,14 +6,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -27,17 +26,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("OData", "odata", LowerCamelCaseEdmModel.GetConventionModel());
+            configuration.MapODataServiceRoute("OData", "odata", LowerCamelCaseEdmModel.GetConventionModel(configuration));
             configuration.EnsureInitialized();
         }
 
@@ -105,7 +101,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var results = json.GetValue("value") as JArray;
             Assert.Equal<int>(10, results.Count);
             var empolyee = results[0] as JObject;
@@ -121,7 +117,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var results = json.GetValue("value") as JArray;
             Assert.Equal<int>(5, results.Count);
 
@@ -147,7 +143,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             Assert.True(8 == (int)result["manager"]["manager"]["manager"]["id"]);
             AssertPropertyNamesAreCamelCase(result);
         }
@@ -161,7 +157,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             Assert.Null(result["manager"]);
         }
 
@@ -174,9 +170,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
-            Assert.Contains("Levels option must be a non-negative integer or 'max', it is set to '-1' instead.",
-                result["error"]["innererror"]["message"].Value<string>());
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Levels option must be a non-negative integer or 'max', it is set to '-1' instead.", result);
         }
 
         [Theory]
@@ -188,7 +183,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             Assert.Contains("The request includes a $expand path which is " +
                 "too deep. The maximum depth allowed is 3. To increase the limit, set the 'MaxExpansionDepth' property " +
                 "on EnableQueryAttribute or ODataValidationSettings, or set the 'MaxDepth' property in ExpandAttribute.",
@@ -204,7 +199,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             Assert.True(1 == content["id"].Value<int>());
 
             JObject manager8 = content["manager"]["manager"]["manager"] as JObject;
@@ -223,7 +218,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             JArray value = content["value"] as JArray;
             Assert.True(10 == value.Count);
 
@@ -253,7 +248,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             JArray value = content["value"] as JArray;
             Assert.True(10 == value.Count);
 
@@ -278,7 +273,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             Assert.True(1 == content["id"].Value<int>());
 
             Assert.True(1 == content["next"]["next"]["id"].Value<int>());
@@ -295,7 +290,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             Assert.True(3 == content["id"].Value<int>());
 
             Assert.True(6 == content["next"]["next"]["next"]["id"].Value<int>());
@@ -312,7 +307,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject employeeNo7 = await response.Content.ReadAsAsync<JObject>();
+            JObject employeeNo7 = await response.Content.ReadAsObject<JObject>();
             Assert.True(7 == employeeNo7["id"].Value<int>());
 
             JObject employeeNo8 = employeeNo7["next"] as JObject;
@@ -336,7 +331,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject employeeNo6 = await response.Content.ReadAsAsync<JObject>();
+            JObject employeeNo6 = await response.Content.ReadAsObject<JObject>();
             Assert.True(6 == employeeNo6["id"].Value<int>());
 
             JToken employee10 = employeeNo6["next"]["next"]["manager"]["manager"] as JObject;
@@ -358,7 +353,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
             var results = content.GetValue("value") as JArray;
             Assert.True(2 == results.Count);
 
@@ -381,7 +376,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var value = json.GetValue("value").ToString();
             Assert.Equal("Name1", value);
             if (format == "application/json;odata.metadata=full")
@@ -413,7 +408,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
                 var value = result.GetValue("value") as JArray;
                 Assert.NotNull(value);
                 Assert.Equal(2, value.Count);
@@ -429,7 +424,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             var value = result.GetValue("value") as JArray;
             /*
@@ -460,7 +455,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             var value = result.GetValue("value") as JArray;
             Assert.Equal(10, value.Count);
@@ -490,7 +485,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 
                 await ResetDatasource();
 
-                var employee = await response.Content.ReadAsAsync<JObject>();
+                var employee = await response.Content.ReadAsObject<JObject>();
                 var result = employee.GetValue("id");
                 Assert.Equal(11, result.Value<int>());
             }
@@ -513,7 +508,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                var content = await response.Content.ReadAsAsync<JObject>();
+                var content = await response.Content.ReadAsObject<JObject>();
 
                 var name = content.GetValue("name");
                 Assert.Equal("Name20", name);
@@ -553,7 +548,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsAsync<JObject>();
+            var content = await response.Content.ReadAsObject<JObject>();
 
             var name = content.GetValue("name");
             Assert.Equal("Name10", name);
@@ -573,7 +568,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             var response = await this.Client.GetAsync(getUri);
             response.EnsureSuccessStatusCode();
 
-            var content = await response.Content.ReadAsAsync<JObject>();
+            var content = await response.Content.ReadAsObject<JObject>();
             var city = content["city"].ToString();
             Assert.Equal("City1", city);
         }

@@ -1,21 +1,37 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
+#else
+using System;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
@@ -26,15 +42,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             var customers = builder.EntitySet<PropertyCustomer>("PropertyCustomers");
             customers.EntityType.Ignore(p => p.Secret);
             return builder.GetEdmModel();
@@ -46,11 +62,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/PropertyCustomers(1)");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             PropertyCustomer customer = await response.Content.ReadAsAsync<PropertyCustomer>(Enumerable.Range(0, 1).Select(f => new JsonMediaTypeFormatter()));
             Assert.NotNull(customer);
             Assert.Equal(1, customer.Id);
             Assert.Equal("Name 1", customer.Name);
             Assert.Null(customer.Secret);
+#endif
         }
     }
 
@@ -61,7 +79,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
@@ -83,11 +101,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/PropertyCustomers(1)");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             PropertyCustomer customer = await response.Content.ReadAsAsync<PropertyCustomer>(Enumerable.Range(0, 1).Select(f => new JsonMediaTypeFormatter()));
             Assert.NotNull(customer);
             Assert.Equal(1, customer.Id);
             Assert.Equal("Name 1", customer.Name);
             Assert.Null(customer.Secret);
+#endif
         }
     }
 
@@ -99,10 +119,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
     }
 
 
-    public class PropertyCustomersController : ODataController
+    public class PropertyCustomersController : TestODataController
     {
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
-        public IHttpActionResult Get([FromODataUri] int key)
+        public ITestActionResult Get([FromODataUri] int key)
         {
             return Ok(new PropertyCustomer { Id = 1, Name = "Name " + 1, Secret = "Secret " + 1 });
         }

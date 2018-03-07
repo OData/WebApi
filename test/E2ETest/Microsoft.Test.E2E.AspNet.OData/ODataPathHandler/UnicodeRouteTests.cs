@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -40,21 +38,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
 
     public class UnicodeRouteTests : WebHostTestBase
     {
+        private WebRouteConfiguration _configuration;
+
         public UnicodeRouteTests(WebHostTestFixture fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.EnableODataSupport(GetEdmModel(), "odataü");
+            _configuration = configuration;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.EnableODataSupport(GetEdmModel(configuration), "odataü");
         }
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder();
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<UnicodeRouteTests_Todoü>("UnicodeRouteTests_Todoü");
 
             return mb.GetEdmModel();
@@ -103,7 +103,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         private DataServiceContext CreateClient(Uri address)
         {
             var client = new DataServiceContext(address, ODataProtocolVersion.V4);
-            client.Format.UseJson(GetEdmModel());
+            client.Format.UseJson(GetEdmModel(_configuration));
 
             return client;
         }

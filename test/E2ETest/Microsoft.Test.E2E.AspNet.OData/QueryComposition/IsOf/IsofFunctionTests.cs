@@ -6,13 +6,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -27,18 +26,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             var controllers = new[]
-            {typeof (BillingCustomersController), typeof (BillingsController), typeof (MetadataController)};
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
+                {typeof (BillingCustomersController), typeof (BillingsController), typeof (MetadataController)};
+            config.AddControllers(controllers);
 
-            config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            config.Services.Replace(typeof (IAssembliesResolver), resolver);
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null);
 
-            IEdmModel model = IsofEdmModel.GetEdmModel();
+            IEdmModel model = IsofEdmModel.GetEdmModel(config);
             foreach (string dataSourceType in DataSourceTypes)
             {
                 config.MapODataServiceRoute(dataSourceType, dataSourceType, model);
@@ -121,7 +118,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
 
             // Act
             HttpResponseMessage response = await Client.GetAsync(requestUri);
-            JObject responseString = await response.Content.ReadAsAsync<JObject>();
+            JObject responseString = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             Assert.True(HttpStatusCode.OK == response.StatusCode);
@@ -169,7 +166,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
 
             // Act
             HttpResponseMessage response = await Client.GetAsync(requestUri);
-            JObject responseString = await response.Content.ReadAsAsync<JObject>();
+            JObject responseString = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             Assert.True(HttpStatusCode.OK == response.StatusCode);
@@ -205,7 +202,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             {
                 Assert.True(HttpStatusCode.OK == response.StatusCode);
 
-                JObject responseString = await response.Content.ReadAsAsync<JObject>();
+                JObject responseString = await response.Content.ReadAsObject<JObject>();
 
                 JArray value = responseString["value"] as JArray;
                 Assert.NotNull(value);
@@ -251,7 +248,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
                 // Assert
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-                JObject responseString = await response.Content.ReadAsAsync<JObject>();
+                JObject responseString = await response.Content.ReadAsObject<JObject>();
 
                 JArray value = responseString["value"] as JArray;
                 Assert.NotNull(value);
@@ -278,7 +275,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             {
                 Assert.True(HttpStatusCode.OK == response.StatusCode);
 
-                JObject responseString = await response.Content.ReadAsAsync<JObject>();
+                JObject responseString = await response.Content.ReadAsObject<JObject>();
 
                 JArray value = responseString["value"] as JArray;
                 Assert.NotNull(value);

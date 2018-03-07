@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -13,6 +12,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -25,17 +25,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().Select().MaxTop(null);
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
-            configuration.MessageHandlers.Add(new ETagMessageHandler());
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.AddETagMessageHandler(new ETagMessageHandler());
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<ETagsCustomer> eTagsCustomersSet = builder.EntitySet<ETagsCustomer>("ETagsCustomers");
             eTagsCustomersSet.HasRequiredBinding(c => c.RelatedCustomer, eTagsCustomersSet);
             eTagsCustomersSet.HasRequiredBinding(c => c.ContainedCustomer, eTagsCustomersSet);
@@ -56,7 +56,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             HttpResponseMessage response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonResult = await response.Content.ReadAsObject<JObject>();
             var jsonETags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
 
             requestUri = this.BaseAddress + "/odata/ETagsDerivedCustomers?$select=Id";
@@ -64,7 +64,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            jsonResult = await response.Content.ReadAsAsync<JObject>();
+            jsonResult = await response.Content.ReadAsObject<JObject>();
             var derivedEtags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             
             Assert.True(String.Concat(jsonETags) == String.Concat(derivedEtags), "Derived Types has different etags than base type");
@@ -78,7 +78,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             HttpResponseMessage response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonResult = await response.Content.ReadAsObject<JObject>();
             var jsonETags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
 
             requestUri = this.BaseAddress + "/odata/ETagsDerivedCustomersSingleton?$select=Id";
@@ -86,7 +86,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            jsonResult = await response.Content.ReadAsAsync<JObject>();
+            jsonResult = await response.Content.ReadAsObject<JObject>();
             var singletonEtag = jsonResult.GetValue("@odata.etag").ToString();
 
             Assert.True(jsonETags.FirstOrDefault() == singletonEtag, "Singleton has different etags than Set");

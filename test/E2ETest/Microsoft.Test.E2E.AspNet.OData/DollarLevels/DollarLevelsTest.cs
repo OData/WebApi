@@ -4,11 +4,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -23,17 +21,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(DLManagersController), typeof(DLEmployeesController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("OData", "odata", DollarLevelsEdmModel.GetConventionModel());
+            configuration.MapODataServiceRoute("OData", "odata", DollarLevelsEdmModel.GetConventionModel(configuration));
             configuration.EnsureInitialized();
         }
 
@@ -55,7 +50,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             Assert.Contains(errorMessage,
                 result["error"]["innererror"]["message"].Value<string>());
         }
@@ -76,13 +71,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             requestUri = this.BaseAddress + "/odata/DLManagers(5)?" + expandedQuery;
             response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var baseline = await response.Content.ReadAsAsync<JObject>();
+            var baseline = await response.Content.ReadAsObject<JObject>();
 
             Assert.True(JToken.DeepEquals(baseline, result));
         }
@@ -104,13 +99,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             requestUri = this.BaseAddress + "/odata/DLManagers(5)?" + expandedQuery;
             response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var baseline = await response.Content.ReadAsAsync<JObject>();
+            var baseline = await response.Content.ReadAsObject<JObject>();
 
             Assert.True(JToken.DeepEquals(baseline, result));
         }
@@ -125,13 +120,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             requestUri = this.BaseAddress + "/odata/DLManagers?" + expandedQuery;
             response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var baseline = await response.Content.ReadAsAsync<JObject>();
+            var baseline = await response.Content.ReadAsObject<JObject>();
 
             Assert.True(JToken.DeepEquals(baseline, result));
         }
@@ -167,13 +162,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             requestUri = this.BaseAddress + "/odata/" + expandedQuery;
             response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var baseline = await response.Content.ReadAsAsync<JObject>();
+            var baseline = await response.Content.ReadAsObject<JObject>();
 
             Assert.True(JToken.DeepEquals(baseline, result));
         }

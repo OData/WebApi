@@ -8,8 +8,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -18,6 +16,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -44,23 +43,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             return responseForPost;
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
 
-            IEdmModel edmModel = UnBoundFunctionEdmModel.GetEdmModel();
+            IEdmModel edmModel = UnBoundFunctionEdmModel.GetEdmModel(configuration);
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
 
             // only with attribute routing & metadata routing convention
             IList<IODataRoutingConvention> routingConventions = new List<IODataRoutingConvention>
             {
-                new AttributeRoutingConvention("AttributeRouting", configuration),
+                configuration.CreateAttributeRoutingConvention(),
                 new MetadataRoutingConvention()
             };
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -71,6 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             configuration.EnsureInitialized();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [InlineData("AttributeRouting")]
         [InlineData("ConventionRouting")]
@@ -188,6 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             Assert.Single(edmModel.EntityContainer.OperationImports());
 
         }
+#endif
 
         private static void AssertPrimitiveOperation(IEdmModel edmModel, string opertionName)
         {
@@ -707,7 +705,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             //Assert
             Assert.True(responseForPost.IsSuccessStatusCode);
-            var response = (await responseForPost.Content.ReadAsAsync<JObject>())["value"] as JArray;
+            var response = (await responseForPost.Content.ReadAsObject<JObject>())["value"] as JArray;
             Assert.Equal(expectedCount, response.Count());
         }
 
@@ -728,7 +726,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             //Assert
             Assert.True(responseForPost.IsSuccessStatusCode);
-            var response = (await responseForPost.Content.ReadAsAsync<JObject>())["value"] as JArray;
+            var response = (await responseForPost.Content.ReadAsObject<JObject>())["value"] as JArray;
             Assert.Equal(expectedCount, response.Count());
         }
 
@@ -749,7 +747,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             //Assert
             Assert.True(responseForPost.IsSuccessStatusCode);
-            var response = (await responseForPost.Content.ReadAsAsync<JObject>())["value"] as JArray;
+            var response = (await responseForPost.Content.ReadAsObject<JObject>())["value"] as JArray;
             Assert.Equal(expectedCount, response.Count());
         }
 

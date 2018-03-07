@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
@@ -16,8 +14,28 @@ using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.OData;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
@@ -30,7 +48,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public decimal Decimal { get; set; }
     }
 
-    public class ValidatorTestsController : ApiController
+    public class ValidatorTestsController : TestNonODataController
     {
         private static List<ValidatorTests_Todo> todoes = new List<ValidatorTests_Todo>();
         static ValidatorTestsController()
@@ -105,7 +123,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
             catch (ODataException ex)
             {
-                throw new HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
+                throw new System.Web.Http.HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+#else
+                throw ex;
+#endif
             }
             return options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>;
         }
@@ -134,7 +156,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
             catch (ODataException ex)
             {
-                throw new HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
+                throw new System.Web.Http.HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
+#else
+                throw ex;
+#endif
             }
             return options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>;
         }
@@ -232,10 +258,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
         }
@@ -271,6 +296,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [MemberData(nameof(ValidateOptionsData))]
         public async Task VerifyValidateOptions(string query, bool success)
@@ -299,7 +325,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
-
+#endif
         [Theory]
         [MemberData(nameof(AllowedFunctionsData))]
         public void VerifyAllowedFunctions(AllowedFunctions value1, AllowedFunctions value2)

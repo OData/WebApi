@@ -4,13 +4,12 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -25,18 +24,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(ProductsController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
 
-            IEdmModel edmModel = CastEdmModel.GetEdmModel();
+            IEdmModel edmModel = CastEdmModel.GetEdmModel(configuration);
             foreach (string dataSourceType in dataSourceTypes)
             {
                 configuration.MapODataServiceRoute(dataSourceType, dataSourceType, edmModel);
@@ -92,7 +88,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
 
             // Act
             HttpResponseMessage response = await Client.GetAsync(requestUri);
-            JObject responseString = await response.Content.ReadAsAsync<JObject>();
+            JObject responseString = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             Assert.True(HttpStatusCode.OK == response.StatusCode,

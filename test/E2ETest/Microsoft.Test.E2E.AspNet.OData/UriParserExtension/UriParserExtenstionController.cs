@@ -4,27 +4,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(UriParseExtenstionDbContext.GetCustomers());
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(UriParseExtenstionDbContext.GetCustomers().FirstOrDefault(c => c.Id == key));
         }
 
-        public IHttpActionResult GetName(int key)
+        public ITestActionResult GetName(int key)
         {
             var customer = UriParseExtenstionDbContext.GetCustomers().FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -35,7 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
             return Ok(customer.Name);
         }
 
-        public IHttpActionResult GetVipProperty(int key)
+        public ITestActionResult GetVipProperty(int key)
         {
             var customer = UriParseExtenstionDbContext.GetCustomers().FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -53,7 +52,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
         }
 
         [EnableQuery]
-        public IHttpActionResult GetOrders(int key)
+        public ITestActionResult GetOrders(int key)
         {
             var customer = UriParseExtenstionDbContext.GetCustomers().FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -64,7 +63,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
             return Ok(customer.Orders);
         }
 
-        public IHttpActionResult GetRef(int key, string navigationProperty)
+        public ITestActionResult GetRef(int key, string navigationProperty)
         {
             var serviceRootUri = GetServiceRootUri();
             var entityId = string.Format("{0}/Customers({1})/{2}", serviceRootUri, key, navigationProperty);
@@ -72,44 +71,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
         }
 
         [HttpGet]
-        public IHttpActionResult CalculateSalary(int key, int month)
+        public ITestActionResult CalculateSalary(int key, int month)
         {
             return Ok("CalculateSalary: Key(" + key + ")(" + month + ")");
         }
 
         [HttpPost]
-        public IHttpActionResult UpdateAddress(int key)
+        public ITestActionResult UpdateAddress(int key)
         {
             return Ok("UpdateAddress: Key(" + key + ")");
         }
 
         [HttpGet]
-        public IHttpActionResult GetCustomerByGender(Gender gender)
+        public ITestActionResult GetCustomerByGender(Gender gender)
         {
             var customers = UriParseExtenstionDbContext.GetCustomers().Where(c => c.Gender == gender);
             return Ok(customers);
         }
-
-        private string GetServiceRootUri()
-        {
-            var routeName = Request.ODataProperties().RouteName;
-            ODataRoute odataRoute = Configuration.Routes[routeName] as ODataRoute;
-            var prefixName = odataRoute.RoutePrefix;
-            var requestUri = Request.RequestUri.ToString();
-            var serviceRootUri = requestUri.Substring(0, requestUri.IndexOf(prefixName) + prefixName.Length);
-            return serviceRootUri;
-        }
     }
 
-    public class OrdersController : ODataController
+    public class OrdersController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(UriParseExtenstionDbContext.GetOrders());
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(UriParseExtenstionDbContext.GetOrders().FirstOrDefault(c => c.Id == key));
         }

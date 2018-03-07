@@ -3,15 +3,14 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -25,13 +24,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
 
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<ComplextTypeCollectionTests_Person>("ComplextTypeCollectionTests_Persons");
 
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -105,7 +102,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class ComplextTypeCollectionTests_PersonsController : ODataController
+    public class ComplextTypeCollectionTests_PersonsController : TestODataController
     {
         public static List<ComplextTypeCollectionTests_Person> Persons = null;
 
@@ -147,29 +144,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
         [EnableQuery]
-        public IQueryable<ComplextTypeCollectionTests_Address> GetAddresses([FromODataUri]int key)
+        public ITestActionResult GetAddresses([FromODataUri]int key)
         {
             ComplextTypeCollectionTests_Person person = Persons.FirstOrDefault(p => p.Id == key);
 
             if (person == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
             }
 
-            return person.Addresses.AsQueryable();
+            return Ok(person.Addresses.AsQueryable());
         }
 
         [EnableQuery(PageSize = 2)]
-        public IQueryable<ComplexTypeCollectionTests_PersonInfo> GetPersonInfos([FromODataUri]int key)
+        public ITestActionResult GetPersonInfos([FromODataUri]int key)
         {
             ComplextTypeCollectionTests_Person person = Persons.FirstOrDefault(p => p.Id == key);
 
             if (person == null)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
             }
 
-            return person.PersonInfos.AsQueryable();
+            return Ok(person.PersonInfos.AsQueryable());
         }
     }
 

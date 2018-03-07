@@ -1,6 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Linq;
+using System.Net;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Xunit;
+#else
 using System;
 using System.Linq;
 using System.Net;
@@ -10,6 +28,7 @@ using Microsoft.Owin.Hosting;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Owin;
 using Xunit;
+#endif
 
 // Parallelism in the test framework is a feature that is new for (Xunit) version 2. However,
 // since each test will spin up a number of web servers each with a listening port, disabling the
@@ -38,13 +57,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     public class WebHostTestFixture : IDisposable
     {
         private static readonly string NormalBaseAddressTemplate = "http://{0}:{1}";
-        private static readonly string DefaultRouteTemplate = "api/{controller}/{action}";
 
         private int _port;
-        private IDisposable _katanaSelfHostServer = null;
-        private Action<HttpConfiguration> _testConfigurationAction = null;
         private bool disposedValue = false;
         private Object thisLock = new Object();
+        private Action<WebRouteConfiguration> _testConfigurationAction = null;
+
+#if NETCORE
+        private IWebHost _selfHostServer = null;
+#else
+        private IDisposable _selfHostServer = null;
+#endif
 
         /// <summary>
         /// Initializes a new instance of the <see cref="WebHostTestFixture"/> class
@@ -65,6 +88,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         public string BaseAddress { get; private set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether error details should be included.
+        /// </summary>
+        public bool IncludeErrorDetail { get; set; } = true;
+
+        /// <summary>
         /// Initialize the fixture.
         /// </summary>
         /// <param name="testConfigurationAction">The test configuration action.</param>
@@ -73,7 +101,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// This is done lazily to allow the update configuration
         /// function to be passed in from the first test class instance.
         /// </remarks>
-        public bool Initialize(Action<HttpConfiguration> testConfigurationAction)
+        public bool Initialize(Action<WebRouteConfiguration> testConfigurationAction)
         {
             SecurityHelper.AddIpListen();
 
@@ -82,20 +110,48 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             {
                 try
                 {
-                    if (_katanaSelfHostServer == null)
+                    if (_selfHostServer == null)
                     {
                         lock (thisLock)
                         {
-                            if (_katanaSelfHostServer == null)
+                            if (_selfHostServer == null)
                             {
+#if NETCORE
+                                string serverName = "localhost";
+#else
+                                string serverName = Environment.MachineName;
+#endif
                                 // setup base address
                                 _port = PortArranger.Reserve();
-                                string baseAddress = string.Format(NormalBaseAddressTemplate, Environment.MachineName, _port.ToString());
-                                this.BaseAddress = baseAddress.Replace("localhost", Environment.MachineName);
+                                this.BaseAddress = string.Format(NormalBaseAddressTemplate, serverName, _port.ToString());
 
                                 // set up the server.
                                 _testConfigurationAction = testConfigurationAction;
-                                _katanaSelfHostServer = WebApp.Start(baseAddress, DefaultKatanaConfigure);
+
+#if NETCORE
+                                _selfHostServer = new WebHostBuilder()
+                                    .UseKestrel(options =>
+                                    {
+                                        options.Listen(IPAddress.Loopback, _port);
+                                    })
+                                    .UseStartup<WebHostTestStartup>()
+                                    .ConfigureServices(services =>
+                                    {
+                                        // Add ourself to the container so WebHostTestStartup
+                                        // can call UpdateConfiguration.
+                                        services.AddSingleton<WebHostTestFixture>(this);
+                                    })
+                                    .ConfigureLogging((hostingContext, logging) =>
+                                    {
+                                        logging.AddDebug();
+                                        logging.SetMinimumLevel(LogLevel.Warning);
+                                    })
+                                    .Build();
+
+                                _selfHostServer.Start();
+#else
+                                _selfHostServer = WebApp.Start(this.BaseAddress, DefaultKatanaConfigure);
+#endif
                             }
                         }
                     }
@@ -105,7 +161,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 catch (HttpListenerException)
                 {
                     // Retry HttpListenerException up to 3 times.
-                    _katanaSelfHostServer = null;
+                    _selfHostServer = null;
                 }
             }
 
@@ -130,10 +186,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             {
                 if (disposing)
                 {
-                    if (_katanaSelfHostServer != null)
+                    if (_selfHostServer != null)
                     {
-                        _katanaSelfHostServer.Dispose();
-                        _katanaSelfHostServer = null;
+#if NETCORE
+                        _selfHostServer.StopAsync();
+                        _selfHostServer.WaitForShutdown();
+#endif
+                        _selfHostServer.Dispose();
+                        _selfHostServer = null;
                     }
                 }
 
@@ -141,6 +201,180 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             }
         }
 
+#if NETCORE
+        private class WebHostTestStartup
+        {
+            public void ConfigureServices(IServiceCollection services)
+            {
+                var coreBuilder = services.AddMvcCore(options =>
+                {
+                    options.Filters.Add(typeof(WebHostLogExceptionFilter));
+                    options.Filters.Add(new DelayLoadFilterProvider<EnableQueryAttribute>());
+                    options.Filters.Add(new DelayLoadFilterProvider<IActionFilter>());
+                    options.Filters.Add(new DelayLoadFilterProvider<ETagMessageHandler>());
+                });
+
+                coreBuilder.AddJsonFormatters();
+                services.AddOData();
+            }
+
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            {
+                // Add a custom exception handler that returns exception as a raw string. Many of the
+                // tests expect to search for the string and UseDeveloperPage() will encode the string
+                // in Html format.
+                app.Use(async (context, next) =>
+                {
+                    try
+                    {
+                        await next.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (context.Response.HasStarted)
+                        {
+                            throw;
+                        }
+
+                        try
+                        {
+                            // Write error by default.
+                            WebHostTestFixture testBase = context.RequestServices.GetService<WebHostTestFixture>();
+                            if (testBase == null || testBase.IncludeErrorDetail)
+                            {
+                                context.Response.Clear();
+                                context.Response.StatusCode = 500;
+                                await context.Response.WriteAsync(ex.ToString());
+                                return;
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            // If there's a Exception while generating the error page, re-throw the original exception.
+                        }
+                        throw;
+                    }
+                });
+
+                app.UseODataBatching();
+                app.UseMvc(routeBuilder =>
+                {
+                    // Setup regular route.
+                    routeBuilder.MapRoute("api default", "api/{controller}/{action?}");
+
+                    // Apply test configuration.
+                    WebRouteConfiguration config = new WebRouteConfiguration(routeBuilder);
+                    WebHostTestFixture testBase = routeBuilder.ServiceProvider.GetRequiredService<WebHostTestFixture>();
+                    testBase?._testConfigurationAction(config);
+
+                    // Apply error details
+                    testBase.IncludeErrorDetail = config.IncludeErrorDetail;
+
+                    // Apply MvcActions Options.
+                    IOptions<MvcOptions> options = routeBuilder.ServiceProvider.GetService<IOptions<MvcOptions>>();
+                    if (config.MvcOptionsActions.Any() && options != null)
+                    {
+                        foreach (var action in config.MvcOptionsActions)
+                        {
+                            action(options.Value);
+                        }
+                    }
+
+                    // Apply Json options.
+                    IOptions<MvcJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcJsonOptions>>();
+                    if (config.JsonReferenceLoopHandling.HasValue && jsonOptions != null)
+                    {
+                        jsonOptions.Value.SerializerSettings.ReferenceLoopHandling = config.JsonReferenceLoopHandling.Value;
+                    }
+
+                    if (config.JsonFormatterIndent.HasValue && jsonOptions != null)
+                    {
+                        jsonOptions.Value.SerializerSettings.Formatting = config.JsonFormatterIndent.Value
+                            ? Newtonsoft.Json.Formatting.Indented
+                            : Newtonsoft.Json.Formatting.None;
+                    }
+
+                    // Apply Kestrel options.
+                    if (config.MaxReceivedMessageSize.HasValue)
+                    {
+                        IOptions<KestrelServerOptions> serverOptions = routeBuilder.ServiceProvider.GetService<IOptions<KestrelServerOptions>>();
+                        if (serverOptions != null)
+                        {
+                            serverOptions.Value.Limits.MaxRequestBodySize = config.MaxReceivedMessageSize.Value;
+                        }
+                    }
+
+                    // Apply filters
+                    if (config.EnableQueryAttributeFilter != null && options != null)
+                    {
+                        var provider = options.Value.Filters
+                            .OfType<DelayLoadFilterProvider<EnableQueryAttribute>>()
+                            .FirstOrDefault();
+
+                        if (provider != null)
+                        {
+                            provider.WrappedFilter = config.EnableQueryAttributeFilter;
+                        }
+                    }
+
+                    if (config.IActionFilterFilter != null && options != null)
+                    {
+                        var provider = options.Value.Filters
+                            .OfType<DelayLoadFilterProvider<IActionFilter>>()
+                            .FirstOrDefault();
+
+                        if (provider != null)
+                        {
+                            provider.WrappedFilter = config.IActionFilterFilter;
+                        }
+                    }
+
+                    if (config.ETagMessageHandlerFilter != null && options != null)
+                    {
+                        var provider = options.Value.Filters
+                            .OfType<DelayLoadFilterProvider<ETagMessageHandler>>()
+                            .FirstOrDefault();
+
+                        if (provider != null)
+                        {
+                            provider.WrappedFilter = config.ETagMessageHandlerFilter;
+                        }
+                    }
+                });
+            }
+
+            private class DelayLoadFilterProvider<T> : IFilterFactory where T : IActionFilter
+            {
+                public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
+                {
+                    if (WrappedFilter != null)
+                    {
+                        return WrappedFilter;
+                    }
+
+                    return new InternalNoOpFilter();
+                }
+
+                public T WrappedFilter { get; set; }
+
+                public bool IsReusable
+                {
+                    get { return true; }
+                }
+
+                private class InternalNoOpFilter : IActionFilter
+                {
+                    public void OnActionExecuted(ActionExecutedContext context)
+                    {
+                    }
+
+                    public void OnActionExecuting(ActionExecutingContext context)
+                    {
+                    }
+                }
+            }
+        }
+#else
         private void DefaultKatanaConfigure(IAppBuilder app)
         {
             // Set default principal to avoid OWIN selfhost bug with VS debugger
@@ -178,11 +412,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 }
             });
 
-            var configuration = new HttpConfiguration();
+            var configuration = new WebRouteConfiguration();
             configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Filters.Add(exceptionFilter);
 
-            configuration.Routes.MapHttpRoute("api default", DefaultRouteTemplate, new { action = RouteParameter.Optional });
+            configuration.Routes.MapHttpRoute("api default", "api/{controller}/{action}", new { action = RouteParameter.Optional });
 
             var httpServer = new HttpServer(configuration);
             configuration.SetHttpServer(httpServer);
@@ -191,5 +425,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 
             app.UseWebApi(httpServer: httpServer);
         }
+#endif
     }
 }

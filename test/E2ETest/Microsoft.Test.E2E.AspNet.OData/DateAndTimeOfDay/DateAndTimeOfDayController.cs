@@ -5,15 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 {
-    public class DCustomersController : ODataController
+    public class DCustomersController : TestODataController
     {
         private static IList<DCustomer> _customers;
 
@@ -56,12 +56,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_customers);
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             DCustomer customer = _customers.FirstOrDefault(e => e.Id == key);
             if (customer == null)
@@ -73,7 +73,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
 
         [HttpGet]
-        public IHttpActionResult BoundFunction(int key, [FromODataUri]Date modifiedDate, [FromODataUri]TimeOfDay modifiedTime,
+        public ITestActionResult BoundFunction(int key, [FromODataUri]Date modifiedDate, [FromODataUri]TimeOfDay modifiedTime,
             [FromODataUri]Date? nullableModifiedDate, [FromODataUri]TimeOfDay? nullableModifiedTime)
         {
             return Ok(BuildString(modifiedDate, modifiedTime, nullableModifiedDate, nullableModifiedTime));
@@ -81,14 +81,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
         [HttpGet]
         [ODataRoute("UnboundFunction(modifiedDate={p1},modifiedTime={p2},nullableModifiedDate={p3},nullableModifiedTime={p4})")]
-        public IHttpActionResult UnboundFunction([FromODataUri]Date p1, [FromODataUri]TimeOfDay p2,
+        public ITestActionResult UnboundFunction([FromODataUri]Date p1, [FromODataUri]TimeOfDay p2,
             [FromODataUri]Date? p3, [FromODataUri]TimeOfDay? p4)
         {
             return Ok(BuildString(p1,p2,p3,p4));
         }
 
         [HttpPost]
-        public IHttpActionResult BoundAction(int key, ODataActionParameters parameters)
+        public ITestActionResult BoundAction(int key, [FromBody]ODataActionParameters parameters)
         {
             VerifyActionParameters(parameters);
             return Ok(true);
@@ -96,13 +96,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
         [HttpPost]
         [ODataRoute("UnboundAction")]
-        public IHttpActionResult UnboundAction(ODataActionParameters parameters)
+        public ITestActionResult UnboundAction([FromBody]ODataActionParameters parameters)
         {
             VerifyActionParameters(parameters);
             return Ok(true);
         }
 
-        private static void VerifyActionParameters(ODataActionParameters parameters)
+        private static void VerifyActionParameters([FromBody]ODataActionParameters parameters)
         {
             Assert.True(parameters.ContainsKey("modifiedDate"));
             Assert.True(parameters.ContainsKey("modifiedTime"));
@@ -133,17 +133,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class EfCustomersController : ODataController
+    public class EfCustomersController : TestODataController
     {
         private readonly DateAndTimeOfDayContext _db = new DateAndTimeOfDayContext();
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_db.Customers);
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             EfCustomer customer = _db.Customers.FirstOrDefault(e => e.Id == key);
             if (customer == null)
@@ -156,7 +156,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
         [HttpPost]
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             DateAndTimeOfDayContext db = new DateAndTimeOfDayContext();
             if (!db.Customers.Any())
@@ -184,7 +184,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class EfPeopleController : ODataController
+    public class EfPeopleController : TestODataController
     {
         private static EdmDateWithEfContext _db = new EdmDateWithEfContext();
 
@@ -210,7 +210,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_db.People);
         }

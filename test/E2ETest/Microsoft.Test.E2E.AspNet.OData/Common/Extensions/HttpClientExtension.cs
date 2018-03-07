@@ -1,4 +1,7 @@
-﻿using System;
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,6 +13,38 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Extensions
 {
     public static class HttpClientExtensions
     {
+        /// <summary>
+        /// Sends a Patch request as an asynchronous operation to the specified Uri with the given <paramref name="content"/> serialized
+        /// as JSON.
+        /// </summary>
+        /// <remarks>
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// </remarks>
+        /// <param name="client">The client used to make the request.</param>
+        /// <param name="requestUri">The Uri the request is sent to.</param>
+        /// <param name="content">The value that will be placed in the request's entity body.</param>
+        /// <returns>A task object representing the asynchronous operation.</returns>
+        public static Task<HttpResponseMessage> PatchAsync(this HttpClient client, Uri requestUri, string content)
+        {
+            return client.PatchAsync(requestUri, content, CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Sends a Patch request as an asynchronous operation to the specified Uri with the given <paramref name="content"/> serialized
+        /// as JSON.
+        /// </summary>
+        /// <remarks>
+        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
+        /// </remarks>
+        /// <param name="client">The client used to make the request.</param>
+        /// <param name="requestUri">The Uri the request is sent to.</param>
+        /// <param name="content">The value that will be placed in the request's entity body.</param>
+        /// <returns>A task object representing the asynchronous operation.</returns>
+        public static Task<HttpResponseMessage> PatchAsync(this HttpClient client, string requestUri, string content)
+        {
+            return client.PatchAsync(new Uri(requestUri), content, CancellationToken.None);
+        }
+
         /// <summary>
         /// Sends a Patch request as an asynchronous operation to the specified Uri with the given <paramref name="value"/> serialized
         /// as JSON.
@@ -86,36 +121,72 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Extensions
             return client.SendAsync(request, cancellationToken);
         }
 
+#if NETCORE // These are only used in the AspNetCore version.
         /// <summary>
-        /// Sends a Patch request as an asynchronous operation to the specified Uri with the given <paramref name="content"/> serialized
+        /// Sends a POST request as an asynchronous operation to the specified Uri with the given <paramref name="value"/> serialized
         /// as JSON.
         /// </summary>
-        /// <remarks>
-        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
-        /// </remarks>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
         /// <param name="requestUri">The Uri the request is sent to.</param>
-        /// <param name="content">The value that will be placed in the request's entity body.</param>
+        /// <param name="value">The value that will be placed in the request's entity body.</param>
         /// <returns>A task object representing the asynchronous operation.</returns>
-        public static Task<HttpResponseMessage> PatchAsync(this HttpClient client, Uri requestUri, string content)
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "We want to support URIs as strings")]
+        public static Task<HttpResponseMessage> PostAsJsonAsync<T>(this HttpClient client, string requestUri, T value)
         {
-            return client.PatchAsync(requestUri, content, CancellationToken.None);
+            return client.PostAsJsonAsync(new Uri(requestUri), value);
         }
 
         /// <summary>
-        /// Sends a Patch request as an asynchronous operation to the specified Uri with the given <paramref name="content"/> serialized
+        /// Sends a POST request as an asynchronous operation to the specified Uri with the given <paramref name="value"/> serialized
         /// as JSON.
         /// </summary>
-        /// <remarks>
-        /// This method uses a default instance of <see cref="JsonMediaTypeFormatter"/>.
-        /// </remarks>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
         /// <param name="client">The client used to make the request.</param>
         /// <param name="requestUri">The Uri the request is sent to.</param>
-        /// <param name="content">The value that will be placed in the request's entity body.</param>
+        /// <param name="value">The value that will be placed in the request's entity body.</param>
         /// <returns>A task object representing the asynchronous operation.</returns>
-        public static Task<HttpResponseMessage> PatchAsync(this HttpClient client, string requestUri, string content)
+        public static Task<HttpResponseMessage> PostAsJsonAsync<T>(this HttpClient client, Uri requestUri, T value)
         {
-            return client.PatchAsync(new Uri(requestUri), content, CancellationToken.None);
+            string content = JsonConvert.SerializeObject(value);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+            request.Content = new StringContent(content);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            return client.SendAsync(request, CancellationToken.None);
         }
+
+        /// <summary>
+        /// Sends a PUT request as an asynchronous operation to the specified Uri with the given <paramref name="value"/> serialized
+        /// as JSON.
+        /// </summary>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
+        /// <param name="client">The client used to make the request.</param>
+        /// <param name="requestUri">The Uri the request is sent to.</param>
+        /// <param name="value">The value that will be placed in the request's entity body.</param>
+        /// <returns>A task object representing the asynchronous operation.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1054:UriParametersShouldNotBeStrings", MessageId = "1#", Justification = "We want to support URIs as strings")]
+        public static Task<HttpResponseMessage> PutAsJsonAsync<T>(this HttpClient client, string requestUri, T value)
+        {
+            return client.PutAsJsonAsync(new Uri(requestUri), value);
+        }
+
+        /// <summary>
+        /// Sends a PUT request as an asynchronous operation to the specified Uri with the given <paramref name="value"/> serialized
+        /// as JSON.
+        /// </summary>
+        /// <typeparam name="T">The type of <paramref name="value"/>.</typeparam>
+        /// <param name="client">The client used to make the request.</param>
+        /// <param name="requestUri">The Uri the request is sent to.</param>
+        /// <param name="value">The value that will be placed in the request's entity body.</param>
+        /// <returns>A task object representing the asynchronous operation.</returns>
+        public static Task<HttpResponseMessage> PutAsJsonAsync<T>(this HttpClient client, Uri requestUri, T value)
+        {
+            string content = JsonConvert.SerializeObject(value);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PUT"), requestUri);
+            request.Content = new StringContent(content);
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            return client.SendAsync(request, CancellationToken.None);
+        }
+#endif
     }
 }

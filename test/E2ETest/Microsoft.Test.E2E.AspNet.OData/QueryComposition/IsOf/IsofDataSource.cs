@@ -148,7 +148,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
     public class BillingCustomerContextTest : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=BillingCustomerContextTest";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=BillingCustomerContextTest1";
 
         public BillingCustomerContextTest()
             : base(ConnectionString)

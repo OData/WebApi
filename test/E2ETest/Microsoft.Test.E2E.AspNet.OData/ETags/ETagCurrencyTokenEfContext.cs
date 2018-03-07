@@ -11,7 +11,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
 {
     public class ETagCurrencyTokenEfContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ETagCurrencyTokenEfContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ETagCurrencyTokenEfContext1";
 
         public ETagCurrencyTokenEfContext()
             : base(ConnectionString)

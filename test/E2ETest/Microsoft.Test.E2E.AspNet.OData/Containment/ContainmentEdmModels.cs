@@ -3,6 +3,7 @@
 
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Containment
 {
@@ -50,9 +51,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             return builder.GetEdmModel();
         }
 
-        public static IEdmModel GetConventionModel()
+        public static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             var paymentInstrumentType = builder.EntityType<PaymentInstrument>();
 
             builder.EntitySet<Account>("Accounts");

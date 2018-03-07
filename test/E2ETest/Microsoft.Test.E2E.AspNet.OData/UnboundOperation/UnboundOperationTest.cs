@@ -7,14 +7,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -32,21 +32,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 
         private readonly string EdmSchemaNamespace = typeof(ConventionCustomer).Namespace;
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { 
                 typeof(ConventionCustomersController), 
                 typeof(MetadataController) };
 
-            var resolver =
-                new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("unboundFunctionConvention", "odata", UnboundFunctionEdmModel.GetEdmModel());
+
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
+            configuration.MapODataServiceRoute("unboundFunctionConvention", "odata", UnboundFunctionEdmModel.GetEdmModel(builder));
 
             configuration.EnsureInitialized();
         }
@@ -149,7 +147,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
             //Assert
             var oDataMessageReaderSettings = new ODataMessageReaderSettings();
             IODataResponseMessage message = new ODataMessageWrapper(stream, response.Content.Headers);
-            var reader = new ODataMessageReader(message, oDataMessageReaderSettings, UnboundFunctionEdmModel.GetEdmModel());
+            var reader = new ODataMessageReader(message, oDataMessageReaderSettings, UnboundFunctionEdmModel.GetEdmModel(new ODataConventionModelBuilder()));
             var oDataWorkSpace = reader.ReadServiceDocument();
 
             var function1 = oDataWorkSpace.FunctionImports.Where(odataResourceCollectionInfo => odataResourceCollectionInfo.Name == "GetAllConventionCustomers");
@@ -345,7 +343,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
             {
                 Assert.Equal((HttpStatusCode)400, response.StatusCode);
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var errorMessage = json["error"]["message"].ToString();
                 const string expect = "The query specified in the URI is not valid. An unknown function with name 'GetConventionCustomerNameByIdImport' was found. This may also be a function import or a key lookup on a navigation property, which is not allowed.";
                 Assert.Equal(expect, errorMessage);

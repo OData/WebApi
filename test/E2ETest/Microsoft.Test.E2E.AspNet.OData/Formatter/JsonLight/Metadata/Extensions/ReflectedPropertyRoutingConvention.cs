@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.Controllers;
-using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -11,9 +10,10 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Extensions
 {
-    public class ReflectedPropertyRoutingConvention : EntitySetRoutingConvention
+    public class ReflectedPropertyRoutingConvention : TestEntitySetRoutingConvention
     {
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        /// <inheritdoc/>
+        protected override string SelectAction(string requestMethod, ODataPath odataPath, TestControllerContext controllerContext, IList<string> actionList)
         {
             if (odataPath.PathTemplate == "~/entityset/key/property" || odataPath.PathTemplate == "~/entityset/key/cast/property")
             {
@@ -24,14 +24,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Extension
                 {
                     var key = odataPath.Segments[1] as KeySegment;
                     controllerContext.AddKeyValueToRouteData(key);
-                    controllerContext.RouteData.Values.Add("property", property.Name);
-                    string prefix = ODataHelper.GetHttpPrefix(controllerContext.Request.Method.ToString());
+                    controllerContext.RouteData.Add("property", property.Name);
+                    string prefix = ODataHelper.GetHttpPrefix(requestMethod);
                     if (string.IsNullOrEmpty(prefix))
                     {
                         return null;
                     }
                     string action = prefix + "Property" + "From" + declareType.Name;
-                    return actionMap.Contains(action) ? action : prefix + "Property";
+                    return actionList.Contains(action) ? action : prefix + "Property";
                 }
             }
 

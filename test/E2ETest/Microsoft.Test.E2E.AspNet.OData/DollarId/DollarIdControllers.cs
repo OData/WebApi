@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 {
-    public class SingersController : ODataController
+    public class SingersController : TestODataController
     {
         public static List<Singer> Singers;
 
@@ -35,23 +35,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         #region Actions
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Singers);
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(Singers.Single(s => s.ID == key));
         }
 
-        public IHttpActionResult GetAlbumsFromSinger(int key)
+        public ITestActionResult GetAlbumsFromSinger(int key)
         {
             var singer = Singers.Single(s => s.ID == key);
             return Ok(singer.Albums);
         }
 
-        public IHttpActionResult DeleteRef(int key, int relatedKey, string navigationProperty)
+        public ITestActionResult DeleteRef(int key, int relatedKey, string navigationProperty)
         {
             var singer = Singers.Single(s => s.ID == key);
             var album = singer.Albums.Single(a => a.ID == relatedKey);
@@ -67,7 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
         [HttpPost]
         [ODataRoute("Singers/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource")]
-        public IHttpActionResult ResetDataSourceOnCollectionOfSinger()
+        public ITestActionResult ResetDataSourceOnCollectionOfSinger()
         {
             InitData();
             return StatusCode(HttpStatusCode.NoContent);
@@ -76,7 +76,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         #endregion
     }
 
-    public class AlbumsController : ODataController
+    public class AlbumsController : TestODataController
     {
         public static List<Album> Albums;
 
@@ -111,12 +111,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Albums);
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(Albums.Single(s => s.ID == key));
         }
@@ -124,7 +124,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         // ~/Albums({key})/Microsoft.Test.E2E.AspNet.OData.DollarId.GetSinger()"
         [HttpGet]
         [EnableQuery]
-        public IHttpActionResult GetSingers(int key)
+        public ITestActionResult GetSingers(int key)
         {
             if (Albums.SingleOrDefault(s => s.ID == key) == null)
             {
@@ -146,7 +146,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             return Ok(singers);
         }
 
-        public IHttpActionResult GetSalesFromAlbum(int key)
+        public ITestActionResult GetSalesFromAlbum(int key)
         {
             var album = Albums.Single(a => a.ID == key);
             return Ok(album.Sales);
@@ -154,7 +154,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
         [HttpDelete]
         [ODataRoute("Albums({key})/Sales({relatedKey})/$ref")]
-        public IHttpActionResult DeleteSalesInfoFromAlum(int key, int relatedKey)
+        public ITestActionResult DeleteSalesInfoFromAlum(int key, int relatedKey)
         {
             var album = Albums.Single(a => a.ID == key);
             var sales = album.Sales.Single(s => s.ID == relatedKey);
@@ -171,7 +171,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
         [HttpPost]
         [ODataRoute("Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource")]
-        public IHttpActionResult ResetDataSourceOnCollectionOfAlbum()
+        public ITestActionResult ResetDataSourceOnCollectionOfAlbum()
         {
             InitData();
             return StatusCode(HttpStatusCode.NoContent);

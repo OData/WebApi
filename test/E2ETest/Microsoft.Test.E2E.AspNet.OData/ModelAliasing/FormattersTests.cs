@@ -7,13 +7,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using ModelAliasing;
 using Newtonsoft.Json.Linq;
@@ -28,16 +28,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("convention", "convention", GetConventionModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("convention", "convention", GetConventionModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetConventionModel()
+        private static IEdmModel GetConventionModel(WebRouteConfiguration config)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = config.CreateConventionModelBuilder();
             EntitySetConfiguration<ModelAliasingMetadataCustomer> customers = builder.EntitySet<ModelAliasingMetadataCustomer>("ModelAliasingCustomers");
             customers.EntityType.Name = "Customer";
             customers.EntityType.Namespace = "ModelAliasing";
@@ -233,16 +233,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         }
     }
 
-    public class ModelAliasingCustomersController : ODataController
+    public class ModelAliasingCustomersController : TestODataController
     {
         private static ModelAliasingMetadataCustomer customer = new ModelAliasingMetadataCustomer();
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 4)]
-        public IHttpActionResult Get([FromODataUri]int key)
+        public ITestActionResult Get([FromODataUri]int key)
         {
             return Ok(customer);
         }
 
-        public IHttpActionResult Post([FromBody] ModelAliasingMetadataCustomer entity)
+        public ITestActionResult Post([FromBody] ModelAliasingMetadataCustomer entity)
         {
             customer = entity;
             return Created(customer);

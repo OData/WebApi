@@ -6,13 +6,11 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -25,13 +23,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] {typeof (EfPeopleController)};
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof (IAssembliesResolver), resolver);
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             IEdmModel model = DateAndTimeOfDayEdmModel.BuildEfPersonEdmModel();
 
@@ -59,7 +54,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            JObject content = await response.Content.ReadAsAsync<JObject>();
+            JObject content = await response.Content.ReadAsObject<JObject>();
 
             Assert.Equal(expect, String.Join(",", content["value"].Select(e => e["Id"].ToString())));
         }

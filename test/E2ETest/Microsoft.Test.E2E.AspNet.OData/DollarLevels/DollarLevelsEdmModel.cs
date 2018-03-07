@@ -3,14 +3,15 @@
 
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
 {
     public class DollarLevelsEdmModel
     {
-        public static IEdmModel GetConventionModel()
+        public static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<DLManager>("DLManagers");
             builder.EntitySet<DLEmployee>("DLEmployees");
 

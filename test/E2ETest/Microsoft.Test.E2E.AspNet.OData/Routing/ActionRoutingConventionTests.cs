@@ -3,14 +3,14 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -23,15 +23,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             EntitySetConfiguration<ActionCar> cars = builder.EntitySet<ActionCar>("ActionCars");
             EntitySetConfiguration<ActionFerrari> ferraris = builder.EntitySet<ActionFerrari>("ActionFerraris");
             cars.EntityType.Action("Wash").Returns<string>();
@@ -57,51 +57,51 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
-            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsAsync<JObject>())["value"]);
+            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsObject<JObject>())["value"]);
         }
     }
 
-    public class ActionFerrarisController : ODataController
+    public class ActionFerrarisController : TestODataController
     {
-        public IHttpActionResult WashOnActionCar(int key)
+        public ITestActionResult WashOnActionCar(int key)
         {
             return Ok("Car");
         }
 
-        public IHttpActionResult Wash(int key)
+        public ITestActionResult Wash(int key)
         {
             return Ok("Ferrari");
         }
 
-        public IHttpActionResult WashOnCollectionOfActionCar()
+        public ITestActionResult WashOnCollectionOfActionCar()
         {
             return Ok("CarCollection");
         }
 
-        public IHttpActionResult Wash()
+        public ITestActionResult Wash()
         {
             return Ok("FerrariCollection");
         }
     }
 
-    public class ActionCarsController : ODataController
+    public class ActionCarsController : TestODataController
     {
-        public IHttpActionResult WashOnActionFerrari(int key)
+        public ITestActionResult WashOnActionFerrari(int key)
         {
             return Ok("Ferrari");
         }
 
-        public IHttpActionResult Wash(int key)
+        public ITestActionResult Wash(int key)
         {
             return Ok("Car");
         }
 
-        public IHttpActionResult WashOnCollectionOfActionFerrari()
+        public ITestActionResult WashOnCollectionOfActionFerrari()
         {
             return Ok("FerrariCollection");
         }
 
-        public IHttpActionResult Wash()
+        public ITestActionResult Wash()
         {
             return Ok("CarCollection");
         }

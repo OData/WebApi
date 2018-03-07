@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -51,9 +49,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return ctx;
         }
 
-        public static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder(configuration);
+            var builder = configuration.CreateConventionModelBuilder();
 
             foreach (var type in Creator.EntityTypes)
             {

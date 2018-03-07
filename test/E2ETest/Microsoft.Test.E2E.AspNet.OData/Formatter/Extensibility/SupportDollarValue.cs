@@ -1,13 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+#else
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -15,8 +19,10 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
 {
@@ -28,7 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         public long? NullableLongProperty { get; set; }
     }
 
-    public class EntityWithPrimitiveAndBinaryPropertyController : ODataController
+    public class EntityWithPrimitiveAndBinaryPropertyController : TestODataController
     {
         private static readonly EntityWithPrimitiveAndBinaryProperty ENTITY;
 
@@ -59,6 +65,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         }
     }
 
+#if !NETCORE // TODO #939: Enable these tests for AspNetCore
     public class SupportDollarValueTest : WebHostTestBase
     {
         public SupportDollarValueTest(WebHostTestFixture fixture)
@@ -66,9 +73,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.
                 MapODataServiceRoute(
                     routeName: "RawValue",
@@ -78,9 +84,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
                     defaultHandler: HttpClientFactory.CreatePipeline(innerHandler: new HttpControllerDispatcher(configuration), handlers: new[] { new ODataNullValueMessageHandler() }));
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder(configuration);
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var parentSet = builder.EntitySet<EntityWithPrimitiveAndBinaryProperty>("EntityWithPrimitiveAndBinaryProperty");
             return builder.GetEdmModel();
         }
@@ -133,4 +139,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
         }
     }
+#endif
 }

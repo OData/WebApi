@@ -1,18 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Http;
+using Microsoft.OData.Client;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+#else
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Web.Http.Dispatcher;
-using System.Web.Http.SelfHost;
 using Microsoft.OData.Client;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
@@ -77,12 +86,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             configuration.EnableODataSupport(GetEdmModel(configuration));
+#if !NETCORE // TODO #939: Enable this functions for AspNetCore
             configuration.Services.Replace(typeof(IHttpControllerTypeResolver), new DynamicHttpControllerTypeResolver(
                 controllers =>
                 {
@@ -90,11 +99,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
                     return controllers;
                 }));
 
-            var selfHostConfig = configuration as HttpSelfHostConfiguration;
-            if (selfHostConfig != null)
-            {
-                selfHostConfig.MaxReceivedMessageSize = selfHostConfig.MaxBufferSize = int.MaxValue;
-            }
+            configuration.MaxReceivedMessageSize = int.MaxValue;
+#endif
         }
 
         // [Theory(Skip = "github Issue #324 random deadlock")]

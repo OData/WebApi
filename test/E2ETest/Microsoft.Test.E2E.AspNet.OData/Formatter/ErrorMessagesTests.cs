@@ -3,13 +3,13 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
@@ -21,24 +21,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             EntitySetConfiguration<ErrorCustomer> customers = builder.EntitySet<ErrorCustomer>("ErrorCustomers");
             return builder.GetEdmModel();
         }
     }
 
-    public class ErrorCustomersController : ODataController
+    public class ErrorCustomersController : TestODataController
     {
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Enumerable.Range(0, 1).Select(i => new ErrorCustomer
             {

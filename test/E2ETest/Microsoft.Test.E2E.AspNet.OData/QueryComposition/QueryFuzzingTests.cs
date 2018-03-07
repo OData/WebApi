@@ -6,8 +6,6 @@ using System.Diagnostics;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.SelfHost;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -61,18 +59,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
-
-            var selfhostConfig = configuration as HttpSelfHostConfiguration;
-            if (selfhostConfig != null)
-            {
-                selfhostConfig.MaxReceivedMessageSize = selfhostConfig.MaxBufferSize = 5000000;
-            }
+            configuration.MaxReceivedMessageSize = int.MaxValue;
         }
 
         [Theory]

@@ -4,10 +4,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
@@ -50,7 +50,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
     #endregion
 
     #region Define Controller
-    public class TradesController : ODataController
+    public class TradesController : TestODataController
     {
         public TradesController()
         {
@@ -150,13 +150,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 
         #region Query
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Trades.AsQueryable());
         }
 
         [HttpGet]
-        public IHttpActionResult HandleUnmappedRequest(ODataPath path)
+        public ITestActionResult HandleUnmappedRequest(ODataPath path)
         {
             var functionSegment = path.Segments.ElementAt(1) as OperationSegment;
             if (functionSegment != null)
@@ -170,7 +170,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
         }
 
         [ODataRoute("Trades/Microsoft.Test.E2E.AspNet.OData.ParameterAlias.GetTradingVolume(productName={productName}, PortingCountryOrRegion={PortingCountryOrRegion})")]
-        public IHttpActionResult GetTradingVolume([FromODataUri]string productName, CountryOrRegion portingCountryOrRegion)
+        public ITestActionResult GetTradingVolume([FromODataUri]string productName, CountryOrRegion portingCountryOrRegion)
         {
             var trades = Trades.Where(t => t.ProductName == productName && t.PortingCountryOrRegion == portingCountryOrRegion).ToArray();
             long? tradingVolume = 0;
@@ -184,7 +184,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 
         [EnableQuery]
         [ODataRoute("GetTradeByCountry(PortingCountryOrRegion={CountryOrRegion})")]
-        public IHttpActionResult GetTradeByCountry([FromODataUri] CountryOrRegion countryOrRegion)
+        public ITestActionResult GetTradeByCountry([FromODataUri] CountryOrRegion countryOrRegion)
         {
             var trades = Trades.Where(t => t.PortingCountryOrRegion == countryOrRegion).ToList();
             return Ok(trades);

@@ -5,13 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
-    public class PartnersController : ODataController
+    public class PartnersController : TestODataController
     {
         public static List<Partner> Partners;
 
@@ -32,24 +32,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         #region Query
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Partners.AsQueryable());
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPartners()
+        public ITestActionResult GetPartners()
         {
             return Ok(Partners.AsQueryable());
         }
 
         [EnableQuery]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(Partners.SingleOrDefault(p=>p.ID == key));
         }
 
-        public IHttpActionResult GetCompanyFromPartner([FromODataUri] int key)
+        public ITestActionResult GetCompanyFromPartner([FromODataUri] int key)
         {
             var company = Partners.First(e => e.ID == key).Company;
             if (company == null)
@@ -61,7 +61,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         #endregion 
 
         #region Update
-        public IHttpActionResult POST([FromBody] Partner partner)
+        public ITestActionResult POST([FromBody] Partner partner)
         {
             Partners.Add(partner);
             return Created(partner);
@@ -70,7 +70,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         #region Navigation link
         [AcceptVerbs("PUT")]
-        public IHttpActionResult CreateRef([FromODataUri] int key, string navigationProperty, [FromBody] Uri link)
+        public ITestActionResult CreateRef([FromODataUri] int key, string navigationProperty, [FromBody] Uri link)
         {
             if (navigationProperty != "Company")
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        public IHttpActionResult DeleteRef([FromODataUri] int key, string navigationProperty)
+        public ITestActionResult DeleteRef([FromODataUri] int key, string navigationProperty)
         {
             if (navigationProperty != "Company")
             {
@@ -107,7 +107,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPut]
         [ODataRoute("Partners({key})/Company")]
-        public IHttpActionResult PutToCompany(int key, Company company)
+        public ITestActionResult PutToCompany(int key, [FromBody]Company company)
         {
             var navigateCompany = Partners.First(e => e.ID == key).Company;
             Partners.First(e => e.ID == key).Company = company;
@@ -124,7 +124,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPatch]
         [ODataRoute("Partners({key})/Company")]
-        public IHttpActionResult PatchToCompany(int key, Delta<Company> company)
+        public ITestActionResult PatchToCompany(int key, Delta<Company> company)
         {
             var navigateCompany = Partners.First(e => e.ID == key).Company;
             company.Patch(Partners.First(e => e.ID == key).Company);
@@ -140,7 +140,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         }
 
         [HttpPost]
-        public IHttpActionResult PostToCompany(int key, [FromBody] Company company)
+        public ITestActionResult PostToCompany(int key, [FromBody] Company company)
         {
             return Ok();
         }
@@ -149,7 +149,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         #region Action
         [HttpPost]
-        public IHttpActionResult ResetDataSourceOnCollectionOfPartner()
+        public ITestActionResult ResetDataSourceOnCollectionOfPartner()
         {
             InitData();
             return StatusCode(HttpStatusCode.NoContent);

@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -14,8 +12,9 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -28,23 +27,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             var controllers = new[] { typeof(UnqualifiedCarsController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
+            config.AddControllers(controllers);
 
-            config.Services.Replace(typeof(IAssembliesResolver), resolver);
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", builder =>
-                builder.AddService(ServiceLifetime.Singleton, sp => GetModel())
+                builder.AddService(ServiceLifetime.Singleton, sp => GetModel(config))
                     .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
                         ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config))
                     .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new UnqualifiedODataUriResolver()));
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<UnqualifiedCar> cars = builder.EntitySet<UnqualifiedCar>("UnqualifiedCars");
             cars.EntityType.Action("Wash").Returns<string>();
             cars.EntityType.Collection.Action("Wash").Returns<string>();
@@ -65,7 +63,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
-            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsAsync<JObject>())["value"]);
+            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsObject<JObject>())["value"]);
         }
 
         [Theory]
@@ -80,34 +78,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             Assert.NotNull(response);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
-            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsAsync<JObject>())["value"]);
+            Assert.Equal(expectedResult, (string)(await response.Content.ReadAsObject<JObject>())["value"]);
         }
     }
 
-    public class UnqualifiedCarsController : ODataController
+    public class UnqualifiedCarsController : TestODataController
     {
         [ODataRoute("UnqualifiedCars({key})/Wash")]
-        public IHttpActionResult WashSingle([FromODataUri]int key)
+        public ITestActionResult WashSingle([FromODataUri]int key)
         {
             return Ok("WashSingle" + key);
         }
 
         [ODataRoute("UnqualifiedCars/Wash")]
-        public IHttpActionResult WashOnCollection()
+        public ITestActionResult WashOnCollection()
         {
             return Ok("WashCollection");
         }
 
         [HttpGet]
         [ODataRoute("UnqualifiedCars({key})/Check")]
-        public IHttpActionResult CheckSingle([FromODataUri]int key)
+        public ITestActionResult CheckSingle([FromODataUri]int key)
         {
             return Ok("CheckSingle" + key);
         }
 
         [HttpGet]
         [ODataRoute("UnqualifiedCars/Check")]
-        public IHttpActionResult CheckOnCollection()
+        public ITestActionResult CheckOnCollection()
         {
             return Ok("CheckCollection");
         }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -76,10 +75,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-
             var conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new DeleteAllRoutingConvention());
             conventions.Insert(0, new NavigationRoutingConvention2());
@@ -120,6 +117,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             await AddAndRemoveBaseNavigationPropertyInDerivedType();
         }
 
+#if !NETCORE // TODO #939: Enable these tests for AspNetCore
         [Theory]
         [InlineData("application/json;odata.metadata=minimal;odata.streaming=true")]
         [InlineData("application/json;odata.metadata=minimal;odata.streaming=false")]
@@ -135,6 +133,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             AcceptHeader = acceptHeader;
             await AddAndRemoveDerivedNavigationPropertyInDerivedType();
         }
+#endif
 
         [Theory]
         [InlineData("application/json;odata.metadata=minimal;odata.streaming=true")]

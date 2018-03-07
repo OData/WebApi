@@ -4,12 +4,8 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
@@ -22,21 +18,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(DominiosController)};
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(configuration));
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Dominio>("Dominios");
             builder.EntitySet<Server>("Servers");
             return builder.GetEdmModel();

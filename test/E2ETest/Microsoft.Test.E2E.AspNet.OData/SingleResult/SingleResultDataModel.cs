@@ -9,7 +9,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.SingleResultTest
     public class SingleResultContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SingleResultTest";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SingleResultTest1";
 
         public SingleResultContext()
             : base(ConnectionString)

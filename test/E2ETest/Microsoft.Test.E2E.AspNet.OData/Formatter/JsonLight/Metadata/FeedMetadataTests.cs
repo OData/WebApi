@@ -4,12 +4,12 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Model;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -23,16 +23,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.EnableODataSupport(GetEdmModel(configuration));
             configuration.AddODataQueryFilter();
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration config)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder(config);
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var entitySet = builder.EntitySet<StubEntity>("StubEntity");
             entitySet.EntityType.Collection.Action("Paged").ReturnsCollectionFromEntitySet<StubEntity>("StubEntity");
             return builder.GetEdmModel();
@@ -61,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             //Act
             HttpResponseMessage response = await Client.SendAsync(message);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
 
             //Assert
             JsonAssert.PropertyEquals(entities.Length, "@odata.count", result);
@@ -91,7 +90,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             //Act
             HttpResponseMessage response = await Client.SendAsync(message);
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
 
             //Assert
             if (acceptHeader.Contains("odata.metadata=none"))
@@ -132,7 +131,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
                 HttpRequestMessage message = new HttpRequestMessage(HttpMethod.Get, nextUrlToQuery);
                 message.SetAcceptHeader(acceptHeader);
                 HttpResponseMessage response = await Client.SendAsync(message);
-                result = await response.Content.ReadAsAsync<JObject>();
+                result = await response.Content.ReadAsObject<JObject>();
                 JArray currentResults = (JArray)result["value"];
                 for (int i = 0; i < currentResults.Count; i++)
                 {

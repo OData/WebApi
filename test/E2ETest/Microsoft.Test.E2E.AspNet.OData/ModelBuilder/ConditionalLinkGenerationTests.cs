@@ -6,9 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -73,15 +71,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.EnableODataSupport(GetImplicitEdmModel());
+            configuration.EnableODataSupport(GetImplicitEdmModel(configuration));
         }
 
-        private static Microsoft.OData.Edm.IEdmModel GetImplicitEdmModel()
+        private static Microsoft.OData.Edm.IEdmModel GetImplicitEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = configuration.CreateConventionModelBuilder();
             var products = modelBuilder.EntitySet<Product>("ConditionalLinkGeneration_Products");
             products.HasEditLink(
                ctx => { return (Uri)null; },
@@ -91,7 +88,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                 {
                     object id;
                     ctx.EdmObject.TryGetPropertyValue("ID", out id);
-                    return new Uri(ctx.Url.CreateODataLink(
+                    return new Uri(ResourceContextHelper.CreateODataLink(ctx,
                                     new EntitySetSegment(ctx.NavigationSource as IEdmEntitySet),
                                     new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, ctx.StructuredType as IEdmEntityType, null)));
                 },

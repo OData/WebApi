@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 {
@@ -47,9 +48,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
     /// </summary>
     internal class DollarIdEdmModel
     {
-        public static IEdmModel GetModel()
+        public static IEdmModel GetModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             var singerConfiguration = builder.EntitySet<Singer>("Singers");
             singerConfiguration.EntityType.Collection.Action("ResetDataSource");
 

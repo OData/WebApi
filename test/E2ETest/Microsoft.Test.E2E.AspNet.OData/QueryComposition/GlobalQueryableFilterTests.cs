@@ -5,13 +5,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.ProductFamilies;
 using Xunit;
 
@@ -24,21 +24,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             this.PageSize = 3;
         }
 
-        public override void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
+#if NETCORE
+        public override void ValidateQuery(Microsoft.AspNetCore.Http.HttpRequest request, ODataQueryOptions queryOptions)
+#else
+        public override void ValidateQuery(System.Net.Http.HttpRequestMessage request, ODataQueryOptions queryOptions)
+#endif
         {
-            //base.ValidateQuery(request, queryOptions);
+            // Skip validation.
         }
     }
 
     public class DerivedODataQueryOptions : ODataQueryOptions
     {
-        public DerivedODataQueryOptions(ODataQueryContext context, HttpRequestMessage request)
+#if NETCORE
+        public DerivedODataQueryOptions(ODataQueryContext context, Microsoft.AspNetCore.Http.HttpRequest request)
+#else
+        public DerivedODataQueryOptions(ODataQueryContext context, System.Net.Http.HttpRequestMessage request)
+#endif
             : base(context, request)
         {
         }
     }
 
-    public class GlobalQueryableFilterController : ApiController
+    public class GlobalQueryableFilterController : TestNonODataController
     {
         private static List<Product> products = new List<Product>();
         static GlobalQueryableFilterController()
@@ -96,9 +104,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             return products.AsQueryable();
         }
 
-        public HttpResponseMessage GetHttpResponseMessage()
+        public ITestActionResult GetHttpResponseMessage()
         {
-            return this.Request.CreateResponse<IQueryable<Product>>(HttpStatusCode.OK, products.AsQueryable());
+            return Ok<IQueryable<Product>>(products.AsQueryable());
         }
 
         public Task<IQueryable> GetTaskIQueryableT()
@@ -156,7 +164,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class DerivedEnitySetController : ODataController
+    public class DerivedEnitySetController : TestODataController
     {
         [DerivedQueryable]
         public IQueryable<Product> Get()
@@ -172,9 +180,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 3 });
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
@@ -189,7 +196,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task TestQueryableWorksUnderGlobalFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url + "?$top=1");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.Single(actual);
         }
@@ -201,7 +208,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task TestActionsThatAreIgnoredByGlobalFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url + "?$top=1");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.NotEqual(1, actual.Count());
         }
@@ -221,7 +228,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public virtual async Task TestQueryableAttributeShouldWinGlobalQueryableFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url);
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.Equal(5, actual.Count());
         }
@@ -242,9 +249,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        internal static void UpdateConfiguration1(HttpConfiguration configuration)
+        internal static void UpdateConfiguration1(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 3 });
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
@@ -258,9 +264,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.AddODataQueryFilter(new DerivedQueryableAttribute());
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
@@ -274,7 +279,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task TestQueryableWorksUnderGlobalFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url + "?$top=4");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.Equal(3, actual.Count());
         }
@@ -284,7 +289,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task TestCustomQueryWorksUnderGlobalFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url);
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.Equal(3, actual.Count());
         }
@@ -297,7 +302,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task TestActionsThatAreIgnoredByGlobalFilter(string url)
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url + "?$top=4");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
             Assert.NotEqual(4, actual.Count());
         }

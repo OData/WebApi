@@ -3,14 +3,15 @@
 
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 {
     public class LowerCamelCaseEdmModel
     {
-        public static IEdmModel GetConventionModel()
+        public static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Employee> employees = builder.EntitySet<Employee>("Employees");
             EntityTypeConfiguration<Employee> employee = employees.EntityType;
             employee.EnumProperty<Gender>(e => e.Sex).Name = "Gender";

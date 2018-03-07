@@ -5,13 +5,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Xunit;
 
@@ -51,7 +49,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class InheritanceQueryableController : ApiController
+    public class InheritanceQueryableController : TestNonODataController
     {
         public IQueryable GetMotorcycles()
         {
@@ -181,7 +179,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var types = new[] { 
                 typeof(InheritanceQueryable_Customer), 
@@ -195,12 +193,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 typeof(ReadOnlyPropertyType), 
                 typeof(InheritanceQueryableController) };
 
-            var resolver = new TestAssemblyResolver(new TypesInjectionAssembly(types));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(types);
 
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.AddODataQueryFilter();
             configuration.EnableDependencyInjection();
         }
@@ -213,7 +209,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url);
             response.EnsureSuccessStatusCode();
-            var actual = await response.Content.ReadAsAsync<IEnumerable<Motorcycle>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<Motorcycle>>();
         }
 
         [Fact]
@@ -221,22 +217,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetDerivedTypeWithAbstractBase?$filter=Microsoft.Test.E2E.AspNet.OData.QueryComposition.InheritanceQueryable_DerivedType/ID eq 1");
             response.EnsureSuccessStatusCode();
-            var actual = await response.Content.ReadAsAsync<IEnumerable<InheritanceQueryable_DerivedType>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<InheritanceQueryable_DerivedType>>();
             Assert.Equal("First", actual.First().Name);
 
             response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetDerivedTypeWithAbstractBase?$filter=Microsoft.Test.E2E.AspNet.OData.QueryComposition.InheritanceQueryable_DerivedType/Name eq 'First'");
             response.EnsureSuccessStatusCode();
-            actual = await response.Content.ReadAsAsync<IEnumerable<InheritanceQueryable_DerivedType>>();
+            actual = await response.Content.ReadAsObject<IEnumerable<InheritanceQueryable_DerivedType>>();
             Assert.Equal(1, actual.First().ID);
 
             response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetDerivedTypeWithAbstractBase?$filter=Microsoft.Test.E2E.AspNet.OData.QueryComposition.InheritanceQueryable_DerivedType/EntityProperty/Name eq 'Fourth'");
             response.EnsureSuccessStatusCode();
-            actual = await response.Content.ReadAsAsync<IEnumerable<InheritanceQueryable_DerivedType>>();
+            actual = await response.Content.ReadAsObject<IEnumerable<InheritanceQueryable_DerivedType>>();
             Assert.Equal(2, actual.First().ID);
 
             response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetDerivedTypeWithAbstractBase?$filter=Microsoft.Test.E2E.AspNet.OData.QueryComposition.InheritanceQueryable_DerivedType/ComplexProperty/ReadOnlyProperty eq 8");
             response.EnsureSuccessStatusCode();
-            actual = await response.Content.ReadAsAsync<IEnumerable<InheritanceQueryable_DerivedType>>();
+            actual = await response.Content.ReadAsObject<IEnumerable<InheritanceQueryable_DerivedType>>();
             Assert.Equal(2, actual.Count());
         }
 
@@ -245,12 +241,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetReadOnlyPropertyType?$filter=ReadOnlyProperty eq 8");
             response.EnsureSuccessStatusCode();
-            var actual = await response.Content.ReadAsAsync<IEnumerable<ReadOnlyPropertyType>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<ReadOnlyPropertyType>>();
             Assert.Single(actual);
 
             response = await this.Client.GetAsync(this.BaseAddress + "/api/InheritanceQueryable/GetReadOnlyPropertyType?$filter=ReadOnlyProperty eq 7");
             response.EnsureSuccessStatusCode();
-            actual = await response.Content.ReadAsAsync<IEnumerable<ReadOnlyPropertyType>>();
+            actual = await response.Content.ReadAsObject<IEnumerable<ReadOnlyPropertyType>>();
             Assert.Empty(actual);
         }
     }

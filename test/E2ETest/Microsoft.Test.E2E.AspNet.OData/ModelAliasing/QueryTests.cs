@@ -7,13 +7,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using ModelAliasing;
 using Newtonsoft.Json.Linq;
@@ -28,15 +28,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("convention", "convention", GetConventionModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("convention", "convention", GetConventionModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetConventionModel()
+        private static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<ModelAliasingMetadataCustomer> customers = builder.EntitySet<ModelAliasingMetadataCustomer>("ModelAliasingQueryCustomers");
             customers.EntityType.Name = "Customer";
             customers.EntityType.Namespace = "ModelAliasing";
@@ -241,10 +241,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         }
     }
 
-    public class ModelAliasingQueryCustomersController : ODataController
+    public class ModelAliasingQueryCustomersController : TestODataController
     {
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Enumerable.Range(0, 10).Select(i => new ModelAliasingMetadataCustomer
             {
@@ -392,7 +392,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
-        public IHttpActionResult Get([FromODataUri] int key)
+        public ITestActionResult Get([FromODataUri] int key)
         {
             return Ok();
         }

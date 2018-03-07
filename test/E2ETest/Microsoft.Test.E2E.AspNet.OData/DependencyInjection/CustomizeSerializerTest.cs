@@ -7,15 +7,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
@@ -30,16 +27,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.Services.Replace(
-                typeof(IAssembliesResolver),
-                new TestAssemblyResolver(typeof(CustomersController), typeof(OrdersController)));
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
+            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
+            configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MapODataServiceRoute("customserializer", "customserializer", builder =>
-                builder.AddService(ServiceLifetime.Singleton, sp => EdmModel.GetEdmModel())
+                builder.AddService(ServiceLifetime.Singleton, sp => EdmModel.GetEdmModel(configuration))
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("customserializer", configuration))
                        .AddService<ODataSerializerProvider, MyODataSerializerProvider>(ServiceLifetime.Singleton)

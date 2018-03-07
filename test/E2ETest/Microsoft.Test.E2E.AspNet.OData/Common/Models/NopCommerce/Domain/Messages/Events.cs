@@ -78,19 +78,19 @@ namespace Nop.Core.Domain.Messages
     /// <summary>
     /// A container for tokens that are added.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public class EntityTokensAddedEvent<T, U> where T : BaseEntity
+    /// <typeparam name="TEntity"></typeparam>
+    public class EntityTokensAddedEvent<TEntity, TItem> where TEntity : BaseEntity
     {
-        private readonly T _entity;
-        private readonly IList<U> _tokens;
+        private readonly TEntity _entity;
+        private readonly IList<TItem> _tokens;
 
-        public EntityTokensAddedEvent(T entity, IList<U> tokens)
+        public EntityTokensAddedEvent(TEntity entity, IList<TItem> tokens)
         {
             _entity = entity;
             _tokens = tokens;
         }
 
-        public T Entity
+        public TEntity Entity
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Nop.Core.Domain.Messages
             }
         }
 
-        public IList<U> Tokens
+        public IList<TItem> Tokens
         {
             get
             {
@@ -110,13 +110,13 @@ namespace Nop.Core.Domain.Messages
     /// <summary>
     /// A container for tokens that are added.
     /// </summary>
-    /// <typeparam name="U"></typeparam>
-    public class MessageTokensAddedEvent<U>
+    /// <typeparam name="TItem"></typeparam>
+    public class MessageTokensAddedEvent<TItem>
     {
         private readonly MessageTemplate _message;
-        private readonly IList<U> _tokens;
+        private readonly IList<TItem> _tokens;
 
-        public MessageTokensAddedEvent(MessageTemplate message, IList<U> tokens)
+        public MessageTokensAddedEvent(MessageTemplate message, IList<TItem> tokens)
         {
             _message = message;
             _tokens = tokens;
@@ -130,7 +130,7 @@ namespace Nop.Core.Domain.Messages
             }
         }
 
-        public IList<U> Tokens
+        public IList<TItem> Tokens
         {
             get
             {

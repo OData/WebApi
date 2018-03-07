@@ -6,15 +6,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Containment
 {
-    public class AccountsController : ODataController
+    public class AccountsController : TestODataController
     {
         private static ContainmentDataSource _dataSource = null;
         public AccountsController()
@@ -26,19 +26,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_dataSource.Accounts.AsQueryable());
         }
 
         [EnableQuery]
-        public IHttpActionResult GetAccountsFromPremiumAccount()
+        public ITestActionResult GetAccountsFromPremiumAccount()
         {
             return Ok(_dataSource.Accounts.OfType<PremiumAccount>().AsQueryable());
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPayinPIsFromAccount(int key)
+        public ITestActionResult GetPayinPIsFromAccount(int key)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             return Ok(payinPIs);
@@ -46,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         [EnableQuery]
         [ODataRoute("Accounts({key})/PayinPIs")]
-        public IHttpActionResult GetPayinPIsFromAccountImport(int key)
+        public ITestActionResult GetPayinPIsFromAccountImport(int key)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             return Ok(payinPIs);
@@ -55,7 +55,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [EnableQuery]
         [HttpGet]
         [ODataRoute("Accounts({key})/PayinPIs({navKey})")]
-        public IHttpActionResult GetSinglePayinPIFromAccount(int key, int navKey)
+        public ITestActionResult GetSinglePayinPIFromAccount(int key, int navKey)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             var payinPI = payinPIs.Single(pi => pi.PaymentInstrumentID == navKey);
@@ -65,7 +65,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [EnableQuery]
         [HttpGet]
         [ODataRoute("Accounts({key})/PayinPIs({navKey})/Statement")]
-        public IHttpActionResult GetStatementFromPaymentInstument(int key, int navKey)
+        public ITestActionResult GetStatementFromPaymentInstument(int key, int navKey)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             var payinPI = payinPIs.Single(pi => pi.PaymentInstrumentID == navKey);
@@ -84,7 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [EnableQuery]
         [HttpPut]
         [ODataRoute("Accounts({key})/PayinPIs({navKey})/Statement")]
-        public IHttpActionResult PutStatement(int key, int navKey, EdmEntityObject statementObject)
+        public ITestActionResult PutStatement(int key, int navKey, [FromBody]EdmEntityObject statementObject)
         {
             Statement newStatement = new Statement();
             var properties = typeof(Statement).GetProperties();
@@ -100,7 +100,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [HttpGet]
         [HttpDelete]
         [ODataRoute("Accounts({key})/PayinPIs({navKey})/Statement")]
-        public IHttpActionResult DeleteStatementFromPaymentInstument(int key, int navKey)
+        public ITestActionResult DeleteStatementFromPaymentInstument(int key, int navKey)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             var payinPI = payinPIs.Single(pi => pi.PaymentInstrumentID == navKey);
@@ -109,33 +109,33 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPayoutPIFromAccount(int key)
+        public ITestActionResult GetPayoutPIFromAccount(int key)
         {
             var payoutPI = _dataSource.Accounts.Single(a => a.AccountID == key).PayoutPI;
             return Ok(payoutPI);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetGiftCardFromPremiumAccount(int key)
+        public ITestActionResult GetGiftCardFromPremiumAccount(int key)
         {
             var giftCard = _dataSource.Accounts.OfType<PremiumAccount>().Single(a => a.AccountID == key).GiftCard;
             return Ok(giftCard);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPayinPIsCountFromAccount(int key)
+        public ITestActionResult GetPayinPIsCountFromAccount(int key)
         {
             var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
             return Ok(payinPIs.Count());
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(_dataSource.Accounts.Single(a => a.AccountID == key));
         }
 
         [ODataRoute("Accounts({key})/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard/$ref")]
-        public IHttpActionResult GetAssociationLinkOfGiftCard(int key)
+        public ITestActionResult GetAssociationLinkOfGiftCard(int key)
         {
             var serviceRootUri = GetServiceRootUri();
             var entityId = string.Format("{0}/Accounts({1})/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard", serviceRootUri, key);
@@ -143,7 +143,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         // GET ~/Accounts({key})/PayoutPI/$ref
-        public IHttpActionResult GetRef(int key, string navigationProperty)
+        public ITestActionResult GetRef(int key, string navigationProperty)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == key);
             var serviceRootUri = GetServiceRootUri();
@@ -152,7 +152,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [ODataRoute("Accounts({key})/PayinPIs/$ref")]
-        public IHttpActionResult GetAssociationLinkOfPayinPIs(int key)
+        public ITestActionResult GetAssociationLinkOfPayinPIs(int key)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == key);
             var serviceRootUri = GetServiceRootUri();
@@ -161,7 +161,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             return Ok(uris);
         }
 
-        public IHttpActionResult Post(Account account)
+        public ITestActionResult Post([FromBody]Account account)
         {
             account.AccountID = 300;
             if (account.PayinPIs == null)
@@ -172,7 +172,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             return Created(account);
         }
 
-        public IHttpActionResult Put(int key, Account account)
+        public ITestActionResult Put(int key, [FromBody]Account account)
         {
             var originalAccount = _dataSource.Accounts.Single(a => a.AccountID == key);
             account.AccountID = originalAccount.AccountID;
@@ -187,7 +187,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         [HttpPatch]
         [ODataRoute("Accounts({key})/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount")]
-        public IHttpActionResult PatchPremiumAccount(int key, Delta<PremiumAccount> delta)
+        public ITestActionResult PatchPremiumAccount(int key, [FromBody]Delta<PremiumAccount> delta)
         {
             var originalAccount = _dataSource.Accounts.Single(a => a.AccountID == key) as PremiumAccount;
             delta.TrySetPropertyValue("AccountID", originalAccount.AccountID); // It is the key property, and should not be updated.
@@ -196,7 +196,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [ODataRoute("Accounts({key})/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount")]
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             var originalAccount = _dataSource.Accounts.Single(a => a.AccountID == key);
             _dataSource.Accounts.Remove(originalAccount);
@@ -204,7 +204,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         // POST ~/Accounts(100)/PayinPIs
-        public IHttpActionResult PostToPayinPIsFromAccount(int key, PaymentInstrument pi)
+        public ITestActionResult PostToPayinPIsFromAccount(int key, [FromBody]PaymentInstrument pi)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == key);
             pi.PaymentInstrumentID = account.PayinPIs.Max(p => p.PaymentInstrumentID) + 1;
@@ -214,7 +214,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         // PUT ~/Accounts(100)/PayoutPI
         [ODataRoute("Accounts({accountId})/PayoutPI")]
-        public IHttpActionResult PutToPayoutPIFromAccount(int accountId, [FromBody]PaymentInstrument paymentInstrument)
+        public ITestActionResult PutToPayoutPIFromAccount(int accountId, [FromBody]PaymentInstrument paymentInstrument)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             account.PayoutPI = paymentInstrument;
@@ -223,7 +223,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         // PUT ~/Accounts(100)/PayinPIs(101)
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})")]
-        public IHttpActionResult PutToPayinPI(int accountId, int paymentInstrumentId, [FromBody]PaymentInstrument paymentInstrument)
+        public ITestActionResult PutToPayinPI(int accountId, int paymentInstrumentId, [FromBody]PaymentInstrument paymentInstrument)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var originalPi = account.PayinPIs.Single(p => p.PaymentInstrumentID == paymentInstrumentId);
@@ -234,7 +234,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         // PATCH ~/Accounts(100)/PayinPIs(101)
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})")]
-        public IHttpActionResult PatchToPayinPI(int accountId, int paymentInstrumentId, [FromBody]Delta<PaymentInstrument> delta)
+        public ITestActionResult PatchToPayinPI(int accountId, int paymentInstrumentId, [FromBody]Delta<PaymentInstrument> delta)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var originalPi = account.PayinPIs.Single(p => p.PaymentInstrumentID == paymentInstrumentId);
@@ -245,7 +245,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // PATCH ~/Accounts(200)/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard
         [HttpPatch]
         [ODataRoute("Accounts({accountId})/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard")]
-        public IHttpActionResult PatchToGiftCardFromPremiumAccount(int accountId, [FromBody] Delta<GiftCard> giftCard)
+        public ITestActionResult PatchToGiftCardFromPremiumAccount(int accountId, [FromBody] Delta<GiftCard> giftCard)
         {
             var account = _dataSource.Accounts.OfType<PremiumAccount>().Single(a => a.AccountID == accountId);
             var originalGiftCard = account.GiftCard;
@@ -256,7 +256,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // DELETE ~/Accounts(100)/PayinPIs(101)
         [HttpDelete]
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})")]
-        public IHttpActionResult DeletePayinPIFromAccount(int accountId, int paymentInstrumentId)
+        public ITestActionResult DeletePayinPIFromAccount(int accountId, int paymentInstrumentId)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var originalPi = account.PayinPIs.Single(p => p.PaymentInstrumentID == paymentInstrumentId);
@@ -273,7 +273,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         // DELETE ~/Accounts(100)/PayinPIs/$ref
         [HttpDelete]
-        public IHttpActionResult DeleteRef(int key, int relatedKey, string navigationProperty)
+        public ITestActionResult DeleteRef(int key, int relatedKey, string navigationProperty)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == key);
 
@@ -296,7 +296,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // Delete ~/Accounts(100)/PayoutPI
         [HttpDelete]
         [ODataRoute("Accounts({accountId})/PayoutPI")]
-        public IHttpActionResult DeletePayoutPIFromAccount(int accountId)
+        public ITestActionResult DeletePayoutPIFromAccount(int accountId)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             account.PayoutPI = null;
@@ -306,7 +306,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // POST ~/Accounts(100)/PayinPIs/Namespace.Clear
         [HttpPost]
         [ODataRoute("Accounts({accountId})/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.Clear")]
-        public IHttpActionResult ClearPayoutPIFromAccount(int accountId, ODataActionParameters parameters)
+        public ITestActionResult ClearPayoutPIFromAccount(int accountId, [FromBody]ODataActionParameters parameters)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var nameContains = parameters["nameContains"] as string;
@@ -321,7 +321,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // POST ~/Accounts(100)/PayinPIs(101)/Namespace.Delete
         [HttpPost]
         [ODataRoute("Accounts({accountId})/PayinPIs({paymentInstrumentId})/Microsoft.Test.E2E.AspNet.OData.Containment.Delete")]
-        public IHttpActionResult DeleteAGivenPayinPIFromAccount(int accountId, int paymentInstrumentId)
+        public ITestActionResult DeleteAGivenPayinPIFromAccount(int accountId, int paymentInstrumentId)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var paymentInstrument = account.PayinPIs.Single(pi => pi.PaymentInstrumentID == paymentInstrumentId);
@@ -332,7 +332,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // POST ~/Accounts(100)/PayoutPI/Namespace.Delete
         [HttpPost]
         [ODataRoute("Accounts({accountId})/PayoutPI/Microsoft.Test.E2E.AspNet.OData.Containment.Delete")]
-        public IHttpActionResult SetPayoutPiToNull(int accountId)
+        public ITestActionResult SetPayoutPiToNull(int accountId)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             account.PayoutPI = null;
@@ -343,7 +343,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // POST ~/Accounts(100)/PayoutPI/Namespace.Duplicate
         [HttpPost]
         //[ODataRoute("Accounts({accountId})/PayinPIs({piId})/Microsoft.Test.E2E.AspNet.OData.Containment.Duplicate")]
-        public IHttpActionResult DuplicatePayinPI(int accountId, int piId)
+        public ITestActionResult DuplicatePayinPI(int accountId, int piId)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var paymentInstrument = account.PayinPIs.Single(pi => pi.PaymentInstrumentID == piId);
@@ -371,7 +371,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         // GET ~/Accounts(100)/PayinPIs/Namespace.GetCount)
         [HttpGet]
         [ODataRoute("Accounts({accountId})/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains={name})")]
-        public IHttpActionResult GetPayinPIsCountWhoseNameContainsGivenValue(int accountId, [FromODataUri]string name)
+        public ITestActionResult GetPayinPIsCountWhoseNameContainsGivenValue(int accountId, [FromODataUri]string name)
         {
             var account = _dataSource.Accounts.Single(a => a.AccountID == accountId);
             var count = account.PayinPIs.Where(pi => pi.FriendlyName.Contains(name)).Count();
@@ -380,21 +380,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             _dataSource = new ContainmentDataSource();
             return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        private string GetServiceRootUri()
-        {
-            // TODO: open a bug about adding ServiceRootUri to ODataProperites().
-            var routeName = Request.ODataProperties().RouteName;
-            ODataRoute odataRoute = Configuration.Routes[routeName] as ODataRoute;
-            var prefixName = odataRoute.RoutePrefix;
-            var requestUri = Request.RequestUri.ToString();
-            var serviceRootUri = requestUri.Substring(0, requestUri.IndexOf(prefixName) + prefixName.Length);
-            return serviceRootUri;
         }
 
         private IEdmEntityType GetEdmEntityTypeOfStatement()
@@ -405,7 +394,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
     }
 
-    public class AnonymousAccountController : ODataController
+    public class AnonymousAccountController : TestODataController
     {
         private static ContainmentDataSource _dataSource = null;
         public AnonymousAccountController()
@@ -417,20 +406,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_dataSource.AnonymousAccount);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPayinPIs()
+        public ITestActionResult GetPayinPIs()
         {
             var payinPIs = _dataSource.AnonymousAccount.PayinPIs;
             return Ok(payinPIs);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetPayoutPI()
+        public ITestActionResult GetPayoutPI()
         {
             var payoutPI = _dataSource.AnonymousAccount.PayoutPI;
             return Ok(payoutPI);

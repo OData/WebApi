@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.OData.Client;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -34,9 +33,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
         }
 

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttributeTest
 {
@@ -104,9 +104,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
 
     public class SelectAttributeEdmModel
     {
-        public static IEdmModel GetEdmModel()
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             builder.EntitySet<Car>("Cars");
@@ -117,9 +117,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
             return model;
         }
 
-        public static IEdmModel GetEdmModelByModelBoundAPI()
+        public static IEdmModel GetEdmModelByModelBoundAPI(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             builder.EntityType<Customer>().HasMany(c => c.Orders).Select("Id");
 

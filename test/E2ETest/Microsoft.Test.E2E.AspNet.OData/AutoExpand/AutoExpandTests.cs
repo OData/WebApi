@@ -6,11 +6,10 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -40,16 +39,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.Services.Replace(
-                typeof (IAssembliesResolver),
-                new TestAssemblyResolver(
-                    typeof (CustomersController), 
-                    typeof (PeopleController),
-                    typeof (NormalOrdersController)));
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
+            configuration.AddControllers(
+                typeof (CustomersController), 
+                typeof (PeopleController),
+                typeof (NormalOrdersController));
+            configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute(
@@ -77,7 +73,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
 
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(customer.Properties().Count(), propCount);
             VerifyOrderAndChoiceOrder(customer);
 
@@ -106,7 +102,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             Assert.NotNull(customer);
             VerifyOrderAndChoiceOrder(customer);
             Assert.Null(customer["Friend"]);
@@ -129,7 +125,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var responseJson = await response.Content.ReadAsAsync<JObject>();
+            var responseJson = await response.Content.ReadAsObject<JObject>();
             var people = responseJson["value"] as JArray;
             var he = people[8] as JObject;
             JObject friend = he;
@@ -163,7 +159,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
 
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             VerifyOrderAndChoiceOrder(customer, special: true);
 
             // level one
@@ -191,7 +187,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
 
-            var customer = await response.Content.ReadAsAsync<JObject>();
+            var customer = await response.Content.ReadAsObject<JObject>();
             VerifyOrderAndChoiceOrder(customer, special: true, vip: true);
 
             // level one

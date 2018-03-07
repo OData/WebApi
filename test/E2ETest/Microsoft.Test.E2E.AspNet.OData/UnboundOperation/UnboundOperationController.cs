@@ -4,14 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 {
-    public class ConventionCustomersController : ODataController
+    public class ConventionCustomersController : TestODataController
     {
         private static IList<ConventionCustomer> _customers = null;
 
@@ -48,7 +48,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
         public IList<ConventionCustomer> Customers { get { return _customers; } }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_customers.AsQueryable());
         }
@@ -131,7 +131,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
         [EnableQuery]
         [ODataRoute("GetDefinedGenders()")]
         [ODataRoute("GetDefinedGenders()/$count")]
-        public IHttpActionResult GetDefinedGenders()
+        public ITestActionResult GetDefinedGenders()
         {
             IList<ConventionGender> genders = new List<ConventionGender>();
             genders.Add(ConventionGender.Male);
@@ -142,7 +142,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
         [HttpPost]
         [ODataRoute("ResetDataSource")]
         [ODataRoute("ResetDataSourceImport")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (!ModelState.IsValid)
             {
@@ -158,7 +158,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
         [EnableQuery]
         [ODataRoute("UpdateAddress")]
         [ODataRoute("UpdateAddressImport")]
-        public IHttpActionResult UpdateAddress(ODataUntypedActionParameters parameters)
+        public ITestActionResult UpdateAddress([FromBody]ODataUntypedActionParameters parameters)
         {
             if (!ModelState.IsValid)
             {
@@ -189,7 +189,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
         [HttpPost]
         [ODataRoute("CreateCustomer")]
         [ODataRoute("CreateCustomerImport")]
-        public IHttpActionResult CreateCustomer(ODataActionParameters parameters)
+        public ITestActionResult CreateCustomer(ODataActionParameters parameters)
         {
             if (!ModelState.IsValid)
             {
@@ -204,7 +204,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 
         [HttpPost]
         [ODataRoute("AdvancedAction")]
-        public IHttpActionResult AdvancedAction(ODataActionParameters parameters)
+        public ITestActionResult AdvancedAction([FromBody]ODataActionParameters parameters)
         {
             Assert.NotNull(parameters);
             Assert.Equal(new[] { 4, 5, 6 }, parameters["nums"] as IEnumerable<int>);

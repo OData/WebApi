@@ -4,6 +4,7 @@
 using System.Data.Entity;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 {
@@ -11,7 +12,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
     {
         public class CountContext : DbContext
         {
-            public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=CountTest";
+            public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=CountTest1";
 
             public CountContext()
                 : base(ConnectionString)
@@ -22,9 +23,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
             public IDbSet<Weapon> Weapons { get; set; }
         }
 
-        public static IEdmModel GetModel()
+        public static IEdmModel GetModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Hero>("Heroes");
             builder.EntitySet<Weapon>("Weapons");
 

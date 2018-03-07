@@ -4,9 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Client;
@@ -65,22 +63,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
     public class ODataResultTests : WebHostTestBase
     {
+        private WebRouteConfiguration _configuration;
+
         public ODataResultTests(WebHostTestFixture fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            _configuration = configuration;
 
-            configuration.EnableODataSupport(GetEdmModel());
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+
+            configuration.EnableODataSupport(GetEdmModel(configuration));
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder();
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<ODataResult_Model1>("ODataResult_Model1");
             mb.EntitySet<ODataResult_Model2>("ODataResult_Model2");
 
@@ -92,7 +93,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
             // Arrange
             var ctx = new DataServiceContext(new Uri(this.BaseAddress), ODataProtocolVersion.V4);
-            ctx.Format.UseJson(GetEdmModel());
+            ctx.Format.UseJson(GetEdmModel(_configuration));
 
             ctx.AddObject(
                 "ODataResult_Model1",

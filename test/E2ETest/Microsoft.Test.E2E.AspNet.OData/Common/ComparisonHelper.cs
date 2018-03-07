@@ -46,9 +46,9 @@ namespace Microsoft.Test.E2E.AspNet.OData
             return CompareArrays(list1.ToArray(), list2.ToArray());
         }
 
-        public static bool CompareDictionaries<K, V>(Dictionary<K, V> dict1, Dictionary<K, V> dict2)
-            where K : IComparable
-            where V : class
+        public static bool CompareDictionaries<TKey, TValue>(Dictionary<TKey, TValue> dict1, Dictionary<TKey, TValue> dict2)
+            where TKey : IComparable
+            where TValue : class
         {
             if (dict1 == null)
             {
@@ -60,20 +60,20 @@ namespace Microsoft.Test.E2E.AspNet.OData
                 return false;
             }
 
-            List<K> keys1 = new List<K>(dict1.Keys);
-            List<K> keys2 = new List<K>(dict2.Keys);
+            List<TKey> keys1 = new List<TKey>(dict1.Keys);
+            List<TKey> keys2 = new List<TKey>(dict2.Keys);
             keys1.Sort();
             keys2.Sort();
-            if (!CompareLists<K>(keys1, keys2))
+            if (!CompareLists<TKey>(keys1, keys2))
             {
                 return false;
             }
 
-            foreach (K key in keys1)
+            foreach (TKey key in keys1)
             {
-                V value1 = dict1[key];
-                V value2 = dict2[key];
-                if (!CompareObjects<V>(value1, value2))
+                TValue value1 = dict1[key];
+                TValue value2 = dict2[key];
+                if (!CompareObjects<TValue>(value1, value2))
                 {
                     return false;
                 }

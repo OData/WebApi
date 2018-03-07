@@ -10,8 +10,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using System.Xml;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
@@ -22,6 +20,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using TypedProxy = Microsoft.Test.E2E.AspNet.OData.OpenType.Typed.Client;
@@ -30,6 +29,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 {
     public class TypedOpenTypeTest : WebHostTestBase
     {
+        WebRouteConfiguration _configuration = null;
         private static string[] Routings = new string[] { "convention", "AttributeRouting" };
         int expectedValueOfInt, actualValueOfInt;
         int? expectedValueOfNullableInt, actualValueOfNullableInt;
@@ -40,23 +40,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
+            _configuration = configuration;
             var controllers = new[] { typeof(EmployeesController), typeof(AccountsController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute(
                 Routings[0],
                 Routings[0],
-                OpenComplexTypeEdmModel.GetTypedConventionModel(),
+                OpenComplexTypeEdmModel.GetTypedConventionModel(configuration),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault());
-            configuration.MapODataServiceRoute(Routings[1], Routings[1], OpenComplexTypeEdmModel.GetTypedConventionModel());
+            configuration.MapODataServiceRoute(Routings[1], Routings[1], OpenComplexTypeEdmModel.GetTypedConventionModel(configuration));
             configuration.MapODataServiceRoute("explicit", "explicit", OpenComplexTypeEdmModel.GetTypedExplicitModel());
             configuration.EnsureInitialized();
         }
@@ -79,7 +77,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
 
                 var results = json.GetValue("value") as JArray;
                 Assert.Equal<int>(3, results.Count);
@@ -115,7 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
 
                 var age = result["AccountInfo"]["Age"];
                 Assert.Equal(10, age);
@@ -167,7 +165,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
 
             var nickName = json.GetValue("NickName").ToString();
             Assert.Equal("NickName1", nickName);
@@ -192,7 +190,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
 
             var city = json.GetValue("City").ToString();
             Assert.Equal("Redmond", city);
@@ -218,7 +216,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
 
             var city = json.GetValue("City").ToString();
             Assert.Equal("Redmond", city);
@@ -242,7 +240,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
 
                 var tag1 = json.GetValue("Tag1").ToString();
                 Assert.Equal("Value 1", tag1);
@@ -265,7 +263,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
 
             var city = json.GetValue("value").ToString();
             Assert.Equal("Redmond", city);
@@ -304,7 +302,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 {
                     Assert.Equal(HttpStatusCode.OK, patchResponse.StatusCode);
 
-                    var content = await patchResponse.Content.ReadAsAsync<JObject>();
+                    var content = await patchResponse.Content.ReadAsObject<JObject>();
 
                     var accountInfo = content["AccountInfo"];
                     Assert.Equal("NewNickName1", accountInfo["NickName"]);
@@ -327,7 +325,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
 
                 var updatedAccountinfo = result["AccountInfo"];
                 Assert.Equal("NewNickName1", updatedAccountinfo["NickName"]);
@@ -362,7 +360,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 {
                     Assert.Equal(HttpStatusCode.OK, putResponse.StatusCode);
 
-                    var content = await putResponse.Content.ReadAsAsync<JObject>();
+                    var content = await putResponse.Content.ReadAsObject<JObject>();
 
                     var accountInfo = content["AccountInfo"];
                     Assert.Equal("NewNickName1", accountInfo["NickName"]);
@@ -382,7 +380,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
 
                 var updatedAccountinfo = result["AccountInfo"];
                 Assert.Equal("NewNickName1", updatedAccountinfo["NickName"]);
@@ -408,7 +406,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var content = await response.Content.ReadAsAsync<JObject>();
+                var content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -433,7 +431,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                content = await response.Content.ReadAsAsync<JObject>();
+                content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -455,7 +453,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var content = await response.Content.ReadAsAsync<JObject>();
+                var content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -479,7 +477,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                content = await response.Content.ReadAsAsync<JObject>();
+                content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -500,7 +498,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var content = await response.Content.ReadAsAsync<JObject>();
+                var content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -526,7 +524,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                content = await response.Content.ReadAsAsync<JObject>();
+                content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("NewStreet", content["Street"]); // updated
@@ -570,7 +568,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 {
                     Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 
-                    var json = await response.Content.ReadAsAsync<JObject>();
+                    var json = await response.Content.ReadAsObject<JObject>();
 
                     var age = json["AccountInfo"]["Age"];
                     Assert.Equal(40, age);
@@ -621,7 +619,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 {
                     response.EnsureSuccessStatusCode();
 
-                    var json = await response.Content.ReadAsAsync<JObject>();
+                    var json = await response.Content.ReadAsObject<JObject>();
 
                     var results = json.GetValue("value") as JArray;
                     Assert.Equal(2, results.Count);
@@ -641,7 +639,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
                 var response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                var content = await response.Content.ReadAsAsync<JObject>();
+                var content = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
                 Assert.Equal("Redmond", content["City"]);
                 Assert.Equal("1 Microsoft Way", content["Street"]);
@@ -678,7 +676,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.GetAsync(requestUri);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
 
                 var city = json.GetValue("City").ToString();
                 Assert.Equal("Redmond", city);
@@ -709,7 +707,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 HttpResponseMessage response = await this.Client.SendAsync(requestForPost);
                 Assert.True(response.IsSuccessStatusCode);
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
 
                 var nickName = json.GetValue("NickName").ToString();
                 Assert.Equal("NickName1", nickName);
@@ -738,7 +736,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             HttpResponseMessage getResponse = await this.Client.GetAsync(getUri);
             Assert.True(getResponse.IsSuccessStatusCode);
 
-            var result = await getResponse.Content.ReadAsAsync<JObject>();
+            var result = await getResponse.Content.ReadAsObject<JObject>();
 
             var city = result["Address"]["City"].ToString();
             Assert.Equal("City 11", city);
@@ -958,7 +956,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 account.Emails = new List<string>() { "c@c.com", "d@d.com" };
                 account.LuckyNumbers = new List<int>() { 4 };
                 client.UpdateObject(account);
-                client.SaveChanges();
+                await client.SaveChangesAsync();
 
                 var updatedAccount = client.Accounts.Where(a => a.Id == 1).Single();
                 Assert.NotNull(updatedAccount);
@@ -1023,7 +1021,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 account.LuckyNumbers = new List<int>() { 4 };
 
                 client.UpdateObject(account);
-                client.SaveChanges(Microsoft.OData.Client.SaveChangesOptions.ReplaceOnUpdate);
+                await client.SaveChangesAsync(Microsoft.OData.Client.SaveChangesOptions.ReplaceOnUpdate);
 
                 var updatedAccount = client.Accounts.Where(a => a.Id == 1).Single();
                 Assert.NotNull(updatedAccount);
@@ -1109,7 +1107,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 LuckyNumbers = new List<int>() { 1, 2, 3 },
             };
             client.AddToAccounts(newAccount);
-            client.SaveChanges();
+            await client.SaveChangesAsync();
 
             TypedProxy.Account insertedAccount = client.Accounts.Where(a => a.Id == 4).Single();
             Assert.NotNull(insertedAccount);
@@ -1179,7 +1177,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 Since = new DateTimeOffset(2014, 05, 23, 0, 0, 0, TimeSpan.FromHours(8)),
             };
             client.AddToAccounts(newAccount);
-            client.SaveChanges();
+            await client.SaveChangesAsync();
 
             TypedProxy.PremiumAccount insertedAccount = client.Accounts.Where(a => a.Id == 4).Single() as TypedProxy.PremiumAccount;
             Assert.NotNull(insertedAccount);
@@ -1214,7 +1212,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 
                 var accountToDelete = client.Accounts.Where(a => a.Id == 1).Single();
                 client.DeleteObject(accountToDelete);
-                client.SaveChanges();
+                await client.SaveChangesAsync();
 
                 var accounts = client.Accounts.ToList();
                 Assert.Equal(2, accounts.Count);
@@ -1260,7 +1258,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 
                 client.Format.UseJson();
 
-                client.Accounts.Where(a => a.Id == 1).Single().IncreaseAgeAction().GetValue();
+                await client.Accounts.Where(a => a.Id == 1).Single().IncreaseAgeAction().GetValueAsync();
 
                 var account = client.Accounts.Where(a => a.Id == 1).Single();
                 Assert.Equal(11, account.AccountInfo.Age);
@@ -1285,10 +1283,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                     City = "Hangzhou",
                     Street = "Anything",
                 };
-                int shipAddressCount = client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValue();
+                int shipAddressCount = await client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValueAsync();
 
                 Assert.Equal(3, shipAddressCount);
-                shipAddressCount = client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValue();
+                shipAddressCount = await client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValueAsync();
 
                 Assert.Equal(4, shipAddressCount);
             }
@@ -1309,7 +1307,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 Street = "New Street",
                 CountryOrRegion = "New CountryOrRegion"
             };
-            client.UpdateAddressAction(address, 1).GetValue();
+            await client.UpdateAddressAction(address, 1).GetValueAsync();
 
             var account = client.Accounts.Where(a => a.Id == 1).Single();
             Assert.Equal("New City", account.Address.City);
@@ -1402,7 +1400,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             string newName = "Name10";
             TypedProxy.Employee newEmployee = new TypedProxy.Employee() { Id = 0, Name = newName };
             client.AddToEmployees(newEmployee);
-            client.SaveChanges();
+            await client.SaveChangesAsync();
 
             var insertedEmplyee = client.Employees.Where(e => e.Id >= 3).Single();
             expectedValueOfString = newName;
@@ -1427,7 +1425,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             manager.Gender = TypedProxy.Gender.Male;
             manager.PhoneNumbers = new List<string>() { "8621-9999-8888" };
             client.AddToEmployees(manager);
-            client.SaveChanges();
+            await client.SaveChangesAsync();
 
             var employees = client.Employees.OfType<TypedProxy.Manager>().ToList();
             var insertedManager = employees.Where(m => m.Id == 3).Single();
@@ -1462,7 +1460,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             manager.Gender = TypedProxy.Gender.Male;
             manager.PhoneNumbers = new List<string>() { "8621-9999-8888", "2345", "4567" };
             client.UpdateObject(manager);
-            client.SaveChanges(SaveChangesOptions.ReplaceOnUpdate);
+            await client.SaveChangesAsync(SaveChangesOptions.ReplaceOnUpdate);
 
             var managers = client.Employees.OfType<TypedProxy.Manager>().ToList();
             var updatedManager = managers.Where(m => m.Id == 2).Single();
@@ -1495,7 +1493,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             manager.Gender = null;
             manager.PhoneNumbers = new List<string>() { "8621-9999-8888", "2345", "4567", "5678" };
             client.UpdateObject(manager);
-            client.SaveChanges();
+            await client.SaveChangesAsync();
 
             var updatedManager = client.Employees.OfType<TypedProxy.Manager>().Where(m => m.Id == 2).Single();
 
@@ -1520,7 +1518,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var strArray = directory.Split(new string[] { "bin" }, StringSplitOptions.None);
             var filePath = Path.Combine(strArray[0], @"src\Microsoft.Test.E2E.AspNet.OData\OpenType\TypedMetadata.csdl.xml");
 
-            IEdmModel edmModel = OpenComplexTypeEdmModel.GetTypedConventionModel();
+            IEdmModel edmModel = OpenComplexTypeEdmModel.GetTypedConventionModel(_configuration);
             XmlWriterSettings setting = new XmlWriterSettings();
             setting.Indent = true;
             setting.NewLineOnAttributes = false;

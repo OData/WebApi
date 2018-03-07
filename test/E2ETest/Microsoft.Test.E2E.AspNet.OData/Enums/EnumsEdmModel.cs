@@ -3,12 +3,13 @@
 
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Enums
 {
     internal class EnumsEdmModel
     {
-        public static IEdmModel GetExplicitModel()
+        public static IEdmModel GetExplicitModel(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = new ODataModelBuilder();
             var employee = builder.EntityType<Employee>();
@@ -49,9 +50,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return builder.GetEdmModel();
         }
 
-        public static IEdmModel GetConventionModel()
+        public static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Employee> employees = builder.EntitySet<Employee>("Employees");
             EntityTypeConfiguration<Employee> employee = employees.EntityType;
 

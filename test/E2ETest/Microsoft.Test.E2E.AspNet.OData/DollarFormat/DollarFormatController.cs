@@ -4,11 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+
 namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
 {
-    public class DollarFormatCustomersController : ODataController
+    public class DollarFormatCustomersController : TestODataController
     {
         private IList<DollarFormatCustomer> customers = Enumerable.Range(0, 10).Select(i =>
                 new DollarFormatCustomer
@@ -31,13 +32,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
                 }).ToList();
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(customers);
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             var customer = customers.FirstOrDefault(c => c.Id == key);
 

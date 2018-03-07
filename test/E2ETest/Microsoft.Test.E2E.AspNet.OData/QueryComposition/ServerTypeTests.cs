@@ -1,6 +1,20 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.Serialization;
+using System.Text;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
+using Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator;
+#else
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +36,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
 using Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
@@ -194,6 +209,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             return sb.ToString();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [MemberData(nameof(TypeData))]
         public void RunQueryableOnAllPossibleTypes(Type type, string queryString)
@@ -208,7 +224,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
             EnableQueryAttribute q = new EnableQueryAttribute();
             var configuration = new HttpConfiguration();
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.Routes.MapHttpRoute("ApiDefault", "api/{controller}/{id}", new { id = RouteParameter.Optional });
             configuration.EnableDependencyInjection();
@@ -238,7 +253,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 // 'System.Security.Cryptography.X509Certificates.X509Certificate2' type is not a supported type. 
                 // Change to use 'System.DateTimeOffset' or ignore this type by calling 
                 // Ignore<System.Security.Cryptography.X509Certificates.X509Certificate2>() 
-                // on 'Microsoft.AspNet.OData.Builder.ODataModelBuilder'.
+                // on 'System.Web.OData.Builder.ODataModelBuilder'.
                 Assert.True(ae.Message.Contains("The type 'System.DateTime' of property")
                     || ae.Message.Contains("System.Windows.Forms.AxHost")
                     || ae.Message.Contains("Found more than one dynamic property container in type"),
@@ -249,5 +264,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                     ae.Message);
             }
         }
+#endif
     }
 }

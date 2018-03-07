@@ -1,19 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if !NETCORE // TODO #939: Enable these tests for AspNetCore
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
@@ -46,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         public string Name { get; set; }
     }
 
-    public class HttpError_TodoController : ODataController
+    public class HttpError_TodoController : TestODataController
     {
         [HttpPost]
         public HttpError_Todo Get(int key)
@@ -67,7 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 case ErrorType.ThrowExceptionInAction:
                     throw new Exception("ThrowExceptionInAction");
                 case ErrorType.ThrowHttpResponseExceptionInAction:
-                    throw new HttpResponseException(
+                    throw new System.Web.Http.HttpResponseException(
                         this.Request.CreateErrorResponse(
                             HttpStatusCode.NotFound,
                             new Exception("ThrowHttpResponseExceptionInAction")));
@@ -84,9 +84,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                     });
                 case ErrorType.ResponseHttpErrorResponseInAction:
                     return
-                        this.Request.CreateResponse<HttpError>(
+                        this.Request.CreateResponse<System.Web.Http.HttpError>(
                             HttpStatusCode.NotFound,
-                            new HttpError("ResponseHttpErrorResponseInAction"));
+                            new System.Web.Http.HttpError("ResponseHttpErrorResponseInAction"));
                 default:
                     return null;
             }
@@ -212,18 +212,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return request;
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             configuration.EnableODataSupport(GetEdmModel(configuration));
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 100 });
         }
 
-        public static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<HttpError_Todo>("HttpError_Todo");
             mb.EntitySet<HttpError_Item>("HttpError_Item");
             return mb.GetEdmModel();
@@ -298,10 +297,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Never;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.IncludeErrorDetail = false;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
             configuration.EnableODataSupport(HttpAndODataErrorAlwaysIncludeDetailsTests.GetEdmModel(configuration));
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 100 });
@@ -329,3 +328,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 }
+#endif

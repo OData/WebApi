@@ -1,6 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +15,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Client;
@@ -23,6 +26,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Containment
 {
@@ -56,31 +60,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(AccountsController), typeof(AnonymousAccountController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
-            HttpServer httpServer = configuration.GetHttpServer();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration
                 .MapODataServiceRoute(routeName: "convention",
                     routePrefix: "convention",
-                    model: ContainmentEdmModels.GetConventionModel(),
-                    batchHandler: new DefaultODataBatchHandler(httpServer));
+                    model: ContainmentEdmModels.GetConventionModel(configuration),
+                    batchHandler: configuration.CreateDefaultODataBatchHandler());
 
             configuration
                 .MapODataServiceRoute(routeName: "explicit",
                     routePrefix: "explicit",
                     model: ContainmentEdmModels.GetExplicitModel(),
-                    batchHandler: new DefaultODataBatchHandler(httpServer));
+                    batchHandler: configuration.CreateDefaultODataBatchHandler());
+
             configuration.EnsureInitialized();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
@@ -154,7 +156,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
               "@odata.context":"http://jinfutan03:9123/explicit/$metadata#Accounts/$entity","AccountID":300,"Name":"Name300"
             }
             */
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(300, (int)json["AccountID"]);
             Assert.Equal(serviceRootUri + "/Accounts(300)", response.Headers.Location.OriginalString);
         }
@@ -172,7 +174,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             string expectedValue, actualValue;
             var results = json.GetValue("value") as JArray;
             Assert.Equal<int>(2, results.Count);
@@ -344,7 +346,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
               ]
             }
              */
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
 
             var results = json.GetValue("value") as JArray;
             Assert.Single(results);
@@ -451,7 +453,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await Client.PatchAsync(requestUri, content);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(200, (int)json["AccountID"]);
         }
 
@@ -490,7 +492,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             var response = await Client.PostAsJsonAsync<PaymentInstrument>(requestUri, pi);
             Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(string.Format("{0}/$metadata#Accounts(100)/PayinPIs/$entity", serviceRootUri), (string)json["@odata.context"]);
             Assert.Equal(103, (int)json["PaymentInstrumentID"]);
 
@@ -509,7 +511,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#Accounts(100)/PayinPIs";
@@ -547,7 +549,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#Accounts(100)/PayinPIs/$entity";
@@ -580,7 +582,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             string expectedValue, actualValue;
             if (!mime.Contains("odata.metadata=none"))
             {
@@ -610,7 +612,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#Accounts(200)/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard/$entity";
@@ -644,7 +646,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
               "@odata.id": "Orders(10643)"
             }
             */
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#$ref";
@@ -679,7 +681,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
             */
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#Collection($ref)";
@@ -711,7 +713,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
             */
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#$ref";
@@ -741,7 +743,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(string.Format("{0}/$metadata#Accounts(100)/PayinPIs/$entity", serviceRootUri), (string)json["@odata.context"]);
             Assert.Equal(newFriendlyName, (string)json["FriendlyName"]);
             Assert.Equal(101, (int)json["PaymentInstrumentID"]);
@@ -766,7 +768,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(string.Format("{0}/$metadata#Accounts(100)/PayoutPI/$entity", serviceRootUri), (string)json["@odata.context"]);
             Assert.Equal(newFriendlyName, (string)json["FriendlyName"]);
             Assert.Equal(1000, (int)json["PaymentInstrumentID"]);
@@ -793,7 +795,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             var response = await Client.PatchAsJsonAsync<GiftCard>(requestUri, giftCard);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(string.Format("{0}/$metadata#Accounts(200)/Microsoft.Test.E2E.AspNet.OData.Containment.PremiumAccount/GiftCard/$entity", serviceRootUri), (string)json["@odata.context"]);
             Assert.Equal(200, (int)json["GiftCardID"]);
             Assert.Equal(cardNo, (string)json["GiftCardNO"]);
@@ -846,7 +848,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             response = await Client.GetAsync(serviceRootUri + "/Accounts(100)?$expand=PayoutPI");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var account = await response.Content.ReadAsAsync<JObject>();
+            var account = await response.Content.ReadAsObject<JObject>();
             Assert.Null(account["PayoutPI"]);
         }
 
@@ -873,7 +875,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
               "Amount":0.0
             }
             */
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#Accounts(100)/PayinPIs(101)/Statement/$entity";
@@ -918,7 +920,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
               "Amount":0.0
             }
             */
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(string.Format("{0}/$metadata#Accounts(100)/PayinPIs(101)/Statement/$entity", serviceRootUri), (string)json["@odata.context"]);
             Assert.Equal(newDescription, (string)json["TransactionDescription"]);
             Assert.Equal(1010, (int)json["StatementID"]);
@@ -940,7 +942,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             response = await Client.GetAsync(serviceRootUri + "/Accounts(100)/PayinPIs(101)?$expand=Statement");
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var account = await response.Content.ReadAsAsync<JObject>();
+            var account = await response.Content.ReadAsObject<JObject>();
             Assert.Null(account["Steatement"]);
         }
         #endregion
@@ -956,7 +958,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             string requestUriBase = string.Format("{0}/{1}/Accounts(100)/PayinPIs", BaseAddress, mode);
             var response = await Client.GetAsync(requestUriBase);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var originCount = ((JArray)json["value"]).Count;
 
             string requestUri = string.Format("{0}/Microsoft.Test.E2E.AspNet.OData.Containment.Clear", requestUriBase);
@@ -965,12 +967,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             var deletedCount = (int)json["value"];
 
             response = await Client.GetAsync(requestUriBase);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             var currentCount = ((JArray)json["value"]).Count;
 
             Assert.Equal(originCount - deletedCount, currentCount);
@@ -1001,7 +1003,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             string requestUri = string.Format("{0}/{1}/Accounts(100)/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains='10')", BaseAddress, mode);
             var response = await Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var count = (int)json["value"];
 
             Assert.Equal(2, count);
@@ -1021,7 +1023,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (mime == "json" || mime.Contains("odata.metadata=minimal") || mime.Contains("odata.metadata=full"))
             {
                 var odataContext = (string)json["@odata.context"]; // PreminumAccount
@@ -1068,7 +1070,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             if (!mime.Contains("odata.metadata=none"))
             {
                 var expectedContextUrl = serviceRootUri + "/$metadata#AnonymousAccount/PayoutPI(PaymentInstrumentID)/$entity";
@@ -1129,7 +1131,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             Assert.DoesNotContain(changedAccountsList, (x) => x.AccountID == accountToDelete.AccountID);
 
             Proxy.Account account = newClient.Accounts.Where(a => a.AccountID == 100).Single();
-            newClient.LoadProperty(account, "PayinPIs");
+            await newClient.LoadPropertyAsync(account, "PayinPIs");
             var payinPIList = account.PayinPIs.ToList();
 
             Assert.DoesNotContain(payinPIList, (pi) => pi.PaymentInstrumentID == 102);
@@ -1145,5 +1147,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var response = await this.Client.PostAsync(uriReset, null);
             return response;
         }
+#endif
     }
 }

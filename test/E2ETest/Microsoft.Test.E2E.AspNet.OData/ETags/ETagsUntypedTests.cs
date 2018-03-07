@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -14,7 +13,9 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -28,12 +29,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
-            configuration.MessageHandlers.Add(new ETagMessageHandler());
+            configuration.AddETagMessageHandler(new ETagMessageHandler());
         }
 
         private static IEdmModel GetEdmModel()
@@ -113,7 +114,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
 
             Assert.True(response.IsSuccessStatusCode);
             var etagInHeader = response.Headers.ETag.ToString();
-            JObject result = await response.Content.ReadAsAsync<JObject>();
+            JObject result = await response.Content.ReadAsObject<JObject>();
             var etagInPayload = (string)result["@odata.etag"];
 
             Assert.True(etagInPayload == etagInHeader);
@@ -121,10 +122,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         }
     }
 
-    public class ETagUntypedCustomersController : ODataController
+    public class ETagUntypedCustomersController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             IEdmModel model = Request.GetModel();
             IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "Customer");

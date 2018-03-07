@@ -9,8 +9,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -18,7 +16,9 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -31,24 +31,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.Services.Replace(
-                  typeof(IAssembliesResolver),
-                  new TestAssemblyResolver(
-                      typeof(SelectCustomerController),
-                      typeof(EFSelectCustomersController),
-                      typeof(EFSelectOrdersController),
-                      typeof(EFWideCustomersController)));
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.AddControllers(
+                    typeof(SelectCustomerController),
+                    typeof(EFSelectCustomersController),
+                    typeof(EFSelectOrdersController),
+                    typeof(EFWideCustomersController));
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("selectexpand", "selectexpand", GetEdmModel(configuration));
         }
 
-        private static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder(configuration);
+            var builder = configuration.CreateConventionModelBuilder();
 
             EntitySetConfiguration<SelectCustomer> customers = builder.EntitySet<SelectCustomer>("SelectCustomer");
             customers.EntityType.Action("CreditRating").Returns<double>();
@@ -72,7 +69,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 model.SetAnnotationValue(nestedType, new Microsoft.AspNet.OData.Query.ModelBoundQuerySettings()
                 {
                     DefaultSelectType = SelectExpandType.Automatic
-                });               
+                });
             }
 
             return model;
@@ -194,7 +191,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
-            var content = await response.Content.ReadAsAsync<JObject>();
+            var content = await response.Content.ReadAsObject<JObject>();
 
             JArray customers = content["value"] as JArray;
             Assert.Equal(10, customers.Count);
@@ -251,7 +248,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
-            var content = await response.Content.ReadAsAsync<JObject>();
+            var content = await response.Content.ReadAsObject<JObject>();
 
             JArray customers = content["value"] as JArray;
             Assert.Equal(10, customers.Count);
@@ -330,7 +327,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.NotNull(response.Content);
-            var content = await response.Content.ReadAsAsync<JObject>();
+            var content = await response.Content.ReadAsObject<JObject>();
 
             JArray customers = content["value"] as JArray;
             Assert.Equal(10, customers.Count);
@@ -686,7 +683,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class SelectCustomerController : ODataController
+    public class SelectCustomerController : TestODataController
     {
         public IList<SelectCustomer> Customers { get; set; }
 
@@ -764,19 +761,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class EFSelectCustomersController : ODataController
+    public class EFSelectCustomersController : TestODataController
     {
         private readonly SampleContext _db = new SampleContext();
 
         [EnableQuery(PageSize = 2)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_db.Customers);
         }
 
         [HttpGet]
         [ODataRoute("ResetDataSource-Customer")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (!_db.Customers.Any())
             {
@@ -813,7 +810,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class EFWideCustomersController : ODataController
+    public class EFWideCustomersController : TestODataController
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -825,7 +822,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
         [HttpGet]
         [ODataRoute("ResetDataSource-WideCustomer")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (!_db.WideCustomers.Any())
             {
@@ -873,19 +870,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class EFSelectOrdersController : ODataController
+    public class EFSelectOrdersController : TestODataController
     {
         private readonly SampleContext _db = new SampleContext();
 
         [EnableQuery(HandleReferenceNavigationPropertyExpandFilter = true)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_db.Orders);
         }
 
         [HttpGet]
         [ODataRoute("ResetDataSource-Order")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (!_db.Orders.Any())
             {
@@ -898,7 +895,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
     public class SampleContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SelectExpandTest1";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=SelectExpandTest2";
 
         public SampleContext()
             : base(ConnectionString)

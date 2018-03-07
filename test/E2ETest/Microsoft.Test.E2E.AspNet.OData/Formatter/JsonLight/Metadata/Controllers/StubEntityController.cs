@@ -30,9 +30,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Controlle
             return base.Get();
         }
 
+#if NETCORE
+        public ITestActionResult Paged()
+        {
+            return Ok(new PageResult<StubEntity>(LocalTable.Values, new Uri("http://differentServer:5000/StubEntity/Default.Paged?$skip=" + LocalTable.Values.Count), LocalTable.Values.Count));
+        }
+#else
         public HttpResponseMessage Paged()
         {
             return Request.CreateResponse(HttpStatusCode.OK, new PageResult<StubEntity>(LocalTable.Values, new Uri("http://differentServer:5000/StubEntity/Default.Paged?$skip=" + LocalTable.Values.Count), LocalTable.Values.Count));
         }
+#endif
     }
 }

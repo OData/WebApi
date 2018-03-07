@@ -4,7 +4,6 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Xml;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -24,15 +23,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             EntitySetConfiguration<ActionProduct> products = builder.EntitySet<ActionProduct>("Products");
             ActionConfiguration productsByCategory = products.EntityType.Action("GetProductsByCategory");
             ActionConfiguration getSpecialProduct = products.EntityType.Action("GetSpecialProduct");

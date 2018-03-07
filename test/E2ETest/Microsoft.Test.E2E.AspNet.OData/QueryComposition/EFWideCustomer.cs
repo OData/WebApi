@@ -4,7 +4,7 @@
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-	public interface IEFCastTest
+    public interface IEFCastTest
     {
     }
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETFX // This class is only used in the AspNet version.
 using System;
 using System.Collections.Specialized;
 using System.Net.Http.Headers;
@@ -111,3 +112,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Instancing
         }
     }
 }
+#endif

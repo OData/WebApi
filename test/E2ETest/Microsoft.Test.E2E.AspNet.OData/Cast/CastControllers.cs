@@ -2,17 +2,15 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Cast
 {
-    public class ProductsController : ODataController
+    public class ProductsController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             if (GetRoutePrefix() == "EF")
             {
@@ -25,7 +23,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
         }
 
         [EnableQuery]
-        public IHttpActionResult GetDimensionInCentimeter(int key)
+        public ITestActionResult GetDimensionInCentimeter(int key)
         {
             if (GetRoutePrefix() == "EF")
             {
@@ -37,12 +35,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                 Product product = DataSource.InMemoryProducts.Single(p => p.ID == key);
                 return Ok(product.DimensionInCentimeter);
             }
-        }
-
-        private string GetRoutePrefix()
-        {
-            ODataRoute oDataRoute = Request.GetRouteData().Route as ODataRoute;
-            return oDataRoute.RoutePrefix;
         }
     }
 

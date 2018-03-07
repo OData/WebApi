@@ -1,27 +1,29 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+#else
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using HttpClientExtensions = System.Net.Http.HttpClientExtensions;
+# endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
+#if !NETCORE // TODO #939: Enable these tests for AspNetCore
     public class SingletonTest : WebHostTestBase
     {
         private const string NameSpace = "Microsoft.Test.E2E.AspNet.OData.Singleton";
@@ -31,24 +33,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(UmbrellaController), typeof(MonstersIncController), typeof(MetadataController), typeof(PartnersController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("ModelBuilderWithConventionRouting", "expCon", SingletonEdmModel.GetExplicitModel("Umbrella"), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute("ModelBuilderWithAttributeRouting", "expAttr", SingletonEdmModel.GetExplicitModel("MonstersInc"));
-            configuration.MapODataServiceRoute("ConventionBuilderwithConventionRouting", "conCon", SingletonEdmModel.GetConventionModel("Umbrella"), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
-            configuration.MapODataServiceRoute("ConventionBuilderwithAttributeRouting", "conAttr", SingletonEdmModel.GetConventionModel("MonstersInc"));
+            configuration.MapODataServiceRoute("ConventionBuilderwithConventionRouting", "conCon", SingletonEdmModel.GetConventionModel(configuration, "Umbrella"), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("ConventionBuilderwithAttributeRouting", "conAttr", SingletonEdmModel.GetConventionModel(configuration, "MonstersInc"));
             configuration.EnsureInitialized();
         }
 
-        #region Test
+    #region Test
 
         [Theory]
         [InlineData("expCon", "Umbrella")]
@@ -60,7 +59,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             string requestUri = string.Format(this.BaseAddress + "/{0}", model);
 
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
 
             foreach (var r in result)
@@ -187,7 +186,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET singleton/Partners
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json.GetValue("value") as JArray;
             Assert.Empty(result);
 
@@ -217,7 +216,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET singleton/Partners
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             result = json.GetValue("value") as JArray;
             Assert.Equal<int>(3, result.Count);
 
@@ -231,7 +230,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET singleton/Partners
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             result = json.GetValue("value") as JArray;
             Assert.Equal<int>(4, result.Count);
 
@@ -243,14 +242,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET singleton/Partners
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             result = json.GetValue("value") as JArray;
             Assert.Equal<int>(3, result.Count);
 
             // GET singleton/Microsoft.Test.E2E.AspNet.OData.Singleton.GetPartnersCount()
             requestUri = string.Format(BaseAddress + "/{0}/{1}/{2}.GetPartnersCount()", model, singletonName, NameSpace);
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(3, (int)json["value"]);
         }
 
@@ -340,18 +339,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET singleton/Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany/Location
             response = await this.Client.GetAsync(requestUri + "/Location?" + formatQuery);
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(company.Location, (string)result["value"]);
 
             // Query complex type
             // GET GET singleton/Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany/Office
             response = await this.Client.GetAsync(requestUri + "/Office?" + formatQuery);
-            result = await response.Content.ReadAsAsync<JObject>();
+            result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(company.Office.City, (string)result["City"]);
 
             // GET singleton/Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany?$select=Location
             response = await this.Client.GetAsync(requestUri + "?$select=Location&" + formatQuery);
-            result = await response.Content.ReadAsAsync<JObject>();
+            result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(company.Location, (string)result["Location"]);
         }
 
@@ -368,7 +367,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET /singleton?$select=Name
             var response = await this.Client.GetAsync(requestUri + "?$select=Name");
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             int i = 0;
             foreach (var pro in result.Properties())
             {
@@ -392,7 +391,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // GET /singleton?$expand=Partners($select=Name)
             response = await this.Client.GetAsync(requestUri + "?$expand=Partners($select=Name)");
-            result = await response.Content.ReadAsAsync<JObject>();
+            result = await response.Content.ReadAsObject<JObject>();
             var json = result.GetValue("Partners") as JArray;
             Assert.Equal(2, json.Count);
 
@@ -407,11 +406,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             // GET /Partners(1)?$expand=Company($select=Name)
             requestUri = string.Format(this.BaseAddress + "/{0}/Partners(1)", model);
             response = await this.Client.GetAsync(requestUri + "?$expand=Company($select=Name)");
-            result = await response.Content.ReadAsAsync<JObject>();
+            result = await response.Content.ReadAsObject<JObject>();
             var company = result.GetValue("Company") as JObject;
             Assert.Equal(singletonName, company.GetValue("Name"));
         }
-        #endregion
+    #endregion
 
         private async Task<HttpResponseMessage> ResetDataSource(string model, string controller)
         {
@@ -421,4 +420,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             return response;
         }
     }
+#endif
 }

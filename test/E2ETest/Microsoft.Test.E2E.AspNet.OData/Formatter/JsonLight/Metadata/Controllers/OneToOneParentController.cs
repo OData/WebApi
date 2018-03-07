@@ -20,9 +20,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Controlle
             }
         }
 
+#if NETCORE
+        public ITestActionResult GetChild(int key)
+        {
+            return Ok(LocalTable[key].Child);
+        }
+#else
         public HttpResponseMessage GetChild(int key)
         {
             return Request.CreateResponse(HttpStatusCode.OK, LocalTable[key].Child);
         }
+#endif
     }
 }

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Xml;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -14,6 +13,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -190,16 +190,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
            configuration.Routes.Clear();
            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-           configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+           configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
 
             EntitySetConfiguration<DollarFormatCustomer> dollarFormatCustomers =
                 builder.EntitySet<DollarFormatCustomer>("DollarFormatCustomers");
@@ -264,7 +264,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 
@@ -314,7 +314,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 
@@ -357,7 +357,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 
@@ -400,7 +400,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 
@@ -444,7 +444,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
 
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 
@@ -487,7 +487,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarFormat
             }
             else if (dollarFormat.ToLowerInvariant().Contains("json"))
             {
-                await response.Content.ReadAsAsync<JObject>();
+                await response.Content.ReadAsObject<JObject>();
             }
         }
 

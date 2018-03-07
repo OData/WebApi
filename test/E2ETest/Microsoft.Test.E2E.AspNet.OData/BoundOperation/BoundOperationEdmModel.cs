@@ -3,14 +3,15 @@
 
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 {
     internal class UnBoundFunctionEdmModel
     {
-        public static IEdmModel GetEdmModel()
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Employee> entitySetConfiguration = builder.EntitySet<Employee>("Employees");
             EntityTypeConfiguration<Manager> entityTypeConfigurationOfManager = builder.EntityType<Manager>();
             EntityTypeConfiguration<Employee> entityTypeConfigurationOfEmployee = builder.EntityType<Employee>();

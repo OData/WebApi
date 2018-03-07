@@ -3,11 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Fuzzing
 {
-    public class FuzzingController : ApiController
+    public class FuzzingController : TestNonODataController
     {
         private static EntityTypeModel1[] cachedEntities = null;
 
@@ -23,7 +24,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Fuzzing
         }
     }
 
-    public class FuzzingDbController : ApiController
+    public class FuzzingDbController : TestNonODataController
     {
         private FuzzingContext context = new FuzzingContext();
 
@@ -33,10 +34,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Fuzzing
             return context.EntityTypeModel1Set.AsEnumerable();
         }
 
+#if NETFX // IDisposable is only implemented in the AspNet version.
         protected override void Dispose(bool disposing)
         {
             context.Dispose();
             base.Dispose(disposing);
         }
+#endif
     }
 }

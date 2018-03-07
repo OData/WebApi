@@ -3,11 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
@@ -19,7 +19,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public string LastName { get; set; }
     }
 
-    public class AnonymousTypeController : ApiController
+    public class AnonymousTypeController : TestNonODataController
     {
         public IQueryable Get()
         {
@@ -40,10 +40,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();
             configuration.EnableDependencyInjection();
@@ -53,7 +52,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task ReturnIQueryableOfAnonymousTypeShouldWork()
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/AnonymousType/Get?$filter=FirstName eq 'John'");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<AnonymousType_Person>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<AnonymousType_Person>>();
             Assert.Single(actual);
             Assert.Equal("John", actual.First().FirstName);
         }

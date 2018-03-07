@@ -3,10 +3,11 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
         private List<Customer> _customers;
 
@@ -69,7 +70,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
     }
 
-    public class OrdersController : ODataController
+    public class OrdersController : TestODataController
     {
         private List<Order> _orders;
         private List<SpecialOrder> _specialOrders;

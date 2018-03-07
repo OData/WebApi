@@ -3,7 +3,6 @@
 
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Xml;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -23,16 +22,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("convention", "convention", GetConventionModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("convention", "convention", GetConventionModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             config.MapODataServiceRoute("explicit", "explicit", GetExplicitModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetConventionModel()
+        private static IEdmModel GetConventionModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<ModelAliasingMetadataCustomer> customers = builder.EntitySet<ModelAliasingMetadataCustomer>("Customers");
             customers.EntityType.Name = "Customer";
             customers.EntityType.Namespace = "ModelAliasing";

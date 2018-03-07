@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -14,6 +13,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Model;
 using Newtonsoft.Json.Linq;
@@ -28,19 +28,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-
             IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new ReflectedPropertyRoutingConvention());
             configuration.MapODataServiceRoute("OData", null, GetEdmModel(configuration), new DefaultODataPathHandler(), conventions);
             configuration.AddODataQueryFilter();
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration config)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder(config);
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<EntityWithSimpleProperties>("EntityWithSimpleProperties");
             return builder.GetEdmModel();
         }
@@ -118,7 +116,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             // Act
             var response = await Client.SendAsync(message);
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             JsonAssert.ArrayLength(entities.Length, "value", result);
@@ -150,7 +148,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
             // Act
             var entryUrl = BaseAddress + "/EntityWithSimpleProperties(" + entity.Id + ")/" + propertyName;
             var response = await Client.GetWithAcceptAsync(entryUrl, acceptHeader);
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             if (acceptHeader.Contains("odata.metadata=none"))
@@ -187,7 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             // Act
             var response = await Client.GetWithAcceptAsync(requestUrl, acceptHeader);
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             // Assert
             Assert.Null(result.Property("BooleanProperty@odata.type"));

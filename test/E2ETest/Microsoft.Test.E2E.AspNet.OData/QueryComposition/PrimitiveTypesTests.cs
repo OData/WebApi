@@ -3,17 +3,17 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class PrimitiveTypesController : ApiController
+    public class PrimitiveTypesController : TestNonODataController
     {
         private List<string> stringList = new List<string>();
 
@@ -43,10 +43,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();
             configuration.EnableDependencyInjection();
@@ -63,7 +62,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             var response = await this.Client.GetAsync(this.BaseAddress + url);
             response.EnsureSuccessStatusCode();
-            var actual = await response.Content.ReadAsAsync<IEnumerable<string>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<string>>();
 
             Assert.Equal("Two", actual.First());
         }

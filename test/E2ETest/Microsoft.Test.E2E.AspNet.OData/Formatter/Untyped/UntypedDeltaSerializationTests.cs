@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -13,7 +12,9 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -26,16 +27,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var customers = builder.EntitySet<UntypedCustomer>("UntypedDeltaCustomers");
             customers.EntityType.Property(c => c.Name).IsRequired();
             var orders = builder.EntitySet<UntypedOrder>("UntypedDeltaOrders");
@@ -54,7 +54,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
-            JObject returnedObject = await response.Content.ReadAsAsync<JObject>();
+            JObject returnedObject = await response.Content.ReadAsObject<JObject>();
             Assert.True(((dynamic)returnedObject).value.Count == 15);
 
             //Verification of content to validate Payload
@@ -73,7 +73,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
         }
     }
 
-    public class UntypedDeltaCustomersController : ODataController
+    public class UntypedDeltaCustomersController : TestODataController
     {
         public IEdmEntityType DeltaCustomerType
         {
@@ -99,7 +99,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             }
         }
 
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             EdmChangedObjectCollection changedCollection = new EdmChangedObjectCollection(DeltaCustomerType);
             //Changed or Modified objects are represented as EdmDeltaEntityObjects

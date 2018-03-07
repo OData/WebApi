@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
@@ -47,9 +47,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 
     public class EdmModel
     {
-        public static IEdmModel GetEdmModel()
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             builder.EnumType<CustomerType>();

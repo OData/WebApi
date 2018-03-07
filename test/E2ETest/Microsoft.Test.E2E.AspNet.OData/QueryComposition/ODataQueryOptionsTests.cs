@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
@@ -40,7 +41,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public string NextPage { get; set; }
     }
 
-    public class ODataQueryOptionsController : ApiController
+    public class ODataQueryOptionsController : TestNonODataController
     {
         private static List<ODataQueryOptions_Todo> todoes = new List<ODataQueryOptions_Todo>();
         static ODataQueryOptionsController()
@@ -80,10 +81,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
         [HttpGet]
-        public HttpResponseMessage OptionsOnHttpResponseMessage(ODataQueryOptions<ODataQueryOptions_Todo> options)
+        public ITestActionResult OptionsOnHttpResponseMessage(ODataQueryOptions<ODataQueryOptions_Todo> options)
         {
             var t = options.ApplyTo(todoes.AsQueryable()) as IQueryable<ODataQueryOptions_Todo>;
-            return this.Request.CreateResponse(System.Net.HttpStatusCode.OK, new { Todoes = t });
+            return Ok(new { Todoes = t });
         }
 
         [HttpGet]
@@ -108,10 +109,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();
             configuration.EnableDependencyInjection();
@@ -121,7 +121,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task OptionsOnIEnumerableTShouldWork()
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/ODataQueryOptions/OptionsOnIEnumerableT?$filter=ID ge 50");
-            var actual = await response.Content.ReadAsAsync<IEnumerable<ODataQueryOptions_Todo>>();
+            var actual = await response.Content.ReadAsObject<IEnumerable<ODataQueryOptions_Todo>>();
             Assert.Equal(50, actual.Count());
         }
 
@@ -129,7 +129,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task OptionsOnStringShouldWork()
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/ODataQueryOptions/OptionsOnString?$filter=ID ge 50");
-            var actual = await response.Content.ReadAsAsync<string>();
+            var actual = await response.Content.ReadAsObject<string>();
             Assert.Equal("Test50", actual);
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task GetTopValueShouldWork()
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/ODataQueryOptions/GetTopValue?$top=50");
-            var actual = await response.Content.ReadAsAsync<int>();
+            var actual = await response.Content.ReadAsObject<int>();
             Assert.Equal(50, actual);
         }
 
@@ -149,14 +149,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Console.WriteLine(actual);
         }
 
+#if !NETCORE // TODO #939: Enable these tests for AspNetCore
         [Fact]
         public void UnitTestOptionsShouldWork()
         {
             ODataQueryOptionsController controller = new ODataQueryOptionsController();
 
-            ODataQueryContext context = new ODataQueryContext(GetEdmModel(), typeof(ODataQueryOptions_Todo), path: null);
+            ODataQueryContext context = new ODataQueryContext(GetEdmModel(new ODataConventionModelBuilder()), typeof(ODataQueryOptions_Todo), path: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$orderby=Name desc");
-            HttpConfiguration configuration = new HttpConfiguration();
+            System.Web.Http.HttpConfiguration configuration = new System.Web.Http.HttpConfiguration();
             configuration.EnableDependencyInjection();
             request.SetConfiguration(configuration);
             ODataQueryOptions<ODataQueryOptions_Todo> options = new ODataQueryOptions<ODataQueryOptions_Todo>(context, request);
@@ -171,17 +172,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
             ODataQueryContext context = new ODataQueryContext(new ODataConventionModelBuilder().GetEdmModel(), typeof(string), path: null);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/?$top=1");
-            HttpConfiguration configuration = new HttpConfiguration();
+            System.Web.Http.HttpConfiguration configuration = new System.Web.Http.HttpConfiguration();
             configuration.EnableDependencyInjection();
             request.SetConfiguration(configuration);
             ODataQueryOptions<string> options = new ODataQueryOptions<string>(context, request);
             var result = controller.OptionsWithString(options);
             Assert.Equal("One", result.List.Single());
         }
+#endif
 
-        private Microsoft.OData.Edm.IEdmModel GetEdmModel()
+        private Microsoft.OData.Edm.IEdmModel GetEdmModel(ODataConventionModelBuilder builder)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntityType<ODataQueryOptions_Todo>();
             return builder.GetEdmModel();
         }

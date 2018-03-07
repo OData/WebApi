@@ -5,16 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Nop.Core.Domain.Blogs;
@@ -22,7 +20,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    public class MixScenarioTests_WebApiController : ApiController
+    public class MixScenarioTests_WebApiController : TestNonODataController
     {
         public IEnumerable<string> Get()
         {
@@ -77,17 +75,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<Vehicle>("MixScenarioTests_OData");
             return mb.GetEdmModel();
         }
@@ -97,7 +94,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/MixScenarioTests_WebApi/Get");
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadAsAsync<IEnumerable<string>>();
+            var result = await response.Content.ReadAsObject<IEnumerable<string>>();
             Assert.Equal(2, result.Count());
             Assert.Equal("value1", result.First());
         }
@@ -107,8 +104,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/MixScenarioTests_WebApi/ThrowExceptionInAction");
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-            var result = await response.Content.ReadAsAsync<HttpError>();
-            Assert.Contains("Something wrong", result["ExceptionMessage"].ToString());
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Something wrong", result);
         }
 
         [Fact]
@@ -116,7 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/MixScenarioTests_WebApi/GetQueryableData?$filter=Id gt 1");
             response.EnsureSuccessStatusCode();
-            var result = await response.Content.ReadAsAsync<IEnumerable<BlogPost>>();
+            var result = await response.Content.ReadAsObject<IEnumerable<BlogPost>>();
             Assert.Equal(2, result.Count());
         }
     }
@@ -128,9 +125,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<Vehicle>("MixScenarioTests_OData");
             return mb.GetEdmModel();
         }

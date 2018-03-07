@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -16,6 +15,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -29,17 +29,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
-            configuration.MessageHandlers.Add(new ETagMessageHandler());
+            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.AddETagMessageHandler(new ETagMessageHandler());
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<ETagsCustomer> eTagsCustomersSet = builder.EntitySet<ETagsCustomer>("ETagsCustomers");
             EntityTypeConfiguration<ETagsCustomer> eTagsCustomers = eTagsCustomersSet.EntityType;
             eTagsCustomers.Property(c => c.Id).IsConcurrencyToken();
@@ -141,7 +141,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json");
             HttpResponseMessage response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonResult = await response.Content.ReadAsObject<JObject>();
             var jsonETags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             Assert.Equal(jsonETags.Count(), jsonETags.Distinct().Count());
 
@@ -150,7 +150,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json;odata=nometadata");
             response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonWithNometadataResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonWithNometadataResult = await response.Content.ReadAsObject<JObject>();
             var jsonWithNometadataETags = jsonWithNometadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             Assert.Equal(jsonWithNometadataETags.Count(), jsonWithNometadataETags.Distinct().Count());
             Assert.Equal(jsonETags, jsonWithNometadataETags);
@@ -160,7 +160,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json;odata=fullmetadata");
             response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonWithFullmetadataResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonWithFullmetadataResult = await response.Content.ReadAsObject<JObject>();
             var jsonWithFullmetadataETags = jsonWithFullmetadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             Assert.Equal(jsonWithFullmetadataETags.Count(), jsonWithFullmetadataETags.Distinct().Count());
             Assert.Equal(jsonETags, jsonWithFullmetadataETags);
@@ -170,7 +170,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             request.Headers.Accept.ParseAdd("application/json;odata=minimalmetadata");
             response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonWithMinimalmetadataResult = await response.Content.ReadAsAsync<JObject>();
+            var jsonWithMinimalmetadataResult = await response.Content.ReadAsObject<JObject>();
             var jsonWithMinimalmetadataETags = jsonWithMinimalmetadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
             Assert.Equal(jsonWithMinimalmetadataETags.Count(), jsonWithMinimalmetadataETags.Distinct().Count());
             Assert.Equal(jsonETags, jsonWithMinimalmetadataETags);

@@ -2,12 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class BaseCustomersController : ODataController
+    public class BaseCustomersController : TestODataController
     {
         protected readonly AggregationContext _db = new AggregationContext();
 
@@ -75,11 +75,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         [EnableQuery]
-        public SingleResult<Customer> Get(int key)
+        public TestSingleResult<Customer> Get(int key)
         {
             ResetDataSource();
             var db = new AggregationContext();
-            return SingleResult.Create(db.Customers.Where(c => c.Id == key));
+            return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
         }
     }
 }

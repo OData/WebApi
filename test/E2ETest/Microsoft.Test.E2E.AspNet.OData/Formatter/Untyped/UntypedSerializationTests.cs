@@ -6,10 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -18,7 +16,10 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -31,17 +32,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var customers = builder.EntitySet<UntypedCustomer>("UntypedCustomers");
             customers.EntityType.Property(c => c.Name).IsRequired();
             var orders = builder.EntitySet<UntypedOrder>("UntypedOrders");
@@ -99,7 +99,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
-            JToken result = await response.Content.ReadAsAsync<JObject>();
+            JToken result = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(JToken.FromObject(expectedPayload), result, JToken.EqualityComparer);
         }
 
@@ -127,7 +127,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             HttpResponseMessage getResponse = await Client.SendAsync(getRequest);
             Assert.True(getResponse.IsSuccessStatusCode);
             Assert.NotNull(getResponse.Content);
-            JObject returnedObject = await getResponse.Content.ReadAsAsync<JObject>();
+            JObject returnedObject = await getResponse.Content.ReadAsObject<JObject>();
             Assert.Equal(untypedCustomer, returnedObject, JToken.EqualityComparer);
         }
 
@@ -137,7 +137,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, BaseAddress + "/untyped/UntypedCustomers/Default.UntypedParameters");
             object payload = new { address = CreateAddress(5), value = 5, addresses = CreateAddresses(10), values = Enumerable.Range(0, 5) };
-            request.Content = new ObjectContent<object>(payload, new JsonMediaTypeFormatter());
+            request.Content = new StringContent((JToken.FromObject(payload) as JObject).ToString());
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             var body = await request.Content.ReadAsStringAsync();
             HttpResponseMessage response = await Client.SendAsync(request);
@@ -189,7 +189,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 
     }
 
-    public class UntypedCustomersController : ODataController
+    public class UntypedCustomersController : TestODataController
     {
         private static IEdmEntityObject postedCustomer = null;
         public IEdmEntityType CustomerType
@@ -216,7 +216,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             }
         }
 
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             IEdmEntityObject[] untypedCustomers = new EdmEntityObject[20];
             for (int i = 0; i < 20; i++)
@@ -238,7 +238,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             return Ok(new EdmEntityObjectCollection(entityCollectionType, untypedCustomers.ToList()));
         }
 
-        public IHttpActionResult Get([FromODataUri] int key)
+        public ITestActionResult Get([FromODataUri] int key)
         {
             object id;
             if (postedCustomer == null || !postedCustomer.TryGetPropertyValue("Id", out id) || key != (int)id)
@@ -250,12 +250,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             ODataQueryOptions query = new ODataQueryOptions(context, Request);
             if (query.SelectExpand != null)
             {
-                Request.ODataProperties().SelectExpandClause = query.SelectExpand.SelectExpandClause;
+                Request.ODataContext().SelectExpandClause = query.SelectExpand.SelectExpandClause;
             }
             return Ok(postedCustomer);
         }
 
-        public IHttpActionResult Post(IEdmEntityObject customer)
+        public ITestActionResult Post([FromBody]IEdmEntityObject customer)
         {
             if (!ModelState.IsValid)
             {
@@ -267,46 +267,46 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 
             IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("UntypedCustomers");
             return Created(Url.CreateODataLink(new EntitySetSegment(entitySet),
-                new KeySegment(new[] {new KeyValuePair<string, object>("Id", id)}, entitySet.EntityType(), null)), customer);
+                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entitySet.EntityType(), null)), customer);
         }
 
-        public IHttpActionResult PrimitiveCollection()
+        public ITestActionResult PrimitiveCollection()
         {
             return Ok(Enumerable.Range(1, 10));
         }
 
-        public IHttpActionResult ComplexObjectCollection()
+        public ITestActionResult ComplexObjectCollection()
         {
             return Ok(CreateAddresses(10));
         }
 
-        public IHttpActionResult EntityCollection()
+        public ITestActionResult EntityCollection()
         {
             return Ok(CreateOrders(10));
         }
 
-        public IHttpActionResult SinglePrimitive()
+        public ITestActionResult SinglePrimitive()
         {
             return Ok(10);
         }
 
-        public IHttpActionResult SingleComplexObject()
+        public ITestActionResult SingleComplexObject()
         {
             return Ok(CreateAddress(10));
         }
 
-        public IHttpActionResult SingleEntity()
+        public ITestActionResult SingleEntity()
         {
             return Ok(CreateOrder(10));
         }
 
-        public IHttpActionResult EnumerableOfIEdmObject()
+        public ITestActionResult EnumerableOfIEdmObject()
         {
             IList<IEdmEntityObject> result = Enumerable.Range(0, 10).Select(i => (IEdmEntityObject)CreateOrder(i)).ToList();
             return Ok(result);
         }
 
-        public IHttpActionResult UntypedParameters(ODataUntypedActionParameters parameters)
+        public ITestActionResult UntypedParameters(ODataUntypedActionParameters parameters)
         {
             if (!ModelState.IsValid)
             {

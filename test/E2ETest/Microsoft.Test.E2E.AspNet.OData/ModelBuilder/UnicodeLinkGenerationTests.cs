@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -26,17 +25,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
-            configuration.EnableODataSupport(GetImplicitEdmModel());
+            configuration.EnableODataSupport(GetImplicitEdmModel(configuration));
         }
 
-        private static IEdmModel GetImplicitEdmModel()
+        private static IEdmModel GetImplicitEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = configuration.CreateConventionModelBuilder();
             modelBuilder.EntitySet<Product>("UnicodeLinkGeneration_Products");
 
             return modelBuilder.GetEdmModel();

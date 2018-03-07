@@ -5,10 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
@@ -26,18 +23,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.ExpandAttribut
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.Services.Replace(
-                typeof (IAssembliesResolver),
-                new TestAssemblyResolver(typeof(CustomersController), typeof(OrdersController)));
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
+            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
+            configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MapODataServiceRoute("enablequery", "enablequery",
-                ExpandAttributeEdmModel.GetEdmModel());
+                ExpandAttributeEdmModel.GetEdmModel(configuration));
             configuration.MapODataServiceRoute("modelboundapi", "modelboundapi",
-                ExpandAttributeEdmModel.GetEdmModelByModelBoundAPI());
+                ExpandAttributeEdmModel.GetEdmModelByModelBoundAPI(configuration));
         }
 
         [Theory]

@@ -4,18 +4,18 @@
 using System;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 {
-    public class ForeignKeyCustomersController : ODataController
+    public class ForeignKeyCustomersController : TestODataController
     {
         ForeignKeyContext _db = new ForeignKeyContext();
 
         [EnableQuery]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             ForeignKeyCustomer customer = _db.Customers.FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -26,7 +26,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
             return Ok(customer);
         }
 
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             ForeignKeyCustomer customer = _db.Customers.FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
         [HttpPost]
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (_db.Database.Exists())
             {
@@ -85,11 +85,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
         }
     }
 
-    public class ForeignKeyOrdersController : ODataController
+    public class ForeignKeyOrdersController : TestODataController
     {
         private readonly ForeignKeyContext _db = new ForeignKeyContext();
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             ForeignKeyOrder order = _db.Orders.FirstOrDefault(c => c.OrderId == key);
             if (order == null)
@@ -102,12 +102,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
     }
 
     // ActionOnDelete = none
-    public class ForeignKeyCustomersNoCascadeController : ODataController
+    public class ForeignKeyCustomersNoCascadeController : TestODataController
     {
         ForeignKeyContextNoCascade _db = new ForeignKeyContextNoCascade();
 
         [EnableQuery]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             ForeignKeyCustomer customer = _db.Customers.FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -118,7 +118,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
             return Ok(customer);
         }
 
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             ForeignKeyCustomer customer = _db.Customers.FirstOrDefault(c => c.Id == key);
             if (customer == null)
@@ -141,7 +141,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
         [HttpPost]
         [ODataRoute("ResetDataSourceNonCacade")]
-        public IHttpActionResult ResetDataSourceNonCacade()
+        public ITestActionResult ResetDataSourceNonCacade()
         {
             if (_db.Database.Exists())
             {
@@ -184,11 +184,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
         }
     }
 
-    public class ForeignKeyOrdersNoCascadeController : ODataController
+    public class ForeignKeyOrdersNoCascadeController : TestODataController
     {
         private readonly ForeignKeyContextNoCascade _db = new ForeignKeyContextNoCascade();
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             ForeignKeyOrder order = _db.Orders.FirstOrDefault(o => o.OrderId == key);
             if (order == null)
@@ -199,7 +199,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
             return Ok(order);
         }
 
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             ForeignKeyOrder order = _db.Orders.FirstOrDefault(o => o.OrderId == key);
             if (order == null)

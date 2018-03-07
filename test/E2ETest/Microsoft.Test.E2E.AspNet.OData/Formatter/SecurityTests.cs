@@ -1,20 +1,26 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System.Collections.Generic;
+using Microsoft.OData.Client;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+#else
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.SelfHost;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
@@ -64,28 +70,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            var selfConfig = configuration as HttpSelfHostConfiguration;
-            if (selfConfig != null)
-            {
-                selfConfig.MaxReceivedMessageSize = selfConfig.MaxBufferSize = int.MaxValue;
-            }
-
-            configuration.Formatters.Clear();
-            configuration.EnableODataSupport(GetEdmModel());
+            configuration.MaxReceivedMessageSize = int.MaxValue;
+            configuration.RemoveNonODataFormatters();
+            configuration.EnableODataSupport(GetEdmModel(configuration));
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Security_NestedModel>("Security_NestedModel");
             builder.EntitySet<Security_ArrayModel>("Security_ArrayModel");
 
             return builder.GetEdmModel();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [InlineData("application/json")]
         [InlineData("application/json;odata.metadata=none")]
@@ -152,5 +153,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
             Assert.False(response.IsSuccessStatusCode);
         }
+#endif
     }
 }

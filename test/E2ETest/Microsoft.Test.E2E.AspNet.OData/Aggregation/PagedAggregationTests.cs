@@ -5,11 +5,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -24,14 +22,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.Services.Replace(
-                typeof (IAssembliesResolver),
-                new TestAssemblyResolver(typeof (Paged.CustomersController)));
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling =
-                Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.AddControllers(typeof (Paged.CustomersController));
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("pagedaggregation", "pagedaggregation",
                 AggregationEdmModel.GetEdmModel(configuration));
@@ -57,7 +51,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;

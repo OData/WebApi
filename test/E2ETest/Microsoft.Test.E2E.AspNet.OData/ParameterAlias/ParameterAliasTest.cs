@@ -4,13 +4,11 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -23,22 +21,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(TradesController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute("OData", "", GetModel());
+            configuration.MapODataServiceRoute("OData", "", GetModel(configuration));
             configuration.EnsureInitialized();
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Trade> tradesConfiguration = builder.EntitySet<Trade>("Trades");
 
             //Add bound function
@@ -71,14 +66,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
             string query = "/GetTradeByCountry(PortingCountryOrRegion=@p1)?@p1=Microsoft.Test.E2E.AspNet.OData.ParameterAlias.CountryOrRegion'USA'";
 
             HttpResponseMessage response = await this.Client.GetAsync(this.BaseAddress + query);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal(3, result.Count);
 
             //Bound function
             string requestUri = this.BaseAddress + "/Trades/Microsoft.Test.E2E.AspNet.OData.ParameterAlias.GetTradingVolume(productName=@p1, PortingCountryOrRegion=@p2)?@p1='Rice'&@p2=Microsoft.Test.E2E.AspNet.OData.ParameterAlias.CountryOrRegion'USA'";
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(1000, (long)json["value"]);
         }
 
@@ -92,7 +87,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
             
             HttpResponseMessage response = await this.Client.GetAsync(requestBaseUri + queryOption);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal(expectedResult, result.Count);
         }
@@ -106,7 +101,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 
             HttpResponseMessage response = await this.Client.GetAsync(requestBaseUri + queryOption);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal(expectedPortingCountry, result.First["PortingCountryOrRegion"]);
             Assert.Equal("Corn", result.First["ProductName"]);
@@ -124,7 +119,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 
             HttpResponseMessage response = await this.Client.GetAsync(requestBaseUri + queryUri);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal(expectedEntryCount, result.Count);
             Assert.Equal(expectedZipCode, result.First["TradeLocation"]["ZipCode"]);
@@ -138,7 +133,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
             var queryUri = "/Trades/Microsoft.Test.E2E.AspNet.OData.ParameterAlias.GetTopTrading(productName=@p1)/unknown?@p1='Corn'";
             var response = await this.Client.GetAsync(requestBaseUri + queryUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             Assert.Equal("Corn", (string)json["value"]);
         }
         #endregion

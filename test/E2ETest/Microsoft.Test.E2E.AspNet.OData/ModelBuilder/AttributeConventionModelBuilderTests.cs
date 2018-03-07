@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
@@ -59,12 +59,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public string IgnoreProperty2 { get; set; }
     }
 
-    public class AttributeConventionModelBuilderTests
+    public class AttributeConventionModelBuilderTests : WebHostTestBase
     {
+        WebRouteConfiguration _configuration;
+
+        public AttributeConventionModelBuilderTests(WebHostTestFixture fixture)
+            :base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
+
         [Fact]
         public void TestSimpleDataContractModel()
         {
-            var builder = new ODataConventionModelBuilder();
+            var builder = _configuration.CreateConventionModelBuilder();
             builder.EntitySet<SimpleDataContractModel>("SimpleDataContractModels");
             var model = builder.GetEdmModel();
 

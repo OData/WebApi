@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -14,7 +13,9 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -27,15 +28,15 @@ namespace Microsoft.Test.E2E.AspNet.OData
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<TestCustomer>("TestCustomers");
             builder.EntitySet<TestOrder>("TestOrders");
             return builder.GetEdmModel();
@@ -48,7 +49,7 @@ namespace Microsoft.Test.E2E.AspNet.OData
             get.Headers.Add("Accept", "application/json;odata.metadata=minimal");
             HttpResponseMessage response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
-            dynamic results = await response.Content.ReadAsAsync<JObject>();
+            dynamic results = await response.Content.ReadAsObject<JObject>();
 
             Assert.True(results.value.Count == 7, "There should be 7 entries in the response");
 
@@ -122,10 +123,10 @@ namespace Microsoft.Test.E2E.AspNet.OData
         }
     }
 
-    public class TestCustomersController : ODataController
+    public class TestCustomersController : TestODataController
     {
 
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             IEdmEntityType customerType = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.TestCustomer") as IEdmEntityType;
             IEdmEntityType customerWithAddressType = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.TestCustomerWithAddress") as IEdmEntityType;

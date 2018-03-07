@@ -1,6 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +19,6 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Web.Http.ModelBinding;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -17,9 +27,11 @@ using Microsoft.OData;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 using Container = ModelBuilder.ActionTest.Default.Container;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
@@ -30,14 +42,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
-            configuration.EnableODataSupport(GetEdmModel(), "odata");
+            configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         // ExtendSupportDate of a single Product
         [Theory]
         [InlineData("ODataActionTests_Products1", "ExtendSupportDate1")]
@@ -128,10 +140,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                 Assert.Equal(newRating, ((ODataActionTests_RatedProduct)prod).Rating);
             }
         }
-
-        private static IEdmModel GetEdmModel()
+#endif
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             var products1 = builder.EntitySet<ODataActionTests_Product>("ODataActionTests_Products1");
             var products2 = builder.EntitySet<ODataActionTests_Product>("ODataActionTests_Products2");
 
@@ -182,6 +194,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             return builder.GetEdmModel();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         public static string GetModelStateErrorInformation(ModelStateDictionary modelState)
         {
             StringBuilder sb = new StringBuilder();
@@ -200,9 +213,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
             return sb.ToString();
         }
+#endif
     }
 
-    public class ODataActionTests_Products1Controller : ODataController
+    public class ODataActionTests_Products1Controller : TestODataController
     {
         private List<ODataActionTests_Product> products = null;
 
@@ -217,30 +231,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public ODataActionTests_Product ExtendSupportDate1([FromODataUri]int key, ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
+#endif
 
             ODataActionTests_Product product = products.Where(prod => prod.ID == key).SingleOrDefault();
 
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (product == null)
             {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+                throw new System.Web.Http.HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
             }
+#endif
 
             product.SupportedUntil = new DateTimeOffset(Convert.ToDateTime(parameters["newDate"].ToString()));
-
             return product;
         }
 
         public IEnumerable<ODataActionTests_Product> ExtendSupportDates1(ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
-
+#endif
             foreach (ODataActionTests_Product prd in products)
             {
                 prd.SupportedUntil = new DateTimeOffset(Convert.ToDateTime(parameters["newDate"].ToString()));
@@ -251,17 +269,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public ODataActionTests_Product UpdateRating1OnODataActionTests_RatedProduct([FromODataUri]int key, ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
+#endif
 
             ODataActionTests_Product ratedProduct = products.Where(prod => prod.ID == key).SingleOrDefault();
 
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (ratedProduct == null)
             {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+                throw new System.Web.Http.HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
             }
+#endif
 
             ((ODataActionTests_RatedProduct)ratedProduct).Rating = Convert.ToInt32(parameters["newRating"].ToString());
 
@@ -270,10 +292,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public IEnumerable<ODataActionTests_Product> UpdateRatings1OnCollectionOfODataActionTests_RatedProduct(ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
+#endif
 
             IEnumerable<ODataActionTests_Product> ratedProducts = products.OfType<ODataActionTests_RatedProduct>();
 
@@ -286,7 +310,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class ODataActionTests_Products2Controller : ODataController
+    public class ODataActionTests_Products2Controller : TestODataController
     {
         private List<ODataActionTests_Product> products = null;
 
@@ -301,17 +325,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public ODataActionTests_Product ExtendSupportDate2([FromODataUri]int key, ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
+#endif
 
             ODataActionTests_Product product = products.Where(prod => prod.ID == key).SingleOrDefault();
 
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (product == null)
             {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+                throw new System.Web.Http.HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
             }
+#endif
 
             product.SupportedUntil = new DateTimeOffset(Convert.ToDateTime(parameters["newDate"].ToString()));
 
@@ -320,11 +348,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public IEnumerable<ODataActionTests_Product> ExtendSupportDates2(ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
-
+#endif
             foreach (ODataActionTests_Product prd in products)
             {
                 prd.SupportedUntil = new DateTimeOffset(Convert.ToDateTime(parameters["newDate"].ToString()));
@@ -335,18 +364,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public ODataActionTests_Product UpdateRating2OnODataActionTests_RatedProduct([FromODataUri]int key, ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
-
+#endif
             ODataActionTests_Product ratedProduct = products.Where(prod => prod.ID == key).SingleOrDefault();
 
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (ratedProduct == null)
             {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
+                throw new System.Web.Http.HttpResponseException(Request.CreateResponse(HttpStatusCode.NotFound));
             }
-
+#endif
             ((ODataActionTests_RatedProduct)ratedProduct).Rating = Convert.ToInt32(parameters["newRating"].ToString());
 
             return ratedProduct;
@@ -354,11 +385,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         public IEnumerable<ODataActionTests_Product> UpdateRatings2OnCollectionOfODataActionTests_RatedProduct(ODataActionParameters parameters)
         {
+#if !NETCORE // TODO #939: Enable this check for AspNetCore
             if (!ModelState.IsValid)
             {
-                throw new HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
+                throw new System.Web.Http.HttpResponseException(Request.CreateErrorResponse(HttpStatusCode.BadRequest, new ODataError() { Message = ODataActionTests.GetModelStateErrorInformation(this.ModelState) }));
             }
-
+#endif
             IEnumerable<ODataActionTests_Product> ratedProducts = products.OfType<ODataActionTests_RatedProduct>();
 
             foreach (ODataActionTests_RatedProduct ratedProduct in ratedProducts)

@@ -9,7 +9,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
     public class AutoExpandCustomerContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandCustomerContext";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandCustomerContext1";
 
         public AutoExpandCustomerContext()
             : base(ConnectionString)
@@ -22,7 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
     public class AutoExpandPeopleContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandPeopleContext";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandPeopleContext1";
 
         public AutoExpandPeopleContext()
             : base(ConnectionString)
@@ -35,7 +35,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
     public class AutoExpandOrdersContext : DbContext
     {
         public static string ConnectionString =
-            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandOrdersContext";
+            @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=AutoExpandOrdersContext1";
 
         public AutoExpandOrdersContext()
             : base(ConnectionString)

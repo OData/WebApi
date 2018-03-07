@@ -4,15 +4,11 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
-using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing.DynamicProperties
@@ -24,7 +20,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing.DynamicProperties
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { 
                 typeof(DynamicCustomersController),
@@ -32,15 +28,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing.DynamicProperties
                 typeof(MetadataController),
             };
 
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
-            configuration.GetHttpServer();
             configuration.MapODataServiceRoute(routeName: "odata", routePrefix: "odata",
-                model: GetEdmModel());
+                model: GetEdmModel(configuration));
 
             configuration.EnsureInitialized();
         }
@@ -97,9 +89,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing.DynamicProperties
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        private static IEdmModel GetEdmModel()
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<DynamicCustomer>("DynamicCustomers");
             builder.Singleton<DynamicSingleCustomer>("DynamicSingleCustomer");
             return builder.GetEdmModel();

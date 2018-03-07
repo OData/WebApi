@@ -5,12 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
@@ -25,7 +25,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public Guid ID { get; set; }
     }
 
-    public class GuidPrimaryKeyTypeController : ODataController
+    public class GuidPrimaryKeyTypeController : TestODataController
     {
         static GuidPrimaryKeyTypeController()
         {
@@ -70,7 +70,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public string ID { get; set; }
     }
 
-    public class StringPrimaryKeyTypeController : ODataController
+    public class StringPrimaryKeyTypeController : TestODataController
     {
         static StringPrimaryKeyTypeController()
         {
@@ -120,7 +120,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public long ID { get; set; }
     }
 
-    public class UIntPrimaryKeyTypeController : ODataController
+    public class UIntPrimaryKeyTypeController : TestODataController
     {
         static UIntPrimaryKeyTypeController()
         {
@@ -165,7 +165,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public long ID { get; set; }
     }
 
-    public class LongPrimaryKeyTypeController : ODataController
+    public class LongPrimaryKeyTypeController : TestODataController
     {
         static LongPrimaryKeyTypeController()
         {
@@ -209,16 +209,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.EnableODataSupport(GetEdmModel());
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            var builder = configuration.CreateConventionModelBuilder();
+            configuration.EnableODataSupport(GetEdmModel(builder));
         }
 
-        public static IEdmModel GetEdmModel()
+        public static IEdmModel GetEdmModel(ODataConventionModelBuilder builder)
         {
-            var builder = new ODataConventionModelBuilder();
             builder.EntitySet<GuidPrimaryKeyType>("GuidPrimaryKeyType");
             builder.EntitySet<StringPrimaryKeyType>("StringPrimaryKeyType");
             builder.EntitySet<UIntPrimaryKeyType>("UIntPrimaryKeyType");
@@ -231,7 +230,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestGuidTypeAsPrimaryKey()
         {
             var client = new DataServiceContext(new Uri(this.BaseAddress));
-            client.Format.UseJson(GetEdmModel());
+            client.Format.UseJson(GetEdmModel(new ODataConventionModelBuilder()));
 
             var query = client.CreateQuery<GuidPrimaryKeyType>("GuidPrimaryKeyType");
             var models = await query.ExecuteAsync();
@@ -253,7 +252,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestStringTypeAsPrimaryKey()
         {
             var client = new DataServiceContext(new Uri(this.BaseAddress));
-            client.Format.UseJson(GetEdmModel());
+            client.Format.UseJson(GetEdmModel(new ODataConventionModelBuilder()));
 
             var query = client.CreateQuery<StringPrimaryKeyType>("StringPrimaryKeyType");
             var models = await query.ExecuteAsync();
@@ -275,7 +274,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestUIntTypeAsPrimaryKey()
         {
             var client = new DataServiceContext(new Uri(this.BaseAddress));
-            client.Format.UseJson(GetEdmModel());
+            client.Format.UseJson(GetEdmModel(new ODataConventionModelBuilder()));
 
             var query = client.CreateQuery<UIntPrimaryKeyType_Client>("UIntPrimaryKeyType");
             var models = await query.ExecuteAsync();
@@ -297,7 +296,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestLongTypeAsPrimaryKey()
         {
             var client = new DataServiceContext(new Uri(this.BaseAddress));
-            client.Format.UseJson(GetEdmModel());
+            client.Format.UseJson(GetEdmModel(new ODataConventionModelBuilder()));
 
             var query = client.CreateQuery<LongPrimaryKeyType>("LongPrimaryKeyType");
             var models = await query.ExecuteAsync();

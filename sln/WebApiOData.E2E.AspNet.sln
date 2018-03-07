@@ -16,7 +16,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", ".
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shared", "..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.shproj", "{B6B951B6-C3F0-4B8E-8955-E039145E7DEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.E2E.AspNet.OData", "..\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Microsoft.Test.E2E.AspNet.OData.csproj", "{436F2E52-4CBC-41E5-BD47-66C16184A214}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.E2E.AspNet.OData", "..\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNet\Microsoft.Test.E2E.AspNet.OData.csproj", "{436F2E52-4CBC-41E5-BD47-66C16184A214}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution

@@ -5,9 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.SxS2.ODataV3.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.SxS2.ODataV4.Controllers;
@@ -25,7 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.SxS2
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[]
             {
@@ -33,9 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.SxS2
                 typeof(ProductsV2Controller), typeof(ODataV4Stack.MetadataController) 
             };
 
-            var resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
 

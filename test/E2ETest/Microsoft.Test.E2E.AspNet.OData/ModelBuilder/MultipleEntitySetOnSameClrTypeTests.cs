@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
@@ -60,17 +59,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.EnableODataSupport(GetImplicitEdmModel());
+            configuration.EnableODataSupport(GetImplicitEdmModel(configuration));
         }
 
-        private static IEdmModel GetImplicitEdmModel()
+        private static IEdmModel GetImplicitEdmModel(WebRouteConfiguration configuration)
         {
-            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder modelBuilder = configuration.CreateConventionModelBuilder();
             modelBuilder.EntitySet<Product>("MultipleEntitySetOnSameClrType_Products1").EntityType.Ignore(p => p.Family);
             modelBuilder.EntitySet<Product>("MultipleEntitySetOnSameClrType_Products2").EntityType.Ignore(p => p.Family);
 

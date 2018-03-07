@@ -8,9 +8,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -24,13 +24,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.Routes.MapHttpRoute("api", "api/{controller}/{id}", new { id = RouteParameter.Optional });
+#if NETCORE
+            configuration.MapHttpRoute("api", "api/{controller}/{id?}");
+#else
+            configuration.MapHttpRoute("api", "api/{controller}/{id}", new { id = System.Web.Http.RouteParameter.Optional });
+#endif
             configuration.EnableDependencyInjection();
         }
 
@@ -274,12 +277,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class JsonSingleResultCustomerController : ApiController
+    public class JsonSingleResultCustomerController : TestNonODataController
     {
         [EnableQuery(MaxExpansionDepth = 10)]
-        public SingleResult<JsonSingleResultCustomer> Get(int id)
+        public TestSingleResult<JsonSingleResultCustomer> Get(int id)
         {
-            return SingleResult.Create(Enumerable.Range(0, 10).Select(i => new JsonSingleResultCustomer
+            return TestSingleResult.Create(Enumerable.Range(0, 10).Select(i => new JsonSingleResultCustomer
             {
                 Id = i,
                 Name = string.Format("Customer{0}", i),

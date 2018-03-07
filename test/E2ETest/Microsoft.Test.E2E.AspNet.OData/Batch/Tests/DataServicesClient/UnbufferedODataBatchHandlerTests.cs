@@ -8,9 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -20,7 +18,6 @@ using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
-using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Xunit;
 
@@ -47,7 +44,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         {
             if (!_initialized)
             {
-                _initialized = true;
                 IList<UnbufferedBatchCustomer> customers = Enumerable.Range(0, 10).Select(i =>
                    new UnbufferedBatchCustomer
                    {
@@ -58,14 +54,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
                 {
                     LocalTable.AddOrUpdate(customer.Id, customer, (key, oldEntity) => oldEntity);
                 }
+                _initialized = true;
             }
         }
 
-        protected override Task<UnbufferedBatchCustomer> CreateEntityAsync(UnbufferedBatchCustomer entity)
+        protected override Task<ITestActionResult> CreateEntityAsync(UnbufferedBatchCustomer entity)
         {
             if (entity.Id < 0)
             {
-                throw new HttpResponseException(Request.CreateResponse(HttpStatusCode.BadRequest));
+                return Task.FromResult(BadRequest() as ITestActionResult);
             }
             return base.CreateEntityAsync(entity);
         }
@@ -78,7 +75,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
 
         public Task CreateRef([FromODataUri] int key, string navigationProperty, [FromBody] Uri link)
         {
-            return Task.FromResult(Request.CreateResponse(HttpStatusCode.NoContent));
+            return Task.FromResult(StatusCode(HttpStatusCode.NoContent));
         }
     }
 
@@ -97,24 +94,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            HttpServer server = configuration.GetHttpServer();
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute(
                 "batch",
                 "UnbufferedBatch",
-                GetEdmModel(),
+                GetEdmModel(builder),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
-                new UnbufferedODataBatchHandler(server));
+                configuration.CreateUnbufferedODataBatchHandler());
         }
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
             EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
             customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
@@ -229,7 +223,7 @@ Content-Type: application/json;odata.metadata=minimal
             var stream = await response.Content.ReadAsStreamAsync();
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
-            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel()))
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
             {
                 var batchReader = messageReader.CreateODataBatchReader();
                 while (batchReader.Read())
@@ -255,24 +249,21 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            HttpServer server = configuration.GetHttpServer();
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
                 "batch",
                 "UnbufferedBatch",
-                GetEdmModel(),
+                GetEdmModel(builder),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
-                new UnbufferedODataBatchHandler(server));
+                configuration.CreateUnbufferedODataBatchHandler());
         }
 
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
             EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
             customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
@@ -323,25 +314,21 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            HttpServer server = configuration.GetHttpServer();
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
                 "batch",
                 "UnbufferedBatch",
-                GetEdmModel(),
+                GetEdmModel(builder),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
-                new UnbufferedODataBatchHandler(server));
-
+                configuration.CreateUnbufferedODataBatchHandler());
         }
 
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
             EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
             customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
@@ -388,23 +375,20 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            HttpServer server = configuration.GetHttpServer();
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
                 "batch",
                 "UnbufferedBatch",
-                GetEdmModel(),
+                GetEdmModel(builder),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
-                new UnbufferedODataBatchHandler(server));
+                configuration.CreateUnbufferedODataBatchHandler());
         }
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
             EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
             customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
@@ -437,24 +421,22 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            HttpServer server = configuration.GetHttpServer();
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
                 "batch",
                 "UnbufferedBatch",
-                GetEdmModel(),
+                GetEdmModel(builder),
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault(),
-                new UnbufferedODataBatchHandler(server));
+                configuration.CreateUnbufferedODataBatchHandler());
+
             configuration.EnableContinueOnErrorHeader();
         }
 
-        protected static IEdmModel GetEdmModel()
+        protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
             EntitySetConfiguration<UnbufferedBatchCustomer> customers = builder.EntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
             EntitySetConfiguration<UnbufferedBatchOrder> orders = builder.EntitySet<UnbufferedBatchOrder>("UnbufferedBatchOrder");
             customers.EntityType.Collection.Action("OddCustomers").ReturnsCollectionFromEntitySet<UnbufferedBatchCustomer>("UnbufferedBatchCustomer");
@@ -501,7 +483,7 @@ GET " + absoluteUri + @"(1) HTTP/1.1
             int subResponseCount = 0;
 
             // Assert
-            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel()))
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
             {
                 var batchReader = messageReader.CreateODataBatchReader();
                 while (batchReader.Read())
@@ -566,7 +548,7 @@ GET " + absoluteUri + @"(1) HTTP/1.1
             int subResponseCount = 0;
 
             // Assert
-            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel()))
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
             {
                 var batchReader = messageReader.CreateODataBatchReader();
                 while (batchReader.Read())

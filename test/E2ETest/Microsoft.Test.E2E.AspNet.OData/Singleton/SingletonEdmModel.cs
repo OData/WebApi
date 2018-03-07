@@ -5,6 +5,7 @@ using System;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
@@ -71,9 +72,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             return builder.GetEdmModel();
         }
 
-        public static IEdmModel GetConventionModel(string singletonName)
+        public static IEdmModel GetConventionModel(WebRouteConfiguration configuration, string singletonName)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Partner> partnersConfiguration = builder.EntitySet<Partner>("Partners");
             EntityTypeConfiguration<Partner> partnerConfiguration = partnersConfiguration.EntityType;
             partnerConfiguration.Collection.Action("ResetDataSource");

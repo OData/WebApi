@@ -5,13 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Controllers;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -21,21 +16,22 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    public class DeleteAllRoutingConvention : EntitySetRoutingConvention
+    public class DeleteAllRoutingConvention : TestEntitySetRoutingConvention
     {
-        public override string SelectAction(Microsoft.AspNet.OData.Routing.ODataPath odataPath, HttpControllerContext context,
-            ILookup<string, HttpActionDescriptor> actionMap)
+        /// <inheritdoc/>
+        protected override string SelectAction(string requestMethod, ODataPath odataPath, TestControllerContext controllerContext, IList<string> actionList)
         {
-            if (context.Request.Method == HttpMethod.Delete &&
-                odataPath.PathTemplate == "~/entityset")
+            if (requestMethod == "DELETE" &&
+                  odataPath.PathTemplate == "~/entityset")
             {
                 string actionName = "Delete";
-                if (actionMap.Contains(actionName))
+                if (actionList.Contains(actionName))
                 {
-                     return actionName;
+                    return actionName;
                 }
             }
             return null;
@@ -68,31 +64,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [HttpPut]
-        public HttpResponseMessage CreateRefToSingleNavigationPropertyOnCar(int key, [FromBody] Uri link)
+        public ITestActionResult CreateRefToSingleNavigationPropertyOnCar(int key, [FromBody] Uri link)
         {
             var found = this.LocalTable[key] as Car;
             if (found == null)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, string.Format("Car with key {0} is not found", key));
+                return NotFound();
             }
 
-            int relatedKey = Request.GetKeyValue<int>(link);
+            int relatedKey = GetRequestValue<int>(link);
             var relatedObj = this.LocalTable[relatedKey];
             if (relatedObj == null)
             {
-                return Request.CreateErrorResponse(HttpStatusCode.NotFound, string.Format("The link with key {0} is not found", relatedKey));
+                return NotFound();
             }
 
             found.SingleNavigationProperty = relatedObj;
 
-            return Request.CreateResponse(HttpStatusCode.NoContent);
+            return StatusCode(HttpStatusCode.NoContent);
         }
 
-        public Task<Vehicle> GetSingleNavigationPropertyOnCar(int key)
+        public Task<ITestActionResult> GetSingleNavigationPropertyOnCar(int key)
         {
-            return Task.Factory.StartNew(() =>
+            return Task< ITestActionResult>.Factory.StartNew(() =>
             {
-                return (this.LocalTable[key] as Car).SingleNavigationProperty;
+                return Ok((LocalTable[key] as Car).SingleNavigationProperty);
             });
         }
     }
@@ -112,20 +108,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             });
         }
 
-        public Task<HttpResponseMessage> PostBaseTypeNavigationProperty(int key, Vehicle vehicle)
+        public Task<ITestActionResult> PostBaseTypeNavigationProperty(int key, Vehicle vehicle)
         {
-            return Task.Factory.StartNew(() =>
+            return Task<ITestActionResult>.Factory.StartNew(() =>
             {
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
                 this.LocalTable[key].BaseTypeNavigationProperty.Add(vehicle);
 
                 IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
 
-                var response = this.Request.CreateResponse(HttpStatusCode.Created, vehicle);
-                response.Headers.Location = new Uri(this.Url.CreateODataLink(
+                string location = this.Url.CreateODataLink(
                         new EntitySetSegment(entitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null)));
-                return response;
+                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null));
+
+                return Created(location, vehicle);
             });
         }
 
@@ -137,26 +133,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             });
         }
 
-        public Task<HttpResponseMessage> PostDerivedTypeNavigationProperty(int key, MiniSportBike vehicle)
+        public Task<ITestActionResult> PostDerivedTypeNavigationProperty(int key, MiniSportBike vehicle)
         {
-            return Task.Factory.StartNew(() =>
+            return Task<ITestActionResult>.Factory.StartNew(() =>
             {
                 new InheritanceTests_VehiclesController().LocalTable.AddOrUpdate(vehicle.Id, vehicle, (id, v) => vehicle);
-                this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
+                    this.LocalTable[key].DerivedTypeNavigationProperty.Add(vehicle);
 
                 IEdmEntitySet entitySet = Request.GetModel().EntityContainer.FindEntitySet("InheritanceTests_Vehicles");
 
-                var response = this.Request.CreateResponse(System.Net.HttpStatusCode.Created, vehicle);
-                response.Headers.Location = new Uri(this.Url.CreateODataLink(
+                string location = this.Url.CreateODataLink(
                         new EntitySetSegment(entitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null)));
-                return response;
+                        new KeySegment(new[] { new KeyValuePair<string, object>("Id", vehicle.Id) }, entitySet.EntityType(), null));
+
+                return Created(location, vehicle);
             });
         }
 
-        public Task DeleteRef(int key, string relatedKey, string navigationProperty)
+        public Task<ITestActionResult> DeleteRef(int key, string relatedKey, string navigationProperty)
         {
-            return Task.Factory.StartNew(() =>
+            return Task<ITestActionResult>.Factory.StartNew(() =>
             {
                 var entity = this.LocalTable[key];
                 switch (navigationProperty)
@@ -166,7 +162,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                             var vehicle = entity.BaseTypeNavigationProperty.FirstOrDefault(v => v.Id == Convert.ToInt32(relatedKey));
                             if (vehicle == null)
                             {
-                                throw new HttpResponseException(this.Request.CreateResponse(HttpStatusCode.NotFound));
+                                return NotFound();
                             }
 
                             entity.BaseTypeNavigationProperty.Remove(vehicle);
@@ -177,15 +173,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                             var vehicle = entity.DerivedTypeNavigationProperty.FirstOrDefault(v => v.Id == Convert.ToInt32(relatedKey));
                             if (vehicle == null)
                             {
-                                throw new HttpResponseException(this.Request.CreateResponse(HttpStatusCode.NotFound));
+                                return NotFound();
                             }
 
                             entity.DerivedTypeNavigationProperty.Remove(vehicle);
                         }
                         break;
+
                     default:
-                        return;
+                        return NotFound();
                 }
+
+                return Ok();
             });
         }
     }
@@ -221,9 +220,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        public static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var builder = new ODataConventionModelBuilder(configuration);
+            var builder = configuration.CreateConventionModelBuilder();
 
             builder.EntitySet<MovingObject>("InheritanceTests_MovingObjects");
             builder.EntitySet<Vehicle>("InheritanceTests_Vehicles");
@@ -240,9 +239,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                         {
                             object id;
                             entityContext.EdmObject.TryGetPropertyValue("Id", out id);
-                            return new Uri(entityContext.Url.CreateODataLink(
+                            return new Uri(ResourceContextHelper.CreateODataLink(entityContext,
                                 new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id)}, entityContext.StructuredType as IEdmEntityType, null),
+                                new KeySegment(new[] { new KeyValuePair<string, object>("Id", id) }, entityContext.StructuredType as IEdmEntityType, null),
                                 new NavigationPropertySegment(navigationProperty, null)));
                         },
                         false);

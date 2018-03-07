@@ -3,17 +3,16 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Products;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Controllers
 {
-    public class FilterTestsController : ApiController
+    public class FilterTestsController : TestNonODataController
     {
         [EnableQuery(PageSize = 999999)]
         public IQueryable<Product> GetProducts()
@@ -34,9 +33,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Controllers
         }
 
         [EnableQuery(PageSize = 999999)]
-        public HttpResponseMessage GetProductsHttpResponse()
+        public ITestActionResult GetProductsHttpResponse()
         {
-            return this.Request.CreateResponse<IEnumerable<Product>>(System.Net.HttpStatusCode.OK, GetProducts());
+            return Ok<IEnumerable<Product>>(GetProducts());
         }
 
         [EnableQuery(PageSize = 999999)]

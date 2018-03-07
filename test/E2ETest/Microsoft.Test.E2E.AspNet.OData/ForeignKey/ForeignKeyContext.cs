@@ -8,7 +8,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 {
     public class ForeignKeyContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextV4";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextV4_1";
 
         public ForeignKeyContext()
             : base(ConnectionString)
@@ -22,7 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
     public class ForeignKeyContextNoCascade : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextNoCascadeV4";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=ForeignKeyE2EContextNoCascadeV4_1";
 
         public ForeignKeyContextNoCascade()
             : base(ConnectionString)

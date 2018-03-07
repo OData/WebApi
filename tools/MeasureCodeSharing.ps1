@@ -1,0 +1,1 @@
+Get-ChildItem -Filter "*.cs" -Recurse | Get-Content | Measure-Object -line

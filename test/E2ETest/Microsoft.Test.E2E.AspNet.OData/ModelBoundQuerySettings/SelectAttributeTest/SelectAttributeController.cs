@@ -3,10 +3,11 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttributeTest
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
         private List<Customer> _customers;
 
@@ -56,7 +57,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
         }
     }
 
-    public class OrdersController : ODataController
+    public class OrdersController : TestODataController
     {
         private List<Order> _orders;
         private List<SpecialOrder> _specialOrders;
@@ -125,7 +126,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
         }
     }
 
-    public class CarsController : ODataController
+    public class CarsController : TestODataController
     {
         private List<Car> _cars;
 
@@ -155,7 +156,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
         }
     }
 
-    public class AutoSelectCustomersController : ODataController
+    public class AutoSelectCustomersController : TestODataController
     {
         private List<AutoSelectCustomer> _customers;
 

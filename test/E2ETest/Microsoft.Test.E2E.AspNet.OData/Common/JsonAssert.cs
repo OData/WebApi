@@ -12,7 +12,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
 {
     public class JsonAssert
     {
-        public static void PropertyEquals<T, K>(T expectedValue, string propertyName, K jsonObject) where K : JObject
+        public static void PropertyEquals<T, TJobject>(T expectedValue, string propertyName, TJobject jsonObject) where TJobject : JObject
         {
             Func<KeyValuePair<string, JToken>, string> selector = x => x.Key;
             IEnumerable<string> keys = Enumerable.Select<KeyValuePair<string, JToken>, string>(jsonObject, selector);

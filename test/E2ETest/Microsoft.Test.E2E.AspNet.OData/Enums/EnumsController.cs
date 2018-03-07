@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Enums
 {
-    public class EmployeesController : ODataController
+    public class EmployeesController : TestODataController
     {
         public EmployeesController()
         {
@@ -69,34 +69,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(Employees.AsQueryable());
         }
 
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             return Ok(Employees.SingleOrDefault(e => e.ID == key));
         }
 
-        public IHttpActionResult GetAccessLevelFromEmployee(int key)
+        public ITestActionResult GetAccessLevelFromEmployee(int key)
         {
             return Ok(Employees.SingleOrDefault(e => e.ID == key).AccessLevel);
         }
 
-        public IHttpActionResult GetNameFromEmployee(int key)
+        public ITestActionResult GetNameFromEmployee(int key)
         {
             return Ok(Employees.SingleOrDefault(e => e.ID == key).Name);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetSkillSetFromEmployee(int key)
+        public ITestActionResult GetSkillSetFromEmployee(int key)
         {
             return Ok(Employees.SingleOrDefault(e => e.ID == key).SkillSet);
         }
 
         [EnableQuery]
-        public IHttpActionResult GetFavoriteSportsFromEmployee(int key)
+        public ITestActionResult GetFavoriteSportsFromEmployee(int key)
         {
             var employee = Employees.SingleOrDefault(e => e.ID == key);
             return Ok(employee.FavoriteSports);
@@ -104,13 +104,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
         [HttpGet]
         [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
-        public IHttpActionResult GetFavoriteSportLikeMost(int key)
+        public ITestActionResult GetFavoriteSportLikeMost(int key)
         {
             var firstOrDefault = Employees.FirstOrDefault(e => e.ID == key);
             return Ok(firstOrDefault.FavoriteSports.LikeMost);
         }
 
-        public IHttpActionResult Post(Employee employee)
+        public ITestActionResult Post([FromBody]Employee employee)
         {
             employee.ID = Employees.Count + 1;
             Employees.Add(employee);
@@ -118,7 +118,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return Created(employee);
         }
 
-        public IHttpActionResult Put(int key, Employee employee)
+        public ITestActionResult Put(int key, [FromBody]Employee employee)
         {
             employee.ID = key;
             Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
@@ -135,7 +135,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return Ok(employee);
         }
 
-        public IHttpActionResult Patch(int key, Delta<Employee> delta)
+        public ITestActionResult Patch(int key, [FromBody]Delta<Employee> delta)
         {
             Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
 
@@ -151,7 +151,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return Ok(delta);
         }
 
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             IEnumerable<Employee> appliedEmployees = Employees.Where(c => c.ID == key);
 
@@ -166,7 +166,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         }
 
         [HttpPost]
-        public IHttpActionResult AddSkill([FromODataUri] int key, ODataActionParameters parameters)
+        public ITestActionResult AddSkill([FromODataUri] int key, [FromBody]ODataActionParameters parameters)
         {
             if (!ModelState.IsValid)
             {
@@ -186,7 +186,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
         [HttpPost]
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             this.InitEmployees();
             return this.StatusCode(HttpStatusCode.NoContent);
@@ -194,7 +194,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
         [HttpPost]
         [ODataRoute("SetAccessLevel")]
-        public IHttpActionResult SetAccessLevel(ODataActionParameters parameters)
+        public ITestActionResult SetAccessLevel([FromBody]ODataActionParameters parameters)
         {
             if (!ModelState.IsValid)
             {
@@ -208,7 +208,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         }
 
         [HttpGet]
-        public IHttpActionResult GetAccessLevel([FromODataUri] int key)
+        public ITestActionResult GetAccessLevel([FromODataUri] int key)
         {
             if (!ModelState.IsValid)
             {
@@ -222,7 +222,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
         [HttpGet]
         [ODataRoute("HasAccessLevel(ID={id},AccessLevel={accessLevel})")]
-        public IHttpActionResult HasAccessLevel([FromODataUri] int id, [FromODataUri] AccessLevel accessLevel)
+        public ITestActionResult HasAccessLevel([FromODataUri] int id, [FromODataUri] AccessLevel accessLevel)
         {
             if (!ModelState.IsValid)
             {

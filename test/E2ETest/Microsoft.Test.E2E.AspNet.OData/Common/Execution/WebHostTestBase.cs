@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Web.Http;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
@@ -13,8 +12,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     public abstract class WebHostTestBase : IClassFixture<WebHostTestFixture>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="WebHostTestBase"/> class
-        /// which uses Katana to host a web service.
+        /// Initializes a new instance of the <see cref="WebHostTestBase"/> class.
         /// </summary>
         /// <param name="fixture">The fixture used to initialize the web service.</param>
         protected WebHostTestBase(WebHostTestFixture fixture)
@@ -39,6 +37,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// A configuration method for the server.
         /// </summary>
         /// <param name="configuration"></param>
-        protected abstract void UpdateConfiguration(HttpConfiguration configuration);
+        protected abstract void UpdateConfiguration(WebRouteConfiguration configuration);
     }
 }

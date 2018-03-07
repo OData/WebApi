@@ -6,13 +6,11 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -32,7 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         public string Name { get; set; }
     }
 
-    public class LinkGeneration_Model1Controller : ODataController
+    public class LinkGeneration_Model1Controller : TestODataController
     {
         public IQueryable<LinkGeneration_Model_v1> Get()
         {
@@ -55,7 +53,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
             };
         }
     }
-    public class LinkGeneration_Model2Controller : ODataController
+    public class LinkGeneration_Model2Controller : TestODataController
     {
         public IQueryable<LinkGeneration_Model_v2> Get()
         {
@@ -77,27 +75,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             var model1 = GetEdmModel1(configuration);
             var model2 = GetEdmModel2(configuration);
             configuration.MapODataServiceRoute("OData1", "v1", model1, new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute("OData2", "v2", model2, new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
-            configuration.Routes.MapHttpRoute("ApiDefault", "api/{controller}/{action}/{id}", new { id = RouteParameter.Optional });
+#if NETCORE
+            configuration.MapHttpRoute("ApiDefault", "api/{controller}/{action}/{id?}");
+#else
+            configuration.MapHttpRoute("ApiDefault", "api/{controller}/{action}/{id}", new { id = System.Web.Http.RouteParameter.Optional });
+#endif
         }
 
-        protected static IEdmModel GetEdmModel1(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel1(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<LinkGeneration_Model_v1>("LinkGeneration_Model1");
             mb.EntitySet<LinkGeneration_Model_v2>("LinkGeneration_Model2");
             return mb.GetEdmModel();
         }
 
-        protected static IEdmModel GetEdmModel2(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel2(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<LinkGeneration_Model_v2>("LinkGeneration_Model2");
             return mb.GetEdmModel();
         }

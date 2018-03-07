@@ -1,15 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Dynamic;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using System.Web.Http;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -22,8 +19,32 @@ using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
+using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Dynamic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Formatting;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Client;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
@@ -176,9 +197,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected static IEdmModel GetEdmModel(HttpConfiguration configuration)
+        protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
-            var mb = new ODataConventionModelBuilder(configuration);
+            var mb = configuration.CreateConventionModelBuilder();
             mb.EntitySet<DeltaTests_Todo>("DeltaTests_Todoes");
             return mb.GetEdmModel();
         }
@@ -307,21 +328,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<DeltaCustomer>("DeltaCustomers");
             builder.EntitySet<DeltaOrder>("DeltaOrders");
             return builder.GetEdmModel();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Fact]
         public async Task PutShouldntOverrideNavigationProperties()
         {
@@ -334,9 +356,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(0)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
-            dynamic query = await response.Content.ReadAsAsync<JObject>();
+            dynamic query = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(3, query.Orders.Count);
         }
+#endif
     }
 
     public class PatchtDeltaOfTTests : WebHostTestBase
@@ -346,21 +369,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration config)
+        protected override void UpdateConfiguration(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
         }
 
-        private static IEdmModel GetModel()
+        private static IEdmModel GetModel(WebRouteConfiguration config)
         {
-            ODataModelBuilder builder = new ODataConventionModelBuilder();
+            ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<DeltaCustomer>("DeltaCustomers");
             builder.EntitySet<DeltaOrder>("DeltaOrders");
             return builder.GetEdmModel();
         }
 
+#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Fact]
         public async Task PatchShouldSupportNonSettableCollectionProperties()
         {
@@ -374,13 +398,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
-            dynamic query = await response.Content.ReadAsAsync<JObject>();
+            dynamic query = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(3, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
+#endif
     }
 
-    public class DeltaCustomersController : ODataController
+    public class DeltaCustomersController : TestODataController
     {
         private static List<DeltaCustomer> customers;
 
@@ -402,7 +427,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]
-        public IHttpActionResult Get([FromODataUri] int key)
+        public ITestActionResult Get([FromODataUri] int key)
         {
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
             if (customer != null)
@@ -414,7 +439,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 return BadRequest();
             }
         }
-        public IHttpActionResult Put([FromODataUri] int key, [FromBody] Delta<DeltaCustomer> entity)
+        public ITestActionResult Put([FromODataUri] int key, [FromBody] Delta<DeltaCustomer> entity)
         {
             if (!ModelState.IsValid)
             {
@@ -426,7 +451,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [AcceptVerbs("PATCH", "MERGE")]
-        public IHttpActionResult Patch([FromODataUri] int key, Delta<DeltaCustomer> patch)
+        public ITestActionResult Patch([FromODataUri] int key, Delta<DeltaCustomer> patch)
         {
             if (!ModelState.IsValid)
             {

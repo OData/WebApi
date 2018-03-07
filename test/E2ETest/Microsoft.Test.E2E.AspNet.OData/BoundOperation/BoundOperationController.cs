@@ -5,14 +5,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 {
-    public class EmployeesController : ODataController
+    public class EmployeesController : TestODataController
     {
         private static List<Employee> _employees = null;
         private static List<Manager> _managers = null;
@@ -75,13 +75,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         public IList<Employee> Customers { get { return _employees; } }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_employees.AsQueryable());
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
-        public IHttpActionResult GetFromManager()
+        public ITestActionResult GetFromManager()
         {
             return Ok(_managers.AsQueryable());
         }
@@ -138,7 +138,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         // ~/Employees(1)/Microsoft.Test.E2E.AspNet.OData.BoundOperation.GetOptionalAddresses()/$count")]
         [HttpGet]
         [EnableQuery]
-        public IHttpActionResult GetOptionalAddresses(int key)
+        public ITestActionResult GetOptionalAddresses(int key)
         {
             IList<Address> addresses = new List<Address>();
             addresses.Add(new Address { City = "Shanghai", Street = "Zixing" });
@@ -155,7 +155,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         [ODataRoute("Employees({key})/OptionalAddresses/$count")]
         [ODataRoute("Employees({key})/Default.GetOptionalAddresses()")]
         [ODataRoute("Employees({key})/Default.GetOptionalAddresses()/$count")]
-        public IHttpActionResult GetOptionalAddressesAttributeRouting(int key)
+        public ITestActionResult GetOptionalAddressesAttributeRouting(int key)
         {
             IList<Address> addresses = new List<Address>();
             addresses.Add(new Address { City = "Shanghai", Street = "Zixing" });
@@ -169,7 +169,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         // ~/Employees(1)/Microsoft.Test.E2E.AspNet.OData.BoundOperation.GetEmails()/$count
         [HttpGet]
         [EnableQuery]
-        public IHttpActionResult GetEmails(int key)
+        public ITestActionResult GetEmails(int key)
         {
             IList<string> emails = new List<string>();
             emails.Add("a@a.com");
@@ -185,7 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         [ODataRoute("Employees({key})/Emails")]
         [ODataRoute("Employees({key})/Emails/$count")]
         [ODataRoute("Employees({key})/Default.GetEmails()")]
-        public IHttpActionResult GetEmailsAttributeRouting([FromODataUri]int key)
+        public ITestActionResult GetEmailsAttributeRouting([FromODataUri]int key)
         {
             IList<string> emails = new List<string>();
             emails.Add("a@a.com");
@@ -254,14 +254,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpGet]
         [ODataRoute("Employees/Default.ComplexFunction(address={address},location={location},addresses={addresses})")]
-        public IHttpActionResult ComplexFunction([FromODataUri]Address address, [FromODataUri]Address location, [FromODataUri]IEnumerable<Address> addresses)
+        public ITestActionResult ComplexFunction([FromODataUri]Address address, [FromODataUri]Address location, [FromODataUri]IEnumerable<Address> addresses)
         {
             return Ok(new[] { address, location }.Concat(addresses));
         }
 
         [HttpGet]
         [ODataRoute("Employees/Default.EntityFunction(person={person},guard={guard},staff={staff})")]
-        public IHttpActionResult EntityFunction([FromODataUri]Employee person, [FromODataUri]Employee guard, [FromODataUri]IEnumerable<Employee> staff)
+        public ITestActionResult EntityFunction([FromODataUri]Employee person, [FromODataUri]Employee guard, [FromODataUri]IEnumerable<Employee> staff)
         {
             VerifyEmployee(person);
             VerifyEmployee(guard);
@@ -304,7 +304,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpPost]
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             if (!ModelState.IsValid)
             {
@@ -317,7 +317,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         // ~/Employees/Namespace.IncreaseSalary
         [EnableQuery]
         [HttpPost]
-        public IHttpActionResult IncreaseSalary(ODataUntypedActionParameters odataActionParameters)
+        public ITestActionResult IncreaseSalary([FromBody]ODataUntypedActionParameters odataActionParameters)
         {
             string name = odataActionParameters["Name"] as string;
             IEnumerable<Employee> candidates = _employees.Where(e => e.Name.StartsWith(name));
@@ -329,7 +329,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         [HttpPost]
         [EnableQuery]
         [ODataRoute("Employees/Default.IncreaseSalary")]
-        public IHttpActionResult IncreaseSalaryAttributeRouting(ODataUntypedActionParameters odataActionParameters)
+        public ITestActionResult IncreaseSalaryAttributeRouting([FromBody]ODataUntypedActionParameters odataActionParameters)
         {
             string name = odataActionParameters["Name"] as string;
             IEnumerable<Employee> candidates = _employees.Where(e => e.Name.StartsWith(name));
@@ -339,7 +339,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         // ~/Employees/Namespace.Manager/Namespace.IncreaseSalary
         [HttpPost]
-        public IHttpActionResult IncreaseSalaryOnCollectionOfManager(ODataUntypedActionParameters odataActionParameters)
+        public ITestActionResult IncreaseSalaryOnCollectionOfManager([FromBody]ODataUntypedActionParameters odataActionParameters)
         {
             string name = odataActionParameters["Name"] as string;
             IEnumerable<Employee> candidates = _managers.Where(e => e.Name.StartsWith(name));
@@ -351,7 +351,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         [HttpPost]
         [EnableQuery]
         [ODataRoute("Employees/NS.Manager/Default.IncreaseSalary")]
-        public IHttpActionResult IncreaseSalaryOnCollectionOfManagerAttributeRouting(ODataUntypedActionParameters odataActionParameters)
+        public ITestActionResult IncreaseSalaryOnCollectionOfManagerAttributeRouting([FromBody]ODataUntypedActionParameters odataActionParameters)
         {
             string name = odataActionParameters["Name"] as string;
             IEnumerable<Employee> candidates = _managers.Where(e => e.Name.StartsWith(name));
@@ -362,7 +362,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         // ~/Employees(1)/Namespace.IncreaseSalary
         [HttpPost]
-        public IHttpActionResult IncreaseSalaryOnEmployee([FromODataUri]int key)
+        public ITestActionResult IncreaseSalaryOnEmployee([FromODataUri]int key)
         {
             var employee = _employees.Where(e => e.ID == key).First();
             employee.Salary *= 2;
@@ -372,7 +372,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         // ~/Employees(1)/Namespace.IncreaseSalary
         [HttpPost]
         [ODataRoute("Employees({key})/Default.IncreaseSalary")]
-        public IHttpActionResult IncreaseSalaryOnEmployeeAttributeRouting([FromODataUri]int key)
+        public ITestActionResult IncreaseSalaryOnEmployeeAttributeRouting([FromODataUri]int key)
         {
             var employee = _employees.Where(e => e.ID == key).First();
             employee.Salary *= 4;
@@ -381,7 +381,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         // ~/Employees(1)/Namespace.Manager/Namespace.IncreaseSalary
         [HttpPost]
-        public IHttpActionResult IncreaseSalaryOnManager([FromODataUri] int key)
+        public ITestActionResult IncreaseSalaryOnManager([FromODataUri] int key)
         {
             var manager = _managers.Where(m => m.ID == key).First();
             manager.Salary *= 2;
@@ -391,7 +391,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         // ~/Employees(1)/Namespace.Manager/Namespace.IncreaseSalary
         [HttpPost]
         [ODataRoute("Employees({key})/NS.Manager/Default.IncreaseSalary")]
-        public IHttpActionResult IncreaseSalaryOnManagerAttributeRouting([FromODataUri] int key)
+        public ITestActionResult IncreaseSalaryOnManagerAttributeRouting([FromODataUri] int key)
         {
             var manager = _managers.Where(m => m.ID == key).First();
             manager.Salary *= 4;
@@ -400,7 +400,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpPost]
         [ODataRoute("Employees/Default.PrimitiveAction")]
-        public IHttpActionResult PrimitiveAction(ODataActionParameters parameters)
+        public ITestActionResult PrimitiveAction([FromBody]ODataActionParameters parameters)
         {
             Assert.Equal(4, parameters.Count);
             Assert.Equal(7, parameters["param"]);
@@ -420,7 +420,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpPost]
         [ODataRoute("Employees/Default.EnumAction")]
-        public IHttpActionResult EnumAction(ODataActionParameters parameters)
+        public ITestActionResult EnumAction([FromBody]ODataActionParameters parameters)
         {
             Assert.Equal(3, parameters.Count);
             Assert.Equal(Color.Red, parameters["bkColor"]);
@@ -438,7 +438,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpPost]
         [ODataRoute("Employees/Default.ComplexAction")]
-        public IHttpActionResult ComplexAction(ODataActionParameters parameters)
+        public ITestActionResult ComplexAction([FromBody]ODataActionParameters parameters)
         {
             Assert.Equal(3, parameters.Count);
 
@@ -466,7 +466,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
         [HttpPost]
         [ODataRoute("Employees/Default.EntityAction")]
-        public IHttpActionResult EntityAction(ODataActionParameters parameters)
+        public ITestActionResult EntityAction([FromBody]ODataActionParameters parameters)
         {
             Assert.Equal(3, parameters.Count);
 

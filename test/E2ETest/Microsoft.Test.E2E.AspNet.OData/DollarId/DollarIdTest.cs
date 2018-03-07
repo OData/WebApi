@@ -4,11 +4,9 @@
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -21,16 +19,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(SingersController), typeof(AlbumsController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
+            configuration.AddControllers(controllers);
 
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
-            configuration.MapODataServiceRoute("Test", "", DollarIdEdmModel.GetModel());
+            configuration.MapODataServiceRoute("Test", "", DollarIdEdmModel.GetModel(configuration));
             configuration.EnsureInitialized();
         }
 
@@ -48,7 +44,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
             //GET Singers(0)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal<int>(2, result.Count);
 
@@ -58,7 +54,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
             //GET Singers(0)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             result = json["value"] as JArray;
             Assert.Single(result);
         }
@@ -76,7 +72,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 
             //GET Singers(0)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Single(result);
 
@@ -84,7 +80,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
             response = await this.Client.GetAsync(requestBaseUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             result = json["value"] as JArray;
             Assert.Empty(result);
         }
@@ -98,7 +94,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             response = await this.Client.GetAsync(requestBaseUri);
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"];
             Assert.Equal("Name102", (string)result[0]["Name"]);
         }

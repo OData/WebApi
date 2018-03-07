@@ -21,6 +21,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Controlle
             }
         }
 
+#if NETCORE
+        public ITestActionResult GetProperty(int key, string property)
+        {
+            var entity = LocalTable[key];
+            object propertyValue = entity.GetType().GetProperty(property).GetValue(entity, null);
+            var result = Ok(propertyValue);
+            return result;
+        }
+#else
         public HttpResponseMessage GetProperty(int key, string property)
         {
             var entity = LocalTable[key];
@@ -28,5 +37,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Controlle
             var result = Request.CreateResponse(HttpStatusCode.OK, propertyValue, entity.GetType().GetProperty(property).PropertyType);
             return result;
         }
+#endif
     }
 }

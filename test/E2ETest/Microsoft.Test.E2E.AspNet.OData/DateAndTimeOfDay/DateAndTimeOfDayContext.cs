@@ -7,7 +7,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 {
     public class DateAndTimeOfDayContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=DateAndTimeOfDayEfDbContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=DateAndTimeOfDayEfDbContext1";
 
         public DateAndTimeOfDayContext()
             : base(ConnectionString)
@@ -19,7 +19,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
     public class EdmDateWithEfContext : DbContext
     {
-        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=EdmDateWithEfDbContext";
+        public static string ConnectionString = @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Initial Catalog=EdmDateWithEfDbContext1";
 
         public EdmDateWithEfContext()
             : base(ConnectionString)

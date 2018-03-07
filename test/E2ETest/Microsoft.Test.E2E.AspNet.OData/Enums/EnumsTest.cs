@@ -7,16 +7,14 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -30,18 +28,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-            configuration.MapODataServiceRoute("convention", "convention", EnumsEdmModel.GetConventionModel());
-            configuration.MapODataServiceRoute("explicit", "explicit", EnumsEdmModel.GetExplicitModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("convention", "convention", EnumsEdmModel.GetConventionModel(configuration));
+            configuration.MapODataServiceRoute("explicit", "explicit", EnumsEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.EnsureInitialized();
         }
 
@@ -142,7 +137,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var results = json.GetValue("value") as JArray;
             Assert.Equal<int>(3, results.Count);
             if (format == "application/json;odata.metadata=full")
@@ -203,7 +198,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var value = json.GetValue("value").ToString();
             Assert.Equal("Execute", value);
             if (format != "application/json;odata.metadata=none")
@@ -214,7 +209,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
             requestUri = this.BaseAddress + "/convention/Employees(1)/SkillSet?$format=" + format;
             response = await this.Client.GetAsync(requestUri);
-            json = await response.Content.ReadAsAsync<JObject>();
+            json = await response.Content.ReadAsObject<JObject>();
             JArray skillSet = json["value"] as JArray;
             Assert.Equal(2, skillSet.Count);
 
@@ -256,7 +251,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             var value = result.GetValue("LikeMost").ToString();
             Assert.Equal("Pingpong", value);
             value = result.GetValue("Like").ToString();
@@ -269,7 +264,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
             requestUri = this.BaseAddress + "/convention/Employees(1)/FavoriteSports/LikeMost?$format=" + format;
             response = await this.Client.GetAsync(requestUri);
-            result = await response.Content.ReadAsAsync<JObject>();
+            result = await response.Content.ReadAsObject<JObject>();
             value = result.GetValue("value").ToString();
             Assert.Equal("Pingpong", value);
         }
@@ -286,7 +281,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
             if (format == "application/json;odata.metadata=full")
             {
                 var typeOfAccessLevel = result["AccessLevel@odata.type"].ToString();
@@ -314,7 +309,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                 // http://<siteurl>/convention/Employees?$filter=AccessLevel eq Microsoft.Test.E2E.AspNet.OData.Enums.AccessLevel'Read'&$format=<Format>
                 Assert.True(response.IsSuccessStatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
                 var value = result.GetValue("value") as JArray;
                 Assert.NotNull(value);
                 Assert.Single(value);
@@ -325,7 +320,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                 // http://<siteurl>/convention/Employees?$filter=AccessLevel has Microsoft.Test.E2E.AspNet.OData.Enums.AccessLevel'Read'&$format=<Format>
                 Assert.True(response.IsSuccessStatusCode);
 
-                var result = await response.Content.ReadAsAsync<JObject>();
+                var result = await response.Content.ReadAsObject<JObject>();
                 var value = result.GetValue("value") as JArray;
                 Assert.NotNull(value);
                 Assert.Equal(2, value.Count);
@@ -344,7 +339,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             var value = result.GetValue("value") as JArray;
             Assert.Equal(3, value.Count);
@@ -362,7 +357,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.True(response.IsSuccessStatusCode);
 
-            var result = await response.Content.ReadAsAsync<JObject>();
+            var result = await response.Content.ReadAsObject<JObject>();
 
             var value = result.GetValue("value") as JArray;
             Assert.Equal(3, value.Count);
@@ -388,7 +383,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
                 Assert.Equal<int>(3, result.Count);
             }
@@ -413,7 +408,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
                 Assert.Equal<int>(4, result.Count);
             }
@@ -429,7 +424,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var accessLevel = json.GetValue("AccessLevel").ToString();
                 Assert.Equal("Read", accessLevel);
 
@@ -462,7 +457,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
 
                 var accessLevel = json.GetValue("AccessLevel");
                 Assert.Equal("Write, Execute", accessLevel);
@@ -522,7 +517,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var values = json.GetValue("value") as JArray;
                 Assert.Equal<int>(3, values.Count);
             }
@@ -537,7 +532,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsAsync<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();
                 var values = json.GetValue("value") as JArray;
                 Assert.Equal<int>(2, values.Count);
             }
@@ -570,7 +565,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var value = json["value"].ToString();
 
             Assert.Equal("Read, Execute", value);
@@ -588,7 +583,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             var response = await this.Client.GetAsync(getUri);
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var value = json["value"].ToString();
             Assert.Equal("Execute", value);
         }
@@ -604,7 +599,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
 
             response.EnsureSuccessStatusCode();
 
-            var json = await response.Content.ReadAsAsync<JObject>();
+            var json = await response.Content.ReadAsObject<JObject>();
             var actualValue = json["value"].Value<bool>();
             Assert.Equal(expectedValue, actualValue);
         }

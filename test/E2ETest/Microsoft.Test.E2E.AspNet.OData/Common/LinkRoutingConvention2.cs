@@ -1,46 +1,31 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common
 {
-    public class LinkRoutingConvention2 : EntitySetRoutingConvention
+    public class LinkRoutingConvention2 : TestEntitySetRoutingConvention
     {
-        public override string SelectAction(ODataPath odataPath, HttpControllerContext controllerContext, ILookup<string, HttpActionDescriptor> actionMap)
+        /// <inheritdoc/>
+        protected override string SelectAction(string requestMethod, ODataPath odataPath, TestControllerContext controllerContext, IList<string> actionList)
         {
-            if (odataPath == null)
-            {
-                throw new ArgumentNullException("odataPath");
-            }
-            if (controllerContext == null)
-            {
-                throw new ArgumentNullException("controllerContext");
-            }
-            if (actionMap == null)
-            {
-                throw new ArgumentNullException("actionMap");
-            }
-            HttpMethod requestMethod = controllerContext.Request.Method;
             if (odataPath.PathTemplate == "~/entityset/key/navigation/$ref"
                 || odataPath.PathTemplate == "~/entityset/key/cast/navigation/$ref"
                 || odataPath.PathTemplate == "~/entityset/key/navigation/key/$ref"
                 || odataPath.PathTemplate == "~/entityset/key/cast/navigation/key/$ref")
             {
                 var actionName = string.Empty;
-                if ((requestMethod == HttpMethod.Post) || (requestMethod == HttpMethod.Put))
+                if ((requestMethod == "POST") || (requestMethod == "PUT"))
                 {
                     actionName += "CreateRefTo";
                 }
-                else if (requestMethod == HttpMethod.Delete)
+                else if (requestMethod == "DELETE")
                 {
                     actionName += "DeleteRefTo";
                 }
@@ -62,14 +47,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
                     }
 
                     var actionCastName = string.Format("{0}On{1}", actionName, ((IEdmEntityType)elementType).Name);
-                    if (actionMap.Contains(actionCastName))
+                    if (actionList.Contains(actionCastName))
                     {
                         AddLinkInfoToRouteData(controllerContext, odataPath);
                         return actionCastName;
                     }
                 }
 
-                if (actionMap.Contains(actionName))
+                if (actionList.Contains(actionName))
                 {
                     AddLinkInfoToRouteData(controllerContext, odataPath);
                     return actionName;
@@ -78,7 +63,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
             return null;
         }
 
-        private static void AddLinkInfoToRouteData(HttpControllerContext controllerContext, ODataPath odataPath)
+        private static void AddLinkInfoToRouteData(TestControllerContext controllerContext, ODataPath odataPath)
         {
             KeySegment keyValueSegment = odataPath.Segments.OfType<KeySegment>().First();
             controllerContext.AddKeyValueToRouteData(keyValueSegment);

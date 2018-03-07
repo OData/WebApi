@@ -9,9 +9,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 {
     internal class UnboundFunctionEdmModel
     {
-        public static IEdmModel GetEdmModel()
+        public static IEdmModel GetEdmModel(ODataConventionModelBuilder builder)
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<ConventionCustomer>("ConventionCustomers");
             builder.EntitySet<ConventionOrder>("ConventionOrders");
 

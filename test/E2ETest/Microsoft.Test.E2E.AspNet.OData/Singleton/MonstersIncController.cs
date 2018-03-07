@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
@@ -18,7 +17,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
     /// Use attribute routing
     /// </summary>
     [ODataRoutePrefix("MonstersInc")]
-    public class MonstersIncController : ODataController
+    public class MonstersIncController : TestODataController
     {
         public static Company MonstersInc;
 
@@ -44,14 +43,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         [EnableQuery]
         [HttpGet]
         [ODataRoute]
-        public IHttpActionResult QueryCompany()
+        public ITestActionResult QueryCompany()
         {
             return Ok(MonstersInc);
         }
 
         [HttpGet]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany")]
-        public IHttpActionResult QueryCompanyFromDerivedType()
+        public ITestActionResult QueryCompanyFromDerivedType()
         {
             var subCompany = MonstersInc as SubCompany;
             if (subCompany != null)
@@ -62,14 +61,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         }
 
         [ODataRoute("Revenue")]
-        public IHttpActionResult GetCompanyRevenue()
+        public ITestActionResult GetCompanyRevenue()
         {
             return Ok(MonstersInc.Revenue);
         }
 
         [HttpGet]
         [ODataRoute("Branches/$count")]
-        public IHttpActionResult GetBranchesCount(ODataQueryOptions<Office> options)
+        public ITestActionResult GetBranchesCount(ODataQueryOptions<Office> options)
         {
             IQueryable<Office> eligibleBranches = MonstersInc.Branches.AsQueryable();
             if (options.Filter != null)
@@ -80,7 +79,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         }
 
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany/Location")]
-        public IHttpActionResult GetDerivedTypeProperty()
+        public ITestActionResult GetDerivedTypeProperty()
         {
             var subCompany = MonstersInc as SubCompany;
             if (subCompany != null)
@@ -92,7 +91,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpGet]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany/Office")]
-        public IHttpActionResult QueryDerivedTypeComplexProperty()
+        public ITestActionResult QueryDerivedTypeComplexProperty()
         {
             var subCompany = MonstersInc as SubCompany;
             if (subCompany != null)
@@ -104,7 +103,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpGet]
         [ODataRoute("Partners")]
-        public IHttpActionResult QueryNavigationProperty()
+        public ITestActionResult QueryNavigationProperty()
         {
             return Ok(MonstersInc.Partners);
         }
@@ -113,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         #region Update
         [HttpPut]
         [ODataRoute]
-        public IHttpActionResult UpdateCompanyByPut(Company newCompany)
+        public ITestActionResult UpdateCompanyByPut(Company newCompany)
         {
             MonstersInc = newCompany;
             return StatusCode(HttpStatusCode.NoContent);
@@ -121,7 +120,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPut]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany")]
-        public IHttpActionResult UpdateCompanyByPutWithDerivedTypeObject(SubCompany newCompany)
+        public ITestActionResult UpdateCompanyByPutWithDerivedTypeObject(SubCompany newCompany)
         {
             MonstersInc = newCompany;
             return StatusCode(HttpStatusCode.NoContent);
@@ -129,7 +128,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPatch]
         [ODataRoute]
-        public IHttpActionResult UpdateCompanyByPatch(Delta<Company> item)
+        public ITestActionResult UpdateCompanyByPatch(Delta<Company> item)
         {
             item.Patch(MonstersInc);
             return StatusCode(HttpStatusCode.NoContent);
@@ -139,9 +138,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         #region Navigation link
         [HttpPost]
         [ODataRoute("Partners/$ref")]
-        public IHttpActionResult AddOrUpdateNavigationLink([FromBody] Uri link)
+        public ITestActionResult AddOrUpdateNavigationLink([FromBody] Uri link)
         {
-            int relatedKey = Request.GetKeyValue<int>(link);
+            int relatedKey = GetRequestValue<int>(link);
             Partner partner = PartnersController.Partners.First(x => x.ID == relatedKey);
             MonstersInc.Partners.Add(partner);
 
@@ -149,7 +148,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         }
 
         [ODataRoute("Partners({relatedKey})/$ref")]
-        public IHttpActionResult DeleteNavigationLink(string relatedKey)
+        public ITestActionResult DeleteNavigationLink(string relatedKey)
         {
             int key = int.Parse(relatedKey);
             Partner partner = MonstersInc.Partners.First(x => x.ID == key);
@@ -160,14 +159,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [AcceptVerbs("GET")]
         [ODataRoute("Partners/$ref")]
-        public IHttpActionResult GetNavigationLink()
+        public ITestActionResult GetNavigationLink()
         {
             return Ok();
         }
 
         [HttpPost]
         [ODataRoute("Partners")]
-        public IHttpActionResult AddPartnersToCompany([FromBody] Partner partner)
+        public ITestActionResult AddPartnersToCompany([FromBody] Partner partner)
         {
             PartnersController.Partners.Add(partner);
             if (MonstersInc.Partners == null)
@@ -186,7 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         #region Action and function
         [HttpPost]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.ResetDataSource")]
-        public IHttpActionResult CallActionResetDataSource()
+        public ITestActionResult CallActionResetDataSource()
         {
             InitData();
             return StatusCode(HttpStatusCode.NoContent);
@@ -194,7 +193,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpGet]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.GetPartnersCount()")]
-        public IHttpActionResult CallFunctionGetPartnersCount()
+        public ITestActionResult CallFunctionGetPartnersCount()
         {
             return Ok(MonstersInc.Partners.Count);
         }

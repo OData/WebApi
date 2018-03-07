@@ -3,21 +3,21 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.SingleResultTest
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
         private readonly SingleResultContext _db = new SingleResultContext();
 
         [EnableQuery]
-        public SingleResult<Customer> Get(int key)
+        public TestSingleResult<Customer> Get(int key)
         {
             ResetDataSource();
             var db = new SingleResultContext();
-            return SingleResult.Create(db.Customers.Where(c => c.Id == key));
+            return TestSingleResult.Create<Customer>(db.Customers.Where(c => c.Id == key));
         }
 
         public void Generate()

@@ -5,17 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.Web.Http.Results;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 {
-    public class EmployeesController : ODataController
+    public class EmployeesController : TestODataController
     {
         public EmployeesController()
         {
@@ -91,19 +89,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
         }
 
         [EnableQuery(MaxExpansionDepth = 3)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_employees.AsQueryable());
         }
 
         [EnableQuery(MaxExpansionDepth = 3)]
         [ODataRoute("Employees/Microsoft.Test.E2E.AspNet.OData.LowerCamelCase.Manager")]
-        public IHttpActionResult GetManagers()
+        public ITestActionResult GetManagers()
         {
             return Ok(_employees.OfType<Manager>().AsQueryable());
         }
 
-        public IHttpActionResult Get(int key, ODataQueryOptions<Employee> options)
+        public ITestActionResult Get(int key, ODataQueryOptions<Employee> options)
         {
             if (options.SelectExpand != null)
             {
@@ -118,8 +116,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             }
             catch (ODataException e)
             {
-                HttpResponseMessage resoponse = Request.CreateErrorResponse(HttpStatusCode.BadRequest, e.Message, e);
-                return ResponseMessage(resoponse);
+                return BadRequest(e.Message);
             }
 
             var querySettings = new ODataQuerySettings();
@@ -130,32 +127,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 
         }
 
-        public IHttpActionResult GetName(int key)
+        public ITestActionResult GetName(int key)
         {
             return Ok(_employees.Single(e => e.ID == key).FullName);
         }
 
         [ODataRoute("GetAddress(id={id})")]
-        public IHttpActionResult GetAddress(int id)
+        public ITestActionResult GetAddress(int id)
         {
             return Ok(_employees.Single(e => e.ID == id).Address);
         }
 
         // GET ~/Employees/Microsoft.Test.E2E.AspNet.OData.LowerCamelCase.GetEarliestTwoEmployees()
         [EnableQuery]
-        public IHttpActionResult GetEarliestTwoEmployeesOnCollectionOfEmployee()
+        public ITestActionResult GetEarliestTwoEmployeesOnCollectionOfEmployee()
         {
             return Ok(_employees.AsQueryable().OrderBy(e => e.ID).Take(2));
         }
 
         // GET ~/Employees(1)/manager
         [EnableQuery(MaxExpansionDepth = 4)]
-        public IHttpActionResult GetManager(int key)
+        public ITestActionResult GetManager(int key)
         {
             return Ok(_employees.Single(e => e.ID == key).Manager);
         }
 
-        public IHttpActionResult Post(Employee employee)
+        public ITestActionResult Post(Employee employee)
         {
             employee.ID = _employees.Count + 1;
             _employees.Add(employee);
@@ -163,7 +160,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             return Created(employee);
         }
 
-        public IHttpActionResult Put(int key, Employee employee)
+        public ITestActionResult Put(int key, [FromBody]Employee employee)
         {
             if (key != employee.ID)
             {
@@ -177,7 +174,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
         }
 
         [ODataRoute("SetAddress")]
-        public IHttpActionResult SetAddress(ODataActionParameters parameters)
+        public ITestActionResult SetAddress([FromBody]ODataActionParameters parameters)
         {
             int id = int.Parse(parameters["id"].ToString());
             Address address = parameters["address"] as Address;
@@ -187,7 +184,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             return Ok(employee);
         }
 
-        public IHttpActionResult Delete(int key)
+        public ITestActionResult Delete(int key)
         {
             IEnumerable<Employee> applied_employees = _employees.Where(c => c.ID == key);
 
@@ -202,16 +199,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
         }
 
         [ODataRoute("ResetDataSource")]
-        public IHttpActionResult ResetDataSource()
+        public ITestActionResult ResetDataSource()
         {
             InitEmployeesAndManagers();
             return this.StatusCode(HttpStatusCode.NoContent);
         }
 
-        private IHttpActionResult Ok(object content, Type type)
+        private ITestActionResult Ok(object content, Type type)
         {
-            var resultType = typeof(OkNegotiatedContentResult<>).MakeGenericType(type);
-            return Activator.CreateInstance(resultType, content, this) as IHttpActionResult;
+            var resultType = typeof(TestOkObjectResult<>).MakeGenericType(type);
+            return Activator.CreateInstance(resultType, content, this) as ITestActionResult;
         }
     }
 }

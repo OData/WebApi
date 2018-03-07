@@ -7,8 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -28,7 +26,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         {
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[]
             {
@@ -36,10 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
                 typeof (CompaniesController), typeof (MetadataController)
             };
 
-            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
-
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Services.Replace(typeof (IAssembliesResolver), resolver);
+            configuration.AddControllers(controllers);
 
             IEdmModel model = AlternateKeysEdmModel.GetEdmModel();
 

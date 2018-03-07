@@ -2,6 +2,7 @@
 <assemblies defaultPublicKeyToken="31bf3856ad364e35">
   <!-- Production assemblies -->
   <assembly name="Microsoft.AspNet.OData"/>
+  <assembly name="Microsoft.AspNetCore.OData"/>
   <assembly name="Microsoft.AspNet.Facebook"/>
   <assembly name="System.Web.Cors"/>
   <assembly name="Microsoft.Web.Helpers"/>
@@ -35,6 +36,7 @@
   <!-- Unit test assemblies and helpers -->
   <assembly name="Microsoft.Test.AspNet.OData.TestCommon"/>
   <assembly name="Microsoft.Test.AspNet.OData"/>
+  <assembly name="Microsoft.Test.E2E.AspNetCore.OData"/>
   <assembly name="Microsoft.AspNet.Facebook.Test"/>
   <assembly name="Microsoft.Web.Helpers.Test"/>
   <assembly name="Microsoft.Web.Http.Data.Test"/>

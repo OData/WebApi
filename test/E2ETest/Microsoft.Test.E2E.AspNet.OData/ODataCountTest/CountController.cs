@@ -3,12 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 {
-    public class HeroesController : ODataController
+    public class HeroesController : TestODataController
     {
         private static CountEdmModel.CountContext _db = new CountEdmModel.CountContext();
 
@@ -42,21 +42,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
         }
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_db.Heroes);
         }
 
         [HttpGet]
         [EnableQuery]
-        public IHttpActionResult GetWeapons()
+        public ITestActionResult GetWeapons()
         {
             return Ok(_db.Weapons);
         }
 
         [HttpGet]
         [EnableQuery]
-        public IHttpActionResult GetNames()
+        public ITestActionResult GetNames()
         {
             var names =  new List<string>
             {

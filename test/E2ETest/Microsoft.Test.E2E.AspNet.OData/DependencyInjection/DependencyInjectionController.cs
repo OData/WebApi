@@ -2,12 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
         [EnableQuery]
         public List<Customer> Get()
@@ -87,7 +87,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
         }
     }
 
-    public class OrdersController : ODataController
+    public class OrdersController : TestODataController
     {
         [EnableQuery]
         public List<Order> Get()

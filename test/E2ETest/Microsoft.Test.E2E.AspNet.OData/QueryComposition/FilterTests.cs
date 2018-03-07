@@ -9,11 +9,11 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models;
 using Microsoft.Test.E2E.AspNet.OData.Common.Models.Products;
 using Xunit;
@@ -215,10 +215,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             return name.Replace("'", "''").Replace("&", "%26").Replace("/", "%2F").Replace("?", "%3F");
         }
 
-        protected override void UpdateConfiguration(HttpConfiguration configuration)
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            configuration.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();
         }
@@ -265,7 +264,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                     traceListener.Close();
                     Assert.True(false);
                 }
-                var result = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)
@@ -297,7 +296,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/api/FilterTests/GetProducts?$filter=" + filter);
                 request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/xml"));
                 var response = await this.Client.SendAsync(request);
-                var result = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)
@@ -327,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 IEnumerable<Product> expected = (IEnumerable<Product>)testCase[1];
 
                 var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetProductsHttpResponse?$filter=" + filter);
-                var result = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)
@@ -357,7 +356,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 IEnumerable<Product> expected = (IEnumerable<Product>)testCase[1];
 
                 var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetAsyncProducts?$filter=" + filter);
-                var result = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)
@@ -387,7 +386,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 IEnumerable<Product> expected = (IEnumerable<Product>)testCase[1];
 
                 var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetProductsAsAnonymousType?$filter=" + filter);
-                var result = await response.Content.ReadAsAsync<IEnumerable<Product>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)
@@ -411,7 +410,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 IEnumerable<Movie> expected = (IEnumerable<Movie>)testCase[1];
 
                 var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetMovies?$filter=" + filter);
-                var result = await response.Content.ReadAsAsync<IEnumerable<Movie>>();
+                var result = await response.Content.ReadAsObject<IEnumerable<Movie>>();
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)

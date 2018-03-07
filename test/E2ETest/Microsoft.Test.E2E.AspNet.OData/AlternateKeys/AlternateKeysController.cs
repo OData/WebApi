@@ -4,16 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 {
-    public class CustomersController : ODataController
+    public class CustomersController : TestODataController
     {
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             foreach (var customer in AlternateKeysDataSource.Customers)
             {
@@ -34,7 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         // alternate key: SSN
         [HttpGet]
         [ODataRoute("Customers(SSN={ssn})")]
-        public IHttpActionResult GetCustomerBySSN([FromODataUri]string ssn)
+        public ITestActionResult GetCustomerBySSN([FromODataUri]string ssn)
         {
             // for special test
             if (ssn == "special-SSN")
@@ -60,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 
         [HttpPatch]
         [ODataRoute("Customers(SSN={ssnKey})")]
-        public IHttpActionResult PatchCustomerBySSN([FromODataUri]string ssnKey, EdmEntityObject delta)
+        public ITestActionResult PatchCustomerBySSN([FromODataUri]string ssnKey, [FromBody]EdmEntityObject delta)
         {
             Assert.Equal("SSN-6-T-006", ssnKey);
 
@@ -98,11 +98,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         }
     }
 
-    public class OrdersController : ODataController
+    public class OrdersController : TestODataController
     {
         [HttpGet]
         [ODataRoute("Orders({orderKey})")]
-        public IHttpActionResult GetOrderByPrimitiveKey(int orderKey)
+        public ITestActionResult GetOrderByPrimitiveKey(int orderKey)
         {
             foreach (var order in AlternateKeysDataSource.Orders)
             {
@@ -122,7 +122,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 
         [HttpGet]
         [ODataRoute("Orders(Name={orderName})")]
-        public IHttpActionResult GetOrderByName([FromODataUri]string orderName)
+        public ITestActionResult GetOrderByName([FromODataUri]string orderName)
         {
             foreach (var order in AlternateKeysDataSource.Orders)
             {
@@ -142,7 +142,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 
         [HttpGet]
         [ODataRoute("Orders(Token={token})")]
-        public IHttpActionResult GetOrderByToken([FromODataUri]Guid token)
+        public ITestActionResult GetOrderByToken([FromODataUri]Guid token)
         {
             foreach (var order in AlternateKeysDataSource.Orders)
             {
@@ -161,9 +161,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         }
     }
 
-    public class PeopleController : ODataController
+    public class PeopleController : TestODataController
     {
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             foreach (var person in AlternateKeysDataSource.People)
             {
@@ -183,7 +183,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 
         [HttpGet]
         [ODataRoute("People(Country_Region={countryOrRegion},Passport={passport})")]
-        public IHttpActionResult FindPeopleByCountryAndPassport([FromODataUri]string countryOrRegion, [FromODataUri]string passport)
+        public ITestActionResult FindPeopleByCountryAndPassport([FromODataUri]string countryOrRegion, [FromODataUri]string passport)
         {
             foreach (var person in AlternateKeysDataSource.People)
             {
@@ -206,9 +206,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         }
     }
 
-    public class CompaniesController : ODataController
+    public class CompaniesController : TestODataController
     {
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             foreach (var company in AlternateKeysDataSource.Companies)
             {
@@ -229,7 +229,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
         /* Not supported now: see github issue: https://github.com/OData/odata.net/issues/294
         [HttpGet]
         [ODataRoute("Companies(City={city},Street={street})")]
-        public IHttpActionResult GetCompanyByLocation([FromODataUri]string city, [FromODataUri]string street)
+        public ITestActionResult GetCompanyByLocation([FromODataUri]string city, [FromODataUri]string street)
         {
             foreach (var company in AlternateKeysDataSource.Companies)
             {

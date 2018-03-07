@@ -1,10 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETFX // This class is only used in the AspNet version.
 using System.Web.Http;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Extensions
 {
+    /// <summary>
+    /// This extension is used to create batch handlers for AspNet.
+    /// </summary>
     public static class HttpConfigurationExtensions
     {
         private const string HttpServerKey = "HttpServerKey";
@@ -25,3 +29,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Extensions
         }
     }
 }
+#endif

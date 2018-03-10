@@ -51,7 +51,12 @@ namespace Microsoft.AspNet.OData.Batch
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
 
-            SetContinueOnError(new WebApiRequestMessage(request), new WebApiRequestHeaders(request.Headers));
+            HttpConfiguration configuration = request.GetConfiguration();
+            bool enableContinueOnErrorHeader = (configuration != null)
+                ? configuration.HasEnabledContinueOnErrorHeader()
+                : false;
+
+            SetContinueOnError(new WebApiRequestHeaders(request.Headers), enableContinueOnErrorHeader);
 
             try
             {

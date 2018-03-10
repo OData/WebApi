@@ -42,7 +42,12 @@ namespace Microsoft.AspNet.OData.Batch
 
             IList<ODataBatchRequestItem> subRequests = await ParseBatchRequestsAsync(context);
 
-            SetContinueOnError(new WebApiRequestMessage(context.Request), new WebApiRequestHeaders(context.Request.Headers));
+            ODataOptions options = context.RequestServices.GetRequiredService<ODataOptions>();
+            bool enableContinueOnErrorHeader = (options != null)
+                ? options.EnableContinueOnErrorHeader
+                : false;
+
+            SetContinueOnError(new WebApiRequestHeaders(context.Request.Headers), enableContinueOnErrorHeader);
 
             IList<ODataBatchResponseItem> responses = await ExecuteRequestMessagesAsync(subRequests, nextHandler);
             await CreateResponseMessageAsync(responses, context.Request);

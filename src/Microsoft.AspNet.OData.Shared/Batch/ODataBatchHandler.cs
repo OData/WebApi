@@ -39,12 +39,12 @@ namespace Microsoft.AspNet.OData.Batch
         /// <summary>
         /// Set ContinueOnError based on the request and headers.
         /// </summary>
-        /// <param name="request">The request.</param>
         /// <param name="header">The request header.</param>
-        internal void SetContinueOnError(IWebApiRequestMessage request, IWebApiHeaders header)
+        /// <param name="enableContinueOnErrorHeader">Flag indicating if continue on error header is enabled.</param>
+        internal void SetContinueOnError(IWebApiHeaders header, bool enableContinueOnErrorHeader)
         {
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(header);
-            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!request.Options.EnableContinueOnErrorHeader))
+            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!enableContinueOnErrorHeader))
             {
                 ContinueOnError = true;
             }

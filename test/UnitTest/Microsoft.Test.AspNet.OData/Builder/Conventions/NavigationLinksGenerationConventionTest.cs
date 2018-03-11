@@ -204,9 +204,15 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             var serializerContext = ODataSerializerContextFactory.Create(model, vehiclesEdmEntitySet, request);
             var entityContext = new ResourceContext(serializerContext, sportbikeType.AsReference(), new SportBike { Model = 2009, Name = "Ninja" });
 
+            // We might get one of these:
+            // http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer
+            // http://localhost/vehicles(Name='Ninja',Model=2009)/Manufacturer
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, motorcycleManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
-
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Ninja')/Manufacturer", uri.AbsoluteUri);
+            string aboluteUri = uri.AbsoluteUri;
+            Assert.Contains("http://localhost/vehicles(", aboluteUri);
+            Assert.Contains("Model=2009", aboluteUri);
+            Assert.Contains("Name='Ninja'", aboluteUri);
+            Assert.Contains(")/Manufacturer", aboluteUri);
         }
     }
 

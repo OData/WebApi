@@ -70,7 +70,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// </summary>
         public string RouteName
         {
-            get { return string.Empty; }
+            get { return this.innerFeature.RouteName; }
         }
 
         /// <summary>

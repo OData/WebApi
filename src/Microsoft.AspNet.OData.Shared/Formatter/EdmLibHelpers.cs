@@ -2,9 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
@@ -85,7 +84,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 // Keep the Binary and XElement in the end, since there are not the default mappings for Edm.Binary and Edm.String.
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(XElement), GetPrimitiveType(EdmPrimitiveTypeKind.String)),
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(Binary), GetPrimitiveType(EdmPrimitiveTypeKind.Binary)),
 #endif
                 new KeyValuePair<Type, IEdmPrimitiveType>(typeof(ushort), GetPrimitiveType(EdmPrimitiveTypeKind.Int32)),

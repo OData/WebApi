@@ -2,10 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Query

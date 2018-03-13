@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.OData;
 

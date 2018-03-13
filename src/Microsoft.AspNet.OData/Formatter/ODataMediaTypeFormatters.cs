@@ -5,8 +5,6 @@ using System.Collections.Generic;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter

@@ -8,7 +8,8 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Microsoft.AspNet.OData.Common {
+namespace Microsoft.AspNet.OData.Common
+{
     using System;
     using System.Linq;
     using System.Reflection;

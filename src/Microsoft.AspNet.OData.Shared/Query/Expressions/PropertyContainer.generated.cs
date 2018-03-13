@@ -4,11 +4,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
-	internal abstract partial class PropertyContainer
+    internal abstract partial class PropertyContainer
 	{
         // Entityframework requires that the two different type initializers for a given type in the same query have the same set of properties in the same order.
         // A $select=Prop1,Prop2,Prop3 where Prop1 and Prop2 are of the same type without this extra NamedPropertyWithNext type results in an select expression that looks like,

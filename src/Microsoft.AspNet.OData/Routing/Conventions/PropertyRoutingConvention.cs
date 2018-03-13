@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {

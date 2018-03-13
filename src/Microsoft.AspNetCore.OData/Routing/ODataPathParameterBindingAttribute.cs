@@ -4,9 +4,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Routing
 {

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;

@@ -2,7 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
@@ -222,7 +222,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         {
                             return ((XElement)value).ToString();
                         }
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
                         else if (type == typeof(Binary))
                         {
                             return ((Binary)value).ToArray();

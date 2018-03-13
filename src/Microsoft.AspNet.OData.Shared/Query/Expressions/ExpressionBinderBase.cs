@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
 #endif
 using System.Diagnostics.CodeAnalysis;
@@ -323,7 +323,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                             {
                                 convertedExpression = Expression.Call(source, "ToString", typeArguments: null, arguments: null);
                             }
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
                             else if (sourceType == typeof(Binary))
                             {
                                 convertedExpression = Expression.Call(source, "ToArray", typeArguments: null, arguments: null);

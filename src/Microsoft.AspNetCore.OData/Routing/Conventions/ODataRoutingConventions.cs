@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions

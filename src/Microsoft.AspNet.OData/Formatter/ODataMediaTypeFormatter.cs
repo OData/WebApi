@@ -189,10 +189,19 @@ namespace Microsoft.AspNet.OData.Formatter
                 ODataSerializerProvider serializerProvider = Request.GetRequestContainer()
                     .GetRequiredService<ODataSerializerProvider>();
 
+                // See if this type is a SingleResult or is derived from SingleResult.
+                bool isSingleResult = false;
+                if (type.IsGenericType)
+                {
+                    Type genericType = type.GetGenericTypeDefinition();
+                    Type baseType = TypeHelper.GetBaseType(type);
+                    isSingleResult = (genericType == typeof(SingleResult<>) || baseType == typeof(SingleResult));
+                }
+
                 return ODataOutputFormatterHelper.CanWriteType(
                     type,
                     _payloadKinds,
-                    type.IsGenericType && type.GetGenericTypeDefinition() == typeof(SingleResult<>),
+                    isSingleResult,
                     new WebApiRequestMessage(Request),
                     (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, Request));
             }

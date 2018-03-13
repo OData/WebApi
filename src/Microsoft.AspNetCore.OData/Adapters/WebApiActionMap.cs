@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
@@ -40,7 +41,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns>True if the action name exist; false otherwise.</returns>
         public bool Contains(string name)
         {
-            return this.innerMap.Any(a => a.ActionName == name);
+            return this.innerMap.Any(a => String.Equals(a.ActionName, name, StringComparison.InvariantCultureIgnoreCase));
         }
     }
 }

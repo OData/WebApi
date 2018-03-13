@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
-using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions

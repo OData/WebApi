@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Common
     /// </summary>
     internal static class TaskHelpers
     {
-#if NETFX
+#if NETFX // These are only used in the AspNet version.
         private static readonly Task _defaultCompleted = Task.FromResult<AsyncVoid>(default(AsyncVoid));
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.OData.Common
 #endif
         }
 
-#if NETFX
+#if NETFX // These are only used in the AspNet version.
         /// <summary>
         /// Used as the T in a "conversion" of a Task into a Task{T}
         /// </summary>

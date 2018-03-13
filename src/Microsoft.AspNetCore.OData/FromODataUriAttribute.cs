@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.AspNet.OData
 {

@@ -2,10 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections;
-using Microsoft.AspNet.OData.Formatter.Serialization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData

@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing.Conventions

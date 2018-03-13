@@ -3,7 +3,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 return str.ToCharArray();
             }
-#if NETFX
+#if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
             else if (type == typeof(Binary))
             {
                 return new Binary((byte[])value);

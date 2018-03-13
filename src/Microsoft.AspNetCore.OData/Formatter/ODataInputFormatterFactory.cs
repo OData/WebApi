@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter

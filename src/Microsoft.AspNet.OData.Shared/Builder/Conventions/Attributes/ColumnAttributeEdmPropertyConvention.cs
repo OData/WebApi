@@ -2,10 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Query;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {

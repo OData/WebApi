@@ -3,9 +3,9 @@
 
 using System.Text;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Query.Expressions

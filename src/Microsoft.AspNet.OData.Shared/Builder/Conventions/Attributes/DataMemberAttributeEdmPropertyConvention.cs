@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;

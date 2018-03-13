@@ -2,14 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData;
-using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {

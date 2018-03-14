@@ -152,7 +152,7 @@ namespace System.Web.OData.Routing.Conventions
             Assert.Equal(expectedActionName, convention.AttributeMappings[pathTemplate].ActionName);
         }
 
-        [Fact]
+        [Fact(Skip = "ODL 7.4 supports enum/string comparison")]
         public void Constructor_ThrowsInvalidOperation_IfFailsToParsePathTemplate()
         {
             // Arrange

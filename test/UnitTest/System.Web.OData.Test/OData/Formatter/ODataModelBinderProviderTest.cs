@@ -329,7 +329,7 @@ namespace System.Web.OData.Formatter
                 response.Content.ReadAsAsync(typeof(bool), configuration.Formatters).Result);
         }
 
-        [Theory]
+        [Theory(Skip = "ODL 7.4 supports enum/string comparison")]
         [InlineData("abc", "GetEnum", "simpleEnum")]
         public void ResourceIsNotFound_IfContainsInvalidEnum(object value, string action, string parameterName)
         {

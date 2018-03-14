@@ -2339,7 +2339,7 @@ namespace System.Web.OData.Routing
             }
         }
 
-        [Theory]
+        [Theory(Skip = "ODL 7.4 supports enum/string comparison")]
         [PropertyData("PrefixFreeEnumCases")]
         public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
         {

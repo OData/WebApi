@@ -65,7 +65,8 @@ namespace WebStack.QA.Test.OData.UriParserExtension
                 return new TheoryDataSet<string, string, HttpStatusCode>()
                 {
                     { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'Male'", "gender='Male'", HttpStatusCode.OK },
-                    { "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'UnknownValue'", "gender='UnknownValue'", HttpStatusCode.NotFound },
+                    //ODL 7.4 supports enum/string comparison
+                    //{ "gender=WebStack.QA.Test.OData.UriParserExtension.Gender'UnknownValue'", "gender='UnknownValue'", HttpStatusCode.NotFound },
                 };
             }
         }

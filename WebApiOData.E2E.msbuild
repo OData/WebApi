@@ -1,0 +1,88 @@
+<Project DefaultTargets="E2ETest" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="tools/WebStack.tasks.targets"/>
+  
+  <!-- Common Properties -->
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' and '$(Desktop)' == 'true' ">CodeAnalysis</Configuration>
+    <CodeAnalysis Condition=" '$(CodeAnalysis)' == '' and '$(Configuration)' != 'Release' ">true</CodeAnalysis>
+    <OutputPath>$(MSBuildThisFileDirectory)bin\$(Configuration)\E2ETest\</OutputPath>
+    <TestResultsDirectory>$(OutputPath)\TestResults\</TestResultsDirectory>
+    <StyleCopEnabled Condition=" '$(StyleCopEnabled)' == '' ">true</StyleCopEnabled>
+	<BuildInParallel Condition=" '$(BuildInParallel)' == '' And $(MSBuildNodeCount) &gt; 1 ">true</BuildInParallel>
+    <BuildInParallel Condition=" '$(BuildInParallel)' == '' ">false</BuildInParallel>
+    <NuGetExeFile>$(MSBuildThisFileDirectory)sln\.nuget\NuGet.exe</NuGetExeFile>
+  </PropertyGroup>
+
+  <UsingTask AssemblyFile=".\sln\packages\xunit.1.9.2\lib\net20\xunit.runner.msbuild.dll" TaskName="Xunit.Runner.MSBuild.xunit"/>
+  
+  <ItemGroup>
+    <SolutionsToBuild Include=".\sln\WebApiOData.E2E.sln">
+      <BuildInParallel>$(BuildInParallel)</BuildInParallel>
+    </SolutionsToBuild>
+  </ItemGroup>
+
+  <!-- Test assemblies -->
+  <ItemGroup>
+    <TestAssembiles Include="$(OutputPath)\WebStack.QA.Test.OData.dll" />
+  </ItemGroup>
+  
+  <Target Name="DownloadNuGet">
+    <RemoveDir Directories="$(OutputPath)" />
+    <DownloadNuGet OutputFileName="$(NuGetExeFile)" MinimumVersion="2.7.0" />
+  </Target>
+
+  <Target Name="RestorePackages" DependsOnTargets="DownloadNuGet">
+    <Message Text="Restoring NuGet packages..." Importance="High" />
+    <Exec Command='"$(NuGetExeFile)" restore "%(SolutionsToBuild.Identity)" -PackagesDirectory sln\packages -NonInteractive -Verbosity quiet -ConfigFile "$(MsBuildThisFileDirectory)sln\.nuget\NuGet.Config"' />
+    
+  </Target>
+  
+  <Target Name="BuildTools">
+    <PropertyGroup>
+        <FxCopProjectLocation>$(MsBuildThisFileDirectory)tools\src\Microsoft.Web.FxCop\</FxCopProjectLocation>
+        <CustomFxCopRulesPath>$(MsBuildThisFileDirectory)sln\packages\CustomFxCopRules</CustomFxCopRulesPath>
+    </PropertyGroup>
+    <MsBuild 
+          Condition=" '$(CodeAnalysis)' == 'true' "
+          Projects="$(FxCopProjectLocation)\Microsoft.Web.FxCop.csproj" 
+          Properties="Configuration=Release;OutputPath=$(CustomFxCopRulesPath)" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="RestorePackages;BuildTools">
+    <PropertyGroup>
+      <RunCodeAnalysis>false</RunCodeAnalysis>
+    </PropertyGroup>
+
+    <Message Text="{Build Test}" Importance="High" />
+    <Message Text="  Configuration $(Configuration)" Importance="High" />
+    <Message Text="RunCodeAnalysis $(RunCodeAnalysis)" Importance="High"/>
+    <MakeDir Directories="$(OutputPath)" />
+
+	<MSBuild
+	  Projects="@(SolutionsToBuild)"
+	  BuildInParallel="%(SolutionsToBuild.BuildInParallel)"
+	  Targets="Build"
+	  Condition=" '%(SolutionsToBuild.Portable)' != 'true' or '$(BuildPortable)' == 'true' "
+	  Properties="Configuration=$(Configuration);CodeAnalysis=$(CodeAnalysis);StyleCopEnabled=$(StyleCopEnabled);VisualStudioVersion=$(VisualStudioVersion)" />
+    <Message Text="{End of Build Test}" Importance="High" />
+    <Message Text="" Importance="High" />
+  </Target>
+  
+  <Target Name="RunTests" DependsOnTargets="Build">
+    <RemoveDir Directories="$(TestResultsDirectory)" />
+    <MakeDir Directories="$(TestResultsDirectory)" />
+    <Message Text="{Running Test}" Importance="High" />
+    <xunit Assemblies="@(TestAssembiles)" Xml="$(TestResultsDirectory)\$(ResultFileName)"/>
+    <Message Text="{End of Running Test}" Importance="High" />
+    <Message Text="" Importance="High" />
+  </Target>
+  
+  <Target Name="E2ETest">
+    <CallTarget Targets="RunTests;PrintTestRunSummary" RunEachTargetSeparately="True" />
+  </Target>
+  
+  <Target Name="PrintTestRunSummary">
+    <PrintTestRunSummary TestResultsDirectory="$(TestResultsDirectory)" />
+  </Target>
+</Project>

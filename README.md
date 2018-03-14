@@ -1,26 +1,53 @@
 ## OData Web API
+ Build  | Status
+--------|---------
+Rolling | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/108/badge"/>
+Nightly | <img src="https://identitydivision.visualstudio.com/_apis/public/build/definitions/2cfe7ec3-b94f-4ab9-85ab-2ebff928f3fd/109/badge"/>
 
 ### Introduction
 [OData Web API](http://odata.github.io/WebApi) (i.e., ASP.NET Web API OData) is a server library built upon [ODataLib](https://github.com/OData/odata.net/) and [Web API](http://www.asp.net/web-api).
 
 ### Project structure
-The project has a few branches, such as master, vNext, gh-pages.
+The project currently has the following branches:
 
-#### master
-The master branch has the following libraries, and the packages are available from NuGet or MyGet:
- - [OData v4 Web API](https://www.nuget.org/packages/Microsoft.AspNet.OData/) (namespace `System.Web.OData`) 
- - [OData v3 Web API](https://www.nuget.org/packages/Microsoft.AspNet.WebApi.OData/) (namespace `System.Web.Http.OData`)
- - [vNext](http://odata.github.io/WebApi/#07-07-6-0-0-alpha1) (namespace [`Microsoft.AspNet.OData`](https://github.com/OData/WebApi/tree/master/vNext))
+**[master](https://github.com/OData/Webapi/tree/master) branch**
 
-#### vNext 
-The [vNext](https://github.com/OData/WebApi/tree/vNext/vNext) branch contains the latest code of OData vNext Web API.
+This is the active development branch for OData WebApi and it is currently most actively iterated. The package name is Microsoft.AspNet.OData. The is the OData WebApi for ODL v7.x releases which contain breaking changes against ODL v6.
 
-#### gh-pages
-The [gh-pages](https://github.com/OData/WebApi/tree/gh-pages) branch contains the documenation source - in Markdown format - of the OData Web API.
+**[release](https://github.com/OData/Webapi/tree/release) branch**
+
+This is the release branch for OData WebApi, contains code base up to most recently stable WebApi release.
+
+**[gh-pages](https://github.com/OData/WebApi/tree/gh-pages) branch**
+
+The gh-pages branch contains documentation source for OData WebApi - tutorials, guides, etc.  The documention source is in Markdown format. It is hosted at [ODataLib Pages](http://odata.github.io/WebApi/ "ODataLib Pages").
+
+**[maintenance-6.x](https://github.com/OData/Webapi/tree/maintenance-6.x) branch**
+
+This is the maintenance branch for OData WebApi 6.x based on ODL 7.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData.
+
+**[maintenance-aspnetcore](https://github.com/OData/Webapi/tree/maintenance-aspnetcore)**
+
+This is the maintenance branch for OData WebApi with ASP.NET Core support. The package name is Microsoft.AspNetCore.OData.
+
+**[maintenance-V4](https://github.com/OData/Webapi/tree/maintenance-V4) branch**
+
+This is the maintenance branch for OData WebApi 5.8 and up based on ODL 6.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData.
+
+**[maintenance-V3](https://github.com/OData/Webapi/tree/maintenance-V3) branch** 
+
+This is the maintenance branch for OData WebApi 5.7 and below based on ODL 5.x, which implements the ODataV3 protocol. The package name is Microsoft.AspNet.WebApi.OData.
+
+**[maintenance-dnx](https://github.com/OData/Webapi/tree/maintenance-dnx) branch**
+
+This is maintenance branch for an early prototype version of OData WebApi based on original ASP.NET Core, aka DNX. Package name is Microsoft.AspNet.OData. This is for project archive purpose only, is not active and doesn't accept contributions. It has only one release with information available [here](http://odata.github.io/WebApi/#07-07-6-0-0-alpha1).
+
+**[odata-v5.3-rtm](https://github.com/OData/WebApi/tree/odata-v5.3-rtm) [v2.0-rtm](https://github.com/OData/WebApi/tree/v2.0-rtm) [v3-rtm](https://github.com/OData/WebApi/tree/odata-v3-rtm) [v3.1-rtm](https://github.com/OData/WebApi/tree/v3.1-rtm) [v3.2-rtm](https://github.com/OData/WebApi/tree/v3.2-rtm) branches**
+
+These are maintenance branches for previous RTMs. Project archives only, contributions not accepted.
 
 ### Building
 ```
-cd OData
 build.cmd
 ```
 
@@ -33,12 +60,11 @@ build.cmd EnableSkipStrongNames
 ```
 
 #### Run tests in cmd
-* `build.cmd` build project, and run unit tests.
-
 To run end-to-end tests, you need to open an **elevated** - Run as administrator - command prompt
-* `build.cmd e2eV4` build projects, run unit tests, and OData **v4** end-to-end tests.
-* `build.cmd e2eV3` build projects, run unit tests, and OData **v3** end-to-end tests.
-* `build.cmd full` build projects, run unit tests, OData **v4 and v3** end-to-end tests.
+
+* `build.cmd` build projects, run unit tests, and OData end-to-end tests.
+
+* `build.cmd quick` build project, and run unit tests
 
 To disable the SkipStrongNames:
 ```
@@ -49,15 +75,14 @@ build.cmd DisableSkipStrongNames
 Open the project, build it, and then test cases should appear in test explorer. If not, this is because the assemblies are delay signed and you're missing the private key so xunit will not load them in Visual Studio. To fix, please run `build.cmd EnableSkipStrongNames`. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
-1.	In your NuGet Package Manager settings add the following package source:
-  * https://www.myget.org/F/aspnetwebstacknightly/
-2.	Package IDs
-  * Choose: Include Prerelease
-  * OData v4: [Microsoft.AspNet.OData](https://www.myget.org/F/aspnetwebstacknightly/Packages?$filter=Id%20eq%20%27Microsoft.AspNet.OData%27&$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
-  * OData v3: [Microsoft.AspNet.WebApi.OData](https://www.myget.org/F/aspnetwebstacknightly/Packages?$filter=Id%20eq%20%27Microsoft.AspNet.WebApi.OData%27&$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
+The nightly build process will upload a NuGet packages for WebApi to the [MyGet.org webapinightly feed](https://www.myget.org/gallery/webapinightly).
+
+To connect to webapinightly feed, use this feed URL: [webapinightly MyGet feed URL](https://www.myget.org/F/webapinightly).
+
+You can query the latest nightly NuGet packages using this query: [MAGIC WebApi query](https://www.myget.org/F/webapinightly/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
 
 ### Contribution
-Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/CONTRIBUTION.md).
+Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/.github/CONTRIBUTION.md).
 
 ### Documentation
 Please visit the [OData Web API pages](http://odata.github.io/WebApi).

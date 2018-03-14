@@ -1,0 +1,127 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Set the version number: major, minor, build and release (i.e. alpha, beta or blank for RTM)-->
+  <PropertyGroup>
+    <VersionMajor Condition="'$(VersionMajor)' == ''">6</VersionMajor>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">2</VersionMinor>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
+    <VersionRelease Condition="'$(VersionRelease)' == ''">beta</VersionRelease>
+  </PropertyGroup>
+
+  <!-- For NuGet Package Dependencies -->
+  <PropertyGroup>
+    <WebApiClientPackageDependency>[5.2.2, 5.3.0)</WebApiClientPackageDependency>
+    <WebApiCorePackageDependency>[5.2.2, 5.3.0)</WebApiCorePackageDependency>
+    <DependencyInjectionPackageDependency>[1.0.0, 2.0.0)</DependencyInjectionPackageDependency>
+    <ODataLibPackageDependency>[7.2.0, 8.0.0)</ODataLibPackageDependency>
+  </PropertyGroup>
+
+  <!--
+    Revision number is a date code. Note that this only work for 6 years before the year part (year minus 2017)
+    overflows the Int16. The system convert below will throw errors when this happens.
+  -->
+  <PropertyGroup>
+    <VersionStartYear Condition="'$(VersionStartYear)' == ''">2017</VersionStartYear>
+    <VersionDateCode>$([System.Convert]::ToInt16('$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))'))</VersionDateCode>
+    <VersionRevision Condition="'$(VersionRevision)' == '' OR '$(VersionRevision)' == '0'">$([System.Convert]::ToString($(VersionDateCode)))</VersionRevision>
+  </PropertyGroup>
+
+    <!-- Product Version -->
+  <PropertyGroup>
+    <VersionFullSemantic>$(VersionMajor).$(VersionMinor).$(VersionBuild)</VersionFullSemantic>
+    <VersionFull>$(VersionFullSemantic).$(VersionRevision)</VersionFull>
+  </PropertyGroup>
+
+  <!-- For NuGet Packages -->
+  <PropertyGroup>
+    <VersionNuGetSemantic>$(VersionFullSemantic)</VersionNuGetSemantic>
+    <VersionNuGetSemantic Condition="'$(VersionRelease)'!=''">$(VersionFullSemantic)-$(VersionRelease)</VersionNuGetSemantic>
+  </PropertyGroup>
+
+  <!--
+ ==================================================================================================
+ Property Groups to define version information. Do not modify this section.
+ ================================================================================================== -->
+  <PropertyGroup>
+    <VersionFileGenerationEnabled Condition="'$(VersionFileGenerationEnabled)' == '' AND '$(MSBuildProjectExtension)' == '.csproj'">true</VersionFileGenerationEnabled>
+    <VersionFileGenerationEnabled Condition="'$(VersionFileGenerationEnabled)' == ''">false</VersionFileGenerationEnabled>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <VersionStartYear Condition="'$(VersionStartYear)' == ''">2017</VersionStartYear>
+    <VersionMajor Condition="'$(VersionMajor)' == '0'">INVALID_VersionMajor</VersionMajor>
+    <VersionMajor Condition="'$(VersionMajor)' == ''">INVALID_VersionMajor</VersionMajor>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">INVALID_VersionMinor</VersionMinor>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">INVALID_VersionBuild</VersionBuild>
+    <VersionRevision Condition="'$(VersionRevision)' == '' OR '$(VersionRevision)' == '0'">$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))</VersionRevision>
+    <VersionRevision Condition="'$(VersionRevision)' == ''">0</VersionRevision>
+    <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild).$(VersionRevision)</AssemblyVersion>
+    <AssemblyFileVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild).$(VersionRevision)</AssemblyFileVersion>
+    <AssemblyInfoVersion>$(AssemblyFileVersion)</AssemblyInfoVersion>
+    <AssemblyVersionFile>$(IntermediateOutputPath)$(MSBuildProjectName).version.cs</AssemblyVersionFile>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(VersionFileGenerationEnabled)' == 'true'">
+    <Compile Include="$(AssemblyVersionFile)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Clean Include="$(AssemblyVersionFile)" Condition="'$(MSBuildProjectExtension)' == '.csproj'"/>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <AssemblyCompany>Microsoft Corporation.</AssemblyCompany>
+    <AssemblyCopyright>© Microsoft Corporation. All rights reserved.</AssemblyCopyright>
+  </PropertyGroup>
+
+  <!-- GenerateVersionFile target: generates assembly attributes into a source file that is included -->
+  <Target Name="GenerateVersionFileCore" Condition="'$(ShouldGenerateVersionFile)' == 'true'">
+    <ItemGroup>
+      <LinesToWrite Include="// $(SourceFileCopyright)" Condition="'$(SourceFileCopyright)' != ''"/>
+      <LinesToWrite Include="// &lt;auto-generated&gt;" />
+      <LinesToWrite Include="//   This code was generated by a tool." />
+      <LinesToWrite Include="// &lt;/auto-generated&gt;" />
+      <LinesToWrite Include="[assembly: System.Reflection.AssemblyCompany(&quot;$(AssemblyCompany)&quot;)]" Condition="'$(AssemblyCompany)' != ''"/>
+      <LinesToWrite Include="[assembly: System.Reflection.AssemblyCopyright(&quot;$(AssemblyCopyright)&quot;)]" Condition="'$(AssemblyCopyright)' != ''"/>
+      <LinesToWrite Include="[assembly: System.Reflection.AssemblyVersion(&quot;$(AssemblyVersion)&quot;)]" Condition="'$(AssemblyVersion)' != ''"/>
+      <LinesToWrite Include="[assembly: System.Reflection.AssemblyFileVersion(&quot;$(AssemblyFileVersion)&quot;)]" Condition="'$(AssemblyFileVersion)' != ''"/>
+      <LinesToWrite Include="[assembly: System.Reflection.AssemblyInformationalVersion(&quot;$(AssemblyInfoVersion)&quot;)]" Condition="'$(AssemblyInfoVersion)' != ''" />
+      <LinesToWrite Include="[assembly: System.Resources.SatelliteContractVersionAttribute(&quot;$(SatelliteContractVersion)&quot;)]" Condition="'$(SatelliteContractVersion)' != ''"/>
+      <LinesToWrite Include="@(VersionFileAttribute)" Condition="'@(VersionFileAttribute)' != ''" />
+    </ItemGroup>
+    <WriteLinesToFile File="$(AssemblyVersionFile)" Lines="@(LinesToWrite)" Overwrite="true"  Encoding="Unicode"/>
+    <Message Text="Assembly Version File: $(AssemblyVersionFile)" />
+  </Target>
+
+  <!-- ShouldGenerateVersionFile target: determines whether a version needs to be generated. -->
+  <Target Name="ShouldGenerateVersionFile">
+    <ReadLinesFromFile File="$(AssemblyVersionFile)" Condition="Exists('$(AssemblyVersionFile)')">
+      <Output ItemName="VersionText" TaskParameter="Lines"/>
+    </ReadLinesFromFile>
+    <PropertyGroup>
+      <VersionText>@(VersionText)</VersionText>
+      <ShouldGenerateVersionFile>!$(VersionText.Contains('$(AssemblyFileVersion)'))</ShouldGenerateVersionFile>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="ValidateVersionValues">
+    <!-- Throw if any of the version values is not int16 -->
+    <PropertyGroup>
+      <VersionMajor>$([System.Convert]::ToInt16('$(VersionMajor)'))</VersionMajor>
+      <VersionMinor>$([System.Convert]::ToInt16('$(VersionMinor)'))</VersionMinor>
+      <VersionBuild>$([System.Convert]::ToUInt16('$(VersionBuild)'))</VersionBuild>
+      <VersionRevision>$([System.Convert]::ToInt16('$(VersionRevision)'))</VersionRevision>
+    </PropertyGroup>
+  </Target>
+
+  <PropertyGroup Condition="'$(VersionFileGenerationEnabled)' == 'true'">
+    <BeforeCompileDependsOn>ValidateVersionValues;ShouldGenerateVersionFile;GenerateVersionFileCore</BeforeCompileDependsOn>
+  </PropertyGroup>
+
+  <Target Name="BeforeCompile" DependsOnTargets="$(BeforeCompileDependsOn)" />
+</Project>

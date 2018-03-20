@@ -4,6 +4,7 @@
 #if NETCORE
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Mvc;
 #else
 using System.Net.Http;
@@ -12,8 +13,8 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Results;
 #endif
-
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -49,6 +50,19 @@ namespace Microsoft.Test.AspNet.OData
 #else
         public new TestOkObjectResult<T> Ok<T>(T value) { return new TestOkObjectResult<T>(base.Ok<T>(value)); }
 #endif
+
+        [NonAction]
+#if NETCORE
+        public new TestCreatedObjectResult<TEntity> Created<TEntity>(TEntity value)
+        {
+            return new TestCreatedObjectResult<TEntity>(new CreatedODataResult<TEntity>(value));
+        }
+#else
+        public new TestCreatedObjectResult<TEntity> Created<TEntity>(TEntity value)
+        {
+            return new TestCreatedObjectResult<TEntity>(base.Created<TEntity>(value));
+        }
+#endif
     }
 
     /// <summary>
@@ -68,6 +82,17 @@ namespace Microsoft.Test.AspNet.OData
     public class TestOkResult : TestActionResult
     {
         public TestOkResult(OkResult innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for CreatedResult
+    /// </summary>
+    public class TestCreatedObjectResult<T> : TestActionResult
+    {
+        public TestCreatedObjectResult(CreatedODataResult<T> innerResult)
             : base(innerResult)
         {
         }

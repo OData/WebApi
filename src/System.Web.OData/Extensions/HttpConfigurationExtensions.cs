@@ -18,7 +18,6 @@ using System.Web.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace System.Web.OData.Extensions
@@ -524,7 +523,7 @@ namespace System.Web.OData.Extensions
 
             // 2) Resolve the path handler and set URI resolver to it.
             IODataPathHandler pathHandler = rootContainer.GetRequiredService<IODataPathHandler>();
-            
+
             // if settings is not on local, use the global configuration settings.
             if (pathHandler != null && pathHandler.UrlKeyDelimiter == null)
             {
@@ -532,39 +531,43 @@ namespace System.Web.OData.Extensions
                 pathHandler.UrlKeyDelimiter = urlKeyDelimiter;
             }
 
-            // 3) Resolve some required services and create the route constraint.
-            ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(routeName);
-
             // Attribute routing must initialized before configuration.EnsureInitialized is called.
             rootContainer.GetServices<IODataRoutingConvention>();
 
-            // 4) Resolve HTTP handler, create the OData route and register it.
-            ODataRoute route;
+            // 3) Resolve HTTP handler, create the OData route and register it.
             HttpRouteCollection routes = configuration.Routes;
-            routePrefix = RemoveTrailingSlash(routePrefix);
-            HttpMessageHandler messageHandler = rootContainer.GetService<HttpMessageHandler>();
-            if (messageHandler != null)
-            {
-                route = new ODataRoute(
-                    routePrefix,
-                    routeConstraint,
-                    defaults: null,
-                    constraints: null,
-                    dataTokens: null,
-                    handler: messageHandler);
-            }
-            else
-            {
-                ODataBatchHandler batchHandler = rootContainer.GetService<ODataBatchHandler>();
-                if (batchHandler != null)
-                {
-                    batchHandler.ODataRouteName = routeName;
-                    string batchTemplate = String.IsNullOrEmpty(routePrefix) ? ODataRouteConstants.Batch
-                        : routePrefix + '/' + ODataRouteConstants.Batch;
-                    routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
-                }
 
-                route = new ODataRoute(routePrefix, routeConstraint);
+            ODataRoute route = rootContainer.GetService<ODataRoute>();
+
+            if (route == null)
+            {
+                ODataPathRouteConstraint routeConstraint = new ODataPathRouteConstraint(routeName);
+                routePrefix = RemoveTrailingSlash(routePrefix);
+                HttpMessageHandler messageHandler = rootContainer.GetService<HttpMessageHandler>();
+                if (messageHandler != null)
+                {
+                    route = new ODataRoute(
+                        routePrefix,
+                        routeConstraint,
+                        defaults: null,
+                        constraints: null,
+                        dataTokens: null,
+                        handler: messageHandler);
+                }
+                else
+                {
+                    ODataBatchHandler batchHandler = rootContainer.GetService<ODataBatchHandler>();
+                    if (batchHandler != null)
+                    {
+                        batchHandler.ODataRouteName = routeName;
+                        string batchTemplate = String.IsNullOrEmpty(routePrefix)
+                            ? ODataRouteConstants.Batch
+                            : routePrefix + '/' + ODataRouteConstants.Batch;
+                        routes.MapHttpBatchRoute(routeName + "Batch", batchTemplate, batchHandler);
+                    }
+
+                    route = new ODataRoute(routePrefix, routeConstraint);
+                }
             }
 
             routes.Add(routeName, route);

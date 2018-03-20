@@ -1,7 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Factories;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,6 +35,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -190,6 +208,20 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Equal(Expect, await response.Content.ReadAsStringAsync());
         }
 
+#if NETCORE
+        private static HttpClient GetClient()
+        {
+            var controllers = new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+            return client;
+        }
+#else
         private static HttpClient GetClient()
         {
             HttpConfiguration config = RoutingConfigurationFactory.CreateWithTypes(
@@ -198,6 +230,7 @@ namespace Microsoft.Test.AspNet.OData
             config.MapODataServiceRoute("odata", "odata", GetEdmModel());
             return new HttpClient(new HttpServer(config));
         }
+#endif
 
         private static IEdmModel GetEdmModel()
         {
@@ -207,18 +240,18 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class DateAndTimeOfDayModelsController : ODataController
+    public class DateAndTimeOfDayModelsController : TestODataController
     {
         private DateAndTimeOfDayModelContext db = new DateAndTimeOfDayModelContext();
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(db.DateTimes);
         }
 
         [EnableQuery]
-        public IHttpActionResult Get(int key)
+        public ITestActionResult Get(int key)
         {
             DateAndTimeOfDayModel dtm = db.DateTimes.FirstOrDefault(e => e.Id == key);
             if (dtm == null)
@@ -229,7 +262,7 @@ namespace Microsoft.Test.AspNet.OData
             return Ok(dtm);
         }
 
-        public IHttpActionResult Post([FromBody]DateAndTimeOfDayModel dt)
+        public ITestActionResult Post([FromBody]DateAndTimeOfDayModel dt)
         {
             Assert.NotNull(dt);
 
@@ -240,7 +273,7 @@ namespace Microsoft.Test.AspNet.OData
             return Created(dt);
         }
 
-        public IHttpActionResult GetBirthday(int key)
+        public ITestActionResult GetBirthday(int key)
         {
             DateAndTimeOfDayModel dtm = db.DateTimes.FirstOrDefault(e => e.Id == key);
             if (dtm == null)
@@ -295,4 +328,3 @@ namespace Microsoft.Test.AspNet.OData
         public TimeSpan ResumeTime { get; set; }
     }
 }
-#endif

@@ -208,7 +208,6 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Equal(Expect, await response.Content.ReadAsStringAsync());
         }
 
-#if NETCORE
         private static HttpClient GetClient()
         {
             var controllers = new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) };
@@ -221,16 +220,6 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = TestServerFactory.CreateClient(server);
             return client;
         }
-#else
-        private static HttpClient GetClient()
-        {
-            HttpConfiguration config = RoutingConfigurationFactory.CreateWithTypes(
-                new[] { typeof(MetadataController), typeof(DateAndTimeOfDayModelsController) });
-            config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
-            config.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            return new HttpClient(new HttpServer(config));
-        }
-#endif
 
         private static IEdmModel GetEdmModel()
         {

@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaObjectInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+        public virtual void WriteDeltaObjectInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
            ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -109,7 +109,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDeltaResource(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        private void WriteDeltaResource(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             Contract.Assert(writeContext != null);
 
@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteDeltaComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
-            ResourceContext resourceContext, ODataDeltaWriter writer)
+            ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(complexProperties != null);
             Contract.Assert(resourceContext != null);
@@ -171,7 +171,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
-            ResourceContext resourceContext, ODataDeltaWriter writer)
+            ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(edmProperty != null);
             Contract.Assert(resourceContext != null);
@@ -195,7 +195,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 else
                 {
                     // If at most one resource can be related, the value is null if no resource is currently related.
-                    writer.WriteStart(deltaResource: null);
+                    writer.WriteStart(resource: null);
                 }
 
                 writer.WriteEnd();

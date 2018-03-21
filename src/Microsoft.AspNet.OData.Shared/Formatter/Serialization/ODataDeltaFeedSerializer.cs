@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference entityType = GetResourceType(feedType).AsEntity();
-            ODataDeltaWriter writer = messageWriter.CreateODataDeltaWriter(entitySet, entityType.EntityDefinition());
+            ODataWriter writer = messageWriter.CreateODataDeltaResourceSetWriter(entitySet, entityType.EntityDefinition());
 
             WriteDeltaFeedInline(graph, feedType, writer, writeContext);
         }
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaFeedInline(object graph, IEdmTypeReference expectedType, ODataDeltaWriter writer,
+        public virtual void WriteDeltaFeedInline(object graph, IEdmTypeReference expectedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -101,7 +101,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             WriteFeed(enumerable, expectedType, writer, writeContext);
         }
 
-        private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataDeltaWriter writer,
+        private void WriteFeed(IEnumerable enumerable, IEdmTypeReference feedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             Contract.Assert(writer != null);
@@ -256,7 +256,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaDeletedEntry(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        public virtual void WriteDeltaDeletedEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             EdmDeltaDeletedEntityObject edmDeltaDeletedEntity = graph as EdmDeltaDeletedEntityObject;
             if (edmDeltaDeletedEntity == null)
@@ -264,19 +264,22 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            ODataDeltaDeletedEntry deltaDeletedEntry = new ODataDeltaDeletedEntry(
-               edmDeltaDeletedEntity.Id, edmDeltaDeletedEntity.Reason);
+            Uri id = StringToUri(edmDeltaDeletedEntity.Id);
+            ODataDeletedResource deletedResource = new ODataDeletedResource(id, edmDeltaDeletedEntity.Reason);
 
             if (edmDeltaDeletedEntity.NavigationSource != null)
             {
-                ODataDeltaSerializationInfo serializationInfo = new ODataDeltaSerializationInfo();
-                serializationInfo.NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name;
-                deltaDeletedEntry.SetSerializationInfo(serializationInfo);
+                ODataResourceSerializationInfo serializationInfo = new ODataResourceSerializationInfo
+                {
+                    NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name
+                };
+                deletedResource.SetSerializationInfo(serializationInfo);
             }
 
-            if (deltaDeletedEntry != null)
+            if (deletedResource != null)
             {
-                writer.WriteDeltaDeletedEntry(deltaDeletedEntry);
+                writer.WriteStart(deletedResource);
+                writer.WriteEnd();
             }
         }
 
@@ -287,7 +290,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaDeletedLink(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        public virtual void WriteDeltaDeletedLink(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             EdmDeltaDeletedLink edmDeltaDeletedLink = graph as EdmDeltaDeletedLink;
             if (edmDeltaDeletedLink == null)
@@ -313,7 +316,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaLink(object graph, ODataDeltaWriter writer, ODataSerializerContext writeContext)
+        public virtual void WriteDeltaLink(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             EdmDeltaLink edmDeltaLink = graph as EdmDeltaLink;
             if (edmDeltaLink == null)
@@ -362,6 +365,27 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Safely returns the specified string as a relative or absolute Uri.
+        /// </summary>
+        /// <param name="uriString">The string to convert to a Uri.</param>
+        /// <returns>The string as a Uri.</returns>
+        internal static Uri StringToUri(string uriString)
+        {
+            Uri uri = null;
+            try
+            {
+                uri = new Uri(uriString, UriKind.RelativeOrAbsolute);
+            }
+            catch (FormatException)
+            {
+                // The Uri constructor throws a format exception if it can't figure out the type of Uri
+                uri = new Uri(uriString, UriKind.Relative);
+            }
+
+            return uri;
         }
     }
 }

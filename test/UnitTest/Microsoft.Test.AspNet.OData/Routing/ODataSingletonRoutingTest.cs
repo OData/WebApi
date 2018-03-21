@@ -74,9 +74,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+#if !NETCORE
             Assert.Contains("No HTTP resource was found that matches the request URI 'http://localhost/VipCustomer'.",
                 await response.Content.ReadAsStringAsync());
-
+#endif
             // AspNetCore: Fails since SelectCandidates does not return error.
         }
 

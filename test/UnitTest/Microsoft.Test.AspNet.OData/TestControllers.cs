@@ -63,6 +63,19 @@ namespace Microsoft.Test.AspNet.OData
             return new TestCreatedObjectResult<TEntity>(base.Created<TEntity>(value));
         }
 #endif
+
+        [NonAction]
+#if NETCORE
+        public new TestUpdatedObjectResult<TEntity> Updated<TEntity>(TEntity value)
+        {
+            return new TestUpdatedObjectResult<TEntity>(new UpdatedODataResult<TEntity>(value));
+        }
+#else
+        public new TestUpdatedObjectResult<TEntity> Updated<TEntity>(TEntity value)
+        {
+            return new TestUpdatedObjectResult<TEntity>(base.Updated<TEntity>(value));
+        }
+#endif
     }
 
     /// <summary>
@@ -93,6 +106,17 @@ namespace Microsoft.Test.AspNet.OData
     public class TestCreatedObjectResult<T> : TestActionResult
     {
         public TestCreatedObjectResult(CreatedODataResult<T> innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for UpdatedResult
+    /// </summary>
+    public class TestUpdatedObjectResult<T> : TestActionResult
+    {
+        public TestUpdatedObjectResult(UpdatedODataResult<T> innerResult)
             : base(innerResult)
         {
         }

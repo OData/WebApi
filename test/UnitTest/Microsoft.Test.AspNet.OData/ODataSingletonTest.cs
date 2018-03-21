@@ -1,7 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -9,8 +9,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
@@ -18,21 +16,39 @@ using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#else
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class ODataSingletonTest
     {
         private const string BaseAddress = @"http://localhost";
-        private HttpConfiguration _configuration;
         private HttpClient _client;
 
         public ODataSingletonTest()
         {
-            _configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OscorpController), typeof(OscorpSubsController) });
-            _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
+            var controllers = new[] { typeof(OscorpController), typeof(OscorpSubsController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+
+            _client = TestServerFactory.CreateClient(server);
         }
 
         private static IEdmModel GetEdmModel()
@@ -128,22 +144,22 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         // Controllers
-        public class OscorpController : ODataController
+        public class OscorpController : TestODataController
         {
-            public IHttpActionResult Get()
+            public ITestActionResult Get()
             {
                 return Ok(ModelBase.Oscorp);
             }
 
-            public IHttpActionResult GetSubSidiaries()
+            public ITestActionResult GetSubSidiaries()
             {
                 return Ok(ModelBase.Oscorp.SubSidiaries);
             }
         }
 
-        public class OscorpSubsController : ODataController
+        public class OscorpSubsController : TestODataController
         {
-            public IHttpActionResult GetHeadQuarter(int key)
+            public ITestActionResult GetHeadQuarter(int key)
             {
                 Subsidiary sub = ModelBase.Oscorp.SubSidiaries.SingleOrDefault(s => s.SubId == key);
                 if (sub.HeadQuarter == null)
@@ -154,7 +170,7 @@ namespace Microsoft.Test.AspNet.OData
                 return Ok(sub.HeadQuarter);
             }
 
-            public IHttpActionResult DeleteRef(int key, string navigationProperty)
+            public ITestActionResult DeleteRef(int key, string navigationProperty)
             {
                 if (navigationProperty != "HeadQuarter")
                 { 
@@ -224,4 +240,3 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
-#endif

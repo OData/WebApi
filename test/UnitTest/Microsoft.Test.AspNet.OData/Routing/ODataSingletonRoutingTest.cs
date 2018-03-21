@@ -74,7 +74,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Act & Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-#if !NETCORE
+#if NETFX
             Assert.Contains("No HTTP resource was found that matches the request URI 'http://localhost/VipCustomer'.",
                 await response.Content.ReadAsStringAsync());
 #endif

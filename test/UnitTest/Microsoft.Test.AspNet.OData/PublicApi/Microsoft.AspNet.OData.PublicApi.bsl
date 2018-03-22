@@ -3108,10 +3108,10 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataDeltaFeedSerial
 	public ODataDeltaFeedSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual Microsoft.OData.ODataDeltaResourceSet CreateODataDeltaFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
@@ -3172,7 +3172,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public virtual Microsoft.OData.ODataResource CreateResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
-	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }

@@ -49,9 +49,9 @@ namespace Microsoft.Test.AspNet.OData.Builder
         [InlineData("Clubs/ns.SeniorClub(1)/Members(1)/ns.VIP/MyBenefits", "Clubs(1)/Members(1)/ns.VIP")]
         [InlineData("Clubs/ns.SeniorClub(1)/Members/ns.VIP(1)/MyBenefits", "Clubs(1)/Members(1)/ns.VIP")]
         // With redundant EntitySet path
-        [InlineData("Clubs(1)/ns.SeniorClub/Members(1)/ns.VIP/MyAccounts(101)/MyPaymentInstruments", "Clubs(1)/Members(1)/MyAccounts(101)")]
-        [InlineData("Clubs/ns.SeniorClub(1)/Members(1)/ns.VIP/MyAccounts(101)/MyPaymentInstruments", "Clubs(1)/Members(1)/MyAccounts(101)")]
-        [InlineData("Clubs/ns.SeniorClub(1)/Members/ns.VIP(1)/MyAccounts(101)/MyPaymentInstruments", "Clubs(1)/Members(1)/MyAccounts(101)")]
+        [InlineData("Clubs(1)/ns.SeniorClub/Members(1)/ns.VIP/MyAccounts(101)/MyPaymentInstruments", "Accounts(101)")]
+        [InlineData("Clubs/ns.SeniorClub(1)/Members(1)/ns.VIP/MyAccounts(101)/MyPaymentInstruments", "Accounts(101)")]
+        [InlineData("Clubs/ns.SeniorClub(1)/Members/ns.VIP(1)/MyAccounts(101)/MyPaymentInstruments", "Accounts(101)")]
         // With single valued navigation property (point to entity set)
         [InlineData("People(1)/MyLatestAccount/MyPaymentInstruments", "People(1)/MyLatestAccount")]
         // With single valued navigation property (point to singleton)

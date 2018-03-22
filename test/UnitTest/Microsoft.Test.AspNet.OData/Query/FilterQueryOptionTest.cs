@@ -290,6 +290,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                     { "cast($it,Edm.String) ne null", new int[] { } },
                     { "cast(ComplexProp,Edm.Double) ne null", new int[] { } },
                     { "cast(ComplexProp,Edm.String) ne null", new int[] { } },
+                    { "cast('123',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne 'First'", new int[] { 1, 2, 3 } }
                 };
             }
         }
@@ -769,7 +770,6 @@ namespace Microsoft.Test.AspNet.OData.Query
         [InlineData("cast(NoSuchProperty,Edm.String) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.NoSuchType) eq null", typeof(ODataException))]
         [InlineData("cast(ProductId,Edm.String) eq 123", typeof(ODataException))]
-        [InlineData("cast('123',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne 'First'", typeof(ODataException))]
         [InlineData("cast(Edm.Int32) eq '123'", typeof(ODataException))]
         public void ApplyWithCast_Throws_WithInvalidFilter(string filter, Type exceptionType)
         {

@@ -257,7 +257,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(
                 () => new ODataResourceDeserializer(deserializerProvider).Read(reader, typeof(Car), context),
-                "An resource with type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' was found, " +
+                "A resource with type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' was found, " +
                 "but it is not assignable to the expected type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Car'. " +
                 "The type specified in the resource must be equal to either the expected type or a derived type.");
         }

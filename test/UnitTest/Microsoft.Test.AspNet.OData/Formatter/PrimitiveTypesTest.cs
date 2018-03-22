@@ -183,7 +183,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 using (ObjectContent content = new ObjectContent(type, value, formatter))
                 {
                     await ExceptionAssert.ThrowsAsync<ODataException>(() => content.ReadAsStringAsync(),
-                        "A null top-level property is not allowed to be serialized.");
+                        "Cannot write the value 'null' in top level property; return 204 instead.");
                 }
             }
         }

@@ -2341,9 +2341,10 @@ namespace System.Web.OData.Routing
 
         [Theory]
         [PropertyData("PrefixFreeEnumCases")]
-        public void PrefixFreeEnumValue_Works_DefaultResolver(string path, string template, string expect)
+        public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
         {
-            Assert.NotNull(new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+            Assert.Throws<ODataException>(
+                () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
         }
 
         [Theory]

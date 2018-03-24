@@ -230,7 +230,7 @@ namespace System.Web.OData
         [InlineData("gender='Male'", false, HttpStatusCode.OK)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", false, HttpStatusCode.OK)]
-        [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.BadRequest)]
+        [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.NotFound)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
         public void ExtensionResolver_Works_EnumPrefixFree(string parameter, bool enableEnumPrefix, HttpStatusCode statusCode)
         {

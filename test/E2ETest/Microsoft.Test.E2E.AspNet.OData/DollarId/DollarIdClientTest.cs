@@ -41,11 +41,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             await clientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
             await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
 
-            var singer = clientContext.Singers.Where(s => s.ID == 0).Single();
+            var singer = await Task.Factory.FromAsync(clientContext.Singers.BeginExecute(null, null), (asyncResult) =>
+            {
+                return clientContext.Singers.EndExecute(asyncResult).Where(s => s.ID == 0).Single();
+            });
+
             await clientContext.LoadPropertyAsync(singer, "Albums");
             Assert.Equal(3, singer.Albums.Count);
 
-            var album = clientContext.Albums.Where(s => s.ID == 0).Single();
+            var album = await Task.Factory.FromAsync(clientContext.Albums.BeginExecute(null, null), (asyncResult) =>
+            {
+                return clientContext.Albums.EndExecute(asyncResult).Where(s => s.ID == 0).Single();
+            });
+
             clientContext.DeleteLink(singer, "Albums", album);
             await clientContext.SaveChangesAsync();
 
@@ -64,7 +72,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
 
             const int albumKey = 5;
-            var album = clientContext.Albums.Where(a => a.ID == albumKey).Single();
+            var album = await Task.Factory.FromAsync(clientContext.Albums.BeginExecute(null, null), (asyncResult) =>
+            {
+                return clientContext.Albums.EndExecute(asyncResult).Where(a => a.ID == albumKey).Single();
+            });
+
             await clientContext.LoadPropertyAsync(album, "Sales");
             Assert.Equal(2, album.Sales.Count);
 

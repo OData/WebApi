@@ -48,7 +48,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
                                   "POST");
 
             // Query
-            var umbrella = ClientContext.Umbrella.Single();
+            var umbrella = await Task.Factory.FromAsync(ClientContext.Umbrella.BeginExecute(null, null), (asyncResult) =>
+            {
+                return ClientContext.Umbrella.EndExecute(asyncResult).Single();
+            });
+
             Assert.Equal("Umbrella", umbrella.Name);
 
             // Update and verify
@@ -148,7 +152,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             await ClientContext.ExecuteAsync(new Uri(serviceRoot + "Partners/Microsoft.Test.E2E.AspNet.OData.Singleton.ResetDataSource"),
                                   "POST");
 
-            var umbrella = ClientContext.Umbrella.Single();
+            var umbrella = await Task.Factory.FromAsync(ClientContext.Umbrella.BeginExecute(null, null), (asyncResult) =>
+            {
+                return ClientContext.Umbrella.EndExecute(asyncResult).Single();
+            });
+
             Client.Partner newPartner = new Client.Partner() { ID = 110, Name = "NewPartner" };
 
             umbrella.Name = "UpdatedCompanyName";

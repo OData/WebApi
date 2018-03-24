@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.OData
                             (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
                             (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
                             (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
-                            (statusCode, message, exception) => actionExecutedContext.Result = new BadRequestObjectResult(message));
+                            (statusCode, message, exception) => actionExecutedContext.Result = CreateBadRequestResult(message, exception));
 
                         if (queryResult != null)
                         {
@@ -139,6 +139,49 @@ namespace Microsoft.AspNet.OData
         private static bool IsSuccessStatusCode(int statusCode)
         {
             return statusCode >= 200 && statusCode < 300;
+        }
+
+        /// <summary>
+        /// Create an error response.
+        /// </summary>
+        /// <param name="message">The message of the error.</param>
+        /// <param name="exception">The error exception if any.</param>
+        /// <returns>A SerializableError.</returns>
+        /// <remarks>This function is recursive.</remarks>
+        public static SerializableError CreateErrorResponse(string message, Exception exception = null)
+        {
+            // The key values mimic the behavior of HttpError in AspNet. It's a fine format
+            // and many of the test cases expect it.
+            SerializableError error = new SerializableError();
+            if (!String.IsNullOrEmpty(message))
+            {
+                error.Add("Message", message);
+            }
+
+            if (exception != null)
+            {
+                error.Add("ExceptionMessage", exception.Message);
+                error.Add("ExceptionType", exception.GetType().FullName);
+                error.Add("StackTrace", exception.StackTrace);
+                if (exception.InnerException != null)
+                {
+                    error.Add("InnerException", CreateErrorResponse(String.Empty, exception.InnerException));
+                }
+            }
+
+            return error;
+        }
+
+        /// <summary>
+        /// Create a BadRequestObjectResult.
+        /// </summary>
+        /// <param name="message">The error message.</param>
+        /// <param name="exception">The exception.</param>
+        /// <returns>A BadRequestObjectResult.</returns>
+        private static BadRequestObjectResult CreateBadRequestResult(string message, Exception exception)
+        {
+            SerializableError error = CreateErrorResponse(message, exception);
+            return new BadRequestObjectResult(error);
         }
 
         /// <summary>

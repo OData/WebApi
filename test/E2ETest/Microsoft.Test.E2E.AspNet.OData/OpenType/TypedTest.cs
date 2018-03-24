@@ -763,8 +763,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var client = new TypedProxy.Container(serviceUrl);
                 client.Format.UseJson();
 
-                var accounts = client.Accounts.Where(a => a.Id <= 2);
-                List<TypedProxy.Account> accountList = accounts.ToList();
+                List<TypedProxy.Account> accountList = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id <= 2).ToList();
+                });
 
                 Assert.Equal(2, accountList.Count);
                 Assert.Equal(1, accountList[0].Id);
@@ -794,8 +796,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var client = new TypedProxy.Container(serviceUrl);
                 client.Format.UseJson();
 
-                var accounts = client.Accounts.Where(a => a.Id <= 2).Select(a => new TypedProxy.Account() { Id = a.Id, Name = a.Name });
-                List<TypedProxy.Account> accountList = accounts.ToList();
+                List<TypedProxy.Account> accountList = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult)
+                        .Where(a => a.Id <= 2).Select(a => new TypedProxy.Account() { Id = a.Id, Name = a.Name })
+                        .ToList();
+                });
 
                 Assert.Equal(2, accountList.Count);
                 Assert.Equal(1, accountList[0].Id);
@@ -816,7 +822,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var client = new TypedProxy.Container(serviceUrl);
                 client.Format.UseJson();
 
-                var account = client.Accounts.Where(a => a.Id == 1).Single();
+                var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
 
                 Assert.Equal(1, account.Id);
                 Assert.Equal("US", account.Address.CountryOrRegion);
@@ -845,7 +854,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var client = new TypedProxy.Container(serviceUrl);
                 client.Format.UseJson();
 
-                var premiumAcconts = client.Accounts.OfType<TypedProxy.PremiumAccount>().ToList();
+                var premiumAcconts = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).OfType<TypedProxy.PremiumAccount>().ToList();
+                });
+
                 var premiumAccount = premiumAcconts.Single(pa => pa.Id == 1);
                 Assert.Equal(1, premiumAccount.Id);
                 Assert.Equal("US", premiumAccount.Address.CountryOrRegion);
@@ -873,7 +886,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var accountInfo = client.Accounts.Where(a => a.Id == 1).Select(a => a.AccountInfo).Single();
+            var accountInfo = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Select(a => a.AccountInfo).Single();
+            });
 
             Assert.Equal("NickName1", accountInfo.NickName);
             Assert.Equal(10, accountInfo.Age);
@@ -888,7 +904,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var address = client.Accounts.Where(a => a.Id == 1).Select(a => a.Address).Single();
+            var address = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Select(a => a.Address).Single();
+            });
 
             Assert.Equal("Redmond", address.City);
             Assert.Equal("US", address.CountryOrRegion);
@@ -903,7 +922,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var tags = client.Accounts.Where(a => a.Id == 1).Select(a => a.Tags).Single();
+            var tags = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Select(a => a.Tags).Single();
+            });
 
             Assert.Equal("Value 1", tags.Tag1);
             Assert.Equal("Value 2", tags.Tag2);
@@ -918,7 +940,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var city = client.Accounts.Where(a => a.Id == 1).Select(a => a.Address.City).Single();
+            var city = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Select(a => a.Address.City).Single();
+            });
 
             Assert.Equal("Redmond", city);
         }
@@ -938,7 +963,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 var client = new TypedProxy.Container(serviceUrl);
                 client.MergeOption = MergeOption.OverwriteChanges;
                 client.Format.UseJson();
-                TypedProxy.Account account = client.Accounts.Where(a => a.Id == 1).Single();
+
+                TypedProxy.Account account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
 
                 account.AccountInfo.NickName = "NewNickName";
                 account.AccountInfo.Age = 11;
@@ -958,7 +987,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 client.UpdateObject(account);
                 await client.SaveChangesAsync();
 
-                var updatedAccount = client.Accounts.Where(a => a.Id == 1).Single();
+                var updatedAccount = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
                 Assert.NotNull(updatedAccount);
 
                 var updatedAccountInfo = updatedAccount.AccountInfo;
@@ -1001,7 +1034,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 client.MergeOption = Microsoft.OData.Client.MergeOption.OverwriteChanges;
                 client.Format.UseJson();
 
-                var account = client.Accounts.Where(a => a.Id == 1).Single();
+                var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
                 Assert.NotNull(account);
 
                 account.AccountInfo.NickName = "NewNickName";
@@ -1023,7 +1060,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 client.UpdateObject(account);
                 await client.SaveChangesAsync(Microsoft.OData.Client.SaveChangesOptions.ReplaceOnUpdate);
 
-                var updatedAccount = client.Accounts.Where(a => a.Id == 1).Single();
+                var updatedAccount = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
                 Assert.NotNull(updatedAccount);
 
                 var updatedAccountInfo = updatedAccount.AccountInfo;
@@ -1109,7 +1150,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.AddToAccounts(newAccount);
             await client.SaveChangesAsync();
 
-            TypedProxy.Account insertedAccount = client.Accounts.Where(a => a.Id == 4).Single();
+            TypedProxy.Account insertedAccount = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 4).Single();
+            });
+
             Assert.NotNull(insertedAccount);
             Assert.Equal("NickName4", insertedAccount.AccountInfo.NickName);
             Assert.Equal(40, insertedAccount.AccountInfo.Age);
@@ -1179,7 +1224,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.AddToAccounts(newAccount);
             await client.SaveChangesAsync();
 
-            TypedProxy.PremiumAccount insertedAccount = client.Accounts.Where(a => a.Id == 4).Single() as TypedProxy.PremiumAccount;
+            TypedProxy.PremiumAccount insertedAccount = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 4).Single() as TypedProxy.PremiumAccount;
+            });
+
             Assert.NotNull(insertedAccount);
             Assert.Equal("NickName4", insertedAccount.AccountInfo.NickName);
             Assert.Equal(40, insertedAccount.AccountInfo.Age);
@@ -1210,11 +1259,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 Uri serviceUrl = new Uri(string.Format(this.BaseAddress + "/{0}/", routing));
                 var client = new TypedProxy.Container(serviceUrl);
 
-                var accountToDelete = client.Accounts.Where(a => a.Id == 1).Single();
+                var accountToDelete = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
                 client.DeleteObject(accountToDelete);
                 await client.SaveChangesAsync();
 
-                var accounts = client.Accounts.ToList();
+                var accounts = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).ToList();
+                });
+
                 Assert.Equal(2, accounts.Count);
 
                 var queryDeletedAccount = accounts.Where(a => a.Id == 1).ToList();
@@ -1239,7 +1296,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 
                 client.Format.UseJson();
 
-                IEnumerable<TypedProxy.Address> addresses = client.Accounts.Where(a => a.Id == 1).Single().GetShipAddresses();
+                var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
+                var addresses = await Task.Factory.FromAsync(account.GetShipAddresses().BeginExecute(null, null), (asyncResult) =>
+                {
+                    return account.GetShipAddresses().EndExecute(asyncResult).ToList();
+                });
 
                 Assert.Equal(2, addresses.Count());
             }
@@ -1258,9 +1323,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 
                 client.Format.UseJson();
 
-                await client.Accounts.Where(a => a.Id == 1).Single().IncreaseAgeAction().GetValueAsync();
+                var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
 
-                var account = client.Accounts.Where(a => a.Id == 1).Single();
+                await account.IncreaseAgeAction().GetValueAsync();
+
+                account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
                 Assert.Equal(11, account.AccountInfo.Age);
             }
         }
@@ -1283,11 +1357,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                     City = "Hangzhou",
                     Street = "Anything",
                 };
-                int shipAddressCount = await client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValueAsync();
 
+                var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
+                int shipAddressCount = await account.AddShipAddress(shipAddress).GetValueAsync();
                 Assert.Equal(3, shipAddressCount);
-                shipAddressCount = await client.Accounts.Where(a => a.Id == 1).Single().AddShipAddress(shipAddress).GetValueAsync();
 
+                account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+                {
+                    return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+                });
+
+                shipAddressCount = await account.AddShipAddress(shipAddress).GetValueAsync();
                 Assert.Equal(4, shipAddressCount);
             }
         }
@@ -1309,7 +1393,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             };
             await client.UpdateAddressAction(address, 1).GetValueAsync();
 
-            var account = client.Accounts.Where(a => a.Id == 1).Single();
+            var account = await Task.Factory.FromAsync(client.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Accounts.EndExecute(asyncResult).Where(a => a.Id == 1).Single();
+            });
+
             Assert.Equal("New City", account.Address.City);
             Assert.Equal("New CountryOrRegion", account.Address.CountryOrRegion);
         }
@@ -1326,7 +1414,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var employees = client.Employees.ToList();
+            var employees = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).ToList();
+            });
 
             int expectedInt = 2;
             int actualInt = employees.Count();
@@ -1344,7 +1435,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var employees = client.Employees.OfType<TypedProxy.Manager>().ToList();
+            var employees = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().ToList();
+            });
 
             int expectedInt = 1;
             int actualInt = employees.Count();
@@ -1374,7 +1468,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var client = new TypedProxy.Container(serviceUrl);
             client.Format.UseJson();
 
-            var employees = client.Employees.Expand("Account").ToList();
+            var query = client.Employees.Expand("Account");
+            var employees = await Task.Factory.FromAsync(query.BeginExecute(null, null), (asyncResult) =>
+            {
+                return query.EndExecute(asyncResult).ToList();
+            });
 
             expectedValueOfInt = 2;
             actualValueOfInt = employees.Count();
@@ -1402,8 +1500,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.AddToEmployees(newEmployee);
             await client.SaveChangesAsync();
 
-            var insertedEmplyee = client.Employees.Where(e => e.Id >= 3).Single();
+            var insertedEmplyee = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).Where(e => e.Id >= 3).Single();
+            });
+
             expectedValueOfString = newName;
+
             actualValueOfString = insertedEmplyee.Name;
 
             Assert.True(expectedValueOfString == actualValueOfString,
@@ -1427,7 +1530,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.AddToEmployees(manager);
             await client.SaveChangesAsync();
 
-            var employees = client.Employees.OfType<TypedProxy.Manager>().ToList();
+            var employees = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().ToList();
+            });
+
             var insertedManager = employees.Where(m => m.Id == 3).Single();
 
             expectedValueOfNullableInt = 2;
@@ -1453,7 +1560,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.MergeOption = MergeOption.OverwriteChanges;
             client.Format.UseJson();
 
-            var employees = client.Employees.OfType<TypedProxy.Manager>().ToList();
+            var employees = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().ToList();
+            });
+
             var manager = employees.Where(m => m.Id == 2).Single();
 
             manager.Level = 3;
@@ -1462,7 +1573,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.UpdateObject(manager);
             await client.SaveChangesAsync(SaveChangesOptions.ReplaceOnUpdate);
 
-            var managers = client.Employees.OfType<TypedProxy.Manager>().ToList();
+            var managers = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().ToList();
+            });
+
             var updatedManager = managers.Where(m => m.Id == 2).Single();
 
             expectedValueOfNullableInt = 3;
@@ -1489,13 +1604,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             client.MergeOption = MergeOption.OverwriteChanges;
             client.Format.UseJson();
 
-            var manager = client.Employees.OfType<TypedProxy.Manager>().Where(m => m.Id == 2).Single();
+            var manager = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().Where(m => m.Id == 2).Single();
+            });
+
             manager.Gender = null;
             manager.PhoneNumbers = new List<string>() { "8621-9999-8888", "2345", "4567", "5678" };
             client.UpdateObject(manager);
             await client.SaveChangesAsync();
 
-            var updatedManager = client.Employees.OfType<TypedProxy.Manager>().Where(m => m.Id == 2).Single();
+            var updatedManager = await Task.Factory.FromAsync(client.Employees.BeginExecute(null, null), (asyncResult) =>
+            {
+                return client.Employees.EndExecute(asyncResult).OfType<TypedProxy.Manager>().Where(m => m.Id == 2).Single();
+            });
 
             expectedValueOfNullableInt = 1;
             actualValueOfNullableInt = updatedManager.Level;

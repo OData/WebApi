@@ -330,15 +330,8 @@ namespace System.Web.OData.Formatter
         }
 
         [Theory]
-        // This test case uses an invalid string that cannot be resolved to any values in the specified enum type.
-        // For WebApi consuming ODL 7.4, error code is HTTP BadRequest due to exception thrown during WebApi's attempt to
-        // materialize the enum from string for action invocation. Note that WebApi's request path processing doesn't throw.
-        //
-        // For WebApi consuming ODL <7.4, error code is HTTP NotFound due to exception thrown from ODL during
-        // WebApi's request path processing.
-        // to process
         [InlineData("abc", "GetEnum", "simpleEnum")]
-        public void IsBadRequest_ForODL74_IfContainsInvalidStringAsEnum(object value, string action, string parameterName)
+        public void ResourceIsNotFound_IfContainsInvalidEnum(object value, string action, string parameterName)
         {
             // Arrange
             HttpConfiguration configuration = new HttpConfiguration();
@@ -361,7 +354,7 @@ namespace System.Web.OData.Formatter
             HttpResponseMessage response = client.GetAsync(url).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Theory]

@@ -3,6 +3,8 @@
 
 using System;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNet.OData
 {
@@ -13,12 +15,21 @@ namespace Microsoft.AspNet.OData
     /// This is essentially a <see cref="ValidateNeverAttribute"/>.
     /// </remarks>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
-    internal sealed partial class NonValidatingParameterBindingAttribute : Attribute, IPropertyValidationFilter
+    internal sealed partial class NonValidatingParameterBindingAttribute : ModelBinderAttribute, IPropertyValidationFilter
     {
         /// <inheritdoc />
         public bool ShouldValidateEntry(ValidationEntry entry, ValidationEntry parentEntry)
         {
             return false;
+        }
+
+        /// <inheritdoc/>
+        public override BindingSource BindingSource
+        {
+            get
+            {
+                return BindingSource.Body;
+            }
         }
     }
 }

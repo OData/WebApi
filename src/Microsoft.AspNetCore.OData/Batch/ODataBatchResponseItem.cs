@@ -49,6 +49,7 @@ namespace Microsoft.AspNet.OData.Batch
                 using (Stream stream = batchResponse.GetStream())
                 {
                     context.RequestAborted.ThrowIfCancellationRequested();
+                    context.Response.Body.Seek(0L, SeekOrigin.Begin);
                     await context.Response.Body.CopyToAsync(stream);
                 }
             }

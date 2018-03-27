@@ -7,6 +7,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,6 +16,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -206,12 +208,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         {
             public void ConfigureServices(IServiceCollection services)
             {
+                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(new DelayLoadFilterProvider<EnableQueryAttribute>()));
+                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(new DelayLoadFilterProvider<IActionFilter>()));
+
                 var coreBuilder = services.AddMvcCore(options =>
                 {
                     options.Filters.Add(typeof(WebHostLogExceptionFilter));
-                    options.Filters.Add(new DelayLoadFilterProvider<EnableQueryAttribute>());
-                    options.Filters.Add(new DelayLoadFilterProvider<IActionFilter>());
-                    options.Filters.Add(new DelayLoadFilterProvider<ETagMessageHandler>());
+                    options.Filters.Add(new DelayLoadFilterFactory<ETagMessageHandler>());
                 });
 
                 coreBuilder.AddJsonFormatters();
@@ -332,7 +335,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     if (config.ETagMessageHandlerFilter != null && options != null)
                     {
                         var provider = options.Value.Filters
-                            .OfType<DelayLoadFilterProvider<ETagMessageHandler>>()
+                            .OfType<DelayLoadFilterFactory<ETagMessageHandler>>()
                             .FirstOrDefault();
 
                         if (provider != null)
@@ -343,7 +346,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 });
             }
 
-            private class DelayLoadFilterProvider<T> : IFilterFactory where T : IActionFilter
+            private class DelayLoadFilterProvider<T> : IFilterProvider where T : IActionFilter
+            {
+                public T WrappedFilter { get; set; }
+
+                public int Order { get { return 0; } }
+
+                public void OnProvidersExecuting(FilterProviderContext context)
+                {
+                    if (WrappedFilter != null)
+                    {
+                        QueryFilterProvider filterProvider = new QueryFilterProvider(WrappedFilter);
+                        filterProvider.OnProvidersExecuting(context);
+                    }
+                }
+                public void OnProvidersExecuted(FilterProviderContext context)
+                {
+                    if (WrappedFilter != null)
+                    {
+                        QueryFilterProvider filterProvider = new QueryFilterProvider(WrappedFilter);
+                        filterProvider.OnProvidersExecuted(context);
+                    }
+                }
+            }
+
+            private class DelayLoadFilterFactory<T> : IFilterFactory where T : IActionFilter
             {
                 public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
                 {

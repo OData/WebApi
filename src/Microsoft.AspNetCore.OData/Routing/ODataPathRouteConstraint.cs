@@ -1,11 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -47,15 +49,13 @@ namespace Microsoft.AspNet.OData.Routing
                 object oDataPathValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
-
-                    StringBuilder requestLeftPartBuilder = new StringBuilder(request.Scheme);
-                    requestLeftPartBuilder.Append("://");
-                    requestLeftPartBuilder.Append(request.Host.HasValue ? request.Host.Value : request.Host.ToString());
-                    requestLeftPartBuilder.Append(request.Path.HasValue ? request.Path.Value : request.Path.ToString());
-
+                    // We need to call Uri.GetLeftPart(), which returns an encoded Url.
+                    // The ODL parser does not like raw values.
+                    Uri requestUri = new Uri(UriHelper.GetEncodedUrl(request));
+                    string requestLeftPart = requestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
-                    path = GetODataPath(oDataPathValue as string, requestLeftPartBuilder.ToString(), queryString, () => request.CreateRequestContainer(RouteName));
+                    path = GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(RouteName));
                 }
 
                 if (path != null)

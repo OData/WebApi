@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData
 
             // Need a value to operate on.
             ObjectResult result = actionExecutedContext.Result as ObjectResult;
-            if (result != null)
+            if (result == null)
             {
                 return;
             }

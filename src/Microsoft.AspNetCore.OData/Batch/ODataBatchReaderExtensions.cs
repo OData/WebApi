@@ -170,6 +170,7 @@ namespace Microsoft.AspNet.OData.Batch
             // different, we need to avoid copying certain features to that the objects don't
             // share the same storage/
             IFeatureCollection features = new FeatureCollection();
+            string pathBase = "";
             foreach (KeyValuePair<Type, object> kvp in originalContext.Features)
             {
                 // Don't include the OData features. They may already
@@ -184,6 +185,11 @@ namespace Microsoft.AspNet.OData.Batch
                 //
                 // Because we need a different request and response, leave those features
                 // out as well.
+                if (kvp.Key == typeof(IHttpRequestFeature))
+                {
+                    pathBase = ((IHttpRequestFeature)kvp.Value).PathBase;
+                }
+
                 if (kvp.Key == typeof(IODataBatchFeature) ||
                     kvp.Key == typeof(IODataFeature) ||
                     kvp.Key == typeof(IItemsFeature) ||
@@ -198,7 +204,10 @@ namespace Microsoft.AspNet.OData.Batch
 
             // Add in an items, request and response feature.
             features[typeof(IItemsFeature)] = new ItemsFeature();
-            features[typeof(IHttpRequestFeature)] = new HttpRequestFeature();
+            features[typeof(IHttpRequestFeature)] = new HttpRequestFeature
+            {
+                PathBase = pathBase
+            };
             features[typeof(IHttpResponseFeature)] = new HttpResponseFeature();
 
             // Create a context from the factory or use the default context.

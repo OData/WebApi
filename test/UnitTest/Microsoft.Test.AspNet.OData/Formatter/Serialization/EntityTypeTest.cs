@@ -29,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
             var config = RoutingConfigurationFactory.CreateWithRootContainer(routeName);
-            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config, routeName);
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config);
             var payload = new ODataPayloadKind[] { ODataPayloadKind.Resource };
             var formatter = FormatterTestHelper.GetFormatter(payload, request, _model, routeName, path);
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);

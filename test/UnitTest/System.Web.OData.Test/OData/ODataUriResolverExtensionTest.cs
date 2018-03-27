@@ -225,7 +225,7 @@ namespace System.Web.OData
             return config;
         }
 
-        [Theory]
+        [Theory(Skip = "ODL 7.4 supports enum to string comparison")]
         [InlineData("gender='Male'", true, HttpStatusCode.OK)]
         [InlineData("gender='Male'", false, HttpStatusCode.OK)]
         [InlineData("gender=System.Web.OData.TestCommon.Models.Gender'Male'", true, HttpStatusCode.OK)]

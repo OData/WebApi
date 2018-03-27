@@ -3,14 +3,20 @@
 
 #if NETCORE
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -67,7 +73,85 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
         /// <param name="request">The request instance in current context</param>
         /// <param name="uri">OData uri</param>
         /// <returns>The parsed odata path</returns>
-#if !NETCORE // TODO #939: Enable this function for AspNetCore
+#if NETCORE
+        public static ODataPath CreateODataPath(this HttpRequest request, Uri uri)
+        {
+            if (uri == null)
+            {
+                throw new ArgumentNullException("uri");
+            }
+
+            // Clone the features so that a new set is used for each context.
+            // The features themselves will be reused but not the collection. We
+            // store the request container as a feature of the request and we don't want
+            // the features added to one context/request to be visible on another.
+            //
+            // Note that just about everything in the HttpContext and HttpRequest is
+            // backed by one of these features. So reusing the features means the HttContext
+            // and HttpRequests are the same without needing to copy properties. To make them
+            // different, we need to avoid copying certain features to that the objects don't
+            // share the same storage/
+            IFeatureCollection features = new FeatureCollection();
+            foreach (KeyValuePair<Type, object> kvp in request.HttpContext.Features)
+            {
+                // Don't include the OData features. They may already
+                // be present. This will get re-created later.
+                //
+                // Also, clear out the items feature, which is used
+                // to store a few object, the one that is an issue here is the Url
+                // helper, which has an affinity to the context. If we leave it,
+                // the context of the helper no longer matches the new context and
+                // the resulting url helper doesn't have access to the OData feature
+                // because it's looking in the wrong context.
+                //
+                // Because we need a different request and response, leave those features
+                // out as well.
+                if (kvp.Key == typeof(IODataBatchFeature) ||
+                    kvp.Key == typeof(IODataFeature) ||
+                    kvp.Key == typeof(IItemsFeature) ||
+                    kvp.Key == typeof(IHttpRequestFeature) ||
+                    kvp.Key == typeof(IHttpResponseFeature))
+                {
+                    continue;
+                }
+
+                features[kvp.Key] = kvp.Value;
+            }
+
+            // Add in an items, request and response feature.
+            features[typeof(IItemsFeature)] = new ItemsFeature();
+            features[typeof(IHttpRequestFeature)] = new HttpRequestFeature();
+            features[typeof(IHttpResponseFeature)] = new HttpResponseFeature();
+
+            // Create a context from the factory or use the default context.
+            HttpContext context = new DefaultHttpContext(features);
+
+            // Clone parts of the request. All other parts of the request will be 
+            // populated during batch processing.
+            context.Request.Cookies = request.HttpContext.Request.Cookies;
+            foreach (KeyValuePair<string, StringValues> header in request.HttpContext.Request.Headers)
+            {
+                context.Request.Headers.Add(header);
+            }
+
+            // Copy the Uri.
+            context.Request.Scheme = uri.Scheme;
+            context.Request.Host = uri.IsDefaultPort ?
+                new HostString(uri.Host) :
+                new HostString(uri.Host, uri.Port);
+            context.Request.QueryString = new QueryString(uri.Query);
+            context.Request.Path = new PathString(uri.AbsolutePath);
+
+            // Get the existing OData route
+            IRoutingFeature routingFeature = context.Features[typeof(IRoutingFeature)] as IRoutingFeature;
+            ODataRoute route = routingFeature.RouteData.Routers.OfType<ODataRoute>().FirstOrDefault();
+
+            // Attempt to route the new request and extract the path.
+            RouteContext routeContext = new RouteContext(context);
+            route.RouteAsync(routeContext).Wait();
+            return context.Request.ODataFeature().Path;
+        }
+#else
         public static ODataPath CreateODataPath(this HttpRequestMessage request, Uri uri)
         {
             if (uri == null)
@@ -92,11 +176,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
             }
 
             return newRequest.ODataProperties().Path;
-        }
-#else
-        public static ODataPath CreateODataPath(this HttpRequest request, Uri uri)
-        {
-            return null;
         }
 #endif
 

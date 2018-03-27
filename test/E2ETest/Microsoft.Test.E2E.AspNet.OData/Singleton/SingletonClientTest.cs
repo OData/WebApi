@@ -64,7 +64,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             Assert.Equal("UpdatedName", name);
 
             // $select
-            var category = ClientContext.Umbrella.Select(u => u.Category).Single();
+            var category = await Task.Factory.FromAsync(ClientContext.Umbrella.BeginExecute(null, null), (asyncResult) =>
+            {
+                return ClientContext.Umbrella.EndExecute(asyncResult).Select(u => u.Category).Single();
+            });
+
             Assert.Equal(Microsoft.Test.E2E.AspNet.OData.Singleton.Client.CompanyCategory.Communication, category);
 
             // Add navigation link

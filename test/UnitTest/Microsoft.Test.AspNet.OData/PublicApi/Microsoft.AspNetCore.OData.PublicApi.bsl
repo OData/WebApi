@@ -419,6 +419,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 
 	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
 	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)
+	public static Microsoft.AspNetCore.Mvc.SerializableError CreateErrorResponse (string message, params System.Exception exception)
 	public virtual Microsoft.OData.Edm.IEdmModel GetModel (System.Type elementClrType, Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor actionDescriptor)
 	public virtual void OnActionExecuted (Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext actionExecutedContext)
 	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, ODataQueryOptions queryOptions)
@@ -458,6 +459,15 @@ NonValidatingParameterBindingAttribute(),
 ]
 public class Microsoft.AspNet.OData.ODataActionParameters : System.Collections.Generic.Dictionary`2[[System.String],[System.Object]], ICollection, IDictionary, IEnumerable, IDeserializationCallback, ISerializable, IDictionary`2, IReadOnlyDictionary`2, ICollection`1, IEnumerable`1, IReadOnlyCollection`1 {
 	public ODataActionParameters ()
+}
+
+public class Microsoft.AspNet.OData.ODataBatchFeature : IODataBatchFeature {
+	public ODataBatchFeature ()
+
+	System.Nullable`1[[System.Guid]] BatchId  { public virtual get; public virtual set; }
+	System.Nullable`1[[System.Guid]] ChangeSetId  { public virtual get; public virtual set; }
+	string ContentId  { public virtual get; public virtual set; }
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ContentIdMapping  { public virtual get; public virtual set; }
 }
 
 public class Microsoft.AspNet.OData.ODataBuilder : IODataBuilder {
@@ -654,6 +664,246 @@ public sealed class Microsoft.AspNet.OData.SingleResult`1 : SingleResult {
 	public SingleResult`1 (IQueryable`1 queryable)
 
 	IQueryable`1 Queryable  { public get; }
+}
+
+public abstract class Microsoft.AspNet.OData.Batch.ODataBatchHandler {
+	protected ODataBatchHandler ()
+
+	Microsoft.OData.ODataMessageQuotas MessageQuotas  { public get; }
+	ODataRoute ODataRoute  { public get; public set; }
+	string ODataRouteName  { public get; public set; }
+
+	public virtual System.Threading.Tasks.Task CreateResponseMessageAsync (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, Microsoft.AspNetCore.Http.HttpRequest request)
+	public virtual System.Uri GetBaseUri (Microsoft.AspNetCore.Http.HttpRequest request)
+	public abstract System.Threading.Tasks.Task ProcessBatchAsync (Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate nextHandler)
+	public virtual System.Threading.Tasks.Task`1[[System.Boolean]] ValidateRequest (Microsoft.AspNetCore.Http.HttpRequest request)
+}
+
+public abstract class Microsoft.AspNet.OData.Batch.ODataBatchRequestItem {
+	protected ODataBatchRequestItem ()
+
+	public abstract System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public static System.Threading.Tasks.Task SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler, Microsoft.AspNetCore.Http.HttpContext context, System.Collections.Generic.Dictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
+}
+
+public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem {
+	protected ODataBatchResponseItem ()
+
+	internal virtual bool IsResponseSuccessful ()
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context)
+
+	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+}
+
+[
+EditorBrowsableAttribute(),
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.Batch.HttpRequestExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static void CopyAbsoluteUrl (Microsoft.AspNetCore.Http.HttpRequest request, System.Uri uri)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void CopyBatchRequestProperties (Microsoft.AspNetCore.Http.HttpRequest subRequest, Microsoft.AspNetCore.Http.HttpRequest batchRequest)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.OData.ODataMessageReader GetODataMessageReader (Microsoft.AspNetCore.Http.HttpRequest request, System.IServiceProvider requestContainer)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static IODataBatchFeature ODataBatchFeature (Microsoft.AspNetCore.Http.HttpRequest request)
+}
+
+[
+EditorBrowsableAttribute(),
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.Batch.ODataBatchHttpRequestExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Nullable`1[[System.Guid]] GetODataBatchId (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Nullable`1[[System.Guid]] GetODataChangeSetId (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static string GetODataContentId (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Collections.Generic.IDictionary`2[[System.String],[System.String]] GetODataContentIdMapping (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static bool IsODataBatchRequest (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataBatchId (Microsoft.AspNetCore.Http.HttpRequest request, System.Guid batchId)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataChangeSetId (Microsoft.AspNetCore.Http.HttpRequest request, System.Guid changeSetId)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataContentId (Microsoft.AspNetCore.Http.HttpRequest request, string contentId)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataContentIdMapping (Microsoft.AspNetCore.Http.HttpRequest request, System.Collections.Generic.IDictionary`2[[System.String],[System.String]] contentIdMapping)
+}
+
+[
+EditorBrowsableAttribute(),
+ExtensionAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.Batch.ODataBatchReaderExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Threading.Tasks.Task`1[[Microsoft.AspNetCore.Http.HttpContext]] ReadChangeSetOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, Microsoft.AspNetCore.Http.HttpContext context, System.Guid batchId, System.Guid changeSetId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
+
+	[
+	AsyncStateMachineAttribute(),
+	ExtensionAttribute(),
+	]
+	public static System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[Microsoft.AspNetCore.Http.HttpContext]]]] ReadChangeSetRequestAsync (Microsoft.OData.ODataBatchReader reader, Microsoft.AspNetCore.Http.HttpContext context, System.Guid batchId, System.Threading.CancellationToken cancellationToken)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Threading.Tasks.Task`1[[Microsoft.AspNetCore.Http.HttpContext]] ReadOperationRequestAsync (Microsoft.OData.ODataBatchReader reader, Microsoft.AspNetCore.Http.HttpContext context, System.Guid batchId, bool bufferContentStream, System.Threading.CancellationToken cancellationToken)
+}
+
+public class Microsoft.AspNet.OData.Batch.ChangeSetRequestItem : ODataBatchRequestItem {
+	public ChangeSetRequestItem (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Http.HttpContext]] contexts)
+
+	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Http.HttpContext]] Contexts  { public get; }
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler)
+}
+
+public class Microsoft.AspNet.OData.Batch.ChangeSetResponseItem : ODataBatchResponseItem {
+	public ChangeSetResponseItem (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Http.HttpContext]] contexts)
+
+	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Http.HttpContext]] Contexts  { public get; }
+
+	internal virtual bool IsResponseSuccessful ()
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+}
+
+public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler {
+	public DefaultODataBatchHandler ()
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]]]] ExecuteRequestMessagesAsync (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchRequestItem]] requests, Microsoft.AspNetCore.Http.RequestDelegate handler)
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Batch.ODataBatchRequestItem]]]] ParseBatchRequestsAsync (Microsoft.AspNetCore.Http.HttpContext context)
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task ProcessBatchAsync (Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate nextHandler)
+}
+
+public class Microsoft.AspNet.OData.Batch.ODataBatchContent {
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
+
+	Microsoft.AspNetCore.Http.HeaderDictionary Headers  { public get; }
+	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
+
+	public System.Threading.Tasks.Task SerializeToStreamAsync (System.IO.Stream stream)
+}
+
+public class Microsoft.AspNet.OData.Batch.ODataBatchMiddleware {
+	public ODataBatchMiddleware (Microsoft.AspNetCore.Http.RequestDelegate next)
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public System.Threading.Tasks.Task Invoke (Microsoft.AspNetCore.Http.HttpContext context)
+}
+
+public class Microsoft.AspNet.OData.Batch.ODataBatchPathMapping {
+	public ODataBatchPathMapping ()
+
+	public void AddRoute (string routeName, string routeTemplate)
+	public bool TryGetRouteName (string path, out System.String& routeName)
+}
+
+public class Microsoft.AspNet.OData.Batch.OperationRequestItem : ODataBatchRequestItem {
+	public OperationRequestItem (Microsoft.AspNetCore.Http.HttpContext context)
+
+	Microsoft.AspNetCore.Http.HttpContext Context  { public get; }
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (Microsoft.AspNetCore.Http.RequestDelegate handler)
+}
+
+public class Microsoft.AspNet.OData.Batch.OperationResponseItem : ODataBatchResponseItem {
+	public OperationResponseItem (Microsoft.AspNetCore.Http.HttpContext context)
+
+	Microsoft.AspNetCore.Http.HttpContext Context  { public get; }
+
+	internal virtual bool IsResponseSuccessful ()
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+}
+
+public class Microsoft.AspNet.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHandler {
+	public UnbufferedODataBatchHandler ()
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] ExecuteChangeSetAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, Microsoft.AspNetCore.Http.HttpRequest originalRequest, Microsoft.AspNetCore.Http.RequestDelegate handler)
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] ExecuteOperationAsync (Microsoft.OData.ODataBatchReader batchReader, System.Guid batchId, Microsoft.AspNetCore.Http.HttpRequest originalRequest, Microsoft.AspNetCore.Http.RequestDelegate handler)
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task ProcessBatchAsync (Microsoft.AspNetCore.Http.HttpContext context, Microsoft.AspNetCore.Http.RequestDelegate nextHandler)
 }
 
 [
@@ -1337,6 +1587,8 @@ public class Microsoft.AspNet.OData.Builder.NonbindingParameterConfiguration : P
 }
 
 public class Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder : ODataModelBuilder {
+	public ODataConventionModelBuilder ()
+	public ODataConventionModelBuilder (Microsoft.AspNetCore.Mvc.ApplicationParts.ApplicationPartManager applicationPartManager)
 	public ODataConventionModelBuilder (System.IServiceProvider provider)
 	public ODataConventionModelBuilder (System.IServiceProvider provider, bool isQueryCompositionMode)
 
@@ -1519,6 +1771,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpContextExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static IODataBatchFeature ODataBatchFeature (Microsoft.AspNetCore.Http.HttpContext httpContext)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static IODataFeature ODataFeature (Microsoft.AspNetCore.Http.HttpContext httpContext)
 }
 
@@ -1610,6 +1867,16 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpResponseExtensions {
 [
 ExtensionAttribute(),
 ]
+public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static void UseODataBatching (Microsoft.AspNetCore.Builder.IApplicationBuilder app)
+}
+
+[
+ExtensionAttribute(),
+]
 public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtensions {
 	[
 	ExtensionAttribute(),
@@ -1694,7 +1961,17 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtension
 	[
 	ExtensionAttribute(),
 	]
+	public static ODataRoute MapODataServiceRoute (Microsoft.AspNetCore.Routing.IRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, ODataBatchHandler batchHandler)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static ODataRoute MapODataServiceRoute (Microsoft.AspNetCore.Routing.IRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, IODataPathHandler pathHandler, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static ODataRoute MapODataServiceRoute (Microsoft.AspNetCore.Routing.IRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, IODataPathHandler pathHandler, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions, ODataBatchHandler batchHandler)
 
 	[
 	ExtensionAttribute(),
@@ -1920,6 +2197,13 @@ public class Microsoft.AspNet.OData.Formatter.QueryStringMediaTypeMapping : Medi
 	public virtual double TryMatchMediaType (Microsoft.AspNetCore.Http.HttpRequest request)
 }
 
+public interface Microsoft.AspNet.OData.Interfaces.IODataBatchFeature {
+	System.Nullable`1[[System.Guid]] BatchId  { public abstract get; public abstract set; }
+	System.Nullable`1[[System.Guid]] ChangeSetId  { public abstract get; public abstract set; }
+	string ContentId  { public abstract get; public abstract set; }
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ContentIdMapping  { public abstract get; public abstract set; }
+}
+
 public interface Microsoft.AspNet.OData.Interfaces.IODataBuilder {
 	Microsoft.Extensions.DependencyInjection.IServiceCollection Services  { public abstract get; }
 }
@@ -2138,6 +2422,7 @@ public class Microsoft.AspNet.OData.Query.ModelBoundQuerySettings {
 }
 
 [
+NonValidatingParameterBindingAttribute(),
 ODataQueryParameterBindingAttribute(),
 ]
 public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
@@ -2913,10 +3198,10 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataDeltaFeedSerial
 	public ODataDeltaFeedSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual Microsoft.OData.ODataDeltaResourceSet CreateODataDeltaFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
-	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
@@ -2977,7 +3262,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public virtual Microsoft.OData.ODataResource CreateResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
-	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataDeltaWriter writer, ODataSerializerContext writeContext)
+	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }

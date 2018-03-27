@@ -95,11 +95,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             var results = await response.Content.ReadAsObject<Dictionary<string, string>[]>();
             var result = results[0];
 
-            Assert.Equal("abc", result["SkipToken"]);
-            Assert.Equal("abc", result["Expand"]);
-            Assert.Equal("abc", result["Select"]);
-            Assert.Equal("abc", result["Count"]);
-            Assert.Equal("abc", result["DeltaToken"]);
+            Assert.Equal("abc", result["skipToken"]);
+            Assert.Equal("abc", result["expand"]);
+            Assert.Equal("abc", result["select"]);
+            Assert.Equal("abc", result["count"]);
+            Assert.Equal("abc", result["deltaToken"]);
         }
     }
 }

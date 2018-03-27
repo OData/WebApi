@@ -10,8 +10,6 @@ using System.Text;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Internal;
@@ -25,6 +23,7 @@ using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
+using Microsoft.AspNet.OData.Routing;
 #else
 using System;
 using System.Collections.Generic;
@@ -747,11 +746,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         private static MediaTypeHeaderValue GetContentTypeFromQueryString(IEdmModel model, Type type, string dollarFormat)
         {
             var formatters = CreateOutputFormatters(model);
-
-            var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var path = new ODataPath();
             var request = string.IsNullOrEmpty(dollarFormat)
-                ? RequestFactory.CreateFromModel(model, "http://any", "OData")
-                : RequestFactory.CreateFromModel(model, "http://any/?$format=" + dollarFormat, "OData");
+                ? RequestFactory.CreateFromModel(model, "http://any", "OData", path)
+                : RequestFactory.CreateFromModel(model, "http://any/?$format=" + dollarFormat, "OData", path);
 
             var context = new OutputFormatterWriteContext(
                 request.HttpContext,

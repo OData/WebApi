@@ -94,12 +94,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             var response = await Client.GetAsync(BaseAddress + "/api/TopSkipOrderByTests/GetODataQueryOptions?$skiptoken=abc&$expand=abc&$select=abc&$count=abc&$deltatoken=abc");
             var results = await response.Content.ReadAsObject<Dictionary<string, string>[]>();
             var result = results[0];
-
+#if NETCORE
             Assert.Equal("abc", result["skipToken"]);
             Assert.Equal("abc", result["expand"]);
             Assert.Equal("abc", result["select"]);
             Assert.Equal("abc", result["count"]);
             Assert.Equal("abc", result["deltaToken"]);
+#else
+            Assert.Equal("abc", result["SkipToken"]);
+            Assert.Equal("abc", result["Expand"]);
+            Assert.Equal("abc", result["Select"]);
+            Assert.Equal("abc", result["Count"]);
+            Assert.Equal("abc", result["DeltaToken"]);
+#endif
         }
     }
 }

@@ -37,7 +37,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Assert
             Assert.True(odataRoute.CanGenerateDirectLink);
             Assert.NotNull(virtualPathData);
+#if NETCORE
+            Assert.Equal("/prefix/odataPath", virtualPathData.VirtualPath);
+#else
             Assert.Equal("prefix/odataPath", virtualPathData.VirtualPath);
+#endif
         }
 
         [Fact]
@@ -64,7 +68,12 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Assert
             Assert.True(odataRoute.CanGenerateDirectLink);
             Assert.NotNull(virtualPathData);
+
+#if NETCORE
+            Assert.Equal("/odataPath", virtualPathData.VirtualPath);
+#else
             Assert.Equal("odataPath", virtualPathData.VirtualPath);
+#endif
         }
 
         [Fact]
@@ -82,7 +91,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Assert
             Assert.True(odataRoute.CanGenerateDirectLink);
             Assert.NotNull(virtualPathData);
+#if NETCORE
+            Assert.Equal("/odataPath", virtualPathData.VirtualPath);
+#else
             Assert.Equal("odataPath", virtualPathData.VirtualPath);
+#endif
         }
 
         [Fact]

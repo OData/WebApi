@@ -64,7 +64,12 @@ namespace Microsoft.AspNet.OData.Batch
                 new HostString(uri.Host) :
                 new HostString(uri.Host, uri.Port);
             request.QueryString = new QueryString(uri.Query);
-            request.Path = new PathString(uri.AbsolutePath);
+            var path = new PathString(uri.AbsolutePath);
+            if (path.StartsWithSegments(request.PathBase, out PathString remainingPath))
+            {
+                path = remainingPath;
+            }
+            request.Path = path;
         }
 
         /// <summary>

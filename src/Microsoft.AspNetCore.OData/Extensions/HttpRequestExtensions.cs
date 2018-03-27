@@ -249,7 +249,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            UriBuilder uriBuilder = new UriBuilder(request.Scheme, request.Host.Host, request.Host.Port.HasValue ? request.Host.Port.Value : 80, request.Path.ToUriComponent());
+            UriBuilder uriBuilder = new UriBuilder(request.Scheme, request.Host.Host, request.Host.Port.HasValue ? request.Host.Port.Value : 80, (request.PathBase + request.Path).ToUriComponent());
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
 
             return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize);

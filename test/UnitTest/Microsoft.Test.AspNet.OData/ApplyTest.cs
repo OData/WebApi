@@ -34,7 +34,7 @@ namespace Microsoft.Test.AspNet.OData
                 config.MapODataServiceRoute("odata", "odata", builder.GetEdmModel());
                 config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
-                config.MapNonODataRoute("api", "api/{controller}", new { controller = "NonODataApplyTestCustomers" });
+                config.MapNonODataRoute("api", "api/{controller}", new { controller = "NonODataApplyTestCustomers", action="Get" });
                 config.EnableDependencyInjection();
             });
 

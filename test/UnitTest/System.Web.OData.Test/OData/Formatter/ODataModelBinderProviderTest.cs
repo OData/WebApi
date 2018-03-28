@@ -357,13 +357,11 @@ namespace System.Web.OData.Formatter
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Theory]
-        // This test case works for WebApi consuming ODL-7.4 which supports string to Enum conversion (https://github.com/OData/odata.net/pull/968).
-        // But for WebApi consuming ODL <7.4, the response is HTTP NotFound.
-        [InlineData("First", "GetEnum", "simpleEnum")]
-        public void DefaultODataPathHandler_WorksForODL74_IfContainsStringAsEnum(object value, string action, string parameterName)
+        [Fact]
+        public void DefaultODataPathHandler_WorksForODL74_IfContainsStringAsEnum()
         {
             // Arrange
+            string value = "First", action = "GetEnum", parameterName = "simpleEnum";
             HttpConfiguration configuration = new HttpConfiguration();
             configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
             configuration.MapODataServiceRoute("odata", "", GetEdmModel());

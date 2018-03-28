@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     // We need to call Uri.GetLeftPart(), which returns an encoded Url.
                     // The ODL parser does not like raw values.
-                    Uri requestUri = new Uri(UriHelper.GetEncodedUrl(request));
+                    Uri requestUri = new Uri(request.GetEncodedUrl());
                     string requestLeftPart = requestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 

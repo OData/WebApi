@@ -88,17 +88,17 @@ namespace System.Web.OData.Builder
 
             // Verify path is parsed correctly.
             Microsoft.OData.UriParser.ODataPath path = parser.ParsePath();
-            Xunit.Assert.NotNull(path);
-            Xunit.Assert.Equal(path.Count, 2);
+            Assert.NotNull(path);
+            Assert.Equal(path.Count, 2);
 
             // Verify expand & select clause is parsed correctly.
             SelectExpandClause result = parser.ParseSelectAndExpand();
-            Xunit.Assert.NotNull(result);
-            Xunit.Assert.Equal(result.SelectedItems.Count(), 1);
+            Assert.NotNull(result);
+            Assert.Equal(result.SelectedItems.Count(), 1);
             ExpandedNavigationSelectItem selectItems = (result.SelectedItems.First() as ExpandedNavigationSelectItem);
-            Xunit.Assert.NotNull(selectItems);
+            Assert.NotNull(selectItems);
             Assert.Equal(selectItems.NavigationSource.Name, "PermanentAccount");
-            Xunit.Assert.Equal(selectItems.SelectAndExpand.SelectedItems.Count(), 2);
+            Assert.Equal(selectItems.SelectAndExpand.SelectedItems.Count(), 2);
         }
 
         private IEdmModel GetModel()
@@ -159,7 +159,7 @@ namespace System.Web.OData.Builder
             var accounts = container.AddEntitySet("Accounts", account);
 
             var paymentInstruments = accounts.FindNavigationTarget(myPaymentInstruments) as EdmNavigationSource;
-            Xunit.Assert.NotNull(paymentInstruments);
+            Assert.NotNull(paymentInstruments);
             paymentInstruments.AddNavigationTarget(billingAddresses, addresses);
 
             // EntityType: Person

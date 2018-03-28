@@ -188,7 +188,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     { "GET", "Products/Default.TopProductOfAll", "TopProductOfAll" },
                     { "GET", "Products/Default.TopProductOfAllByCity(city='any')", "TopProductOfAllByCity(any)" },
                     { "GET", "Products/Default.TopProductOfAllByCity(city='some%23hashes')", "TopProductOfAllByCity(some#hashes)" },
+#if NETFX // ASP.NET Core can't get the raw request Uri string now. See githu issue: https://github.com/aspnet/Mvc/issues/6892
                     { "GET", "Products/Default.TopProductOfAllByCity(city='some%2fslashes')", "TopProductOfAllByCity(some/slashes)" },
+#endif
                     { "GET", "Products/Default.TopProductOfAllByCity(city='some%3Fquestion%3Fmarks')", "TopProductOfAllByCity(some?question?marks)" },
                     { "GET", "Products/Default.TopProductOfAllByCity(city='some%3flower%23escapes')", "TopProductOfAllByCity(some?lower#escapes)" },
                     { "GET", "Products/Default.TopProductOfAllByCity(city='some%20spaces')", "TopProductOfAllByCity(some spaces)" },

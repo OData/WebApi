@@ -69,7 +69,6 @@ namespace WebStack.QA.Test.OData.ETags
             string expectMetadata =
                 "<EntitySet Name=\"ETagsCustomers\" EntityType=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
                 "          <NavigationPropertyBinding Path=\"RelatedCustomer\" Target=\"ETagsCustomers\" />\r\n" +
-                "          <NavigationPropertyBinding Path=\"ContainedCustomer\" Target=\"ContainedCustomer\" />\r\n" +
                 "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
                 "            <Collection>\r\n" +
                 "              <PropertyPath>Id</PropertyPath>\r\n" +

@@ -65,20 +65,13 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
-            // Ignore non-OData requests.
-            if (request.ODataFeature().Path == null)
-            {
-                return false;
-            }
-
             Type type = context.ModelType;
             if (type == null)
             {
                 throw Error.ArgumentNull("type");
             }
 
-            ODataDeserializerProvider deserializerProvider = request.ODataFeature()
-                .RequestContainer.GetRequiredService<ODataDeserializerProvider>();
+            ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
             return ODataInputFormatterHelper.CanReadType(
                 type,

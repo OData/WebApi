@@ -4,7 +4,6 @@
 #if NETCORE
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using Microsoft.AspNet.OData.Extensions;
@@ -18,7 +17,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
 #else
 using System;
@@ -44,15 +42,15 @@ namespace Microsoft.Test.AspNet.OData.Factories
         /// <param name="controllers">The controllers to use.</param>
         /// <param name="configureAction">The route configuration action.</param>
         /// <returns>An TestServer.</returns>
-        public static TestServer Create(
-            Type[] controllers,
-            Action<IRouteBuilder> configureAction)
+        public static TestServer Create(Type[] controllers, Action<IRouteBuilder> configureAction, Action<IServiceCollection> configureService = null)
         {
             IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
             builder.ConfigureServices(services =>
             {
                 services.AddMvc();
                 services.AddOData();
+
+                configureService?.Invoke(services);
             });
 
             builder.Configure(app =>

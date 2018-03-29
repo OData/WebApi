@@ -77,12 +77,6 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.ReadFromStreamAsyncMustHaveRequest);
             }
 
-            // Ignore non-OData requests.
-            if (request.ODataFeature().Path == null)
-            {
-                return false;
-            }
-
             // Allow the base class to make its determination, which includes
             // checks for SupportedMediaTypes.
             bool suportedMediaTypeFound = false;
@@ -113,8 +107,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            ODataSerializerProvider serializerProvider = request.ODataFeature()
-                .RequestContainer.GetRequiredService<ODataSerializerProvider>();
+            ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
             // See if this type is a SingleResult or is derived from SingleResult.
             bool isSingleResult = false;

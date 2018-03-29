@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Find the action with the greatest number of matched parameters including
                 // matches with no parameters.
                 var matchedCandidates = candidates
-                    .Where(c => !c.Parameters.Any() || c.Parameters.All(p => context.RouteData.Values.ContainsKey(p.Name)))
+                    .Where(c => !c.Parameters.Any() || c.Parameters.Any(p => context.RouteData.Values.ContainsKey(p.Name)))
                     .OrderByDescending(c => c.Parameters.Count);
 
                 // Return either the best matched candidate or the first

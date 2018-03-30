@@ -70,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
         [InlineData("application/json;odata.metadata=minimal", "PersonEntryInJsonLightMinimalMetadata.json")]
         [InlineData("application/json;odata.metadata=full", "PersonEntryInJsonLightFullMetadata.json")]
-        public async Task GetEntryInODataJsonLightFormat(string metadata, string expect)
+        public async Task GetEntityResourceInODataJsonLightFormat(string metadata, string expect)
         {
             // Arrange
             using (HttpClient client = CreateClient())
@@ -208,7 +208,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                     response.Content.Headers.ContentType.MediaType);
+
+#if NETCORE
+                string expect = "{\"@odata.context\":\"http://localhost:8081/$metadata#People/$entity\",\"@odata.id\":\"http://localhost:8081/People(10)\",\"PerId\":10,\"Age\":10,\"MyGuid\":\"f99080c0-2f9e-472e-8c72-1a8ecd9f902d\",\"Name\":\"Asha\",\"FavoriteColor\":\"Red, Green\",\"Order\":{\"OrderAmount\":235342,\"OrderName\":\"FirstOrder\"}}";
+                await ODataTestUtil.VerifyResponse(response.Content, expect);
+#else
                 await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+#endif
             }
         }
 
@@ -248,7 +254,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                         response.Content.Headers.ContentType.MediaType);
                     Assert.Null(ODataTestUtil.GetDataServiceVersion(response.Content.Headers));
 
+#if NETCORE
+                    string expect = "{\"@odata.context\":\"http://localhost:8081/$metadata#People/$entity\",\"@odata.id\":\"http://localhost:8081/People(10)\",\"PerId\":10,\"Age\":10,\"MyGuid\":\"f99080c0-2f9e-472e-8c72-1a8ecd9f902d\",\"Name\":\"Asha\",\"FavoriteColor\":\"Red, Green\",\"Order\":{\"OrderAmount\":235342,\"OrderName\":\"FirstOrder\"}}";
+                    await ODataTestUtil.VerifyResponse(response.Content, expect);
+#else
                     await ODataTestUtil.VerifyResponse(response.Content, Resources.PersonEntryInPlainOldJson);
+#endif
                 }
 
                 // Arrange #3: this request should return response in OData json format
@@ -647,7 +658,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         public class EnumCustomersController : TestODataController
         {
-            public ITestActionResult Post(EnumCustomer customer)
+            public ITestActionResult Post([FromBody]EnumCustomer customer)
             {
                 return Ok(customer);
             }
@@ -968,8 +979,11 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal(HttpStatusCode.OK, actual.StatusCode);
             Assert.Equal(ODataTestUtil.ApplicationJsonMediaTypeWithQuality.MediaType,
                 actual.Content.Headers.ContentType.MediaType);
-            Assert.Equal(ODataTestUtil.Version4NumberString,
-                ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
+#if NETCORE
+            Assert.Equal(ODataTestUtil.Version4NumberString, ODataTestUtil.GetDataServiceVersion(actual.Headers));
+#else
+            Assert.Equal(ODataTestUtil.Version4NumberString, ODataTestUtil.GetDataServiceVersion(actual.Content.Headers));
+#endif
             return ODataTestUtil.VerifyResponse(actual.Content, expectedContent);
         }
 

@@ -51,7 +51,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return requestMessage;
         }
 
-        public static string GetDataServiceVersion(HttpContentHeaders headers)
+        public static string GetDataServiceVersion(HttpHeaders headers)
         {
             string dataServiceVersion = null;
             IEnumerable<string> values;

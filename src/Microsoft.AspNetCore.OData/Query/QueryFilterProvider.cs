@@ -76,7 +76,8 @@ namespace Microsoft.AspNet.OData.Query
                 if ((TypeHelper.IsIQueryable(returnType) || TypeHelper.IsTypeAssignableFrom(typeof(SingleResult), returnType)) &&
                     !controllerActionDescriptor.Parameters.Any(parameter => TypeHelper.IsTypeAssignableFrom(typeof(ODataQueryOptions), parameter.ParameterType)))
                 {
-                    context.Results.Add(new FilterItem(new FilterDescriptor(QueryFilter, FilterScope.Global)));
+                    var filterDesc = new FilterDescriptor(QueryFilter, FilterScope.Global);
+                    context.Results.Add(new FilterItem(filterDesc, QueryFilter));
                 }
             }
         }

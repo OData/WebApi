@@ -37,14 +37,17 @@ namespace Microsoft.AspNet.OData.Results
         }
 
         /// <inheritdoc/>
-        public virtual Task ExecuteResultAsync(ActionContext context)
+        public async virtual Task ExecuteResultAsync(ActionContext context)
         {
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
             IActionResult result = GetInnerActionResult(request);
             response.Headers["Location"] = GenerateLocationHeader(request).ToString();
+
+            // Since AddEntityId relies on the response, make sure to execute the result
+            // before calling AddEntityId() to ensure the response code is set correctly.
+            await result.ExecuteResultAsync(context);
             ResultHelpers.AddEntityId(response, () => GenerateEntityId(request));
-            return result.ExecuteResultAsync(context);
         }
 
         // internal just for unit test.

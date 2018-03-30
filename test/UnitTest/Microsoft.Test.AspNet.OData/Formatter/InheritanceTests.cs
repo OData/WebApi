@@ -8,11 +8,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+#if NETFX
+using System.Web.Http;
+#endif
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
+#if NETCORE
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.DependencyInjection;
+#endif
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -34,14 +42,23 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public InheritanceTests()
         {
             _model = GetEdmModel();
-            var server = TestServerFactory.Create(null, (configuration) =>
+            Type[] controllers = new[] { typeof(InheritanceController) };
+            var server = TestServerFactory.Create(controllers, (configuration) =>
             {
-                configuration.MapNonODataRoute("default", "{action}", new { Controller = "Inheritance" });
-#if !NETCORE // TODO #939: Enable these functions on AspNetCore.
+                configuration.MapNonODataRoute("default", "{action}", new { controller = "Inheritance" });
+#if NETCORE
+                configuration.EnableDependencyInjection(b => b.AddService(Microsoft.OData.ServiceLifetime.Singleton, p => _model));
+#else
                 configuration.Routes.MapFakeODataRoute();
                 configuration.EnableODataDependencyInjectionSupport();
 #endif
-            });
+
+            }
+#if NETCORE
+            ,
+            (services) => services.AddSingleton<IUrlHelperFactory, MyUrlHelperFactory>()
+#endif
+            );
 
             _client = TestServerFactory.CreateClient(server);
         }
@@ -416,7 +433,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return new Vehicle[] { motorcycle, car, sportBike };
         }
 
-        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle(Motorcycle motorcycle)
+        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle([FromBody]Motorcycle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;
@@ -434,7 +451,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return motorcycle;
         }
 
-        public Vehicle PostMotorcycle_When_Expecting_Vehicle(Vehicle motorcycle)
+        public Vehicle PostMotorcycle_When_Expecting_Vehicle([FromBody]Vehicle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;
@@ -447,4 +464,46 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return motorcycle;
         }
     }
+
+#if NETCORE
+    public class MyUrlHelper : IUrlHelper
+    {
+        public MyUrlHelper(ActionContext context)
+        {
+            ActionContext = context;
+        }
+
+        public ActionContext ActionContext { get; }
+
+        public string Action(UrlActionContext actionContext) => String.Empty;
+
+        public string Content(string contentPath) => String.Empty;
+
+        public bool IsLocalUrl(string url) => true;
+
+        public string Link(string routeName, object values) => "http://any/";
+
+        public string RouteUrl(UrlRouteContext routeContext) => String.Empty;
+    }
+
+    public class MyUrlHelperFactory : IUrlHelperFactory
+    {
+        public IUrlHelper GetUrlHelper(ActionContext context)
+        {
+            if (context.HttpContext.Request.ODataFeature().Path == null)
+            {
+                IEdmModel model = context.HttpContext.Request.GetModel();
+                context.HttpContext.Request.ODataFeature().Path = new DefaultODataPathHandler()
+                    .Parse(model, "http://any/", context.HttpContext.Request.Path);
+            }
+
+            if (String.IsNullOrEmpty(context.HttpContext.Request.ODataFeature().RouteName))
+            {
+                context.HttpContext.Request.ODataFeature().RouteName = "OData";
+            }
+
+            return new MyUrlHelper(context);
+        }
+    }
+#endif
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +9,34 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Factories;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -22,6 +51,7 @@ using Microsoft.Test.AspNet.OData.Extensions;
 using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter
@@ -34,14 +64,24 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public InheritanceTests()
         {
             _model = GetEdmModel();
-            var server = TestServerFactory.Create(null, (configuration) =>
+            Type[] controllers = new[] { typeof(InheritanceController) };
+            var server = TestServerFactory.Create(controllers, (configuration) =>
             {
                 configuration.MapNonODataRoute("default", "{action}", new { Controller = "Inheritance" });
-#if !NETCORE // TODO #939: Enable these functions on AspNetCore.
+#if NETCORE
+                configuration.EnableDependencyInjection(b => b.AddService(Microsoft.OData.ServiceLifetime.Singleton, p => _model));
+                var options = configuration.ApplicationBuilder.ApplicationServices.GetRequiredService<IOptions<MvcOptions>>().Value;
+                options.Filters.Add(new MyResourceFilter());
+#else
                 configuration.Routes.MapFakeODataRoute();
                 configuration.EnableODataDependencyInjectionSupport();
 #endif
-            });
+            }
+#if NETCORE
+            ,
+            (services) => services.AddSingleton<IUrlHelperFactory, MyUrlHelperFactory>()
+#endif
+            );
 
             _client = TestServerFactory.CreateClient(server);
         }
@@ -416,7 +456,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return new Vehicle[] { motorcycle, car, sportBike };
         }
 
-        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle(Motorcycle motorcycle)
+        public Motorcycle PostMotorcycle_When_Expecting_Motorcycle([FromBody]Motorcycle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;
@@ -434,7 +474,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return motorcycle;
         }
 
-        public Vehicle PostMotorcycle_When_Expecting_Vehicle(Vehicle motorcycle)
+        public Vehicle PostMotorcycle_When_Expecting_Vehicle([FromBody]Vehicle motorcycle)
         {
             Assert.IsType<Motorcycle>(motorcycle);
             return motorcycle;
@@ -447,4 +487,59 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             return motorcycle;
         }
     }
+
+#if NETCORE
+    public class MyUrlHelper : IUrlHelper
+    {
+        public MyUrlHelper(ActionContext context)
+        {
+            ActionContext = context;
+        }
+
+        public ActionContext ActionContext { get; }
+
+        public string Action(UrlActionContext actionContext) => String.Empty;
+
+        public string Content(string contentPath) => String.Empty;
+
+        public bool IsLocalUrl(string url) => true;
+
+        public string Link(string routeName, object values) => "http://any/";
+
+        public string RouteUrl(UrlRouteContext routeContext) => String.Empty;
+    }
+
+    public class MyUrlHelperFactory : IUrlHelperFactory
+    {
+        public IUrlHelper GetUrlHelper(ActionContext context)
+        {
+            return new MyUrlHelper(context);
+        }
+    }
+
+    public class MyResourceFilter : IResourceFilter
+    {
+        public void OnResourceExecuted(ResourceExecutedContext context)
+        {
+            // nothing
+        }
+
+        public void OnResourceExecuting(ResourceExecutingContext context)
+        {
+            context.HttpContext.Request.GetRequestContainer();
+
+            if (context.HttpContext.Request.ODataFeature().Path == null)
+            {
+                IEdmModel model = context.HttpContext.Request.GetModel();
+                context.HttpContext.Request.ODataFeature().Path = new DefaultODataPathHandler()
+                    .Parse(model, "http://any/", context.HttpContext.Request.Path);
+            }
+
+            if (String.IsNullOrEmpty(context.HttpContext.Request.ODataFeature().RouteName))
+            {
+                context.HttpContext.Request.ODataFeature().RouteName = "OData";
+            }
+        }
+    }
+#endif
 }

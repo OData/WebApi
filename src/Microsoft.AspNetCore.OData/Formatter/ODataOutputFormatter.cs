@@ -113,8 +113,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            ODataSerializerProvider serializerProvider = request.ODataFeature()
-                .RequestContainer.GetRequiredService<ODataSerializerProvider>();
+            ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
             // See if this type is a SingleResult or is derived from SingleResult.
             bool isSingleResult = false;
@@ -214,8 +213,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     };
                 };
 
-                ODataSerializerProvider serializerProvider = request.ODataFeature()
-                    .RequestContainer.GetRequiredService<ODataSerializerProvider>();
+                ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
                 ODataOutputFormatterHelper.WriteToStream(
                     type,

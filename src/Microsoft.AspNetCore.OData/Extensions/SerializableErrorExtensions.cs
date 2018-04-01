@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Mvc;
@@ -28,11 +29,17 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("serializableError");
             }
 
+            string message = serializableError.GetPropertyValue<string>(SerializableErrorKeys.MessageKey);
+            string details = ConvertModelStateErrors(serializableError);
+
             return new ODataError
             {
-                Message = serializableError.GetPropertyValue<string>(SerializableErrorKeys.MessageKey),
+                Message = string.IsNullOrEmpty(message) ? details : message,
                 ErrorCode = serializableError.GetPropertyValue<string>(SerializableErrorKeys.ErrorCodeKey),
-                InnerError = ToODataInnerError(serializableError)
+                InnerError = ToODataInnerError(serializableError),
+                Details = serializableError
+                    .Select(kvp => new ODataErrorDetail() { Message = kvp.Key + ":" + kvp.Value, })
+                    .AsCollection(),
             };
         }
 

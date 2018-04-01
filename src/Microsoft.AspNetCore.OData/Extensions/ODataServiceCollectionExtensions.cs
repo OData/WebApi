@@ -62,6 +62,9 @@ namespace Microsoft.AspNet.OData.Extensions
                 {
                     options.OutputFormatters.Insert(0, outputFormatter);
                 }
+
+                // Add the value provider.
+                options.ValueProviderFactories.Add(new ODataValueProviderFactory());
             });
 
             // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor

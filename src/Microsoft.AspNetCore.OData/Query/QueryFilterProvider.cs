@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -72,9 +73,7 @@ namespace Microsoft.AspNet.OData.Query
             if (controllerActionDescriptor != null)
             {
                 Type returnType = controllerActionDescriptor.MethodInfo.ReturnType;
-
-                if ((TypeHelper.IsIQueryable(returnType) || TypeHelper.IsTypeAssignableFrom(typeof(SingleResult), returnType)) &&
-                    !controllerActionDescriptor.Parameters.Any(parameter => TypeHelper.IsTypeAssignableFrom(typeof(ODataQueryOptions), parameter.ParameterType)))
+                if (ShouldAddFilter(context, returnType, controllerActionDescriptor))
                 {
                     var filterDesc = new FilterDescriptor(QueryFilter, FilterScope.Global);
                     context.Results.Add(new FilterItem(filterDesc, QueryFilter));
@@ -91,5 +90,45 @@ namespace Microsoft.AspNet.OData.Query
         public void OnProvidersExecuted(FilterProviderContext context)
         {
         }
-    }
+
+        private bool ShouldAddFilter(FilterProviderContext context, Type returnType, ControllerActionDescriptor controllerActionDescriptor)
+        {
+            // Get the inner return type if type is a task.
+            Type innerReturnType = returnType;
+            if (TypeHelper.IsGenericType(returnType) && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                innerReturnType = returnType.GetGenericArguments().First();
+            }
+
+            // See if this type is a SingleResult or is derived from SingleResult.
+            bool isSingleResult = false;
+            if (innerReturnType.IsGenericType)
+            {
+                Type genericType = innerReturnType.GetGenericTypeDefinition();
+                Type baseType = TypeHelper.GetBaseType(innerReturnType);
+                isSingleResult = (genericType == typeof(SingleResult<>) || baseType == typeof(SingleResult));
+            }
+
+            // Don't apply the filter if the result is not IQueryable() or SingleReult().
+            if (!TypeHelper.IsIQueryable(innerReturnType) && !isSingleResult)
+            {
+                return false;
+            }
+
+            // If the controller takes a ODataQueryOptions, don't apply the filter.
+            if (controllerActionDescriptor.Parameters
+                .Any(parameter => TypeHelper.IsTypeAssignableFrom(typeof(ODataQueryOptions), parameter.ParameterType)))
+            {
+                return false;
+            }
+
+            // Don't apply a global filter if one of the same type exists.
+            if (context.Results.Where(f => f.Filter?.GetType() == QueryFilter.GetType()).Any())
+            {
+                return false;
+            }
+
+            return true;
+        }
+}
 }

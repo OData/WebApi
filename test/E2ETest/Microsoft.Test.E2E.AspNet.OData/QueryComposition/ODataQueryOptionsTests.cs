@@ -129,8 +129,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public async Task OptionsOnStringShouldWork()
         {
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/ODataQueryOptions/OptionsOnString?$filter=ID ge 50");
-            var actual = await response.Content.ReadAsObject<string>();
-            Assert.Equal("Test50", actual);
+            var actual = await response.Content.ReadAsStringAsync();
+            Assert.Contains("Test50", actual);
         }
 
         [Fact]

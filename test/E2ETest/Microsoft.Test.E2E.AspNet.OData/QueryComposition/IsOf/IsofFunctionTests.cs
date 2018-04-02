@@ -146,14 +146,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             var requestUri = string.Format("{0}/EF/BillingCustomers{1}", this.BaseAddress, filter);
 
             // Act
-            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            HttpResponseMessage response = null;
+            HttpRequestException exception = null;
+            try
+            {
+                response = await Client.GetAsync(requestUri);
+            }
+            catch (HttpRequestException e)
+            {
+                exception = e;
+            }
 
-            // Assert
+#if NETCORE
+            // AspNetCore does not encounter the error until after the headers have been sent, at which
+            // point is closes the connection.
             Assert.DoesNotContain("unused", expected);
+            Assert.Null(response);
+            Assert.NotNull(exception);
+            Assert.Contains("Error while copying content to a stream.", exception.Message);
+#else
+            // AspNet catches the exception and converts it to a 500.
+            Assert.DoesNotContain("unused", expected);
+            Assert.Null(exception);
+            Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
             Assert.Contains("Only entity types and complex types are supported in LINQ to Entities queries.",
                 await response.Content.ReadAsStringAsync());
+#endif
         }
 
         [Theory]
@@ -195,7 +215,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             var requestUri = string.Format("{0}/{1}/BillingCustomers{2}", this.BaseAddress, dataSourceMode, filter);
 
             // Act
-            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            HttpResponseMessage response = null;
+            HttpRequestException exception = null;
+            try
+            {
+                response = await Client.GetAsync(requestUri);
+            }
+            catch (HttpRequestException e)
+            {
+                exception = e;
+            }
 
             // Assert
             if (work)
@@ -212,7 +241,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             }
             else
             {
+#if NETCORE
+                // AspNetCore does not encounter the error until after the headers have been sent, at which
+                // point is closes the connection.
+                Assert.Null(response);
+                Assert.NotNull(exception);
+                Assert.Contains("Error while copying content to a stream.", exception.Message);
+#else
+                // AspNet catches the exception and converts it to a 500.
+                Assert.Null(exception);
+                Assert.NotNull(response);
                 Assert.True(HttpStatusCode.InternalServerError == response.StatusCode);
+#endif
             }
         }
 
@@ -268,7 +308,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             var requestUri = string.Format("{0}/{1}/Billings{2}", this.BaseAddress, dataSourceMode, filter);
 
             // Act
-            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            HttpResponseMessage response = null;
+            HttpRequestException exception = null;
+            try
+            {
+                response = await Client.GetAsync(requestUri);
+            }
+            catch (HttpRequestException e)
+            {
+                exception = e;
+            }
 
             // Assert
             if (work)
@@ -285,10 +334,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
             }
             else
             {
+#if NETCORE
+                // AspNetCore does not encounter the error until after the headers have been sent, at which
+                // point is closes the connection.
+                Assert.Null(response);
+                Assert.NotNull(exception);
+                Assert.Contains("Error while copying content to a stream.", exception.Message);
+#else
+                // AspNet catches the exception and converts it to a 500.
+                Assert.Null(exception);
+                Assert.NotNull(response);
                 Assert.True(HttpStatusCode.InternalServerError == response.StatusCode);
-
                 Assert.Contains("DbIsOfExpression requires an expression argument with a polymorphic result type that is " +
                     "compatible with the type argument.", await response.Content.ReadAsStringAsync());
+#endif
             }
         }
 

@@ -206,10 +206,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 #if NETCORE
         private class WebHostTestStartup
         {
+            DelayLoadFilterProvider<EnableQueryAttribute> enableQueryProvider = new DelayLoadFilterProvider<EnableQueryAttribute>();
+            DelayLoadFilterProvider<IActionFilter> actionFilterProvider = new DelayLoadFilterProvider<IActionFilter>();
+
             public void ConfigureServices(IServiceCollection services)
             {
-                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(new DelayLoadFilterProvider<EnableQueryAttribute>()));
-                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(new DelayLoadFilterProvider<IActionFilter>()));
+                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(enableQueryProvider));
+                services.TryAddEnumerable(ServiceDescriptor.Singleton<IFilterProvider>(actionFilterProvider));
 
                 var coreBuilder = services.AddMvcCore(options =>
                 {
@@ -218,6 +221,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 });
 
                 coreBuilder.AddJsonFormatters();
+                coreBuilder.AddDataAnnotations();
                 services.AddOData();
             }
 
@@ -263,7 +267,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 app.UseMvc(routeBuilder =>
                 {
                     // Setup regular route.
-                    routeBuilder.MapRoute("api default", "api/{controller}/{action?}");
+                    routeBuilder.MapRoute("api default", "api/{controller}/{action=Get}");
 
                     // Apply test configuration.
                     WebRouteConfiguration config = new WebRouteConfiguration(routeBuilder);
@@ -310,26 +314,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     // Apply filters
                     if (config.EnableQueryAttributeFilter != null && options != null)
                     {
-                        var provider = options.Value.Filters
-                            .OfType<DelayLoadFilterProvider<EnableQueryAttribute>>()
-                            .FirstOrDefault();
-
-                        if (provider != null)
-                        {
-                            provider.WrappedFilter = config.EnableQueryAttributeFilter;
-                        }
+                        enableQueryProvider.WrappedFilter = config.EnableQueryAttributeFilter;
                     }
 
                     if (config.IActionFilterFilter != null && options != null)
                     {
-                        var provider = options.Value.Filters
-                            .OfType<DelayLoadFilterProvider<IActionFilter>>()
-                            .FirstOrDefault();
-
-                        if (provider != null)
-                        {
-                            provider.WrappedFilter = config.IActionFilterFilter;
-                        }
+                        actionFilterProvider.WrappedFilter = config.IActionFilterFilter;
                     }
 
                     if (config.ETagMessageHandlerFilter != null && options != null)

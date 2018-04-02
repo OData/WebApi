@@ -57,7 +57,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new CustomEntityRoutingConvention());
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), conventions);
+#if NETCORE
+            config.MapHttpRoute("api", "api/{controller}/{keyAsCustomer}", new { action = "Get", keyAsCustomer = new BindCustomer { Id = -1 } });
+#else
             config.MapHttpRoute("api", "api/{controller}/{keyAsCustomer}", new { keyAsCustomer = new BindCustomer { Id = -1 } });
+#endif
         }
 
         private static IEdmModel GetModel(WebRouteConfiguration config)
@@ -76,8 +80,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(expectedStatusCode, (int)response.StatusCode);
-            dynamic content = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(key, (int)content.Id);
+            JObject content = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(key, content["Id"]);
         }
 
         [Theory]
@@ -88,8 +92,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(expectedStatusCode, (int)response.StatusCode);
-            dynamic content = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(0, (int)content.Id);
+            JObject content = await response.Content.ReadAsObject<JObject>();
+#if NETCORE
+            Assert.Equal(0, content["id"]);
+#else
+            Assert.Equal(0, content["Id"]);
+#endif
         }
     }
 
@@ -111,7 +119,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
 
             if (result != null && conventionStore != null)
             {
-                conventionStore["keyAsCustomer"] = new BindCustomer { Id = (int)routeData["key"] };
+                conventionStore["keyAsCustomer.Id"] = (int)routeData["key"];
             }
 
             return result;

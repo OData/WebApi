@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
         #region Update
         [HttpPut]
         [ODataRoute]
-        public ITestActionResult UpdateCompanyByPut(Company newCompany)
+        public ITestActionResult UpdateCompanyByPut([FromBody] Company newCompany)
         {
             MonstersInc = newCompany;
             return StatusCode(HttpStatusCode.NoContent);
@@ -120,7 +120,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPut]
         [ODataRoute("Microsoft.Test.E2E.AspNet.OData.Singleton.SubCompany")]
-        public ITestActionResult UpdateCompanyByPutWithDerivedTypeObject(SubCompany newCompany)
+        public ITestActionResult UpdateCompanyByPutWithDerivedTypeObject([FromBody] SubCompany newCompany)
         {
             MonstersInc = newCompany;
             return StatusCode(HttpStatusCode.NoContent);
@@ -128,7 +128,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
         [HttpPatch]
         [ODataRoute]
-        public ITestActionResult UpdateCompanyByPatch(Delta<Company> item)
+        public ITestActionResult UpdateCompanyByPatch([FromBody] Delta<Company> item)
         {
             item.Patch(MonstersInc);
             return StatusCode(HttpStatusCode.NoContent);

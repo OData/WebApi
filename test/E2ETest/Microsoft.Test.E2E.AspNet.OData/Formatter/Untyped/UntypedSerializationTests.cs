@@ -119,7 +119,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             request.Content = new StringContent(untypedCustomer.ToString());
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(request);
-            Console.WriteLine(await response.Content.ReadAsStringAsync());
             Assert.True(response.IsSuccessStatusCode);
 
             HttpRequestMessage getRequest = new HttpRequestMessage(HttpMethod.Get, string.Format("{0}{1}({2})?$expand=Orders", BaseAddress, url, i));

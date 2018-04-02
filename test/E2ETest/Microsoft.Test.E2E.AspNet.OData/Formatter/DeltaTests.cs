@@ -5,29 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.OData.Client;
-using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
-using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
-using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
-using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
-using Xunit;
-#else
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData;
@@ -42,6 +23,32 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Dynamic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using System.Xml.Linq;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Client;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
@@ -296,7 +303,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(todo.XElement.Replace(" ", string.Empty).Replace(Environment.NewLine, string.Empty),
                 actual.XElement.Replace(" ", string.Empty).Replace(Environment.NewLine, string.Empty));
 
-            // clear respository
+            // clear repository
             await this.ClearRepositoryAsync("DeltaTests_Todoes");
         }
 
@@ -343,14 +350,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return builder.GetEdmModel();
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Fact]
         public async Task PutShouldntOverrideNavigationProperties()
         {
-            HttpRequestMessage put = new HttpRequestMessage(HttpMethod.Put, BaseAddress + "/odata/DeltaCustomers(5)");
-            dynamic data = new ExpandoObject();
-            put.Content = new ObjectContent<dynamic>(data, new JsonMediaTypeFormatter());
-            HttpResponseMessage response = await Client.SendAsync(put);
+            string putUri = BaseAddress + "/odata/DeltaCustomers(5)";
+            ExpandoObject data = new ExpandoObject();
+            HttpResponseMessage response = await Client.PutAsJsonAsync(putUri, data);
             Assert.True(response.IsSuccessStatusCode);
 
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(0)?$expand=Orders");
@@ -359,7 +364,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             dynamic query = await response.Content.ReadAsObject<JObject>();
             Assert.Equal(3, query.Orders.Count);
         }
-#endif
     }
 
     public class PatchtDeltaOfTTests : WebHostTestBase
@@ -384,15 +388,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return builder.GetEdmModel();
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Fact]
         public async Task PatchShouldSupportNonSettableCollectionProperties()
         {
             HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
             dynamic data = new ExpandoObject();
             data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
-            patch.Content = new ObjectContent<dynamic>(data, new JsonMediaTypeFormatter());
+            string content = JsonConvert.SerializeObject(data);
+            patch.Content = new StringContent(content);
+            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(patch);
+
             Assert.True(response.IsSuccessStatusCode);
 
             HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
@@ -402,7 +408,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(3, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
-#endif
     }
 
     public class DeltaCustomersController : TestODataController

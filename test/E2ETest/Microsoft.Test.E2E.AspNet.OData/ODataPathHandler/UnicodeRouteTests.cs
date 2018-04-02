@@ -60,6 +60,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
             return mb.GetEdmModel();
         }
 
+#if NETFX
+        /// <remarks>
+        /// This test fails on AspNetCore due to Kestrel not allowing non-ASCII characters in headers.
+        /// See: https://github.com/aspnet/KestrelHttpServer/issues/1144
+        /// </remarks>
         [Fact]
         public async Task CRUDEntitySetShouldWork()
         {
@@ -99,7 +104,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
             var entities = await GetEntitiesAsync(uri, entitySetName);
             Assert.Empty(entities.ToList());
         }
-
+#endif
         private DataServiceContext CreateClient(Uri address)
         {
             var client = new DataServiceContext(address, ODataProtocolVersion.V4);

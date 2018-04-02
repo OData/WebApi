@@ -3,11 +3,16 @@
 
 #if NETCORE
 using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Newtonsoft.Json;
+using Xunit;
 #else
 using System.Collections.Generic;
 using System.Net.Http;
@@ -19,6 +24,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Newtonsoft.Json;
 using Xunit;
 #endif
 
@@ -109,6 +115,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             var content = await response.Content.ReadAsStringAsync();
             Assert.Contains("The depth limit for entries in nested expanded navigation links was reached", content);
         }
+#endif
 
         [Theory]
         [InlineData("application/json")]
@@ -132,7 +139,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             model.NavigationCollection = navigationList;
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, this.BaseAddress + "/Security_ArrayModel");
-            request.Content = new ObjectContent<Security_ArrayModel>(model, new JsonMediaTypeFormatter(), MediaTypeHeaderValue.Parse(mediaType));
+            request.Content = new StringContent(JsonConvert.SerializeObject(model));
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse(mediaType);
             var response = await this.Client.SendAsync(request);
 
             response.EnsureSuccessStatusCode();
@@ -146,13 +154,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             AttackStringBuilder asb = new AttackStringBuilder();
             asb.Append("3.0").Repeat("0", 100000);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, this.BaseAddress + "/Security_ArrayModel");
-
-            request.Content = new ObjectContent<Security_ArrayModel>(model, new JsonMediaTypeFormatter(), MediaTypeHeaderValue.Parse("application/json"));
+            request.Content = new StringContent(JsonConvert.SerializeObject(model));
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Add("DataServiceVersion", asb.ToString());
             var response = await this.Client.SendAsync(request);
 
             Assert.False(response.IsSuccessStatusCode);
         }
-#endif
     }
 }

@@ -160,7 +160,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 
         [NonAction]
 #if NETCORE
-        public new TestCreatedODataResult<object> Created(string uri, object entity) { return new TestCreatedODataResult<object>(uri, entity); }
+        public new TestCreatedResult Created(string uri, object entity) { return new TestCreatedResult(base.Created(uri, entity)); }
 #else
         public new TestCreatedResult<T> Created<T>(string uri, T entity) { return new TestCreatedResult<T>(base.Created<T>(uri, entity)); }
 #endif
@@ -175,9 +175,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
         protected string GetServiceRootUri()
         {
 #if NETCORE
+            string routeName = Request.ODataFeature().RouteName;
             StringBuilder requestLeftPartBuilder = new StringBuilder(Request.Scheme);
             requestLeftPartBuilder.Append("://");
             requestLeftPartBuilder.Append(Request.Host.HasValue ? Request.Host.Value : Request.Host.ToString());
+            if (!string.IsNullOrEmpty(routeName))
+            {
+                requestLeftPartBuilder.Append("/");
+                requestLeftPartBuilder.Append(routeName);
+            }
+
             return requestLeftPartBuilder.ToString();
 #else
             var routeName = Request.ODataProperties().RouteName;
@@ -206,6 +213,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
         {
             return Request.GetKeyValue<T>(value);
         }
+
+#if NETCORE
+        protected bool Validate(object model)
+        {
+            return TryValidateModel(model);
+        }
+#endif
     }
 
     /// <summary>
@@ -343,12 +357,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for BadRequestObjectResult
     /// </summary>
 #if NETCORE
-    public class TestBadRequestObjectResult : TestObjectResult
+    public class TestBadRequestObjectResult : TestActionResult
     {
-        public TestBadRequestObjectResult(object innerResult)
+        public TestBadRequestObjectResult(BadRequestObjectResult innerResult)
             : base(innerResult)
         {
-            this.StatusCode = 400;
         }
     }
 #else
@@ -425,10 +438,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for CreatedResult
     /// </summary>
 #if NETCORE
-    public class TestCreatedResult<T> : CreatedODataResult<T>, ITestActionResult
+    public class TestCreatedResult: TestActionResult
     {
-        public TestCreatedResult(string uri, T entity)
-            : base(entity)
+        public TestCreatedResult(CreatedResult innerResult)
+            : base(innerResult)
         {
         }
     }

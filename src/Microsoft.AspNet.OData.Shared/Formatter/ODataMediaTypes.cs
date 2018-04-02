@@ -14,17 +14,17 @@ namespace Microsoft.AspNet.OData.Formatter
     internal static class ODataMediaTypes
     {
         public static readonly string ApplicationJson = "application/json";
-        public static readonly string ApplicationJsonODataFullMetadata = "application/json; odata.metadata=full";
-        public static readonly string ApplicationJsonODataFullMetadataStreamingFalse = "application/json; odata.metadata=full; odata.streaming=false";
-        public static readonly string ApplicationJsonODataFullMetadataStreamingTrue = "application/json; odata.metadata=full; odata.streaming=true";
-        public static readonly string ApplicationJsonODataMinimalMetadata = "application/json; odata.metadata=minimal";
-        public static readonly string ApplicationJsonODataMinimalMetadataStreamingFalse = "application/json; odata.metadata=minimal; odata.streaming=false";
-        public static readonly string ApplicationJsonODataMinimalMetadataStreamingTrue = "application/json; odata.metadata=minimal; odata.streaming=true";
-        public static readonly string ApplicationJsonODataNoMetadata = "application/json; odata.metadata=none";
-        public static readonly string ApplicationJsonODataNoMetadataStreamingFalse = "application/json; odata.metadata=none; odata.streaming=false";
-        public static readonly string ApplicationJsonODataNoMetadataStreamingTrue = "application/json; odata.metadata=none; odata.streaming=true";
-        public static readonly string ApplicationJsonStreamingFalse = "application/json; odata.streaming=false";
-        public static readonly string ApplicationJsonStreamingTrue = "application/json; odata.streaming=true";
+        public static readonly string ApplicationJsonODataFullMetadata = "application/json;odata.metadata=full";
+        public static readonly string ApplicationJsonODataFullMetadataStreamingFalse = "application/json;odata.metadata=full;odata.streaming=false";
+        public static readonly string ApplicationJsonODataFullMetadataStreamingTrue = "application/json;odata.metadata=full;odata.streaming=true";
+        public static readonly string ApplicationJsonODataMinimalMetadata = "application/json;odata.metadata=minimal";
+        public static readonly string ApplicationJsonODataMinimalMetadataStreamingFalse = "application/json;odata.metadata=minimal;odata.streaming=false";
+        public static readonly string ApplicationJsonODataMinimalMetadataStreamingTrue = "application/json;odata.metadata=minimal;odata.streaming=true";
+        public static readonly string ApplicationJsonODataNoMetadata = "application/json;odata.metadata=none";
+        public static readonly string ApplicationJsonODataNoMetadataStreamingFalse = "application/json;odata.metadata=none;odata.streaming=false";
+        public static readonly string ApplicationJsonODataNoMetadataStreamingTrue = "application/json;odata.metadata=none;odata.streaming=true";
+        public static readonly string ApplicationJsonStreamingFalse = "application/json;odata.streaming=false";
+        public static readonly string ApplicationJsonStreamingTrue = "application/json;odata.streaming=true";
         public static readonly string ApplicationXml = "application/xml";
 
         public static ODataMetadataLevel GetMetadataLevel(string mediaType, IEnumerable<KeyValuePair<string, string>> parameters)

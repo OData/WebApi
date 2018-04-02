@@ -20,77 +20,77 @@ namespace Microsoft.Test.OData.WebApi.AspNet.Formatter
         [Fact]
         public void ApplicationJsonODataFullMetadata_Value()
         {
-            Assert.Equal("application/json; odata.metadata=full",
+            Assert.Equal("application/json;odata.metadata=full",
                 ODataMediaTypes.ApplicationJsonODataFullMetadata.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=full; odata.streaming=false",
+            Assert.Equal("application/json;odata.metadata=full;odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataFullMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=full; odata.streaming=true",
+            Assert.Equal("application/json;odata.metadata=full;odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataMinimalMetadata_Value()
         {
-            Assert.Equal("application/json; odata.metadata=minimal",
+            Assert.Equal("application/json;odata.metadata=minimal",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadata.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=minimal; odata.streaming=false",
+            Assert.Equal("application/json;odata.metadata=minimal;odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataMinimalMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=minimal; odata.streaming=true",
+            Assert.Equal("application/json;odata.metadata=minimal;odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataNoMetadata_Value()
         {
-            Assert.Equal("application/json; odata.metadata=none",
+            Assert.Equal("application/json;odata.metadata=none",
                 ODataMediaTypes.ApplicationJsonODataNoMetadata.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.metadata=none; odata.streaming=false",
+            Assert.Equal("application/json;odata.metadata=none;odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse.ToString());
         }
 
         [Fact]
         public void ApplicationJsonODataNoMetadataStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.metadata=none; odata.streaming=true",
+            Assert.Equal("application/json;odata.metadata=none;odata.streaming=true",
                 ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue.ToString());
         }
 
         [Fact]
         public void ApplicationJsonStreamingFalse_Value()
         {
-            Assert.Equal("application/json; odata.streaming=false",
+            Assert.Equal("application/json;odata.streaming=false",
                 ODataMediaTypes.ApplicationJsonStreamingFalse.ToString());
         }
 
         [Fact]
         public void ApplicationJsonStreamingTrue_Value()
         {
-            Assert.Equal("application/json; odata.streaming=true", ODataMediaTypes.ApplicationJsonStreamingTrue.ToString());
+            Assert.Equal("application/json;odata.streaming=true", ODataMediaTypes.ApplicationJsonStreamingTrue.ToString());
         }
 
         [Fact]

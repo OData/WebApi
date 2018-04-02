@@ -3,20 +3,9 @@
 
 #if NETCORE
 using System.Collections.Generic;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common;
-using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
-using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
-#else
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -27,6 +16,24 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Newtonsoft.Json;
+using Xunit;
+#else
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.Common;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Newtonsoft.Json;
 using Xunit;
 #endif
 
@@ -68,18 +75,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Routing
             }
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [MemberData(nameof(AddRelatedObjectConventionsWorkPropertyData))]
         public async Task AddRelatedObjectConventionsWork(string method, string url)
         {
             object data = new AROOrder() { Id = 5 };
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), BaseAddress + url);
-            request.Content = new ObjectContent(data.GetType(), data, new JsonMediaTypeFormatter());
+            request.Content = new StringContent(JsonConvert.SerializeObject(data));
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
-#endif
     }
 
     public class AROCustomer

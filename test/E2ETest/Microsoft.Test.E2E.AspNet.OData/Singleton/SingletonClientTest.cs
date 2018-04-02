@@ -86,7 +86,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             Assert.NotNull(umbrella.Partners);
 
             // Add navigation target which is a singleton to entity
-            partner = ClientContext.Partners.Where(p => p.ID == partner2.ID).Single();
+            partner = await Task.Factory.FromAsync(ClientContext.Partners.BeginExecute(null, null), (asyncResult) =>
+            {
+                return ClientContext.Partners.EndExecute(asyncResult).Where(p => p.ID == partner2.ID).Single();
+            });
+
             ClientContext.SetLink(partner, "Company", umbrella);
             await ClientContext.SaveChangesAsync();
 
@@ -106,7 +110,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             ClientContext.DeleteLink(umbrella, "Partners", partner);
             await ClientContext.SaveChangesAsync();
 
-            umbrella = ClientContext.Umbrella.Expand(u => u.Partners).Single();
+            var umbrellaQuery = ClientContext.Umbrella.Expand(u => u.Partners);
+            umbrella = await Task.Factory.FromAsync(umbrellaQuery.BeginExecute(null, null), (asyncResult) =>
+            {
+                return umbrellaQuery.EndExecute(asyncResult).Single();
+            });
+
             Assert.Single(umbrella.Partners);
         }
 

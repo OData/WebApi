@@ -14,13 +14,12 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 #else
 using System;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -30,6 +29,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 #endif
 
@@ -62,13 +62,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/PropertyCustomers(1)");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-#if !NETCORE // TODO #939: Enable this check for AspNetCore
-            PropertyCustomer customer = await response.Content.ReadAsAsync<PropertyCustomer>(Enumerable.Range(0, 1).Select(f => new JsonMediaTypeFormatter()));
+            PropertyCustomer customer = await response.Content.ReadAsObject<PropertyCustomer>();
             Assert.NotNull(customer);
             Assert.Equal(1, customer.Id);
             Assert.Equal("Name 1", customer.Name);
             Assert.Null(customer.Secret);
-#endif
         }
     }
 
@@ -101,13 +99,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/PropertyCustomers(1)");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-#if !NETCORE // TODO #939: Enable this check for AspNetCore
-            PropertyCustomer customer = await response.Content.ReadAsAsync<PropertyCustomer>(Enumerable.Range(0, 1).Select(f => new JsonMediaTypeFormatter()));
+            PropertyCustomer customer = await response.Content.ReadAsObject<PropertyCustomer>();
             Assert.NotNull(customer);
             Assert.Equal(1, customer.Id);
             Assert.Equal("Name 1", customer.Name);
             Assert.Null(customer.Secret);
-#endif
         }
     }
 

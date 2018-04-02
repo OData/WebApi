@@ -71,8 +71,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         [MemberData(nameof(FuzzingQueries))]
         public async Task TestFuzzingQueries(string filter)
         {
-            var handler = typeof(HttpMessageInvoker).GetField("handler", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(this.Client) as HttpMessageHandler;
-            this.Client = new HttpClient(handler);
             Stopwatch sw = new Stopwatch();
             sw.Start();
             var response = await this.Client.GetAsync(this.BaseAddress + "/api/Fuzzing?$top=1&" + filter);

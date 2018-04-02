@@ -30,7 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 #if NETCORE
-            configuration.MapHttpRoute("api", "api/{controller}/{id?}");
+            configuration.MapHttpRoute("api", "api/{controller}/{id?}", defaults: new { action = "Get" });
 #else
             configuration.MapHttpRoute("api", "api/{controller}/{id}", new { id = System.Web.Http.RouteParameter.Optional });
 #endif

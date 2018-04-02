@@ -2,6 +2,20 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
+using System.Collections.Generic;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Xunit;
 #else
 using System.Collections.Generic;
 using System.Net;
@@ -23,7 +37,6 @@ using HttpClientExtensions = System.Net.Http.HttpClientExtensions;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
-#if !NETCORE // TODO #939: Enable these tests for AspNetCore
     public class SingletonTest : WebHostTestBase
     {
         private const string NameSpace = "Microsoft.Test.E2E.AspNet.OData.Singleton";
@@ -160,8 +173,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             // Negative: Add singleton
             // POST singleton
             var company = new Company();
-            var content = new ObjectContent(company.GetType(), company, new JsonMediaTypeFormatter());
-            response = await this.Client.PostAsync(requestUri, content);
+            response = await this.Client.PostAsJsonAsync(requestUri, company);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
 
             // Negative: Delete singleton
@@ -223,9 +235,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             // Add Partner to Company by "Deep Insert"
             // POST singleton/Partners
             Partner partner = new Partner() { ID = 100, Name = "NewHire" };
-            request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Content = new ObjectContent(partner.GetType(), partner, new JsonMediaTypeFormatter());
-            response = await Client.SendAsync(request);
+            response = await this.Client.PostAsJsonAsync(requestUri, partner);
             response.EnsureSuccessStatusCode();
 
             // GET singleton/Partners
@@ -312,8 +322,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // Negative: POST Partners(1)/Company
             var company = new Company();
-            var content = new ObjectContent(company.GetType(), company, new JsonMediaTypeFormatter());
-            response = await this.Client.PostAsync(requestUri, content);
+            response = await this.Client.PostAsJsonAsync(requestUri, company);
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
@@ -377,16 +386,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 
             // POST /singleton/Partners
             Partner partner = new Partner() { ID = 100, Name = "NewHire" };
-            var request = new HttpRequestMessage(HttpMethod.Post, requestUri + "/Partners");
-            request.Content = new ObjectContent(partner.GetType(), partner, new JsonMediaTypeFormatter());
-            response = await Client.SendAsync(request);
+            response = await this.Client.PostAsJsonAsync(requestUri + "/Partners", partner);
             response.EnsureSuccessStatusCode();
 
             // POST /singleton/Partners
             partner = new Partner() { ID = 101, Name = "NewHire2" };
-            request = new HttpRequestMessage(HttpMethod.Post, requestUri + "/Partners");
-            request.Content = new ObjectContent(partner.GetType(), partner, new JsonMediaTypeFormatter());
-            response = await Client.SendAsync(request);
+            response = await this.Client.PostAsJsonAsync(requestUri + "/Partners", partner);
             response.EnsureSuccessStatusCode();
 
             // GET /singleton?$expand=Partners($select=Name)
@@ -398,7 +403,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             // PUT Partners(1)/Company/$ref
             var navigationUri = string.Format(this.BaseAddress + "/{0}/Partners(1)/Company/$ref", model);
             string idLinkBase = string.Format(this.BaseAddress + "/{0}/{1}", model, singletonName);
-            request = new HttpRequestMessage(HttpMethod.Put, navigationUri);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, navigationUri);
             request.Content = new StringContent("{ \"@odata.id\" : \"" + idLinkBase + "\"}");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             response = await Client.SendAsync(request);
@@ -420,5 +425,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton
             return response;
         }
     }
-#endif
 }

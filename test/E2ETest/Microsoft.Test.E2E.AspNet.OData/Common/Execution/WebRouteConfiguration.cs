@@ -108,7 +108,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// </summary>
         public int? MaxReceivedMessageSize { get; set; }
 
-
         /// <summary>
         /// An instance of EnableQueryAttribute.
         /// </summary>

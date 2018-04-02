@@ -16,6 +16,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Xunit;
 #else
 using System;
@@ -115,7 +116,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
         [HttpPost]
-        public IQueryable<ValidatorTests_Todo> ValidateOptions([FromBody]ODataValidationSettings settings, ODataQueryOptions options)
+        public ITestActionResult ValidateOptions([FromBody]ODataValidationSettings settings, ODataQueryOptions<ValidatorTests_Todo> options)
         {
             try
             {
@@ -123,13 +124,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
             catch (ODataException ex)
             {
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
-                throw new System.Web.Http.HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-#else
-                throw ex;
-#endif
+                return BadRequest(ex.Message);
             }
-            return options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>;
+
+            return Ok(options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>);
         }
 
         [HttpGet]
@@ -140,7 +138,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
         [HttpGet]
-        public IQueryable<ValidatorTests_Todo> ValidateWithCustomValidator(ODataQueryOptions options)
+        public ITestActionResult ValidateWithCustomValidator(ODataQueryOptions<ValidatorTests_Todo> options)
         {
             if (options.Filter != null)
             {
@@ -156,13 +154,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
             catch (ODataException ex)
             {
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
-                throw new System.Web.Http.HttpResponseException(this.Request.CreateErrorResponse(HttpStatusCode.BadRequest, ex));
-#else
-                throw ex;
-#endif
+                return BadRequest(ex.Message);
             }
-            return options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>;
+
+            return Ok(options.ApplyTo(todoes.AsQueryable()) as IQueryable<ValidatorTests_Todo>);
         }
     }
 
@@ -296,7 +291,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [MemberData(nameof(ValidateOptionsData))]
         public async Task VerifyValidateOptions(string query, bool success)
@@ -313,9 +307,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             settings.AllowedOrderByProperties.Add("ID");
             settings.AllowedOrderByProperties.Add("DateTime");
 
-            var response = await this.Client.PostAsync(
-                this.BaseAddress + "/api/ValidatorTests/ValidateOptions?" + query,
-                new ObjectContent<ODataValidationSettings>(settings, new JsonMediaTypeFormatter()));
+            var response = await this.Client.PostAsJsonAsync(this.BaseAddress + "/api/ValidatorTests/ValidateOptions?" + query, settings);
             if (success)
             {
                 response.EnsureSuccessStatusCode();
@@ -325,7 +317,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
-#endif
+
         [Theory]
         [MemberData(nameof(AllowedFunctionsData))]
         public void VerifyAllowedFunctions(AllowedFunctions value1, AllowedFunctions value2)

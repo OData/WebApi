@@ -47,7 +47,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Validation
             get
             {
                 TheoryDataSet<int, string> data = new TheoryDataSet<int, string>();
-                data.Add((int)HttpStatusCode.BadRequest, "ExtraProperty : The field ExtraProperty must match the regular expression 'Some value'.\r\n");
+                data.Add((int)HttpStatusCode.BadRequest, "The field ExtraProperty must match the regular expression 'Some value'");
                 data.Add((int)HttpStatusCode.OK, "");
                 return data;
             }
@@ -76,10 +76,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Validation
             Assert.Equal(expectedResponseCode, (int)response.StatusCode);
             if (response.StatusCode == HttpStatusCode.BadRequest)
             {
-                dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
-                Assert.Equal(message, result["error"].innererror.message.Value);
+                var result = await response.Content.ReadAsStringAsync();
+                Assert.Contains(message, result);
             }
-
         }
     }
 
@@ -99,9 +98,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Validation
         {
             PatchCustomer c = new PatchCustomer() { Id = key, ExtraProperty = "Some value" };
             patch.Patch(c);
-#if !NETCORE // TODO #939: Enable this check for AspNetCore
             Validate(c);
-#endif
+
             if (ModelState.IsValid)
             {
                 return Ok(c);

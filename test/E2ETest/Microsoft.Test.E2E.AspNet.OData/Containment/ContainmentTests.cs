@@ -2,10 +2,25 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData;
+using Microsoft.OData.Client;
+using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
+using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
+using Newtonsoft.Json.Linq;
+using Xunit;
 #else
 using System;
 using System.Collections.Generic;
@@ -82,7 +97,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             configuration.EnsureInitialized();
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
@@ -1130,7 +1144,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
             Assert.DoesNotContain(changedAccountsList, (x) => x.AccountID == accountToDelete.AccountID);
 
-            Proxy.Account account = newClient.Accounts.Where(a => a.AccountID == 100).Single();
+            Proxy.Account account = await Task.Factory.FromAsync(newClient.Accounts.BeginExecute(null, null), (asyncResult) =>
+            {
+                return newClient.Accounts.EndExecute(asyncResult).Where(a => a.AccountID == 100).Single();
+            });
+
             await newClient.LoadPropertyAsync(account, "PayinPIs");
             var payinPIList = account.PayinPIs.ToList();
 
@@ -1147,6 +1165,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var response = await this.Client.PostAsync(uriReset, null);
             return response;
         }
-#endif
     }
 }

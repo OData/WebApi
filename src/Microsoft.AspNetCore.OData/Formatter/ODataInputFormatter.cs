@@ -77,8 +77,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("type");
             }
 
-            ODataDeserializerProvider deserializerProvider = request.ODataFeature()
-                .RequestContainer.GetRequiredService<ODataDeserializerProvider>();
+            ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
             return ODataInputFormatterHelper.CanReadType(
                 type,
@@ -141,8 +140,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 List<IDisposable> toDispose = new List<IDisposable>();
 
-                ODataDeserializerProvider deserializerProvider = request.ODataFeature()
-                    .RequestContainer.GetRequiredService<ODataDeserializerProvider>();
+                ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
                 object result = ODataInputFormatterHelper.ReadFromStream(
                     type,

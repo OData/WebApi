@@ -27,7 +27,7 @@ using Microsoft.Test.AspNet.OData.Common;
 
 namespace Microsoft.Test.AspNet.OData.Query
 {
-    public class QueryCompositionPrimitiveController : TestControllerBase
+    public class QueryCompositionPrimitiveController : TestNonODataController
     {
         [EnableQuery]
         public IQueryable<int> GET()
@@ -36,7 +36,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerController : TestControllerBase
+    public class QueryCompositionCustomerController : TestNonODataController
     {
         internal static List<QueryCompositionCustomer> CustomerList = new List<QueryCompositionCustomer>
             {  
@@ -91,7 +91,7 @@ namespace Microsoft.Test.AspNet.OData.Query
     }
 
     [EnableQuery]
-    public class QueryCompositionCustomerQueryableController : TestControllerBase
+    public class QueryCompositionCustomerQueryableController : TestNonODataController
     {
         public IQueryable<QueryCompositionCustomer> Get()
         {
@@ -99,7 +99,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerWithTaskOfIEnumerableController : TestControllerBase
+    public class QueryCompositionCustomerWithTaskOfIEnumerableController : TestNonODataController
     {
         [EnableQuery]
         public Task<IEnumerable<QueryCompositionCustomer>> Get()
@@ -108,7 +108,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerGlobalController : TestControllerBase
+    public class QueryCompositionCustomerGlobalController : TestNonODataController
     {
         public IQueryable<QueryCompositionCustomer> Get()
         {
@@ -116,7 +116,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerValidationController : TestControllerBase
+    public class QueryCompositionCustomerValidationController : TestNonODataController
     {
         [EnableQuery(MaxSkip = 1, MaxTop = 2, AllowedArithmeticOperators = AllowedArithmeticOperators.Modulo, AllowedFunctions = AllowedFunctions.Length,
             AllowedLogicalOperators = AllowedLogicalOperators.Equal, AllowedOrderByProperties = "Id,Name")]
@@ -127,7 +127,7 @@ namespace Microsoft.Test.AspNet.OData.Query
     }
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
-    public class QueryCompositionCustomerLowLevelController : TestControllerBase
+    public class QueryCompositionCustomerLowLevelController : TestNonODataController
     {
         // demo 2: low level APIs
         public IQueryable<QueryCompositionCustomer> Get(ODataQueryOptions queryOptions)
@@ -151,7 +151,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionCustomerLowLevel_ODataQueryOptionsOfTController : TestControllerBase
+    public class QueryCompositionCustomerLowLevel_ODataQueryOptionsOfTController : TestNonODataController
     {
         public int GetCount(ODataQueryOptions<QueryCompositionCustomer> queryOptions)
         {
@@ -175,7 +175,7 @@ namespace Microsoft.Test.AspNet.OData.Query
     }
 #endif
 
-    public class QueryCompositionCategoryController : TestControllerBase
+    public class QueryCompositionCategoryController : TestNonODataController
     {
         [EnableQuery]
         public IQueryable<QueryCompositionCategory> Get()
@@ -184,7 +184,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         }
     }
 
-    public class QueryCompositionAnonymousTypesController : TestControllerBase
+    public class QueryCompositionAnonymousTypesController : TestNonODataController
     {
         [EnableQuery]
         public IQueryable Get()

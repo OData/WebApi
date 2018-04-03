@@ -1179,7 +1179,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 #endif
     }
 
-    public class EntityModelsController : TestControllerBase
+    public class EntityModelsController : TestNonODataController
     {
         private static readonly IQueryable<ODataQueryOptionTest_EntityModel> _entityModels;
 

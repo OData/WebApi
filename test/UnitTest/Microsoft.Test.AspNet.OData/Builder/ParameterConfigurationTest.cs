@@ -59,7 +59,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
                 edmTypeConfiguration);
 
             // Assert
-            Assert.Equal(isNullable, parameter.OptionalParameter);
+            Assert.Equal(isNullable, parameter.Nullable);
         }
 
         [Theory]
@@ -89,7 +89,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             NonbindingParameterConfiguration parameter = new NonbindingParameterConfiguration("name", collectionType);
 
             // Assert
-            Assert.Equal(isNullable, parameter.OptionalParameter);
+            Assert.Equal(isNullable, parameter.Nullable);
         }
     }
 }

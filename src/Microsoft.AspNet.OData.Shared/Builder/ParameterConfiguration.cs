@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Builder
             TypeConfiguration = parameterType;
 
             Type elementType;
-            OptionalParameter = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
+            Nullable = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
                 ? EdmLibHelpers.IsNullable(elementType)
                 : EdmLibHelpers.IsNullable(parameterType.ClrType);
         }
@@ -48,8 +48,8 @@ namespace Microsoft.AspNet.OData.Builder
         public IEdmTypeConfiguration TypeConfiguration { get; protected set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this parameter is optional or not.
+        /// Gets or sets a value indicating whether this parameter is nullable or not.
         /// </summary>
-        public bool OptionalParameter { get; set; }
+        public bool Nullable { get; set; }
     }
 }

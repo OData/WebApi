@@ -1047,7 +1047,7 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
 	string Name  { public get; protected set; }
-	bool OptionalParameter  { public get; public set; }
+	bool Nullable  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
 }
 
@@ -2765,6 +2765,9 @@ public sealed class Microsoft.AspNet.OData.Query.UnsortableAttribute : System.At
 public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IActionResult {
 	public CreatedODataResult`1 (T entity)
 
+	[
+	AsyncStateMachineAttribute(),
+	]
 	public virtual System.Threading.Tasks.Task ExecuteResultAsync (Microsoft.AspNetCore.Mvc.ActionContext context)
 }
 

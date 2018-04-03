@@ -195,8 +195,8 @@ namespace Microsoft.AspNet.OData.Builder
         {
             foreach (ParameterConfiguration parameter in operationConfiguration.Parameters)
             {
-                bool isParameterOptional = parameter.OptionalParameter;
-                IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterOptional);
+                bool isParameterNullable = parameter.Nullable;
+                IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterNullable);
                 IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
                 operation.AddParameter(operationParameter);
             }

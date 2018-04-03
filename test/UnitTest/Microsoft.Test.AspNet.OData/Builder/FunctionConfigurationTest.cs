@@ -338,29 +338,29 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ODataModelBuilder builder = new ODataModelBuilder();
             FunctionConfiguration function = builder.Function("MyFunction");
             function.Parameter<string>("p0");
-            function.Parameter<string>("p1").OptionalParameter = false;
-            function.Parameter<int>("p2").OptionalParameter = true;
+            function.Parameter<string>("p1").Nullable = false;
+            function.Parameter<int>("p2").Nullable = true;
             function.Parameter<int>("p3");
             function.Parameter<Address>("p4");
-            function.Parameter<Address>("p5").OptionalParameter = false;
+            function.Parameter<Address>("p5").Nullable = false;
 
             function.CollectionParameter<ZipCode>("p6");
-            function.CollectionParameter<ZipCode>("p7").OptionalParameter = false;
+            function.CollectionParameter<ZipCode>("p7").Nullable = false;
 
             Dictionary<string, ParameterConfiguration> parameters = function.Parameters.ToDictionary(e => e.Name, e => e);
 
             // Assert
-            Assert.True(parameters["p0"].OptionalParameter);
-            Assert.False(parameters["p1"].OptionalParameter);
+            Assert.True(parameters["p0"].Nullable);
+            Assert.False(parameters["p1"].Nullable);
 
-            Assert.True(parameters["p2"].OptionalParameter);
-            Assert.False(parameters["p3"].OptionalParameter);
+            Assert.True(parameters["p2"].Nullable);
+            Assert.False(parameters["p3"].Nullable);
 
-            Assert.True(parameters["p4"].OptionalParameter);
-            Assert.False(parameters["p5"].OptionalParameter);
+            Assert.True(parameters["p4"].Nullable);
+            Assert.False(parameters["p5"].Nullable);
 
-            Assert.True(parameters["p6"].OptionalParameter);
-            Assert.False(parameters["p7"].OptionalParameter);
+            Assert.True(parameters["p6"].Nullable);
+            Assert.False(parameters["p7"].Nullable);
         }
 
         [Fact]
@@ -697,13 +697,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var functionBuilder = movie.Function("Watch");
 
-            functionBuilder.Parameter<string>("string").OptionalParameter = false;
+            functionBuilder.Parameter<string>("string").Nullable = false;
             functionBuilder.Parameter<string>("nullaleString");
 
-            functionBuilder.Parameter<Address>("address").OptionalParameter = false;
+            functionBuilder.Parameter<Address>("address").Nullable = false;
             functionBuilder.Parameter<Address>("nullableAddress");
 
-            functionBuilder.CollectionParameter<Address>("addresses").OptionalParameter = false;
+            functionBuilder.CollectionParameter<Address>("addresses").Nullable = false;
             functionBuilder.CollectionParameter<Address>("nullableAddresses");
             functionBuilder.Returns<int>();
 

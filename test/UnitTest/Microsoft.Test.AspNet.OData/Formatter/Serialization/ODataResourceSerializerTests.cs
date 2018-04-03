@@ -1312,6 +1312,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             // Assert
 #if NETCORE
+            // In ASP.NET Core, it's using the global UriHelper to pick up the first Router to generate the Uri.
+            // Owing that there's no router created in this case, a default OData router will be used to generate the Uri.
+            // The default OData router will add '$metadata' after the route prefix.
             string expectedMetadata = expectedMetadataPrefix + "/$metadata#" + expectedNamespace + "." + expectedActionName;
 #else
             string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;
@@ -1375,6 +1378,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             // Assert
             Assert.NotNull(actualAction);
 #if NETCORE
+            // In ASP.NET Core, it's using the global UriHelper to pick up the first Router to generate the Uri.
+            // Owing that there's no router created in this case, a default OData router will be used to generate the Uri.
+            // The default OData router will add '$metadata' after the route prefix.
             string expectedMetadata = expectedMetadataPrefix + "/$metadata#" + expectedNamespace + "." + expectedActionName;
 #else
             string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;

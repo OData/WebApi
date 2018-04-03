@@ -1002,7 +1002,7 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
 	string Name  { public get; protected set; }
-	bool OptionalParameter  { public get; public set; }
+	bool Nullable  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
 }
 

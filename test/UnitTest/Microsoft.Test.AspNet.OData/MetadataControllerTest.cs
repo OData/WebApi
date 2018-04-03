@@ -575,7 +575,7 @@ namespace Microsoft.Test.AspNet.OData
 
             action = person.Action("NonNullableAction").Returns<FormatterAddress>();
             action.OptionalReturn = false;
-            action.Parameter<string>("param").OptionalParameter = false;
+            action.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
 
             var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
@@ -622,7 +622,7 @@ namespace Microsoft.Test.AspNet.OData
 
             function = person.Function("NonNullableFunction").Returns<FormatterAddress>();
             function.OptionalReturn = false;
-            function.Parameter<string>("param").OptionalParameter = false;
+            function.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
 
             var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });

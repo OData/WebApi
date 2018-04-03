@@ -304,40 +304,40 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ODataModelBuilder builder = new ODataModelBuilder();
             ActionConfiguration action = builder.Action("MyAction");
             action.Parameter<string>("p0");
-            action.Parameter<string>("p1").OptionalParameter = false;
-            action.Parameter<int>("p2").OptionalParameter = true;
+            action.Parameter<string>("p1").Nullable = false;
+            action.Parameter<int>("p2").Nullable = true;
             action.Parameter<int>("p3");
             action.Parameter<Address>("p4");
-            action.Parameter<Address>("p5").OptionalParameter = false;
+            action.Parameter<Address>("p5").Nullable = false;
 
             action.CollectionParameter<ZipCode>("p6");
-            action.CollectionParameter<ZipCode>("p7").OptionalParameter = false;
+            action.CollectionParameter<ZipCode>("p7").Nullable = false;
 
             action.EntityParameter<Customer>("p8");
-            action.EntityParameter<Customer>("p9").OptionalParameter = false;
+            action.EntityParameter<Customer>("p9").Nullable = false;
 
             action.CollectionEntityParameter<Customer>("p10");
-            action.CollectionEntityParameter<Customer>("p11").OptionalParameter = false;
+            action.CollectionEntityParameter<Customer>("p11").Nullable = false;
             Dictionary<string, ParameterConfiguration> parameters = action.Parameters.ToDictionary(e => e.Name, e => e);
 
             // Assert
-            Assert.True(parameters["p0"].OptionalParameter);
-            Assert.False(parameters["p1"].OptionalParameter);
+            Assert.True(parameters["p0"].Nullable);
+            Assert.False(parameters["p1"].Nullable);
 
-            Assert.True(parameters["p2"].OptionalParameter);
-            Assert.False(parameters["p3"].OptionalParameter);
+            Assert.True(parameters["p2"].Nullable);
+            Assert.False(parameters["p3"].Nullable);
 
-            Assert.True(parameters["p4"].OptionalParameter);
-            Assert.False(parameters["p5"].OptionalParameter);
+            Assert.True(parameters["p4"].Nullable);
+            Assert.False(parameters["p5"].Nullable);
 
-            Assert.True(parameters["p6"].OptionalParameter);
-            Assert.False(parameters["p7"].OptionalParameter);
+            Assert.True(parameters["p6"].Nullable);
+            Assert.False(parameters["p7"].Nullable);
 
-            Assert.True(parameters["p8"].OptionalParameter);
-            Assert.False(parameters["p9"].OptionalParameter);
+            Assert.True(parameters["p8"].Nullable);
+            Assert.False(parameters["p9"].Nullable);
 
-            Assert.True(parameters["p10"].OptionalParameter);
-            Assert.False(parameters["p11"].OptionalParameter);
+            Assert.True(parameters["p10"].Nullable);
+            Assert.False(parameters["p11"].Nullable);
         }
 
         [Fact]
@@ -627,19 +627,19 @@ namespace Microsoft.Test.AspNet.OData.Builder
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             var actionBuilder = movie.Action("Watch");
 
-            actionBuilder.Parameter<string>("string").OptionalParameter = false;
+            actionBuilder.Parameter<string>("string").Nullable = false;
             actionBuilder.Parameter<string>("nullaleString");
 
-            actionBuilder.Parameter<Address>("address").OptionalParameter = false;
+            actionBuilder.Parameter<Address>("address").Nullable = false;
             actionBuilder.Parameter<Address>("nullableAddress");
 
-            actionBuilder.EntityParameter<Customer>("customer").OptionalParameter = false;
+            actionBuilder.EntityParameter<Customer>("customer").Nullable = false;
             actionBuilder.EntityParameter<Customer>("nullableCustomer");
 
-            actionBuilder.CollectionParameter<Address>("addresses").OptionalParameter = false;
+            actionBuilder.CollectionParameter<Address>("addresses").Nullable = false;
             actionBuilder.CollectionParameter<Address>("nullableAddresses");
 
-            actionBuilder.CollectionEntityParameter<Customer>("customers").OptionalParameter = false;
+            actionBuilder.CollectionEntityParameter<Customer>("customers").Nullable = false;
             actionBuilder.CollectionEntityParameter<Customer>("nullableCustomers");
 
             // Act

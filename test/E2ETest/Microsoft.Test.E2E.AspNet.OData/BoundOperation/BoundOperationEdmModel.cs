@@ -62,13 +62,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             // Function with complex and collection of complex parameters
             function = entityTypeConfigurationOfEmployee.Collection.Function("ComplexFunction").ReturnsCollection<Address>();
-            function.Parameter<Address>("address").OptionalParameter = false;
+            function.Parameter<Address>("address").Nullable = false;
             function.Parameter<Address>("location"); // nullable
             function.CollectionParameter<Address>("addresses"); // collection with nullable element
 
             // Function with entity and collection of entity parameters
             function = entityTypeConfigurationOfEmployee.Collection.Function("EntityFunction").Returns<string>();
-            function.EntityParameter<Employee>("person").OptionalParameter = false;
+            function.EntityParameter<Employee>("person").Nullable = false;
             function.EntityParameter<Employee>("guard"); // nullable
             function.CollectionEntityParameter<Employee>("staff"); // collection with nullable element
 
@@ -109,13 +109,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             // Action with complex and collection of complex parameters
             action = entityTypeConfigurationOfEmployee.Collection.Action("ComplexAction");
-            action.Parameter<Address>("address").OptionalParameter = false;
+            action.Parameter<Address>("address").Nullable = false;
             action.Parameter<Address>("location"); // nullable
             action.CollectionParameter<Address>("addresses"); // collection with nullable element
 
             // Action with entity and collection of entity parameters
             action = entityTypeConfigurationOfEmployee.Collection.Action("EntityAction");
-            action.EntityParameter<Employee>("person").OptionalParameter = false;
+            action.EntityParameter<Employee>("person").Nullable = false;
             action.EntityParameter<Employee>("guard"); // nullable
             action.CollectionEntityParameter<Employee>("staff"); // collection with nullable element
             #endregion

@@ -765,7 +765,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             ActionConfiguration unboundEntity = builder.Action("UnboundEntity");
             unboundEntity.Parameter<int>("Id");
-            unboundEntity.EntityParameter<Customer>("Customer").OptionalParameter = false;
+            unboundEntity.EntityParameter<Customer>("Customer").Nullable = false;
             unboundEntity.EntityParameter<Customer>("NullableCustomer");
 
             ActionConfiguration unboundEntityCollection = builder.Action("UnboundEntityCollection");

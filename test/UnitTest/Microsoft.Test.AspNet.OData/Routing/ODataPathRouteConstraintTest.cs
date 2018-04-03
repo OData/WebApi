@@ -5,20 +5,18 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
-using Microsoft.Test.AspNet.OData.Common;
-using Xunit;
-using Microsoft.Test.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Factories;
+using Xunit;
 #else
 using System;
 using System.Collections.Generic;
@@ -67,7 +65,15 @@ namespace Microsoft.Test.AspNet.OData.Routing
             { "some(sub)and&other=delims" },
             { "some(delims)but%2Bupper:escaped" },              // "some(delims)but+upper:escaped"
             { "some(delims)but%2blower:escaped" },              // "some(delims)but+lower:escaped"
+#if NETCORE
+            // RFC3986 specifies "[" and "]" and gen-delims in BNF notation in section  2.2
+            // but section 3.2.2 specifies that the are only valid in a Uri as part of an IPV6
+            // host. Therefore, they are not valid in any part of a Uri.
+            { ":@" },                                           // general delimeters that work
+#else
+            // For back-compat, AspNet still tests with "[" and "]" as gen-delims.
             { ":[]@" },                                         // general delimeters that work
+#endif
             { "Chinese%E8%A5%BF%E9%9B%85%E5%9B%BEChars" },      // "Chinese西雅图Chars"
             { "Unicode%D8%83Format%D8%83Char" },                // "Unicode؃Format؃Char", class Cf
             { "Unicode%E1%BF%BCTitlecase%E1%BF%BCChar" },       // "UnicodeῼTitlecaseῼChar", class Lt

@@ -61,6 +61,7 @@ namespace Microsoft.Test.AspNet.OData.Factories
             // Assign the route and get the request container, which will initialize
             // the request container if one does not exists.
             context.Request.ODataFeature().RouteName = useRouteName;
+            context.Request.GetRequestContainer();
 
             // Add some routing info
             IRouter defaultRoute = routeBuilder.Routes.FirstOrDefault();

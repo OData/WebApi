@@ -1,14 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Net.Http;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using HttpRouteCollectionExtensions = Microsoft.Test.AspNet.OData.Formatter.HttpRouteCollectionExtensions;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace Microsoft.Test.AspNet.OData
@@ -30,7 +28,6 @@ namespace Microsoft.Test.AspNet.OData
         {
             configuration.CreateODataRootContainer(routeName, action);
         }
-
 
         public static void EnableODataDependencyInjectionSupport(this HttpConfiguration configuration, string routeName,
             IEdmModel model)
@@ -96,4 +93,3 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
-#endif

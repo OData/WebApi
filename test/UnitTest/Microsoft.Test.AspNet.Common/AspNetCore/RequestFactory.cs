@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if NETCORE
 using System;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
@@ -17,16 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
-#else
-using System.Net.Http;
-using System.Web.Http;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing;
-using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData;
-#endif
 
-namespace Microsoft.Test.AspNet.OData.Factories
+namespace Microsoft.Test.AspNet.OData
 {
     /// <summary>
     /// A class to create HttpRequest[Message].
@@ -37,7 +27,6 @@ namespace Microsoft.Test.AspNet.OData.Factories
         /// Initializes a new instance of the routing configuration class.
         /// </summary>
         /// <returns>A new instance of the routing configuration class.</returns>
-#if NETCORE
         public static HttpRequest Create(IRouteBuilder routeBuilder = null, string routeName = null)
         {
             // Add the options services.
@@ -78,34 +67,11 @@ namespace Microsoft.Test.AspNet.OData.Factories
             // Get request and return it.
             return context.Request;
         }
-#else
-        public static HttpRequestMessage Create(HttpConfiguration config = null, string routeName = null)
-        {
-            var request = new HttpRequestMessage();
-
-            if (config != null)
-            {
-                request.SetConfiguration(config);
-            }
-
-            if (!string.IsNullOrEmpty(routeName))
-            {
-                request.EnableODataDependencyInjectionSupport(routeName);
-            }
-            else
-            {
-                request.EnableODataDependencyInjectionSupport();
-            }
-
-            return request;
-        }
-#endif
 
         /// <summary>
         /// Initializes a new instance of the routing configuration class.
         /// </summary>
         /// <returns>A new instance of the routing configuration class.</returns>
-#if NETCORE
         public static HttpRequest Create(HttpMethod method, string uri, IRouteBuilder routeBuilder = null, string routeName = null)
         {
             HttpRequest request = Create(routeBuilder, routeName);
@@ -121,39 +87,11 @@ namespace Microsoft.Test.AspNet.OData.Factories
 
             return request;
         }
-#else
-        public static HttpRequestMessage Create(HttpMethod method, string uri)
-        {
-            var request = new HttpRequestMessage(method, uri);
-            request.EnableODataDependencyInjectionSupport();
-            return request;
-        }
-#endif
 
         /// <summary>
         /// Initializes a new instance of the routing configuration class.
         /// </summary>
         /// <returns>A new instance of the routing configuration class.</returns>
-#if NETFX
-        public static HttpRequestMessage Create(HttpMethod method, string uri, HttpConfiguration config, string routeName = null)
-        {
-            var request = new HttpRequestMessage(method, uri);
-            request.SetConfiguration(config);
-
-            if (!string.IsNullOrEmpty(routeName))
-            {
-                request.EnableODataDependencyInjectionSupport(routeName);
-            }
-
-            return request;
-        }
-#endif
-
-        /// <summary>
-        /// Initializes a new instance of the routing configuration class.
-        /// </summary>
-        /// <returns>A new instance of the routing configuration class.</returns>
-#if NETCORE
         public static HttpRequest CreateFromModel(IEdmModel model, string uri = "http://localhost", string routeName = "Route", ODataPath path = null)
         {
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer(routeName);
@@ -168,21 +106,5 @@ namespace Microsoft.Test.AspNet.OData.Factories
 
             return request;
         }
-#else
-        public static HttpRequestMessage CreateFromModel(IEdmModel model, string uri = "http://localhost", string routeName = "Route", ODataPath path = null)
-        {
-            var configuration = RoutingConfigurationFactory.Create();
-            configuration.MapODataServiceRoute(routeName, null, model);
-
-            var request = RequestFactory.Create(HttpMethod.Get, uri, configuration, routeName);
-
-            if (path != null)
-            {
-                request.ODataProperties().Path = path;
-            }
-
-            return request;
-        }
-#endif
     }
 }

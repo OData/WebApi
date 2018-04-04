@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 
 namespace Microsoft.Test.AspNet.OData.Routing.Conventions

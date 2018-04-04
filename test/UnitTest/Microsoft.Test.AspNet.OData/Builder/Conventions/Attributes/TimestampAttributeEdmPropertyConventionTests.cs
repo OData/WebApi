@@ -6,7 +6,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 

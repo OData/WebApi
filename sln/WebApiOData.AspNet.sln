@@ -13,6 +13,8 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.AspNet.OData", "..\test\UnitTest\Microsoft.Test.AspNet.OData\Microsoft.Test.AspNet.OData.csproj", "{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.AspNet.OData.Abstraction", "..\test\UnitTest\Microsoft.Test.AspNet.Common\AspNet\Microsoft.Test.AspNet.OData.Abstraction.csproj", "{FDACDBAF-F337-44A6-8460-A59D7D23C726}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a6f9775d-f7e2-424e-8363-79644a73038f}*SharedItemsImports = 4
@@ -81,6 +83,30 @@ Global
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x64.Build.0 = Release|Any CPU
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.ActiveCfg = Release|Any CPU
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.Build.0 = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x64.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x64.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x86.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x64.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x64.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x86.ActiveCfg = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x86.Build.0 = CodeAnalysis|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x64.Build.0 = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x86.Build.0 = Debug|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x64.ActiveCfg = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x64.Build.0 = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x86.ActiveCfg = Release|Any CPU
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -89,5 +115,6 @@ Global
 		{A6F9775D-F7E2-424E-8363-79644A73038F} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
 		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
+		{FDACDBAF-F337-44A6-8460-A59D7D23C726} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 	EndGlobalSection
 EndGlobal

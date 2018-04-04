@@ -4,7 +4,7 @@
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Test.AspNet.OData.Factories
+namespace Microsoft.Test.AspNet.OData
 {
     /// <summary>
     /// A factory for creating <see cref="ODataDeserializerProvider"/>.

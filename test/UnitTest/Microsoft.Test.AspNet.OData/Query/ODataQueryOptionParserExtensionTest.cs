@@ -8,7 +8,6 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Routing;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;

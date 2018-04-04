@@ -8,7 +8,6 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 #else
 using System.Collections.Generic;
@@ -16,7 +15,6 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 #endif
 

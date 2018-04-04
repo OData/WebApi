@@ -15,7 +15,6 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Common.Types;
 using Xunit;
@@ -35,7 +34,6 @@ using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Common.Types;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 #endif
 

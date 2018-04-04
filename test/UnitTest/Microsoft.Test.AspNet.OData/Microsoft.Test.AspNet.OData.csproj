@@ -148,17 +148,6 @@
     <Compile Include="Extensions\HttpRequestExtensions.cs" />
     <Compile Include="Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="Extensions\RoutingConfigurationExtensions.cs" />
-    <Compile Include="Factories\ControllerDescriptorFactory.cs" />
-    <Compile Include="Factories\ODataConventionModelBuilderFactory.cs" />
-    <Compile Include="Factories\ODataDeserializerProviderFactory.cs" />
-    <Compile Include="Factories\ODataSerializerContextFactory.cs" />
-    <Compile Include="Factories\ODataSerializerProviderFactory.cs" />
-    <Compile Include="Factories\RequestFactory.cs" />
-    <Compile Include="Factories\ResourceSetContextFactory.cs" />
-    <Compile Include="Factories\ResponseFactory.cs" />
-    <Compile Include="Factories\RoutingConfigurationFactory.cs" />
-    <Compile Include="Factories\ServerFactory.cs" />
-    <Compile Include="Factories\WebApiAssembliesResolverFactory.cs" />
     <Compile Include="Formatter\FormatterTestHelper.cs" />
     <Compile Include="ContextUtil.cs" />
     <Compile Include="EdmDeltaCollectionTypeTest.cs" />
@@ -227,8 +216,6 @@
     <Compile Include="Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="ClrPropertyInfoAnnotationTest.cs" />
     <Compile Include="EdmDeltaComplexObjectTest.cs" />
-    <Compile Include="MockContainer.cs" />
-    <Compile Include="DependencyInjectionHelper.cs" />
     <Compile Include="DateAndTimeOfDayTest.cs" />
     <Compile Include="DateTimeTest.cs" />
     <Compile Include="DefaultContainerBuilderTests.cs" />
@@ -440,9 +427,6 @@
     <Compile Include="TestCommon\SimpleOpenZipCode.cs" />
     <Compile Include="TestCommon\SimpleVipCustomer.cs" />
     <Compile Include="TestCommon\TestAssemblyResolver.cs" />
-    <Compile Include="TestCommon\MockAssembly.cs" />
-    <Compile Include="TestCommon\MockPropertyInfo.cs" />
-    <Compile Include="TestCommon\MockType.cs" />
     <Compile Include="TestCommon\Models\NonGenericEnumerable.cs" />
     <Compile Include="TestCommon\ODataMediaTypeMapping.cs" />
     <Compile Include="Formatter\PeopleController.cs" />
@@ -583,6 +567,10 @@
     <ProjectReference Include="..\..\..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj">
       <Project>{a6f9775d-f7e2-424e-8363-79644a73038f}</Project>
       <Name>Microsoft.AspNet.OData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.Test.AspNet.Common\AspNet\Microsoft.Test.AspNet.OData.Abstraction.csproj">
+      <Project>{fdacdbaf-f337-44a6-8460-a59d7d23c726}</Project>
+      <Name>Microsoft.Test.AspNet.OData.Abstraction</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

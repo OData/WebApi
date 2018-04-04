@@ -89,6 +89,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj" />
+    <ProjectReference Include="..\Microsoft.Test.AspNet.Common\AspNetCore\Microsoft.Test.AspNetCore.OData.Abstraction.csproj" />
   </ItemGroup>
 
   <ItemGroup>

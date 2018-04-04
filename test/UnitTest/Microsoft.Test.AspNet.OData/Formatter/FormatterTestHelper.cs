@@ -3,7 +3,6 @@
 
 #if NETCORE
 using System.IO;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Formatter;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
 using System;
@@ -82,7 +80,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         internal static IHeaderDictionary GetContentHeaders(string contentType = null)
         {
-            IHeaderDictionary headers = Factories.RequestFactory.Create().Headers;
+            IHeaderDictionary headers = RequestFactory.Create().Headers;
             if (!string.IsNullOrEmpty(contentType))
             {
                 headers["Content-Type"] = contentType;

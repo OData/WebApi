@@ -1,19 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if NETCORE
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData;
-using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
-using Microsoft.Test.AspNet.OData.Formatter;
-#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,9 +8,6 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
-using Microsoft.Test.AspNet.OData.Formatter;
-#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -57,13 +41,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             var configuration = RoutingConfigurationFactory.Create();
             string routeName = HttpRouteCollectionExtensions.RouteName;
-#if NETCORE
-            IPerRouteContainer perRouteContainer = configuration.ServiceProvider.GetRequiredService<IPerRouteContainer>();
-            Action<IContainerBuilder> builderAction = ODataRouteBuilderExtensions.ConfigureDefaultServices(configuration, action);
-            _rootContainer = perRouteContainer.CreateODataRootContainer(routeName, builderAction);
-#else
             _rootContainer = configuration.CreateODataRootContainer(routeName, action);
-#endif
         }
     }
 }

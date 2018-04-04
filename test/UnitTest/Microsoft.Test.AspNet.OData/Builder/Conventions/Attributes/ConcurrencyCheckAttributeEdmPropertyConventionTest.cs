@@ -9,7 +9,6 @@ using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 

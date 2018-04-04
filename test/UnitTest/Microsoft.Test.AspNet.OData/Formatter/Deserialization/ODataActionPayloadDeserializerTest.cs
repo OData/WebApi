@@ -15,7 +15,6 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Common.Models;
-using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 

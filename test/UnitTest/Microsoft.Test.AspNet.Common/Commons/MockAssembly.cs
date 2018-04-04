@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace Microsoft.Test.AspNet.OData.Common
 {
-    internal sealed class MockAssembly : Assembly
+    public sealed class MockAssembly : Assembly
     {
         Type[] _types;
 

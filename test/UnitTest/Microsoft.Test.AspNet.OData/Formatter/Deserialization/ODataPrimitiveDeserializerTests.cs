@@ -4,7 +4,6 @@
 #if NETCORE
 using System;
 using System.IO;
-using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -12,8 +11,6 @@ using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Microsoft.Test.AspNet.OData.Common;
 using Moq;
@@ -30,7 +27,6 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Moq;
 using Xunit;

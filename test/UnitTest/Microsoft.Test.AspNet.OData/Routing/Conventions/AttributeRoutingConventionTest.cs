@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
@@ -31,7 +30,6 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 #endif

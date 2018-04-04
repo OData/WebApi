@@ -13,7 +13,6 @@ using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Common.Types;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Query.Expressions;
 using Microsoft.Test.AspNet.OData.Query.Validators;
 using Moq;

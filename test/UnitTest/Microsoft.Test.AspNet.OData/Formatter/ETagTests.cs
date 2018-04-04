@@ -13,7 +13,6 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;

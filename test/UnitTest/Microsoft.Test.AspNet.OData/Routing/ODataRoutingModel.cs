@@ -9,7 +9,6 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Common.Types;
-using Microsoft.Test.AspNet.OData.Factories;
 
 namespace Microsoft.Test.AspNet.OData.Routing
 {

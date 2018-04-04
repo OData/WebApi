@@ -6,7 +6,6 @@ using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #else
@@ -21,7 +20,6 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 #endif
 

@@ -9,7 +9,6 @@ using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Factories;
 using Newtonsoft.Json.Serialization;
 using Xunit;
 

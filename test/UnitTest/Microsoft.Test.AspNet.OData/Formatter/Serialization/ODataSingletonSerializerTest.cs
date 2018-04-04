@@ -6,7 +6,6 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
@@ -17,7 +16,6 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
@@ -35,7 +33,6 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Factories;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif

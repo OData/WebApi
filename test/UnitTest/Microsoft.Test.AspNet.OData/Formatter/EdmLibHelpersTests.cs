@@ -15,7 +15,6 @@ using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Factories;
 using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 

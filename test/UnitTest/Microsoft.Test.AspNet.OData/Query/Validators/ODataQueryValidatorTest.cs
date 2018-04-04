@@ -10,7 +10,6 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Factories;
 using Moq;
 using Xunit;
 

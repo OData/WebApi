@@ -35,6 +35,7 @@
 
   <!-- Unit test assemblies and helpers -->
   <assembly name="Microsoft.Test.AspNet.OData.TestCommon"/>
+  <assembly name="Microsoft.Test.AspNet.OData.Abstraction"/>
   <assembly name="Microsoft.Test.AspNet.OData"/>
   <assembly name="Microsoft.Test.E2E.AspNetCore.OData"/>
   <assembly name="Microsoft.AspNet.Facebook.Test"/>

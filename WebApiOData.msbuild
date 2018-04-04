@@ -26,6 +26,7 @@
 
   <!-- Test assemblies -->
   <ItemGroup>
+    <TestAssembiles Include="$(OutputPath)Microsoft.Test.AspNet.OData.Abstraction.dll" />
     <TestAssembiles Include="$(OutputPath)Microsoft.Test.AspNet.OData.dll" />
   </ItemGroup>
 
@@ -92,7 +93,7 @@
         <Properties>TestAssembly=%(TestAssembiles.FullPath);XmlPath=$(TestResultsDirectory)%(TestAssembiles.FileName)-XunitResults.xml</Properties>
       </XunitProject>
     </ItemGroup>
-	
+
     <!-- Re-create the test results directory so that print summary doesn't run on old test results -->
     <RemoveDir Directories="$(TestResultsDirectory)" />
     <MakeDir Directories="$(TestResultsDirectory)" />

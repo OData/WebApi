@@ -5,7 +5,6 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
@@ -65,7 +64,15 @@ namespace Microsoft.Test.AspNet.OData.Factories
             // Add some routing info
             IRouter defaultRoute = routeBuilder.Routes.FirstOrDefault();
             RouteData routeData = new RouteData();
-            routeData.Routers.Add(defaultRoute);
+            if (defaultRoute != null)
+            {
+                routeData.Routers.Add(defaultRoute);
+            }
+            else
+            {
+                var resolver = routeBuilder.ServiceProvider.GetRequiredService<IInlineConstraintResolver>();
+                routeData.Routers.Add(new ODataRoute(routeBuilder.DefaultHandler, useRouteName, null, new ODataPathRouteConstraint(useRouteName), resolver));
+            }
 
             var mockAction = new Mock<ActionDescriptor>();
             ActionDescriptor actionDescriptor = mockAction.Object;

@@ -148,7 +148,6 @@
     <Compile Include="Extensions\HttpRequestExtensions.cs" />
     <Compile Include="Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="Extensions\RoutingConfigurationExtensions.cs" />
-    <Compile Include="Formatter\FormatterTestHelper.cs" />
     <Compile Include="ContextUtil.cs" />
     <Compile Include="EdmDeltaCollectionTypeTest.cs" />
     <Compile Include="EdmDeltaTypeTest.cs" />

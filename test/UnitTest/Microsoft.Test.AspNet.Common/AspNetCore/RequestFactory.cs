@@ -4,9 +4,11 @@
 using System;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -50,11 +52,25 @@ namespace Microsoft.Test.AspNet.OData
             // Assign the route and get the request container, which will initialize
             // the request container if one does not exists.
             context.Request.ODataFeature().RouteName = useRouteName;
+            IPerRouteContainer perRouteContainer = routeBuilder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
+            if (!perRouteContainer.HasODataRootContainer(useRouteName))
+            {
+                Action<IContainerBuilder> builderAction = ODataRouteBuilderExtensions.ConfigureDefaultServices(routeBuilder, null);
+                IServiceProvider serviceProvider = perRouteContainer.CreateODataRootContainer(useRouteName, builderAction);
+            }
 
             // Add some routing info
             IRouter defaultRoute = routeBuilder.Routes.FirstOrDefault();
             RouteData routeData = new RouteData();
-            routeData.Routers.Add(defaultRoute);
+            if (defaultRoute != null)
+            {
+                routeData.Routers.Add(defaultRoute);
+            }
+            else
+            {
+                var resolver = routeBuilder.ServiceProvider.GetRequiredService<IInlineConstraintResolver>();
+                routeData.Routers.Add(new ODataRoute(routeBuilder.DefaultHandler, useRouteName, null, new ODataPathRouteConstraint(useRouteName), resolver));
+            }
 
             var mockAction = new Mock<ActionDescriptor>();
             ActionDescriptor actionDescriptor = mockAction.Object;

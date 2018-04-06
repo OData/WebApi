@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Builder;
 using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Query.Validators;
@@ -259,7 +260,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void ApplyTo_PropertyAliased_IfEnabled(bool modelAliasing, string propertyName)
         {
             // Arrange
-            var builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
+            var builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing);
             builder.EntitySet<PropertyAlias>("PropertyAliases");
             var model = builder.GetEdmModel();
 

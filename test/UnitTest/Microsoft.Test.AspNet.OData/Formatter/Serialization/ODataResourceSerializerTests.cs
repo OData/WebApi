@@ -49,14 +49,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         {
             _model = SerializationTestsHelpers.SimpleCustomerOrderModel();
 
-            _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Customer"), new ClrTypeAnnotation(typeof(Customer)));
-            _model.SetAnnotationValue<ClrTypeAnnotation>(_model.FindType("Default.Order"), new ClrTypeAnnotation(typeof(Order)));
-            _model.SetAnnotationValue(
-                _model.FindType("Default.SpecialCustomer"),
-                new ClrTypeAnnotation(typeof(SpecialCustomer)));
-            _model.SetAnnotationValue(
-                _model.FindType("Default.SpecialOrder"),
-                new ClrTypeAnnotation(typeof(SpecialOrder)));
+            _model.SetAnnotationValue(_model.FindType("Default.Customer"), new ClrTypeAnnotation(typeof(Customer)));
+            _model.SetAnnotationValue(_model.FindType("Default.Order"), new ClrTypeAnnotation(typeof(Order)));
+            _model.SetAnnotationValue(_model.FindType("Default.SpecialCustomer"), new ClrTypeAnnotation(typeof(SpecialCustomer)));
+            _model.SetAnnotationValue(_model.FindType("Default.SpecialOrder"), new ClrTypeAnnotation(typeof(SpecialOrder)));
 
             _customerSet = _model.EntityContainer.FindEntitySet("Customers");
             _customer = new Customer()
@@ -1314,7 +1310,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             ODataAction actualAction = _serializer.CreateODataAction(action, context);
 
             // Assert
+            // In ASP.NET Core, it's using the global UriHelper to pick up the first Router to generate the Uri.
+            // Owing that there's no router created in this case, a default OData router will be used to generate the Uri.
+            // The default OData router will add '$metadata' after the route prefix.
+#if NETCORE
+            string expectedMetadata = expectedMetadataPrefix + "/$metadata#" + expectedNamespace + "." + expectedActionName;
+#else
             string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;
+#endif
             ODataAction expectedAction = new ODataAction
             {
                 Metadata = new Uri(expectedMetadata),
@@ -1373,7 +1376,15 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             // Assert
             Assert.NotNull(actualAction);
+            // Assert
+            // In ASP.NET Core, it's using the global UriHelper to pick up the first Router to generate the Uri.
+            // Owing that there's no router created in this case, a default OData router will be used to generate the Uri.
+            // The default OData router will add '$metadata' after the route prefix.
+#if NETCORE
+            string expectedMetadata = expectedMetadataPrefix + "/$metadata#" + expectedNamespace + "." + expectedActionName;
+#else
             string expectedMetadata = expectedMetadataPrefix + "#" + expectedNamespace + "." + expectedActionName;
+#endif
             AssertEqual(new Uri(expectedMetadata), actualAction.Metadata);
         }
 

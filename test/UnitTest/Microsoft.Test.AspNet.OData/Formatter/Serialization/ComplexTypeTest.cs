@@ -19,10 +19,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public async Task ComplexTypeSerializesAsOData()
         {
             // Arrange
+            IEdmModel model = GetSampleModel();
             var config = RoutingConfigurationFactory.Create();
+            config = RoutingConfigurationFactory.CreateWithRootContainer("OData", b => b.AddService(ServiceLifetime.Singleton, s => model));
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config);
             var payload = new ODataPayloadKind[] { ODataPayloadKind.Resource };
-            var formatter = FormatterTestHelper.GetFormatter(payload, request, GetSampleModel());
+            var formatter = FormatterTestHelper.GetFormatter(payload, request, model);
             var content = FormatterTestHelper.GetContent(new Person(0, new ReferenceDepthContext(7)), formatter,
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
 

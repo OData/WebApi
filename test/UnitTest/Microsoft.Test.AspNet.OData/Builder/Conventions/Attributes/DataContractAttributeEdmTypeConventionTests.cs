@@ -26,7 +26,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_RemovesAllPropertiesThatAreNotDataMembers()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: false);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: false);
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
 
@@ -51,7 +51,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_DoesnotRemove_ExplicitlyAddedProperties()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: false);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: false);
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);
@@ -154,7 +154,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_NameAndNamespaceNotAliased_IfAddedExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: true);
 
             Mock<Type> clrType = new Mock<Type>();
             clrType.Setup(t => t.GetCustomAttributes(It.IsAny<bool>()))

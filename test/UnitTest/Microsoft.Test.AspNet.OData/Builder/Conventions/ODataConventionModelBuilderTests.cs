@@ -1371,7 +1371,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_ModelAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(true);
             builder.EntitySet<ModelAlias>("ModelAliases");
 
             // Act
@@ -1392,7 +1392,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_PropertyAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(true);
             builder.EntitySet<PropertyAlias>("PropertyAliases");
 
             // Act
@@ -1413,7 +1413,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DerivedClassPropertyAliased_IfModelAliasingEnabled()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(true);
             builder.EntitySet<PropertyAlias>("PropertyAliases");
 
             // Act
@@ -1435,7 +1435,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_PropertyNotAliased_IfPropertyAddedExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(true);
             EntitySetConfiguration<PropertyAlias> entitySet = builder.EntitySet<PropertyAlias>("PropertyAliases");
             entitySet.EntityType.Property(p => p.FirstName).Name = "GivenName";
             entitySet.EntityType.Property(p => p.Points).Name = "Score";
@@ -1454,7 +1454,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
         public void ModelBuilder_DerivedClassPropertyNotAliased_IfPropertyAddedExplicitly()
         {
             // Arrange
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(true);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(true);
             EntityTypeConfiguration<PropertyAliasDerived> derived = builder.EntityType<PropertyAliasDerived>()
                 .DerivesFrom<PropertyAlias>();
             derived.Property(p => p.LastName).Name = "FamilyName";

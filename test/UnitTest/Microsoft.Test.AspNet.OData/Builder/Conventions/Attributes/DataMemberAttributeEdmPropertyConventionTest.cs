@@ -97,7 +97,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasSetIfEnabled_ValidPropertyAlias(string propertyAlias, bool modelAliasing, string expectedProptertyName)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -128,7 +128,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_InvalidPropertyAlias(string propertyAlias, bool modelAliasing)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -155,7 +155,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
         public void Apply_AliasNotSet_NoPropertyAlias(bool modelAliasing)
         {
             // Arrange
-            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing: modelAliasing);
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing: modelAliasing);
 
             MockType type =
                 new MockType("Mocktype")
@@ -321,7 +321,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Returns(new[] { new DataContractAttribute() });
 
             // Act
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing);
             builder.AddEntityType(type);
             IEdmModel model = builder.GetEdmModel();
 
@@ -359,7 +359,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
                 .Returns(new[] { new DataContractAttribute() });
 
             // Act
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.CreateWithModelAliasing(modelAliasing);
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderHelper.CreateWithModelAliasing(modelAliasing);
             builder.AddEntityType(derivedType);
             IEdmModel model = builder.GetEdmModel();
 

@@ -438,6 +438,7 @@
     <Compile Include="Builder\EntitySetTest.cs" />
     <Compile Include="Builder\EntityTypeTest.cs" />
     <Compile Include="Builder\MetadataTest.cs" />
+    <Compile Include="Builder\ODataConventionModelBuilderHelper.cs" />
     <Compile Include="Builder\ODataModelBuilderTest.cs" />
     <Compile Include="Builder\PrimitiveTypeTest.cs" />
     <Compile Include="Builder\ProgrammableBuilderApiTest.cs" />

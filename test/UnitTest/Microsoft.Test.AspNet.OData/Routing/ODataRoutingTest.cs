@@ -488,7 +488,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
     }
 
-    public class RoutingCustomersController : ODataController
+    public class RoutingCustomersController : TestODataController
     {
         public string GetRoutingCustomers()
         {
@@ -682,22 +682,25 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [HttpGet]
-        public string EntityTypeFunction(int key, [FromODataUri] ODataRoutingModel.Product product)
+        public ITestActionResult EntityTypeFunction(int key, [FromODataUri] ODataRoutingModel.Product product)
         {
-            Assert.NotNull(product);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
 
             // entity call
             if (key == 10)
             {
-                return "EntityTypeFunction(ID=" + product.ID + ",Name=" + product.Name + ")";
+                return Ok("EntityTypeFunction(ID=" + product.ID + ",Name=" + product.Name + ")");
             }
             else if (key == 11)
             {
                 // entity reference call
-                return "EntityTypeFunctionWithEntityReference(ID=" + product.ID + ",Name=" + (product.Name ?? "--") + ")";
+                return Ok("EntityTypeFunctionWithEntityReference(ID=" + product.ID + ",Name=" + (product.Name ?? "--") + ")");
             }
 
-            return "BadRequest";
+            return Ok("BadRequest");
         }
 
         [HttpGet]

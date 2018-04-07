@@ -42,6 +42,9 @@ namespace Microsoft.Test.AspNet.OData
         public new TestNotFoundResult NotFound() { return new TestNotFoundResult(base.NotFound()); }
 
         [NonAction]
+        public new TestBadRequestResult BadRequest() { return new TestBadRequestResult(base.BadRequest()); }
+
+        [NonAction]
         public new TestOkResult Ok() { return new TestOkResult(base.Ok()); }
 
         [NonAction]
@@ -84,6 +87,17 @@ namespace Microsoft.Test.AspNet.OData
     public class TestNotFoundResult : TestActionResult
     {
         public TestNotFoundResult(NotFoundResult innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for BadRequestResult
+    /// </summary>
+    public class TestBadRequestResult : TestActionResult
+    {
+        public TestBadRequestResult(BadRequestResult innerResult)
             : base(innerResult)
         {
         }

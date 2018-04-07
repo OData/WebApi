@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -82,20 +84,59 @@ namespace Microsoft.AspNet.OData.Routing
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
-                // Find the action with the greatest number of matched parameters including
-                // matches with no parameters.
-                var matchedCandidates = candidates
-                    .Where(c => !c.Parameters.Any() || c.Parameters.Any(p => context.RouteData.Values.ContainsKey(p.Name)))
-                    .OrderByDescending(c => c.Parameters.Count);
+                // Get the available parameter names from the route data. Ignore case of key names.
+                IList<string> availableKeys = routeData.Values.Keys.Select(k => k.ToLowerInvariant()).AsList();
+
+                // Filter out types we know how to bind out of the parameter lists. These values
+                // do not show up in RouteData() but will bind properly later.
+                var considerCandidates = candidates
+                    .Select(c => new ActionIdAndParameters(c.Id, c.Parameters.Count, c.Parameters
+                        .Where(p =>
+                        {
+                            return p.ParameterType != typeof(ODataPath) &&
+                                !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
+                        })));
+
+                // Find the action with the all matched parameters from available keys including
+                // matches with no parameters. Ordered first by the total number of matched
+                // parameters followed by the total number of parameters.  Ignore case of
+                // parameter names. The first one is the best match.
+                //
+                // Assume key,relatedKey exist in RouteData. 1st one wins:
+                // Method(ODataPath,ODataQueryOptions) vs Method(ODataPath).
+                // Method(key,ODataQueryOptions) vs Method(key).
+                // Method(key,ODataQueryOptions) vs Method(key).
+                // Method(key,relatedKey) vs Method(key).
+                // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
+                var matchedCandidates = considerCandidates
+                    .Where(c => !c.FilteredParameters.Any() || c.FilteredParameters.All(p => availableKeys.Contains(p.Name.ToLowerInvariant())))
+                    .OrderByDescending(c => c.FilteredParameters.Count)
+                    .ThenByDescending(c => c.TotalParameterCount);
 
                 // Return either the best matched candidate or the first
                 // candidate if none matched.
                 return (matchedCandidates.Any())
-                    ? matchedCandidates.FirstOrDefault()
+                    ? candidates.Where(c => c.Id == matchedCandidates.FirstOrDefault().Id).FirstOrDefault()
                     : candidates.FirstOrDefault();
             }
 
             return _innerSelector.SelectBestCandidate(context, candidates);
+        }
+
+        private class ActionIdAndParameters
+        {
+            public ActionIdAndParameters(string id, int parameterCount, IEnumerable<ParameterDescriptor> filteredParameters)
+            {
+                Id = id;
+                TotalParameterCount = parameterCount;
+                FilteredParameters = filteredParameters.ToList();
+            }
+
+            public string Id { get; set; }
+
+            public int TotalParameterCount { get; set; }
+
+            public IList<ParameterDescriptor> FilteredParameters { get; private set; }
         }
     }
 }

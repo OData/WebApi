@@ -67,9 +67,7 @@ namespace Microsoft.AspNet.OData
 
                 // Now make sure parameter type is ODataQueryOptions or ODataQueryOptions<T>.
                 Type parameterType = paramDescriptor?.ParameterType;
-                if ((parameterType == typeof(ODataQueryOptions)) ||
-                    (parameterType.IsGenericType &&
-                     parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>)))
+                if (IsODataQueryOptions(parameterType))
                 {
 
                     // Get the entity type from the parameter type if it is ODataQueryOptions<T>.
@@ -108,6 +106,13 @@ namespace Microsoft.AspNet.OData
                 }
 
                 return TaskHelpers.Completed();
+            }
+
+            public static bool IsODataQueryOptions(Type parameterType)
+            {
+                return ((parameterType == typeof(ODataQueryOptions)) ||
+                        (parameterType.IsGenericType &&
+                         parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>)));
             }
 
             public static ODataQueryOptions<T> CreateODataQueryOptions<T>(ODataQueryContext context, HttpRequest request)

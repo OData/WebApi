@@ -165,20 +165,24 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             // Arrange
             var routeRequest = new TestRouteRequest(HttpMethod.Get, "http://any/odata/$metadata");
-            var values = new Dictionary<string, object>() { { "odataPath", "$metadata" } };
+            string expectedRoute = "$metadata";
+            var values = new Dictionary<string, object>() { { "odataPath", expectedRoute } };
             var constraint = CreatePathRouteConstraint();
 
             // Act & Assert
             Assert.True(ConstraintMatch(constraint, routeRequest, values, RouteDirection.UriResolution));
-
+#if NETCORE
+            Assert.Equal(_routeName, routeRequest.InnerRequest.ODataFeature().RouteName);
+            Assert.NotNull(routeRequest.InnerRequest.ODataFeature().Path);
+            Assert.Equal(expectedRoute, routeRequest.InnerRequest.ODataFeature().Path.ToString());
+#else
             Assert.Equal("Metadata", values["controller"]);
             Assert.Same(_model, routeRequest.InnerRequest.GetModel());
             Assert.Equal(_conventions, routeRequest.InnerRequest.GetRoutingConventions());
             Assert.Same(_pathHandler, routeRequest.InnerRequest.GetPathHandler());
-#if NETCORE
-            Assert.Same(_routeName, routeRequest.InnerRequest.ODataFeature().RouteName);
-#else
-            Assert.Same(_routeName, routeRequest.InnerRequest.ODataProperties().RouteName);
+            Assert.Equal(_routeName, routeRequest.InnerRequest.ODataProperties().RouteName);
+            Assert.NotNull(routeRequest.InnerRequest.ODataProperties().Path);
+            Assert.Equal(expectedRoute, routeRequest.InnerRequest.ODataProperties().Path.ToString());
 #endif
         }
 
@@ -423,6 +427,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // The RequestFactory will create a request container which most tests want but for checking the constraint,
             // we don't want a request container before the test runs since Match() creates one.
             request.DeleteRequestContainer(true);
+
+            if (routeRequest != null)
+            {
+                routeRequest.InnerRequest = request;
+            }
 
             AspNetCore.Routing.RouteDirection routeDirection = (direction == RouteDirection.UriResolution)
                 ? AspNetCore.Routing.RouteDirection.IncomingRequest

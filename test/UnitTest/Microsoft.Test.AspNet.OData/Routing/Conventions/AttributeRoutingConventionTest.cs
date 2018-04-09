@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNet.OData.Routing.Template;
@@ -18,6 +19,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
+using static Microsoft.Test.AspNet.OData.Routing.AttributeRoutingTest;
 #else
 using System;
 using System.Net.Http;
@@ -126,6 +128,12 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             var serviceProvider = GetServiceProvider(config, RouteName);
             var request = RequestFactory.Create(config, RouteName);
 
+#if NETCORE
+            request.ODataFeature().Path = new ODataPath();
+            request.Method = "Get";
+            ControllerDescriptorFactory.Create(config, "MetadataAndService", typeof(MetadataAndServiceController));
+#endif
+
             ODataPathTemplate pathTemplate = new ODataPathTemplate();
             Mock<IODataPathTemplateHandler> pathTemplateHandler = new Mock<IODataPathTemplateHandler>();
             pathTemplateHandler.Setup(p => p.ParseTemplate("$metadata", serviceProvider))
@@ -228,6 +236,10 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         {
             // Arrange
             var configuration = RoutingConfigurationFactory.CreateWithRootContainerAndTypes(RouteName, null, typeof(TestODataController));
+#if NETCORE
+            ControllerDescriptorFactory.Create(configuration, "TestOData", typeof(TestODataController));
+#endif
+
             AttributeRoutingConvention convention = CreateAttributeRoutingConvention(RouteName, configuration);
 
             // Act & Assert

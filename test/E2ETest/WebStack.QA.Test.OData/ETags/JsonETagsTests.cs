@@ -67,7 +67,42 @@ namespace WebStack.QA.Test.OData.ETags
         public void ModelBuilderTest()
         {
             string expectMetadata =
-                "<EntitySet Name=\"ETagsCustomers\" EntityType=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n" +
+                "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">\r\n" +
+                "  <edmx:DataServices>\r\n" +
+                "    <Schema Namespace=\"WebStack.QA.Test.OData.ETags\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+                "      <EntityType Name=\"ETagsCustomer\">\r\n" +
+                "        <Key>\r\n" +
+                "          <PropertyRef Name=\"Id\" />\r\n" +
+                "        </Key>\r\n" +
+                "        <Property Name=\"Id\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"Name\" Type=\"Edm.String\" />\r\n" +
+                "        <Property Name=\"BoolProperty\" Type=\"Edm.Boolean\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"ByteProperty\" Type=\"Edm.Byte\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"CharProperty\" Type=\"Edm.String\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"DecimalProperty\" Type=\"Edm.Decimal\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"DoubleProperty\" Type=\"Edm.Double\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"ShortProperty\" Type=\"Edm.Int16\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"LongProperty\" Type=\"Edm.Int64\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"SbyteProperty\" Type=\"Edm.SByte\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"FloatProperty\" Type=\"Edm.Single\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"UshortProperty\" Type=\"Edm.Int32\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"UintProperty\" Type=\"Edm.Int64\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"UlongProperty\" Type=\"Edm.Int64\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"GuidProperty\" Type=\"Edm.Guid\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"DateTimeOffsetProperty\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />\r\n" +
+                "        <Property Name=\"Notes\" Type=\"Collection(Edm.String)\" />\r\n" +
+                "        <Property Name=\"StringWithConcurrencyCheckAttributeProperty\" Type=\"Edm.String\" />\r\n" +
+                "        <NavigationProperty Name=\"RelatedCustomer\" Type=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\" />\r\n" +
+                "        <NavigationProperty Name=\"ContainedCustomer\" Type=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\" ContainsTarget=\"true\" />\r\n" +
+                "      </EntityType>\r\n" +
+                "      <EntityType Name=\"ETagsDerivedCustomer\" BaseType=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
+                "        <Property Name=\"Role\" Type=\"Edm.String\" />\r\n" +
+                "      </EntityType>\r\n" +
+                "    </Schema>\r\n" +
+                "    <Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">\r\n" +
+                "      <EntityContainer Name=\"Container\">\r\n" +
+                "        <EntitySet Name=\"ETagsCustomers\" EntityType=\"WebStack.QA.Test.OData.ETags.ETagsCustomer\">\r\n" +
                 "          <NavigationPropertyBinding Path=\"RelatedCustomer\" Target=\"ETagsCustomers\" />\r\n" +
                 "          <Annotation Term=\"Org.OData.Core.V1.OptimisticConcurrency\">\r\n" +
                 "            <Collection>\r\n" +
@@ -90,7 +125,11 @@ namespace WebStack.QA.Test.OData.ETags
                 "              <PropertyPath>StringWithConcurrencyCheckAttributeProperty</PropertyPath>\r\n" +
                 "            </Collection>\r\n" +
                 "          </Annotation>\r\n" +
-                "        </EntitySet>";
+                "        </EntitySet>\r\n" +
+                "      </EntityContainer>\r\n" +
+                "    </Schema>\r\n" +
+                "  </edmx:DataServices>\r\n" +
+                "</edmx:Edmx>";
 
             // Remove indentation
             expectMetadata = Regex.Replace(expectMetadata, @"\r\n\s*<", @"<");

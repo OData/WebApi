@@ -877,7 +877,6 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             HttpClient client = TestServerFactory.CreateClient(server);
 
-
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
                 "http://localhost/odata/Customers?$apply=groupby((Name), aggregate(CustomerId with sum as TotalId))");
 
@@ -963,10 +962,18 @@ namespace Microsoft.Test.AspNet.OData.Query
             _customers = ApplyQueryOptionTest.CustomerApplyTestData;
         }
 
+#if NETCORE
+        [EnableQuery]
+        public IQueryable<Customer> Get()
+        {
+            return _customers.AsQueryable();
+        }
+#else
         [EnableQuery]
         public ITestActionResult Get()
         {
             return Ok(_customers);
         }
+#endif
     }
 }

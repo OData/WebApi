@@ -325,14 +325,14 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            IServiceProvider requestContainer = request.HttpContext.ODataFeature().RequestContainer;
+            IServiceProvider requestContainer = request.ODataFeature().RequestContainer;
             if (requestContainer != null)
             {
                 return requestContainer;
             }
 
             // HTTP routes will not have chance to call CreateRequestContainer. We have to call it.
-            return request.CreateRequestContainer(request.HttpContext.ODataFeature().RouteName);
+            return request.CreateRequestContainer(request.ODataFeature().RouteName);
         }
 
         /// <summary>
@@ -343,7 +343,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>The request container created.</returns>
         public static IServiceProvider CreateRequestContainer(this HttpRequest request, string routeName)
         {
-            if (request.HttpContext.ODataFeature().RequestContainer != null)
+            if (request.ODataFeature().RequestContainer != null)
             {
                 throw Error.InvalidOperation(SRResources.RequestContainerAlreadyExists);
             }
@@ -351,8 +351,8 @@ namespace Microsoft.AspNet.OData.Extensions
             IServiceScope requestScope = request.CreateRequestScope(routeName);
             IServiceProvider requestContainer = requestScope.ServiceProvider;
 
-            request.HttpContext.ODataFeature().RequestScope = requestScope;
-            request.HttpContext.ODataFeature().RequestContainer = requestContainer;
+            request.ODataFeature().RequestScope = requestScope;
+            request.ODataFeature().RequestContainer = requestContainer;
 
             return requestContainer;
         }
@@ -367,11 +367,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </param>
         public static void DeleteRequestContainer(this HttpRequest request, bool dispose)
         {
-            if (request.HttpContext.ODataFeature().RequestScope != null)
+            if (request.ODataFeature().RequestScope != null)
             {
-                IServiceScope requestScope = request.HttpContext.ODataFeature().RequestScope;
-                request.HttpContext.ODataFeature().RequestScope = null;
-                request.HttpContext.ODataFeature().RequestContainer = null;
+                IServiceScope requestScope = request.ODataFeature().RequestScope;
+                request.ODataFeature().RequestScope = null;
+                request.ODataFeature().RequestContainer = null;
 
                 if (dispose)
                 {

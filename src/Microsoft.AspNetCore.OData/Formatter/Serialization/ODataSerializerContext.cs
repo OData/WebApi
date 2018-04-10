@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -13,6 +14,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     public partial class ODataSerializerContext
     {
         private HttpRequest _request;
+        private IUrlHelper _urlHelper;
 
         /// <summary>
         /// Gets or sets the HTTP Request whose response is being serialized.
@@ -20,13 +22,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
-            get { return _request; }
-
+            get => _request;
             set
             {
                 _request = value;
                 InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
-                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.HttpContext.GetUrlHelper()) : null;
+                Url = _request != null ? _request.GetUrlHelper() : null;
             }
         }
 
@@ -38,6 +39,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private void CopyPlatformSpecificProperties(ODataSerializerContext context)
         {
             Request = context.Request;
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IUrlHelper"/> to use for generating OData links.
+        /// </summary>
+        public IUrlHelper Url
+        {
+            get =>  _urlHelper;
+            set
+            {
+                _urlHelper = value;
+                InternalUrlHelper = value != null ? new WebApiUrlHelper(value) : null;
+            }
         }
     }
 }

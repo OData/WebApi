@@ -25,7 +25,10 @@ namespace Microsoft.AspNet.OData
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
-            get => _request;
+            get
+            {
+                return _request;
+            }
             set
             {
                 _request = value;
@@ -48,7 +51,10 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public IUrlHelper Url
         {
-            get => _urlHelper;
+            get
+            {
+                return _urlHelper;
+            }
             set
             {
                 _urlHelper = value;

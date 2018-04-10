@@ -96,6 +96,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             Assert.Null(controller);
         }
 
+#if NETFX // AspNetCore version returns the action descriptor.
         [Fact]
         public void SelectController_RetrunsEntitySetName_ForEntitySetRequest()
         {
@@ -112,7 +113,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
         }
 
         [Fact]
-        public void SelectController_RetrunsSingletonName_ForSingletonRequest()
+        public void SelectController_ReturnsSingletonName_ForSingletonRequest()
         {
             // Arrange
             var request = RequestFactory.Create();
@@ -125,6 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             // Assert
             Assert.Equal("VipCustomer", controller);
         }
+#endif
 
 #if NETCORE
         private string SelectController(NavigationSourceRoutingConvention convention, ODataPath odataPath, HttpRequest request)

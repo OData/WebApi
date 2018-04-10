@@ -1,6 +1,32 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
+using Moq;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,9 +34,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
-#if NETFX // Only AspNet version has UrlHelper
 using System.Web.Http.Routing;
-#endif
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -26,6 +50,7 @@ using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
@@ -609,9 +634,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 Request = request,
                 Model = model.Model,
                 MetadataLevel = ODataMetadataLevel.FullMetadata,
-#if NETFX // Only AspNet version has Url property
-                Url = CreateMetadataLinkFactory("http://IgnoreMetadataPath")
-#endif
+                Url = CreateMetadataLinkFactory("http://IgnoreMetadataPath", request)
             };
 
             var result = new object[0];
@@ -672,9 +695,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             {
                 EntitySetBase = customers,
                 Request = request,
-#if NETFX // Only AspNet version has Url property
-                Url = CreateMetadataLinkFactory(expectedMetadataPrefix)
-#endif
+                Url = CreateMetadataLinkFactory(expectedMetadataPrefix, request)
             };
 
             ODataSerializerContext serializerContext = new ODataSerializerContext
@@ -683,9 +704,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
                 Request = request,
                 Model = model,
                 MetadataLevel = ODataMetadataLevel.FullMetadata,
-#if NETFX // Only AspNet version has Url property
                 Url = resourceSetContext.Url
-#endif
             };
 
             // Act
@@ -730,8 +749,38 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             Assert.Equal(expected.AbsoluteUri, actual.AbsoluteUri);
         }
 
-#if NETFX // Only AspNet version has UrlHelper
-        private static UrlHelper CreateMetadataLinkFactory(string metadataPath)
+#if NETCORE
+        public class MyUrlHelper : IUrlHelper
+        {
+            private string _link;
+
+            public MyUrlHelper(string metadataPath, ActionContext context)
+            {
+                _link = metadataPath;
+                ActionContext = context;
+            }
+
+            public ActionContext ActionContext { get; set; }
+
+            public string Action(UrlActionContext actionContext) => throw new NotImplementedException();
+
+            public string Content(string contentPath) => throw new NotImplementedException();
+
+            public bool IsLocalUrl(string url) => throw new NotImplementedException();
+
+            public string Link(string routeName, object values) => _link;
+
+            public string RouteUrl(UrlRouteContext routeContext) => throw new NotImplementedException();
+        }
+
+        private static IUrlHelper CreateMetadataLinkFactory(string metadataPath, HttpRequest request)
+        {
+            ActionContext context = new ActionContext();
+            context.HttpContext = request.HttpContext;
+            return new MyUrlHelper(metadataPath, context);
+        }
+#else
+        private static UrlHelper CreateMetadataLinkFactory(string metadataPath, HttpRequestMessage notUsedRequest)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, metadataPath);
             request.EnableODataDependencyInjectionSupport();

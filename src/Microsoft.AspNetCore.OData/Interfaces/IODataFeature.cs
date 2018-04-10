@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
@@ -45,6 +46,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the delta link for the OData response.
         /// </summary>
         Uri DeltaLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Url helper.
+        /// </summary>
+        IUrlHelper UrlHelper { get; set; }
 
         /// <summary>
         /// Gets or sets the total count for the OData response.

@@ -6,6 +6,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -16,6 +17,7 @@ namespace Microsoft.AspNet.OData
     public partial class ResourceSetContext
     {
         private HttpRequest _request;
+        private IUrlHelper _urlHelper;
 
         /// <summary>
         /// Gets or sets the HTTP request that caused this instance to be generated.
@@ -23,12 +25,12 @@ namespace Microsoft.AspNet.OData
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
         public HttpRequest Request
         {
-            get { return _request; }
+            get => _request;
             set
             {
                 _request = value;
                 InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
-                InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.HttpContext.GetUrlHelper()) : null;
+                Url = _request != null ? Request.GetUrlHelper() : null;
             }
         }
 
@@ -39,6 +41,19 @@ namespace Microsoft.AspNet.OData
         public IEdmModel EdmModel
         {
             get { return Request.GetModel(); }
+        }
+
+        /// <summary>
+        /// Gets or sets the <see cref="IUrlHelper"/> to use for generating OData links.
+        /// </summary>
+        public IUrlHelper Url
+        {
+            get => _urlHelper;
+            set
+            {
+                _urlHelper = value;
+                InternalUrlHelper = value != null ? new WebApiUrlHelper(value) : null;
+            }
         }
 
         /// <summary>
@@ -54,6 +69,7 @@ namespace Microsoft.AspNet.OData
             {
                 Request = writeContext.Request,
                 EntitySetBase = writeContext.NavigationSource as IEdmEntitySetBase,
+                Url = writeContext.Url,
                 ResourceSetInstance = resourceSetInstance
             };
 

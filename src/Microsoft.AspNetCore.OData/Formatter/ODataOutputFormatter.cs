@@ -222,7 +222,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     _version,
                     baseAddress,
                     contentType,
-                    new WebApiUrlHelper(request.HttpContext.GetUrlHelper()),
+                    new WebApiUrlHelper(request.GetUrlHelper()),
                     new WebApiRequestMessage(request),
                     new WebApiRequestHeaders(request.Headers),
                     (services) => ODataMessageWrapperHelper.Create(response.Body, response.Headers, services),
@@ -269,7 +269,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("request");
             }
 
-            string baseAddress = request.HttpContext.GetUrlHelper().CreateODataLink();
+            string baseAddress = request.GetUrlHelper().CreateODataLink();
             if (baseAddress == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);

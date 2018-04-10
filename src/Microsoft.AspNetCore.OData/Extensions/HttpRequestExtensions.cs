@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
@@ -41,6 +42,28 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return request.HttpContext.ODataFeature();
+        }
+
+        /// <summary>
+        /// Extension method to return the <see cref="IUrlHelper"/> from the <see cref="HttpRequest"/>.
+        /// </summary>
+        /// <param name="request">The Http request.</param>
+        /// <returns>The <see cref="IUrlHelper"/>.</returns>
+        public static IUrlHelper GetUrlHelper(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            IODataFeature feature = request.ODataFeature();
+            if (feature.UrlHelper == null)
+            {
+                // if not set, get it from global.
+                feature.UrlHelper = request.HttpContext.GetUrlHelper();
+            }
+
+            return feature.UrlHelper;
         }
 
         /// <summary>

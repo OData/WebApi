@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
@@ -17,19 +16,18 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 {
-    public class FeedTest
+    public class ResourceSetTest
     {
         private IEdmModel _model = GetSampleModel();
 
         [Fact]
-        public async Task IEnumerableOfEntityTypeSerializesAsODataFeed()
+        public async Task IEnumerableOfEntityTypeSerializesAsODataResourceSet()
         {
             // Arrange
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
-            var config = RoutingConfigurationFactory.CreateWithRootContainer("Route");
-            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config);
+            var request = RequestFactory.CreateFromModel(_model, "http://localhost/property", "Route", path);
             var payload = new ODataPayloadKind[] { ODataPayloadKind.ResourceSet };
             var formatter = FormatterTestHelper.GetFormatter(payload, request, _model, "Route", path);
 

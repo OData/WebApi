@@ -485,7 +485,7 @@
     <Compile Include="Formatter\Serialization\CollectionTest.cs" />
     <Compile Include="Formatter\Serialization\ComplexTypeTest.cs" />
     <Compile Include="Formatter\Serialization\EntityTypeTest.cs" />
-    <Compile Include="Formatter\Serialization\FeedTest.cs" />
+    <Compile Include="Formatter\Serialization\ResourceSetTest.cs" />
     <Compile Include="Formatter\PrimitiveTypesTest.cs" />
     <Compile Include="Formatter\Serialization\SerializationTestsHelpers.cs" />
     <Compile Include="TestCommon\Models\ComplexTypes\Attributed\Person.cs" />

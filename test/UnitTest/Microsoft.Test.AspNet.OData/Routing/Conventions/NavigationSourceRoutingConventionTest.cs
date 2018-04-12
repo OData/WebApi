@@ -134,7 +134,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             RouteContext routeContext = new RouteContext(request.HttpContext);
             routeContext.HttpContext.ODataFeature().Path = odataPath;
 
-            ControllerActionDescriptor descriptor = convention.SelectAction(routeContext).FirstOrDefault();
+            ControllerActionDescriptor descriptor = convention.SelectAction(routeContext)?.FirstOrDefault();
             return descriptor?.ControllerName;
         }
 #else

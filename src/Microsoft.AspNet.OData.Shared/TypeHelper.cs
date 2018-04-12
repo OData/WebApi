@@ -23,11 +23,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>The memberInfo from a type.</returns>
         public static MemberInfo AsMemberInfo(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo() as MemberInfo;
-#else
             return clrType as MemberInfo;
-#endif
         }
 
         /// <summary>
@@ -37,11 +33,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>The type from a MemberInfo.</returns>
         public static Type AsType(MemberInfo memberInfo)
         {
-#if NETCORE1x
-            return memberInfo.DeclaringType;
-#else
             return memberInfo as Type;
-#endif
         }
 
         /// <summary>
@@ -51,11 +43,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>The assembly from a type.</returns>
         public static Assembly GetAssembly(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().Assembly;
-#else
             return clrType.Assembly;
-#endif
         }
 
         /// <summary>
@@ -65,11 +53,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>The base type from a type.</returns>
         public static Type GetBaseType(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().BaseType;
-#else
             return clrType.BaseType;
-#endif
         }
 
         /// <summary>
@@ -80,13 +64,8 @@ namespace Microsoft.AspNet.OData
         public static string GetQualifiedName(MemberInfo memberInfo)
         {
             Contract.Assert(memberInfo != null);
-#if NETCORE1x
-            TypeInfo type = memberInfo as TypeInfo;
-            return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
-#else
             Type type = memberInfo as Type;
             return type != null ? (type.Namespace + "." + type.Name) : memberInfo.Name;
-#endif
         }
 
         /// <summary>
@@ -96,11 +75,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>The reflected type from a member info.</returns>
         public static Type GetReflectedType(MemberInfo memberInfo)
         {
-#if NETCORE1x
-            return memberInfo.DeclaringType;
-#else
             return memberInfo.ReflectedType;
-#endif
         }
 
         /// <summary>
@@ -110,11 +85,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is abstract; false otherwise.</returns>
         public static bool IsAbstract(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsAbstract;
-#else
             return clrType.IsAbstract;
-#endif
         }
 
         /// <summary>
@@ -124,11 +95,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is a class; false otherwise.</returns>
         public static bool IsClass(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsClass;
-#else
             return clrType.IsClass;
-#endif
         }
 
         /// <summary>
@@ -138,11 +105,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is a generic type; false otherwise.</returns>
         public static bool IsGenericType(this Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsGenericType;
-#else
             return clrType.IsGenericType;
-#endif
         }
 
         /// <summary>
@@ -152,11 +115,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is a generic type definition; false otherwise.</returns>
         public static bool IsGenericTypeDefinition(this Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsGenericTypeDefinition;
-#else
             return clrType.IsGenericTypeDefinition;
-#endif
         }
 
         /// <summary>
@@ -166,11 +125,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is an interface; false otherwise.</returns>
         public static bool IsInterface(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsInterface;
-#else
             return clrType.IsInterface;
-#endif
         }
 
         /// <summary>
@@ -199,11 +154,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is public; false otherwise.</returns>
         public static bool IsPublic(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsPublic;
-#else
             return clrType.IsPublic;
-#endif
         }
 
         /// <summary>
@@ -213,11 +164,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is a primitive; false otherwise.</returns>
         public static bool IsPrimitive(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsPrimitive;
-#else
             return clrType.IsPrimitive;
-#endif
         }
 
         /// <summary>
@@ -238,11 +185,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is a value type; false otherwise.</returns>
         public static bool IsValueType(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsValueType;
-#else
             return clrType.IsValueType;
-#endif
         }
 
         /// <summary>
@@ -252,11 +195,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if the type is visible; false otherwise.</returns>
         public static bool IsVisible(Type clrType)
         {
-#if NETCORE1x
-            return clrType.GetTypeInfo().IsVisible;
-#else
             return clrType.IsVisible;
-#endif
         }
 
         /// <summary>
@@ -351,11 +290,7 @@ namespace Microsoft.AspNet.OData
         public static bool IsEnum(Type clrType)
         {
             Type underlyingTypeOrSelf = GetUnderlyingTypeOrSelf(clrType);
-#if NETCORE1x
-            return underlyingTypeOrSelf.GetTypeInfo().IsEnum;
-#else
             return underlyingTypeOrSelf.IsEnum;
-#endif
         }
 
         /// <summary>

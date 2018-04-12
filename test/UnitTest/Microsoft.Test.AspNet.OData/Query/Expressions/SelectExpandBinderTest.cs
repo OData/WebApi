@@ -554,7 +554,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
             Expression property = _binder.CreatePropertyValueExpression(_model.Customer, idProperty, customer);
 
+#if NETCORE
+            Assert.Equal(String.Format("Convert({0}.ID, Nullable`1)", customer.ToString()), property.ToString());
+#else
             Assert.Equal(String.Format("Convert({0}.ID)", customer.ToString()), property.ToString());
+#endif
             Assert.Equal(typeof(int?), property.Type);
         }
 

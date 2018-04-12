@@ -501,7 +501,6 @@
     <Compile Include="TestCommon\ReferenceDepthContext.cs" />
     <Compile Include="TestCommon\SupportedTypes.cs" />
     <Compile Include="TestCommon\TypeInitializer.cs" />
-    <Compile Include="TestControllers.cs" />
     <Compile Include="TypeHelperTest.cs" />
   </ItemGroup>
   <ItemGroup>

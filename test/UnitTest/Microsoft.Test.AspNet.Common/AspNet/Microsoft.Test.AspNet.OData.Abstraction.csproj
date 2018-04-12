@@ -95,6 +95,8 @@
     <Compile Include="ODataSerializerContextFactory.cs" />
     <Compile Include="ODataSerializerProviderFactory.cs" />
     <Compile Include="FormatterTestHelper.cs" />
+    <Compile Include="TestODataController.cs" />
+    <Compile Include="TestNonODataController.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj">

@@ -12,6 +12,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Extensions;
@@ -701,10 +702,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 }
                 catch (ODataException e)
                 {
-                    var responseMessage = new HttpResponseMessage(HttpStatusCode.BadRequest);
-                    responseMessage.Content = new StringContent(
-                        Error.Format("The query specified in the URI is not valid. {0}", e.Message));
-                    return null; // ResponseMessage(responseMessage);
+                    string error = Error.Format("The query specified in the URI is not valid. {0}", e.Message);
+                    return BadRequest(error);
                 }
 
                 var querySettings = new ODataQuerySettings();
@@ -728,8 +727,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 #else
             private ITestActionResult Ok(object content, Type type)
             {
-                //var resultType = typeof(OkNegotiatedContentResult<>).MakeGenericType(type);
-                return null; // Activator.CreateInstance(resultType, content, this) as IActionResult;
+                return Ok(content);
             }
 #endif
         }

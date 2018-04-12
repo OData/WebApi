@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Builder;
 
 namespace Microsoft.AspNet.OData.Extensions
@@ -15,9 +16,15 @@ namespace Microsoft.AspNet.OData.Extensions
         /// USe OData batching middleware.
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder "/> to use.</param>
-        public static void UseODataBatching(this IApplicationBuilder app)
+        /// <returns>The <see cref="IApplicationBuilder "/>.</returns>
+        public static IApplicationBuilder UseODataBatching(this IApplicationBuilder app)
         {
-            app.UseMiddleware<ODataBatchMiddleware>();
+            if (app == null)
+            {
+                throw Error.ArgumentNull("app");
+            }
+
+            return app.UseMiddleware<ODataBatchMiddleware>();
         }
     }
 }

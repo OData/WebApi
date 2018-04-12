@@ -490,6 +490,7 @@ public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public virtual get; public virtual set; }
+	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public virtual get; public virtual set; }
 
 	public virtual void Dispose ()
 	protected void Dispose (bool disposing)
@@ -637,6 +638,7 @@ public class Microsoft.AspNet.OData.ResourceSetContext {
 	Microsoft.OData.Edm.IEdmEntitySetBase EntitySetBase  { public get; public set; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; public set; }
 	object ResourceSetInstance  { public get; public set; }
+	Microsoft.AspNetCore.Mvc.IUrlHelper Url  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.UnqualifiedCallAndEnumPrefixFreeResolver : Microsoft.OData.UriParser.ODataUriResolver {
@@ -1858,6 +1860,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
+	public static Microsoft.AspNetCore.Mvc.IUrlHelper GetUrlHelper (Microsoft.AspNetCore.Http.HttpRequest request)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static Microsoft.OData.ODataMessageWriterSettings GetWriterSettings (Microsoft.AspNetCore.Http.HttpRequest request)
 
 	[
@@ -1883,7 +1890,7 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExt
 	[
 	ExtensionAttribute(),
 	]
-	public static void UseODataBatching (Microsoft.AspNetCore.Builder.IApplicationBuilder app)
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseODataBatching (Microsoft.AspNetCore.Builder.IApplicationBuilder app)
 }
 
 [
@@ -2232,6 +2239,7 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public abstract get; public abstract set; }
+	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
 }
 
 [
@@ -3307,6 +3315,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	string RootElementName  { public get; public set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
 	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
+	Microsoft.AspNetCore.Mvc.IUrlHelper Url  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataServiceDocumentSerializer : ODataSerializer {

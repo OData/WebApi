@@ -5,6 +5,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 #else
 using System.Net.Http;
@@ -43,6 +44,9 @@ namespace Microsoft.Test.AspNet.OData
 
         [NonAction]
         public new TestBadRequestResult BadRequest() { return new TestBadRequestResult(base.BadRequest()); }
+
+        [NonAction]
+        public new TestBadRequestObjectResult BadRequest(object error) { return new TestBadRequestObjectResult(base.BadRequest(error)); }
 
         [NonAction]
         public new TestOkResult Ok() { return new TestOkResult(base.Ok()); }
@@ -100,6 +104,35 @@ namespace Microsoft.Test.AspNet.OData
         public TestBadRequestResult(BadRequestResult innerResult)
             : base(innerResult)
         {
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for BadRequestObjectResult
+    /// </summary>
+    public class TestBadRequestObjectResult : TestActionResult
+    {
+        private object _value;
+
+        public TestBadRequestObjectResult(BadRequestObjectResult innerResult)
+            : base(innerResult)
+        {
+            _value = innerResult.Value;
+        }
+
+        public override Task ExecuteResultAsync(ActionContext context)
+        {
+            if (_value is string)
+            {
+                context.HttpContext.Response.StatusCode = 400;
+                context.HttpContext.Response.WriteAsync(_value as string);
+            }
+            else
+            {
+                base.ExecuteResultAsync(context);
+            }
+
+            return Task.CompletedTask;
         }
     }
 
@@ -176,7 +209,7 @@ namespace Microsoft.Test.AspNet.OData
             this.innerResult = innerResult;
         }
 
-        public Task ExecuteResultAsync(ActionContext context)
+        public virtual Task ExecuteResultAsync(ActionContext context)
         {
             return innerResult.ExecuteResultAsync(context);
         }

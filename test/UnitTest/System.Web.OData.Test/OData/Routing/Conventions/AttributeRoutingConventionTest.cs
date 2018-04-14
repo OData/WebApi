@@ -161,12 +161,12 @@ namespace System.Web.OData.Routing.Conventions
                 "TestController", typeof(InvalidPathTemplateController));
 
             // Act & Assert
+            // When KeyAsSegent is enabled by default and trying to parse uri "Customers/Order", exception is thrown with
+            // message for invalid key segment.
             Assert.Throws<InvalidOperationException>(
                 () => new AttributeRoutingConvention(RouteName, new[] { controller }),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
-                "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
-                "collection, this must be the last segment in the request URI or it must be followed by an function or " +
-                "action that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+                "a valid OData path template. Bad Request - Error in query syntax.");
         }
 
         [Fact]

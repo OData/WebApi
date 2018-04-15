@@ -79,7 +79,12 @@ namespace Microsoft.Test.AspNet.OData
         }
 #endif
 
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsNullIfResponseIsNull()
         {
             // Arrange
@@ -95,6 +100,10 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfContentIsNull()
         {
             // Arrange
@@ -112,6 +121,10 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfNoObjectContent()
         {
             // Arrange
@@ -128,8 +141,11 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Same(originalResponse, response);
         }
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfObjectContentHasValue()
         {
             // Arrange
@@ -159,6 +175,10 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData(HttpStatusCode.Redirect)]
         [InlineData(HttpStatusCode.BadRequest)]
         [InlineData(HttpStatusCode.InternalServerError)]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfStatusCodeIsNotOk(HttpStatusCode status)
         {
             // Arrange
@@ -188,6 +208,10 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("Post")]
         [InlineData("Put")]
         [InlineData("Patch")]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfRequestIsNotGet(string method)
         {
             // Arrange
@@ -213,6 +237,10 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsOriginalResponseIfRequestDoesNotHaveODataPath()
         {
             // Arrange
@@ -237,6 +265,10 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
+        /// <remarks>
+        /// This test specifically test the AspNet behavior or ODataNullValueMessageHandler and whether it creates
+        /// a new response or returns the original response. AspNetCore always returns the original response.
+        /// </remarks>
         public async Task SendAsync_ReturnsNotFoundForNullEntityResponse()
         {
             // Arrange
@@ -391,6 +423,10 @@ namespace Microsoft.Test.AspNet.OData
             public int ComplexTypeProperty { get; set; }
         }
 
+#if NETFX
+        /// <remarks>
+        /// This class is used to return a specific response for AspNet tests.
+        /// </remarks>
         private class TestMessageHandler : HttpMessageHandler
         {
             private readonly HttpResponseMessage _response;
@@ -406,5 +442,6 @@ namespace Microsoft.Test.AspNet.OData
                 return Task.FromResult(_response);
             }
         }
+#endif
     }
 }

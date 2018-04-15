@@ -54,7 +54,7 @@ namespace Microsoft.Test.AspNet.OData
         /// Initializes a new instance of the routing configuration class.
         /// </summary>
         /// <returns>A new instance of the routing configuration class.</returns>
-        public static HttpRequestMessage Create(HttpMethod method, string uri, HttpConfiguration config, string routeName = null)
+        public static HttpRequestMessage Create(HttpMethod method, string uri, HttpConfiguration config, string routeName = null, ODataPath path = null)
         {
             var request = new HttpRequestMessage(method, uri);
             request.SetConfiguration(config);
@@ -62,6 +62,11 @@ namespace Microsoft.Test.AspNet.OData
             if (!string.IsNullOrEmpty(routeName))
             {
                 request.EnableODataDependencyInjectionSupport(routeName);
+            }
+
+            if (path != null)
+            {
+                request.ODataProperties().Path = path;
             }
 
             return request;

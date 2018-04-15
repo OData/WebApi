@@ -18,10 +18,7 @@ namespace Microsoft.Test.AspNet.OData
 {
     internal static class FormatterTestHelper
     {
-        internal static ODataOutputFormatter GetFormatter(ODataPayloadKind[] payload, HttpRequest request,
-            IEdmModel model = null,
-            string routeName = null,
-            ODataPath path = null)
+        internal static ODataOutputFormatter GetFormatter(ODataPayloadKind[] payload, HttpRequest request)
         {
             // request is not needed on AspNetCore.
             ODataOutputFormatter formatter;

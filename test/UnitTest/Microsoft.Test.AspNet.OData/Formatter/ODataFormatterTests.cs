@@ -1002,6 +1002,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>
             {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
                 config.MapODataServiceRoute("IgnoredRouteName", null, model != null ? model : ODataTestUtil.GetEdmModel());
 
                 if (modifyMediaTypes != null)

@@ -2,65 +2,24 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
-using Microsoft.OData.Edm;
-using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.AspNet.OData
 {
     internal static class FormatterTestHelper
     {
-        internal static ODataMediaTypeFormatter GetFormatter(ODataPayloadKind[] payload, HttpRequestMessage request,
-            IEdmModel model = null,
-            string routeName = null,
-            ODataPath path = null)
+        internal static ODataMediaTypeFormatter GetFormatter(ODataPayloadKind[] payload, HttpRequestMessage request)
         {
             ODataMediaTypeFormatter formatter;
             formatter = new ODataMediaTypeFormatter(payload);
             formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataMinimalMetadata));
             formatter.SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationXml));
 
-            if (model != null && routeName != null)
-            {
-                if (!request.GetConfiguration().Routes.Any(r =>
-                    {
-                        ODataRoute route = r as ODataRoute;
-                        return route == null ? false : route.PathRouteConstraint.RouteName == routeName;
-                    }))
-                {
-                    request.GetConfiguration().MapODataServiceRoute(routeName, null, model);
-                    request.EnableODataDependencyInjectionSupport(routeName);
-                }
-            }
-            else if (routeName != null)
-            {
-                request.EnableODataDependencyInjectionSupport(routeName);
-            }
-            else if (model != null)
-            {
-                request.GetConfiguration().EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName, model);
-                request.EnableODataDependencyInjectionSupport(model);
-                request.GetConfiguration().Routes.MapFakeODataRoute();
-            }
-            else
-            {
-                request.GetConfiguration().EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName);
-                request.EnableODataDependencyInjectionSupport();
-                request.GetConfiguration().Routes.MapFakeODataRoute();
-            }
-
-            if (path != null)
-            {
-                request.ODataProperties().Path = path;
-            }
-
+            request.GetConfiguration().Routes.MapFakeODataRoute();
             formatter.Request = request;
             return formatter;
         }

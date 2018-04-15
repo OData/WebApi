@@ -29,7 +29,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             var request = RequestFactory.CreateFromModel(_model, "http://localhost/property", "Route", path);
             var payload = new ODataPayloadKind[] { ODataPayloadKind.ResourceSet };
-            var formatter = FormatterTestHelper.GetFormatter(payload, request, _model, "Route", path);
+            var formatter = FormatterTestHelper.GetFormatter(payload, request);
 
             IEnumerable<Employee> collectionOfPerson = new Collection<Employee>()
             {

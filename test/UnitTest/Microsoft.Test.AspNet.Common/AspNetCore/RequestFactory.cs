@@ -88,7 +88,7 @@ namespace Microsoft.Test.AspNet.OData
         /// Initializes a new instance of the routing configuration class.
         /// </summary>
         /// <returns>A new instance of the routing configuration class.</returns>
-        public static HttpRequest Create(HttpMethod method, string uri, IRouteBuilder routeBuilder = null, string routeName = null)
+        public static HttpRequest Create(HttpMethod method, string uri, IRouteBuilder routeBuilder = null, string routeName = null, ODataPath path = null)
         {
             HttpRequest request = Create(routeBuilder, routeName);
             request.Method = method.ToString();
@@ -100,6 +100,11 @@ namespace Microsoft.Test.AspNet.OData
                 new HostString(requestUri.Host, requestUri.Port);
             request.QueryString = new QueryString(requestUri.Query);
             request.Path = new PathString(requestUri.AbsolutePath);
+
+            if (path != null)
+            {
+                request.ODataFeature().Path = path;
+            }
 
             return request;
         }

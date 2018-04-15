@@ -159,8 +159,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             catch (Exception ex)
             {
                 // AspNetCore will throw, validate the exception.
-                Assert.Equal(typeof(AggregateException), ex.GetType());
-                Assert.Equal(typeof(InvalidOperationException), ex.InnerException.GetType());
+                Assert.Equal(typeof(InvalidOperationException), ex.GetType());
             }
         }
     }

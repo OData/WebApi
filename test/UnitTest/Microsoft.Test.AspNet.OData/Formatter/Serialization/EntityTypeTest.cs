@@ -23,14 +23,14 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
         public async Task EntityTypeSerializesAsODataEntry()
         {
             // Arrange
-            const string routeName = "Route";
+            const string routeName = "OData";
             IEdmEntitySet entitySet = _model.EntityContainer.FindEntitySet("employees");
             ODataPath path = new ODataPath(new EntitySetSegment(entitySet));
 
-            var config = RoutingConfigurationFactory.CreateWithRootContainer(routeName);
-            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config);
+            var config = RoutingConfigurationFactory.CreateWithRootContainer(routeName, b => b.AddService(ServiceLifetime.Singleton, s => _model));
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/property", config, routeName, path);
             var payload = new ODataPayloadKind[] { ODataPayloadKind.Resource };
-            var formatter = FormatterTestHelper.GetFormatter(payload, request, _model, routeName, path);
+            var formatter = FormatterTestHelper.GetFormatter(payload, request);
             Employee employee = (Employee)TypeInitializer.GetInstance(SupportedTypes.Employee);
             var content = FormatterTestHelper.GetContent(employee, formatter,
                 ODataMediaTypes.ApplicationJsonODataMinimalMetadata);

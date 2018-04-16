@@ -1620,6 +1620,9 @@
     <Compile Include="..\Routing\AddRelatedObjectTests.cs">
       <Link>Routing\AddRelatedObjectTests.cs</Link>
     </Compile>
+    <Compile Include="..\Routing\AttributeRoutingTests.cs">
+      <Link>Routing\AttributeRoutingTests.cs</Link>
+    </Compile>
     <Compile Include="..\Routing\DynamicProperties\DynamicPropertiesController.cs">
       <Link>Routing\DynamicProperties\DynamicPropertiesController.cs</Link>
     </Compile>

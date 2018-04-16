@@ -3012,6 +3012,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteAttribute : System.
 	public ODataRouteAttribute (string pathTemplate)
 
 	string PathTemplate  { public get; }
+	string RouteName  { public get; public set; }
 }
 
 [

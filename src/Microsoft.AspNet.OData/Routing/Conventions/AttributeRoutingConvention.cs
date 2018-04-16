@@ -266,6 +266,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             return
                 routeAttributes
+                    .Where(route => String.IsNullOrEmpty(route.RouteName) || route.RouteName == _routeName)
                     .Select(route => GetODataPathTemplate(prefix, route.PathTemplate, requestContainer, controllerName, actionName))
                     .Where(template => template != null);
         }

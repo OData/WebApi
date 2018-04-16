@@ -33,5 +33,10 @@ namespace Microsoft.AspNet.OData.Routing
         /// Gets the OData URL path template that this action handles.
         /// </summary>
         public string PathTemplate { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the OData route with which to associate the attribute.
+        /// </summary>
+        public string RouteName { get; set; }
     }
 }

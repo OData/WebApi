@@ -425,6 +425,31 @@ namespace System.Web.OData.Routing
         }
 
         [Fact]
+        public void CanParseUrlWithDefaultKeyAsSegment()
+        {
+            // Arrange: OData path specified with key as segment.
+            string odataPath = "RoutingCustomers/112";
+            string expectedText = "112";
+            IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+
+            // Create path handler (parser) with default UrlKeyDelimiter = null.
+            var simplifiedParser = new DefaultODataPathHandler();
+
+            // Act: The parse using default UrlKeyDemiliter can parse OData path with key as segment correctly.
+            ODataPath path = simplifiedParser.Parse(_model, _serviceRoot, odataPath);
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+
+            KeySegment keySegment = Assert.IsType<KeySegment>(segment);
+            Assert.Equal(expectedText, keySegment.ToUriLiteral());
+
+            Assert.Same(expectedSet, path.NavigationSource);
+            Assert.Same(expectedSet.EntityType(), path.EdmType);
+        }
+
+        [Fact]
         public void CanParseCastCollectionSegment()
         {
             // Arrange
@@ -915,7 +940,6 @@ namespace System.Web.OData.Routing
             Assert.NotNull(segment);
             OperationSegment operation = Assert.IsType<OperationSegment>(segment);
             IEdmOperation edmOperation = Assert.Single(operation.Operations);
-            
             EdmAction action = Assert.IsType<EdmAction>(edmOperation);
             Assert.Equal(expectedText, action.FullName());
 
@@ -962,12 +986,23 @@ namespace System.Web.OData.Routing
         [InlineData("RoutingCustomers/Default.FunctionBoundToVIPs()")]
         public void CannotParseOperationBoundToDerivedCollectionType(string uri)
         {
+            // When EnableKeyAsSegment is enabled, in ODataPathParser.CreateNextSegment(), after attempting to resolve
+            // function bound to derived type with no lucks, ODataPathParser will further attempt to resolve the segment text as Key
+            // resulting in exception thrown indicating invalid key.
+
             // Arrange & Act & Assert
             Assert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + uri),
-                "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
-                " this must be the last segment in the request URI or it must be followed by an function or action " +
-                "that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+                "Bad Request - Error in query syntax.");
+        }
+
+        [Fact]
+        public void CanParseOperationBoundToCollectionType()
+        {
+            string uri = "RoutingCustomers/Default.FunctionBoundToRoutingCustomers()";
+            // Arrange & Act & Assert
+            ODataPath odataPath = _parser.Parse(_model, _serviceRoot, _serviceRoot + uri);
+            Assert.Equal(odataPath.Segments.Count, 2);
         }
 
         [Fact]
@@ -982,12 +1017,14 @@ namespace System.Web.OData.Routing
         [Fact]
         public void CannotParseUnboundOperationAfterEntityCollectionType()
         {
+            // The unbound operation cannot be resolved for the entity collection type. Subsequently, with EnableKeyAsSegment enabled,
+            // ODataPathParser will further attempt to resolve the segment text as Key
+            // resulting in exception thrown indicating invalid key.
+
             // Arrange & Act & Assert
             Assert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers/Default.GetAllVIPs()"),
-                "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection," +
-                " this must be the last segment in the request URI or it must be followed by an function or action " +
-                "that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+                "Bad Request - Error in query syntax.");
         }
 
         [Fact]
@@ -1354,7 +1391,7 @@ namespace System.Web.OData.Routing
             object stringParameter = functionSegment.GetParameterValue("StringParameter");
             object guidParameter = functionSegment.GetParameterValue("GuidParameter");
             object enumParameter = functionSegment.GetParameterValue("EnumParameter");
-            
+
             // Assert
             Assert.Equal(123, intParameter);
             Assert.Null(nullableDoubleParameter);

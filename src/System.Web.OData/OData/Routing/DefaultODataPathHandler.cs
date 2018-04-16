@@ -128,10 +128,7 @@ namespace System.Web.OData.Routing
             }
             else
             {
-                // ODL changes to use ODataUrlKeyDelimiter.Slash as default value.
-                // Web API still uses the ODataUrlKeyDelimiter.Parentheses as default value.
-                // Please remove it after fix: https://github.com/OData/odata.net/issues/642
-                uriParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Parentheses;
+                uriParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Slash;
             }
 
             ODL.ODataPath path;

@@ -1,39 +1,48 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable this test on AspNetCore.
+#if NETCORE
 using System;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Formatting;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.AspNet.OData.Common;
 using Microsoft.Test.AspNet.OData.Common.Models;
-using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#else
+using System;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.Test.AspNet.OData.Common.Models;
+using Xunit;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+#endif
 
 namespace Microsoft.Test.AspNet.OData.Formatter
 {
     public class PrimitiveTypesTest
     {
-        public static TheoryDataSet<Type, object, MediaTypeHeaderValue, string> PrimitiveTypesToTest
+        public static TheoryDataSet<Type, object, string, string> PrimitiveTypesToTest
         {
             get
             {
-                MediaTypeHeaderValue fullMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataFullMetadata);
-                MediaTypeHeaderValue noMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataNoMetadata);
+                string fullMetadata = ODataMediaTypes.ApplicationJsonODataFullMetadata;
+                string noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
 
-                return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
+                return new TheoryDataSet<Type, object, string, string>
                 {
                     {typeof(string), "This is a Test String", fullMetadata, "StringFullMetadata.json"},
                     {typeof(string), "This is a Test String", noMetadata, "StringNoMetadata.json"},
@@ -59,50 +68,41 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         [Theory]
         [MemberData(nameof(PrimitiveTypesToTest))]
-        public async Task PrimitiveTypesSerializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
-            string resourceName)
+        public async Task PrimitiveTypesSerializeAsOData(Type valueType, object value, string mediaType, string resourceName)
         {
+            // Arrange
             string expectedEntity = Resources.GetString(resourceName);
-            Assert.NotNull(expectedEntity);
+            Assert.NotNull(expectedEntity); // Guard
 
             ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
-            string actualEntity;
+            IEdmProperty property = model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
+            ODataPath path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
 
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/WorkItems(10)/ID"))
-            {
-                request.SetConfiguration(configuration);
-                IEdmProperty property =
-                    model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
-                request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
-                request.EnableODataDependencyInjectionSupport();
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData", path);
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(request);
-                formatter.SupportedMediaTypes.Add(mediaType);
+            var formatter = FormatterTestHelper.GetFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
 
-                Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
+            // Act
+            Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
+            var content = FormatterTestHelper.GetContent(value, type, formatter, mediaType.ToString());
+            string actualEntity = await FormatterTestHelper.GetContentResult(content, request);
 
-                using (ObjectContent content = new ObjectContent(type, value, formatter))
-                {
-                    actualEntity = await content.ReadAsStringAsync();
-                }
-            }
-
+            // Assert
             Assert.NotNull(valueType);
             JsonAssert.Equal(expectedEntity, actualEntity);
         }
 
         [Theory]
         [MemberData(nameof(PrimitiveTypesToTest))]
-        public async Task PrimitiveTypesDeserializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
-            string resourceName)
+        public async Task PrimitiveTypesDeserializeAsOData(Type valueType, object value, string mediaType, string resourceName)
         {
+            // Arrange
             string entity = Resources.GetString(resourceName);
-            Assert.NotNull(entity);
+            Assert.NotNull(entity); // Guard
 
             object expectedValue = value;
 
@@ -110,41 +110,26 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
-            object actualValue;
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData", c => c.AddService(ServiceLifetime.Singleton, b => model));
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData");
 
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID"))
-            {
-                HttpConfiguration config = new HttpConfiguration();
-                config.MapODataServiceRoute("default", "", model);
-                request.SetConfiguration(config);
-                request.EnableODataDependencyInjectionSupport("default");
+            var formatter = FormatterTestHelper.GetInputFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(request);
-                formatter.SupportedMediaTypes.Add(mediaType);
+            // Act
+            object actualValue = await FormatterTestHelper.ReadAsync(formatter, entity, valueType, request, mediaType);
 
-                using (StringContent content = new StringContent(entity))
-                {
-                    content.Headers.ContentType = mediaType;
-
-                    using (Stream stream = await content.ReadAsStreamAsync())
-                    {
-                        actualValue = await formatter.ReadFromStreamAsync(valueType, stream, content,
-                            new Mock<IFormatterLogger>().Object);
-                    }
-                }
-            }
-
+            // Assert
             Assert.Equal(expectedValue, actualValue);
         }
 
-        public static TheoryDataSet<Type, object, MediaTypeHeaderValue, string> NullPrimitiveValueToTest
+        public static TheoryDataSet<Type, object, string, string> NullPrimitiveValueToTest
         {
             get
             {
-                MediaTypeHeaderValue fullMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataFullMetadata);
-                MediaTypeHeaderValue noMetadata = MediaTypeHeaderValue.Parse(ODataMediaTypes.ApplicationJsonODataNoMetadata);
+                string fullMetadata = ODataMediaTypes.ApplicationJsonODataFullMetadata;
+                string noMetadata = ODataMediaTypes.ApplicationJsonODataNoMetadata;
 
-                return new TheoryDataSet<Type, object, MediaTypeHeaderValue, string>
+                return new TheoryDataSet<Type, object, string, string>
                 {
                     // TODO: please remove the *.json file after ODL fixes the @odata.null issue.
                     {typeof(int?), (int?)null, fullMetadata, "NullableInt32FullMetadata.json"},
@@ -155,43 +140,35 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
         [Theory]
         [MemberData(nameof(NullPrimitiveValueToTest))]
-        public async Task NullPrimitiveValueSerializeAsODataThrows(Type valueType, object value, MediaTypeHeaderValue mediaType, string unused)
+        public async Task NullPrimitiveValueSerializeAsODataThrows(Type valueType, object value, string mediaType, string unused)
         {
+            // Arrange
             Assert.NotNull(valueType);
             Assert.NotNull(unused);
 
             ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmProperty property = model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
+            ODataPath path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData", path);
 
-            using (HttpConfiguration configuration = CreateConfiguration())
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/WorkItems(10)/ID"))
-            {
-                request.SetConfiguration(configuration);
-                IEdmProperty property =
-                    model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
-                request.ODataProperties().Path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
-                request.EnableODataDependencyInjectionSupport();
+            var formatter = FormatterTestHelper.GetFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(request);
-                formatter.SupportedMediaTypes.Add(mediaType);
-
-                Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
-
-                using (ObjectContent content = new ObjectContent(type, value, formatter))
-                {
-                    await ExceptionAssert.ThrowsAsync<ODataException>(() => content.ReadAsStringAsync(),
-                        "Cannot write the value 'null' in top level property; return 204 instead.");
-                }
-            }
+            // Act & Assert
+            Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
+            var content = FormatterTestHelper.GetContent(value, type, formatter, mediaType.ToString());
+            await ExceptionAssert.ThrowsAsync<ODataException>(
+                () => FormatterTestHelper.GetContentResult(content, request),
+                "Cannot write the value 'null' in top level property; return 204 instead.");
         }
 
         [Theory]
         [MemberData(nameof(NullPrimitiveValueToTest))]
-        public async Task NullPrimitiveValueDeserializeAsOData(Type valueType, object value, MediaTypeHeaderValue mediaType,
-            string resourceName)
+        public async Task NullPrimitiveValueDeserializeAsOData(Type valueType, object value, string mediaType, string resourceName)
         {
+            // Arrange
             string entity = Resources.GetString(resourceName);
             Assert.NotNull(entity);
 
@@ -201,45 +178,16 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             modelBuilder.EntitySet<WorkItem>("WorkItems");
             IEdmModel model = modelBuilder.GetEdmModel();
 
-            object actualValue;
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData", c => c.AddService(ServiceLifetime.Singleton, b => model));
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData");
 
-            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/WorkItems(10)/ID"))
-            {
-                HttpConfiguration config = new HttpConfiguration();
-                config.MapODataServiceRoute("default", "", model);
-                request.SetConfiguration(config);
-                request.EnableODataDependencyInjectionSupport("default");
+            var formatter = FormatterTestHelper.GetInputFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
 
-                ODataMediaTypeFormatter formatter = CreateFormatter(request);
-                formatter.SupportedMediaTypes.Add(mediaType);
+            // Act
+            object actualValue = await FormatterTestHelper.ReadAsync(formatter, entity, valueType, request, mediaType);
 
-                using (StringContent content = new StringContent(entity))
-                {
-                    content.Headers.ContentType = mediaType;
-
-                    using (Stream stream = await content.ReadAsStreamAsync())
-                    {
-                        actualValue = await formatter.ReadFromStreamAsync(valueType, stream, content,
-                            new Mock<IFormatterLogger>().Object);
-                    }
-                }
-            }
-
+            // Assert
             Assert.Equal(expectedValue, actualValue);
-        }
-
-        private static HttpConfiguration CreateConfiguration()
-        {
-            HttpConfiguration configuration = new HttpConfiguration();
-            configuration.Routes.MapFakeODataRoute();
-            configuration.EnableODataDependencyInjectionSupport();
-            return configuration;
-        }
-
-        private ODataMediaTypeFormatter CreateFormatter(HttpRequestMessage request)
-        {
-            return new ODataMediaTypeFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }) { Request = request };
         }
     }
 }
-#endif

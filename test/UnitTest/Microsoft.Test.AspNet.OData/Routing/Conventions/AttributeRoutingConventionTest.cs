@@ -210,9 +210,7 @@ namespace Microsoft.Test.AspNet.OData.Routing.Conventions
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new AttributeRoutingConvention(RouteName, descriptors, new DefaultODataPathHandler()),
                 "The path template 'Customers/Order' on the action 'GetCustomers' in controller 'TestController' is not " +
-                "a valid OData path template. The request URI is not valid. Since the segment 'Customers' refers to a " +
-                "collection, this must be the last segment in the request URI or it must be followed by an function or " +
-                "action that can be bound to it otherwise all intermediate segments must refer to a single resource.");
+                "a valid OData path template. Bad Request - Error in query syntax.");
         }
 
 #if NETFX // AspNetCore version uses lazy initialization.

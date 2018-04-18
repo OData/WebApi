@@ -386,7 +386,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string expectedText = "112";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
 
-            // Act
+            // Act: key-in-parentheses url should be parsed successfully by default parser using key-as-segment delimiter.
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
@@ -401,6 +401,31 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Same(expectedSet.EntityType(), path.EdmType);
         }
 
+        [Fact]
+        public void CanParseKeyInParenthesesUrlUsingParenthesesAsDelimiter()
+        {
+            // Arrange
+            string odataPath = "RoutingCustomers(112)";
+            string expectedText = "112";
+            IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+
+            var parenthesisAsDelimiterParser = new DefaultODataPathHandler();
+            parenthesisAsDelimiterParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Parentheses;
+
+            // Act: key-in-parentheses url should be parsed successfully by parser using key-in-parentheses delimiter.
+            ODataPath path = parenthesisAsDelimiterParser.Parse(_model, _serviceRoot, odataPath);
+            ODataPathSegment segment = path.Segments.Last();
+
+            // Assert
+            Assert.NotNull(segment);
+
+            KeySegment keySegment = Assert.IsType<KeySegment>(segment);
+
+            Assert.Equal(expectedText, keySegment.ToUriLiteral());
+            Assert.IsType<KeySegment>(segment);
+            Assert.Same(expectedSet, path.NavigationSource);
+            Assert.Same(expectedSet.EntityType(), path.EdmType);
+        }
 
         [Fact]
         public void CanParseKeyAsSegmentUrl()
@@ -409,11 +434,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string odataPath = "RoutingCustomers/112";
             string expectedText = "112";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
-            var simplifiedParser = new DefaultODataPathHandler();
-            simplifiedParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Slash;
 
-            // Act
-            ODataPath path = simplifiedParser.Parse(_model, _serviceRoot, odataPath);
+            // Act: key-as-segment url should be able to parsed by default parser using key-as-segment delimiter.
+            ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
@@ -424,6 +447,23 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             Assert.Same(expectedSet, path.NavigationSource);
             Assert.Same(expectedSet.EntityType(), path.EdmType);
+        }
+
+        [Fact]
+        public void ParseKeyAsSegmentUrlUsingParenthesesAsDelimiterShouldThrow()
+        {
+            // Arrange
+            string odataPath = "RoutingCustomers/112";
+            IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
+            var parenthesisAsDelimiterParser = new DefaultODataPathHandler();
+            parenthesisAsDelimiterParser.UrlKeyDelimiter = ODataUrlKeyDelimiter.Parentheses;
+
+            // Act: should throw when try to parse key-as-segment url by parser using key-in-parentheses delimiter.
+            ExceptionAssert.Throws<ODataException>(
+                () => parenthesisAsDelimiterParser.Parse(_model, _serviceRoot, odataPath),
+                "The request URI is not valid. Since the segment 'RoutingCustomers' refers to a collection, " +
+                "this must be the last segment in the request URI or it must be followed by an function or action" +
+                " that can be bound to it otherwise all intermediate segments must refer to a single resource.");
         }
 
         [Fact]

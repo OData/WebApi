@@ -1,7 +1,23 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.Edm;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -17,6 +33,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -29,11 +46,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string RequestUri = "http://localhost/odata/OpenCustomers(2)/Address";
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OpenCustomersController) });
-            configuration.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = GetClient(enableNullDynamicProperty);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
@@ -79,10 +92,7 @@ namespace Microsoft.Test.AspNet.OData
             "}";
 
             const string RequestUri = "http://localhost/odata/OpenCustomers";
-
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OpenCustomersController) });
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = GetClient();
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
@@ -112,10 +122,7 @@ namespace Microsoft.Test.AspNet.OData
             "}";
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OpenCustomersController) });
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = GetClient();
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, requestUri);
@@ -141,10 +148,7 @@ namespace Microsoft.Test.AspNet.OData
             "}";
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OpenCustomersController) });
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = GetClient();
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
@@ -162,10 +166,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(OpenCustomersController) });
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            HttpClient client = GetClient();
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, requestUri);
@@ -182,10 +183,25 @@ namespace Microsoft.Test.AspNet.OData
             builder.EntitySet<OpenCustomer>("OpenCustomers");
             return builder.GetEdmModel();
         }
+
+        private HttpClient GetClient(bool enableNullDynamicProperty = false)
+        {
+            var controllers = new[] { typeof(OpenCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                if (enableNullDynamicProperty)
+                {
+                    config.SetSerializeNullDynamicProperty(enableNullDynamicProperty);
+                }
+
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            return TestServerFactory.CreateClient(server);
+        }
     }
 
     // Controller
-    public class OpenCustomersController : ODataController
+    public class OpenCustomersController : TestODataController
     {
         private static IList<OpenCustomer> CreateCustomers()
         {
@@ -206,7 +222,7 @@ namespace Microsoft.Test.AspNet.OData
             return customers;
         }
 
-        public IHttpActionResult GetAddress(int key)
+        public ITestActionResult GetAddress(int key)
         {
             IList<OpenCustomer> customers = CreateCustomers();
             OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
@@ -225,7 +241,7 @@ namespace Microsoft.Test.AspNet.OData
             return Ok(address);
         }
 
-        public IHttpActionResult PostOpenCustomer([FromBody]OpenCustomer customer)
+        public ITestActionResult PostOpenCustomer([FromBody]OpenCustomer customer)
         {
             // Verify there is a string dynamic property
             object countryValue;
@@ -258,7 +274,7 @@ namespace Microsoft.Test.AspNet.OData
             return Ok(customer);
         }
 
-        public IHttpActionResult PutToAddress(int key, Delta<OpenAddress> address)
+        public ITestActionResult PutToAddress(int key, Delta<OpenAddress> address)
         {
             IList<OpenCustomer> customers = CreateCustomers();
             OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
@@ -285,7 +301,7 @@ namespace Microsoft.Test.AspNet.OData
             return Updated(customer);
         }
 
-        public IHttpActionResult PatchToAddress(int key, Delta<OpenAddress> address)
+        public ITestActionResult PatchToAddress(int key, Delta<OpenAddress> address)
         {
             IList<OpenCustomer> customers = CreateCustomers();
             OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
@@ -316,7 +332,7 @@ namespace Microsoft.Test.AspNet.OData
             return Updated(customer);
         }
 
-        public IHttpActionResult DeleteToAddress(int key)
+        public ITestActionResult DeleteToAddress(int key)
         {
             IList<OpenCustomer> customers = CreateCustomers();
             OpenCustomer customer = customers.FirstOrDefault(c => c.CustomerId == key);
@@ -362,4 +378,3 @@ namespace Microsoft.Test.AspNet.OData
         public IDictionary<string, object> DynamicProperties { get; set; }
     }
 }
-#endif

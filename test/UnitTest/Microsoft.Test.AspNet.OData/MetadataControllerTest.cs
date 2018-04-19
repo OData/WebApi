@@ -1,7 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.Test.AspNet.OData.Formatter;
+using Xunit;
+#else
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -20,6 +34,7 @@ using Microsoft.Test.AspNet.OData.Common.Types;
 using Microsoft.Test.AspNet.OData.Formatter;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -29,11 +44,10 @@ namespace Microsoft.Test.AspNet.OData
         public async Task DollarMetaData_Works_WithoutAcceptHeader()
         {
             // Arrange
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient();
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -41,6 +55,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Contains("<edmx:Edmx", await response.Content.ReadAsStringAsync());
         }
 
+#if NETFX // the following test cases only apply for Asp.Net so far.
         [Fact]
         public void GetMetadata_Returns_EdmModelFromRequest()
         {
@@ -69,6 +84,63 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Fact]
+        public async Task ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
+        {
+            HttpServer server = new HttpServer(GetConfiguration());
+            server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
+
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            var response = await client.SendAsync(request);
+
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", await response.Content.ReadAsStringAsync());
+        }
+
+        [Theory]
+        [InlineData("application/xml")]
+        [InlineData("application/abcd")]
+        public async Task ServiceDocument_Returns_NotAcceptable_ForNonJsonMediaType(string mediaType)
+        {
+            // Arrange
+            HttpServer server = new HttpServer(GetConfiguration());
+            server.Configuration.Services.Replace(typeof(IContentNegotiator), new DefaultContentNegotiator(true));
+
+            HttpClient client = new HttpClient(server);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(mediaType));
+
+            // Act
+            var response = await client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
+        }
+
+        [Fact]
+        public void Controller_DoesNotAppear_InApiDescriptions()
+        {
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
+            config.Routes.MapHttpRoute("Default", "{controller}/{action}");
+            config.MapODataServiceRoute(ODataConventionModelBuilderFactory.Create().GetEdmModel());
+            config.EnsureInitialized();
+            var explorer = config.Services.GetApiExplorer();
+
+            var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
+
+            Assert.DoesNotContain("ODataMetadata", apis);
+        }
+
+        private HttpConfiguration GetConfiguration()
+        {
+            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
+            config.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
+            return config;
+        }
+#endif
+
+        [Fact]
         public async Task DollarMetadata_Works_WithMultipleModels()
         {
             ODataConventionModelBuilder builder1 = ODataConventionModelBuilderFactory.Create();
@@ -79,12 +151,13 @@ namespace Microsoft.Test.AspNet.OData
             builder2.EntitySet<FormatterPerson>("People2");
             var model2 = builder2.GetEdmModel();
 
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("OData1", "v1", model1);
-            config.MapODataServiceRoute("OData2", "v2", model2);
+            var server = TestServerFactory.Create(new[] { typeof(MetadataController) }, (config) =>
+            {
+                config.MapODataServiceRoute("OData1", "v1", model1);
+                config.MapODataServiceRoute("OData2", "v2", model2);
+            });
 
-            HttpClient client = new HttpClient(server);
+            HttpClient client = TestServerFactory.CreateClient(server);
             await AssertHasEntitySet(client, "http://localhost/v1/$metadata", "People1");
             await AssertHasEntitySet(client, "http://localhost/v2/$metadata", "People2");
         }
@@ -96,12 +169,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ForeignCustomer>("Customers");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -120,12 +188,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<FkProduct>("Products");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -155,12 +218,7 @@ namespace Microsoft.Test.AspNet.OData
             product.HasRequired(o => o.SupplierNav, (o, c) => o.SupplierKey == c.Id);
 
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -189,12 +247,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<FkProduct2>("Products");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -238,12 +291,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<FkProduct3>("Products");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -262,12 +310,7 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ForeignCustomer2>("Customers");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -295,12 +338,7 @@ namespace Microsoft.Test.AspNet.OData
                 .HasRequired(o => o.Customer, (o, c) => o.CustomerId == c.OtherCustomerKey);
 
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -331,12 +369,7 @@ namespace Microsoft.Test.AspNet.OData
                 .CascadeOnDelete();
 
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -365,12 +398,7 @@ namespace Microsoft.Test.AspNet.OData
                     (o, c) => o.CustomerForeignKey1 == c.CustomerId1 && o.CustomerForeignKey2 == c.CustomerId2);
 
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -394,12 +422,7 @@ namespace Microsoft.Test.AspNet.OData
             builder.EntitySet<DerivedPrincipalEntity>("Principals");
             builder.EntitySet<DependentEntity>("Dependents");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -445,12 +468,7 @@ namespace Microsoft.Test.AspNet.OData
                 "<NavigationProperty Name=\"Customer\" Type=\"DefaultNamespace.Customer\" Partner=\"Orders\">" +
                     "<ReferentialConstraint Property=\"CustomerForeignKey\" ReferencedProperty=\"CustomerId\" />" +
                 "</NavigationProperty>";
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            HttpServer server = new HttpServer(config);
-            config.MapODataServiceRoute("odata", "odata", model);
-
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
             HttpResponseMessage response = await client.GetAsync("http://localhost/odata/$metadata");
@@ -468,14 +486,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<FormatterAddress>();
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -491,14 +505,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<FormatterAddress>();
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -531,14 +541,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<ComplexBaseType>();
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -576,14 +582,10 @@ namespace Microsoft.Test.AspNet.OData
             action.OptionalReturn = false;
             action.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -623,14 +625,10 @@ namespace Microsoft.Test.AspNet.OData
             function.OptionalReturn = false;
             function.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -650,14 +648,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataModelBuilder builder = new ODataModelBuilder();
             builder.EntityType<AbstractEntityType>().Abstract().Property(a => a.IntProperty);
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -696,14 +690,10 @@ namespace Microsoft.Test.AspNet.OData
             builder.EntityType<SubEntityType>().HasKey(b => b.SubKey).DerivesFrom<AbstractEntityType>();
             builder.EntityType<AnotherSubEntityType>().HasKey(d => d.AnotherKey).DerivesFrom<AbstractEntityType>();
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -730,14 +720,10 @@ namespace Microsoft.Test.AspNet.OData
             builder.EntityType<EnumModel>().HasKey(e => e.Simple).Namespace = "NS";
             builder.EnumType<SimpleEnum>().Namespace = "NS";
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -764,14 +750,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<CustomerWithConcurrencyAttribute>("Customers");
             IEdmModel model = builder.GetEdmModel();
-
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(model);
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
@@ -781,37 +763,12 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Contains(expectMetadata, payload);
         }
 
-        private static async Task AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
-        {
-            var response = await client.GetAsync(uri);
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains(entitySetName, await response.Content.ReadAsStringAsync());
-        }
-
-        [Fact]
-        public async Task ServiceDocumentWorks_AfterTracingIsEnabled_IfModelIsSetOnConfiguration()
-        {
-            HttpServer server = new HttpServer(GetConfiguration());
-            server.Configuration.Services.Replace(typeof(ITraceWriter), new Mock<ITraceWriter>().Object);
-
-            HttpClient client = new HttpClient(server);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            var response = await client.SendAsync(request);
-
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
-            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", await response.Content.ReadAsStringAsync());
-        }
-
         [Fact]
         public async Task ServiceDocumentWorks_OutputSingleton()
         {
             // Arrange
-            HttpServer server = new HttpServer(GetConfiguration());
-
-            HttpClient client = new HttpClient(server);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
+            HttpClient client = GetClient();
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/odata");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
             // Act
@@ -824,35 +781,14 @@ namespace Microsoft.Test.AspNet.OData
                 repsoneString);
         }
 
-        [Theory]
-        [InlineData("application/xml")]
-        [InlineData("application/abcd")]
-        public async Task ServiceDocument_Returns_NotAcceptable_ForNonJsonMediaType(string mediaType)
-        {
-            // Arrange
-            HttpServer server = new HttpServer(GetConfiguration());
-            server.Configuration.Services.Replace(typeof(IContentNegotiator), new DefaultContentNegotiator(true));
-
-            HttpClient client = new HttpClient(server);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(mediaType));
-
-            // Act
-            var response = await client.SendAsync(request);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.NotAcceptable, response.StatusCode);
-        }
-
         [Fact]
         public async Task ServiceDocument_ContainsFunctonImport()
         {
             // Arrange
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient();
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/");
+            var responseString = await client.GetStringAsync("http://localhost/odata");
 
             // Assert
             Assert.Contains("\"name\":\"GetPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetPerson\"", responseString);
@@ -867,17 +803,16 @@ namespace Microsoft.Test.AspNet.OData
             IEnumerable<IEdmFunctionImport> functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetSalary");
 
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/");
+            var responseString = await client.GetStringAsync("http://localhost/odata/");
 
             // Assert
             var functionImport = Assert.Single(functionImports);
             Assert.Equal("Default.GetSalary", functionImport.Function.FullName());
             Assert.True(functionImport.IncludeInServiceDocument);
-            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/odata/$metadata\"", responseString);
             Assert.DoesNotContain("\"name\":\"GetSalary\",\"kind\":\"FunctionImport\",\"url\":\"GetSalary\"", responseString);
         }
 
@@ -889,11 +824,10 @@ namespace Microsoft.Test.AspNet.OData
             IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetAddress").ToArray();
 
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/");
+            var responseString = await client.GetStringAsync("http://localhost/odata/");
 
             // Assert
             Assert.Equal(2, functionImports.Length);
@@ -907,7 +841,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Empty(functionImports[0].Function.Parameters);
             Assert.Equal("AddressId", functionImports[1].Function.Parameters.First().Name);
 
-            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/odata/$metadata\"", responseString);
             Assert.DoesNotContain("\"name\":\"GetAddress\",\"kind\":\"FunctionImport\",\"url\":\"GetAddress\"", responseString);
         }
 
@@ -919,11 +853,10 @@ namespace Microsoft.Test.AspNet.OData
             IEdmFunctionImport[] functionImports = model.EntityContainer.Elements.OfType<IEdmFunctionImport>()
                 .Where(f => f.Name == "GetVipPerson").ToArray();
 
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(model);
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/");
+            var responseString = await client.GetStringAsync("http://localhost/odata/");
 
             // Assert
             Assert.Equal(3, functionImports.Length);
@@ -936,7 +869,7 @@ namespace Microsoft.Test.AspNet.OData
             Assert.Empty(functionImports[1].Function.Parameters);
             Assert.Equal(2, functionImports[2].Function.Parameters.Count());
 
-            Assert.Contains("\"@odata.context\":\"http://localhost/$metadata\"", responseString);
+            Assert.Contains("\"@odata.context\":\"http://localhost/odata/$metadata\"", responseString);
             Assert.Contains("\"name\":\"GetVipPerson\",\"kind\":\"FunctionImport\",\"url\":\"GetVipPerson\"", responseString);
         }
 
@@ -944,30 +877,15 @@ namespace Microsoft.Test.AspNet.OData
         public async Task ServiceDocument_FunctionNamespace_Configuration()
         {
             // Arrange
-            HttpServer server = new HttpServer(GetConfiguration());
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient();
 
             // Act
-            var response = await client.GetAsync("http://localhost/$metadata");
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
             var responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
             Assert.Contains("CustomizeNamepace.GetNS", responseString);
             Assert.Contains("Namespace=\"CustomizeNamepace\"", responseString);
-        }
-
-        [Fact]
-        public void Controller_DoesNotAppear_InApiDescriptions()
-        {
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.Routes.MapHttpRoute("Default", "{controller}/{action}");
-            config.MapODataServiceRoute(ODataConventionModelBuilderFactory.Create().GetEdmModel());
-            config.EnsureInitialized();
-            var explorer = config.Services.GetApiExplorer();
-
-            var apis = explorer.ApiDescriptions.Select(api => api.ActionDescriptor.ControllerDescriptor.ControllerName);
-
-            Assert.DoesNotContain("ODataMetadata", apis);
         }
 
         [Fact]
@@ -977,14 +895,10 @@ namespace Microsoft.Test.AspNet.OData
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<FormatterAccount>("Accounts");
 
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(builder.GetEdmModel());
-
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(builder.GetEdmModel());
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/$metadata");
+            var responseString = await client.GetStringAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.Contains(
@@ -1018,14 +932,10 @@ namespace Microsoft.Test.AspNet.OData
                 .HasSinglePath(c => c.Location)
                 .HasRequiredBinding(a => a.City, "Cities");
 
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(builder.GetEdmModel());
-
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(builder.GetEdmModel());
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/$metadata");
+            var responseString = await client.GetStringAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);
@@ -1057,14 +967,10 @@ namespace Microsoft.Test.AspNet.OData
             bindingConfiguration.HasOptionalBinding((BindingUsAddress u) => u.UsCity, "Cities_A");
             bindingConfiguration.HasManyBinding((BindingUsAddress u) => u.UsCities, "Cities_B");
 
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(builder.GetEdmModel());
-
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(builder.GetEdmModel());
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/$metadata");
+            var responseString = await client.GetStringAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);
@@ -1105,25 +1011,30 @@ namespace Microsoft.Test.AspNet.OData
             builder.EntitySet<BindingCustomer>("Customers");
             builder.EntitySet<BindingCity>("Cities");
 
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(builder.GetEdmModel());
-
-            HttpServer server = new HttpServer(config);
-            HttpClient client = new HttpClient(server);
+            HttpClient client = GetClient(builder.GetEdmModel());
 
             // Act
-            var responseString = await client.GetStringAsync("http://localhost/$metadata");
+            var responseString = await client.GetStringAsync("http://localhost/odata/$metadata");
 
             // Assert
             Assert.Contains(expectMetadata, responseString);
         }
 
-        private HttpConfiguration GetConfiguration()
+        private static async Task AssertHasEntitySet(HttpClient client, string uri, string entitySetName)
         {
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(MetadataController) });
-            config.MapODataServiceRoute(ODataTestUtil.GetEdmModel());
-            return config;
+            var response = await client.GetAsync(uri);
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(entitySetName, await response.Content.ReadAsStringAsync());
+        }
+
+        private HttpClient GetClient(IEdmModel model = null)
+        {
+            var server = TestServerFactory.Create(new[] { typeof(MetadataController) }, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "odata", model ?? ODataTestUtil.GetEdmModel());
+            });
+            return TestServerFactory.CreateClient(server);
         }
     }
 }
-#endif

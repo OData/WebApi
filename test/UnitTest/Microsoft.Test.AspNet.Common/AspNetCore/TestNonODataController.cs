@@ -10,5 +10,7 @@ namespace Microsoft.Test.AspNet.OData
     /// </summary>
     public class TestNonODataController : Controller
     {
+        [NonAction]
+        public new TestOkObjectResult Ok(object value) { return new TestOkObjectResult(value); }
     }
 }

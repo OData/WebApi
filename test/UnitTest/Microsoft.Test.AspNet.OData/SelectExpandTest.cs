@@ -1,7 +1,27 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +40,7 @@ using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -27,42 +48,6 @@ namespace Microsoft.Test.AspNet.OData
     {
         private const string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
         private const string AcceptJson = "application/json";
-
-        private HttpConfiguration _configuration;
-        private HttpClient _client;
-
-        public SelectExpandTest()
-        {
-            _configuration = RoutingConfigurationFactory.CreateWithTypes(
-                new[]
-                {
-                    typeof(SelectExpandTestCustomersController), typeof(SelectExpandTestCustomersAliasController),
-                    typeof(PlayersController), typeof(NonODataSelectExpandTestCustomersController),
-                    typeof(AttributedSelectExpandCustomersController), typeof(SelectExpandTestCustomer),
-                    typeof(SelectExpandTestSpecialCustomer), typeof(SelectExpandTestCustomerWithAlias),
-                    typeof(SelectExpandTestOrder), typeof(SelectExpandTestSpecialOrder),
-                    typeof(SelectExpandTestSpecialOrderWithAlias),
-                    typeof(ReferenceNavigationPropertyExpandFilterController),
-                });
-
-            _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-            _configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-
-            _configuration.MapODataServiceRoute("odata", "odata", GetModel());
-            _configuration.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
-            _configuration.MapODataServiceRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
-            _configuration.MapODataServiceRoute(
-                "odata-alias2-inheritance",
-                "odata-alias2-inheritance",
-                GetModelWithCustomerAliasAndInheritance());
-            _configuration.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
-            _configuration.MapODataServiceRoute("odata-expandfilter", "odata-expandfilter", GetModelWithReferenceNavigationPropertyFilter());
-            _configuration.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
-            _configuration.EnableDependencyInjection();
-
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
-        }
 
         [Fact]
         public async Task SelectExpand_Works()
@@ -389,10 +374,48 @@ namespace Microsoft.Test.AspNet.OData
 
         private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
         {
+            var controllers = new[] {
+                typeof(SelectExpandTestCustomersController),
+                typeof(SelectExpandTestCustomersAliasController),
+                typeof(PlayersController),
+                typeof(NonODataSelectExpandTestCustomersController),
+                typeof(AttributedSelectExpandCustomersController),
+                typeof(SelectExpandTestCustomer),
+                typeof(SelectExpandTestSpecialCustomer),
+                typeof(SelectExpandTestCustomerWithAlias),
+                typeof(SelectExpandTestOrder),
+                typeof(SelectExpandTestSpecialOrder),
+                typeof(SelectExpandTestSpecialOrderWithAlias),
+                typeof(ReferenceNavigationPropertyExpandFilterController),
+            };
+
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+#if NETFX
+                config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+#endif
+                config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+                config.MapODataServiceRoute("odata", "odata", GetModel());
+                config.MapODataServiceRoute("odata-inheritance", "odata-inheritance", GetModelWithInheritance());
+                config.MapODataServiceRoute("odata-alias", "odata-alias", GetModelWithCustomerAlias());
+                config.MapODataServiceRoute("odata-alias2-inheritance", "odata-alias2-inheritance", GetModelWithCustomerAliasAndInheritance());
+                config.MapODataServiceRoute("odata2", "odata2", GetModelWithOperations());
+                config.MapODataServiceRoute("odata-expandfilter", "odata-expandfilter", GetModelWithReferenceNavigationPropertyFilter());
+#if NETCORE
+                config.MapRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers", action="Get" });
+#else
+                config.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
+#endif
+                config.EnableDependencyInjection();
+                });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
-            request.SetConfiguration(_configuration);
-            return _client.SendAsync(request);
+#if NETFX
+            request.SetConfiguration(server.Configuration);
+#endif
+            return client.SendAsync(request);
         }
 
         private static void ValidateCustomer(JToken customer)
@@ -686,7 +709,20 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class NonODataSelectExpandTestCustomersController : ApiController
+#if NETCORE // Use this attribute to help ASP.NET Core to fiter on the action.
+    [AttributeUsage(AttributeTargets.Method)]
+    public class IdSpecificAttribute : Attribute, IActionConstraint
+    {
+        public int Order => 0;
+
+        public bool Accept(ActionConstraintContext context)
+        {
+            return context.RouteContext.HttpContext.Request.Query.ContainsKey("id");
+        }
+    }
+#endif
+
+    public class NonODataSelectExpandTestCustomersController : TestNonODataController
     {
         [EnableQuery]
         public IEnumerable<SelectExpandTestCustomer> Get()
@@ -695,6 +731,9 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [EnableQuery]
+#if NETCORE
+        [IdSpecific]
+#endif
         public SingleResult Get(int id)
         {
             IQueryable<SelectExpandTestCustomer> singleCustomer = SelectExpandTestCustomer.Customers
@@ -703,18 +742,18 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class ReferenceNavigationPropertyExpandFilterController : ODataController
+    public class ReferenceNavigationPropertyExpandFilterController : TestODataController
     {
         [EnableQuery(HandleReferenceNavigationPropertyExpandFilter = true)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(SelectExpandTestCustomer.Customers);
         }
     }
 
-    public class AttributedSelectExpandCustomersController : ApiController
+    public class AttributedSelectExpandCustomersController : TestNonODataController
     {
-        public IHttpActionResult Get(ODataQueryOptions<AttributedSelectExpandCustomer> options)
+        public ITestActionResult Get(ODataQueryOptions<AttributedSelectExpandCustomer> options)
         {
             IQueryable result = options.ApplyTo(Enumerable.Range(1, 10).Select(i => new AttributedSelectExpandCustomer
             {
@@ -731,7 +770,7 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class PlayersController : ODataController
+    public class PlayersController : TestODataController
     {
         private IList<Player> players = Enumerable.Range(0, 5).Select(i =>
                     new Player
@@ -743,7 +782,7 @@ namespace Microsoft.Test.AspNet.OData
                     }).ToList();
 
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(players);
         }
@@ -757,4 +796,3 @@ namespace Microsoft.Test.AspNet.OData
         public string Address { get; set; }
     }
 }
-#endif

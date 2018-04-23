@@ -10,5 +10,7 @@ namespace Microsoft.Test.AspNet.OData
     /// </summary>
     public class TestNonODataController : ApiController
     {
+        [NonAction]
+        public new TestOkObjectResult<T> Ok<T>(T value) { return new TestOkObjectResult<T>(base.Ok<T>(value)); }
     }
 }

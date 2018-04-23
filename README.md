@@ -30,6 +30,7 @@ The gh-pages branch contains documentation source for OData WebApi - tutorials, 
 
 This is the maintenance branch for OData WebApi with ASP.NET Core support. The package name is Microsoft.AspNetCore.OData.
 
+
 **[maintenance-V4](https://github.com/OData/Webapi/tree/maintenance-V4) branch**
 
 This is the maintenance branch for OData WebApi based on ODL 6.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData, with latest maintenance release version [5.10](https://www.nuget.org/packages/Microsoft.AspNet.OData/5.10.0).
@@ -75,12 +76,20 @@ build.cmd DisableSkipStrongNames
 Open the project, build it, and then test cases should appear in test explorer. If not, this is because the assemblies are delay signed and you're missing the private key so xunit will not load them in Visual Studio. To fix, please run `build.cmd EnableSkipStrongNames`. Run all the tests in the test explorer. For running end-to-end tests you must open the solution as *Administrator*. More detail at [this](http://odata.github.io/WebApi/#09-01-unittest-e2etest).
 
 ### Nightly builds
-The nightly build process will upload a NuGet packages for WebApi to the [MyGet.org webapinightly feed](https://www.myget.org/gallery/webapinightly).
+The nightly build process will upload a NuGet packages for WebApi to:
+ v7.x.x: [MyGet.org webapinetcore feed](https://www.myget.org/gallery/webapinetcore)
+ v6.x.x: [MyGet.org webapinightly feed](https://www.myget.org/gallery/webapinightly)
 
-To connect to webapinightly feed, use this feed URL: [webapinightly MyGet feed URL](https://www.myget.org/F/webapinightly).
 
-You can query the latest nightly NuGet packages using this query: [MAGIC WebApi query](https://www.myget.org/F/webapinightly/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
+To connect to webapinightly feed, use this feed URL:
+ v7.x.x: [webapinetcore MyGet feed URL](https://www.myget.org/F/webapinetcore)
+ v6.x.x: [webapinightly MyGet feed URL](https://www.myget.org/F/webapinightly)
+ 
 
+You can query the latest nightly NuGet packages using this query:
+ v7.x.x: [MAGIC WebApi query](https://www.myget.org/F/webapinetcore/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
+ v6.x.x: [MAGIC WebApi query](https://www.myget.org/F/webapinightly/Packages?$select=Id,Version&$orderby=Version%20desc&$top=4&$format=application/json)
+ 
 ### Contribution
 Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/master/.github/CONTRIBUTION.md).
 

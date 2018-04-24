@@ -1,7 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.OData.Edm;
+using Microsoft.Test.AspNet.OData.Common;
+using Moq;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -12,6 +21,7 @@ using Microsoft.OData.Edm;
 using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
@@ -59,7 +69,7 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Property_Request_RoundTrips()
         {
-            ReflectionAssert.Property(_context, (c) => c.Request, null, allowNull: true, roundTripTestValue: new HttpRequestMessage());
+            ReflectionAssert.Property(_context, (c) => c.Request, null, allowNull: true, roundTripTestValue: RequestFactory.Create());
         }
 
         [Fact]
@@ -77,7 +87,9 @@ namespace Microsoft.Test.AspNet.OData
         [Fact]
         public void Property_Url_RoundTrips()
         {
+#if NETFX // So far, Asp.NET core version doesn't have Url property.
             ReflectionAssert.Property(_context, (c) => c.Url, null, allowNull: true, roundTripTestValue: new UrlHelper(new HttpRequestMessage()));
+#endif
         }
 
         [Fact]
@@ -320,4 +332,3 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
-#endif

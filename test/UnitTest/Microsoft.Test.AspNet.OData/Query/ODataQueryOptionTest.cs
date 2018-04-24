@@ -1047,14 +1047,12 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.NotNull(queryOptions.Count);
         }
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]
         public async Task ODataQueryOptions_SetToApplied()
         {
             // Arrange
             string url = "http://localhost/odata/EntityModels?$filter=ID eq 1&$skip=1&$select=A&$expand=ExpandProp";
-            HttpServer server = CreateServer();
-            HttpClient client = new HttpClient(server);
+            HttpClient client = CreateClient();
 
             // Act
             HttpResponseMessage response = await client.GetAsync(url);
@@ -1074,8 +1072,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             // Arrange
             string url = "http://localhost/odata/Products?$expand=" + propName;
-            HttpServer server = CreateServer();
-            HttpClient client = new HttpClient(server);
+            HttpClient client = CreateClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
 
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
@@ -1101,8 +1098,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             // Arrange
             string url = "http://localhost/odata/Products?$expand=" + propName;
-            HttpServer server = CreateServer();
-            HttpClient client = new HttpClient(server);
+            HttpClient client = CreateClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
@@ -1133,8 +1129,9 @@ namespace Microsoft.Test.AspNet.OData.Query
             var request = RequestFactory.Create(
                 HttpMethod.Get,
                 uri);
+#if NETFX
             request.EnableHttpDependencyInjectionSupport();
-
+#endif
             // Act
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
@@ -1147,8 +1144,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             // Arrange
             string url = "http://localhost/odata/Products?$top=1&test=1&test=2";
-            HttpServer server = CreateServer();
-            HttpClient client = new HttpClient(server);
+            HttpClient client = CreateClient();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
@@ -1159,22 +1155,23 @@ namespace Microsoft.Test.AspNet.OData.Query
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
-        private static HttpServer CreateServer()
+        private static HttpClient CreateClient()
         {
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(
-                    typeof(EntityModelsController),
-                    typeof(ProductsController));
-
+            var controllers = new[] { typeof(EntityModelsController), typeof(ProductsController) };
             ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<ODataQueryOptionTest_EntityModel>("EntityModels");
             builder.EntitySet<MyProduct>("Products");
             builder.EntitySet<ODataQueryOptionTest_EntityModelMultipleKeys>("ODataQueryOptionTest_EntityModelMultipleKeys");
             IEdmModel model = builder.GetEdmModel();
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute("odata", "odata", model);
-            return new HttpServer(configuration);
+
+            var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null);
+                config.MapODataServiceRoute("odata", "odata", model);
+            });
+
+            return TestServerFactory.CreateClient(server);
         }
-#endif
     }
 
     public class EntityModelsController : TestControllerBase

@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
@@ -21,11 +19,13 @@ namespace Microsoft.Test.AspNet.OData
         public async Task AGet_Full()
         {
             // Arrange
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(AccountsController) });
-            configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            var controllers = new[] { typeof(AccountsController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null);
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpResponseMessage response = await client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=full");
@@ -38,10 +38,13 @@ namespace Microsoft.Test.AspNet.OData
         public async Task AGet_Minimial()
         {
             // Arrange
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(AccountsController) });
-            configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
-
-            HttpClient client = new HttpClient(new HttpServer(configuration));
+            var controllers = new[] { typeof(AccountsController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null);
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpResponseMessage response = await client.GetAsync(_requestRooturl + "Accounts?$expand=PayoutPI&$format=application/json;odata.metadata=minimal");
@@ -74,10 +77,10 @@ namespace Microsoft.Test.AspNet.OData
     }
 
     // Controller
-    public class AccountsController : ODataController
+    public class AccountsController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_accounts);
         }
@@ -119,4 +122,3 @@ namespace Microsoft.Test.AspNet.OData
         public int Id { get; set; }
     }
 }
-#endif

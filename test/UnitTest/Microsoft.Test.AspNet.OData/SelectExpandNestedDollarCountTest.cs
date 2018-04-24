@@ -1,7 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.OData.Edm;
+using Xunit;
+#else
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,30 +26,13 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class SelectExpandNestedDollarCountTest
     {
         private const string AcceptJson = "application/json";
-
-        private HttpConfiguration _configuration;
-        private HttpClient _client;
-
-        public SelectExpandNestedDollarCountTest()
-        {
-            _configuration = RoutingConfigurationFactory.CreateWithTypes(
-                new[]
-                {
-                    typeof(MsCustomersController), typeof(MetadataController)
-                });
-            _configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
-
-            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
-            _configuration.MapODataServiceRoute("odata", "odata", GetModel());
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
-        }
 
         [Fact]
         public async Task SelectExpand_WithOneLevelNestedDollarCount_Works()
@@ -119,9 +114,21 @@ namespace Microsoft.Test.AspNet.OData
 
         private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
         {
+            var controllers = new[] { typeof(MsCustomersController), typeof(MetadataController) };
+            var server = TestServerFactory.Create(controllers, configuration =>
+            {
+#if NETFX
+                configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
+#endif
+                configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
+                configuration.MapODataServiceRoute("odata", "odata", GetModel());
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
-            return _client.SendAsync(request);
+            return client.SendAsync(request);
         }
 
         private IEdmModel GetModel()
@@ -135,7 +142,7 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class MsCustomersController : ODataController
+    public class MsCustomersController : TestODataController
     {
         private static IList<MsCustomer> _customers;
 
@@ -159,7 +166,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [EnableQuery(PageSize = 2)]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             return Ok(_customers);
         }
@@ -190,4 +197,3 @@ namespace Microsoft.Test.AspNet.OData
         public string Category { get; set; }
     }
 }
-#endif

@@ -1,7 +1,21 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.OData.Edm;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,31 +30,31 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Xunit;
+#endif
 
 namespace Microsoft.Test.AspNet.OData
 {
     public class QueryableLimitationTest
     {
         private const string BaseAddress = @"http://localhost";
-        private HttpConfiguration _configuration;
         private HttpClient _client;
         private IEdmModel _model;
 
         public QueryableLimitationTest()
         {
-            _configuration = RoutingConfigurationFactory.CreateWithTypes(new[]
+            _model = GetEdmModel();
+            var controllers = new[]
             {
                 typeof(QueryLimitCustomersController),
                 typeof(OpenCustomersController),
                 typeof(MetadataController)
+            };
+            var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.Count().OrderBy().Filter().Expand().MaxTop(null);
+                config.MapODataServiceRoute("odata", "odata", _model);
             });
-
-            _model = GetEdmModel();
-
-            _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
-            _configuration.MapODataServiceRoute("odata", "odata", _model);
-            HttpServer server = new HttpServer(_configuration);
-            _client = new HttpClient(server);
+            _client = TestServerFactory.CreateClient(server);
         }
 
         private static IEdmModel GetEdmModel()
@@ -200,11 +214,7 @@ namespace Microsoft.Test.AspNet.OData
             string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
-            // Remove the following condition after updating to ODL 6.13.
-            if (_model.FindTerm(CapabilitiesVocabularyConstants.CountRestrictions) != null)
-            {
-                Assert.Equal(expect, responseString);
-            }
+            Assert.Equal(expect, responseString);
         }
 
         [Fact]
@@ -449,7 +459,7 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         // Controller
-        public class QueryLimitCustomersController : ODataController
+        public class QueryLimitCustomersController : TestODataController
         {
             private IList<QueryLimitCustomer> customers = Enumerable.Range(0, 10).Select(i =>
                     new QueryLimitCustomer
@@ -480,31 +490,31 @@ namespace Microsoft.Test.AspNet.OData
                     }).ToList();
 
             [EnableQuery(PageSize = 10, MaxExpansionDepth = 5, MaxAnyAllExpressionDepth = 1)]
-            public IHttpActionResult Get()
+            public ITestActionResult Get()
             {
                 return Ok(customers);
             }
 
             [EnableQuery]
-            public IHttpActionResult GetAddresses(int key)
+            public ITestActionResult GetAddresses(int key)
             {
                 return Ok(customers.Single(customer => customer.Id == key).Addresses);
             }
 
             [EnableQuery]
-            public IHttpActionResult GetNumbers(int key)
+            public ITestActionResult GetNumbers(int key)
             {
                 return Ok(customers.Single(customer => customer.Id == key).Numbers);
             }
 
             [EnableQuery]
-            public IHttpActionResult GetImportantOrders(int key)
+            public ITestActionResult GetImportantOrders(int key)
             {
                 return Ok(customers.Single(customer => customer.Id == key).ImportantOrders);
             }
 
             [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.All ^ AllowedQueryOptions.Count)]
-            public IHttpActionResult GetNotes(int key)
+            public ITestActionResult GetNotes(int key)
             {
                 return Ok(customers.Single(customer => customer.Id == key).Notes);
             }
@@ -558,4 +568,3 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
-#endif

@@ -1,12 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -44,14 +42,18 @@ namespace Microsoft.Test.AspNet.OData
 
         private static HttpClient GetClient(DependencyInjectionModel instance)
         {
-            var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(DependencyInjectionModelsController) });
             IEdmModel model = GetEdmModel();
-            config.MapODataServiceRoute("odata", "odata", builder =>
+            var controllers = new[] { typeof(DependencyInjectionModelsController) };
+            var server = TestServerFactory.Create(controllers, config =>
+            {
+                config.MapODataServiceRoute("odata", "odata", builder =>
                 builder.AddService(ServiceLifetime.Singleton, sp => instance)
                        .AddService(ServiceLifetime.Singleton, sp => model)
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
                             ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", config)));
-            return new HttpClient(new HttpServer(config));
+            });
+
+            return TestServerFactory.CreateClient(server);
         }
 
         private static IEdmModel GetEdmModel()
@@ -62,10 +64,10 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 
-    public class DependencyInjectionModelsController : ODataController
+    public class DependencyInjectionModelsController : TestODataController
     {
         [EnableQuery]
-        public IHttpActionResult Get()
+        public ITestActionResult Get()
         {
             IServiceProvider requestContainer = this.Request.GetRequestContainer();
             return Ok(requestContainer.GetRequiredService<DependencyInjectionModel>());
@@ -77,4 +79,3 @@ namespace Microsoft.Test.AspNet.OData
         public int Id { get; set; }
     }
 }
-#endif

@@ -34,9 +34,8 @@
   <assembly name="WebMatrix.WebData"/>
 
   <!-- Unit test assemblies and helpers -->
-  <assembly name="Microsoft.Test.AspNet.OData.TestCommon"/>
-  <assembly name="Microsoft.Test.AspNet.OData.Abstraction"/>
-  <assembly name="Microsoft.Test.AspNet.OData"/>
+  <assembly name="Microsoft.AspNet.OData.Test"/>
+  <assembly name="Microsoft.AspNetCore.OData.Test"/>
   <assembly name="Microsoft.Test.E2E.AspNetCore.OData"/>
   <assembly name="Microsoft.AspNet.Facebook.Test"/>
   <assembly name="Microsoft.Web.Helpers.Test"/>

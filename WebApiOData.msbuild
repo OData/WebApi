@@ -17,7 +17,7 @@
     <SkipStrongNamesXml>$(MSBuildThisFileDirectory)tools\SkipStrongNames.xml</SkipStrongNamesXml>
     <NuGetExeFile>$(MSBuildThisFileDirectory)sln\.nuget\NuGet.exe</NuGetExeFile>
   </PropertyGroup>
-	
+
   <ItemGroup>
     <SolutionsToBuild Include=".\sln\WebApiOData.AspNet.sln">
       <BuildInParallel>$(BuildInParallel)</BuildInParallel>
@@ -26,8 +26,7 @@
 
   <!-- Test assemblies -->
   <ItemGroup>
-    <TestAssembiles Include="$(OutputPath)Microsoft.Test.AspNet.OData.Abstraction.dll" />
-    <TestAssembiles Include="$(OutputPath)Microsoft.Test.AspNet.OData.dll" />
+    <TestAssembiles Include="$(OutputPath)Microsoft.AspNet.OData.Test.dll" />
   </ItemGroup>
 
   <Target Name="EnableSkipStrongNames" DependsOnTargets="RestoreSkipStrongNames">

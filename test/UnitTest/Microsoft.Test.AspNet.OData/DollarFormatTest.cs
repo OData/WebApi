@@ -1,11 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -23,14 +21,18 @@ namespace Microsoft.Test.AspNet.OData
         public async Task DollarFormat_Applies_IfPresent(string path, string mediaTypeFormat)
         {
             // Arrange
+#if NETCORE // ASP.NET Core appends the charset.
+            MediaTypeHeaderValue expected = MediaTypeHeaderValue.Parse(mediaTypeFormat + ";charset=utf-8");
+#else
             MediaTypeHeaderValue expected = MediaTypeHeaderValue.Parse(mediaTypeFormat);
+#endif
             string url = string.Format("http://localhost/{0}?$format={1}", path, mediaTypeFormat);
             IEdmModel model = GetEdmModel();
-            var configuration = RoutingConfigurationFactory.CreateWithTypes(
-                new[] { typeof(FormatCustomersController), typeof(ThisController) });
-            HttpServer server = new HttpServer(configuration);
-            HttpClient client = new HttpClient(server);
-            configuration.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            var server = TestServerFactory.Create(new[] { typeof(FormatCustomersController), typeof(ThisController) }, config =>
+            {
+                config.MapODataServiceRoute("odata", routePrefix: null, model: model);
+            });
+            HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, url);
@@ -74,4 +76,3 @@ namespace Microsoft.Test.AspNet.OData
         }
     }
 }
-#endif

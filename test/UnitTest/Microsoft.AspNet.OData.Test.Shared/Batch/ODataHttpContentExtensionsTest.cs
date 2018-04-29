@@ -6,11 +6,11 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Batch
+namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class ODataHttpContentExtensionsTest
     {

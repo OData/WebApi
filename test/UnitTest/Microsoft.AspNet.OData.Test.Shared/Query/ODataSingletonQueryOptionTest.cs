@@ -6,14 +6,14 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class ODataSingletonQueryOptionTest
     {
@@ -45,11 +45,11 @@ namespace Microsoft.Test.AspNet.OData.Query
         {
             // Arrange
             const string expectedPayload = "{" +
-                "\"@odata.context\":\"http://localhost/odata/$metadata#Me/Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
+                "\"@odata.context\":\"http://localhost/odata/$metadata#Me/Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.SpecialCustomer(Birthday)\"," +
                 "\"Birthday\":\"1991-01-12T09:03:40-00:05\"" +
                 "}";
 
-            string requestUri = "http://localhost/odata/Me/Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.SpecialCustomer?$select=Birthday";
+            string requestUri = "http://localhost/odata/Me/Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.SpecialCustomer?$select=Birthday";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Act
@@ -113,7 +113,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             Birthday = new DateTimeOffset(1991, 1, 12, 9, 3, 40, new TimeSpan(0, -5, 0)),
             Level = 60,
             Bonus = 999.19m,
-            SimpleEnum = Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum.Third,
+            SimpleEnum = Common.Types.SimpleEnum.Third,
             Orders = Enumerable.Range(0, 10).Select(j =>
                 new Order
                 {

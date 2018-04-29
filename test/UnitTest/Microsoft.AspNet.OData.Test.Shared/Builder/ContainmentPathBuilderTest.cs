@@ -11,7 +11,7 @@ using Microsoft.OData.UriParser;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class ContainmentPathBuilderTest
     {

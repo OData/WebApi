@@ -4,12 +4,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class ParameterAliasNodeTranslatorTest
     {
@@ -173,7 +174,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_CollectionResourceCastNode_FroComplex()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Addresses/Microsoft.Test.AspNet.OData.Query.ParameterAliasAddress/all(a : a ne null)");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Addresses/Microsoft.AspNet.OData.Test.Query.ParameterAliasAddress/all(a : a ne null)");
 
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
@@ -188,7 +189,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_CollectionResourceCastNode_ForEntity()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Orders/Microsoft.Test.AspNet.OData.Query.ParameterAliasOrder/all(o : o ne null)");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Orders/Microsoft.AspNet.OData.Test.Query.ParameterAliasOrder/all(o : o ne null)");
 
             // Assert
             var allNode = Assert.IsType<AllNode>(translatedNode);
@@ -219,7 +220,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_SingleResourceCastNode_ForEntity()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Microsoft.Test.AspNet.OData.Query.ParameterAliasCustomer eq null");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/Microsoft.AspNet.OData.Test.Query.ParameterAliasCustomer eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);
@@ -278,7 +279,7 @@ namespace Microsoft.Test.AspNet.OData.Query
         public void CanTranslate_SingleResourceCastNode_ForComplex()
         {
             // Arrange & Act
-            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/SpecialAddress/Microsoft.Test.AspNet.OData.Query.ParameterAliasAddress eq null");
+            QueryNode translatedNode = TranslateFilterExpression("Default.SingleEntityFunctionCall(p1=@p)/SpecialAddress/Microsoft.AspNet.OData.Test.Query.ParameterAliasAddress eq null");
 
             // Assert
             var binaryOperatorNode = Assert.IsType<BinaryOperatorNode>(translatedNode);

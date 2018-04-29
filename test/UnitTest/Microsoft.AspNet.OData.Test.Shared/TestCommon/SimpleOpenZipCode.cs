@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public class SimpleOpenZipCode
     {

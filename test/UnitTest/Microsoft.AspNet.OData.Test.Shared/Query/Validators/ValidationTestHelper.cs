@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Query.Expressions;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Query.Expressions;
 
-namespace Microsoft.Test.AspNet.OData.Query.Validators
+namespace Microsoft.AspNet.OData.Test.Query.Validators
 {
     internal static class ValidationTestHelper
     {

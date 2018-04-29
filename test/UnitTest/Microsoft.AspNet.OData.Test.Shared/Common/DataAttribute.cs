@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public abstract class DataAttribute : Xunit.Sdk.DataAttribute

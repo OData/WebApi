@@ -3,9 +3,10 @@
 
 using System.Linq;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 {
     public class ODataRoutingConventionsTest
     {

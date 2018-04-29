@@ -6,14 +6,14 @@ using System;
 using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.ModelBinding;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class FromODataUriTest
     {

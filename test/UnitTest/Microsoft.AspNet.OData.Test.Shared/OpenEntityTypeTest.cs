@@ -9,13 +9,13 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #else
@@ -27,17 +27,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class OpenEntityTypeTest
     {
@@ -68,8 +68,8 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
-            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/Microsoft.Test.AspNet.OData.Common.SimpleVipCustomer/$entity", result["@odata.context"]);
-            Assert.Equal("#Microsoft.Test.AspNet.OData.Common.SimpleVipCustomer", result["@odata.type"]);
+            Assert.Equal("http://localhost/odata/$metadata#SimpleOpenCustomers/Microsoft.AspNet.OData.Test.Common.SimpleVipCustomer/$entity", result["@odata.context"]);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Common.SimpleVipCustomer", result["@odata.type"]);
             Assert.Equal(9, result["CustomerId"]);
             Assert.Equal("VipCustomer", result["Name"]);
             Assert.Equal("#Collection(Int32)", result["ListProp@odata.type"]);

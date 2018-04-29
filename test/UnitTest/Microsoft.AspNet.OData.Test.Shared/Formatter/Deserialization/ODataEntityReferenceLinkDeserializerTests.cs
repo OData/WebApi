@@ -5,14 +5,15 @@ using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataEntityReferenceLinkDeserializerTests
     {

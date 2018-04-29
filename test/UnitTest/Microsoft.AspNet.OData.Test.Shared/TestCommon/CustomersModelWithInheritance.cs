@@ -5,7 +5,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public class CustomersModelWithInheritance
     {
@@ -76,7 +76,7 @@ namespace Microsoft.Test.AspNet.OData.Common
             model.AddElement(specialOrder);
 
             // test entity
-            EdmEntityType testEntity = new EdmEntityType("Microsoft.Test.AspNet.OData.Query.Expressions", "TestEntity");
+            EdmEntityType testEntity = new EdmEntityType("Microsoft.AspNet.OData.Test.Query.Expressions", "TestEntity");
             testEntity.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Binary);
             model.AddElement(testEntity);
 

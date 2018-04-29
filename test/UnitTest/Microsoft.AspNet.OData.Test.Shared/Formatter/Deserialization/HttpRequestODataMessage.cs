@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using Microsoft.OData;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     class HttpRequestODataMessage : IODataRequestMessage
     {

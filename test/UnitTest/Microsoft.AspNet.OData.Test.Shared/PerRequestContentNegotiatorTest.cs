@@ -8,13 +8,13 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class PerRequestContentNegotiatorTest
     {

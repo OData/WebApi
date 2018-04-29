@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class EdmStructuredObjectTest
     {

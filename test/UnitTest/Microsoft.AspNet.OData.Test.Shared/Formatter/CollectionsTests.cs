@@ -9,16 +9,16 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Test.Abstraction;
 #else
 using System;
 using System.Collections.Generic;
@@ -29,17 +29,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class CollectionsTests
     {
@@ -124,9 +124,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task EntityCollectionProperty_Deserialize()
         {
             string message = "{ 'ID' : 44,  'Vehicles' : [ " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
@@ -141,9 +141,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         public async Task Posting_A_Feed_To_NonCollectionProperty_ODataLibThrows()
         {
             string message = "{ 'ID' : 44,  'Vehicle' : [ " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
-                "{ '@odata.type' : '#Microsoft.Test.AspNet.OData.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.Car', 'Model': 2009, 'Name': 'Car'}, " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle', 'Model': 2010, 'Name': 'Motorcycle'}, " +
+                "{ '@odata.type' : '#Microsoft.AspNet.OData.Test.Builder.TestModels.SportBike', 'Model': 2012, 'Name': 'SportBike'} " +
                 " ] }";
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");

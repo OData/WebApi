@@ -4,16 +4,16 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 {
     public class FunctionLinkGenerationConventionTest
     {

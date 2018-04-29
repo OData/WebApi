@@ -11,7 +11,7 @@ using System.Net.Http;
 using Microsoft.AspNet.OData.Extensions;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Extensions
+namespace Microsoft.AspNet.OData.Test.Extensions
 {
 #if NETCORE
     /// <summary>

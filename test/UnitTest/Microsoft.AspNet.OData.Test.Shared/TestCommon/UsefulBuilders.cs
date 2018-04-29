@@ -4,11 +4,11 @@
 using System;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common.Types;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public static class UsefulBuilders
     {

@@ -4,7 +4,7 @@
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     internal static class JsonAssert
     {

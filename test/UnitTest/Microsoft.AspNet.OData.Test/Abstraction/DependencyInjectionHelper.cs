@@ -9,7 +9,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     public static class DependencyInjectionHelper
     {

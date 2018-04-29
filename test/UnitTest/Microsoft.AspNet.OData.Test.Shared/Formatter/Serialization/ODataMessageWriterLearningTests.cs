@@ -5,12 +5,12 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataMessageWriterLearningTests
     {

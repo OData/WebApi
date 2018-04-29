@@ -4,7 +4,7 @@
 using System;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     /// <summary>
     /// MSTest utility for testing that a given type has the expected properties such as being public, sealed, etc.

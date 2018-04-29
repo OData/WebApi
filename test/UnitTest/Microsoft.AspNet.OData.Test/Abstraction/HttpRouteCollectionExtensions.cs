@@ -7,7 +7,7 @@ using System.Web.Http;
 using System.Web.Http.Routing;
 using Moq;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     internal static class HttpRouteCollectionExtensions
     {

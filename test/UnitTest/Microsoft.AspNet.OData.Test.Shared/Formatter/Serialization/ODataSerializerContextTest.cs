@@ -4,12 +4,12 @@
 #if NETCORE
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
@@ -17,18 +17,18 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using System;
 using System.Linq;
 using System.Web.Http.Routing;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataSerializerContextTest
     {
@@ -148,7 +148,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => context.GetEdmType(edmObject, null),
-                exceptionMessage: "The EDM type of the object of type 'Microsoft.Test.AspNet.OData.Formatter.Serialization.ODataSerializerContextTest+NullEdmType'" +
+                exceptionMessage: "The EDM type of the object of type 'Microsoft.AspNet.OData.Test.Formatter.Serialization.ODataSerializerContextTest+NullEdmType'" +
                 " is null. The EDM type of an IEdmObject cannot be null.");
         }
 

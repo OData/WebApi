@@ -5,7 +5,7 @@ using System;
 using Microsoft.AspNet.OData.Query;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class AllowedLogicalOperatorsTest
     {

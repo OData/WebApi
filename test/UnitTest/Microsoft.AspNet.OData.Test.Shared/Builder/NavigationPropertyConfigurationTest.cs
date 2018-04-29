@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class NavigationPropertyConfigurationTest
     {
@@ -380,7 +380,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => navigationProperty.HasConstraint(dependentPropertyInfo, principalPropertyInfo),
-                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.Test.AspNet.OData.Common.MockType"));
+                String.Format(SRResources.ReferentialConstraintPropertyTypeNotValid, "Microsoft.AspNet.OData.Test.Common.MockType"));
         }
 
         class Principal

@@ -6,11 +6,10 @@ using System;
 using System.IO;
 using System.Net.Http.Formatting;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class PageResultOfTTest
     {

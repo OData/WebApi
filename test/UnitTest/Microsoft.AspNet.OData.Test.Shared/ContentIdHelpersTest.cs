@@ -7,7 +7,7 @@ using System.Net.Http;
 using Microsoft.AspNet.OData;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ContentIdHelpersTest
     {

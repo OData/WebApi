@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ODataSwaggerConverterTest
     {
@@ -104,7 +104,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Customer""
             }
           },
           ""default"": {
@@ -128,7 +128,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to post"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Customer""
             }
           }
         ],
@@ -136,7 +136,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Customer""
             }
           },
           ""default"": {
@@ -175,7 +175,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Customers"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Customer""
             }
           },
           ""default"": {
@@ -206,7 +206,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to patch"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Customer""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Customer""
             }
           }
         ],
@@ -307,7 +307,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Order""
             }
           },
           ""default"": {
@@ -331,7 +331,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to post"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Order""
             }
           }
         ],
@@ -339,7 +339,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Order""
             }
           },
           ""default"": {
@@ -378,7 +378,7 @@ namespace Microsoft.Test.AspNet.OData
           ""200"": {
             ""description"": ""EntitySet Orders"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Order""
             }
           },
           ""default"": {
@@ -409,7 +409,7 @@ namespace Microsoft.Test.AspNet.OData
             ""in"": ""body"",
             ""description"": ""The entity to patch"",
             ""schema"": {
-              ""$ref"": ""#/definitions/Microsoft.Test.AspNet.OData.Order""
+              ""$ref"": ""#/definitions/Microsoft.AspNet.OData.Test.Order""
             }
           }
         ],
@@ -568,7 +568,7 @@ namespace Microsoft.Test.AspNet.OData
     }
   },
   ""definitions"": {
-    ""Microsoft.Test.AspNet.OData.Customer"": {
+    ""Microsoft.AspNet.OData.Test.Customer"": {
       ""properties"": {
         ""CustomerId"": {
           ""description"": ""CustomerId"",
@@ -577,7 +577,7 @@ namespace Microsoft.Test.AspNet.OData
         }
       }
     },
-    ""Microsoft.Test.AspNet.OData.Order"": {
+    ""Microsoft.AspNet.OData.Test.Order"": {
       ""properties"": {
         ""OrderId"": {
           ""description"": ""OrderId"",

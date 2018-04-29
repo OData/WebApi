@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -19,13 +18,14 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
@@ -41,7 +41,6 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -49,16 +48,17 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataFormatterTests
     {
@@ -322,10 +322,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                 dynamic json = JToken.Parse(result);
 
                 Assert.Equal("The query specified in the URI is not valid. " +
-                    "Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
+                    "Could not find a property named 'abc' on type 'Microsoft.AspNet.OData.Test.Formatter.FormatterPerson'.",
                     json["error"]["message"].Value);
 
-                Assert.Equal("Could not find a property named 'abc' on type 'Microsoft.Test.AspNet.OData.Formatter.FormatterPerson'.",
+                Assert.Equal("Could not find a property named 'abc' on type 'Microsoft.AspNet.OData.Test.Formatter.FormatterPerson'.",
                     json["error"]["innererror"]["message"].Value);
 
                 Assert.Equal("Microsoft.OData.ODataException",
@@ -417,7 +417,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/" + entitySet + "(Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red')");
+                "http://localhost/" + entitySet + "(Microsoft.AspNet.OData.Test.Builder.TestModels.Color'Red')");
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
@@ -448,7 +448,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
             {
                 request.Content = new StringContent(
-                    string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
+                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                 request.Headers.Accept.ParseAdd("application/json");
@@ -479,9 +479,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Assert
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             JObject customer = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color",
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.Color",
                 customer.GetValue("Color@odata.type"));
-            Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)",
+            Assert.Equal("#Collection(Microsoft.AspNet.OData.Test.Builder.TestModels.Color)",
                 customer.GetValue("Colors@odata.type"));
         }
 
@@ -516,7 +516,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
             request.Content = new StringContent(
-                string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
+                string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
@@ -542,7 +542,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
             {
                 request.Content = new StringContent(
-                    string.Format(@"{{'@odata.type':'#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer',
+                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
                             'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                 request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
@@ -553,9 +553,9 @@ namespace Microsoft.Test.AspNet.OData.Formatter
                     // Assert
                     ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
                     dynamic payload = JToken.Parse(await response.Content.ReadAsStringAsync());
-                    Assert.Equal("#Microsoft.Test.AspNet.OData.Formatter.EnumCustomer", payload["@odata.type"].Value);
-                    Assert.Equal("#Microsoft.Test.AspNet.OData.Builder.TestModels.Color", payload["Color@odata.type"].Value);
-                    Assert.Equal("#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
+                    Assert.Equal("#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer", payload["@odata.type"].Value);
+                    Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.Color", payload["Color@odata.type"].Value);
+                    Assert.Equal("#Collection(Microsoft.AspNet.OData.Test.Builder.TestModels.Color)", payload["Colors@odata.type"].Value);
                 }
             }
         }
@@ -616,7 +616,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         {
             // Arrange
             const string expect = @"{
-  ""@odata.context"": ""http://localhost/$metadata#Collection(Microsoft.Test.AspNet.OData.Builder.TestModels.Color)"",
+  ""@odata.context"": ""http://localhost/$metadata#Collection(Microsoft.AspNet.OData.Test.Builder.TestModels.Color)"",
   ""@odata.count"": 3,
   ""@odata.nextLink"": ""http://localhost/EnumCustomers(5)/Colors?$count=true&$skip=2"",
   ""value"": [

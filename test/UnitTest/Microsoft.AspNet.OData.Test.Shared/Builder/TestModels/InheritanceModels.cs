@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNet.OData.Builder;
 
-namespace Microsoft.Test.AspNet.OData.Builder.TestModels
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
     [MediaType]
     public abstract class Vehicle

@@ -2,10 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataPayloadKindHelperTests : EnumHelperTestBase<ODataPayloadKind>
     {

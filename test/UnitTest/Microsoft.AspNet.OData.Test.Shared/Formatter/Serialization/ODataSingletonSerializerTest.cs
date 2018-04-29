@@ -7,15 +7,15 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Net.Http;
 using System.Text;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
@@ -25,19 +25,19 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Web.Http.Routing;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataSingletonSerializerTest
     {

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,10 +16,11 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataRouteTest
     {

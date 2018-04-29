@@ -7,12 +7,12 @@ using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Common.Models;
+using Microsoft.AspNet.OData.Test.Query.Controllers;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common.Models;
-using Microsoft.Test.AspNet.OData.Query.Controllers;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class HttpActionDescriptorExtensionTests
     {

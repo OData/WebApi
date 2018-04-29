@@ -5,7 +5,7 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create ResourceSetContextFactory.

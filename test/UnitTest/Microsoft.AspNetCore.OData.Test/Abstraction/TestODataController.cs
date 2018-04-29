@@ -7,7 +7,7 @@ using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// TestController is a controller designed to be used in UnitTests to abstract the controller

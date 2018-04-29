@@ -4,13 +4,14 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 {
     public class EntityKeyConventionTests
     {
@@ -99,7 +100,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             Assert.Same(enumProperty, enumKey);
 
             Assert.Equal(EdmTypeKind.Enum, enumKey.Type.TypeKind());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Color", enumKey.Type.Definition.FullTypeName());
         }
 
         [Fact]

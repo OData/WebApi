@@ -10,7 +10,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Threading;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     /// <summary>
     /// This class allocates ports while ensuring that:

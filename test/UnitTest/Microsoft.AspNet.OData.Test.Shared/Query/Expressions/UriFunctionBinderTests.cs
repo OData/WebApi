@@ -4,11 +4,11 @@
 using System;
 using System.Reflection;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     /// <summary>
     /// Tests to UriFunctions binder.

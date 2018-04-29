@@ -5,19 +5,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class ODataQueryOptionsOfTEntityTest
     {
@@ -33,7 +33,7 @@ namespace Microsoft.Test.AspNet.OData.Query
 
             ExceptionAssert.ThrowsArgument(
                 () => new ODataQueryOptions<int>(context, request),
-                "context", "The entity type 'Microsoft.Test.AspNet.OData.Common.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
+                "context", "The entity type 'Microsoft.AspNet.OData.Test.Common.Models.Customer' does not match the expected entity type 'System.Int32' as set on the query context.");
         }
 
         [Fact]
@@ -146,7 +146,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.Common.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'Microsoft.AspNet.OData.Test.Common.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]
@@ -196,7 +196,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
                 "query",
-                "Cannot apply ODataQueryOptions of 'Microsoft.Test.AspNet.OData.Common.Models.Customer' to IQueryable of 'System.Int32'.");
+                "Cannot apply ODataQueryOptions of 'Microsoft.AspNet.OData.Test.Common.Models.Customer' to IQueryable of 'System.Int32'.");
         }
 
         [Fact]

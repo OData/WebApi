@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.OData;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     internal class MockODataRequestMessage : IODataRequestMessage
     {

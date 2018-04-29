@@ -17,7 +17,7 @@ using Microsoft.OData.Edm;
 using Moq;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public static class ODataModelBuilderMocks
     {

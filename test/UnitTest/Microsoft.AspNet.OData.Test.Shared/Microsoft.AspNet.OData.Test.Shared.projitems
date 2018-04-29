@@ -204,7 +204,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\PresidentController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataRawValueMediaTypeMappingTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataValueExtensionsTest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\HttpRouteCollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\JsonAssert.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataMediaTypeFormattersTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\CollectionsTests.cs" />
@@ -325,7 +324,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenOrder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenZipCode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleVipCustomer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\TestAssemblyResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\ODataMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\UsefulBuilders.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\EdmTestHelpers.cs" />

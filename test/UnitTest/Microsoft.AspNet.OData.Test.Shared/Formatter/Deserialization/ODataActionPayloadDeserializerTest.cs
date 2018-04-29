@@ -6,19 +6,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataActionPayloadDeserializerTest
     {
@@ -499,7 +499,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
         private const string EntityPayload =
             "{" +
                 "\"Id\": 1, " +
-                "\"Customer\": {\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
+                "\"Customer\": {\"@odata.type\":\"#Microsoft.AspNet.OData.Test.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" } " +
                 // null can't work here, see: https://github.com/OData/odata.net/issues/99
                 // ",\"NullableCustomer\" : null " +  //
             "}";
@@ -567,10 +567,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             "{" +
                 "\"Id\": 1, " +
                 "\"Customers\": [" +
-                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
+                    "{\"@odata.type\":\"#Microsoft.AspNet.OData.Test.Common.Models.Customer\", \"Id\":109,\"Name\":\"Avatar\" }, " +
                     // null can't work. see: https://github.com/OData/odata.net/issues/100
                     // "null," +
-                    "{\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Common.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
+                    "{\"@odata.type\":\"#Microsoft.AspNet.OData.Test.Common.Models.Customer\", \"Id\":901,\"Name\":\"Robot\" } " +
                  "]" +
             "}";
 

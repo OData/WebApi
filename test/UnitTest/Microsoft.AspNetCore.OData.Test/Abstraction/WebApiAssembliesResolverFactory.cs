@@ -3,12 +3,12 @@
 
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Test.AspNet.OData.Common;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create WebApiAssembliesResolver.

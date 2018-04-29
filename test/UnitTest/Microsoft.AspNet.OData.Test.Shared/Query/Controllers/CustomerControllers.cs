@@ -6,10 +6,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.AspNet.OData.Test.Common.Models;
 
-namespace Microsoft.Test.AspNet.OData.Query.Controllers
+namespace Microsoft.AspNet.OData.Test.Query.Controllers
 {
     public class CustomerHighLevelController : ODataController
     {

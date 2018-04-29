@@ -5,7 +5,7 @@ using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class ModelContainerTest
     {

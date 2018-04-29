@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ETagOfTEntityTypeTests
     {
@@ -127,7 +127,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             // Act & Assert
             ExceptionAssert.Throws<ArgumentException>(
                 () => etagCustomer.ApplyTo(query),
-                "Cannot apply ETag of 'Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer' to IQueryable of " +
+                "Cannot apply ETag of 'Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.Customer' to IQueryable of " +
                 "'System.Int32'.\r\nParameter name: query");
         }
     }

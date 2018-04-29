@@ -11,7 +11,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Moq;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     internal static class FormatterTestHelper
     {

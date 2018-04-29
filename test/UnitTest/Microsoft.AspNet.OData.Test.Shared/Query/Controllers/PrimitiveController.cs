@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
 
-namespace Microsoft.Test.AspNet.OData.Query.Controllers
+namespace Microsoft.AspNet.OData.Test.Query.Controllers
 {
     public class PrimitiveController : ODataController
     {

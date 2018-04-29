@@ -3,7 +3,7 @@
 
 using System.Web.Http;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// NonODataController is an abstracted ASP.NET [Core] controller.

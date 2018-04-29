@@ -8,14 +8,13 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #else
@@ -27,18 +26,18 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Extensions;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataLevelsTest
     {
@@ -293,7 +292,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public async Task Levels_Works_WithTypeCast()
         {
             // Arrange
-            string uri = "LevelsEntities(6)?$expand=Microsoft.Test.AspNet.OData.Routing.LevelsDerivedEntity/AncestorsInDerivedEntity($levels=2)";
+            string uri = "LevelsEntities(6)?$expand=Microsoft.AspNet.OData.Test.Routing.LevelsDerivedEntity/AncestorsInDerivedEntity($levels=2)";
 
             // Act
             HttpResponseMessage response = await _client.GetAsync("http://localhost/odata/" + uri);

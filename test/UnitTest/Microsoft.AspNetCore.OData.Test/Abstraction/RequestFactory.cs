@@ -18,7 +18,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create HttpRequest[Message].

@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 using System.Text;
 using Microsoft.AspNet.OData.Query.Expressions;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class ExpressionStringBuilder : ExpressionVisitor
     {

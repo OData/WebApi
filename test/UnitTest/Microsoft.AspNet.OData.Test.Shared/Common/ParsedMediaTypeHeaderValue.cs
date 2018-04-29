@@ -4,7 +4,7 @@
 using System;
 using System.Net.Http.Headers;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     internal class ParsedMediaTypeHeaderValue
     {

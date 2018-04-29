@@ -8,21 +8,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Extensions;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -35,24 +35,24 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Web.Http.Routing;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Extensions;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataResourceSetSerializerTests
     {
@@ -218,13 +218,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
 
             // Assert
             Assert.Equal(@"{
-  ""@odata.context"": ""http://any/$metadata#Collection(Microsoft.Test.AspNet.OData.Common.SimpleOpenAddress)"",
+  ""@odata.context"": ""http://any/$metadata#Collection(Microsoft.AspNet.OData.Test.Common.SimpleOpenAddress)"",
   ""value"": [
     {
       ""Street"": ""Microsoft Rd"",
       ""City"": ""Redmond"",
       ""StringProp"": ""abc"",
-      ""Locations@odata.type"": ""#Collection(Microsoft.Test.AspNet.OData.Common.SimpleOpenAddress)"",
+      ""Locations@odata.type"": ""#Collection(Microsoft.AspNet.OData.Test.Common.SimpleOpenAddress)"",
       ""Locations"": []
     }
   ]

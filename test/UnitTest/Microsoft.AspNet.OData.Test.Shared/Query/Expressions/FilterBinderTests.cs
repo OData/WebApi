@@ -11,18 +11,18 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class FilterBinderTests
     {
@@ -1700,7 +1700,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void NSCast_OnEnumerableEntityCollection_GeneratesExpression_WithOfTypeOnEnumerable()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/EnumerableProducts/Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "Category/EnumerableProducts/Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
                 "$it => $it.Category.EnumerableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
                 NotTesting);
 
@@ -1711,7 +1711,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void NSCast_OnQueryableEntityCollection_GeneratesExpression_WithOfTypeOnQueryable()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/QueryableProducts/Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
+                "Category/QueryableProducts/Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/any(p: p/ProductName eq 'ProductName')",
                 "$it => $it.Category.QueryableProducts.OfType().Any(p => (p.ProductName == \"ProductName\"))",
                 NotTesting);
         }
@@ -1720,7 +1720,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void NSCast_OnEntityCollection_CanAccessDerivedInstanceProperty()
         {
             var filters = VerifyQueryDeserialization(
-                "Category/Products/Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/any(p: p/DerivedProductName eq 'DerivedProductName')");
+                "Category/Products/Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/any(p: p/DerivedProductName eq 'DerivedProductName')");
 
             RunFilters(
                 filters,
@@ -1737,16 +1737,16 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void NSCast_OnSingleEntity_GeneratesExpression_WithAsOperator()
         {
             var filters = VerifyQueryDeserialization(
-                "Microsoft.Test.AspNet.OData.Query.Expressions.Product/ProductName eq 'ProductName'",
+                "Microsoft.AspNet.OData.Test.Query.Expressions.Product/ProductName eq 'ProductName'",
                 "$it => (($it As Product).ProductName == \"ProductName\")",
                 NotTesting);
         }
 
         [Theory]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.Product/ProductName eq 'ProductName'")]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'DerivedProductName'")]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/Category/Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.Product/ProductName eq 'ProductName'")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/DerivedProductName eq 'DerivedProductName'")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/Category/Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory/CategoryID eq 123")]
         public void Inheritance_WithDerivedInstance(string filter)
         {
             var filters = VerifyQueryDeserialization<DerivedProduct>(filter);
@@ -1757,9 +1757,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/DerivedProductName eq 'ProductName'")]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
-        [InlineData("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct/Category/Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory/CategoryID eq 123")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/DerivedProductName eq 'ProductName'")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/Category/CategoryID eq 123")]
+        [InlineData("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct/Category/Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory/CategoryID eq 123")]
         public void Inheritance_WithBaseInstance(string filter)
         {
             var filters = VerifyQueryDeserialization<Product>(filter);
@@ -1773,8 +1773,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         public void CastToNonDerivedType_Throws()
         {
             ExceptionAssert.Throws<ODataException>(
-                () => VerifyQueryDeserialization<Product>("Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory/CategoryID eq 123"),
-                "Encountered invalid type cast. 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'.");
+                () => VerifyQueryDeserialization<Product>("Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory/CategoryID eq 123"),
+                "Encountered invalid type cast. 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'.");
         }
 
         [Theory]
@@ -1814,8 +1814,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast(null,Edm.String) ne '123'", "$it => (null != \"123\")")]
         [InlineData("cast(null,Edm.DateTimeOffset) eq 2001-01-01T12:00:00.000+08:00", "$it => (null == Convert(01/01/2001 12:00:00 +08:00))")]
         [InlineData("cast(null,Edm.Duration) eq duration'P8DT23H59M59.9999S'", "$it => (null == Convert(8.23:59:59.9999000))")]
-        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null", "$it => (null == null)")]
-        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') eq null", "$it => (null == null)")]
+        [InlineData("cast(null,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') eq null", "$it => (null == null)")]
+        [InlineData("cast(null,'Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum') eq null", "$it => (null == null)")]
         [InlineData("cast(IntProp,Edm.String) eq '123'", "$it => (Convert($it.IntProp.ToString()) == \"123\")")]
         [InlineData("cast(LongProp,Edm.String) eq '123'", "$it => (Convert($it.LongProp.ToString()) == \"123\")")]
         [InlineData("cast(SingleProp,Edm.String) eq '123'", "$it => (Convert($it.SingleProp.ToString()) == \"123\")")]
@@ -1844,9 +1844,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast(IntProp,Edm.Int64) eq 123", "$it => (Convert($it.IntProp) == 123)")]
         [InlineData("cast(NullableLongProp,Edm.Double) eq 1.23", "$it => (Convert($it.NullableLongProp) == Convert(1.23))")]
         [InlineData("cast(2147483647,Edm.Int16) ne null", "$it => (Convert(Convert(2147483647)) != null)")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'1',Edm.String) eq '1'", "$it => (Convert(Convert(Second).ToString()) == \"1\")")]
         [InlineData("cast(cast(cast(IntProp,Edm.Int64),Edm.Int16),Edm.String) eq '123'", "$it => (Convert(Convert(Convert($it.IntProp)).ToString()) == \"123\")")]
-        [InlineData("cast('123',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null", "$it => (Convert(123) != null)")]
+        [InlineData("cast('123',Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null", "$it => (Convert(123) != null)")]
         public void CastMethod_Succeeds(string filter, string expectedResult)
         {
             // Arrange & Act & Assert
@@ -1858,7 +1858,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         [Theory]
         [InlineData("cast(NoSuchProperty,Edm.Int32) ne null",
-            "Could not find a property named 'NoSuchProperty' on type 'Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes'.")]
+            "Could not find a property named 'NoSuchProperty' on type 'Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes'.")]
         public void Cast_UndefinedSource_ThrowsODataException(string filter, string errorMessage)
         {
             // Arrange & Act & Assert
@@ -1928,36 +1928,36 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
-        [InlineData("cast(0,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(0,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'0',Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'0',Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
-        [InlineData("cast(SimpleEnumProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(FlagsEnumProp,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) ne null")]
-        [InlineData("cast(NullableSimpleEnumProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(IntProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(DateTimeOffsetProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',Edm.Int32) eq 1")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'1',Edm.Int32) eq 1")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(0,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(0,Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'0',Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'0',Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(SimpleEnumProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(FlagsEnumProp,Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum) ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(IntProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(DateTimeOffsetProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'1',Edm.Int32) eq 1")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'1',Edm.Int32) eq 1")]
         [InlineData("cast(SimpleEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(FlagsEnumProp,Edm.Int32) eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,Edm.Guid) ne null")]
 
-        [InlineData("cast('Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast('Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
-        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(0,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'0','Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'0','Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
-        [InlineData("cast(SimpleEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(FlagsEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum') ne null")]
-        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(IntProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(DateTimeOffsetProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') ne null")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1','Edm.Int32') eq 1")]
-        [InlineData("cast(Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'1','Edm.Int32') eq 1")]
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(0,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(0,'Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'0','Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'0','Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(SimpleEnumProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(FlagsEnumProp,'Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum') ne null")]
+        [InlineData("cast(NullableSimpleEnumProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(IntProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(DateTimeOffsetProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') ne null")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'1','Edm.Int32') eq 1")]
+        [InlineData("cast(Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'1','Edm.Int32') eq 1")]
         [InlineData("cast(SimpleEnumProp,'Edm.Int32') eq 123")]
         [InlineData("cast(FlagsEnumProp,'Edm.Int32') eq 123")]
         [InlineData("cast(NullableSimpleEnumProp,'Edm.Guid') ne null")]
@@ -1980,8 +1980,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("cast($it,Edm.String) eq null")]
         [InlineData("cast(ComplexProp,Edm.Double) eq null")]
         [InlineData("cast(ComplexProp,Edm.String) eq null")]
-        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum) eq null")]
-        [InlineData("cast(StringProp,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum) eq null")]
+        [InlineData("cast(StringProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum) eq null")]
+        [InlineData("cast(StringProp,Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum) eq null")]
         public void Cast_UnsupportedTarget_ReturnsNull(string filter)
         {
             // Arrange & Act & Assert
@@ -1991,10 +1991,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         // See OtherFunctions_SomeTwoParameterCasts_ThrowODataException and OtherFunctions_SomeSingleParameterCasts_ThrowODataException
         // in FilterQueryValidatorTest.  ODL's ODataQueryOptionParser and FunctionCallBinder call the code throwing these exceptions.
         [Theory]
-        [InlineData("cast(null,Microsoft.Test.AspNet.OData.Query.Expressions.Address) ne null",
+        [InlineData("cast(null,Microsoft.AspNet.OData.Test.Query.Expressions.Address) ne null",
             "Encountered invalid type cast. " +
-            "'Microsoft.Test.AspNet.OData.Query.Expressions.Address' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes'.")]
-        [InlineData("cast(null,Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes) ne null",
+            "'Microsoft.AspNet.OData.Test.Query.Expressions.Address' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes'.")]
+        [InlineData("cast(null,Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes) ne null",
             "Cast or IsOf Function must have a type in its arguments.")]
         public void Cast_NonPrimitiveTarget_ThrowsODataException(string filter, string expectErrorMessage)
         {
@@ -2005,10 +2005,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         [Theory]
         [InlineData("cast(null,'Edm.Int32') ne null")]
-        [InlineData("cast(StringProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null")]
+        [InlineData("cast(StringProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') eq null")]
         [InlineData("cast(IntProp,'Edm.String') eq '123'")]
-        [InlineData("cast('Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes') eq null")]
-        [InlineData("cast($it,'Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes') eq null")]
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes') eq null")]
+        [InlineData("cast($it,'Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes') eq null")]
         public void SingleQuotesOnTypeNameOfCast_WorksForNow(string filter)
         {
             // Arrange
@@ -2037,7 +2037,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             var parser = new ODataQueryOptionParser(model, entityType, entitySet,
                 new Dictionary<string, string>
                 {
-                    { "$filter", "cast(StringProp,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum') eq null" }
+                    { "$filter", "cast(StringProp,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum') eq null" }
                 });
 
             // Act
@@ -2048,7 +2048,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             Assert.NotNull(filterClause);
             var castNode = Assert.IsType<SingleValueFunctionCallNode>(((BinaryOperatorNode)filterClause.Expression).Left);
             Assert.Equal("cast", castNode.Name);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum", ((ConstantNode)castNode.Parameters.Last()).Value);
         }
 
         public static TheoryDataSet<string> CastToQuotedPrimitiveType
@@ -2152,10 +2152,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             {
                 return new TheoryDataSet<string>
                 {
-                    { "cast(Microsoft.Test.AspNet.OData.Query.Expressions.Address) eq null" },
-                    { "cast(null, Microsoft.Test.AspNet.OData.Query.Expressions.Address) eq null" },
-                    { "cast('', Microsoft.Test.AspNet.OData.Query.Expressions.Address) eq null" },
-                    { "cast(SupplierAddress, Microsoft.Test.AspNet.OData.Query.Expressions.Address) eq null" },
+                    { "cast(Microsoft.AspNet.OData.Test.Query.Expressions.Address) eq null" },
+                    { "cast(null, Microsoft.AspNet.OData.Test.Query.Expressions.Address) eq null" },
+                    { "cast('', Microsoft.AspNet.OData.Test.Query.Expressions.Address) eq null" },
+                    { "cast(SupplierAddress, Microsoft.AspNet.OData.Test.Query.Expressions.Address) eq null" },
                 };
             }
         }
@@ -2167,7 +2167,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             // Arrange
             var expectedMessage =
                 "Encountered invalid type cast. " +
-                "'Microsoft.Test.AspNet.OData.Query.Expressions.Address' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'.";
+                "'Microsoft.AspNet.OData.Test.Query.Expressions.Address' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'.";
 
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
@@ -2179,10 +2179,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             {
                 return new TheoryDataSet<string>
                 {
-                    { "cast('Microsoft.Test.AspNet.OData.Query.Expressions.Address') eq null" },
-                    { "cast(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address') eq null" },
-                    { "cast('', 'Microsoft.Test.AspNet.OData.Query.Expressions.Address') eq null" },
-                    { "cast(SupplierAddress, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address') ne null" },
+                    { "cast('Microsoft.AspNet.OData.Test.Query.Expressions.Address') eq null" },
+                    { "cast(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.Address') eq null" },
+                    { "cast('', 'Microsoft.AspNet.OData.Test.Query.Expressions.Address') eq null" },
+                    { "cast(SupplierAddress, 'Microsoft.AspNet.OData.Test.Query.Expressions.Address') ne null" },
                 };
             }
         }
@@ -2212,18 +2212,18 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 return new TheoryDataSet<string, string>
                 {
                     {
-                        "cast(Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct)/DerivedProductName eq null",
+                        "cast(Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct)/DerivedProductName eq null",
                         "Cast or IsOf Function must have a type in its arguments."
                     },
                     {
-                        "cast(null, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq null",
+                        "cast(null, Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)/DerivedCategoryName eq null",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                     {
-                        "cast(Category, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)/DerivedCategoryName eq null",
+                        "cast(Category, Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)/DerivedCategoryName eq null",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                 };
             }
@@ -2239,9 +2239,9 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         // Demonstrates a bug in FilterBinder.
         [Theory]
-        [InlineData("cast('Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "DerivedProductName")]
-        [InlineData("cast(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
-        [InlineData("cast(Category, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "DerivedProductName")]
+        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
+        [InlineData("cast(Category, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
         public void CastToQuotedEntityType_ThrowsArgumentException(string filter, string propertyName)
         {
             // Arrange
@@ -2256,8 +2256,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("cast(null,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
-        [InlineData("cast(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        [InlineData("cast(null,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
+        [InlineData("cast(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
         public void CastNullToQuotedEntityType_ThrowsArgumentException(string filter)
         {
             // Arrange
@@ -2275,11 +2275,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         [Theory]
         [InlineData("isof(Edm.Int16)", "$it => IIF(($it Is System.Int16), True, False)")]
-        [InlineData("isof('Microsoft.Test.AspNet.OData.Query.Expressions.Product')", "$it => IIF(($it Is Microsoft.Test.AspNet.OData.Query.Expressions.Product), True, False)")]
+        [InlineData("isof('Microsoft.AspNet.OData.Test.Query.Expressions.Product')", "$it => IIF(($it Is Microsoft.AspNet.OData.Test.Query.Expressions.Product), True, False)")]
         [InlineData("isof(ProductName,Edm.String)", "$it => IIF(($it.ProductName Is System.String), True, False)")]
-        [InlineData("isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.Category')", "$it => IIF(($it.Category Is Microsoft.Test.AspNet.OData.Query.Expressions.Category), True, False)")]
-        [InlineData("isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')", "$it => IIF(($it.Category Is Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory), True, False)")]
-        [InlineData("isof(Ranking, 'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')", "$it => IIF(($it.Ranking Is Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum), True, False)")]
+        [InlineData("isof(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.Category')", "$it => IIF(($it.Category Is Microsoft.AspNet.OData.Test.Query.Expressions.Category), True, False)")]
+        [InlineData("isof(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')", "$it => IIF(($it.Category Is Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory), True, False)")]
+        [InlineData("isof(Ranking, 'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum')", "$it => IIF(($it.Ranking Is Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum), True, False)")]
         public void IsofMethod_Succeeds(string filter, string expectedResult)
         {
             // Arrange & Act & Assert
@@ -2301,7 +2301,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
 
         [Theory]
         [InlineData("isof(NoSuchProperty,Edm.Int32)",
-            "Could not find a property named 'NoSuchProperty' on type 'Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes'.")]
+            "Could not find a property named 'NoSuchProperty' on type 'Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes'.")]
         public void IsOfUndefinedSource_ThrowsODataException(string filter, string errorMessage)
         {
             // Arrange & Act & Assert
@@ -2324,11 +2324,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof(null,Edm.Single)")]
         [InlineData("isof(null,Edm.Stream)")]
         [InlineData("isof(null,Edm.String)")]
-        [InlineData("isof(null,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum)")]
-        [InlineData("isof(null,Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum)")]
+        [InlineData("isof(null,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum)")]
+        [InlineData("isof(null,Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum)")]
 
         [InlineData("isof(ByteArrayProp,Edm.Binary)")] // ByteArrayProp == null
-        [InlineData("isof(IntProp,Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum)")]
+        [InlineData("isof(IntProp,Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum)")]
         [InlineData("isof(NullableShortProp,'Edm.Int16')")] // NullableShortProp == null
 
         [InlineData("isof('Edm.Binary')")]
@@ -2346,8 +2346,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof('Edm.Single')")]
         [InlineData("isof('Edm.Stream')")]
         [InlineData("isof('Edm.String')")]
-        [InlineData("isof('Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
-        [InlineData("isof('Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
+        [InlineData("isof('Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum')")]
+        [InlineData("isof('Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum')")]
 
         [InlineData("isof(23,'Edm.Byte')")]
         [InlineData("isof(23,'Edm.Decimal')")]
@@ -2357,8 +2357,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof(23,'Edm.SByte')")]
         [InlineData("isof(23,'Edm.Single')")]
         [InlineData("isof('hello','Edm.Stream')")]
-        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
-        [InlineData("isof(0,'Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
+        [InlineData("isof(0,'Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum')")]
+        [InlineData("isof(0,'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum')")]
 
         [InlineData("isof('2001-01-01T12:00:00.000+08:00','Edm.DateTimeOffset')")] // source is string
         [InlineData("isof('00000000-0000-0000-0000-000000000000','Edm.Guid')")] // source is string
@@ -2369,8 +2369,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("isof('OData','Edm.Binary')")]
         [InlineData("isof('PT12H','Edm.Duration')")]
         [InlineData("isof(23,'Edm.String')")]
-        [InlineData("isof('0','Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum')")]
-        [InlineData("isof('0','Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum')")]
+        [InlineData("isof('0','Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum')")]
+        [InlineData("isof('0','Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum')")]
         public void IsOfPrimitiveType_Succeeds_WithFalse(string filter)
         {
             // Arrange
@@ -2453,11 +2453,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             {
                 return new TheoryDataSet<string>
                 {
-                    { "isof(Microsoft.Test.AspNet.OData.Query.Expressions.Address)" },
-                    { "isof(null,Microsoft.Test.AspNet.OData.Query.Expressions.Address)" },
-                    { "isof(null, Microsoft.Test.AspNet.OData.Query.Expressions.Address)" },
-                    { "isof(SupplierAddress,Microsoft.Test.AspNet.OData.Query.Expressions.Address)" },
-                    { "isof(SupplierAddress, Microsoft.Test.AspNet.OData.Query.Expressions.Address)" },
+                    { "isof(Microsoft.AspNet.OData.Test.Query.Expressions.Address)" },
+                    { "isof(null,Microsoft.AspNet.OData.Test.Query.Expressions.Address)" },
+                    { "isof(null, Microsoft.AspNet.OData.Test.Query.Expressions.Address)" },
+                    { "isof(SupplierAddress,Microsoft.AspNet.OData.Test.Query.Expressions.Address)" },
+                    { "isof(SupplierAddress, Microsoft.AspNet.OData.Test.Query.Expressions.Address)" },
                 };
             }
         }
@@ -2469,7 +2469,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             // Arrange
             var expectedMessage =
                 "Encountered invalid type cast. " +
-                "'Microsoft.Test.AspNet.OData.Query.Expressions.Address' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'.";
+                "'Microsoft.AspNet.OData.Test.Query.Expressions.Address' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'.";
 
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
@@ -2482,28 +2482,28 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
                 return new TheoryDataSet<string, string>
                 {
                     {
-                        "isof(Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct)",
+                        "isof(Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct)",
                         "Cast or IsOf Function must have a type in its arguments."
                     },
                     {
-                        "isof(null,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)",
+                        "isof(null,Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                     {
-                        "isof(null, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)",
+                        "isof(null, Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                     {
-                        "isof(Category,Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)",
+                        "isof(Category,Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                     {
-                        "isof(Category, Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory)",
+                        "isof(Category, Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory)",
                         "Encountered invalid type cast. " +
-                        "'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.Test.AspNet.OData.Query.Expressions.Product'."
+                        "'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory' is not assignable from 'Microsoft.AspNet.OData.Test.Query.Expressions.Product'."
                     },
                 };
             }
@@ -2523,11 +2523,11 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             {
                 return new TheoryDataSet<string>
                 {
-                    { "isof('Microsoft.Test.AspNet.OData.Query.Expressions.DerivedProduct')" },
-                    { "isof(SupplierAddress,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')" },
-                    { "isof(SupplierAddress, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')" },
-                    { "isof(Category,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')" },
-                    { "isof(Category, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')" },
+                    { "isof('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')" },
+                    { "isof(SupplierAddress,'Microsoft.AspNet.OData.Test.Query.Expressions.Address')" },
+                    { "isof(SupplierAddress, 'Microsoft.AspNet.OData.Test.Query.Expressions.Address')" },
+                    { "isof(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')" },
+                    { "isof(Category, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')" },
                 };
             }
         }
@@ -2552,10 +2552,10 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         }
 
         [Theory]
-        [InlineData("isof(null,'Microsoft.Test.AspNet.OData.Query.Expressions.Address')")]
-        [InlineData("isof(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.Address')")]
-        [InlineData("isof(null,'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')")]
-        [InlineData("isof(null, 'Microsoft.Test.AspNet.OData.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(null,'Microsoft.AspNet.OData.Test.Query.Expressions.Address')")]
+        [InlineData("isof(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.Address')")]
+        [InlineData("isof(null,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')")]
+        [InlineData("isof(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')")]
         public void IsOfQuotedNonPrimitiveTypeWithNull_Succeeds_WithFalse(string filter)
         {
             // Arrange
@@ -2588,7 +2588,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("DateTimeOffsetProp eq @p", "2001-01-01T12:00:00.000+08:00", "$it => ($it.DateTimeOffsetProp == 01/01/2001 12:00:00 +08:00)")]
         [InlineData("TimeSpanProp eq @p", "duration'P8DT23H59M59.9999S'", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
         [InlineData("GuidProp eq @p", "00000000-0000-0000-0000-000000000000", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
-        [InlineData("SimpleEnumProp eq @p", "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        [InlineData("SimpleEnumProp eq @p", "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'", "$it => (Convert($it.SimpleEnumProp) == 0)")]
         // Parameter alias value is null.
         [InlineData("NullableIntProp eq @p", "null", "$it => ($it.NullableIntProp == null)")]
         [InlineData("NullableBoolProp eq @p", "null", "$it => ($it.NullableBoolProp == null)")]
@@ -2610,7 +2610,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         [InlineData("@p eq 2001-01-01T12:00:00.000+08:00", "DateTimeOffsetProp", "$it => ($it.DateTimeOffsetProp == 01/01/2001 12:00:00 +08:00)")]
         [InlineData("@p eq duration'P8DT23H59M59.9999S'", "TimeSpanProp", "$it => ($it.TimeSpanProp == 8.23:59:59.9999000)")]
         [InlineData("@p eq 00000000-0000-0000-0000-000000000000", "GuidProp", "$it => ($it.GuidProp == 00000000-0000-0000-0000-000000000000)")]
-        [InlineData("@p eq Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'", "SimpleEnumProp", "$it => (Convert($it.SimpleEnumProp) == 0)")]
+        [InlineData("@p eq Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'", "SimpleEnumProp", "$it => (Convert($it.SimpleEnumProp) == 0)")]
         // Parameter alias value has built-in functions.
         [InlineData("@p eq 'abc'", "substring(StringProp,5)", "$it => ($it.StringProp.Substring(5) == \"abc\")")]
         [InlineData("2 eq @p", "IntProp add 1", "$it => (2 == ($it.IntProp + 1))")]
@@ -2619,8 +2619,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             // Arrange
             IEdmModel model = GetModel<DataTypes>();
-            IEdmType targetEdmType = model.FindType("Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.Test.AspNet.OData.Query.Expressions.Products");
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
             IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
             queryOptions.Add("@p", parameterAliasValue);
             ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
@@ -2652,8 +2652,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             // Arrange
             IEdmModel model = GetModel<DataTypes>();
-            IEdmType targetEdmType = model.FindType("Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.Test.AspNet.OData.Query.Expressions.Products");
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
             IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
             ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
             ODataQueryContext context = new ODataQueryContext(model, typeof(DataTypes));
@@ -2677,8 +2677,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             // Arrange
             IEdmModel model = GetModel<DataTypes>();
-            IEdmType targetEdmType = model.FindType("Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.Test.AspNet.OData.Query.Expressions.Products");
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
 
             ODataQueryOptionParser parser = new ODataQueryOptionParser(
                 model,
@@ -2707,8 +2707,8 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
         {
             // Arrange
             IEdmModel model = GetModel<DataTypes>();
-            IEdmType targetEdmType = model.FindType("Microsoft.Test.AspNet.OData.Query.Expressions.DataTypes");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.Test.AspNet.OData.Query.Expressions.Products");
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
 
             ODataQueryOptionParser parser = new ODataQueryOptionParser(
                 model,

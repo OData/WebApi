@@ -9,7 +9,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class HttpErrorExtensionsTest
     {

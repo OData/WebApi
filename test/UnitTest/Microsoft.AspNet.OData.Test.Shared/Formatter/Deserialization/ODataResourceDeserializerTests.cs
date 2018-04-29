@@ -8,20 +8,20 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataResourceDeserializerTests
     {
@@ -227,13 +227,13 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             ODataResourceWrapper resourceWrapper =
                 new ODataResourceWrapper(new ODataResource
                 {
-                    TypeName = "Microsoft.Test.AspNet.OData.Formatter.Deserialization.BaseType"
+                    TypeName = "Microsoft.AspNet.OData.Test.Formatter.Deserialization.BaseType"
                 });
 
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(
                 () => deserializer.ReadResource(resourceWrapper, _productEdmType, new ODataDeserializerContext { Model = model }),
-                "An instance of the abstract resource type 'Microsoft.Test.AspNet.OData.Formatter.Deserialization.BaseType' was found. " +
+                "An instance of the abstract resource type 'Microsoft.AspNet.OData.Test.Formatter.Deserialization.BaseType' was found. " +
                 "Abstract resource types cannot be instantiated.");
         }
 

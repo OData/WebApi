@@ -7,14 +7,14 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Builder;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builderr
+namespace Microsoft.AspNet.OData.Test.Builderr
 {
     public class EntitySetTest
     {
@@ -121,7 +121,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             var binding = Assert.Single(entitySet.FindNavigationPropertyBindings(edmNavProperty));
             Assert.Same(target, binding.Target);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
         }
 
         [Fact]
@@ -186,9 +186,9 @@ namespace Microsoft.Test.AspNet.OData.Builderr
             ExceptionAssert.ThrowsArgument(
                 () => vehicles.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
-                "The declaring entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle' " +
+                "The declaring entity type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle' " +
                 "of the given navigation property is not a part of the entity type " +
-                "'Microsoft.Test.AspNet.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'vehicles'.");
+                "'Microsoft.AspNet.OData.Test.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'vehicles'.");
         }
 
         [Fact]
@@ -216,7 +216,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             IEdmNavigationPropertyBinding binding = Assert.Single(vehicles.FindNavigationPropertyBindings(motorcycleManufacturerProperty));
             Assert.Same(motorcycleManufacturerPropertyTargetSet, binding.Target);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
         }
 
         [Fact]
@@ -244,7 +244,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             IEdmNavigationPropertyBinding binding = Assert.Single(vehicles.FindNavigationPropertyBindings(motorcycleManufacturerProperty));
             Assert.Same(motorcycleManufacturerPropertyTargetSet, binding.Target);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle/Manufacturer", binding.Path.Path);
         }
 
         [Fact]
@@ -272,7 +272,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             IEdmNavigationPropertyBinding binding = Assert.Single(vehicles.FindNavigationPropertyBindings(motorcycleManufacturerProperty));
             Assert.Same(motorcycleManufacturerPropertyTargetSet, binding.Target);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Motorcycle/Manufacturers", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Motorcycle/Manufacturers", binding.Path.Path);
         }
 
         [Fact]
@@ -342,7 +342,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
-                "The entity set or singleton 'Customers' is based on type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Customer' that has no keys defined.");
+                "The entity set or singleton 'Customers' is based on type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Customer' that has no keys defined.");
         }
 
         [Fact]
@@ -512,7 +512,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
             IEdmNavigationPropertyBinding binding = Assert.Single(bindings);
             Assert.Equal("UsCity", binding.NavigationProperty.Name);
             Assert.Equal("Cities_A", binding.Target.Name);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCity", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity", binding.Path.Path);
 
             IEdmNavigationSource navSource = customers.FindNavigationTarget(cityProperty, binding.Path);
             Assert.Same(navSource, binding.Target);
@@ -522,7 +522,7 @@ namespace Microsoft.Test.AspNet.OData.Builderr
             binding = Assert.Single(bindings);
             Assert.Equal("UsCities", binding.NavigationProperty.Name);
             Assert.Equal("Cities_B", binding.Target.Name);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BindingVipCustomer/VipLocation/Microsoft.Test.AspNet.OData.Formatter.BindingUsAddress/UsCities", binding.Path.Path);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities", binding.Path.Path);
 
             navSource = customers.FindNavigationTarget(citiesProperty, binding.Path);
             Assert.Same(navSource, binding.Target);

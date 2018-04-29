@@ -4,21 +4,21 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
-using Microsoft.Test.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
+using Microsoft.AspNet.OData.Test.Routing;
 using Moq;
 using Xunit;
-using Customer = Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer;
+using Customer = Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.Customer;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class SelectExpandQueryOptionTest
     {
@@ -252,7 +252,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -308,7 +308,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: "Name",
@@ -375,7 +375,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -484,7 +484,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -570,7 +570,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = ODataLevelsTest.GetEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing.LevelsEntity"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity"));
             context.RequestContainer = new MockContainer();
             var selectExpand = new SelectExpandQueryOption(
                 select: null,
@@ -629,7 +629,7 @@ namespace Microsoft.Test.AspNet.OData.Query
             var model = GetAutoExpandEdmModel();
             var context = new ODataQueryContext(
                 model,
-                model.FindDeclaredType("Microsoft.Test.AspNet.OData.Common.Models.AutoExpandCustomer"));
+                model.FindDeclaredType("Microsoft.AspNet.OData.Test.Common.Models.AutoExpandCustomer"));
             var request = RequestFactory.Create(HttpMethod.Get, url);
             var queryOption = new ODataQueryOptions(context, request);
             queryOption.AddAutoSelectExpandProperties();

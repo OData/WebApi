@@ -5,19 +5,21 @@
 using System.Net.Http;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #else
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 {
     public class FunctionRoutingConventionTests
     {

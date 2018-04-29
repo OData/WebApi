@@ -3,7 +3,7 @@
 
 using Microsoft.AspNet.OData.Builder;
 
-namespace Microsoft.Test.AspNet.OData.Builder.TestModels
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
     public class MySpecialOrder : MyOrder
     {

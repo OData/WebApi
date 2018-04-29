@@ -11,18 +11,18 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
+using Microsoft.AspNet.OData.Test.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Query.Validators;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
-using Microsoft.Test.AspNet.OData.Query.Expressions;
-using Microsoft.Test.AspNet.OData.Query.Validators;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #else
@@ -36,21 +36,21 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
+using Microsoft.AspNet.OData.Test.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
-using Microsoft.Test.AspNet.OData.Query.Expressions;
-using Microsoft.Test.AspNet.OData.Query.Validators;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
-namespace Microsoft.Test.AspNet.OData.Query
+namespace Microsoft.AspNet.OData.Test.Query
 {
     public class ODataQueryOptionTest
     {
@@ -825,7 +825,7 @@ namespace Microsoft.Test.AspNet.OData.Query
                 IQueryable<int> e = Enumerable.Range(1, 9).AsQueryable();
                 return new TheoryDataSet<IQueryable, string, object>
                 {
-                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
+                    { e.Select(i => (SimpleEnum)(i%3)), "$filter=$it eq Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'&$orderby=$it desc&$skip=1&$top=1", SimpleEnum.First },
                     { e.Select(i => (SimpleEnum?)null), "$filter=$it eq null&$orderby=$it desc&$skip=1&$top=1", null },
                 };
             }

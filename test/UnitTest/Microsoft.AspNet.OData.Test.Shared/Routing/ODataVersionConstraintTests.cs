@@ -7,7 +7,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Routing.Test
+namespace Microsoft.AspNet.OData.Test.Routing.Test
 {
     public class ODataVersionConstraintTests
     {

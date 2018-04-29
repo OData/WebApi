@@ -6,7 +6,7 @@ using System.Web.Http;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     internal static class HttpConfigurationExtensions
     {

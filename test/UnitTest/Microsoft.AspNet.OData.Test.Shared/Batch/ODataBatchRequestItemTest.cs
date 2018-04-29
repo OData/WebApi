@@ -8,10 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Batch;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Batch
+namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class ODataBatchRequestItemTest
     {

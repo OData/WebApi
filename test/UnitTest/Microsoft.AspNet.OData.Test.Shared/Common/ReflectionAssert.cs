@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public class ReflectionAssert
     {

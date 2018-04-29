@@ -9,21 +9,21 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
+using Microsoft.AspNet.OData.Test.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
-using Microsoft.Test.AspNet.OData.Routing;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ODataUriResolverExtensionTest
     {
@@ -35,22 +35,22 @@ namespace Microsoft.Test.AspNet.OData
                 {
                     { "GET", "$meTadata", "" },
                     { "GET", "rouTINGCustomers", "GetRoutingCustomers" },
-                    { "GET", "rouTINGCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "GetRoutingCustomersFromVIP" },
+                    { "GET", "rouTINGCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "GetRoutingCustomersFromVIP" },
                     { "GET", "proDucts(10)", "Get(10)" },
                     { "PATCH", "rouTINGCustomers(10)", "PatchRoutingCustomer(10)" },
                     { "GET", "rouTINGCustomers(10)/ProDucTs", "GetProducts(10)" },
                     { "GET", "rouTINGCustomers(10)/naMe", "GetName(10)" },
-                    { "GET", "rouTINGCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Name", "GetName(10)" },
+                    { "GET", "rouTINGCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name", "GetName(10)" },
                     { "PUT", "rouTINGCustomers(1)/Products/$ReF", "CreateRef(1)(Products)" },
                     { "POST", "rouTINGCustomers(1)/Products/$rEf", "CreateRef(1)(Products)" },
                     { "GET", "rouTINGCustomers(10)/Name/$vAlUe", "GetName(10)" },
-                    { "GET", "rouTINGCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Name/$value", "GetName(10)" },
+                    { "GET", "rouTINGCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name/$value", "GetName(10)" },
                     { "POST", "rouTINGCustomers(1)/default.getRElatedRoutingCustomers", "GetRelatedRoutingCustomers(1)" },
                     { "POST",
-                        "rouTINGCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/getRelatedrouTingCustomers",
+                        "rouTINGCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/getRelatedrouTingCustomers",
                         "GetRelatedRoutingCustomers(1)" },
                     { "POST", "rouTINGCustomers/DefaulT.getProducts", "GetProducts" },
-                    { "POST", "rouTINGCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/getProducts", "GetProducts" },
+                    { "POST", "rouTINGCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/getProducts", "GetProducts" },
                     { "GET", "ProDucts(1)/ToppRoDuctId", "TopProductId(1)" },
                     { "GET", "ProDucts(1)/Default.ToppRoductIdByCity(ciTy='any')", "TopProductIdByCity(1, any)" },
                     { "GET", "ProDucts/TopProductofaLl", "TopProductOfAll" },
@@ -236,10 +236,10 @@ namespace Microsoft.Test.AspNet.OData
         [Theory]
         [InlineData("gender='Male'", true, HttpStatusCode.OK)]
         [InlineData("gender='Male'", false, HttpStatusCode.OK)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", false, HttpStatusCode.OK)]
+        [InlineData("gender=Microsoft.AspNet.OData.Test.Common.Models.Gender'Male'", true, HttpStatusCode.OK)]
+        [InlineData("gender=Microsoft.AspNet.OData.Test.Common.Models.Gender'Male'", false, HttpStatusCode.OK)]
         [InlineData("gender='SomeUnknowValue'", true, HttpStatusCode.NotFound)]
-        [InlineData("gender=Microsoft.Test.AspNet.OData.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
+        [InlineData("gender=Microsoft.AspNet.OData.Test.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.NotFound)]
         public async Task ExtensionResolver_Works_EnumPrefixFree(string parameter, bool enableEnumPrefix, HttpStatusCode statusCode)
         {
             // Arrange
@@ -278,16 +278,16 @@ namespace Microsoft.Test.AspNet.OData
         [InlineData("$filter=Gender eq 'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
         [InlineData("$filter=Gender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq 'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Male'", false, HttpStatusCode.OK, "0,2,4,6,8")]
+        [InlineData("$filter=Gender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=Gender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Female'", false, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=Gender eq 'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
-        [InlineData("$filter=Gender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
+        [InlineData("$filter=Gender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'SomeUnknowValue'", true, HttpStatusCode.BadRequest, null)]
         [InlineData("$filter=NullableGender eq 'Male'", true, HttpStatusCode.OK, "")]
-        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "")]
+        [InlineData("$filter=NullableGender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Male'", true, HttpStatusCode.OK, "")]
         [InlineData("$filter=NullableGender eq 'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
-        [InlineData("$filter=NullableGender eq Microsoft.Test.AspNet.OData.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
+        [InlineData("$filter=NullableGender eq Microsoft.AspNet.OData.Test.Common.Models.Gender'Female'", true, HttpStatusCode.OK, "1,3,5,7,9")]
         [InlineData("$filter=NullableGender eq null", true, HttpStatusCode.OK, "0,2,4,6,8")]
         public async Task ExtensionResolver_Works_EnumPrefixFree_QueryOption(string query, bool enableEnumPrefix, HttpStatusCode statusCode, string output)
         {

@@ -4,7 +4,7 @@
 using System;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public abstract class EnumHelperTestBase<TEnum> where TEnum : IComparable, IFormattable, IConvertible
     {

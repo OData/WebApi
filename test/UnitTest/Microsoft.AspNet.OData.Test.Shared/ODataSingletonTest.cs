@@ -11,8 +11,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #else
@@ -25,13 +26,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ODataSingletonTest
     {
@@ -72,7 +74,7 @@ namespace Microsoft.Test.AspNet.OData
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("http://localhost/odata/$metadata#Oscorp", (string)result["@odata.context"]);
-            Assert.Equal("#Microsoft.Test.AspNet.OData.Corporation", (string)result["@odata.type"]);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Corporation", (string)result["@odata.type"]);
             Assert.Equal("http://localhost/odata/Oscorp", (string)result["@odata.id"]);
             Assert.Equal("http://localhost/odata/Oscorp/SubSidiaries", (string)result["SubSidiaries@odata.navigationLink"]);
             VerifySingleton(result);

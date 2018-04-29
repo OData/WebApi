@@ -4,7 +4,7 @@
 using System.Net;
 using System.Net.Http;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create HttpResponse[Message].

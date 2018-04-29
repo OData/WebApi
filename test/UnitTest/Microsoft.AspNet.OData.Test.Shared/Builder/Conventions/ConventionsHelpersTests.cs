@@ -3,17 +3,16 @@
 
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 {
     public class ConventionsHelpersTests
     {
@@ -68,10 +67,10 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
                     { new DateTimeOffset(1,1,1,0,0,0,TimeSpan.Zero), "0001-01-01T00:00:00Z" },
                     { TimeSpan.FromSeconds(86456), "duration'P1DT56S'" },
                     { DateTimeOffset.FromFileTime(0).ToUniversalTime(), "1601-01-01T00:00:00Z" },
-                    { SimpleEnum.First, "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First'" },
-                    { FlagsEnum.One | FlagsEnum.Two, "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Two'" },
-                    { (SimpleEnum)123, "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'123'" },
-                    { (FlagsEnum)123, "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'123'" },
+                    { SimpleEnum.First, "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'" },
+                    { FlagsEnum.One | FlagsEnum.Two, "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'One, Two'" },
+                    { (SimpleEnum)123, "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'123'" },
+                    { (FlagsEnum)123, "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'123'" },
                     { new Date(2014, 10, 14), "2014-10-14"},
                     { new TimeOfDay(15, 38, 25, 109), "15:38:25.1090000"},
                 };

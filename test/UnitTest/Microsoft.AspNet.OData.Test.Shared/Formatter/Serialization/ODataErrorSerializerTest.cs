@@ -6,9 +6,9 @@ using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 #else
@@ -17,13 +17,13 @@ using System.Runtime.Serialization;
 using System.Web.Http;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataErrorSerializerTest
     {

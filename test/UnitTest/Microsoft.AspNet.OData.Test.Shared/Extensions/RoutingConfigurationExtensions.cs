@@ -2,18 +2,14 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
-using System.Net.Http;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Test.AspNet.OData.Common;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 #else
 using System.Web.Http;
 using System.Web.Http.Routing;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Extensions
+namespace Microsoft.AspNet.OData.Test.Extensions
 {
 #if NETCORE
     /// <summary>

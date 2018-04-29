@@ -5,17 +5,17 @@
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter.Deserialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 using Xunit;
 #else
 using System;
@@ -23,22 +23,22 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter;
+using Microsoft.AspNet.OData.Test.Formatter.Deserialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class EnumSerializerTest
     {
@@ -131,7 +131,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             // Arrange
             string enumComplexPayload = @"{
-  ""@odata.context"":""http://localhost/$metadata#Microsoft.Test.AspNet.OData.EnumComplex"",""RequiredColor"":""Red, Blue"",""NullableColor"":null,""UndefinedColor"":""123""
+  ""@odata.context"":""http://localhost/$metadata#Microsoft.AspNet.OData.Test.EnumComplex"",""RequiredColor"":""Red, Blue"",""NullableColor"":null,""UndefinedColor"":""123""
 }";
 
             ODataMediaTypeFormatter formatter = GetFormatter();
@@ -166,7 +166,7 @@ namespace Microsoft.Test.AspNet.OData
             HttpClient client = TestServerFactory.CreateClient(server);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get,
-                "http://localhost/odata/NullableEnumFunction(ColorParameter=Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Red')");
+                "http://localhost/odata/NullableEnumFunction(ColorParameter=Microsoft.AspNet.OData.Test.Builder.TestModels.Color'Red')");
 
             // Act
             HttpResponseMessage respone = await client.SendAsync(request);

@@ -4,7 +4,7 @@
 using System;
 using System.Collections;
 
-namespace Microsoft.Test.AspNet.OData.Common.Models
+namespace Microsoft.AspNet.OData.Test.Common.Models
 {
     public class NonGenericEnumerable : IEnumerable
     {

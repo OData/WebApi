@@ -6,13 +6,14 @@ using System.Xml.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataMetadataSerializerTest
     {
@@ -64,7 +65,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
             // Assert
             stream.Seek(0, SeekOrigin.Begin);
             string result = new StreamReader(stream).ReadToEnd();
-            Assert.Contains("<Singleton Name=\"Me\" Type=\"Microsoft.Test.AspNet.OData.Formatter.Serialization.Models.Customer\">", result);
+            Assert.Contains("<Singleton Name=\"Me\" Type=\"Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.Customer\">", result);
         }
     }
 }

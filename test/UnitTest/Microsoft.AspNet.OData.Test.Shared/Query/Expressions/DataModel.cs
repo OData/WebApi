@@ -10,9 +10,9 @@ using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.AspNet.OData.Test.Common.Types;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class Product
     {

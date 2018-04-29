@@ -8,7 +8,7 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public static class EdmModelAsserts
     {

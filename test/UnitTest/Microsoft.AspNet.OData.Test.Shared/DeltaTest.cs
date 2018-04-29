@@ -9,11 +9,10 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
 using Xunit;
 #else
 using System;
@@ -28,19 +27,19 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class DeltaTest
     {
@@ -71,7 +70,7 @@ namespace Microsoft.Test.AspNet.OData
         {
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => new Delta<Derived>(typeof(AnotherDerived)),
-                "The actual entity type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived' is not assignable to the expected type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived'.");
+                "The actual entity type 'Microsoft.AspNet.OData.Test.DeltaTest+AnotherDerived' is not assignable to the expected type 'Microsoft.AspNet.OData.Test.DeltaTest+Derived'.");
         }
 
         [Fact]
@@ -381,7 +380,7 @@ namespace Microsoft.Test.AspNet.OData
             // Act & Assert
             ExceptionAssert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndNullValue = new[] { "1" },
-                "The property 'CollectionPropertyWithoutSetAndNullValue' on type 'Microsoft.Test.AspNet.OData.DeltaTest+InvalidD" +
+                "The property 'CollectionPropertyWithoutSetAndNullValue' on type 'Microsoft.AspNet.OData.Test.DeltaTest+InvalidD" +
                 "eltaModel' returned a null value. The input stream contains collection items which cannot be added if " +
                 "the instance is null.");
         }
@@ -395,8 +394,8 @@ namespace Microsoft.Test.AspNet.OData
             // Act & Assert
             ExceptionAssert.Throws<SerializationException>(
                 () => delta.CollectionPropertyWithoutSetAndClear = new[] { "1" },
-                "The type 'System.Int32[]' of the property 'CollectionPropertyWithoutSetAndClear' on type 'Microsoft.Test." +
-                "AspNet.OData.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
+                "The type 'System.Int32[]' of the property 'CollectionPropertyWithoutSetAndClear' on type 'Microsoft." +
+                "AspNet.OData.Test.DeltaTest+InvalidDeltaModel' does not have a Clear method. Consider using a collection type" +
                 " that does have a Clear method, such as IList<T> or ICollection<T>.");
         }
 
@@ -411,7 +410,7 @@ namespace Microsoft.Test.AspNet.OData
             ExceptionAssert.ThrowsArgument(
                 () => delta.Patch(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'Microsoft.AspNet.OData.Test.DeltaTest+Derived' on an entity of type 'Microsoft.AspNet.OData.Test.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -425,7 +424,7 @@ namespace Microsoft.Test.AspNet.OData
             ExceptionAssert.ThrowsArgument(
                 () => delta.Put(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'Microsoft.AspNet.OData.Test.DeltaTest+Derived' on an entity of type 'Microsoft.AspNet.OData.Test.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -439,7 +438,7 @@ namespace Microsoft.Test.AspNet.OData
             ExceptionAssert.ThrowsArgument(
                 () => delta.CopyChangedValues(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'Microsoft.AspNet.OData.Test.DeltaTest+Derived' on an entity of type 'Microsoft.AspNet.OData.Test.DeltaTest+AnotherDerived'.");
         }
 
         [Fact]
@@ -453,7 +452,7 @@ namespace Microsoft.Test.AspNet.OData
             ExceptionAssert.ThrowsArgument(
                 () => delta.CopyUnchangedValues(unrelatedEntity),
                 "original",
-                "Cannot use Delta of type 'Microsoft.Test.AspNet.OData.DeltaTest+Derived' on an entity of type 'Microsoft.Test.AspNet.OData.DeltaTest+AnotherDerived'.");
+                "Cannot use Delta of type 'Microsoft.AspNet.OData.Test.DeltaTest+Derived' on an entity of type 'Microsoft.AspNet.OData.Test.DeltaTest+AnotherDerived'.");
         }
 
         public static TheoryDataSet<string, string, object> ODataFormatter_Can_Read_Delta_DataSet

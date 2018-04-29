@@ -9,7 +9,7 @@ using System.Web.Http.Filters;
 using System.Web.Http.Routing;
 using Moq;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     internal static class ContextUtil
     {

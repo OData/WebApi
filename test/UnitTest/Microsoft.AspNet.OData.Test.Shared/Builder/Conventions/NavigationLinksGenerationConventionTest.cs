@@ -3,18 +3,18 @@
 
 using System;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 {
     public class NavigationLinksGenerationConventionTest
     {
@@ -92,7 +92,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             Uri uri = linkBuilder.BuildNavigationLink(entityContext, carManufacturerProperty, ODataMetadataLevel.MinimalMetadata);
 
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Accord')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/Manufacturer", uri.AbsoluteUri);
         }
 
         [Fact]

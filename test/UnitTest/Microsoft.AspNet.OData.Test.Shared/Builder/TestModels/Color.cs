@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Microsoft.Test.AspNet.OData.Builder.TestModels
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
     [Flags]
     public enum Color

@@ -5,11 +5,11 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class PropertySelectorVisitorTest
     {

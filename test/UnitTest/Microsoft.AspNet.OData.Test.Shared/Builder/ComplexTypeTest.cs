@@ -6,12 +6,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class ComplexTypeTest
     {
@@ -84,7 +85,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => zipCode.ComplexProperty(z => z.Recursive),
                 "propertyInfo",
-                "The complex type 'Microsoft.Test.AspNet.OData.Builder.TestModels.RecursiveZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
+                "The complex type 'Microsoft.AspNet.OData.Test.Builder.TestModels.RecursiveZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
         }
 
         [Fact]
@@ -305,7 +306,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>().Property(v => v.BaseProperty),
                 "propertyInfo",
-                "Cannot redefine property 'BaseProperty' already defined on the base type 'Microsoft.Test.AspNet.OData.Builder.BaseComplexType'.");
+                "Cannot redefine property 'BaseProperty' already defined on the base type 'Microsoft.AspNet.OData.Test.Builder.BaseComplexType'.");
         }
 
         [Fact]
@@ -319,8 +320,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => builder.ComplexType<BaseComplexType>().Property(v => v.BaseProperty),
                 "propertyInfo",
-                "Cannot define property 'BaseProperty' in the base type 'Microsoft.Test.AspNet.OData.Builder.BaseComplexType' " +
-                "as the derived type 'Microsoft.Test.AspNet.OData.Builder.DerivedComplexType' already defines it.");
+                "Cannot define property 'BaseProperty' in the base type 'Microsoft.AspNet.OData.Test.Builder.BaseComplexType' " +
+                "as the derived type 'Microsoft.AspNet.OData.Test.Builder.DerivedComplexType' already defines it.");
         }
 
         [Fact]
@@ -333,7 +334,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => builder.ComplexType<string>().DerivesFrom<BaseComplexType>(),
                 "baseType",
-                "'System.String' does not inherit from 'Microsoft.Test.AspNet.OData.Builder.BaseComplexType'.");
+                "'System.String' does not inherit from 'Microsoft.AspNet.OData.Test.Builder.BaseComplexType'.");
         }
 
         [Fact]
@@ -350,7 +351,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => derivedComplex.DerivesFrom<BaseComplexType>(),
                 "propertyInfo",
-                "Cannot redefine property 'BaseProperty' already defined on the base type 'Microsoft.Test.AspNet.OData.Builder.BaseComplexType'.");
+                "Cannot redefine property 'BaseProperty' already defined on the base type 'Microsoft.AspNet.OData.Test.Builder.BaseComplexType'.");
         }
 
         [Fact]
@@ -366,8 +367,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => builder.ComplexType<DerivedComplexType>().DerivesFrom<BaseComplexType>(),
                 "propertyInfo",
-                "Cannot define property 'BaseProperty' in the base type 'Microsoft.Test.AspNet.OData.Builder.DerivedComplexType' as " +
-                "the derived type 'Microsoft.Test.AspNet.OData.Builder.SubDerivedComplexType' already defines it.");
+                "Cannot define property 'BaseProperty' in the base type 'Microsoft.AspNet.OData.Test.Builder.DerivedComplexType' as " +
+                "the derived type 'Microsoft.AspNet.OData.Test.Builder.SubDerivedComplexType' already defines it.");
         }
 
         [Fact]
@@ -380,7 +381,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => builder.EntityType<BaseComplexType>().DerivesFrom<BaseComplexType>(),
                 "baseType",
-                "'Microsoft.Test.AspNet.OData.Builder.BaseComplexType' does not inherit from 'Microsoft.Test.AspNet.OData.Builder.BaseComplexType'.");
+                "'Microsoft.AspNet.OData.Test.Builder.BaseComplexType' does not inherit from 'Microsoft.AspNet.OData.Test.Builder.BaseComplexType'.");
         }
 
         [Fact]
@@ -456,13 +457,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             IEdmEntityType customerType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Customer", customerType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Customer", customerType.FullName());
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
             Assert.Single(customerType.DeclaredProperties);
             Assert.Empty(customerType.NavigationProperties());
 
             IEdmComplexType orderType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Order", orderType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Order", orderType.FullName());
 
             IEdmNavigationProperty navProperty = Assert.Single(orderType.NavigationProperties());
             Assert.Equal(EdmMultiplicity.One, navProperty.TargetMultiplicity());
@@ -486,13 +487,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             IEdmEntityType customerType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Customer", customerType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Customer", customerType.FullName());
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
             Assert.Single(customerType.DeclaredProperties);
             Assert.Empty(customerType.NavigationProperties());
 
             IEdmComplexType orderType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Order", orderType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Order", orderType.FullName());
 
             IEdmNavigationProperty navProperty = Assert.Single(orderType.NavigationProperties());
             Assert.Equal(EdmMultiplicity.ZeroOrOne, navProperty.TargetMultiplicity());
@@ -516,13 +517,13 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Assert
             IEdmEntityType orderType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Order", orderType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Order", orderType.FullName());
             Assert.Equal("OrderId", orderType.DeclaredKey.Single().Name);
             Assert.Single(orderType.DeclaredProperties);
             Assert.Empty(orderType.NavigationProperties());
 
             IEdmComplexType customerType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Customer", customerType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Customer", customerType.FullName());
 
             IEdmNavigationProperty navProperty = Assert.Single(customerType.NavigationProperties());
             Assert.Equal(EdmMultiplicity.Many, navProperty.TargetMultiplicity());

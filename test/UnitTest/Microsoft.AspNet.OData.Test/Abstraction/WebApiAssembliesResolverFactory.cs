@@ -5,10 +5,10 @@ using System.Reflection;
 using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create WebApiAssembliesResolver.

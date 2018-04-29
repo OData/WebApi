@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public class MediaTypeHeaderValueComparer : IComparer<MediaTypeHeaderValue>
     {

@@ -8,13 +8,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #else
 using System;
@@ -24,16 +24,16 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class AttributeRoutingUnboundTest
     {
@@ -117,7 +117,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains("\"@odata.context\":\"http://localhost/$metadata#ConventionOrders/$entity\"", responseString);
-            Assert.Contains("\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Routing.ConventionOrder", responseString);
+            Assert.Contains("\"@odata.type\":\"#Microsoft.AspNet.OData.Test.Routing.ConventionOrder", responseString);
             Assert.Contains("\"OrderName\":\"OrderName 5\"", responseString);
             Assert.Contains("\"Price@odata.type\":\"#Decimal\",\"Price\":13", responseString);
         }
@@ -126,7 +126,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public async Task AttributeRouting_TopFunctionWithComplexParameter()
         {
             // Arrange
-            string requestUri = "http://localhost/ComplexFunction(address=@p)?@p={\"@odata.type\":\"%23Microsoft.Test.AspNet.OData.Routing.ConventionAddress\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"911\"}";
+            string requestUri = "http://localhost/ComplexFunction(address=@p)?@p={\"@odata.type\":\"%23Microsoft.AspNet.OData.Test.Routing.ConventionAddress\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"911\"}";
 
             // Act
             var response = await _client.GetAsync(requestUri);
@@ -141,7 +141,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public async Task AttributeRouting_TopFunctionWithEntityParameter()
         {
             // Arrange
-            string requestUri = "http://localhost/EntityFunction(order=@p)?@p={\"@odata.type\":\"%23Microsoft.Test.AspNet.OData.Routing.ConventionOrder\",\"Price\":9.9}";
+            string requestUri = "http://localhost/EntityFunction(order=@p)?@p={\"@odata.type\":\"%23Microsoft.AspNet.OData.Test.Routing.ConventionOrder\",\"Price\":9.9}";
 
             // Act
             var response = await _client.GetAsync(requestUri);

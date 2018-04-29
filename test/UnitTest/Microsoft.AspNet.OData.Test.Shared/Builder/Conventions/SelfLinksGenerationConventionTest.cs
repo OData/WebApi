@@ -3,18 +3,18 @@
 
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 {
     public class SelfLinksGenerationConventionTest
     {
@@ -75,7 +75,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
             EntitySelfLinks selfLinks = linkBuilder.BuildEntitySelfLinks(entityContext, ODataMetadataLevel.FullMetadata);
 
             Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')", selfLinks.IdLink.ToString());
-            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
+            Assert.Equal("http://localhost/vehicles(Model=2009,Name='Contoso')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]
@@ -99,7 +99,7 @@ namespace Microsoft.Test.AspNet.OData.Builder.Conventions
 
             // Assert
             Assert.Equal("http://localhost/MyVehicle", selfLinks.IdLink.ToString());
-            Assert.Equal("http://localhost/MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car", selfLinks.EditLink.ToString());
+            Assert.Equal("http://localhost/MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car", selfLinks.EditLink.ToString());
         }
 
         [Fact]

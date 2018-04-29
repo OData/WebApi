@@ -3,7 +3,7 @@
 
 using Microsoft.AspNet.OData.Routing.Conventions;
 
-namespace Microsoft.Test.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 {
     class MockNavigationSourceRoutingConvention : NavigationSourceRoutingConvention
     {

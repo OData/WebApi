@@ -4,7 +4,7 @@
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A factory for creating <see cref="ODataSerializerProvider"/>.

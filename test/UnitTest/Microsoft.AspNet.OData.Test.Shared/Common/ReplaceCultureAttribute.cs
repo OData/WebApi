@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Threading;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     /// <summary>
     /// Replaces the current culture and UI culture for the test.

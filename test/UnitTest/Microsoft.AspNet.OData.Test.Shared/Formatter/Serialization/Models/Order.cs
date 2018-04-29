@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization.Models
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization.Models
 {
     public class Order
     {

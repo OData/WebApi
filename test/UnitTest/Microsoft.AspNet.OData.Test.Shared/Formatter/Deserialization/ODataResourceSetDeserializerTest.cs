@@ -9,20 +9,19 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-//using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataResourceSetDeserializerTest
     {
@@ -99,7 +98,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
 
             ExceptionAssert.Throws<SerializationException>(
                 () => deserializer.ReadResourceSet(feedWrapper, _customerType, readContext).GetEnumerator().MoveNext(),
-                "'Microsoft.Test.AspNet.OData.Common.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
+                "'Microsoft.AspNet.OData.Test.Common.Models.Customer' cannot be deserialized using the ODataMediaTypeFormatter.");
         }
 
         [Fact]
@@ -134,7 +133,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
             IEdmCollectionTypeReference addressCollectionType =
                 new EdmCollectionTypeReference(new EdmCollectionType(addressType));
 
-            HttpContent content = new StringContent("{ 'value': [ {'@odata.type':'Microsoft.Test.AspNet.OData.Common.Models.Address', 'City' : 'Redmond' } ] }");
+            HttpContent content = new StringContent("{ 'value': [ {'@odata.type':'Microsoft.AspNet.OData.Test.Common.Models.Address', 'City' : 'Redmond' } ] }");
             var headers = FormatterTestHelper.GetContentHeaders("application/json");
             IODataRequestMessage request = ODataMessageWrapperHelper.Create(await content.ReadAsStreamAsync(), headers);
             ODataMessageReader reader = new ODataMessageReader(request, new ODataMessageReaderSettings(), _model);

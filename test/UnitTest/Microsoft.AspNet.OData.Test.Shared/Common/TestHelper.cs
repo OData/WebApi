@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     public static class UnitTestHelper
     {

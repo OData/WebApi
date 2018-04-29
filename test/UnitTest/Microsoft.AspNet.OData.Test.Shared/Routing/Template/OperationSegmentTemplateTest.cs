@@ -4,13 +4,13 @@
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Template;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Routing.Template
+namespace Microsoft.AspNet.OData.Test.Routing.Template
 {
     public class OperationSegmentTemplateTest
     {

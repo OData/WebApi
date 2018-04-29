@@ -4,7 +4,7 @@
 using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create ODataConventionModelBuilder.

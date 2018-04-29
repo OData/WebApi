@@ -4,7 +4,7 @@
 using System.IO;
 using Microsoft.AspNet.OData.Common;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     internal static class Resources
     {

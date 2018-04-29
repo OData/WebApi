@@ -2,35 +2,15 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
-using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Globalization;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
-using Moq;
-using Newtonsoft.Json.Linq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
@@ -49,19 +29,19 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Routing;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Models;
 using Moq;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -69,7 +49,7 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataMediaTypeFormatterTests
     {
@@ -83,7 +63,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Encoding.UTF8.GetBytes(
                 "{" +
                     "\"@odata.context\":\"http://localhost/$metadata#sampleTypes/$entity\"," +
-                    "\"@odata.type\":\"#Microsoft.Test.AspNet.OData.Formatter.SampleType\"," +
+                    "\"@odata.type\":\"#Microsoft.AspNet.OData.Test.Formatter.SampleType\"," +
                     "\"@odata.id\":\"http://localhost/sampleTypes(42)\"," +
                     "\"@odata.editLink\":\"http://localhost/sampleTypes(42)\"," +
                     "\"Number\":42" +
@@ -470,7 +450,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             IEdmModel model = ODataConventionModelBuilderFactory.Create().GetEdmModel();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/");
             request.EnableODataDependencyInjectionSupport();
-            request.GetConfiguration().Routes.MapHttpRoute(HttpRouteCollectionExtensions.RouteName, "{param}");
+            request.GetConfiguration().Routes.MapHttpRoute(Abstraction.HttpRouteCollectionExtensions.RouteName, "{param}");
             request.ODataProperties().Path = new ODataPath();
 
             ODataMediaTypeFormatter formatter = CreateFormatter(model, request, ODataPayloadKind.ServiceDocument);
@@ -1082,7 +1062,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             IEdmModel model = CreateModel();
-            IEdmSchemaType entityType = model.FindDeclaredType("Microsoft.Test.AspNet.OData.Formatter.SampleType");
+            IEdmSchemaType entityType = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Formatter.SampleType");
             IEdmStructuralProperty property =
                 ((IEdmStructuredType)entityType).FindProperty("Number") as IEdmStructuralProperty;
             HttpRequestMessage request = CreateFakeODataRequest(model);
@@ -1238,7 +1218,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             ODataSerializerProvider serializerProvider = null)
         {
             var request = new HttpRequestMessage(HttpMethod.Get, "http://dummy/");
-            request.EnableODataDependencyInjectionSupport(HttpRouteCollectionExtensions.RouteName, builder =>
+            request.EnableODataDependencyInjectionSupport(Abstraction.HttpRouteCollectionExtensions.RouteName, builder =>
             {
                 builder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
 

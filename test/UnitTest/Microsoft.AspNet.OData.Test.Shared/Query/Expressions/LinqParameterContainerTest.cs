@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class LinqParameterContainerTest
     {

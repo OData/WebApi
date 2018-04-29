@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.AspNet.OData.Test.Common.Types;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization.Models
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization.Models
 {
     public class Customer
     {

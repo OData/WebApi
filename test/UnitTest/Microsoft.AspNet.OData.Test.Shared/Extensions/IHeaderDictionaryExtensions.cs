@@ -11,7 +11,7 @@ using Microsoft.Extensions.Primitives;
 using System.Net.Http.Headers;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Extensions
+namespace Microsoft.AspNet.OData.Test.Extensions
 {
 #if NETCORE
     /// <summary>

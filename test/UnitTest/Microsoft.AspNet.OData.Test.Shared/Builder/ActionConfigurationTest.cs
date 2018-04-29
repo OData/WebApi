@@ -10,13 +10,14 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class ActionConfigurationTest
     {
@@ -416,7 +417,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
                 "Found more than one action with name 'ActionOnCustomer' " +
-                "bound to the same type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Customer'. " +
+                "bound to the same type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Customer'. " +
                 "Each bound action must have a different binding type or name.");
         }
 
@@ -857,7 +858,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => action.Returns<Movie>(),
-                "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'Microsoft.AspNet.OData.Test.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsFromEntitySet' if the return type is an entity.");
         }
 
@@ -871,7 +872,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => action.ReturnsCollection<Movie>(),
-                "The EDM type 'Microsoft.Test.AspNet.OData.Builder.Movie' is already declared as an entity type. Use the " +
+                "The EDM type 'Microsoft.AspNet.OData.Test.Builder.Movie' is already declared as an entity type. Use the " +
                 "method 'ReturnsCollectionFromEntitySet' if the return type is an entity collection.");
         }
 

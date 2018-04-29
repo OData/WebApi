@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
@@ -12,12 +11,13 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class DefaultODataPathHandlerTest
     {
@@ -107,18 +107,18 @@ namespace Microsoft.Test.AspNet.OData.Routing
             EntitySetSegment entitySetSegment = Assert.IsType<EntitySetSegment>(path.Segments.First());
             Assert.Equal("üCategories", entitySetSegment.EntitySet.Name);
 
-            Assert.Equal("Collection(Microsoft.Test.AspNet.OData.Routing.üCategory)", entitySetSegment.EdmType.FullTypeName());
+            Assert.Equal("Collection(Microsoft.AspNet.OData.Test.Routing.üCategory)", entitySetSegment.EdmType.FullTypeName());
         }
 
         [Fact]
         public void Parse_ForInvalidCast_ThrowsODataException()
         {
-            string odataPath = "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.Product";
+            string odataPath = "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.Product";
 
             ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(_model, _serviceRoot, odataPath),
-                "The type 'Microsoft.Test.AspNet.OData.Routing.Product' specified in the URI is neither a base type " +
-                "nor a sub-type of the previously-specified type 'Microsoft.Test.AspNet.OData.Routing.RoutingCustomer'.");
+                "The type 'Microsoft.AspNet.OData.Test.Routing.Product' specified in the URI is neither a base type " +
+                "nor a sub-type of the previously-specified type 'Microsoft.AspNet.OData.Test.Routing.RoutingCustomer'.");
         }
 
         [Fact]
@@ -139,12 +139,12 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("$metadata", "~/$metadata", "$metadata")]
         [InlineData("$batch", "~/$batch", "$batch")]
         [InlineData("RoutingCustomers(112)", "~/entityset/key", "RoutingCustomers(112)")]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "~/entityset/cast", "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP")]
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "~/entityset/cast", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP")]
         [InlineData("RoutingCustomers(100)/Products", "~/entityset/key/navigation", "RoutingCustomers(100)/Products")]
         [InlineData("RoutingCustomers(100)/Address/Unknown", "~/entityset/key/property/unresolved", "RoutingCustomers(100)/Address/Unknown")]
         [InlineData("RoutingCustomers(100)/Products()", "~/entityset/key/navigation", "RoutingCustomers(100)/Products")]
-        [InlineData("RoutingCustomers(100)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation",
-            "RoutingCustomers(100)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager")]
+        [InlineData("RoutingCustomers(100)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager", "~/entityset/key/cast/navigation",
+            "RoutingCustomers(100)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager")]
         [InlineData("GetRoutingCustomerById()", "~/unboundaction", "GetRoutingCustomerById")]
         [InlineData("UnboundFunction()", "~/unboundfunction", "UnboundFunction()")]
         [InlineData("UnboundFunctionWithOneParamters(P1=1)", "~/unboundfunction", "UnboundFunctionWithOneParamters(P1=1)")]
@@ -157,19 +157,19 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("RoutingCustomers(1)/Products/$ref", "~/entityset/key/navigation/$ref", "RoutingCustomers(1)/Products/$ref")]
         [InlineData("RoutingCustomers(112)/Default.GetRelatedRoutingCustomers", "~/entityset/key/action",
             "RoutingCustomers(112)/Default.GetRelatedRoutingCustomers")]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetMostProfitable", "~/entityset/cast/action",
-            "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetMostProfitable")]
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetMostProfitable", "~/entityset/cast/action",
+            "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetMostProfitable")]
         [InlineData("RoutingCustomers(112)/Default.GetOrdersCount(factor=1)", "~/entityset/key/function",
             "RoutingCustomers(112)/Default.GetOrdersCount(factor=1)")]
-        [InlineData("RoutingCustomers(112)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetOrdersCount(factor=1)", "~/entityset/key/cast/function",
-            "RoutingCustomers(112)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetOrdersCount(factor=1)")]
+        [InlineData("RoutingCustomers(112)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetOrdersCount(factor=1)", "~/entityset/key/cast/function",
+            "RoutingCustomers(112)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetOrdersCount(factor=1)")]
         [InlineData("RoutingCustomers/Default.FunctionBoundToRoutingCustomers()", "~/entityset/function",
             "RoutingCustomers/Default.FunctionBoundToRoutingCustomers()")]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()", "~/entityset/cast/function",
-            "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.FunctionBoundToRoutingCustomers()")]
-        [InlineData("Products(1)/RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager/ManagedProducts",
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.FunctionBoundToRoutingCustomers()", "~/entityset/cast/function",
+            "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.FunctionBoundToRoutingCustomers()")]
+        [InlineData("Products(1)/RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager/ManagedProducts",
             "~/entityset/key/navigation/key/cast/navigation/navigation",
-            "Products(1)/RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager/ManagedProducts")]
+            "Products(1)/RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager/ManagedProducts")]
         [InlineData("Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')", "~/entityset/key/function",
             "Products(1)/Default.FunctionBoundToProductWithMultipleParamters(P1=1,P2=2,P3='a')")]
         [InlineData("Products(1)/Default.FunctionBoundToProduct()", "~/entityset/key/function",
@@ -181,10 +181,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("EnumCustomers(1)/Color", "~/entityset/key/property", "EnumCustomers(1)/Color")]
         [InlineData("EnumCustomers(1)/Color/$value", "~/entityset/key/property/$value", "EnumCustomers(1)/Color/$value")]
         [InlineData("VipCustomer", "~/singleton", "VipCustomer")]
-        [InlineData("VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP", "~/singleton/cast", "VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP")]
+        [InlineData("VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP", "~/singleton/cast", "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP")]
         [InlineData("VipCustomer/Products", "~/singleton/navigation", "VipCustomer/Products")]
-        [InlineData("VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager", "~/singleton/cast/navigation",
-            "VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager")]
+        [InlineData("VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager", "~/singleton/cast/navigation",
+            "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager")]
         [InlineData("VipCustomer/Name/$value", "~/singleton/property/$value", "VipCustomer/Name/$value")]
         [InlineData("VipCustomer/Products/$ref", "~/singleton/navigation/$ref", "VipCustomer/Products/$ref")]
         [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "~/singleton/action", "VipCustomer/Default.GetRelatedRoutingCustomers")]
@@ -206,7 +206,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [InlineData("", new string[] { })]
         [InlineData("UnboundFunctionWithOneParamters(P1=1)/Products", new string[] { "UnboundFunctionWithOneParamters(P1=1)", "Products" })]
         [InlineData("UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')", new string[] { "UnboundFunctionWithMultipleParamters(P1=1,P2=2,P3='a')" })]
-        [InlineData("RoutingCustomers(100)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager", new string[] { "RoutingCustomers(100)", "Microsoft.Test.AspNet.OData.Routing.VIP", "RelationshipManager" })]
+        [InlineData("RoutingCustomers(100)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager", new string[] { "RoutingCustomers(100)", "Microsoft.AspNet.OData.Test.Routing.VIP", "RelationshipManager" })]
         [InlineData("RoutingCustomers(112)/Address/Street", new string[] { "RoutingCustomers(112)", "Address", "Street" })]
         [InlineData("RoutingCustomers(1)/Name/$value", new string[] { "RoutingCustomers(1)", "Name", "$value" })]
         [InlineData("RoutingCustomers(1)/Products/$ref", new string[] { "RoutingCustomers(1)", "Products", "$ref" })]
@@ -289,10 +289,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets()
                 .SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType entityType = _model.SchemaElements.OfType<IEdmEntityType>()
-                .SingleOrDefault(s => s.FullName() == "Microsoft.Test.AspNet.OData.Routing.VIP");
+                .SingleOrDefault(s => s.FullName() == "Microsoft.AspNet.OData.Test.Routing.VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP");
             Assert.NotNull(path); // Guard
             ODataPathSegment segment = path.Segments.Last();
 
@@ -301,7 +301,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Equal("~/entityset/cast", path.PathTemplate);
 
             TypeSegment typeSegment = Assert.IsType<TypeSegment>(segment);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Routing.VIP", typeSegment.ToUriLiteral());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.VIP", typeSegment.ToUriLiteral());
             Assert.Same(expectedSet, path.NavigationSource);
             Assert.Same(entityType, ((IEdmCollectionType)path.EdmType).ElementType.Definition);
         }
@@ -313,10 +313,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets()
                 .SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType entityType = _model.SchemaElements.OfType<IEdmEntityType>()
-                .SingleOrDefault(s => s.FullName() == "Microsoft.Test.AspNet.OData.Routing.VIP");
+                .SingleOrDefault(s => s.FullName() == "Microsoft.AspNet.OData.Test.Routing.VIP");
 
             // Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP");
             Assert.NotNull(path); // Guard
             ODataPathSegment segment = path.Segments.Last();
 
@@ -326,7 +326,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             TypeSegment typeSegment = Assert.IsType<TypeSegment>(segment);
 
-            Assert.Equal("Microsoft.Test.AspNet.OData.Routing.VIP", typeSegment.ToUriLiteral());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.VIP", typeSegment.ToUriLiteral());
             Assert.Same(expectedSet, path.NavigationSource);
             Assert.Same(entityType, path.EdmType);
         }
@@ -336,10 +336,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             // Arrange
             IEdmComplexType complexType = _model.SchemaElements.OfType<IEdmComplexType>()
-                .SingleOrDefault(s => s.FullName() == "Microsoft.Test.AspNet.OData.Routing.UsAddress");
+                .SingleOrDefault(s => s.FullName() == "Microsoft.AspNet.OData.Test.Routing.UsAddress");
 
             // Act
-            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Address/Microsoft.Test.AspNet.OData.Routing.UsAddress");
+            ODataPath path = _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Address/Microsoft.AspNet.OData.Test.Routing.UsAddress");
             Assert.NotNull(path); // Guard
             ODataPathSegment segment = path.Segments.Last();
 
@@ -348,7 +348,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             Assert.Equal("~/entityset/key/property/cast", path.PathTemplate);
             TypeSegment typeSegment = Assert.IsType<TypeSegment>(segment);
 
-            Assert.Equal("Microsoft.Test.AspNet.OData.Routing.UsAddress", typeSegment.ToUriLiteral());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.UsAddress", typeSegment.ToUriLiteral());
 
             Assert.NotNull(path.NavigationSource);
 
@@ -495,8 +495,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParseCastCollectionSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP";
-            string expectedText = "Microsoft.Test.AspNet.OData.Routing.VIP";
+            string odataPath = "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP";
+            string expectedText = "Microsoft.AspNet.OData.Test.Routing.VIP";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
@@ -519,8 +519,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParseCastSingletonSegment()
         {
             // Arrange
-            string odataPath = "VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP";
-            string expectedText = "Microsoft.Test.AspNet.OData.Routing.VIP";
+            string odataPath = "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP";
+            string expectedText = "Microsoft.AspNet.OData.Test.Routing.VIP";
             IEdmSingleton expectedSingleton = _model.EntityContainer.FindSingleton("VipCustomer");
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
@@ -542,8 +542,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParseCastEntitySegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(100)/Microsoft.Test.AspNet.OData.Routing.VIP";
-            string expectedText = "Microsoft.Test.AspNet.OData.Routing.VIP";
+            string odataPath = "RoutingCustomers(100)/Microsoft.AspNet.OData.Test.Routing.VIP";
+            string expectedText = "Microsoft.AspNet.OData.Test.Routing.VIP";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "RoutingCustomers");
             IEdmEntityType expectedType = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP");
 
@@ -590,7 +590,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParseNavigateToSingleSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers(100)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager";
+            string odataPath = "RoutingCustomers(100)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager";
             string expectedText = "RelationshipManager";
             IEdmEntitySet expectedSet = _model.EntityContainer.EntitySets().SingleOrDefault(s => s.Name == "SalesPeople");
             IEdmNavigationProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(s => s.Name == "VIP").NavigationProperties().SingleOrDefault(n => n.Name == "RelationshipManager");
@@ -736,12 +736,12 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(112)/Pet/Microsoft.Test.AspNet.OData.Routing.Dog")]
-        [InlineData("VipCustomer/Pet/Microsoft.Test.AspNet.OData.Routing.Dog")]
+        [InlineData("RoutingCustomers(112)/Pet/Microsoft.AspNet.OData.Test.Routing.Dog")]
+        [InlineData("VipCustomer/Pet/Microsoft.AspNet.OData.Test.Routing.Dog")]
         public void CanParseComplexCastSegment(string odataPath)
         {
             // Arrange
-            const string ExpectedText = "Microsoft.Test.AspNet.OData.Routing.Dog";
+            const string ExpectedText = "Microsoft.AspNet.OData.Test.Routing.Dog";
             IEdmComplexType expectedType =
                 _model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(e => e.Name == "Dog");
 
@@ -760,8 +760,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers(112)/Pet/Microsoft.Test.AspNet.OData.Routing.Dog/CanBark", "CanBark")]
-        [InlineData("VipCustomer/Pet/Microsoft.Test.AspNet.OData.Routing.Cat/CanMeow", "CanMeow")]
+        [InlineData("RoutingCustomers(112)/Pet/Microsoft.AspNet.OData.Test.Routing.Dog/CanBark", "CanBark")]
+        [InlineData("VipCustomer/Pet/Microsoft.AspNet.OData.Test.Routing.Cat/CanMeow", "CanMeow")]
         public void CanParsePropertyValueAfterComplexCastSegment(string odataPath, string expectText)
         {
             // Arrange & Act
@@ -819,7 +819,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             Assert.Null(path.NavigationSource);
             Assert.NotNull(path.EdmType);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Routing.Address", (path.EdmType as IEdmComplexType).FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.Address", (path.EdmType as IEdmComplexType).FullName());
         }
 
         [Theory]
@@ -883,9 +883,9 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         [Theory]
         [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers")]
-        [InlineData("RoutingCustomers(2)/Microsoft.Test.AspNet.OData.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
+        [InlineData("RoutingCustomers(2)/Microsoft.AspNet.OData.Test.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
         [InlineData("Products(7)/TopProductId", "TopProductId")]
-        [InlineData("Products(7)/Microsoft.Test.AspNet.OData.Routing.ImportantProduct/TopProductId", "TopProductId")]
+        [InlineData("Products(7)/Microsoft.AspNet.OData.Test.Routing.ImportantProduct/TopProductId", "TopProductId")]
         public void ParseAsUnresolvedPathSegment_UnqualifiedOperationPath(string odataPath, string unresolveValue)
         {
             // Arrange & Act & Assert
@@ -967,7 +967,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public void CanParseActionBoundToCollectionSegment()
         {
             // Arrange
-            string odataPath = "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetMostProfitable";
+            string odataPath = "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetMostProfitable";
             string expectedText = "Default.GetMostProfitable";
             IEdmAction expectedEdmElement = _model.SchemaElements.OfType<IEdmAction>().SingleOrDefault(e => e.Name == "GetMostProfitable");
             Assert.NotNull(expectedEdmElement);
@@ -1014,7 +1014,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         [Theory]
         [InlineData("RoutingCustomers(5)/Default.GetSpecialGuid()", "Default.GetSpecialGuid()")]
-        [InlineData("RoutingCustomers(5)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSpecialGuid()", "Default.GetSpecialGuid()")]
+        [InlineData("RoutingCustomers(5)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSpecialGuid()", "Default.GetSpecialGuid()")]
         [InlineData("RoutingCustomers(5)/Default.ActionBoundToSpecialVIP()", "Default.ActionBoundToSpecialVIP()")]
         public void ParseAsUnresolvePathSegment_OperationBoundToDerivedType(string uri, string unresolvedValue)
         {
@@ -1172,10 +1172,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'123'")]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'-9999'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'999'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'-12345'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'123'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'-9999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'999'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'-12345'")]
         public void CanParseUndefinedEnumValue(Type enumerationType, string enumerationExpression)
         {
             // Arrange
@@ -1192,10 +1192,10 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First, Second'")]
-        [InlineData(typeof(SimpleEnum), "Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'UnknownValue'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'UnknownValue'")]
-        [InlineData(typeof(FlagsEnum), "Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'abc'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First, Second'")]
+        [InlineData(typeof(SimpleEnum), "Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'UnknownValue'")]
+        [InlineData(typeof(FlagsEnum), "Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'abc'")]
         public void CannotParseInvalidEnumValue(Type enumerationType, string enumerationExpression)
         {
             // Arrange
@@ -1565,7 +1565,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         [Theory]
         [InlineData(
-            "(address=@p)?@p={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}"
+            "(address=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"}"
             )]
         public void CanParse_ComplexTypeAsFunctionParameterInAlias(string parameterValue)
         {
@@ -1585,7 +1585,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("(address={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
+        [InlineData("(address={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
         public void ParseComplexTypeAsFunctionParameterInlineThrows(string parameterValue)
         {
             // Arrange & Act
@@ -1627,7 +1627,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}")]
+        [InlineData("{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}")]
         [InlineData("{\"@odata.Id\":\"http://localhost/odata/Products(9)\"}")]
         public void CanParse_EntityTypeAsFunctionParameter_ParametersAlias(string entityAlias)
         {
@@ -1649,15 +1649,15 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             // Arrange
             const string odataPath =
-                "RoutingCustomers(1)/Default.EntityTypeFunction(product={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}";
+                "RoutingCustomers(1)/Default.EntityTypeFunction(product={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}";
 
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
         }
 
         [Theory]
-        [InlineData("{\"value\":[{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
-                    "{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}")]
+        [InlineData("{\"value\":[{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                    "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}")]
         [InlineData("[{\"@odata.Id\":\"http://localhost/odata/Products(9)\"},{\"@odata.Id\":\"http://localhost/odata/Products(10)\"}]")]
         public void CanParse_CollectionEntityTypeAsFunctionParameter_ParametersAlias(string entityAlias)
         {
@@ -1679,8 +1679,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
         {
             // Arrange
             const string odataPath = "RoutingCustomers(1)/Default.CollectionEntityTypeFunction(products=" +
-                "{\"value\":[{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
-                "{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}";
+                "{\"value\":[{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":10,\"Name\":\"TV\"}]}";
 
             // & Act
             ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, odataPath));
@@ -1924,7 +1924,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             // Arrange
             var model = _model;
             var expectedSet = model.EntityContainer.FindEntitySet(expectedSetName);
-            var expectedType = model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing." + expectedTypeName) as IEdmEntityType;
+            var expectedType = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
@@ -1975,14 +1975,14 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP", "VIP", "RoutingCustomers", false)]
-        [InlineData("Products(1)/Microsoft.Test.AspNet.OData.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
-        [InlineData("Products(1)/RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "VIP", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "VIP", "RoutingCustomers", true)]
+        [InlineData("RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP", "VIP", "RoutingCustomers", false)]
+        [InlineData("Products(1)/Microsoft.AspNet.OData.Test.Routing.ImportantProduct", "ImportantProduct", "Products", false)]
+        [InlineData("Products(1)/RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "VIP", "RoutingCustomers", true)]
         [InlineData("SalesPeople(1)/ManagedRoutingCustomers", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products(1)/Microsoft.Test.AspNet.OData.Routing.ImportantProduct/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
-        [InlineData("Products(1)/RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
+        [InlineData("RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products(1)/Microsoft.AspNet.OData.Test.Routing.ImportantProduct/LeadSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("Products(1)/RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager/ManagedProducts", "ImportantProduct", "Products", true)]
         public void CanResolveSetAndTypeViaCastSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -2000,7 +2000,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers(1)/Default.GetBestRelatedRoutingCustomer", "VIP", "RoutingCustomers", false)]
-        [InlineData("RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
         [InlineData("SalesPeople(1)/Default.GetVIPRoutingCustomers", "VIP", "RoutingCustomers", true)]
         public void CanResolveSetAndTypeViaEntityActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
@@ -2009,7 +2009,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         [Theory]
         [InlineData("VipCustomer/Default.GetRelatedRoutingCustomers", "RoutingCustomer", "RoutingCustomers", true)]
-        [InlineData("VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
+        [InlineData("VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSalesPerson", "SalesPerson", "SalesPeople", false)]
         public void CanResolveSetAndTypeViaSingletonSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -2018,11 +2018,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [Theory]
         [InlineData("RoutingCustomers/Default.GetVIPs", "VIP", "RoutingCustomers", true)]
         [InlineData("RoutingCustomers/Default.GetProducts", "Product", "Products", true)]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetProducts", "Product", "Products", true)]
-        [InlineData("Products(1)/RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
-        [InlineData("MyProduct/RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetProducts", "Product", "Products", true)]
+        [InlineData("Products(1)/RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
+        [InlineData("MyProduct/RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSalesPeople", "SalesPerson", "SalesPeople", true)]
         [InlineData("SalesPeople/Default.GetVIPRoutingCustomers", "VIP", "RoutingCustomers", true)]
-        [InlineData("RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetMostProfitable", "VIP", "RoutingCustomers", false)]
+        [InlineData("RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetMostProfitable", "VIP", "RoutingCustomers", false)]
         public void CanResolveSetAndTypeViaCollectionActionSegment(string odataPath, string expectedTypeName, string expectedSetName, bool isCollection)
         {
             AssertTypeMatchesExpectedType(odataPath, expectedSetName, expectedTypeName, isCollection);
@@ -2315,8 +2315,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     { "vIpCustomEr/prOduCts", "~/singleton/navigation", "VipCustomer/Products" },
 
                     // Type Name
-                    { "rouTingcustomers/Microsoft.Test.AspNet.OData.RouTing.VIP", "~/entityset/cast", "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP" },
-                    { "vIpCustomEr/Microsoft.Test.AspNet.OData.Routing.VIP", "~/singleton/cast", "VipCustomer/Microsoft.Test.AspNet.OData.Routing.VIP" },
+                    { "rouTingcustomers/Microsoft.AspNet.OData.Test.RouTing.VIP", "~/entityset/cast", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP" },
+                    { "vIpCustomEr/Microsoft.AspNet.OData.Test.Routing.VIP", "~/singleton/cast", "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP" },
 
                     // Action
                     { "gETroutingCUstomerById()", "~/unboundaction", "GetRoutingCustomerById" },
@@ -2411,11 +2411,11 @@ namespace Microsoft.Test.AspNet.OData.Routing
                 {
                     { "UnboundFuncWithEnumParameters(LongEnum='ThirdLong', FlagsEnum='7')",
                       "~/unboundfunction",
-                      "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'2',FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7')" },
+                      "UnboundFuncWithEnumParameters(LongEnum=Microsoft.AspNet.OData.Test.Common.Types.LongEnum'2',FlagsEnum=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'7')" },
 
                     { "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum='1', FlagsEnum='One, Four')",
                       "~/entityset/function",
-                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1',FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'5')"}
+                      "RoutingCustomers/Default.BoundFuncWithEnumParameters(SimpleEnum=Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'1',FlagsEnum=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'5')"}
                 };
             }
         }
@@ -2463,7 +2463,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
             string expectedTypeName, bool isCollection)
         {
             // Arrange
-            var expectedType = _model.FindDeclaredType("Microsoft.Test.AspNet.OData.Routing." + expectedTypeName) as IEdmEntityType;
+            var expectedType = _model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing." + expectedTypeName) as IEdmEntityType;
 
             // Act
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);

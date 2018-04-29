@@ -3,13 +3,13 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class ODataEnumDeserializerTests
     {

@@ -6,13 +6,14 @@ using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ODataActionParametersTest
     {
@@ -20,9 +21,9 @@ namespace Microsoft.Test.AspNet.OData
 
         [Theory]
         [InlineData("Drive", "Vehicles(Model=6,Name='6')/org.odata.Drive")]
-        [InlineData("Drive", "Vehicles(Model=6,Name='6')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Drive")]
+        [InlineData("Drive", "Vehicles(Model=6,Name='6')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/org.odata.Drive")]
         [InlineData("Drive", "MyVehicle/org.odata.Drive")]
-        [InlineData("Drive", "MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Drive")]
+        [InlineData("Drive", "MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/org.odata.Drive")]
         public void Can_Find_Action_QualifiedActionName(string actionName, string url)
         {
             // Arrange
@@ -41,9 +42,9 @@ namespace Microsoft.Test.AspNet.OData
 
         [Theory]
         [InlineData("Vehicles(Model=6,Name='6')/Drive")]
-        [InlineData("Vehicles(Model=6,Name='6')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("Vehicles(Model=6,Name='6')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/Drive")]
         [InlineData("MyVehicle/Drive")]
-        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/Drive")]
+        [InlineData("MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/Drive")]
         public void ParseAsUnresolvedPathSegment_UnqualifiedBoundAction(string url)
         {
             // Arrange
@@ -56,8 +57,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Wash")]
-        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/org.odata.Wash")]
+        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/org.odata.Wash")]
+        [InlineData("MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/org.odata.Wash")]
         public void Can_find_action_overload_using_bindingparameter_type(string url)
         {
             // Arrange
@@ -75,8 +76,8 @@ namespace Microsoft.Test.AspNet.OData
         }
 
         [Theory]
-        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/customize.NSAction")]
-        [InlineData("MyVehicle/Microsoft.Test.AspNet.OData.Builder.TestModels.Car/customize.NSAction")]
+        [InlineData("Vehicles(Model=8,Name='8')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/customize.NSAction")]
+        [InlineData("MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/customize.NSAction")]
         public void Can_Find_Customized_Namespace_Action(string url)
         {
             // Arrange
@@ -114,7 +115,7 @@ namespace Microsoft.Test.AspNet.OData
 
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(() =>
-                new DefaultODataPathHandler().Parse(model, _serviceRoot, "Vehicles/Microsoft.Test.AspNet.OData.Builder.TestModels.Car(Model=8,Name='8')/org.odata.Park"),
+                new DefaultODataPathHandler().Parse(model, _serviceRoot, "Vehicles/Microsoft.AspNet.OData.Test.Builder.TestModels.Car(Model=8,Name='8')/org.odata.Park"),
                 "Multiple action overloads were found with the same binding parameter for 'org.odata.Park'.");
         }
 

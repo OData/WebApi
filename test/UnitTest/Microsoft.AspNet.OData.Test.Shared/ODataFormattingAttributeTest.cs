@@ -13,7 +13,7 @@ using Microsoft.OData;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class ODataFormattingAttributeTest
     {

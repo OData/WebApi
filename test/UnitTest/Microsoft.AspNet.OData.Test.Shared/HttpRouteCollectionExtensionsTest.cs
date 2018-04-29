@@ -13,13 +13,14 @@ using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class HttpRouteCollectionExtensionsTest
     {

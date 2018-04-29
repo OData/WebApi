@@ -6,14 +6,15 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class EnumDeserializerTest
     {
@@ -151,7 +152,7 @@ namespace Microsoft.Test.AspNet.OData
                 {
                     new ODataProperty { Name = "NullableColor", Value = null}
                 },
-                TypeName = "Microsoft.Test.AspNet.OData.EnumComplexWithNullableEnum"
+                TypeName = "Microsoft.AspNet.OData.Test.EnumComplexWithNullableEnum"
             };
 
             IEdmModel model = GetEdmModel();
@@ -179,7 +180,7 @@ namespace Microsoft.Test.AspNet.OData
                 {
                     new ODataProperty { Name = "RequiredColor", Value = new ODataEnumValue("123") }
                 },
-                TypeName = "Microsoft.Test.AspNet.OData.EnumComplexWithRequiredEnum"
+                TypeName = "Microsoft.AspNet.OData.Test.EnumComplexWithRequiredEnum"
             };
 
             IEdmModel model = GetEdmModel();
@@ -215,7 +216,7 @@ namespace Microsoft.Test.AspNet.OData
                         Value = new ODataEnumValue(color.ToString())
                     }
                 },
-                TypeName = "Microsoft.Test.AspNet.OData.EnumComplexWithRequiredEnum"
+                TypeName = "Microsoft.AspNet.OData.Test.EnumComplexWithRequiredEnum"
             };
 
             ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };

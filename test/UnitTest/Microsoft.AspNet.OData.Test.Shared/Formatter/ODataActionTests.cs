@@ -7,9 +7,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
@@ -21,15 +21,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataActionTests
     {
@@ -74,10 +74,10 @@ namespace Microsoft.Test.AspNet.OData.Formatter
         }
 
         private const string EntityPayload = @"{ 
-                ""Customer"": {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.Customer"", ""ID"":101,""Name"":""Avatar"" } , 
+                ""Customer"": {""@odata.type"":""#Microsoft.AspNet.OData.Test.Formatter.Customer"", ""ID"":101,""Name"":""Avatar"" } , 
                 ""Customers"": [
-                    {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.Customer"", ""ID"":901,""Name"":""John"" } , 
-                    {""@odata.type"":""#Microsoft.Test.AspNet.OData.Formatter.SubCustomer"", ""ID"":902,""Name"":""Mike"", ""Price"": 9.9 } 
+                    {""@odata.type"":""#Microsoft.AspNet.OData.Test.Formatter.Customer"", ""ID"":901,""Name"":""John"" } , 
+                    {""@odata.type"":""#Microsoft.AspNet.OData.Test.Formatter.SubCustomer"", ""ID"":902,""Name"":""Mike"", ""Price"": 9.9 } 
                 ]
             }";
 
@@ -229,12 +229,12 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             var model = new EdmModel();
 
             // entity type customer
-            EdmEntityType customer = new EdmEntityType("Microsoft.Test.AspNet.OData.Formatter", "Customer");
+            EdmEntityType customer = new EdmEntityType("Microsoft.AspNet.OData.Test.Formatter", "Customer");
             customer.AddKeys(customer.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
             customer.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
             model.AddElement(customer);
 
-            EdmEntityType subCustomer = new EdmEntityType("Microsoft.Test.AspNet.OData.Formatter", "SubCustomer", customer);
+            EdmEntityType subCustomer = new EdmEntityType("Microsoft.AspNet.OData.Test.Formatter", "SubCustomer", customer);
             customer.AddKeys(subCustomer.AddStructuralProperty("Price", EdmPrimitiveTypeKind.Double));
             model.AddElement(subCustomer);
 
@@ -402,7 +402,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             Assert.Equal(2, customers.Count());
             EdmEntityObject entity = customers.First() as EdmEntityObject;
             IEdmTypeReference typeReference = entity.GetEdmType();
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.Customer", typeReference.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.Customer", typeReference.FullName());
 
             customer = customers.First();
             Assert.NotNull(customer);
@@ -411,7 +411,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
 
             entity = customers.Last() as EdmEntityObject;
             typeReference = entity.GetEdmType();
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.SubCustomer", typeReference.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.SubCustomer", typeReference.FullName());
             customer = customers.Last();
             Assert.NotNull(customer);
             Assert.Equal(902, customer.ID);

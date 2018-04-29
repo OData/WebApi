@@ -9,12 +9,13 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #else
 using System;
@@ -22,19 +23,19 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Routing;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataPathRouteConstraintTest
     {

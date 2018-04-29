@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -16,7 +16,7 @@ using Newtonsoft.Json.Linq;
 using Xunit;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class DependencyInjectionTests
     {

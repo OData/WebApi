@@ -7,10 +7,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.AspNetCore.Mvc.Internal;
@@ -19,7 +20,6 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 using MediaTypeHeaderValue = System.Net.Http.Headers.MediaTypeHeaderValue;
@@ -31,18 +31,18 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataMediaTypeFormattersTests
     {

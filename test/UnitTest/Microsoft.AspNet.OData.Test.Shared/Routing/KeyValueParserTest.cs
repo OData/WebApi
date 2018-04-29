@@ -4,11 +4,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class KeyValueParserTest
     {

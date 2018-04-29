@@ -8,11 +8,11 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class SelectExpandNodeTest
     {

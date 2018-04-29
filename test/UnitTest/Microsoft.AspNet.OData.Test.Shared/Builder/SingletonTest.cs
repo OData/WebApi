@@ -5,16 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class SingletonTest
     {
@@ -153,7 +152,7 @@ namespace Microsoft.Test.AspNet.OData.Builder
 
             var osCorp = container.FindSingleton("OsCorp");
             Assert.NotNull(osCorp);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Builder.TestModels.Company", osCorp.EntityType().FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Builder.TestModels.Company", osCorp.EntityType().FullName());
 
             var companies = container.FindEntitySet("Companies");
             Assert.NotNull(companies);
@@ -386,8 +385,8 @@ namespace Microsoft.Test.AspNet.OData.Builder
             ExceptionAssert.ThrowsArgument(
                 () => myVehicle.HasNavigationPropertyLink(navProperty, new NavigationLinkBuilder((ctxt, property) => new Uri("http://works/"), followsConventions: false)),
                 "navigationProperty",
-                "The declaring entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Car' of the given navigation property is not a part of the " +
-                "entity type 'Microsoft.Test.AspNet.OData.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'MyVehicle'.");
+                "The declaring entity type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Car' of the given navigation property is not a part of the " +
+                "entity type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Vehicle' hierarchy of the entity set or singleton 'MyVehicle'.");
         }
 
         [Fact]

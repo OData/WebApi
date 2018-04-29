@@ -2,14 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
-using System.Collections.Generic;
 using System.Net;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 #else
 using System.Collections.Generic;
@@ -18,14 +17,14 @@ using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Web.Http;
 using System.Web.Http.Results;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Results;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Query.Results
+namespace Microsoft.AspNet.OData.Test.Results
 {
     public class UpdatedODataResultTest
     {

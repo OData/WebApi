@@ -7,8 +7,9 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http;
+using Microsoft.AspNet.OData.Test.Abstraction;
 
-namespace Microsoft.Test.AspNet.OData.Batch
+namespace Microsoft.AspNet.OData.Test.Batch
 {
     internal class MockHttpServer : HttpServer
     {

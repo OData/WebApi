@@ -7,11 +7,11 @@ using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 
-namespace Microsoft.Test.AspNet.OData.Batch
+namespace Microsoft.AspNet.OData.Test.Batch
 {
     /// <summary>
     /// Provides extension methods for the <see cref="HttpContent"/> class.

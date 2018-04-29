@@ -19,7 +19,7 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     /// <summary>
     /// Class that provides <see cref="MediaTypeHeaderValue"/>s for OData from query strings.

@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     internal static class FormatterTestHelper
     {

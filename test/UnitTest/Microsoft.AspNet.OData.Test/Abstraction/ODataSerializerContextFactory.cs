@@ -6,7 +6,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create ODataSerializerContext.

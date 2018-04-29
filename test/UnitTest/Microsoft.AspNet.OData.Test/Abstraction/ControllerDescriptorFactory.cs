@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to create [Http]ControllerDescriptor.

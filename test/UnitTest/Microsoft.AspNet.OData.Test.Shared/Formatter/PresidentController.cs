@@ -4,8 +4,7 @@
 #if NETCORE
 using System;
 using System.Net;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Extensions;
 #else
 using System;
 using System.Net;
@@ -13,7 +12,7 @@ using System.Net.Http;
 using Microsoft.AspNet.OData;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class PresidentController : ODataController
     {

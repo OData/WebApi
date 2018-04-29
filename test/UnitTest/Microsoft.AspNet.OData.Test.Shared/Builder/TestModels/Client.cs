@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 
-namespace Microsoft.Test.AspNet.OData.Builder.TestModelss
+namespace Microsoft.AspNet.OData.Test.Builder.TestModelss
 {
     public class Client
     {

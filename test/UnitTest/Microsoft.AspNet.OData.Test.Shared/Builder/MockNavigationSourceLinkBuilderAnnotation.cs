@@ -7,7 +7,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     internal class MockNavigationSourceLinkBuilderAnnotation : NavigationSourceLinkBuilderAnnotation
     {

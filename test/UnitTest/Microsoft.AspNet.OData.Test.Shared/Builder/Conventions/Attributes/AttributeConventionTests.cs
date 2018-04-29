@@ -4,10 +4,10 @@
 using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder.Conventions.Attributes
+namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
 {
     public class AttributeConventionTests
     {

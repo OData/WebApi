@@ -4,17 +4,17 @@
 using System;
 using System.Globalization;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
+using Microsoft.AspNet.OData.Test.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
-using Microsoft.Test.AspNet.OData.Routing;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Validators
+namespace Microsoft.AspNet.OData.Test.Query.Validators
 {
     public class SelectExpandQueryValidatorTest
     {

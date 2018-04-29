@@ -9,12 +9,13 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Expressions
+namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
     public class AggregationBinderTests
     {

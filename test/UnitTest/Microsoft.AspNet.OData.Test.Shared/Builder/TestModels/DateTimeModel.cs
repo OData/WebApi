@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Test.AspNet.OData.Builder.TestModels
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 {
     public class DateTimeModel
     {

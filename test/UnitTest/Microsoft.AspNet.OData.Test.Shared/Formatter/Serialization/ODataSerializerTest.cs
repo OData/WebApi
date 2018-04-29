@@ -3,12 +3,12 @@
 
 using System;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class ODataSerializerTest
     {

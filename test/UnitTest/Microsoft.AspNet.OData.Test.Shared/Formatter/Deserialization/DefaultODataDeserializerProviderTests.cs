@@ -3,15 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Deserialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
     public class DefaultODataDeserializerProviderTests
     {

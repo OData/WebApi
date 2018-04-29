@@ -20,7 +20,7 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Moq;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 {
     /// <summary>
     /// Helper to create parameters for NavigationSourceRoutingConvention SelectAction().

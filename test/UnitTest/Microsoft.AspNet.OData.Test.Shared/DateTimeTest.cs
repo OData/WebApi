@@ -9,12 +9,12 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #else
@@ -26,16 +26,16 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class DateTimeTest
     {
@@ -53,7 +53,7 @@ namespace Microsoft.Test.AspNet.OData
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>" +
                 "<edmx:Edmx Version=\"4.0\" xmlns:edmx=\"http://docs.oasis-open.org/odata/ns/edmx\">" +
                 "<edmx:DataServices>" +
-                "<Schema Namespace=\"Microsoft.Test.AspNet.OData.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Schema Namespace=\"Microsoft.AspNet.OData.Test.Builder.TestModels\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                     "<EntityType Name=\"DateTimeModel\">" +
                         "<Key>" +
                             "<PropertyRef Name=\"Id\" />" +
@@ -67,12 +67,12 @@ namespace Microsoft.Test.AspNet.OData
                 "</Schema>" +
                 "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                     "<Function Name=\"CalcBirthday\" IsBound=\"true\">" +
-                        "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.Test.AspNet.OData.Builder.TestModels.DateTimeModel\" />" +
+                        "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Builder.TestModels.DateTimeModel\" />" +
                         "<Parameter Name=\"dto\" Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
                         "<ReturnType Type=\"Edm.DateTimeOffset\" Nullable=\"false\" />" +
                     "</Function>" +
                     "<EntityContainer Name=\"Container\">" +
-                        "<EntitySet Name=\"DateTimeModels\" EntityType=\"Microsoft.Test.AspNet.OData.Builder.TestModels.DateTimeModel\" />" +
+                        "<EntitySet Name=\"DateTimeModels\" EntityType=\"Microsoft.AspNet.OData.Test.Builder.TestModels.DateTimeModel\" />" +
                     "</EntityContainer>" +
                 "</Schema>" +
                 "</edmx:DataServices>" +

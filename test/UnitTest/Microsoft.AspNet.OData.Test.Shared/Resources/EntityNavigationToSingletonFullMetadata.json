@@ -1,3 +1,3 @@
 ﻿{
-  "@odata.context":"http://localhost/odata/$metadata#Oscorp","@odata.type":"#Microsoft.Test.AspNet.OData.Corporation","@odata.id":"http://localhost/odata/Oscorp","@odata.editLink":"http://localhost/odata/Oscorp","CorpId":9999,"CorpName":"Oscorp Enterprise","CorpWeb":"www.Oscorp.com","CorpAddress":"Oscorp Way #001","SubSidiaries@odata.associationLink":"http://localhost/odata/Oscorp/SubSidiaries/$ref","SubSidiaries@odata.navigationLink":"http://localhost/odata/Oscorp/SubSidiaries"
+  "@odata.context":"http://localhost/odata/$metadata#Oscorp","@odata.type":"#Microsoft.AspNet.OData.Test.Corporation","@odata.id":"http://localhost/odata/Oscorp","@odata.editLink":"http://localhost/odata/Oscorp","CorpId":9999,"CorpName":"Oscorp Enterprise","CorpWeb":"www.Oscorp.com","CorpAddress":"Oscorp Way #001","SubSidiaries@odata.associationLink":"http://localhost/odata/Oscorp/SubSidiaries/$ref","SubSidiaries@odata.navigationLink":"http://localhost/odata/Oscorp/SubSidiaries"
 }

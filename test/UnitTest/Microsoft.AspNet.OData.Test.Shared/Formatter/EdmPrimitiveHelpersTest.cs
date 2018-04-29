@@ -7,12 +7,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Data.Linq;
 #endif
 using System.Xml.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class EdmPrimitiveHelpersTest
     {

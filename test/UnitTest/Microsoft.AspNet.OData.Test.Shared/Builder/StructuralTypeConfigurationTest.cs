@@ -3,11 +3,11 @@
 
 using System;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class StructuralTypeConfigurationTest
     {

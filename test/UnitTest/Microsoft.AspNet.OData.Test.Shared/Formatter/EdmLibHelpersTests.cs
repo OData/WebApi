@@ -12,13 +12,14 @@ using System.Xml.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query.Expressions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Builder;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Formatter.Serialization.Models;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class EdmLibHelpersTests
     {
@@ -119,7 +120,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             IEdmType edmType = model.GetEdmType(typeof(IEnumerable<BaseType>));
 
             Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
         [Fact]
@@ -129,7 +130,7 @@ namespace Microsoft.Test.AspNet.OData.Formatter
             IEdmType edmType = model.GetEdmType(typeof(IEnumerable<SelectExpandWrapper<BaseType>>));
 
             Assert.Equal(EdmTypeKind.Collection, edmType.TypeKind);
-            Assert.Equal("Microsoft.Test.AspNet.OData.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
+            Assert.Equal("Microsoft.AspNet.OData.Test.Formatter.BaseType", (edmType as IEdmCollectionType).ElementType.FullName());
         }
 
         [Fact]

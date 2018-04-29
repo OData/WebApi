@@ -3,7 +3,7 @@
 
 using System.Net.Http;
 
-namespace Microsoft.Test.AspNet.OData.Batch
+namespace Microsoft.AspNet.OData.Test.Batch
 {
     internal class MockHttpRequestMessage : HttpRequestMessage
     {

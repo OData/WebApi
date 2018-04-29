@@ -8,10 +8,10 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class PropertyPairSelectorVisitorTest
     {

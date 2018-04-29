@@ -9,14 +9,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Extensions;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Xunit;
 #else
 using System;
@@ -27,17 +27,17 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
-using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
+using Microsoft.AspNet.OData.Test.Extensions;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataRoutingTest
     {
@@ -118,8 +118,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     { "GET", "RoutingCustomers/", "GetRoutingCustomers" },
                     { "GET", "RoutingCustomers/?hello=goodbye", "GetRoutingCustomers" },
                     // entity set / cast
-                    { "GET", "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "GetRoutingCustomersFromVIP" },
-                    { "POST", "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP", "PostRoutingCustomerFromVIP" },
+                    { "GET", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "GetRoutingCustomersFromVIP" },
+                    { "POST", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP", "PostRoutingCustomerFromVIP" },
                     // entity by key defaults
                     { "GET", "Products(10)", "Get(10)" },
                     { "PUT", "Products(10)", "Put(10)" },
@@ -134,15 +134,15 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     { "DELETE", "RoutingCustomers(10)", "DeleteRoutingCustomer(10)" },
                     // navigation properties
                     { "GET", "RoutingCustomers(10)/Products", "GetProducts(10)" },
-                    { "GET", "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Products", "GetProducts(10)" },
+                    { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Products", "GetProducts(10)" },
                     { "GET",
-                        "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/RelationshipManager",
+                        "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/RelationshipManager",
                         "GetRelationshipManagerFromVIP(10)" },
                     // structural properties
                     { "GET", "RoutingCustomers(10)/Name", "GetName(10)" },
                     { "GET", "RoutingCustomers(10)/Address", "GetAddress(10)" },
-                    { "GET", "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Name", "GetName(10)" },
-                    { "GET", "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Company", "GetCompanyFromVIP(10)" },
+                    { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Company", "GetCompanyFromVIP(10)" },
                     // refs
                     { "PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
                     { "POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
@@ -151,21 +151,21 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     { "DELETE", "RoutingCustomers(1)/Products/$ref?$id=../../Products(5)", "DeleteRef(1)(5)(Products)" },
                     // raw value
                     { "GET", "RoutingCustomers(10)/Name/$value", "GetName(10)" },
-                    { "GET", "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Name/$value", "GetName(10)" },
-                    { "GET", "RoutingCustomers(10)/Microsoft.Test.AspNet.OData.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)" },
+                    { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name/$value", "GetName(10)" },
+                    { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Company/$value", "GetCompanyFromVIP(10)" },
                     // actions on entities by key
                     { "POST", "RoutingCustomers(1)/Default.GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers(1)" },
                     { "POST",
-                        "RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetRelatedRoutingCustomers",
+                        "RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetRelatedRoutingCustomers",
                         "GetRelatedRoutingCustomers(1)" },
                     { "POST",
-                        "RoutingCustomers(1)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSalesPerson",
+                        "RoutingCustomers(1)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSalesPerson",
                         "GetSalesPersonOnVIP(1)" },
                     // actions on entity sets
                     { "POST", "RoutingCustomers/Default.GetProducts", "GetProducts" },
-                    { "POST", "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetProducts", "GetProducts" },
+                    { "POST", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetProducts", "GetProducts" },
                     { "POST",
-                        "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetMostProfitable",
+                        "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetMostProfitable",
                         "GetMostProfitableOnCollectionOfVIP" },
                     // functions on entities by key
                     { "GET", "Products(1)/Default.TopProductId", "TopProductId(1)" },
@@ -180,7 +180,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
                         "Products(1)/Default.TopProductIdByCityAndModel(city=@city,model=@model)?@city='any'&@model=2",
                         "TopProductIdByCityAndModel(1, any, 2)" },
                     { "GET",
-                        "Products(1)/Microsoft.Test.AspNet.OData.Routing.ImportantProduct/Default.TopProductId",
+                        "Products(1)/Microsoft.AspNet.OData.Test.Routing.ImportantProduct/Default.TopProductId",
                         "TopProductId(1)" },
                     // functions on entity sets
                     { "GET", "Products/Default.TopProductOfAll", "TopProductOfAll" },
@@ -211,67 +211,67 @@ namespace Microsoft.Test.AspNet.OData.Routing
                         "Products/Default.TopProductOfAllByCityAndModel(city=@city,model=@model)?@city='any'&@model=2",
                         "TopProductOfAllByCityAndModel(any, 2)" },
                     { "GET",
-                        "Products/Microsoft.Test.AspNet.OData.Routing.ImportantProduct/Default.TopProductOfAllByCity(city='any')",
+                        "Products/Microsoft.AspNet.OData.Test.Routing.ImportantProduct/Default.TopProductOfAllByCity(city='any')",
                         "TopProductOfAllByCity(any)" },
                     // functions bound to the base and derived type
                     { "GET", "RoutingCustomers(4)/Default.GetOrdersCount()", "GetOrdersCount_4" },
                     { "GET",
-                        "RoutingCustomers(5)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetOrdersCount()",
+                        "RoutingCustomers(5)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetOrdersCount()",
                         "GetOrdersCountOnVIP_5" },
                     { "GET",
-                        "RoutingCustomers(6)/Microsoft.Test.AspNet.OData.Routing.SpecialVIP/Default.GetOrdersCount()",
+                        "RoutingCustomers(6)/Microsoft.AspNet.OData.Test.Routing.SpecialVIP/Default.GetOrdersCount()",
                         "GetOrdersCountOnVIP_6" },
                     { "GET", "RoutingCustomers(7)/Default.GetOrdersCount(factor=3)", "GetOrdersCount_(7,3)" },
                     { "GET",
-                        "RoutingCustomers(8)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetOrdersCount(factor=4)",
+                        "RoutingCustomers(8)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetOrdersCount(factor=4)",
                         "GetOrdersCount_(8,4)" },
                     { "GET",
-                        "RoutingCustomers(9)/Microsoft.Test.AspNet.OData.Routing.SpecialVIP/Default.GetOrdersCount(factor=5)",
+                        "RoutingCustomers(9)/Microsoft.AspNet.OData.Test.Routing.SpecialVIP/Default.GetOrdersCount(factor=5)",
                         "GetOrdersCount_(9,5)" },
                     // functions bound to the collection of the base and the derived type
                     { "GET", "RoutingCustomers/Default.GetAllEmployees()", "GetAllEmployees" },
                     { "GET",
-                        "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetAllEmployees()",
+                        "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetAllEmployees()",
                         "GetAllEmployeesOnCollectionOfVIP" },
                     { "GET",
-                        "RoutingCustomers/Microsoft.Test.AspNet.OData.Routing.SpecialVIP/Default.GetAllEmployees()",
+                        "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.SpecialVIP/Default.GetAllEmployees()",
                         "GetAllEmployeesOnCollectionOfVIP" },
                     // functions only bound to derived type
                     { "GET", "RoutingCustomers(5)/Default.GetSpecialGuid()", "~/entityset/key/unresolved" },
                     { "GET",
-                        "RoutingCustomers(5)/Microsoft.Test.AspNet.OData.Routing.VIP/Default.GetSpecialGuid()",
+                        "RoutingCustomers(5)/Microsoft.AspNet.OData.Test.Routing.VIP/Default.GetSpecialGuid()",
                         "~/entityset/key/cast/unresolved" },
                     { "GET",
-                        "RoutingCustomers(5)/Microsoft.Test.AspNet.OData.Routing.SpecialVIP/Default.GetSpecialGuid()",
+                        "RoutingCustomers(5)/Microsoft.AspNet.OData.Test.Routing.SpecialVIP/Default.GetSpecialGuid()",
                         "GetSpecialGuid_5" },
                     // functions with enum type parameter
                     { "GET",
                         "RoutingCustomers/Default.BoundFuncWithEnumParameters(" +
-                            "SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'1'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Four')",
+                            "SimpleEnum=Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'1'," +
+                            "FlagsEnum=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'One, Four')",
                         "BoundFuncWithEnumParameters(Second,One, Four)" },
                     { "GET",
                         "RoutingCustomers/Default.BoundFuncWithEnumParameterForAttributeRouting(" +
-                            "SimpleEnum=Microsoft.Test.AspNet.OData.Common.Types.SimpleEnum'First')",
+                            "SimpleEnum=Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First')",
                         "BoundFuncWithEnumParameterForAttributeRouting(First)" },
                     { "GET",
-                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7')",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.AspNet.OData.Test.Common.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'7')",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     // The OData ABNF doesn't allow spaces within enum literals. But ODL _requires_ spaces after commas.
                     { "GET",
-                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'," +
-                            "FlagsEnum=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Two, Four')",
+                        "UnboundFuncWithEnumParameters(LongEnum=Microsoft.AspNet.OData.Test.Common.Types.LongEnum'ThirdLong'," +
+                            "FlagsEnum=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'One, Two, Four')",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     { "GET",
                         "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
-                            "@long=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'&" +
-                            "@flags=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'7'",
+                            "@long=Microsoft.AspNet.OData.Test.Common.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'7'",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     { "GET",
                         "UnboundFuncWithEnumParameters(LongEnum=@long,FlagsEnum=@flags)?" +
-                            "@long=Microsoft.Test.AspNet.OData.Common.Types.LongEnum'ThirdLong'&" +
-                            "@flags=Microsoft.Test.AspNet.OData.Common.Types.FlagsEnum'One, Two, Four'",
+                            "@long=Microsoft.AspNet.OData.Test.Common.Types.LongEnum'ThirdLong'&" +
+                            "@flags=Microsoft.AspNet.OData.Test.Common.Types.FlagsEnum'One, Two, Four'",
                         "UnboundFuncWithEnumParameters(ThirdLong,One, Two, Four)" },
                     // unmapped requests
                     { "GET", "RoutingCustomers(10)/Products(1)", "~/entityset/key/navigation/key" },
@@ -312,30 +312,30 @@ namespace Microsoft.Test.AspNet.OData.Routing
                     // Complex
                     {
                         "GET",
-                        "RoutingCustomers(10)/Default.CanMoveToAddress(address=@p)?@p={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}",
+                        "RoutingCustomers(10)/Default.CanMoveToAddress(address=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}",
                         "CanMoveToAddress(Street=NE 24th St.,City=Redmond,ZipCode=9001)"
                     },
 
                     // Collection of complex
                     {
                         "GET", "RoutingCustomers(10)/Default.MoveToAddresses(addresses=@p)?" +
-                               "@p=[{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}," +
-                               "{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}]",
+                               "@p=[{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}," +
+                               "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\",\"ZipCode\":\"9001\"}]",
                         "MoveToAddresses(addresses={2})"
                     },
 
                     // Entity
                     {
                         "GET",
-                        "RoutingCustomers(10)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}",
+                        "RoutingCustomers(10)/Default.EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}",
                         "EntityTypeFunction(ID=9,Name=Phone)"
                     },
 
                     // Feed (Collection of entity)
                     {
                         "GET", "RoutingCustomers(10)/Default.CollectionEntityTypeFunction(products=@p)" +
-                               "?@p=[{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
-                               "{\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.SpecialProduct\",\"ID\":9,\"Name\":\"Phone\",\"Value\":9}]",
+                               "?@p=[{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"ID\":9,\"Name\":\"Phone\"}," +
+                               "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.SpecialProduct\",\"ID\":9,\"Name\":\"Phone\",\"Value\":9}]",
                         "CollectionEntityTypeFunction(products={2})"
                     },
                 };
@@ -367,7 +367,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         [Theory]
         [InlineData("CollectionOfPrimitiveTypeFunction(intValues=@p)?@p=[1,2,4,7,8")] // missing "]"
         [InlineData("CanMoveToAddress(address=@p)?@p={\"@odata.")] // not valid complex payload
-        [InlineData("EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.Test.AspNet.OData.Routing.Product\",\"id\":9,\"Name\":\"Phone\"}")] // should be "ID"
+        [InlineData("EntityTypeFunction(product=@p)?@p={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Product\",\"id\":9,\"Name\":\"Phone\"}")] // should be "ID"
         public async Task RoutesIncorrectly_ForBadFunctionParameters(string uri)
         {
             // Arrange & Act
@@ -465,7 +465,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         }
 
         [Theory]
-        [InlineData("EnumCustomers?$filter=Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Unknown' eq null", "The string 'Microsoft.Test.AspNet.OData.Builder.TestModels.Color'Unknown'' is not a valid enumeration type constant.")]
+        [InlineData("EnumCustomers?$filter=Microsoft.AspNet.OData.Test.Builder.TestModels.Color'Unknown' eq null", "The string 'Microsoft.AspNet.OData.Test.Builder.TestModels.Color'Unknown'' is not a valid enumeration type constant.")]
         [InlineData("EnumCustomers?$filter=geo.length(null) eq null", "Unknown function 'geo.length'.")]
         [InlineData("EnumCustomers?$filter=Default.OverloadUnboundFunction() eq null", "Unknown function 'Default.OverloadUnboundFunction'.")]
         public async Task BadQueryString_ReturnsBadRequest(string uri, string expectedError)
@@ -619,8 +619,8 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
         // Writing this function here is used as guard. In the model, we doesn't define GetOrdersCount(int factor)
         // function on VIP entity type. So, the following two requests:
-        // ~/RoutingCustomers(7)/Microsoft.Test.AspNet.OData.Routing.VIP/GetOrdersCount(factor=2)
-        // ~/RoutingCustomers(9)/Microsoft.Test.AspNet.OData.Routing.SpecialVIP/GetOrdersCount(factor=5)
+        // ~/RoutingCustomers(7)/Microsoft.AspNet.OData.Test.Routing.VIP/GetOrdersCount(factor=2)
+        // ~/RoutingCustomers(9)/Microsoft.AspNet.OData.Test.Routing.SpecialVIP/GetOrdersCount(factor=5)
         // will never be routed into this function. Otherwise, it routes to the above function as
         // public string GetOrdersCount(int key, int factor)
         public string GetOrdersCountOnVIP(int key, int factor)

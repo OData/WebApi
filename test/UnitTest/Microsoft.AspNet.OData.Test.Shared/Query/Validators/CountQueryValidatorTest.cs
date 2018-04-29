@@ -3,17 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData.Edm;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Common.Types;
 using Xunit;
 
-namespace Microsoft.Test.AspNet.OData.Query.Validators
+namespace Microsoft.AspNet.OData.Test.Query.Validators
 {
     public class CountQueryValidatorTest
     {

@@ -10,9 +10,9 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
@@ -27,15 +27,15 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
 #endif
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public class DateAndTimeOfDayTest
     {

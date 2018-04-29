@@ -4,13 +4,14 @@
 using System.Net.Http;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Common;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Routing.Conventions
+namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 {
     public class EntitySetRoutingConventionTest
     {

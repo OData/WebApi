@@ -5,12 +5,13 @@ using System;
 using System.Diagnostics.Contracts;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Template;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData
+namespace Microsoft.AspNet.OData.Test
 {
     public static class ODataPathHandlerExtensions
     {

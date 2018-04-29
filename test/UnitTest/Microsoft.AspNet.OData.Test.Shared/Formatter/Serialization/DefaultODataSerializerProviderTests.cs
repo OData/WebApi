@@ -4,22 +4,22 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Extensions;
+using Microsoft.AspNet.OData.Test.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Common;
-using Microsoft.Test.AspNet.OData.Extensions;
-using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
-using Microsoft.Test.AspNet.OData.Routing;
 using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Formatter.Serialization
+namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 {
     public class DefaultODataSerializerProviderTests
     {

@@ -8,14 +8,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Xml;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Formatter.Deserialization;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
-using Microsoft.Test.AspNet.OData.Formatter.Deserialization;
 
-namespace Microsoft.Test.AspNet.OData.Common
+namespace Microsoft.AspNet.OData.Test.Common
 {
     internal static class EdmTestHelpers
     {

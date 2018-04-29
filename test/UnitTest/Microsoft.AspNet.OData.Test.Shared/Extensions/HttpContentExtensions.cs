@@ -4,7 +4,6 @@
 #if NETCORE
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.Test.AspNet.OData.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 #else
@@ -12,7 +11,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Extensions
+namespace Microsoft.AspNet.OData.Test.Extensions
 {
     /// <summary>
     /// Extensions for HttpContent.

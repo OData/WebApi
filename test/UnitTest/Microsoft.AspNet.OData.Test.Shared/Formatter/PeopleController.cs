@@ -5,19 +5,17 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
-using Microsoft.Test.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Extensions;
 #else
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.AspNet.OData.Builder.TestModels;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 #endif
 
-namespace Microsoft.Test.AspNet.OData.Formatter
+namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class PeopleController : ODataController
     {

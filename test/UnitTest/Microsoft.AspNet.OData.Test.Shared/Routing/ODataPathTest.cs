@@ -7,7 +7,7 @@ using Microsoft.OData.UriParser;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
-namespace Microsoft.Test.AspNet.OData.Routing
+namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataPathTest
     {

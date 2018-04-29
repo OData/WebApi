@@ -4,11 +4,11 @@
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Microsoft.AspNet.OData.Test.Abstraction;
-using Microsoft.AspNet.OData.Test.Routing;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 

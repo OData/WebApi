@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData.Edm;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test

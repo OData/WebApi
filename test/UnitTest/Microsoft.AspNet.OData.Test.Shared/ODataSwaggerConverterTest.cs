@@ -2,8 +2,8 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData.Test.Abstraction;
-using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
 

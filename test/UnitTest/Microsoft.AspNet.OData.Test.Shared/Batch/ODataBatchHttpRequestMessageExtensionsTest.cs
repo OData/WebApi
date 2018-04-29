@@ -8,9 +8,9 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;
-using Microsoft.OData;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Batch

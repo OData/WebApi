@@ -9,8 +9,8 @@ using System.Data.Linq;
 using System.Linq;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Query;
-using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Test.Common.Types;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {

@@ -27,12 +27,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             // Create an application part manager with both the product and test assemblies.
             ApplicationPartManager applicationPartManager = new ApplicationPartManager();
             applicationPartManager.ApplicationParts.Add(new AssemblyPart(typeof(ODataConventionModelBuilder).Assembly));
-
-            // Make sure call Create() method from "Microsoft.Test.AspNet{Core}.OData"
-            Assembly assembly = Assembly.GetCallingAssembly();
-            Debug.Assert(assembly.FullName.Contains("Microsoft.Test.AspNet.OData") ||
-                assembly.FullName.Contains("Microsoft.Test.AspNetCore.OData"));
-            applicationPartManager.ApplicationParts.Add(new AssemblyPart(assembly));
+            applicationPartManager.ApplicationParts.Add(new AssemblyPart(typeof(ODataConventionModelBuilderFactory).Assembly));
 
             // Also, a few tests are built on CultureInfo so include it as well.
             applicationPartManager.ApplicationParts.Add(new AssemblyPart(typeof(CultureInfo).Assembly));

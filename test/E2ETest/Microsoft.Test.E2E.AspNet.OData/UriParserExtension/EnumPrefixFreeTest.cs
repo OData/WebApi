@@ -35,7 +35,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
                     builder.AddService(ServiceLifetime.Singleton, sp => UriParserExtenstionEdmModel.GetEdmModel(configuration))
                         .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
                             ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", configuration))
-                        .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new StringAsEnumResolver()));
+                        .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp =>
+                                                new StringAsEnumResolver() { EnableCaseInsensitive = true }));
 
             configuration.EnsureInitialized();
         }
@@ -44,10 +45,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
         {
             get
             {
+                // Create data with case insensitive parameter name and case insensitive enum value.
+                // Enum type prefix, if present, is still required to be case sensitive since it is type-related.
                 return new TheoryDataSet<string, string, int>()
                 {
-                    { "gender=Microsoft.Test.E2E.AspNet.OData.UriParserExtension.Gender'Male'", "gender='Male'", (int)HttpStatusCode.OK },
-                    { "gender=Microsoft.Test.E2E.AspNet.OData.UriParserExtension.Gender'UnknownValue'", "gender='UnknownValue'", (int)HttpStatusCode.NotFound },
+                    { "gEnDeR=Microsoft.Test.E2E.AspNet.OData.UriParserExtension.Gender'mAlE'", "GeNdEr='MaLe'", (int)HttpStatusCode.OK },
+                    { "GeNdEr=Microsoft.Test.E2E.AspNet.OData.UriParserExtension.Gender'UnknownValue'", "gEnDeR='UnknownValue'", (int)HttpStatusCode.NotFound },
                 };
             }
         }

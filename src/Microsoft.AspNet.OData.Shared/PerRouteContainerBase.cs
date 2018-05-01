@@ -4,6 +4,7 @@
 using System;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
 {
@@ -139,6 +140,13 @@ namespace Microsoft.AspNet.OData
             }
 
             builder.AddDefaultODataServices();
+
+            // Set Uri resolver to by default enabling unqualified functions/actions and case insensitive match.
+            builder.AddService(
+                ServiceLifetime.Singleton,
+                typeof(ODataUriResolver),
+                sp => new UnqualifiedODataUriResolver { EnableCaseInsensitive = true });
+
             return builder;
         }
     }

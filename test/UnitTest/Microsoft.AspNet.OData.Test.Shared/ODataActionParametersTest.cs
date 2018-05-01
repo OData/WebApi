@@ -11,6 +11,8 @@ using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -45,16 +47,18 @@ namespace Microsoft.AspNet.OData.Test
         [InlineData("Vehicles(Model=6,Name='6')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/Drive")]
         [InlineData("MyVehicle/Drive")]
         [InlineData("MyVehicle/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/Drive")]
-        public void ParseAsUnresolvedPathSegment_UnqualifiedBoundAction(string url)
+        public void CanParse_UnqualifiedBoundAction(string url)
         {
             // Arrange
             IEdmModel model = GetModel();
 
             // Act & Assert
-            UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
+            OperationSegment operationSegment = Assert.IsType<OperationSegment>(
                 new DefaultODataPathHandler().Parse(model, _serviceRoot, url).Segments.Last());
-            Assert.Equal("Drive", unresolvedPathSegment.SegmentValue);
+            Assert.Single(operationSegment.Operations);
+            Assert.Equal("Drive", operationSegment.Operations.First().Name);
         }
+
 
         [Theory]
         [InlineData("Vehicles(Model=8,Name='8')/Microsoft.AspNet.OData.Test.Builder.TestModels.Car/org.odata.Wash")]

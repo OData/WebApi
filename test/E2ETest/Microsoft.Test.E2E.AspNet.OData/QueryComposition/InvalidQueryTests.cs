@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
@@ -39,18 +40,46 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
         [Theory]
-        [InlineData("/odata/InvalidQueryCustomers?$filter=id eq 5")]
-        [InlineData("/odata/InvalidQueryCustomers(5)?$filter=id eq 5")]
-        [InlineData("/odata/InvalidQueryCustomers?$orderby=id")]
-        [InlineData("/odata/InvalidQueryCustomers(5)?$orderby=id asc")]
-        [InlineData("/odata/InvalidQueryCustomers?$orderby=id desc")]
+        [InlineData("/odata/InvalidQueryCustomers?$filter=xxid eq 5")]
+        [InlineData("/odata/InvalidQueryCustomers(5)?$filter=xxid eq 5")]
+        [InlineData("/odata/InvalidQueryCustomers?$orderby=xxid")]
+        [InlineData("/odata/InvalidQueryCustomers(5)?$orderby=xxid asc")]
+        [InlineData("/odata/InvalidQueryCustomers?$orderby=xxid desc")]
         public async Task ParseErrorsProduceMeaningfulMessages(string query)
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
             HttpResponseMessage response = await Client.SendAsync(request);
             dynamic error = JObject.Parse(await response.Content.ReadAsStringAsync());
-            Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'id' on type 'Microsoft.Test.E2E.AspNet.OData.QueryComposition.InvalidQueryCustomer'.",
+            Assert.Equal("The query specified in the URI is not valid. Could not find a property named 'xxid' on type 'Microsoft.Test.E2E.AspNet.OData.QueryComposition.InvalidQueryCustomer'.",
                          (string)error["error"]["message"]);
+        }
+
+        [Theory]
+        [InlineData("/odata/InvalidQueryCustomers(5)?$filter=id eq 5")]
+        [InlineData("/odata/InvalidQueryCustomers(5)?$orderby=id asc")]
+        public async Task ShouldThrow_CollectionRequiredForLastSegment(string query)
+        {
+            // Default ODataUriResolver with EnableCaseSensitive = true should be able parse the property 'id'
+            // to valid edm property named 'Id'.
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = await Client.SendAsync(request);
+            dynamic error = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.Equal("The query specified in the URI is not valid. The requested resource is not a collection. Query options $filter, $orderby, $count, $skip, and $top can be applied only on collections.",
+                         (string)error["error"]["message"]);
+        }
+
+        [Theory]
+        [InlineData("/odata/InvalidQueryCustomers?$filter=id eq 5")]
+        [InlineData("/odata/InvalidQueryCustomers?$orderby=id")]
+        [InlineData("/odata/InvalidQueryCustomers?$orderby=id desc")]
+        public async Task ShouldWork_ParserEnableCaseInsensitiveByDefault(string query)
+        {
+            // Default ODataUriResolver with EnableCaseSensitive = true should be able to resolve name 'id'
+            // to valid edm property named 'Id'.
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + query);
+            HttpResponseMessage response = await Client.SendAsync(request);
+            JObject jsonRsp = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(jsonRsp["value"]);
         }
     }
 
@@ -72,6 +101,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     public class InvalidQueryCustomer
     {
         public int Id { get; set; }
+
         public string Name { get; set; }
     }
 }

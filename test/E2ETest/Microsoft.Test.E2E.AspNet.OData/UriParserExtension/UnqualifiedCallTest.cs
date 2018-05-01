@@ -32,10 +32,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
 
             configuration.MapODataServiceRoute("odata", "odata",
                 builder =>
-                    builder.AddService(ServiceLifetime.Singleton, sp => UriParserExtenstionEdmModel.GetEdmModel(configuration))
+                    builder.AddService(ServiceLifetime.Singleton,
+                        sp => UriParserExtenstionEdmModel.GetEdmModel(configuration))
                         .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
-                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", configuration))
-                        .AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new UnqualifiedODataUriResolver()));
+                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("odata", configuration)));
 
             configuration.EnsureInitialized();
         }
@@ -52,27 +52,63 @@ namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
             }
         }
 
+        public static TheoryDataSet<string, string, string> UnqualifiedCallAndCaseInsensitiveCases
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>()
+                {
+                    { "Get", "Customers(1)/Default.CalculateSalary(month=2)", "CuStOmErS(1)/CaLcUlAtESaLaRy(MONTH=2)" },
+                    { "Post", "Customers(1)/Default.UpdateAddress()", "cUsToMeRs(1)/upDaTeAdDrEsS()" },
+                };
+            }
+        }
+
         [Theory]
         [MemberData(nameof(UnqualifiedCallCases))]
-        public async Task EnableUnqualifiedCallTest(string method, string caseSensitive, string caseInsensitive)
+        public async Task EnableUnqualifiedCallTest(string method, string qualifiedFunction, string unqualifiedFunction)
         {
             // Case sensitive
-            var caseSensitiveUri = string.Format("{0}/odata/{1}", this.BaseAddress, caseSensitive);
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), caseSensitiveUri);
+            var qualifiedFunctionUri = string.Format("{0}/odata/{1}", this.BaseAddress, qualifiedFunction);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), qualifiedFunctionUri);
             HttpResponseMessage response = await Client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            string caseSensitiveResponse = await response.Content.ReadAsStringAsync();
+            string qualifiedFunctionResponse = await response.Content.ReadAsStringAsync();
 
             // Case Insensitive
-            var caseInsensitiveUri = string.Format("{0}/odata/{1}", this.BaseAddress, caseInsensitive);
-            request = new HttpRequestMessage(new HttpMethod(method), caseInsensitiveUri);
+            var unqualifiedFunctionUri = string.Format("{0}/odata/{1}", this.BaseAddress, unqualifiedFunction);
+            request = new HttpRequestMessage(new HttpMethod(method), unqualifiedFunctionUri);
             response = await Client.SendAsync(request);
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            string caseInsensitiveResponse = await response.Content.ReadAsStringAsync();
+            string unqualifiedFunctionResponse = await response.Content.ReadAsStringAsync();
 
-            Assert.Equal(caseSensitiveResponse, caseInsensitiveResponse);
+            Assert.Equal(qualifiedFunctionResponse, unqualifiedFunctionResponse);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnqualifiedCallAndCaseInsensitiveCases))]
+        public async Task EnableUnqualifiedCallAndCaseInsensitiveTest(string method, string qualifiedSensitiveFunction,
+            string unqualifiedInsensitiveFunction)
+        {
+            // Case sensitive
+            var qualifiedSensitiveFunctionUri = string.Format("{0}/odata/{1}", this.BaseAddress, qualifiedSensitiveFunction);
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), qualifiedSensitiveFunctionUri);
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            string qualifiedSensitiveFunctionResponse = await response.Content.ReadAsStringAsync();
+
+            // Case Insensitive
+            var unqualifiedInsensitiveFunctionUri = string.Format("{0}/odata/{1}", this.BaseAddress, unqualifiedInsensitiveFunction);
+            request = new HttpRequestMessage(new HttpMethod(method), unqualifiedInsensitiveFunctionUri);
+            response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            string unqualifiedInsensitiveFunctionResponse = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(qualifiedSensitiveFunctionResponse, unqualifiedInsensitiveFunctionResponse);
         }
     }
 }

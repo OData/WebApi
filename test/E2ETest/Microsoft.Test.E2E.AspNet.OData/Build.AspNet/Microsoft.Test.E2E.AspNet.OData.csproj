@@ -1800,6 +1800,9 @@
     <Compile Include="..\UriParserExtension\UnqualifiedCallTest.cs">
       <Link>UriParserExtension\UnqualifiedCallTest.cs</Link>
     </Compile>
+    <Compile Include="..\UriParserExtension\UriResolverDependencyTestWithOldDefaultConfig.cs">
+      <Link>UriParserExtension\UriResolverDependencyTestWithOldDefaultConfig.cs</Link>
+    </Compile>    
     <Compile Include="..\UriParserExtension\UriParserExtensionDataModel.cs">
       <Link>UriParserExtension\UriParserExtensionDataModel.cs</Link>
     </Compile>

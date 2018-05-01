@@ -36,7 +36,18 @@ namespace AspNetCoreODataSample.Web
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc(builder => builder.MapODataServiceRoute("odata", "odata", EdmModelBuilder.GetEdmModel()));
+            var model = EdmModelBuilder.GetEdmModel();
+
+            app.UseMvc(builder =>
+            {
+                builder.Select().Expand().Filter().OrderBy().MaxTop(100).Count();
+
+                builder.MapODataServiceRoute("odata1", "efcore", model);
+
+                builder.MapODataServiceRoute("odata2", "inmem", model);
+
+                builder.MapODataServiceRoute("odata3", "composite", EdmModelBuilder.GetCompositeModel());
+            });
         }
     }
 }

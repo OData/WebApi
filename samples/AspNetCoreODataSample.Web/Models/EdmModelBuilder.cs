@@ -21,5 +21,14 @@ namespace AspNetCoreODataSample.Web.Models
 
             return _edmModel;
         }
+
+        public static IEdmModel GetCompositeModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Person>("People");
+            var type = builder.EntitySet<Person>("Person").EntityType;
+            type.HasKey(x => new { x.FirstName, x.LastName });
+            return builder.GetEdmModel();
+        }
     }
 }

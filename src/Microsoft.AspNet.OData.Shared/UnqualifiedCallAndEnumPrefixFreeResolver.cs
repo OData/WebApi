@@ -34,6 +34,12 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc/>
+        public override IEnumerable<IEdmOperation> ResolveUnboundOperations(IEdmModel model, string identifier)
+        {
+            return _unqualified.ResolveUnboundOperations(model, identifier);
+        }
+
+        /// <inheritdoc/>
         public override IEnumerable<IEdmOperation> ResolveBoundOperations(IEdmModel model, string identifier,
             IEdmType bindingType)
         {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -27,7 +28,16 @@ namespace Microsoft.AspNet.OData.Test
             }
             else
             {
-                action = b => b.AddService(ServiceLifetime.Singleton, sp => model);
+                // By default, create the Uri resolver for unqualified functions & actions,
+                // and existing handling of namespace-qualified functions & actions is still preserved.
+                action = b => b.AddService(ServiceLifetime.Singleton, sp => model)
+                    .AddService(
+                        ServiceLifetime.Singleton,
+                        typeof(ODataUriResolver),
+                        sp => new UnqualifiedCallAndEnumPrefixFreeResolver
+                        {
+                            EnableCaseInsensitive = false
+                        });
             }
 
             return handler.Parse(serviceRoot, odataPath, new MockContainer(action));

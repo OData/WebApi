@@ -165,7 +165,7 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         private static object ConvertCollection(ODataCollectionValue collectionValue,
-            IEdmTypeReference edmTypeReference, Type clrType, string parameterName, 
+            IEdmTypeReference edmTypeReference, Type clrType, string parameterName,
             ODataDeserializerContext readContext, IServiceProvider requestContainer)
         {
             Contract.Assert(collectionValue != null);

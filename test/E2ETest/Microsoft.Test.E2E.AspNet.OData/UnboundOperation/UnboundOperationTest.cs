@@ -34,8 +34,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            var controllers = new[] { 
-                typeof(ConventionCustomersController), 
+            var controllers = new[] {
+                typeof(ConventionCustomersController),
                 typeof(MetadataController) };
 
             configuration.AddControllers(controllers);
@@ -322,33 +322,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
-        [Fact]
-        public async Task FunctionImportInFilter()
-        {
-            // Arrange
-            const int CustomerId = 407;
-            ConventionCustomer expectCustomer = (new ConventionCustomersController().GetConventionCustomerById(CustomerId)); // expect customer instance
-            Assert.NotNull(expectCustomer);
-
-            // Make sure the function import can be called successfully by following root.
-            var requestFunction = this.BaseAddress + "/odata/GetConventionCustomerNameByIdImport(CustomerId=" + CustomerId + ")";
-            using (var httpResponseMessage = await Client.GetAsync(requestFunction))
-            {
-                string responseString = await httpResponseMessage.Content.ReadAsStringAsync();
-                Assert.Contains("Name 7", responseString);
-            }
-
-            var requestInFilter = this.BaseAddress + "/odata/ConventionCustomers?$filter=GetConventionCustomerNameByIdImport(CustomerId=" + CustomerId + ") eq 'Name 7'";
-            using (var response = await Client.GetAsync(requestInFilter))
-            {
-                Assert.Equal((HttpStatusCode)400, response.StatusCode);
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var errorMessage = json["error"]["message"].ToString();
-                const string expect = "The query specified in the URI is not valid. An unknown function with name 'GetConventionCustomerNameByIdImport' was found. This may also be a function import or a key lookup on a navigation property, which is not allowed.";
-                Assert.Equal(expect, errorMessage);
-            }
-        }
+        // Re-enable this test after ODL issue is fixed.
+        // See ODL issue: https://github.com/OData/odata.net/issues/1155
+        // In ODL, e2e test ExceptionSholdThrowForFunctionImport_EnableCaseInsensitive has been added to cover similar
+        // scenario on ODL layer.
+        //[Fact]
+//        public async Task FunctionImportInFilter()
+//        {
+//            // Arrange
+//            const int CustomerId = 407;
+//            ConventionCustomer expectCustomer = (new ConventionCustomersController().GetConventionCustomerById(CustomerId)); // expect customer instance
+//            Assert.NotNull(expectCustomer);
+//
+//            // Make sure the function import can be called successfully by following root.
+//            var requestFunction = this.BaseAddress + "/odata/GetConventionCustomerNameByIdImport(CustomerId=" + CustomerId + ")";
+//            using (var httpResponseMessage = await Client.GetAsync(requestFunction))
+//            {
+//                string responseString = await httpResponseMessage.Content.ReadAsStringAsync();
+//                Assert.Contains("Name 7", responseString);
+//            }
+//
+//            var requestInFilter = this.BaseAddress + "/odata/ConventionCustomers?$filter=GetConventionCustomerNameByIdImport(CustomerId=" + CustomerId + ") eq 'Name 7'";
+//            using (var response = await Client.GetAsync(requestInFilter))
+//            {
+//                Assert.Equal((HttpStatusCode)400, response.StatusCode);
+//
+//                var json = await response.Content.ReadAsObject<JObject>();
+//                var errorMessage = json["error"]["message"].ToString();
+//                const string expect = "The query specified in the URI is not valid. An unknown function with name 'GetConventionCustomerNameByIdImport' was found. This may also be a function import or a key lookup on a navigation property, which is not allowed.";
+//                Assert.Equal(expect, errorMessage);
+//            }
+//        }
 
         [Fact]
         public async Task UnboundFunction_WithPrimitiveEnumComplexEntity_AndCollectionOfThemParameters()

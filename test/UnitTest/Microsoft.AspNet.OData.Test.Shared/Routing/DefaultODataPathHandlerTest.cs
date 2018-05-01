@@ -883,11 +883,27 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
         [Theory]
         [InlineData("RoutingCustomers(1)/GetRelatedRoutingCustomers", "GetRelatedRoutingCustomers")]
-        [InlineData("RoutingCustomers(2)/Microsoft.AspNet.OData.Test.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
         [InlineData("Products(7)/TopProductId", "TopProductId")]
         [InlineData("Products(7)/Microsoft.AspNet.OData.Test.Routing.ImportantProduct/TopProductId", "TopProductId")]
-        public void ParseAsUnresolvedPathSegment_UnqualifiedOperationPath(string odataPath, string unresolveValue)
+        public void ParseAsValidPathSegment_UnqualifiedOperationPath(string odataPath, string expectedOperationName)
         {
+            // With Microsoft.OData.Core.UnqualifiedODataUriResolver as default dependency injection in WebAPI,
+            // Unqualified functions & actions should be resolved successfully.
+
+            // Arrange & Act & Assert
+            OperationSegment validPathSegment = Assert.IsType<OperationSegment>(
+                _parser.Parse(_model, _serviceRoot, odataPath).Segments.Last());
+            Assert.Single(validPathSegment.Operations);
+            Assert.Equal(expectedOperationName, validPathSegment.Operations.First().Name);
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers(2)/Microsoft.AspNet.OData.Test.Routing.VIP/GetMostProfitable", "GetMostProfitable")]
+        public void ParseAsUnresolvedPathSegment_UnqualifiedOperationPathWithIncorrectBindingType(string odataPath, string unresolveValue)
+        {
+            // Verify that unqualified function bound to wrong type cannot be resolved.
+            // The 'GetMostProfitable' function should be bound to EntityType<VIP>().Collection, not EntityType<VIP>.
+
             // Arrange & Act & Assert
             UnresolvedPathSegment unresolvedPathSegment = Assert.IsType<UnresolvedPathSegment>(
                 _parser.Parse(_model, _serviceRoot, odataPath).Segments.Last());
@@ -899,8 +915,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             // Arrange & Act & Assert
             ExceptionAssert.Throws<ODataException>(
-                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers(1)/GetRelatedRoutingCustomers/Segment"),
-                "The URI segment 'Segment' is invalid after the segment 'GetRelatedRoutingCustomers'.");
+                () => _parser.Parse(_model, _serviceRoot, _serviceRoot + "RoutingCustomers(1)/InvalidFunctionName/Segment"),
+                "The URI segment 'Segment' is invalid after the segment 'InvalidFunctionName'.");
         }
 
         [Fact]
@@ -1046,6 +1062,60 @@ namespace Microsoft.AspNet.OData.Test.Routing
             // Arrange & Act & Assert
             ODataPath odataPath = _parser.Parse(_model, _serviceRoot, _serviceRoot + uri);
             Assert.Equal(2, odataPath.Segments.Count);
+        }
+
+        [Theory]
+        [InlineData("RoutingCustomers/FunctionBoundToRoutingCustomers()", "FunctionBoundToRoutingCustomers")]
+        [InlineData("RoutingCustomers/Default.FunctionBoundToRoutingCustomers()", "Default.FunctionBoundToRoutingCustomers")]
+        public void CanParseBothUnQualifiedAndQualifiedOperationByDefault(string uri, string expectedIdentifier)
+        {
+            // Arrange & Act & Assert
+            ODataPath odataPath = _parser.Parse(_model, _serviceRoot, _serviceRoot + uri);
+            Assert.Equal(2, odataPath.Segments.Count);
+
+            ODataPathSegment firstSegment = odataPath.Segments.First(), secondSegment = odataPath.Segments.Last();
+            Assert.True(
+                firstSegment is EntitySetSegment &&
+                firstSegment.Identifier.Equals("RoutingCustomers", StringComparison.Ordinal));
+            Assert.True(
+                secondSegment is OperationSegment &&
+                secondSegment.Identifier.Equals(expectedIdentifier, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void CanParseQualified_WhenRestoreOldDefaultUriResolver()
+        {
+            // Arrange & Act & Assert
+            // Restore to the old default value (an ODataUriResolver instance), and verify the old behavior is restored.
+            string uri = "RoutingCustomers/Default.FunctionBoundToRoutingCustomers()";
+            string expectedIdentifier = "Default.FunctionBoundToRoutingCustomers";
+
+            ODataUriResolver oldResolver = new ODataUriResolver();
+            DefaultODataPathHandler parserUsingOldDefaultResolver = new DefaultODataPathHandler();
+            ODataPath odataPath = parserUsingOldDefaultResolver.Parse(_model, _serviceRoot, _serviceRoot + uri, oldResolver);
+
+            Assert.Equal(2, odataPath.Segments.Count);
+
+            ODataPathSegment firstSegment = odataPath.Segments.First(), secondSegment = odataPath.Segments.Last();
+            Assert.True(
+                firstSegment is EntitySetSegment &&
+                firstSegment.Identifier.Equals("RoutingCustomers", StringComparison.Ordinal));
+            Assert.True(
+                secondSegment is OperationSegment &&
+                secondSegment.Identifier.Equals(expectedIdentifier, StringComparison.Ordinal));
+        }
+
+        [Fact]
+        public void CannotParseUnQualified_WhenRestoreToOldDefaultUriResolver()
+        {
+            // Arrange & Act & Assert
+            // Restore to the old default value (an ODataUriResolver instance), and verify the old behavior is restored.
+            string uri = "RoutingCustomers/FunctionBoundToRoutingCustomers()";
+            ODataUriResolver oldResolver = new ODataUriResolver();
+            DefaultODataPathHandler parserUsingOldDefaultResolver = new DefaultODataPathHandler();
+            ExceptionAssert.Throws<ODataException>(
+                () => parserUsingOldDefaultResolver.Parse(_model, _serviceRoot, _serviceRoot + uri, oldResolver),
+                "Bad Request - Error in query syntax.");
         }
 
         [Fact]
@@ -1772,7 +1842,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("CustomersWithMultiKeys(Key1=1)")]
         [InlineData("CustomersWithMultiKeys(Key2=2)")]
         [InlineData("CustomersWithMultiKeys(Key3=3)")]
-        [InlineData("CustomersWithMultiKeys(Key1=1,Key2=2,Key3=3)")]
+        // Update cases in this test after ODL isuse is resolved: https://github.com/OData/odata.net/issues/1153.
+        //        [InlineData("CustomersWithMultiKeys(Key1=1,Key2=2,Key3=3)")]
         public void CannotParse_UnmatchedCountOfKeys(string path)
         {
             // Arrange
@@ -1786,7 +1857,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model.Model, _serviceRoot, path),
-                "The number of keys specified in the URI does not match number of key properties for the resource 'NS.CustomerWithMultiKeys'.");
+                "Bad Request - Error in query syntax.");
         }
 
         [Theory]
@@ -2422,29 +2493,35 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
         [Theory]
         [MemberData(nameof(PrefixFreeEnumCases))]
-        public void PrefixFreeEnumValue_Throws_DefaultResolver(string path, string template, string expect)
+        public void PrefixFreeEnumValue_Works_DefaultResolver(string path, string template, string expect)
         {
             Assert.NotNull(template);
             Assert.NotNull(expect);
-            ExceptionAssert.Throws<ODataException>(
-                () => new DefaultODataPathHandler().Parse(_model, _serviceRoot, path));
+
+            ODataPath odataPath = _parser.Parse(_model, _serviceRoot, path);
+            Assert.NotNull(odataPath);
+            Assert.Equal(template, odataPath.PathTemplate);
+            Assert.Equal(expect, odataPath.ToString());
         }
 
         [Theory]
         [MemberData(nameof(PrefixFreeEnumCases))]
-        public void PrefixFreeEnumValue_Works_PrefixFreeResolver(string path, string template, string expect)
+        public void PrefixFreeEnumValue_Works_PrefixFreeResolverAndDefaultResolver(string path, string template, string expect)
         {
-            // Arrange
+            // Arrange: try default and non-default Uri resolvers.
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            StringAsEnumResolver resolver = new StringAsEnumResolver();
+            ODataUriResolver[] resolvers = { new StringAsEnumResolver(), null};
 
             // Act
-            ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
+            foreach (ODataUriResolver resolver in resolvers)
+            {
+                ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
-            // Assert
-            Assert.NotNull(odataPath);
-            Assert.Equal(template, odataPath.PathTemplate);
-            Assert.Equal(expect, odataPath.ToString());
+                // Assert
+                Assert.NotNull(odataPath);
+                Assert.Equal(template, odataPath.PathTemplate);
+                Assert.Equal(expect, odataPath.ToString());
+            }
         }
 
         private static void AssertTypeMatchesExpectedTypeForSingleton(string odataPath, string expectedSingletonName, string expectedTypeName, bool isCollection)

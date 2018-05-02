@@ -188,18 +188,22 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets the OData query parameters from the query.
+        /// Gets the query parameters from the query with duplicated key ignored.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, string> ODataQueryParameters
+        public IDictionary<string, string> QueryParameters
         {
             get
             {
-                return this.innerRequest.Query
-                    .Where(kvp => kvp.Key.StartsWith("$", StringComparison.Ordinal) ||
-                        kvp.Key.StartsWith("@", StringComparison.Ordinal))
-                    .SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value))
-                    .ToDictionary(p => p.Key, p => p.Value);
+                IDictionary<string, string> result = new Dictionary<string, string>();
+                foreach (var pair in this.innerRequest.Query)
+                {
+                    if (!result.ContainsKey(pair.Key))
+                    {
+                        result.Add(pair.Key, pair.Value);
+                    }
+                }
+                return result;
             }
         }
 

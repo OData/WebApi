@@ -44,6 +44,8 @@ namespace Microsoft.AspNet.OData.Query
 
         private bool _etagIfNoneMatchChecked;
 
+        private bool _enableNoDollarSignQueryOptions = false;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -53,21 +55,29 @@ namespace Microsoft.AspNet.OData.Query
         {
             Contract.Assert(context != null);
 
+            ODataUriResolver uriResolver = context.RequestContainer.GetRequiredService<ODataUriResolver>();
+            if (uriResolver != null)
+            {
+                _enableNoDollarSignQueryOptions = uriResolver.EnableNoDollarQueryOptions;
+            }
+
             // Parse the query from request Uri, including only keys which are OData query parameters or parameter alias
+            // OData query parameters are normalized with the $-sign prefixes when the
+            // <code>EnableNoDollarSignPrefixSystemQueryOption</code> option is used.
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> queryParameters = GetODataQueryParameters();
+            IDictionary<string, string> normalizedqueryParameters = GetODataQueryParameters();
 
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                queryParameters);
+                normalizedqueryParameters);
 
             // Note: the context.RequestContainer must be set by the ODataQueryOptions constructor.
             Contract.Assert(context.RequestContainer != null);
             _queryOptionParser.Resolver = context.RequestContainer.GetRequiredService<ODataUriResolver>();
 
-            BuildQueryOptions(queryParameters);
+            BuildQueryOptions(normalizedqueryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }
@@ -133,23 +143,40 @@ namespace Microsoft.AspNet.OData.Query
         private IWebApiHeaders InternalHeaders { get; set; }
 
         /// <summary>
-        /// Check if the given query option is an OData system query option.
+        /// Check if the given query option is an OData system query option using $-prefix-required theme.
         /// </summary>
         /// <param name="queryOptionName">The name of the query option.</param>
         /// <returns>Returns <c>true</c> if the query option is an OData system query option.</returns>
         public static bool IsSystemQueryOption(string queryOptionName)
         {
-            return queryOptionName == "$orderby" ||
-                 queryOptionName == "$filter" ||
-                 queryOptionName == "$top" ||
-                 queryOptionName == "$skip" ||
-                 queryOptionName == "$count" ||
-                 queryOptionName == "$expand" ||
-                 queryOptionName == "$select" ||
-                 queryOptionName == "$format" ||
-                 queryOptionName == "$skiptoken" ||
-                 queryOptionName == "$deltatoken" ||
-                 queryOptionName == "$apply";
+            return IsSystemQueryOption(queryOptionName, false);
+        }
+
+        /// <summary>
+        /// Check if the given query option is an OData system query option.
+        /// </summary>
+        /// <param name="queryOptionName">The name of the query option.</param>
+        /// <param name="isDollarSignOptional">Whether the optional-$-prefix scheme is used for OData system query.</param>
+        /// <returns>Returns <c>true</c> if the query option is an OData system query option.</returns>
+        public static bool IsSystemQueryOption(string queryOptionName, bool isDollarSignOptional)
+        {
+            string fixedQueryOptionName = queryOptionName;
+            if (isDollarSignOptional && !queryOptionName.StartsWith("$", StringComparison.Ordinal))
+            {
+                fixedQueryOptionName = "$" + queryOptionName;
+            }
+
+            return fixedQueryOptionName.Equals("$orderby", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$filter", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$top", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$skip", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$count", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$expand", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$select", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$format", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$skiptoken", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$deltatoken", StringComparison.Ordinal) ||
+                 fixedQueryOptionName.Equals("$apply", StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -219,13 +246,17 @@ namespace Microsoft.AspNet.OData.Query
             Justification = "Need lower case string here.")]
         public bool IsSupportedQueryOption(string queryOptionName)
         {
-            if (!_queryOptionParser.Resolver.EnableCaseInsensitive)
+            ODataUriResolver resolver = _queryOptionParser != null
+                ? _queryOptionParser.Resolver
+                : Request.GetRequestContainer().GetRequiredService<ODataUriResolver>();
+
+            if (!resolver.EnableCaseInsensitive)
             {
-                return IsSystemQueryOption(queryOptionName);
+                return IsSystemQueryOption(queryOptionName, this._enableNoDollarSignQueryOptions);
             }
 
             string lowcaseQueryOptionName = queryOptionName.ToLowerInvariant();
-            return IsSystemQueryOption(lowcaseQueryOptionName);
+            return IsSystemQueryOption(lowcaseQueryOptionName, this._enableNoDollarSignQueryOptions);
         }
 
         /// <summary>
@@ -706,7 +737,38 @@ namespace Microsoft.AspNet.OData.Query
 
         private IDictionary<string, string> GetODataQueryParameters()
         {
-            return InternalRequest.ODataQueryParameters;
+            Dictionary<string, string> result = new Dictionary<string, string>();
+
+            foreach (KeyValuePair<string, string> kvp in InternalRequest.QueryParameters)
+            {
+                // Check supported system query options per $-sign-prefix option.
+                if (!_enableNoDollarSignQueryOptions)
+                {
+                    // This is the original case for required $-sign prefix.
+                    if (kvp.Key.StartsWith("$", StringComparison.Ordinal))
+                    {
+                        result.Add(kvp.Key, kvp.Value);
+                    }
+                }
+                else
+                {
+                    if (IsSupportedQueryOption(kvp.Key))
+                    {
+                        // Normalized the supported system query key by adding the $-prefix if needed.
+                        result.Add(
+                            !kvp.Key.StartsWith("$", StringComparison.Ordinal) ? "$" + kvp.Key : kvp.Key,
+                            kvp.Value);
+                    }
+                }
+
+                // check parameter alias
+                if (kvp.Key.StartsWith("@", StringComparison.Ordinal))
+                {
+                    result.Add(kvp.Key, kvp.Value);
+                }
+            }
+
+            return result;
         }
 
         private string GetAutoSelectRawValue()

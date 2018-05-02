@@ -138,6 +138,31 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal(2, count);
         }
 
+        [Theory]
+        [InlineData("?filter=id eq 33", true)]
+        [InlineData("?filter=Id eq 33", false)]
+        public async void QueryComposition_WorkAsExpect_ForOptionalDollarSignPrefixForSystemQuery(
+            string noDollarSignSystemQuery, bool enableCaseInsensitive)
+        {
+            // Arrange
+            ODataUriResolver resolver = new ODataUriResolver
+            {
+                EnableNoDollarQueryOptions = true,
+                EnableCaseInsensitive = enableCaseInsensitive
+
+            };
+            HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", true, resolver));
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            HttpResponseMessage response = await GetResponse(client, server.Configuration,
+                "http://localhost:8080/QueryCompositionCustomer" + noDollarSignSystemQuery);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("[{\"Name\":\"Highest\",\"Add", response.Content.ReadAsStringAsync().Result);
+        }
+
         [Fact]
         public async Task AnonymousTypes_Work_With_EnableQueryAttribute()
         {

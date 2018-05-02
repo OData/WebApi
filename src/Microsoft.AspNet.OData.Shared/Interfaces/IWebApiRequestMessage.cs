@@ -22,7 +22,7 @@ namespace Microsoft.AspNet.OData.Interfaces
     internal interface IWebApiRequestMessage
     {
         /// <summary>
-        /// Gets the contents of the HTTP message. 
+        /// Gets the contents of the HTTP message.
         /// </summary>
         IWebApiContext Context { get; }
 
@@ -98,7 +98,7 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Get the name value pairs from the query.
         /// </summary>
         /// <returns></returns>
-        IDictionary<string, string> ODataQueryParameters { get; }
+        IDictionary<string, string> QueryParameters { get; }
 
         /// <summary>
         /// Get the reader settings associated with the request.

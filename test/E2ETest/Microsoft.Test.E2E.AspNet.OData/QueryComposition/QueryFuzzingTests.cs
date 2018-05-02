@@ -119,6 +119,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                     // &$filter=(indexof(trim('stringLiternal'),%20tolower(toupper(StringProperty)))%20eq%20indexof('stringLiternal',%20tolower(ComplexTypeProperty/StringProperty)))
                     Assert.True(true);
                 }
+                else if (message.Contains("The query specified in the URI is not valid. "))
+                {
+                    // There are cases that duplicated query options can lead to message indicating invalid URI. For example:
+                    // $filter=(ComplexTypeProperty/DateTimeOffsetProperty le SingleNavigationProperty/SingleNavigationProperty/DateTimeOffsetProperty)
+                    // &$filter=(floor(round(123.123M) sub DecimalProperty mul DecimalProperty add DecimalProperty) le round(DecimalProperty) add 123.123M sub SingleNavigationProperty/DecimalProperty div ComplexTypeProperty/DecimalProperty sub DecimalProperty)"
+                    Assert.True(true);
+                }
                 else
                 {
                     Assert.False(true);

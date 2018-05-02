@@ -73,6 +73,36 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(expectedContainingPath, uri.ToString());
         }
 
+        [Theory]
+        // No $-prefix query options
+        [InlineData("People(123)?expand=MyPermanentAccount(select=Id,MyPaymentInstruments)")]
+        // Mixed $-prefix query options
+        [InlineData("People(123)?$expand=MyPermanentAccount(select=Id,MyPaymentInstruments)")]
+        // $-prefix query options; key as segment in path
+        [InlineData("People/123?$expand=MyPermanentAccount($select=Id,MyPaymentInstruments)")]
+        public void TryEnableNoDollarSignSystemQueryOption(string relativeUri)
+        {
+            // Create parser specifying optional-$-sign setting.
+            var parser = new ODataUriParser(GetModel(), new Uri(relativeUri, UriKind.Relative))
+            {
+                EnableNoDollarQueryOptions = true
+            };
+
+            // Verify path is parsed correctly.
+            Microsoft.OData.UriParser.ODataPath path = parser.ParsePath();
+            Assert.NotNull(path);
+            Assert.Equal(2, path.Count);
+
+            // Verify expand & select clause is parsed correctly.
+            SelectExpandClause result = parser.ParseSelectAndExpand();
+            Assert.NotNull(result);
+            Assert.Single(result.SelectedItems);
+            ExpandedNavigationSelectItem selectItems = (result.SelectedItems.First() as ExpandedNavigationSelectItem);
+            Assert.NotNull(selectItems);
+            Assert.Equal("PermanentAccount", selectItems.NavigationSource.Name);
+            Assert.Equal(2, selectItems.SelectAndExpand.SelectedItems.Count());
+        }
+
         private IEdmModel GetModel()
         {
             if (_model != null)

@@ -45,10 +45,17 @@ namespace Microsoft.AspNet.OData.Query
             context.RequestContainer = request.GetRequestContainer();
 
             Context = context;
+            Request = request;
             InternalRequest = new WebApiRequestMessage(request);
             InternalHeaders = new WebApiRequestHeaders(request.Headers);
 
             Initialize(context);
         }
+
+        /// <summary>
+        /// Gets the request message associated with this instance.
+        /// </summary>
+        /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
+        public HttpRequest Request { get; private set; }
     }
 }

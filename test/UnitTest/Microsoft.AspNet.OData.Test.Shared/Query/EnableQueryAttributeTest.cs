@@ -345,7 +345,11 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Arrange
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?select");
-            request.EnableODataDependencyInjectionSupport();
+
+            // Enable DI with default resolver.
+            request.EnableODataDependencyInjectionSupport("default",
+                b => b.AddService(ServiceLifetime.Singleton, sp => new ODataUriResolver()));
+
             HttpControllerContext controllerContext = new HttpControllerContext(request.GetConfiguration(), new HttpRouteData(new HttpRoute()), request);
             HttpControllerDescriptor controllerDescriptor = new HttpControllerDescriptor(new HttpConfiguration(), "CustomerHighLevel", typeof(CustomerHighLevelController));
             HttpActionDescriptor actionDescriptor = new ReflectedHttpActionDescriptor(controllerDescriptor, typeof(CustomerHighLevelController).GetMethod("Get"));

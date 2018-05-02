@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets the contents of the HTTP message. 
+        /// Gets the contents of the HTTP message.
         /// </summary>
         public IWebApiContext Context { get; private set; }
 
@@ -180,17 +180,22 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets the OData query parameters from the query.
+        /// Gets the query parameters from the query with duplicated key ignored.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<string, string> ODataQueryParameters
+        public IDictionary<string, string> QueryParameters
         {
             get
             {
-                return this.innerRequest.GetQueryNameValuePairs()
-                    .Where(p => p.Key.StartsWith("$", StringComparison.Ordinal) ||
-                        p.Key.StartsWith("@", StringComparison.Ordinal))
-                    .ToDictionary(p => p.Key, p => p.Value);
+                IDictionary<string, string> result = new Dictionary<string, string>();
+                foreach (var pair in this.innerRequest.GetQueryNameValuePairs())
+                {
+                    if (!result.ContainsKey(pair.Key))
+                    {
+                        result.Add(pair.Key, pair.Value);
+                    }
+                }
+                return result;
             }
         }
 

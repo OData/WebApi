@@ -290,7 +290,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
                 "http://localhost/{0}({1}={2})",
                 action,
@@ -322,7 +322,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
                 "http://localhost/GetNullableFlagsEnum(flagsEnum={0})",
                 value == null ? "null" : Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
@@ -351,7 +351,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format(
                 "http://localhost/{0}({1}={2})",
                 action,
@@ -361,6 +361,34 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             // Assert
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public void DefaultODataPathHandler_WorksForODL74_IfContainsStringAsEnum()
+        {
+            // Arrange
+            string value = "First", action = "GetEnum", parameterName = "simpleEnum";
+            HttpConfiguration configuration = new HttpConfiguration();
+            configuration.Services.Replace(typeof(ModelBinderProvider), new ODataModelBinderProvider());
+            configuration.MapODataServiceRoute("odata", "", GetEdmModel());
+
+            var controllers = new[] { typeof(ODataModelBinderProviderTestODataController) };
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new MockAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            HttpServer server = new HttpServer(configuration);
+            HttpClient client = new HttpClient(server);
+
+            // Act
+            string url = String.Format(
+                "http://localhost/{0}({1}={2})",
+                action,
+                parameterName,
+                Uri.EscapeDataString(ConventionsHelpers.GetUriRepresentationForValue(value)));
+            HttpResponseMessage response = client.GetAsync(url).Result;
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
@@ -380,7 +408,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpServer server = new HttpServer(configuration);
             HttpClient client = new HttpClient(server);
 
-            // Act 
+            // Act
             string url = String.Format("http://localhost/{0}({1}=@p)?@p={2}", action, parameterName, parameterValue);
             HttpResponseMessage response = await client.GetAsync(url);
 

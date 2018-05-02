@@ -364,7 +364,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void DefaultODataPathHandler_WorksForODL74_IfContainsStringAsEnum()
+        public void DefaultODataPathHandler_IfContainsStringAsEnum()
         {
             // Arrange
             string value = "First", action = "GetEnum", parameterName = "simpleEnum";

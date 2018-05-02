@@ -65,19 +65,19 @@ namespace Microsoft.AspNet.OData.Query
             // OData query parameters are normalized with the $-sign prefixes when the
             // <code>EnableNoDollarSignPrefixSystemQueryOption</code> option is used.
             RawValues = new ODataRawQueryOptions();
-            IDictionary<string, string> normalizedqueryParameters = GetODataQueryParameters();
+            IDictionary<string, string> normalizedQueryParameters = GetODataQueryParameters();
 
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                normalizedqueryParameters);
+                normalizedQueryParameters);
 
             // Note: the context.RequestContainer must be set by the ODataQueryOptions constructor.
             Contract.Assert(context.RequestContainer != null);
             _queryOptionParser.Resolver = context.RequestContainer.GetRequiredService<ODataUriResolver>();
 
-            BuildQueryOptions(normalizedqueryParameters);
+            BuildQueryOptions(normalizedQueryParameters);
 
             Validator = ODataQueryValidator.GetODataQueryValidator(context);
         }

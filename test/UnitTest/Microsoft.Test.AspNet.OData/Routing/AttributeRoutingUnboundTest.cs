@@ -4,6 +4,7 @@
 #if NETCORE
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -320,7 +321,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
         public string EntityFunction([FromODataUri] ConventionOrder order)
         {
             Assert.NotNull(order);
-            return "" + order.Price;
+            return order.Price.ToString(CultureInfo.InvariantCulture);
         }
     }
 

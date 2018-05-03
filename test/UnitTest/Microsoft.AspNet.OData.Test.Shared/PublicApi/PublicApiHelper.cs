@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
             }
         }
 
-        public static void DumpPublicApi(params string[] assemblyNames)
+        public static void DumpPublicApi(StreamWriter streamWriter, params string[] assemblyNames)
         {
             IList<Assembly> assemblies = new List<Assembly>();
             for (int k = 0; k < assemblyNames.Length; ++k)
@@ -58,16 +58,16 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(@"Error loading types from assembly '{0}':", assemblyNames[k]);
-                    Console.WriteLine(e.ToString());
+                    streamWriter.WriteLine(@"Error loading types from assembly '{0}':", assemblyNames[k]);
+                    streamWriter.WriteLine(e.ToString());
                     Environment.Exit(1);
                 }
             }
 
-            DumpPublicApi(assemblies.ToArray());
+            DumpPublicApi(streamWriter, assemblies.ToArray());
         }
 
-        public static void DumpPublicApi(params Assembly[] assemblies)
+        public static void DumpPublicApi(StreamWriter streamWriter, params Assembly[] assemblies)
         {
             Reset();
 
@@ -84,8 +84,7 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
             }
 
             typesList.Sort(TypeCompare.Default);
-            StringBuilder builder = new StringBuilder();
-            DumpPublicApiImplementation(typesList, builder);
+            DumpPublicApiImplementation(streamWriter, typesList);
         }
 
         private static Hashtable CreateSynonms()
@@ -114,8 +113,9 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
             return synonms;
         }
 
-        private static void DumpPublicApiImplementation(ArrayList sortedTypeList, StringBuilder builder)
+        private static void DumpPublicApiImplementation(StreamWriter streamWriter, ArrayList sortedTypeList)
         {
+            StringBuilder builder = new StringBuilder();
             string lastNamespace = "";
             foreach (Type type in sortedTypeList)
             {
@@ -161,11 +161,11 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                     ConstructorInfo ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance, null, EmptyTypes, EmptyParameterModifiers);
                     if (null != ctor)
                     {
-                        Console.WriteLine("{0}", type.FullName);
+                        streamWriter.WriteLine("{0}", type.FullName);
                     }
                     else
                     {
-                        Console.WriteLine("{0} missing public ctor", type.FullName);
+                        streamWriter.WriteLine("{0} missing public ctor", type.FullName);
                     }
                 }
 
@@ -199,12 +199,12 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                 if (builder.Length > 0)
                 {
                     AssemblyFilter(builder);
-                    Console.Write(builder.ToString());
+                    streamWriter.Write(builder.ToString());
                     builder.Length = 0;
                 }
-                Console.Write("}");
-                Console.Write(Environment.NewLine);
-                Console.Write(Environment.NewLine);
+                streamWriter.Write("}");
+                streamWriter.Write(Environment.NewLine);
+                streamWriter.Write(Environment.NewLine);
             }
         }
 
@@ -580,9 +580,8 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                 {
                     fieldValue = info.GetValue(null);
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    Console.WriteLine(e.ToString());
                 }
 
                 if (null != fieldValue)

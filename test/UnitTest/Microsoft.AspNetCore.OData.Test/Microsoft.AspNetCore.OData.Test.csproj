@@ -4,6 +4,7 @@
   </PropertyGroup>
   <Import Project="..\..\..\tools\WebStack.settings.targets" />
   <PropertyGroup>
+    <OutputPath>$(WebStackRootPath)bin\$(Configuration)\UnitTest\AspNetCore\</OutputPath>
     <CodeAnalysisRuleSet>..\..\Relaxed.ruleset</CodeAnalysisRuleSet>
     <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETCORE;NETCORE2x;NOT_CLS_COMPLIANT</DefineConstants>
     <RootNamespace>Microsoft.AspNet.OData.Test</RootNamespace>

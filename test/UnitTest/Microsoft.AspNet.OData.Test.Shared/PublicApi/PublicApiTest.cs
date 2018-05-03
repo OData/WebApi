@@ -22,14 +22,9 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
             {
                 using (StreamWriter sw = new StreamWriter(fs))
                 {
-                    TextWriter standardOut = Console.Out;
-                    Console.SetOut(sw);
-
                     string assemblyPath = outputPath + Path.DirectorySeparatorChar + AssemblyName;
                     Assert.True(File.Exists(assemblyPath), string.Format("{0} does not exist in current directory", assemblyPath));
-                    PublicApiHelper.DumpPublicApi(assemblyPath);
-
-                    Console.SetOut(standardOut);
+                    PublicApiHelper.DumpPublicApi(sw, assemblyPath);
                 }
             }
             string outputString = File.ReadAllText(outputFile);

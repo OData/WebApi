@@ -28,7 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             if (stdOut.Contains("Error") || stdOut.Contains("Error"))
             {
                 // Ignore error 183: Cannot create a file when that file already exists.
-                if ((!stdOut.Contains("Error: 183")) && (!stdOut.Contains("Error: 183")))
+                if ((!stdOut.Contains("Error: 183")) && (!stdErr.Contains("Error: 183")))
                 {
                     Console.WriteLine(command);
                     Console.Write(stdOut);

@@ -1,98 +1,56 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B024A947-150C-458E-97F1-315035DF7742}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C40883CD-366D-4534-8B58-3EA0D13136DF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", "..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj", "{A6F9775D-F7E2-424E-8363-79644A73038F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", "..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj", "{A2576B14-10AB-4F10-92AB-3C31396DB9D6}"
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shared", "..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.shproj", "{B6B951B6-C3F0-4B8E-8955-E039145E7DEC}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test.Shared", "..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.shproj", "{D909E7AB-3281-46EA-929B-F35FE7E94B0F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9E4940C9-92AB-4A99-A4C3-E0D87F94078B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData.Test", "..\test\UnitTest\Microsoft.AspNet.OData.Test\Microsoft.AspNet.OData.Test.csproj", "{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData.Test", "..\test\UnitTest\Microsoft.AspNet.OData.Test\Microsoft.AspNet.OData.Test.csproj", "{67627E7C-216D-4A27-BA88-1D7C71E7939A}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test.Shared", "..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.shproj", "{D909E7AB-3281-46EA-929B-F35FE7E94B0F}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a6f9775d-f7e2-424e-8363-79644a73038f}*SharedItemsImports = 4
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{67627e7c-216d-4a27-ba88-1d7c71e7939a}*SharedItemsImports = 4
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a2576b14-10ab-4f10-92ab-3c31396db9d6}*SharedItemsImports = 4
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
-		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d5dbe2c8-ce32-43ef-b39e-0b11f6629f44}*SharedItemsImports = 4
 		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
-		CodeAnalysis|x64 = CodeAnalysis|x64
-		CodeAnalysis|x86 = CodeAnalysis|x86
-		Cover|Any CPU = Cover|Any CPU
-		Cover|x64 = Cover|x64
-		Cover|x86 = Cover|x86
 		Debug|Any CPU = Debug|Any CPU
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
 		Release|Any CPU = Release|Any CPU
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x64.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.CodeAnalysis|x86.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|x64.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Cover|x86.Build.0 = CodeAnalysis|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x64.Build.0 = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Debug|x86.Build.0 = Debug|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x64.ActiveCfg = Release|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x64.Build.0 = Release|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x86.ActiveCfg = Release|Any CPU
-		{A6F9775D-F7E2-424E-8363-79644A73038F}.Release|x86.Build.0 = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|x64.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.CodeAnalysis|x86.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|x64.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Cover|x86.Build.0 = CodeAnalysis|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|x64.Build.0 = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Debug|x86.Build.0 = Debug|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x64.ActiveCfg = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x64.Build.0 = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.ActiveCfg = Release|Any CPU
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.Build.0 = Release|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{A6F9775D-F7E2-424E-8363-79644A73038F} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
-		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
-		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
-		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6} = {B024A947-150C-458E-97F1-315035DF7742}
+		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {B024A947-150C-458E-97F1-315035DF7742}
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A} = {9E4940C9-92AB-4A99-A4C3-E0D87F94078B}
+		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {9E4940C9-92AB-4A99-A4C3-E0D87F94078B}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {85540959-E3DB-4C2D-8F9B-D9E2BD7036CA}
 	EndGlobalSection
 EndGlobal

@@ -1138,7 +1138,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (serializerContext.NavigationSource == null || serializerContext.NavigationSource == serializerContext.Path.NavigationSource)
                     {
                         edmType = serializerContext.Path.EdmType;
-                        if (edmType.TypeKind == EdmTypeKind.Collection)
+                        if (edmType != null && edmType.TypeKind == EdmTypeKind.Collection)
                         {
                             edmType = (edmType as IEdmCollectionType).ElementType.Definition;
                         }

@@ -11,14 +11,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", ".
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shared", "..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.shproj", "{B6B951B6-C3F0-4B8E-8955-E039145E7DEC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.AspNet.OData", "..\test\UnitTest\Microsoft.Test.AspNet.OData\Microsoft.Test.AspNet.OData.csproj", "{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}"
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test.Shared", "..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.shproj", "{D909E7AB-3281-46EA-929B-F35FE7E94B0F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.AspNet.OData.Abstraction", "..\test\UnitTest\Microsoft.Test.AspNet.Common\AspNet\Microsoft.Test.AspNet.OData.Abstraction.csproj", "{FDACDBAF-F337-44A6-8460-A59D7D23C726}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData.Test", "..\test\UnitTest\Microsoft.AspNet.OData.Test\Microsoft.AspNet.OData.Test.csproj", "{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a6f9775d-f7e2-424e-8363-79644a73038f}*SharedItemsImports = 4
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d5dbe2c8-ce32-43ef-b39e-0b11f6629f44}*SharedItemsImports = 4
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
@@ -83,30 +85,6 @@ Global
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x64.Build.0 = Release|Any CPU
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.ActiveCfg = Release|Any CPU
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44}.Release|x86.Build.0 = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x64.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.CodeAnalysis|x86.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|Any CPU.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x64.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x64.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x86.ActiveCfg = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Cover|x86.Build.0 = CodeAnalysis|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x64.Build.0 = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Debug|x86.Build.0 = Debug|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x64.ActiveCfg = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x64.Build.0 = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x86.ActiveCfg = Release|Any CPU
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,7 +92,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{A6F9775D-F7E2-424E-8363-79644A73038F} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
 		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {A9836F9E-6DB3-4D9F-ADCA-CF42D8C8BA93}
+		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 		{D5DBE2C8-CE32-43EF-B39E-0B11F6629F44} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
-		{FDACDBAF-F337-44A6-8460-A59D7D23C726} = {C40883CD-366D-4534-8B58-3EA0D13136DF}
 	EndGlobalSection
 EndGlobal

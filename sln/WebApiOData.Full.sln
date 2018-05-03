@@ -1,0 +1,85 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B024A947-150C-458E-97F1-315035DF7742}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData", "..\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.csproj", "{A2576B14-10AB-4F10-92AB-3C31396DB9D6}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shared", "..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.shproj", "{B6B951B6-C3F0-4B8E-8955-E039145E7DEC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{9E4940C9-92AB-4A99-A4C3-E0D87F94078B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.AspNet.OData.Test", "..\test\UnitTest\Microsoft.AspNet.OData.Test\Microsoft.AspNet.OData.Test.csproj", "{67627E7C-216D-4A27-BA88-1D7C71E7939A}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test.Shared", "..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.shproj", "{D909E7AB-3281-46EA-929B-F35FE7E94B0F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData", "..\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj", "{D571B599-A046-42EA-B39A-C7EA1B052931}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.Test", "..\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj", "{8804EACC-2E48-4377-9F18-D7A89989C2D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{92B48F8B-5B2A-413E-A20E-2359BF9F56E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreODataSample.Web", "..\samples\AspNetCoreODataSample.Web\AspNetCoreODataSample.Web.csproj", "{0123BBFE-4F78-459E-8B75-ED7D02065164}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{67627e7c-216d-4a27-ba88-1d7c71e7939a}*SharedItemsImports = 4
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a2576b14-10ab-4f10-92ab-3c31396db9d6}*SharedItemsImports = 4
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		CodeAnalysis|Any CPU = CodeAnalysis|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.CodeAnalysis|Any CPU.ActiveCfg = CodeAnalysis|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.CodeAnalysis|Any CPU.Build.0 = CodeAnalysis|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D571B599-A046-42EA-B39A-C7EA1B052931}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0123BBFE-4F78-459E-8B75-ED7D02065164}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A2576B14-10AB-4F10-92AB-3C31396DB9D6} = {B024A947-150C-458E-97F1-315035DF7742}
+		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {B024A947-150C-458E-97F1-315035DF7742}
+		{67627E7C-216D-4A27-BA88-1D7C71E7939A} = {9E4940C9-92AB-4A99-A4C3-E0D87F94078B}
+		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {9E4940C9-92AB-4A99-A4C3-E0D87F94078B}
+		{D571B599-A046-42EA-B39A-C7EA1B052931} = {B024A947-150C-458E-97F1-315035DF7742}
+		{8804EACC-2E48-4377-9F18-D7A89989C2D1} = {9E4940C9-92AB-4A99-A4C3-E0D87F94078B}
+		{0123BBFE-4F78-459E-8B75-ED7D02065164} = {92B48F8B-5B2A-413E-A20E-2359BF9F56E7}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {85540959-E3DB-4C2D-8F9B-D9E2BD7036CA}
+	EndGlobalSection
+EndGlobal

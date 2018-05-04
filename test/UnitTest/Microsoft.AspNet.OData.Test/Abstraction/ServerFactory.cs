@@ -23,8 +23,8 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// <param name="configureAction">The route configuration action.</param>
         /// <returns>An HttpServer.</returns>
         public static HttpServer Create(
-        Type[] controllers,
-        Action<HttpConfiguration> configureAction)
+            Type[] controllers,
+            Action<HttpConfiguration> configureAction)
         {
             HttpConfiguration configuration = new HttpConfiguration();
             return Create(configuration, controllers, configureAction);

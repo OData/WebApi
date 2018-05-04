@@ -67,12 +67,16 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
                 // Because Xunit uses the test data for a unique Id, we'll use a stable time
                 // derived from UtcNow() to allow a test discovery pass and run work
                 // for a 24 hour period.
-                DateTime dt = DateTime.Today;
-                DateTimeOffset dto = new DateTimeOffset(dt).ToLocalTime();
+                DateTime dt1 = DateTime.Today;
+                DateTimeOffset dto1 = new DateTimeOffset(dt1).ToLocalTime();
+
+                DateTime dt2 = DateTime.Today.AddDays(1);
+                DateTimeOffset dto2 = new DateTimeOffset(dt2).ToLocalTime();
+
                 return new TheoryDataSet<object, DateTimeOffset>
                 {
-                    { dt, dto },
-                    { new DateTime?(dt), dto}
+                    { dt1, dto1 },
+                    { new DateTime?(dt2), dto2}
                 };
             }
         }

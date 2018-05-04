@@ -9,10 +9,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.Test.E2E.AspNet.OData</RootNamespace>
     <AssemblyName>Microsoft.Test.E2E.AspNet.OData</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <OutputPath>$(WebStackRootPath)bin\$(Configuration)\E2ETest\AspNet\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)src\</SolutionDir>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile />
     <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETFX;NETFX45</DefineConstants>
+    <RestorePackages>true</RestorePackages>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
   </PropertyGroup>

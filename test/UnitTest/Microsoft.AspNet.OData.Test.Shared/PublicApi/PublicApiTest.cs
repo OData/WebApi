@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                 String.Format("Base line file {1} and output file {2} do not match, please check.{0}" +
                 "To update the baseline, please run:{0}{0}" +
                 "copy /y \"{2}\" \"{1}\"", Environment.NewLine,
-                @"test\UnitTest\Microsoft.AspNetCore.OData.Test\PublicApi\" + BaseLineFileName,
+                @"test\UnitTest\Microsoft.AspNet.OData.Test\PublicApi\" + BaseLineFileName,
                 outputFile));
         }
 

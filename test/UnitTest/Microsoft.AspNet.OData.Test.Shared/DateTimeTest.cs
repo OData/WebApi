@@ -39,6 +39,9 @@ namespace Microsoft.AspNet.OData.Test
 {
     public class DateTimeTest
     {
+        // Note: the product uses a static TimezoneHelper class to store the timezone. As a result,
+        // these date/time tests that test timezone are susceptible to failing due to their uses of
+        // and end-to-end test pipeline which relies on the static TimezoneHelper class.
         private readonly TimeZoneInfo _utcTimeZoneInfo = TimeZoneInfo.Utc;
         private readonly TimeZoneInfo _pacificStandard = TimeZoneInfo.FindSystemTimeZoneById("Pacific Standard Time");
         private readonly TimeZoneInfo _chinaStandard = TimeZoneInfo.FindSystemTimeZoneById("China Standard Time");

@@ -2074,6 +2074,18 @@ public sealed class Microsoft.AspNet.OData.Extensions.SerializableErrorExtension
 	public static Microsoft.OData.ODataError CreateODataError (Microsoft.AspNetCore.Mvc.SerializableError serializableError)
 }
 
+public sealed class Microsoft.AspNet.OData.Extensions.SerializableErrorKeys {
+	public static readonly string ErrorCodeKey = "ErrorCode"
+	public static readonly string ExceptionMessageKey = "ExceptionMessage"
+	public static readonly string ExceptionTypeKey = "ExceptionType"
+	public static readonly string InnerExceptionKey = "InnerException"
+	public static readonly string MessageDetailKey = "MessageDetail"
+	public static readonly string MessageKey = "Message"
+	public static readonly string MessageLanguageKey = "MessageLanguage"
+	public static readonly string ModelStateKey = "ModelState"
+	public static readonly string StackTraceKey = "StackTrace"
+}
+
 [
 EditorBrowsableAttribute(),
 ExtensionAttribute(),

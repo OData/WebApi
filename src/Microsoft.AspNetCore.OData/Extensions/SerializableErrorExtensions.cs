@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -29,85 +30,143 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("serializableError");
             }
 
-            string message = serializableError.GetPropertyValue<string>(SerializableErrorKeys.MessageKey);
-            string details = ConvertModelStateErrors(serializableError);
+            //Clone for removal of handled entries
+            var errors = serializableError.ToDictionary(pair => pair.Key, pair => pair.Value);
+
+            var innerError = errors.ToODataInnerError();
+
+            string errorCode = errors.GetPropertyValue<string>(SerializableErrorKeys.ErrorCodeKey);
+            string message = errors.GetPropertyValue<string>(SerializableErrorKeys.MessageKey);
+
+            errors.Remove(SerializableErrorKeys.ErrorCodeKey);
+            errors.Remove(SerializableErrorKeys.MessageKey);
 
             return new ODataError
             {
-                Message = string.IsNullOrEmpty(message) ? details : message,
-                ErrorCode = serializableError.GetPropertyValue<string>(SerializableErrorKeys.ErrorCodeKey),
-                InnerError = ToODataInnerError(serializableError),
-                Details = serializableError
-                    .Select(kvp => new ODataErrorDetail() { Message = kvp.Key + ":" + kvp.Value, })
-                    .AsCollection(),
+                ErrorCode = string.IsNullOrWhiteSpace(errorCode) ? null : errorCode,
+                Message = string.IsNullOrWhiteSpace(message) ? errors.ConvertModelStateErrors() : message,
+                Details = errors.CreateErrorDetails(),
+                InnerError = innerError
             };
         }
 
-        private static ODataInnerError ToODataInnerError(SerializableError serializableError)
+        private static ODataInnerError ToODataInnerError(this Dictionary<string, object> errors)
         {
-            string innerErrorMessage = serializableError.GetPropertyValue<string>(SerializableErrorKeys.ExceptionMessageKey);
+            string innerErrorMessage = errors.GetPropertyValue<string>(SerializableErrorKeys.ExceptionMessageKey);
+
             if (innerErrorMessage == null)
             {
-                string messageDetail = serializableError.GetPropertyValue<string>(SerializableErrorKeys.MessageDetailKey);
+                string messageDetail = errors.GetPropertyValue<string>(SerializableErrorKeys.MessageDetailKey);
+
                 if (messageDetail == null)
                 {
-                    SerializableError modelStateError = serializableError.GetPropertyValue<SerializableError>(SerializableErrorKeys.ModelStateKey);
+                    SerializableError modelStateError = errors.GetPropertyValue<SerializableError>(SerializableErrorKeys.ModelStateKey);
+
+                    errors.Remove(SerializableErrorKeys.ModelStateKey);
+
                     return (modelStateError == null) ? null
                         : new ODataInnerError { Message = ConvertModelStateErrors(modelStateError) };
                 }
-                else
-                {
-                    return new ODataInnerError() { Message = messageDetail };
-                }
+
+                errors.Remove(SerializableErrorKeys.MessageDetailKey);
+
+                return new ODataInnerError { Message = messageDetail };
             }
-            else
+
+            errors.Remove(SerializableErrorKeys.ExceptionMessageKey);
+
+            ODataInnerError innerError = new ODataInnerError
             {
-                ODataInnerError innerError = new ODataInnerError();
-                innerError.Message = innerErrorMessage;
-                innerError.TypeName = serializableError.GetPropertyValue<string>(SerializableErrorKeys.ExceptionTypeKey);
-                innerError.StackTrace = serializableError.GetPropertyValue<string>(SerializableErrorKeys.StackTraceKey);
-                SerializableError innerExceptionError = serializableError.GetPropertyValue<SerializableError>(SerializableErrorKeys.InnerExceptionKey);
-                if (innerExceptionError != null)
-                {
-                    innerError.InnerError = ToODataInnerError(innerExceptionError);
-                }
-                return innerError;
+                Message = innerErrorMessage,
+                TypeName = errors.GetPropertyValue<string>(SerializableErrorKeys.ExceptionTypeKey),
+                StackTrace = errors.GetPropertyValue<string>(SerializableErrorKeys.StackTraceKey)
+            };
+
+            errors.Remove(SerializableErrorKeys.ExceptionTypeKey);
+            errors.Remove(SerializableErrorKeys.StackTraceKey);
+
+            SerializableError innerExceptionError = errors.GetPropertyValue<SerializableError>(SerializableErrorKeys.InnerExceptionKey);
+
+            errors.Remove(SerializableErrorKeys.InnerExceptionKey);
+
+            if (innerExceptionError != null)
+            {
+                innerError.InnerError = ToODataInnerError(innerExceptionError);
             }
+
+            return innerError;
         }
 
         // Convert the model state errors in to a string (for debugging only).
         // This should be improved once ODataError allows more details.
-        private static string ConvertModelStateErrors(SerializableError error)
+        private static string ConvertModelStateErrors(this IReadOnlyDictionary<string, object> errors)
         {
             StringBuilder builder = new StringBuilder();
-            foreach (KeyValuePair<string, object> modelStateError in error)
-            {
-                if (modelStateError.Value != null)
-                {
-                    builder.Append(modelStateError.Key);
-                    builder.Append(" : ");
 
-                    IEnumerable<string> errorMessages = modelStateError.Value as IEnumerable<string>;
-                    if (errorMessages != null)
+            foreach (KeyValuePair<string, object> modelStateError in errors.Where(kvp => kvp.Value != null))
+            {
+                if (builder.Length > 0)
+                {
+                    builder.AppendLine();
+                }
+
+                if (!string.IsNullOrWhiteSpace(modelStateError.Key))
+                {
+                    builder.AppendLine($"{modelStateError.Key}:");
+                }
+
+                IEnumerable<string> errorMessages = modelStateError.Value as IEnumerable<string>;
+
+                if (errorMessages != null)
+                {
+                    foreach (string errorMessage in errorMessages)
                     {
-                        foreach (string errorMessage in errorMessages)
-                        {
-                            builder.AppendLine(errorMessage);
-                        }
+                        builder.AppendLine(errorMessage);
                     }
-                    else
-                    {
-                        builder.AppendLine(modelStateError.Value.ToString());
-                    }
+                }
+                else
+                {
+                    builder.AppendLine(modelStateError.Value.ToString());
                 }
             }
 
-            return builder.ToString();
+            var result = builder.ToString();
+
+            return !result.EndsWith(Environment.NewLine) ? result : result.Substring(0, result.Length - Environment.NewLine.Length);
         }
 
-        private static TValue GetPropertyValue<TValue>(this SerializableError error, string errorKey)
+        private static ICollection<ODataErrorDetail> CreateErrorDetails(this IReadOnlyDictionary<string, object> errors)
+        {
+            return errors.SelectMany(CreateErrorDetails).ToList();
+        }
+
+        private static IEnumerable<ODataErrorDetail> CreateErrorDetails(KeyValuePair<string, object> pair)
+        {
+            var errors = pair.Value as IEnumerable<string>;
+
+            if (errors != null)
+            {
+                return errors.Select(error => new ODataErrorDetail
+                {
+                    Target = string.IsNullOrWhiteSpace(pair.Key) ? null : pair.Key,
+                    Message = error
+                });
+            }
+
+            return new[]
+            {
+                new ODataErrorDetail
+                {
+                    Target = pair.Key,
+                    Message = pair.Value?.ToString()
+                }
+            };
+        }
+
+        private static TValue GetPropertyValue<TValue>(this IReadOnlyDictionary<string, object> error, string errorKey)
         {
             object value;
+
             if (error.TryGetValue(errorKey, out value) && value is TValue)
             {
                 return (TValue)value;
@@ -117,7 +176,11 @@ namespace Microsoft.AspNet.OData.Extensions
         }
     }
 
-    internal static class SerializableErrorKeys
+    /// <summary>
+    ///     Different keys for adding entries to an <see cref="SerializableError" /> instance so
+    ///     that it can be parsed to a <see cref="ODataError" /> instance
+    /// </summary>
+    public static class SerializableErrorKeys
     {
         /// <summary>
         /// Provides a key for the Message.

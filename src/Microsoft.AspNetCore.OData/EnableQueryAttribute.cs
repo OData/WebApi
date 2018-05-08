@@ -155,17 +155,17 @@ namespace Microsoft.AspNet.OData
             SerializableError error = new SerializableError();
             if (!String.IsNullOrEmpty(message))
             {
-                error.Add("Message", message);
+                error.Add(SerializableErrorKeys.MessageKey, message);
             }
 
             if (exception != null)
             {
-                error.Add("ExceptionMessage", exception.Message);
-                error.Add("ExceptionType", exception.GetType().FullName);
-                error.Add("StackTrace", exception.StackTrace);
+                error.Add(SerializableErrorKeys.ExceptionMessageKey, exception.Message);
+                error.Add(SerializableErrorKeys.ExceptionTypeKey, exception.GetType().FullName);
+                error.Add(SerializableErrorKeys.StackTraceKey, exception.StackTrace);
                 if (exception.InnerException != null)
                 {
-                    error.Add("InnerException", CreateErrorResponse(String.Empty, exception.InnerException));
+                    error.Add(SerializableErrorKeys.InnerExceptionKey, CreateErrorResponse(String.Empty, exception.InnerException));
                 }
             }
 

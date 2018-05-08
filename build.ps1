@@ -63,7 +63,6 @@ $LOGDIR = $ENLISTMENT_ROOT + "\bin"
 # Default to use Visual Studio 2015
 $VS14MSBUILD=$PROGRAMFILESX86 + "\MSBuild\14.0\Bin\MSBuild.exe"
 $VSTEST = $PROGRAMFILESX86 + "\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
-$FXCOPDIR = $PROGRAMFILESX86 + "\Microsoft Visual Studio 14.0\Team Tools\Static Analysis Tools\FxCop"
 $SN = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sn.exe"
 $SNx64 = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\x64\sn.exe"
 
@@ -94,7 +93,6 @@ else
 }
 
 # Other variables
-$FXCOP = $FXCOPDIR + "\FxCopCmd.exe"
 $BUILDLOG = $LOGDIR + "\msbuild.log"
 $TESTLOG = $LOGDIR + "\mstest.log"
 $NUGETEXE = $ENLISTMENT_ROOT + "\sln\.nuget\NuGet.exe"
@@ -157,21 +155,6 @@ ForEach($dll in $NetCoreE2ETestDlls)
 {
     $NetCoreE2ETestSuite += $NetCoreE2ETestDIR + "\" + $dll
 }
-
-# FXcop
-$FxCopRulesOptions = "/rule:$FxCopDir\Rules\DesignRules.dll",
-    "/rule:$FxCopDir\Rules\NamingRules.dll",
-    "/rule:$FxCopDir\Rules\PerformanceRules.dll",
-    "/rule:$FxCopDir\Rules\SecurityRules.dll",
-    "/rule:$FxCopDir\Rules\GlobalizationRules.dll",
-    "/dictionary:$ENLISTMENT_ROOT\src\CodeAnalysisDictionary.xml",
-    "/ruleid:-Microsoft.Design#CA1006",
-    "/ruleid:-Microsoft.Design#CA1016",
-    "/ruleid:-Microsoft.Design#CA1020",
-    "/ruleid:-Microsoft.Design#CA1021",
-    "/ruleid:-Microsoft.Design#CA1045",
-    "/ruleid:-Microsoft.Design#CA2210",
-    "/ruleid:-Microsoft.Performance#CA1814"
 
 Function GetDlls
 {
@@ -426,21 +409,6 @@ Function TestProcess
     $script:TEST_END_TIME = Get-Date
 }
 
-Function FxCopProcess
-{
-    Info("Start To FxCop ...")
-    
-    & $FXCOP "/f:$ClassicProductDIR\$ClassicProductDlls" "/o:$LOGDIR\AspNetODataFxCopReport.xml" `
-        $FxCopRulesOptions 1>$null 2>$null
-    & $FXCOP "/f:$NetCoreProductDIR\$NetCoreProductDlls" "/o:$LOGDIR\AspNetCoreODataFxCopReport.xml" `
-        $FxCopRulesOptions 1>$null 2>$null
-
-    Write-Host "For more information, please open the following FxCop result files:"
-    Write-Host "$LOGDIR\AspNetODataFxCopReport.xml"
-    Write-Host "$LOGDIR\AspNetCoreODataFxCopReport.xml"
-    Success "FxCop Done"
-}
-
 # Main Process
 
 if (! (Test-Path $LOGDIR))
@@ -467,7 +435,6 @@ NugetRestoreSolution
 BuildProcess
 SkipStrongName
 TestProcess
-FxCopProcess
 
 $buildTime = New-TimeSpan $script:BUILD_START_TIME -end $script:BUILD_END_TIME
 $testTime = New-TimeSpan $script:TEST_START_TIME -end $script:TEST_END_TIME

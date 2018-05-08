@@ -82,10 +82,10 @@ ForEach ($version in $VS15VERSIONS)
 }
 
 $DOTNETDIR = "C:\Program Files\dotnet\"
-$DOTNETTEST = $null
+$DOTNETEXE = $null
 if ([System.IO.File]::Exists($DOTNETDIR + "dotnet.exe"))
 {
-    $DOTNETTEST = $DOTNETDIR + "dotnet.exe"
+    $DOTNETEXE = $DOTNETDIR + "dotnet.exe"
 }
 else
 {
@@ -106,6 +106,11 @@ $ClassicE2ETestSLN = "WebApiOData.E2E.AspNet.sln"
 $NetCoreUnitTesSLN = "WebApiOData.AspNetCore.sln"
 $NetCoreE2ETestSLN = "WebApiOData.E2E.AspNetCore.sln"
 $NugetRestoreSolutions = $ClassicUnitTestSLN, $ClassicE2ETestSLN, $NetCoreUnitTesSLN, $NetCoreE2ETestSLN
+
+$NetCoreProductPROJ = "\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj "
+$NetCoreUnitTestPROJ = "\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj"
+$NetCoreE2ETestPROJ = "\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNetCore\Microsoft.Test.E2E.AspNetCore.OData.csproj"
+$NugetRestoreDotNetProjects = $NetCoreProductPROJ, $NetCoreUnitTestPROJ, $NetCoreE2ETestPROJ
 
 $ClassicProductDIR = $ENLISTMENT_ROOT + "\bin\$Configuration"
 $ClassicProductDlls = "Microsoft.AspNet.OData.dll"
@@ -232,6 +237,10 @@ Function NugetRestoreSolution
     foreach($solution in $NugetRestoreSolutions)
     {
         & $NUGETEXE "restore" ($ENLISTMENT_ROOT + "\sln\" + $solution)
+    }
+    foreach($project in $NugetRestoreDotNetProjects)
+    {
+        & $DOTNETEXE  "restore" ($ENLISTMENT_ROOT + $project)
     }
     Success("Pull Nuget Packages Success")
 }
@@ -375,7 +384,7 @@ Function RunTest($title, $testdir, $framework)
         foreach($testProj in $testdir)
         {
             Info("Launching $testProj...")
-            & $DOTNETTEST "test" $testProj $Conf "--no-build" >> $TESTLOG
+            & $DOTNETEXE "test" $testProj $Conf "--no-build" >> $TESTLOG
         }
     }
     else

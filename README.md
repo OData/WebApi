@@ -33,6 +33,7 @@ This is the maintenance branch for OData WebApi with ASP.NET Core support. The p
 
 **[maintenance-V4](https://github.com/OData/Webapi/tree/maintenance-V4) branch**
 
+
 This is the maintenance branch for OData WebApi based on ODL 6.x, which implements the ODataV4 protocol. The package name is Microsoft.AspNet.OData, with latest maintenance release version [5.10](https://www.nuget.org/packages/Microsoft.AspNet.OData/5.10.0).
 
 **[maintenance-V3](https://github.com/OData/Webapi/tree/maintenance-V3) branch** 
@@ -101,5 +102,7 @@ Please refer to the [ODataSamples WebApi](https://github.com/OData/ODataSamples/
 
 ### Debug
 Please refer to the [How to debug](http://odata.github.io/WebApi/10-01-debug-webapi-source).
+
+### Code of Conduct
 
 This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.

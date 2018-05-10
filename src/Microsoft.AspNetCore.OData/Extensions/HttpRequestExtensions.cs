@@ -366,6 +366,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>The request container created.</returns>
         public static IServiceProvider CreateRequestContainer(this HttpRequest request, string routeName)
         {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
             if (request.ODataFeature().RequestContainer != null)
             {
                 throw Error.InvalidOperation(SRResources.RequestContainerAlreadyExists);

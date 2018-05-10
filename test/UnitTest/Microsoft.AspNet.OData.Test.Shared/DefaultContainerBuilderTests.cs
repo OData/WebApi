@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using Microsoft.AspNet.OData;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Xunit;

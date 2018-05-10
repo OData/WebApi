@@ -143,7 +143,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UShortEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\VersionTestHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpRequestExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\HttpRequestODataMessage.cs" />

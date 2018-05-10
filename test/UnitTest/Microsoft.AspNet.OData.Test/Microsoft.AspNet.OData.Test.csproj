@@ -123,6 +123,7 @@
     <Compile Include="Abstraction\FormatterTestHelper.cs" />
     <Compile Include="Abstraction\TestODataController.cs" />
     <Compile Include="Abstraction\TestNonODataController.cs" />
+    <Compile Include="Extensions\HttpRequestExtensions.cs" />
     <Compile Include="PublicApi\PublicApiTest.cs" />
   </ItemGroup>
   <ItemGroup>

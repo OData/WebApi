@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -59,6 +60,11 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the next link for the OData response.
         /// </summary>
         public Uri NextLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the batch route data.
+        /// </summary>
+        public RouteValueDictionary BatchRouteData { get; set; }
 
         /// <summary>
         /// Gets or sets the delta link for the OData response.

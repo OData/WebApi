@@ -264,7 +264,17 @@ namespace Microsoft.AspNet.OData.Batch
             IUrlHelperFactory factory = request.HttpContext.RequestServices.GetRequiredService<IUrlHelperFactory>();
             IUrlHelper helper = factory.GetUrlHelper(actionContext);
 
-            string baseAddress = helper.Link(oDataRouteName, new RouteValueDictionary() { { ODataRouteConstants.ODataPath, String.Empty } });
+            RouteValueDictionary routeData = new RouteValueDictionary() { { ODataRouteConstants.ODataPath, String.Empty } };
+            RouteValueDictionary batchRouteData = request.ODataFeature().BatchRouteData;
+            if (batchRouteData != null && batchRouteData.Any())
+            {
+                foreach (var data in batchRouteData)
+                {
+                    routeData.Add(data.Key, data.Value);
+                }
+            }
+
+            string baseAddress = helper.Link(oDataRouteName, routeData);
             if (baseAddress == null)
             {
                 throw new InvalidOperationException(SRResources.UnableToDetermineBaseUrl);

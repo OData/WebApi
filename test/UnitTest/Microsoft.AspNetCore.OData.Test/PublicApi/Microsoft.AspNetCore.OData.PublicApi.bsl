@@ -480,6 +480,7 @@ public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	public ODataFeature ()
 
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public virtual get; public virtual set; }
+	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
@@ -878,7 +879,7 @@ public class Microsoft.AspNet.OData.Batch.ODataBatchPathMapping {
 	public ODataBatchPathMapping ()
 
 	public void AddRoute (string routeName, string routeTemplate)
-	public bool TryGetRouteName (string path, out System.String& routeName)
+	public bool TryGetRouteName (Microsoft.AspNetCore.Http.HttpContext context, out System.String& routeName)
 }
 
 public class Microsoft.AspNet.OData.Batch.OperationRequestItem : ODataBatchRequestItem {
@@ -2241,6 +2242,7 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataBuilder {
 
 public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public abstract get; public abstract set; }
+	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }

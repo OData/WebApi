@@ -2794,6 +2794,7 @@ public class Microsoft.AspNet.OData.Routing.ODataPath {
 
 	Microsoft.OData.Edm.IEdmType EdmType  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
+	Microsoft.OData.UriParser.ODataPath Path  { public get; }
 	string PathTemplate  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] Segments  { public get; }
 

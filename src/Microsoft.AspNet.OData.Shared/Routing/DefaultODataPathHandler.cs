@@ -245,7 +245,7 @@ namespace Microsoft.AspNet.OData.Routing
 
             return new ODataPath(segments)
             {
-                ODLPath = path
+                Path = path
             };
         }
 

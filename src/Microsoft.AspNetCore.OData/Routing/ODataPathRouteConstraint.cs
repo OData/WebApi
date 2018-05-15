@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
@@ -29,7 +28,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// True if this instance equals a specified route; otherwise, false.
         /// </returns>
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        public bool Match(HttpContext httpContext, IRouter route, string routeKey, RouteValueDictionary values, RouteDirection routeDirection)
+        public virtual bool Match(HttpContext httpContext, IRouter route, string routeKey, RouteValueDictionary values, RouteDirection routeDirection)
         {
             if (httpContext == null)
             {

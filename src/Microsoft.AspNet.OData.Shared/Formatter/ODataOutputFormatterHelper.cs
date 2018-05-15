@@ -164,7 +164,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
                 SelectAndExpand = internalRequest.Context.SelectExpandClause,
                 Apply = internalRequest.Context.ApplyClause,
-                Path = (path == null || IsOperationPath(path)) ? null : path.ODLPath,
+                Path = (path == null || IsOperationPath(path)) ? null : path.Path,
             };
 
             ODataMetadataLevel metadataLevel = ODataMetadataLevel.MinimalMetadata;

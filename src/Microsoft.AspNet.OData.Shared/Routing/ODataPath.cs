@@ -106,6 +106,9 @@ namespace Microsoft.AspNet.OData.Routing
             return _pathLiteral;
         }
 
-        internal Semantic.ODataPath ODLPath { get; set; }
+        /// <summary>
+        /// Gets the ODL path.
+        /// </summary>
+        public Semantic.ODataPath Path { get; internal set; }
     }
 }

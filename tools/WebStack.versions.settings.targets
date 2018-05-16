@@ -13,8 +13,8 @@
   <PropertyGroup>
     <AspNetPackageDependency>[5.2.2, 5.3.0)</AspNetPackageDependency>
     <AspNetCorePackageDependency>[2.0.0, 3.0.0)</AspNetCorePackageDependency>
-    <DependencyInjection1PackageDependency>[1.0.0, 2.0.0)</DependencyInjection1PackageDependency>
-    <DependencyInjection2PackageDependency>[2.0.0, 3.0.0)</DependencyInjection2PackageDependency>
+    <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
+    <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>
     <ODataLibPackageDependency>[7.4.3, 8.0.0)</ODataLibPackageDependency>
   </PropertyGroup>
 

@@ -28,6 +28,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
+        private static int SelectCustomerPropertyCount =>
+            typeof(SelectCustomer).GetProperties().Length + 1;  // The +1 is for SelectOrders@odata.count.
+
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(SelectCustomerController));
@@ -124,6 +127,56 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             JsonAssert.ArrayLength(10, "value", result);
             JArray customers = (JArray)result["value"];
             Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 1 && x.Properties().All(p => p.Name == "Name")));
+        }
+
+        [Fact(Skip = "This GitHub issue needs to be fixed before this test can pass: https://github.com/OData/WebApi/issues/196")]
+        public async Task QueryComplexPropertiesOfAnEntry()
+        {
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer/?$select=LocationAddresses/City", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata=minimalmetadata"));
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response;
+
+            response = await client.SendAsync(request);
+
+            Assert.NotNull(response);
+            Assert.NotNull(response.Content);
+            string content = await response.Content.ReadAsStringAsync();
+
+            Assert.True(
+                response.StatusCode == HttpStatusCode.OK,
+                string.Format("Expected status code OK. Actual status code: {0}. Response content: {1}", response.StatusCode, content));
+
+            JObject result = JObject.Parse(content);
+            Assert.NotNull(result);
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+
+            Action<JProperty> assertCityProperty = cityProperty =>
+            {
+                Assert.Equal("City", cityProperty.Name);
+                Assert.Equal(JTokenType.String, cityProperty.Value.Type);
+            };
+
+            Action<JObject> assertLocationAddress = locationAddress =>
+            {
+                Assert.Collection(locationAddress.Properties(), assertCityProperty);
+            };
+
+            Action<JProperty> assertLocationAddressesProperty = locationAddressesProperty =>
+            {
+                Assert.Equal("LocationAddresses", locationAddressesProperty.Name);
+                Assert.Equal(JTokenType.Array, locationAddressesProperty.Value.Type);
+
+                var locationAddresses = (JArray)locationAddressesProperty.Value;
+                Assert.Collection(locationAddresses.OfType<JObject>(), Enumerable.Repeat(assertLocationAddress, 10).ToArray());
+            };
+
+            foreach (JObject customer in customers.OfType<JObject>())
+            {
+                Assert.Collection(customer.Properties(), assertLocationAddressesProperty);
+            }
         }
 
         [Fact]
@@ -337,7 +390,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
             JsonAssert.ArrayLength(10, "value", result);
             JArray customers = (JArray)result["value"];
-            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == SelectCustomerPropertyCount));
             foreach (JObject customer in (IEnumerable<JToken>)customers)
             {
                 JArray orders = customer["SelectOrders"] as JArray;
@@ -368,7 +421,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Console.WriteLine(result);
             JsonAssert.ArrayLength(10, "value", result);
             JArray customers = (JArray)result["value"];
-            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == SelectCustomerPropertyCount));
             foreach (JObject customer in (IEnumerable<JToken>)customers)
             {
                 JArray orders = customer["SelectOrders"] as JArray;
@@ -414,7 +467,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
             JsonAssert.ArrayLength(10, "value", result);
             JArray customers = (JArray)result["value"];
-            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 4));
+            Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == SelectCustomerPropertyCount));
             foreach (JObject customer in (IEnumerable<JToken>)customers)
             {
                 JArray orders = customer["SelectOrders"] as JArray;
@@ -558,6 +611,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                         Name = string.Format("Name {0}", k),
                         Price = k * -1000
                     }).ToList().AsQueryable()
+                }).ToList(),
+                LocationAddresses = Enumerable.Range(0, i).Select(j => new SelectAddress
+                {
+                    FirstLine = string.Format("First line {0}", j),
+                    SecondLine = string.Format("Second line {0}", j),
+                    ZipCode = j * -100,
+                    City = string.Format("City {0}", j),
+                    State = string.Format("State {0}", j),
+                    Country = string.Format("CountryOrRegion {0}", j),
                 }).ToList()
             }).ToList();
         }
@@ -611,6 +673,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public int Id { get; set; }
         public string Name { get; set; }
         public virtual IList<SelectOrder> SelectOrders { get; set; }
+        public virtual IList<SelectAddress> LocationAddresses { get; set; }
     }
 
     public class SelectPremiumCustomer : SelectCustomer

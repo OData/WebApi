@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
 #endif
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Xml.Linq;
@@ -16,6 +17,7 @@ namespace Microsoft.AspNet.OData.Formatter
 {
     internal static class EdmPrimitiveHelpers
     {
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
         public static object ConvertPrimitiveValue(object value, Type type)
         {
             Contract.Assert(value != null);
@@ -23,6 +25,11 @@ namespace Microsoft.AspNet.OData.Formatter
 
             // if value is of the same type nothing to do here.
             if (value.GetType() == type || value.GetType() == Nullable.GetUnderlyingType(type))
+            {
+                return value;
+            }
+
+            if (type.IsInstanceOfType(value))
             {
                 return value;
             }

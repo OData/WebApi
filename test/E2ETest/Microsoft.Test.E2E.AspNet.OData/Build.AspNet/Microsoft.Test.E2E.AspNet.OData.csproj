@@ -1636,6 +1636,21 @@
     <Compile Include="..\Singleton\UmbrellaController.cs">
       <Link>Singleton\UmbrellaController.cs</Link>
     </Compile>
+    <Compile Include="..\Spatial\SpatialController.cs">
+      <Link>Spatial\SpatialController.cs</Link>
+    </Compile>
+    <Compile Include="..\Spatial\SpatialEdmModel.cs">
+      <Link>Spatial\SpatialEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\Spatial\SpatialFactory.cs">
+      <Link>Spatial\SpatialFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\Spatial\SpatialModels.cs">
+      <Link>Spatial\SpatialModels.cs</Link>
+    </Compile>
+    <Compile Include="..\Spatial\SpatialTests.cs">
+      <Link>Spatial\SpatialTests.cs</Link>
+    </Compile>
     <Compile Include="..\Swagger\SwaggerController.cs">
       <Link>Swagger\SwaggerController.cs</Link>
     </Compile>

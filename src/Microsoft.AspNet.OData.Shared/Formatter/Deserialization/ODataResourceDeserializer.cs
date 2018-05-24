@@ -434,8 +434,18 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext);
 
+            // First resolve Data member alias or annotation, then set the regular
+            // or delta resource accordingly.
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
-            DeserializationHelpers.SetProperty(resource, propertyName, value);
+
+            if (readContext.IsDeltaOfT)
+            {
+                DeserializationHelpers.SetNestedResource(resource, propertyName, value);
+            }
+            else
+            {
+                DeserializationHelpers.SetProperty(resource, propertyName, value);
+            }
         }
 
         private void ApplyDynamicResourceInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference resourceStructuredType,
@@ -481,30 +491,27 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 Model = readContext.Model,
             };
 
+            Type clrType = null;
             if (readContext.IsUntyped)
             {
-                if (structuredType.IsEntity())
-                {
-                    nestedReadContext.ResourceType = typeof(EdmEntityObject);
-                }
-                else
-                {
-                    nestedReadContext.ResourceType = typeof(EdmComplexObject);
-                }
+                clrType = structuredType.IsEntity()
+                    ? typeof(EdmEntityObject)
+                    : typeof(EdmComplexObject);
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
+                clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
 
                 if (clrType == null)
                 {
                     throw new ODataException(
                         Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
-
-                nestedReadContext.ResourceType = clrType;
             }
 
+            nestedReadContext.ResourceType = readContext.IsDeltaOfT
+                ? typeof(Delta<>).MakeGenericType(new Type[] { clrType })
+                : clrType;
             return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
         }
 

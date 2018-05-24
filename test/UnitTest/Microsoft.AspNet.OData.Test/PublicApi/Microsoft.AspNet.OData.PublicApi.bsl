@@ -10,6 +10,7 @@ public interface Microsoft.AspNet.OData.IDelta {
 	void Clear ()
 	System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
+	bool TryAddNestedResource (string name, object deltaNestedResource)
 	bool TryGetPropertyType (string name, out System.Type& type)
 	bool TryGetPropertyValue (string name, out System.Object& value)
 	bool TrySetPropertyValue (string name, object value)
@@ -70,6 +71,7 @@ public abstract class Microsoft.AspNet.OData.Delta : System.Dynamic.DynamicObjec
 	public abstract void Clear ()
 	public abstract System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public abstract System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
+	public virtual bool TryAddNestedResource (string name, object deltaNestedResource)
 	public virtual bool TryGetMember (System.Dynamic.GetMemberBinder binder, out System.Object& result)
 	public abstract bool TryGetPropertyType (string name, out System.Type& type)
 	public abstract bool TryGetPropertyValue (string name, out System.Object& value)
@@ -148,6 +150,8 @@ public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObj
 
 	System.Type EntityType  { public abstract get; }
 	System.Type ExpectedClrType  { public abstract get; }
+
+	internal virtual object GetInstance ()
 }
 
 [
@@ -243,10 +247,11 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public void CopyChangedValues (TStructuralType original)
 	public void CopyUnchangedValues (TStructuralType original)
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
-	public TStructuralType GetInstance ()
+	internal virtual object GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public void Patch (TStructuralType original)
 	public void Put (TStructuralType original)
+	public virtual bool TryAddNestedResource (string name, object deltaNestedResource)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)

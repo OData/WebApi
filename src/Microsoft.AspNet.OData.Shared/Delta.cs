@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData
     /// A class the tracks changes (i.e. the Delta) for an entity.
     /// </summary>
     [NonValidatingParameterBinding]
-    public abstract class Delta : DynamicObject, IDelta 
+    public abstract class Delta : DynamicObject, IDelta
     {
         /// <summary>
         /// Clears the Delta and resets the underlying Entity.
@@ -42,6 +42,17 @@ namespace Microsoft.AspNet.OData
         /// <param name="value">The value of the Property</param>
         /// <returns>True if the Property was found</returns>
         public abstract bool TryGetPropertyValue(string name, out object value);
+
+        /// <summary>
+        /// Attempts to add the delta nested resource.
+        /// </summary>
+        /// <param name="name">Name of the nested resource.</param>
+        /// <param name="deltaNestedResource">The delta object for the nested resource.</param>
+        /// <returns></returns>
+        public virtual bool TryAddNestedResource(string name, object deltaNestedResource)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Attempts to get the <see cref="Type"/> of the Property called <paramref name="name"/> from the underlying Entity.
@@ -84,14 +95,14 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Returns the Properties that have been modified through this Delta as an 
-        /// enumeration of Property Names 
+        /// Returns the Properties that have been modified through this Delta as an
+        /// enumeration of Property Names
         /// </summary>
         public abstract IEnumerable<string> GetChangedPropertyNames();
 
         /// <summary>
-        /// Returns the Properties that have not been modified through this Delta as an 
-        /// enumeration of Property Names 
+        /// Returns the Properties that have not been modified through this Delta as an
+        /// enumeration of Property Names
         /// </summary>
         public abstract IEnumerable<string> GetUnchangedPropertyNames();
     }

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,31 +8,20 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Test.Abstraction;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.OData.Edm;
-using Newtonsoft.Json.Linq;
-using Xunit;
-#else
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+#if !NETCORE
 using System.Web.Http;
+#endif
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
+#if NETCORE
+using Microsoft.AspNetCore.Mvc;
+#endif
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
-#endif
 
 namespace Microsoft.AspNet.OData.Test
 {
@@ -118,7 +106,25 @@ namespace Microsoft.AspNet.OData.Test
               "\"Street\":\"UpdatedStreet\"," +
               "\"City\":\"UpdatedCity\"," +
               "\"Publish@odata.type\":\"#Date\"," +
-              "\"Publish\":\"2016-02-02\"" +
+              "\"Publish\":\"2016-02-02\"," +
+              "\"LineA\": {" +
+                "\"Description\": \"DescLineA.\"," +
+                "\"Fee\" : 0," +
+                "\"PhoneInfo\" : {" +
+                    "\"ContactName\" : \"ContactNameA\"," +
+                    "\"PhoneNumber\" : 9876543," +
+                    "\"Spec\" : { \"Make\" : \"Apple\",\"ScreenSize\" : 6 }" +
+                "}" +
+              "}," +
+              "\"LineB\": {" +
+                "\"Description\": \"DescLineB.\"," +
+                "\"Fee\" : 0," +
+                "\"PhoneInfo\" : {" +
+                    "\"ContactName\" : \"ContactNameA\"," +
+                    "\"PhoneNumber\" : 9876543," +
+                    "\"Spec\" : { \"Make\" : \"Apple\",\"ScreenSize\" : 6 }" +
+                "}" +
+              "}" +
             "}";
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
@@ -146,6 +152,102 @@ namespace Microsoft.AspNet.OData.Test
               "\"BirthDay@odata.type\":\"#Date\"," +
               "\"BirthDay\":\"2016-01-29\"" +
             "}";
+
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+            HttpClient client = GetClient();
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task OpenComplexType_PatchNestedComplexTypeProperty()
+        {
+            // Arrange
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""9B198CA0-9546-4162-A4C0-14EAA255ACA7"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""LineB"": {""Description"": ""DescriptionB""}
+            }";
+            payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
+
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+            HttpClient client = GetClient();
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task OpenComplexType_PatchNestedComplexTypeProperty_DoubleNested()
+        {
+            // Arrange
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""A4D09554-5551-4B36-A1CB-CFBCDB1F4EAD"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""LineA"": {
+                    ""Description"": ""DescriptionA"",
+                    ""PhoneInfo"" : {""ContactName"":""ContactNameA"", ""PhoneNumber"": 7654321}
+                },
+                ""LineB"": {
+                    ""PhoneInfo"": {""ContactName"": ""ContactNameB""}
+                }
+            }";
+            payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
+
+            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
+           HttpClient client = GetClient();
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task OpenComplexType_PatchNestedComplexTypeProperty_DeepNestedResourceOnNewSubNode()
+        {
+            // Arrange
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""2D071BD4-E4FB-4639-8024-BBC173850441"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""LineA"": {
+                    ""Description"": ""LineDetailsWithNewDeepSubNode."",
+                    ""PhoneInfo"" : {
+                        ""ContactName"":""ContactNameA"",
+                        ""Spec"" : { ""ScreenSize"" : 6 }
+                    }
+                }
+            }";
+            payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
             HttpClient client = GetClient();
@@ -215,7 +317,9 @@ namespace Microsoft.AspNet.OData.Test
                     {
                         Street = "Street " + i,
                         City = "City " + i,
-                        DynamicProperties = new Dictionary<string, object> { { "IntProp", IntValues[i] } }
+                        DynamicProperties = new Dictionary<string, object> { { "IntProp", IntValues[i] } },
+                        // Leaving LineA as null
+                        LineB = new LineDetails() { Fee = OpenAddress.DefaultValue_Fee }
                     }
                 }).ToList();
 
@@ -323,11 +427,87 @@ namespace Microsoft.AspNet.OData.Test
 
             Assert.Equal(3, origin.DynamicProperties.Count); // include the origin dynamic properties
 
-            KeyValuePair<string, object> dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "Token");
-            Assert.Equal(new Guid("2E724E81-8462-4BA0-B920-DC87A61C8EA3"), dynamicProperty.Value);
+            KeyValuePair<string, object> dynamicPropertyBirthDay = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
+            Assert.Equal(new Date(2016, 1, 29), dynamicPropertyBirthDay.Value);
 
-            dynamicProperty = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
-            Assert.Equal(new Date(2016, 1, 29), dynamicProperty.Value);
+            string dynamicPropertyToken = origin.DynamicProperties.FirstOrDefault(e => e.Key == "Token")
+                .Value.ToString().ToUpperInvariant();
+
+            switch (dynamicPropertyToken)
+            {
+                case "2E724E81-8462-4BA0-B920-DC87A61C8EA3":
+                    // All changed non-dynamic properties: ["Street"]
+                    Assert.True(address.GetChangedPropertyNames().Count() == 1);
+                    break;
+
+                case "9B198CA0-9546-4162-A4C0-14EAA255ACA7":
+
+                    // All changed non-dynamic properties: ["Street", "LineB"]
+                    Assert.True(address.GetChangedPropertyNames().Count() == 2);
+
+                    Assert.Null(origin.LineA);
+
+                    Assert.NotNull(origin.LineB);
+                    Assert.Equal("DescriptionB", origin.LineB.Description);
+
+                    // Fee is not overwritten.
+                    Assert.Equal(OpenAddress.DefaultValue_Fee, origin.LineB.Fee);
+                    break;
+
+                case "A4D09554-5551-4B36-A1CB-CFBCDB1F4EAD":
+
+                    // All changed non-dynamic properties: ["Street", "LineA", "LineB"]
+                    Assert.True(address.GetChangedPropertyNames().Count() == 3);
+
+                    // --- LineA ---
+                    Assert.NotNull(origin.LineA);
+                    Assert.Equal("DescriptionA", origin.LineA.Description);
+
+                    // LineA.Fee is left as uninitialized.
+                    Assert.Equal(LineDetails.UninitializedValue_Fee, origin.LineA.Fee);
+
+                    Assert.NotNull(origin.LineA.PhoneInfo);
+                    Assert.Equal("ContactNameA", origin.LineA.PhoneInfo.ContactName);
+                    Assert.Equal(7654321, origin.LineA.PhoneInfo.PhoneNumber);
+
+                    // --- LineB ---
+                    Assert.NotNull(origin.LineB);
+                    Assert.Null(origin.LineB.Description);
+
+                    // LineB.Fee is originally initialized for OpenAddress is created for each customer.
+                    Assert.Equal(OpenAddress.DefaultValue_Fee, origin.LineB.Fee);
+
+                    Assert.NotNull(origin.LineB.PhoneInfo);
+                    Assert.Equal("ContactNameB", origin.LineB.PhoneInfo.ContactName);
+                    Assert.Equal(0, origin.LineB.PhoneInfo.PhoneNumber);
+                    break;
+
+                case "2D071BD4-E4FB-4639-8024-BBC173850441":
+                    // All changed non-dynamic properties: ["Street", "LineA"]
+                    Assert.True(address.GetChangedPropertyNames().Count() == 2);
+
+                    // --- LineA ---
+                    Assert.NotNull(origin.LineA);
+                    Assert.Equal("LineDetailsWithNewDeepSubNode.", origin.LineA.Description);
+                    Assert.Equal(LineDetails.UninitializedValue_Fee, origin.LineA.Fee);
+
+                    Assert.NotNull(origin.LineA.PhoneInfo);
+                    Assert.Equal("ContactNameA", origin.LineA.PhoneInfo.ContactName);
+                    Assert.Equal(0, origin.LineA.PhoneInfo.PhoneNumber);
+
+                    Assert.NotNull(origin.LineA.PhoneInfo.Spec);
+                    Assert.Null(origin.LineA.PhoneInfo.Spec.Make);
+                    Assert.Equal(6, origin.LineA.PhoneInfo.Spec.ScreenSize);
+
+                    // --- LineB ---
+                    Assert.NotNull(origin.LineB);
+                    break;
+
+                default:
+                    // Error
+                    Assert.True(false, "Unexpected token value " + dynamicPropertyToken);
+                    break;
+            }
 
             return Updated(customer);
         }
@@ -368,6 +548,8 @@ namespace Microsoft.AspNet.OData.Test
 
     public class OpenAddress
     {
+        internal const int DefaultValue_Fee = 20;
+
         public OpenAddress()
         {
             DynamicProperties = new Dictionary<string, object>();
@@ -376,5 +558,41 @@ namespace Microsoft.AspNet.OData.Test
         public string Street { get; set; }
         public string City { get; set; }
         public IDictionary<string, object> DynamicProperties { get; set; }
+
+        public LineDetails LineA { get; set; }
+
+        public LineDetails LineB { get; set; }
+    }
+
+    public class LineDetails
+    {
+        internal const int UninitializedValue_Fee = -1;
+
+        public LineDetails()
+        {
+            Fee = UninitializedValue_Fee;
+        }
+
+        public string Description { get; set; }
+
+        public int Fee { get; set; }
+
+        public Phone PhoneInfo { get; set; }
+    }
+
+    public class Phone
+    {
+        public string ContactName { get; set; }
+
+        public int PhoneNumber { get; set; }
+
+        public PhoneHardwareSpec Spec { get; set; }
+    }
+
+    public class PhoneHardwareSpec
+    {
+        public string Make { get; set; }
+
+        public int ScreenSize { get; set; }
     }
 }

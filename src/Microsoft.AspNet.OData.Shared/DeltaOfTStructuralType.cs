@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -28,13 +30,17 @@ namespace Microsoft.AspNet.OData
         private HashSet<string> _updatableProperties;
 
         private HashSet<string> _changedProperties;
+
+        // Nested resources or structures changed at this level.
+        private IDictionary<string, object> _deltaNestedResources;
+
         private TStructuralType _instance;
         private Type _entityType;
 
         private PropertyInfo _dynamicDictionaryPropertyinfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
- 
+
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -156,6 +162,33 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc/>
+        public override bool TryAddNestedResource(string name, object deltaNestedResource)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (!_updatableProperties.Contains(name))
+            {
+                return false;
+            }
+
+            if (_deltaNestedResources.ContainsKey(name))
+            {
+                // Ignore duplicated nested resource.
+                return false;
+            }
+
+            // Add the nested resource in the hierarchy.
+            // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which
+            // is used for keeping track of changed non-structural properties at current level.
+            _deltaNestedResources[name] = deltaNestedResource;
+
+            return true;
+        }
+
+        /// <inheritdoc/>
         public override bool TryGetPropertyValue(string name, out object value)
         {
             if (name == null)
@@ -167,7 +200,7 @@ namespace Microsoft.AspNet.OData
             {
                 if (_dynamicDictionaryCache == null)
                 {
-                    _dynamicDictionaryCache = 
+                    _dynamicDictionaryCache =
                         GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
                 }
 
@@ -177,11 +210,25 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            PropertyAccessor<TStructuralType> cacheHit;
-            if (_allProperties.TryGetValue(name, out cacheHit))
+            if (this._deltaNestedResources.ContainsKey(name))
             {
-                value = cacheHit.GetValue(_instance);
+                // If this is a nested resource, get the value from the dictionary of nested resources.
+                TypedDelta deltaNestedResource = (TypedDelta)_deltaNestedResources[name];
+                Debug.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+                Debug.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
+
+                value = deltaNestedResource.GetInstance();
                 return true;
+            }
+            else
+            {
+                // try to retrieve the value as property.
+                PropertyAccessor<TStructuralType> cacheHit;
+                if (_allProperties.TryGetValue(name, out cacheHit))
+                {
+                    value = cacheHit.GetValue(_instance);
+                    return true;
+                }
             }
 
             value = null;
@@ -234,19 +281,20 @@ namespace Microsoft.AspNet.OData
         /// Returns the instance that holds all the changes (and original values) being tracked by this Delta.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Not appropriate to be a property")]
-        public TStructuralType GetInstance()
+        internal override object GetInstance()
         {
             return _instance;
         }
 
         /// <summary>
         /// Returns the known properties that have been modified through this <see cref="Delta"/> as an
-        /// <see cref="IEnumerable{T}" /> of property Names. Does not include the names of the changed
-        /// dynamic properties.
+        /// <see cref="IEnumerable{T}" /> of property Names.
+        /// Includes the structural properties at current level.
+        /// Does not include the names of the changed dynamic properties.
         /// </summary>
         public override IEnumerable<string> GetChangedPropertyNames()
         {
-            return _changedProperties;
+            return _changedProperties.Concat(_deltaNestedResources.Keys);
         }
 
         /// <summary>
@@ -260,8 +308,8 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Copies the changed property values from the underlying entity (accessible via <see cref="GetInstance()" />) 
-        /// to the <paramref name="original"/> entity.
+        /// Copies the changed property values from the underlying entity (accessible via <see cref="GetInstance()" />)
+        /// to the <paramref name="original"/> entity recursively.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
         public void CopyChangedValues(TStructuralType original)
@@ -271,18 +319,76 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("original");
             }
 
+            // Delta parameter type cannot be derived type of original
+            // to prevent unrecognizable information from being applied to original resource.
             if (!_entityType.IsAssignableFrom(original.GetType()))
             {
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
             }
 
-            PropertyAccessor<TStructuralType>[] propertiesToCopy = GetChangedPropertyNames().Select(s => _allProperties[s]).ToArray();
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+
+            // For regular non-structural properties at current level.
+            PropertyAccessor<TStructuralType>[] propertiesToCopy =
+                this._changedProperties.Select(s => _allProperties[s]).ToArray();
             foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_instance, original);
             }
 
             CopyChangedDynamicValues(original);
+
+            // For nested resources.
+            foreach (string nestedResourceName in _deltaNestedResources.Keys)
+            {
+                // Patch for each nested resource changed under this TStructuralType.
+                dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
+                dynamic originalNestedResource = null;
+                if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
+                {
+                    throw Error.Argument(nestedResourceName, "Cannot find nested resource name '{0}' in parent resource type '{1}'",
+                        nestedResourceName, original.GetType());
+                }
+
+                if (originalNestedResource == null)
+                {
+                    // When patching original target of null value, directly set nested resource.
+                    dynamic deltaObject = _deltaNestedResources[nestedResourceName];
+                    dynamic instance = deltaObject.GetInstance();
+
+                    // Recursively patch up the instance with the nested resources.
+                    deltaObject.CopyChangedValues(instance);
+
+                    _allProperties[nestedResourceName].SetValue(original, instance);
+                }
+                else
+                {
+                    // Recursively patch the subtree.
+                    deltaNestedResource.CopyChangedValues(originalNestedResource);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the property object by the specified name.
+        /// </summary>
+        /// <param name="structural"></param>
+        /// <param name="propertyName"></param>
+        /// <param name="propertyRef">Output </param>
+        /// <returns></returns>
+        private static bool TryGetPropertyRef(TStructuralType structural, string propertyName,
+            out dynamic propertyRef)
+        {
+            propertyRef = null;
+            bool found = false;
+            PropertyInfo propertyInfo = structural.GetType().GetProperty(propertyName);
+            if (propertyInfo != null)
+            {
+                propertyRef = propertyInfo.GetValue(structural, null);
+                found = true;
+            }
+
+            return found;
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties
@@ -332,7 +438,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />) 
+        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />)
         /// to the <paramref name="original"/> entity.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
@@ -434,6 +540,7 @@ namespace Microsoft.AspNet.OData
 
             _instance = Activator.CreateInstance(structuralType) as TStructuralType;
             _changedProperties = new HashSet<string>();
+            _deltaNestedResources = new Dictionary<string, object>();
             _entityType = structuralType;
 
             _changedDynamicProperties = new HashSet<string>();

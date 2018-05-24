@@ -516,7 +516,7 @@ namespace Microsoft.AspNet.OData.Test
             }
 
             // Assert
-            Assert.Equal(delta.GetChangedPropertyNames(), new[] { propertyName });
+            Assert.Equal(new[] { propertyName }, delta.GetChangedPropertyNames());
             object value;
             Assert.True(delta.TryGetPropertyValue(propertyName, out value));
             Assert.Equal(expectedValue, value);
@@ -570,7 +570,7 @@ namespace Microsoft.AspNet.OData.Test
             }
 
             // Assert
-            Assert.Equal(delta.GetChangedPropertyNames(), new[] { propertyName });
+            Assert.Equal(new[] { propertyName }, delta.GetChangedPropertyNames() );
             object value;
             Assert.True(delta.TryGetPropertyValue(propertyName, out value));
             Assert.Equal(expectedValue, value);

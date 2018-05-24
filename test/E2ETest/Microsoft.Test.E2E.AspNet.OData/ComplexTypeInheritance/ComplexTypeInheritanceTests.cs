@@ -236,15 +236,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         public async Task PatchContainingEntity(string modelMode)
         {
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
-            string requestUri = serviceRootUri + "/Windows(3)";
+            string requestUri = serviceRootUri + "/Windows(1)";
 
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            // We should be able to PATCH nested resource with delta object of the same CLR type.
             var content = @"
 {
     'CurrentShape':
     {
         '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
-        'Radius':2,
+        'Radius':1,
         'Center':{'X':1,'Y':2},
         'HasBorder':true
     },
@@ -264,14 +266,45 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
             JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
             string name = (string)contentOfJObject["Name"];
-            Assert.True("AnotherPopup" == name);
+            Assert.True("CircleWindow" == name);
             int radius = (int)contentOfJObject["CurrentShape"]["Radius"];
-            Assert.True(2 == radius,
+            Assert.True(1 == radius,
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
 
             JArray windows = contentOfJObject["OptionalShapes"] as JArray;
             Assert.True(0 == windows.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}", 1, windows.Count, requestUri, contentOfString));
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // Patch ~/Widnows(3)
+        public async Task PatchContainingEntity_MismatchedRuntimeTypeError(string modelMode)
+        {
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)";
+
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            // Attempt to PATCH nested resource with delta object of the different CLR type
+            // will result an error.
+            var content = @"
+{
+    'CurrentShape':
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
+        'Radius':2,
+        'Center':{'X':1,'Y':2},
+        'HasBorder':true
+    },
+    'OptionalShapes': [ ]
+}";
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            request.Content = stringContent;
+            HttpResponseMessage response = await Client.SendAsync(request);
+            string contentOfString = await response.Content.ReadAsStringAsync();
+            Assert.True(HttpStatusCode.BadRequest == response.StatusCode);
         }
 
         [Theory]

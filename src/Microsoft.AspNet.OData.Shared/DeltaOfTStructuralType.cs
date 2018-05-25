@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.OData
         private IDictionary<string, object> _deltaNestedResources;
 
         private TStructuralType _instance;
-        private Type _entityType;
+        private Type _structuredType;
 
         private PropertyInfo _dynamicDictionaryPropertyinfo;
         private HashSet<string> _changedDynamicProperties;
@@ -92,11 +92,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc/>
-        public override Type EntityType
+        public override Type StructuredType
         {
             get
             {
-                return _entityType;
+                return _structuredType;
             }
         }
 
@@ -109,11 +109,23 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override void Clear()
         {
-            Reset(_entityType);
+            Reset(_structuredType);
         }
 
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
+        {
+            if (value is IDelta)
+            {
+                return TrySetNestedResourceInternal(name, value);
+            }
+            else
+            {
+                return TrySetPropertyValueInternal(name, value);
+            }
+        }
+
+        private bool TrySetPropertyValueInternal(string name, object value)
         {
             if (name == null)
             {
@@ -161,8 +173,7 @@ namespace Microsoft.AspNet.OData
             return true;
         }
 
-        /// <inheritdoc/>
-        public override bool TryAddNestedResource(string name, object deltaNestedResource)
+        private bool TrySetNestedResourceInternal(string name, object deltaNestedResource)
         {
             if (name == null)
             {
@@ -213,11 +224,15 @@ namespace Microsoft.AspNet.OData
             if (this._deltaNestedResources.ContainsKey(name))
             {
                 // If this is a nested resource, get the value from the dictionary of nested resources.
-                TypedDelta deltaNestedResource = (TypedDelta)_deltaNestedResources[name];
-                Debug.Assert(deltaNestedResource != null, "deltaNestedResource != null");
-                Debug.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
+                object deltaNestedResource = _deltaNestedResources[name];
 
-                value = deltaNestedResource.GetInstance();
+                Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+                Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
+
+                // Get the Delta<{NestedResourceType}>._instance using Reflection.
+                FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+                Contract.Assert(field != null, "field != null");
+                value = field.GetValue(deltaNestedResource);
                 return true;
             }
             else
@@ -281,7 +296,7 @@ namespace Microsoft.AspNet.OData
         /// Returns the instance that holds all the changes (and original values) being tracked by this Delta.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification = "Not appropriate to be a property")]
-        internal override object GetInstance()
+        public TStructuralType GetInstance()
         {
             return _instance;
         }
@@ -321,9 +336,9 @@ namespace Microsoft.AspNet.OData
 
             // Delta parameter type cannot be derived type of original
             // to prevent unrecognizable information from being applied to original resource.
-            if (!_entityType.IsAssignableFrom(original.GetType()))
+            if (!_structuredType.IsAssignableFrom(original.GetType()))
             {
-                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
+                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -346,7 +361,7 @@ namespace Microsoft.AspNet.OData
                 dynamic originalNestedResource = null;
                 if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
                 {
-                    throw Error.Argument(nestedResourceName, "Cannot find nested resource name '{0}' in parent resource type '{1}'",
+                    throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
                         nestedResourceName, original.GetType());
                 }
 
@@ -370,25 +385,24 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Gets the property object by the specified name.
+        /// Attempts to get the property by the specified name.
         /// </summary>
-        /// <param name="structural"></param>
-        /// <param name="propertyName"></param>
-        /// <param name="propertyRef">Output </param>
-        /// <returns></returns>
+        /// <param name="structural">The structural object.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="propertyRef">Output for property value.</param>
+        /// <returns>true if the property is found; false otherwise.</returns>
         private static bool TryGetPropertyRef(TStructuralType structural, string propertyName,
             out dynamic propertyRef)
         {
             propertyRef = null;
-            bool found = false;
             PropertyInfo propertyInfo = structural.GetType().GetProperty(propertyName);
             if (propertyInfo != null)
             {
                 propertyRef = propertyInfo.GetValue(structural, null);
-                found = true;
+                return true;
             }
 
-            return found;
+            return false;
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties
@@ -449,9 +463,9 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("original");
             }
 
-            if (!_entityType.IsInstanceOfType(original))
+            if (!_structuredType.IsInstanceOfType(original))
             {
-                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _entityType, original.GetType());
+                throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
             IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
@@ -541,7 +555,7 @@ namespace Microsoft.AspNet.OData
             _instance = Activator.CreateInstance(structuralType) as TStructuralType;
             _changedProperties = new HashSet<string>();
             _deltaNestedResources = new Dictionary<string, object>();
-            _entityType = structuralType;
+            _structuredType = structuralType;
 
             _changedDynamicProperties = new HashSet<string>();
             _dynamicDictionaryCache = null;
@@ -550,7 +564,7 @@ namespace Microsoft.AspNet.OData
         private void InitializeProperties(IEnumerable<string> updatableProperties)
         {
             _allProperties = _propertyCache.GetOrAdd(
-                _entityType,
+                _structuredType,
                 (backingType) => backingType
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
                     .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)

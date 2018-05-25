@@ -430,7 +430,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("DeltaTypeMismatch", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find nested resource name &apos;{0}&apos; in parent resource type &apos;{1}&apos;..
+        /// </summary>
+        internal static string DeltaNestedResourceNameNotFound
+        {
+            get
+            {
+                return ResourceManager.GetString("DeltaNestedResourceNameNotFound", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The dependent property type &apos;{0}&apos; is not same as the principal property type &apos;{1}. The dependent and principal properties must have must have same types in the same order..
         /// </summary>

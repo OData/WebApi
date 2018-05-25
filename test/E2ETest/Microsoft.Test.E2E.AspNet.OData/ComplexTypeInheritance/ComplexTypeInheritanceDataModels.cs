@@ -49,7 +49,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         public Point TopLeft { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        
+
         public Rectangle()
         {
 

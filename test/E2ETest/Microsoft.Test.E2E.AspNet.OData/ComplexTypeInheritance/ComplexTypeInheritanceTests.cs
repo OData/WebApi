@@ -293,7 +293,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 {
     'CurrentShape':
     {
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',
         'Radius':2,
         'Center':{'X':1,'Y':2},
         'HasBorder':true
@@ -305,6 +305,60 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             HttpResponseMessage response = await Client.SendAsync(request);
             string contentOfString = await response.Content.ReadAsStringAsync();
             Assert.True(HttpStatusCode.BadRequest == response.StatusCode);
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // Patch ~/Widnows(3)
+        public async Task PatchContainingEntity_DeltaIsBaseType(string modelMode)
+        {
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)";
+
+            // PATCH nested resource with delta object of the base CLR type should work.
+            // --- PATCH #1 ---
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            var content = @"
+{
+    'CurrentShape':
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+        'HasBorder':true
+    },
+    'OptionalShapes': [ ]
+}";
+            string contentOfString = await ExecuteHTTP(request, content);
+
+            // Only 'HasBoarder' is updated; 'Vertexes' still has the correct value.
+            Assert.Contains("\"HasBorder\":true", contentOfString);
+            Assert.Contains("\"Vertexes\":[{\"X\":0,\"Y\":0},{\"X\":2,\"Y\":0},{\"X\":2,\"Y\":2},{\"X\":0,\"Y\":2}]", contentOfString);
+
+
+            // --- PATCH #2 ---
+            request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            content = @"
+{
+    'CurrentShape':
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+        'Vertexes':[ {'X':1,'Y':2}, {'X':2,'Y':3}, {'X':4,'Y':8} ]
+    },
+    'OptionalShapes': [ ]
+}";
+            contentOfString = await ExecuteHTTP(request, content);
+
+            // Only 'Vertexes' is updated;  'HasBoarder' still has the correct value.
+            Assert.Contains("\"Vertexes\":[{\"X\":1,\"Y\":2},{\"X\":2,\"Y\":3},{\"X\":4,\"Y\":8}]", contentOfString);
+            Assert.Contains("\"HasBorder\":false", contentOfString);
+        }
+
+        private async Task<string> ExecuteHTTP(HttpRequestMessage request, string content)
+        {
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            request.Content = stringContent;
+            HttpResponseMessage response = await Client.SendAsync(request);
+            return await response.Content.ReadAsStringAsync();
         }
 
         [Theory]

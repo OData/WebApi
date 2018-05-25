@@ -597,7 +597,7 @@ namespace Microsoft.AspNet.OData.Test
             TypedDelta delta = new Delta<Customer>(actualType);
 
             // Act
-            Type actualActualType = delta.EntityType;
+            Type actualActualType = delta.StructuredType;
             Type actualExpectedType = delta.ExpectedClrType;
 
             // Assert

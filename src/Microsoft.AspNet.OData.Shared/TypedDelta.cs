@@ -14,21 +14,12 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets the actual type of the entity for which the changes are tracked.
         /// </summary>
-        public abstract Type EntityType { get; }
+        public abstract Type StructuredType { get; }
 
         /// <summary>
         /// Gets the expected type of the entity for which the changes are tracked.
         /// </summary>
         public abstract Type ExpectedClrType { get; }
-
-        /// <summary>
-        /// Returns the instance that holds all the changes at current level being tracked by this Delta.
-        /// </summary>
-        /// <returns>The internal resource instance.</returns>
-        internal virtual object GetInstance()
-        {
-            return null;
-        }
 
         /// <summary>
         /// Helper method to check whether the given type is Delta generic type.

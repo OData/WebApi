@@ -438,14 +438,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             // or delta resource accordingly.
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
 
-            if (readContext.IsDeltaOfT)
-            {
-                DeserializationHelpers.SetNestedResource(resource, propertyName, value);
-            }
-            else
-            {
-                DeserializationHelpers.SetProperty(resource, propertyName, value);
-            }
+            DeserializationHelpers.SetProperty(resource, propertyName, value);
         }
 
         private void ApplyDynamicResourceInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference resourceStructuredType,
@@ -510,7 +503,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             nestedReadContext.ResourceType = readContext.IsDeltaOfT
-                ? typeof(Delta<>).MakeGenericType(new Type[] { clrType })
+                ? typeof(Delta<>).MakeGenericType(clrType)
                 : clrType;
             return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
         }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
@@ -60,7 +59,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
             EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
             IEdmModel model)
-        {  
+        {
             if (propertyKind == EdmTypeKind.Collection && propertyValue.GetType() != typeof(EdmComplexObjectCollection)
                 && propertyValue.GetType() != typeof(EdmEnumObjectCollection))
             {
@@ -188,14 +187,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 delta.TrySetPropertyValue(propertyName, value);
             }
-        }
-
-        internal static void SetNestedResource(object resource, string nestedResourceName, object deltaNestedResource)
-        {
-            IDelta delta = resource as IDelta;
-            Debug.Assert(delta != null);
-
-            delta.TryAddNestedResource(nestedResourceName, deltaNestedResource);
         }
 
         internal static void SetDynamicProperty(object resource, string propertyName, object value,

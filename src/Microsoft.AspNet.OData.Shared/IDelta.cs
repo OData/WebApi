@@ -35,14 +35,6 @@ namespace Microsoft.AspNet.OData
         bool TrySetPropertyValue(string name, object value);
 
         /// <summary>
-        /// Attempts to add the delta nested resource.
-        /// </summary>
-        /// <param name="name">Name of the nested resource.</param>
-        /// <param name="deltaNestedResource">The delta object for the nested resource.</param>
-        /// <returns>True if the nested resource is added successfully; otherwise false.</returns>
-        bool TryAddNestedResource(string name, object deltaNestedResource);
-
-        /// <summary>
         /// Attempts to get the value of the Property called <paramref name="name"/> from the underlying Entity.
         /// </summary>
         /// <param name="name">The name of the Property</param>

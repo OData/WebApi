@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -10,18 +11,31 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-#if !NETCORE
-using System.Web.Http;
-#endif
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
-#if NETCORE
 using Microsoft.AspNetCore.Mvc;
-#endif
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using System.Web.Http;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.OData.Edm;
+using Newtonsoft.Json.Linq;
+using Xunit;
+#endif
 
 namespace Microsoft.AspNet.OData.Test
 {
@@ -144,8 +158,7 @@ namespace Microsoft.AspNet.OData.Test
         [Fact]
         public async Task OpenComplexType_PatchComplexTypeProperty()
         {
-            // Arrange
-            const string payload = "{" +
+            string payload = "{" +
               "\"Street\":\"UpdatedStreet\"," +
               "\"Token@odata.type\":\"#Guid\"," +
               "\"Token\":\"2E724E81-8462-4BA0-B920-DC87A61C8EA3\"," +
@@ -153,24 +166,12 @@ namespace Microsoft.AspNet.OData.Test
               "\"BirthDay\":\"2016-01-29\"" +
             "}";
 
-            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-            HttpClient client = GetClient();
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            await ExecutePatchRequest(payload);
         }
 
         [Fact]
         public async Task OpenComplexType_PatchNestedComplexTypeProperty()
         {
-            // Arrange
             string payload = @"{
                 ""Street"":""UpdatedStreet"",
                 ""Token@odata.type"":""#Guid"",
@@ -179,26 +180,13 @@ namespace Microsoft.AspNet.OData.Test
                 ""BirthDay"":""2016-01-29"",
                 ""LineB"": {""Description"": ""DescriptionB""}
             }";
-            payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
 
-            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-            HttpClient client = GetClient();
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            await ExecutePatchRequest(payload);
         }
 
         [Fact]
         public async Task OpenComplexType_PatchNestedComplexTypeProperty_DoubleNested()
         {
-            // Arrange
             string payload = @"{
                 ""Street"":""UpdatedStreet"",
                 ""Token@odata.type"":""#Guid"",
@@ -213,20 +201,8 @@ namespace Microsoft.AspNet.OData.Test
                     ""PhoneInfo"": {""ContactName"": ""ContactNameB""}
                 }
             }";
-            payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
 
-            const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
-           HttpClient client = GetClient();
-
-            // Act
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+            await ExecutePatchRequest(payload);
         }
 
         [Fact]
@@ -247,6 +223,13 @@ namespace Microsoft.AspNet.OData.Test
                     }
                 }
             }";
+
+            await ExecutePatchRequest(payload);
+        }
+
+        private async Task ExecutePatchRequest(string payload)
+        {
+            // Arrange
             payload = Regex.Replace(payload, @"\s*", "", RegexOptions.Multiline);
 
             const string requestUri = "http://localhost/odata/OpenCustomers(1)/Address";
@@ -256,6 +239,7 @@ namespace Microsoft.AspNet.OData.Test
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
@@ -318,8 +302,8 @@ namespace Microsoft.AspNet.OData.Test
                         Street = "Street " + i,
                         City = "City " + i,
                         DynamicProperties = new Dictionary<string, object> { { "IntProp", IntValues[i] } },
-                        // Leaving LineA as null
-                        LineB = new LineDetails() { Fee = OpenAddress.DefaultValue_Fee }
+                        LineA = null, // Leaving LineA as null
+                        LineB = new LineDetails() { Fee = LineDetails.DefaultValue_Fee }
                     }
                 }).ToList();
 
@@ -451,7 +435,7 @@ namespace Microsoft.AspNet.OData.Test
                     Assert.Equal("DescriptionB", origin.LineB.Description);
 
                     // Fee is not overwritten.
-                    Assert.Equal(OpenAddress.DefaultValue_Fee, origin.LineB.Fee);
+                    Assert.Equal(LineDetails.DefaultValue_Fee, origin.LineB.Fee);
                     break;
 
                 case "A4D09554-5551-4B36-A1CB-CFBCDB1F4EAD":
@@ -475,7 +459,7 @@ namespace Microsoft.AspNet.OData.Test
                     Assert.Null(origin.LineB.Description);
 
                     // LineB.Fee is originally initialized for OpenAddress is created for each customer.
-                    Assert.Equal(OpenAddress.DefaultValue_Fee, origin.LineB.Fee);
+                    Assert.Equal(LineDetails.DefaultValue_Fee, origin.LineB.Fee);
 
                     Assert.NotNull(origin.LineB.PhoneInfo);
                     Assert.Equal("ContactNameB", origin.LineB.PhoneInfo.ContactName);
@@ -548,8 +532,6 @@ namespace Microsoft.AspNet.OData.Test
 
     public class OpenAddress
     {
-        internal const int DefaultValue_Fee = 20;
-
         public OpenAddress()
         {
             DynamicProperties = new Dictionary<string, object>();
@@ -567,6 +549,7 @@ namespace Microsoft.AspNet.OData.Test
     public class LineDetails
     {
         internal const int UninitializedValue_Fee = -1;
+        internal const int DefaultValue_Fee = 20;
 
         public LineDetails()
         {

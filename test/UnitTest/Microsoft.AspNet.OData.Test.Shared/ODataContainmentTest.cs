@@ -94,7 +94,34 @@ namespace Microsoft.AspNet.OData.Test
                 "http://localhost/odata/$metadata#MyOrders/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/$entity",
                 (string)result["@odata.context"]);
         }
-        
+
+        [Fact]
+        public async Task GetMyOrder_NotFound()
+        {
+            // Arrange --- we don't have order with key id=3
+            string url = @"/odata/MyOrders(3)";
+            var requestUri = BaseAddress + url;
+
+            // Act
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var response = await _client.SendAsync(request);
+            Assert.True(response.StatusCode == HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task GetMyOrder_SpecialId()
+        {
+            // Arrange --- query with special Id -1 so that the controller attempts to
+            // return single result from an empty IQueryable.
+            string url = @"/odata/MyOrders(-1)";
+            var requestUri = BaseAddress + url;
+
+            // Act
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var response = await _client.SendAsync(request);
+            Assert.True(response.StatusCode == HttpStatusCode.NotFound);
+        }
+
         [Fact]
         public async Task GetOrderLine_Containment()
         {
@@ -133,7 +160,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("ns.Tag", tag["title"]);
             Assert.Equal("http://localhost/odata/MyOrders(1)/OrderLines(2)/ns.Tag", tag["target"]);
         }
-        
+
         [Fact]
         public async Task GetMyOrders_WithContainmentProperties()
         {
@@ -178,7 +205,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("http://localhost/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/OrderLines", mySpecialOrder["OrderLines@odata.navigationLink"]);
             Assert.Equal("http://localhost/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/OrderLines/$ref", mySpecialOrder["OrderLines@odata.associationLink"]);
         }
-        
+
         [Fact]
         public async Task ExpandOrderLines_Containment()
         {
@@ -247,12 +274,12 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             string payload = @"{ 
-                ""ID"": 3, 
-                ""Name"": ""def"" 
+                ""ID"": 3,
+                ""Name"": ""def""
             }";
             request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json"); 
-            
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
             var response = await _client.SendAsync(request);
             var result = JObject.Parse(await response.Content.ReadAsStringAsync());
 
@@ -272,8 +299,8 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             var request = new HttpRequestMessage(HttpMethod.Put, requestUri);
             string payload = @"{ 
-                ""ID"": 2, 
-                ""Name"": ""xyz"" 
+                ""ID"": 2,
+                ""Name"": ""xyz""
             }";
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -294,7 +321,7 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             var request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
             string payload = @"{ 
-                ""Name"": ""xyz"" 
+                ""Name"": ""xyz""
             }";
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -363,8 +390,8 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             string payload = @"{ 
-                ""ID"": 3, 
-                ""Name"": ""def"" 
+                ""ID"": 3,
+                ""Name"": ""def""
             }";
             request.Content = new StringContent(payload);
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -464,8 +491,16 @@ namespace Microsoft.AspNet.OData.Test
             [ODataRoute("MyOrders({orderId})")]
             public SingleResult<MyOrder> Get(int orderId)
             {
-                var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId);
-                return SingleResult.Create(result);
+                if (orderId == -1)
+                {
+                    // For special Id value of -1, try to create a single result that takes a query returning empty.
+                    return SingleResult.Create(Enumerable.Empty<MyOrder>().AsQueryable());
+                }
+                else
+                {
+                    var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId);
+                    return SingleResult.Create(result);
+                }
             }
 
             [EnableQuery]

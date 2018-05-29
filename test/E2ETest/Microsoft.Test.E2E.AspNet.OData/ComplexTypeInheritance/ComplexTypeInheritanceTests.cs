@@ -328,7 +328,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
     },
     'OptionalShapes': [ ]
 }";
-            string contentOfString = await ExecuteHTTP(request, content);
+            string contentOfString = await ExecuteAsync(request, content);
 
             // Only 'HasBoarder' is updated; 'Vertexes' still has the correct value.
             Assert.Contains("\"HasBorder\":true", contentOfString);
@@ -346,14 +346,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
     },
     'OptionalShapes': [ ]
 }";
-            contentOfString = await ExecuteHTTP(request, content);
+            contentOfString = await ExecuteAsync(request, content);
 
             // Only 'Vertexes' is updated;  'HasBoarder' still has the correct value.
             Assert.Contains("\"Vertexes\":[{\"X\":1,\"Y\":2},{\"X\":2,\"Y\":3},{\"X\":4,\"Y\":8}]", contentOfString);
             Assert.Contains("\"HasBorder\":false", contentOfString);
         }
 
-        private async Task<string> ExecuteHTTP(HttpRequestMessage request, string content)
+        private async Task<string> ExecuteAsync(HttpRequestMessage request, string content)
         {
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             request.Content = stringContent;

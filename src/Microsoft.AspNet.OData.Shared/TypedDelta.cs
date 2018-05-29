@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData
     public abstract class TypedDelta : Delta
     {
         /// <summary>
-        /// Gets the actual type of the entity for which the changes are tracked.
+        /// Gets the actual type of the structural object for which the changes are tracked.
         /// </summary>
         public abstract Type StructuredType { get; }
 

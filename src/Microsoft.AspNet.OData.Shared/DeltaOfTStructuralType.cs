@@ -10,6 +10,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -125,80 +126,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private bool TrySetPropertyValueInternal(string name, object value)
-        {
-            if (name == null)
-            {
-                throw Error.ArgumentNull("name");
-            }
-
-            if (_dynamicDictionaryPropertyinfo != null)
-            {
-                // Dynamic property can have the same name as the dynamic property dictionary.
-                if (name == _dynamicDictionaryPropertyinfo.Name ||
-                    !_allProperties.ContainsKey(name))
-                {
-                    if (_dynamicDictionaryCache == null)
-                    {
-                        _dynamicDictionaryCache =
-                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
-                    }
-
-                    _dynamicDictionaryCache[name] = value;
-                    _changedDynamicProperties.Add(name);
-                    return true;
-                }
-            }
-
-            if (!_updatableProperties.Contains(name))
-            {
-                return false;
-            }
-
-            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
-
-            if (value == null && !EdmLibHelpers.IsNullable(cacheHit.Property.PropertyType))
-            {
-                return false;
-            }
-
-            Type propertyType = cacheHit.Property.PropertyType;
-            if (value != null && !TypeHelper.IsCollection(propertyType) && !propertyType.IsAssignableFrom(value.GetType()))
-            {
-                return false;
-            }
-
-            cacheHit.SetValue(_instance, value);
-            _changedProperties.Add(name);
-            return true;
-        }
-
-        private bool TrySetNestedResourceInternal(string name, object deltaNestedResource)
-        {
-            if (name == null)
-            {
-                throw Error.ArgumentNull("name");
-            }
-
-            if (!_updatableProperties.Contains(name))
-            {
-                return false;
-            }
-
-            if (_deltaNestedResources.ContainsKey(name))
-            {
-                // Ignore duplicated nested resource.
-                return false;
-            }
-
-            // Add the nested resource in the hierarchy.
-            // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which
-            // is used for keeping track of changed non-structural properties at current level.
-            _deltaNestedResources[name] = deltaNestedResource;
-
-            return true;
-        }
-
         /// <inheritdoc/>
         public override bool TryGetPropertyValue(string name, out object value)
         {
@@ -237,7 +164,7 @@ namespace Microsoft.AspNet.OData
             }
             else
             {
-                // try to retrieve the value as property.
+                // try to retrieve the value of property.
                 PropertyAccessor<TStructuralType> cacheHit;
                 if (_allProperties.TryGetValue(name, out cacheHit))
                 {
@@ -379,76 +306,12 @@ namespace Microsoft.AspNet.OData
                 else
                 {
                     // Recursively patch the subtree.
+                    bool isDeltaType = TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
+                    Contract.Assert(isDeltaType, nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
+
                     deltaNestedResource.CopyChangedValues(originalNestedResource);
                 }
             }
-        }
-
-        /// <summary>
-        /// Attempts to get the property by the specified name.
-        /// </summary>
-        /// <param name="structural">The structural object.</param>
-        /// <param name="propertyName">Name of the property.</param>
-        /// <param name="propertyRef">Output for property value.</param>
-        /// <returns>true if the property is found; false otherwise.</returns>
-        private static bool TryGetPropertyRef(TStructuralType structural, string propertyName,
-            out dynamic propertyRef)
-        {
-            propertyRef = null;
-            PropertyInfo propertyInfo = structural.GetType().GetProperty(propertyName);
-            if (propertyInfo != null)
-            {
-                propertyRef = propertyInfo.GetValue(structural, null);
-                return true;
-            }
-
-            return false;
-        }
-
-        // Copy changed dynamic properties and leave the unchanged dynamic properties
-        private void CopyChangedDynamicValues(TStructuralType targetEntity)
-        {
-            if (_dynamicDictionaryPropertyinfo == null)
-            {
-                return;
-            }
-
-            if (_dynamicDictionaryCache == null)
-            {
-                _dynamicDictionaryCache =
-                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
-            }
-
-            IDictionary<string, object> fromDictionary = _dynamicDictionaryCache;
-            if (fromDictionary == null)
-            {
-                return;
-            }
-
-            IDictionary<string, object> toDictionary =
-                GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
-
-            IDictionary<string, object> tempDictionary = toDictionary != null
-                ? new Dictionary<string, object>(toDictionary)
-                : new Dictionary<string, object>();
-
-            foreach (string dynamicPropertyName in _changedDynamicProperties)
-            {
-                object dynamicPropertyValue = fromDictionary[dynamicPropertyName];
-
-                // a dynamic property value equal to null, it means to remove this dynamic property
-                if (dynamicPropertyValue == null)
-                {
-                    tempDictionary.Remove(dynamicPropertyName);
-                }
-                else
-                {
-                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
-                }
-            }
-
-            CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
-                targetEntity);
         }
 
         /// <summary>
@@ -477,48 +340,6 @@ namespace Microsoft.AspNet.OData
             CopyUnchangedDynamicValues(original);
         }
 
-        // Missing dynamic structural properties MUST be removed or set to null in *Put*
-        private void CopyUnchangedDynamicValues(TStructuralType targetEntity)
-        {
-            if (_dynamicDictionaryPropertyinfo == null)
-            {
-                return;
-            }
-
-            if (_dynamicDictionaryCache == null)
-            {
-                _dynamicDictionaryCache =
-                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
-            }
-
-            IDictionary<string, object> toDictionary =
-                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
-
-            if (_dynamicDictionaryCache == null)
-            {
-                if (toDictionary != null)
-                {
-                    toDictionary.Clear();
-                }
-            }
-            else
-            {
-                IDictionary<string, object> tempDictionary = toDictionary != null
-                    ? new Dictionary<string, object>(toDictionary)
-                    : new Dictionary<string, object>();
-
-                List<string> removedSet = tempDictionary.Keys.Except(_changedDynamicProperties).ToList();
-
-                foreach (string name in removedSet)
-                {
-                    tempDictionary.Remove(name);
-                }
-
-                CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
-                    targetEntity);
-            }
-        }
-
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
@@ -538,53 +359,6 @@ namespace Microsoft.AspNet.OData
         {
             CopyChangedValues(original);
             CopyUnchangedValues(original);
-        }
-
-        private void Reset(Type structuralType)
-        {
-            if (structuralType == null)
-            {
-                throw Error.ArgumentNull("structuralType");
-            }
-
-            if (!typeof(TStructuralType).IsAssignableFrom(structuralType))
-            {
-                throw Error.InvalidOperation(SRResources.DeltaEntityTypeNotAssignable, structuralType, typeof(TStructuralType));
-            }
-
-            _instance = Activator.CreateInstance(structuralType) as TStructuralType;
-            _changedProperties = new HashSet<string>();
-            _deltaNestedResources = new Dictionary<string, object>();
-            _structuredType = structuralType;
-
-            _changedDynamicProperties = new HashSet<string>();
-            _dynamicDictionaryCache = null;
-        }
-
-        private void InitializeProperties(IEnumerable<string> updatableProperties)
-        {
-            _allProperties = _propertyCache.GetOrAdd(
-                _structuredType,
-                (backingType) => backingType
-                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
-                    .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
-                    .ToDictionary(p => p.Property.Name));
-
-            if (updatableProperties != null)
-            {
-                _updatableProperties = new HashSet<string>(updatableProperties);
-                _updatableProperties.IntersectWith(_allProperties.Keys);
-            }
-            else
-            {
-                _updatableProperties = new HashSet<string>(_allProperties.Keys);
-            }
-
-            if (_dynamicDictionaryPropertyinfo != null)
-            {
-                _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
-            }
         }
 
         private static void CopyDynamicPropertyDictionary(IDictionary<string, object> source,
@@ -652,6 +426,236 @@ namespace Microsoft.AspNet.OData
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Attempts to get the property by the specified name.
+        /// </summary>
+        /// <param name="structural">The structural object.</param>
+        /// <param name="propertyName">Name of the property.</param>
+        /// <param name="propertyRef">Output for property value.</param>
+        /// <returns>true if the property is found; false otherwise.</returns>
+        private static bool TryGetPropertyRef(TStructuralType structural, string propertyName,
+            out dynamic propertyRef)
+        {
+            propertyRef = null;
+            PropertyInfo propertyInfo = structural.GetType().GetProperty(propertyName);
+            if (propertyInfo != null)
+            {
+                propertyRef = propertyInfo.GetValue(structural, null);
+                return true;
+            }
+
+            return false;
+        }
+
+        private void Reset(Type structuralType)
+        {
+            if (structuralType == null)
+            {
+                throw Error.ArgumentNull("structuralType");
+            }
+
+            if (!typeof(TStructuralType).IsAssignableFrom(structuralType))
+            {
+                throw Error.InvalidOperation(SRResources.DeltaEntityTypeNotAssignable, structuralType, typeof(TStructuralType));
+            }
+
+            _instance = Activator.CreateInstance(structuralType) as TStructuralType;
+            _changedProperties = new HashSet<string>();
+            _deltaNestedResources = new Dictionary<string, object>();
+            _structuredType = structuralType;
+
+            _changedDynamicProperties = new HashSet<string>();
+            _dynamicDictionaryCache = null;
+        }
+
+        private void InitializeProperties(IEnumerable<string> updatableProperties)
+        {
+            _allProperties = _propertyCache.GetOrAdd(
+                _structuredType,
+                (backingType) => backingType
+                    .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+                    .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
+                    .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
+                    .ToDictionary(p => p.Property.Name));
+
+            if (updatableProperties != null)
+            {
+                _updatableProperties = new HashSet<string>(updatableProperties);
+                _updatableProperties.IntersectWith(_allProperties.Keys);
+            }
+            else
+            {
+                _updatableProperties = new HashSet<string>(_allProperties.Keys);
+            }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
+            }
+        }
+
+        // Copy changed dynamic properties and leave the unchanged dynamic properties
+        private void CopyChangedDynamicValues(TStructuralType targetEntity)
+        {
+            if (_dynamicDictionaryPropertyinfo == null)
+            {
+                return;
+            }
+
+            if (_dynamicDictionaryCache == null)
+            {
+                _dynamicDictionaryCache =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
+            }
+
+            IDictionary<string, object> fromDictionary = _dynamicDictionaryCache;
+            if (fromDictionary == null)
+            {
+                return;
+            }
+
+            IDictionary<string, object> toDictionary =
+                GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
+
+            IDictionary<string, object> tempDictionary = toDictionary != null
+                ? new Dictionary<string, object>(toDictionary)
+                : new Dictionary<string, object>();
+
+            foreach (string dynamicPropertyName in _changedDynamicProperties)
+            {
+                object dynamicPropertyValue = fromDictionary[dynamicPropertyName];
+
+                // a dynamic property value equal to null, it means to remove this dynamic property
+                if (dynamicPropertyValue == null)
+                {
+                    tempDictionary.Remove(dynamicPropertyName);
+                }
+                else
+                {
+                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                }
+            }
+
+            CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
+                targetEntity);
+        }
+
+        // Missing dynamic structural properties MUST be removed or set to null in *Put*
+        private void CopyUnchangedDynamicValues(TStructuralType targetEntity)
+        {
+            if (_dynamicDictionaryPropertyinfo == null)
+            {
+                return;
+            }
+
+            if (_dynamicDictionaryCache == null)
+            {
+                _dynamicDictionaryCache =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: false);
+            }
+
+            IDictionary<string, object> toDictionary =
+                    GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, targetEntity, create: false);
+
+            if (_dynamicDictionaryCache == null)
+            {
+                if (toDictionary != null)
+                {
+                    toDictionary.Clear();
+                }
+            }
+            else
+            {
+                IDictionary<string, object> tempDictionary = toDictionary != null
+                    ? new Dictionary<string, object>(toDictionary)
+                    : new Dictionary<string, object>();
+
+                List<string> removedSet = tempDictionary.Keys.Except(_changedDynamicProperties).ToList();
+
+                foreach (string name in removedSet)
+                {
+                    tempDictionary.Remove(name);
+                }
+
+                CopyDynamicPropertyDictionary(tempDictionary, toDictionary, _dynamicDictionaryPropertyinfo,
+                    targetEntity);
+            }
+        }
+
+        private bool TrySetPropertyValueInternal(string name, object value)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                // Dynamic property can have the same name as the dynamic property dictionary.
+                if (name == _dynamicDictionaryPropertyinfo.Name ||
+                    !_allProperties.ContainsKey(name))
+                {
+                    if (_dynamicDictionaryCache == null)
+                    {
+                        _dynamicDictionaryCache =
+                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
+                    }
+
+                    _dynamicDictionaryCache[name] = value;
+                    _changedDynamicProperties.Add(name);
+                    return true;
+                }
+            }
+
+            if (!_updatableProperties.Contains(name))
+            {
+                return false;
+            }
+
+            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
+
+            if (value == null && !EdmLibHelpers.IsNullable(cacheHit.Property.PropertyType))
+            {
+                return false;
+            }
+
+            Type propertyType = cacheHit.Property.PropertyType;
+            if (value != null && !TypeHelper.IsCollection(propertyType) && !propertyType.IsAssignableFrom(value.GetType()))
+            {
+                return false;
+            }
+
+            cacheHit.SetValue(_instance, value);
+            _changedProperties.Add(name);
+            return true;
+        }
+
+        private bool TrySetNestedResourceInternal(string name, object deltaNestedResource)
+        {
+            if (name == null)
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (!_updatableProperties.Contains(name))
+            {
+                return false;
+            }
+
+            if (_deltaNestedResources.ContainsKey(name))
+            {
+                // Ignore duplicated nested resource.
+                return false;
+            }
+
+            // Add the nested resource in the hierarchy.
+            // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which
+            // is used for keeping track of changed non-structural properties at current level.
+            _deltaNestedResources[name] = deltaNestedResource;
+
+            return true;
         }
     }
 }

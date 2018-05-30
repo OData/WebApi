@@ -1,21 +1,21 @@
 ---
 layout: post
-title : "14.3 WebApi URI parser default setting updates: case-insensitive name token and unqualified functions & actions"
-description: "7.x WebApi Uri parser using case-insensitve name token and unqualified functions & actions"
+title : "14.3 WebApi URI parser default setting updates: case-insensitive names and unqualified functions & actions"
+description: "7.x WebApi URI parser using case-insensitve names and unqualified functions & actions"
 category: "14. 7.x Features "
 ---
 
 
 **OData Core Library** v7.x has introduced the following two usability improvement:
 
-* Uri parsing with case-insensitive name token, and 
+* Uri parsing with case-insensitive name, and 
 
 * Unqualified functions & actions, which are not required to have namespace prefix.
 
-Starting v7.0, these two functionality are supported by default in WebApi.
+Starting with WebAPI OData v7.0, these two behaviors are supported by default.
  
 ### Examples
-**Prior to WebApi v7.0**, for example, the following Uris are functional:
+**Prior to WebApi v7.0**, for example, the following Uris are supported:
 
 * GET /service/Customers?$filter=Id eq 5
 
@@ -35,20 +35,20 @@ and the combination of both case-insensitive and unqualified functions & actions
 
 
 ### Backward Compatibility
-Case-insensitive semantics is supported for type name, property name and function/action name. It will first try to resolve the name token with case-sensitive semantics and return the best match if found; otherwise case-insensitive semantics would be attempted, returning the unique match or throwing exception in case of multiple case-insensitive matches.
+Case-insensitive semantics is supported for type name, property name and function/action name. WebAPI OData will first try to resolve the name with case-sensitive semantics and return the best match if found; otherwise case-insensitive semantics are applied, returning the unique match or throwing an exception if multiple case-insensitive matches exist.
 
-With support for unqualified function & action, Uri parser will do namespace-qualified function & action resolution when the function name is namespace-qualified; otherwise all namespaces in the customer's model are treated as default namespaces, returning the unique match or throwing exception in case of multiple namespace-unqualified matches. 
+With support for unqualified function & action, the URI parser will do namespace-qualified function & action resolution when the operation name is namespace-qualified; otherwise all namespaces in the customer's model are treated as default namespaces, returning the unique match or throwing an exception if multiple unqualified matches exist.
 
-Therefore, existing working cases for WebApi prior to v7.0 are supposed to continue to work, with support for variances shown above added to WebApi v7.0.
+Because of the precedence rules applied, scenarios supported in previous versions of WebAPI continue to be supported with the same semantics, while new scenarios that previously returned errors are also are now supported.
 
-Please note that, even though case-insensitive and unqualified function & action supports are added as WebApi usability improvement, the best practice of service design of using case-insensitively unique name tokens is still strongly encouraged (see ["Service designers ...should avoid naming bound functions, actions, or derived types with the same name as a structural or navigation property of the type](http://docs.oasis-open.org/odata/odata/v4.01/cs01/part1-protocol/odata-v4.01-cs01-part1-protocol.html#_Toc505771104)). One particular example is that property and unqualified function with same name could result in failing to create operation segment as expected.
+Please note that, even though case-insensitive and unqualified function & action support is added as a usability improvement, services are strongly encouraged to use names that are unique regardless of case, and to [avoid naming bound functions, actions, or derived types with the same name as a property of the bound type](http://docs.oasis-open.org/odata/odata/v4.01/cs01/part1-protocol/odata-v4.01-cs01-part1-protocol.html#_Toc505771104). For example, a property and unqualified function with same name would resolve to a property name when the unqualified function may have been expected.
 
 
 ### Restoring the original behavior
-Even though the updated default values above are backward compatible, customer can still customize WebApi back to original behavior using dependency injection:
+Even though the new behavior is backward compatible for most scenarios, customers can configure WebAPI to enforce case sensitivity and namespace qualification, as in 6.x, using dependency injection:
 ~~~csharp
     // HttpConfiguration configuration
     IServiceProvider rootContainer = configuration.CreateODataRootContainer(routeName, 
-        builder => builder..AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new ODataUriResolver());
+        builder => builder.AddService<ODataUriResolver>(ServiceLifetime.Singleton, sp => new ODataUriResolver());
 ~~~
-The above code segment utilizes the WebApi's HttpConfigurationExtensions method CreateODataRootContainer to override the built-in WebApi singleton service type ODataUriResolver with an original default instance of ODataUriResolver in the IServiceProvider root container.
+The above code replaces the ODataUriResolver service that supports case-insensitivity and unqualified names with a default instance of ODataUriResolver that does not.

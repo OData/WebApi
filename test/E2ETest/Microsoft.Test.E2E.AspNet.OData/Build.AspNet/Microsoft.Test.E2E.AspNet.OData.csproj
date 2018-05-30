@@ -1549,6 +1549,9 @@
     <Compile Include="..\QueryComposition\SelectExpandTests.cs">
       <Link>QueryComposition\SelectExpandTests.cs</Link>
     </Compile>
+    <Compile Include="..\QueryComposition\SelectExpandEFTests.cs">
+      <Link>QueryComposition\SelectExpandEFTests.cs</Link>
+    </Compile>
     <Compile Include="..\QueryComposition\SelectTypeExplosionTests.cs">
       <Link>QueryComposition\SelectTypeExplosionTests.cs</Link>
     </Compile>

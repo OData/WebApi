@@ -16,7 +16,14 @@ namespace Microsoft.AspNet.OData.Builder
         public static void FindAllNavigationProperties(this ODataModelBuilder builder,
             StructuralTypeConfiguration configuration,
             IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations,
-            Stack<MemberInfo> path)
+            Stack<MemberInfo> path) =>
+            builder.FindAllNavigationPropertiesRecursive(configuration, navigations, path, new HashSet<Type>());
+
+        private static void FindAllNavigationPropertiesRecursive(this ODataModelBuilder builder,
+            StructuralTypeConfiguration configuration,
+            IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations,
+            Stack<MemberInfo> path,
+            HashSet<Type> typesAlreadyProcessed)
         {
             if (builder == null)
             {
@@ -41,7 +48,7 @@ namespace Microsoft.AspNet.OData.Builder
             IEnumerable<StructuralTypeConfiguration> thisAndBaseTypes = configuration.ThisAndBaseTypes();
             foreach (var config in thisAndBaseTypes)
             {
-                builder.FindNavigationProperties(config, navigations, path);
+                builder.FindNavigationProperties(config, navigations, path, typesAlreadyProcessed);
             }
 
             IEnumerable<StructuralTypeConfiguration> derivedTypes = builder.DerivedTypes(configuration);
@@ -54,7 +61,7 @@ namespace Microsoft.AspNet.OData.Builder
 
                 path.Push(TypeHelper.AsMemberInfo(config.ClrType));
 
-                builder.FindNavigationProperties(config, navigations, path);
+                builder.FindNavigationProperties(config, navigations, path, typesAlreadyProcessed);
 
                 path.Pop();
             }
@@ -62,7 +69,7 @@ namespace Microsoft.AspNet.OData.Builder
 
         private static void FindNavigationProperties(this ODataModelBuilder builder, StructuralTypeConfiguration configuration,
             IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navs,
-            Stack<MemberInfo> path)
+            Stack<MemberInfo> path, HashSet<Type> typesAlreadyProcessed)
         {
             Contract.Assert(builder != null);
             Contract.Assert(configuration != null);
@@ -86,19 +93,26 @@ namespace Microsoft.AspNet.OData.Builder
                         new Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>(configuration,
                             bindingPath, nav));
                 }
-                else if (complex != null)
+                else if (complex != null && !typesAlreadyProcessed.Contains(complex.RelatedClrType))
                 {
                     StructuralTypeConfiguration complexType = builder.GetTypeConfigurationOrNull(complex.RelatedClrType) as StructuralTypeConfiguration;
-                    builder.FindAllNavigationProperties(complexType, navs, path);
+
+                    // Prevent infinite recursion on self-referential complex types.
+                    typesAlreadyProcessed.Add(complex.RelatedClrType);
+                    builder.FindAllNavigationPropertiesRecursive(complexType, navs, path, typesAlreadyProcessed);
+                    typesAlreadyProcessed.Remove(complex.RelatedClrType);
                 }
-                else if (collection != null)
+                else if (collection != null && !typesAlreadyProcessed.Contains(collection.ElementType))
                 {
                     IEdmTypeConfiguration edmType = builder.GetTypeConfigurationOrNull(collection.ElementType);
                     if (edmType != null && edmType.Kind == EdmTypeKind.Complex)
                     {
                         StructuralTypeConfiguration complexType = (StructuralTypeConfiguration)edmType;
 
-                        builder.FindAllNavigationProperties(complexType, navs, path);
+                        // Prevent infinite recursion on self-referential complex types.
+                        typesAlreadyProcessed.Add(collection.ElementType);
+                        builder.FindAllNavigationPropertiesRecursive(complexType, navs, path, typesAlreadyProcessed);
+                        typesAlreadyProcessed.Remove(collection.ElementType);
                     }
                 }
 

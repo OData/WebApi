@@ -28,7 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
         }
 
-        private static int SelectCustomerPropertyCount =>
+        private static readonly int SelectCustomerPropertyCount =
             typeof(SelectCustomer).GetProperties().Length + 1;  // The +1 is for SelectOrders@odata.count.
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)

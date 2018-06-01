@@ -345,5 +345,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public int Id { get; set; }
         public virtual EFSelectCustomer SelectCustomer { get; set; }
     }
-}
-        
+}        

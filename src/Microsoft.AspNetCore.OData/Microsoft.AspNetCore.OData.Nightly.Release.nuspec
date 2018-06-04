@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package>
+  <metadata>
+    <id>Microsoft.AspNetCore.OData</id>
+    <title>Microsoft ASP.NET Core 2.0 for OData v4.0</title>
+    <version>$VersionFullSemantic$-Nightly$NightlyBuildVersion$</version>
+    <authors>Microsoft</authors>
+    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+    <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC and to support OData query syntax for your web APIs.</description>
+    <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Core MVC.</summary>
+    <language>en-US</language>
+    <projectUrl>http://odata.github.io</projectUrl>
+    <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <tags>Microsoft AspNetCore WebApi OData</tags>
+    <dependencies>
+        <group targetFramework=".NETStandard2.0">
+          <dependency id="Microsoft.AspNetCore.Mvc.Core" version="$AspNetCorePackageDependency$" />
+          <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjection2PackageDependency$" />
+          <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
+        </group>
+      </dependencies>
+  </metadata>
+  <files>
+    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.dll" target="lib\netstandard2.0" />
+    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.pdb" target="lib\netstandard2.0" />
+    <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.xml" target="lib\netstandard2.0" />
+    <file src="$SourcesRoot$\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
+    <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
+  </files>
+</package>

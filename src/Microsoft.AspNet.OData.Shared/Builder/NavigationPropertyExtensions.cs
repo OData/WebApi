@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
             IList<Tuple<StructuralTypeConfiguration, IList<MemberInfo>, NavigationPropertyConfiguration>> navigations,
             Stack<MemberInfo> path)
         {
-            return builder.FindAllNavigationPropertiesRecursive(configuration, navigations, path, new HashSet<Type>());
+            builder.FindAllNavigationPropertiesRecursive(configuration, navigations, path, new HashSet<Type>());
         }
 
         private static void FindAllNavigationPropertiesRecursive(this ODataModelBuilder builder,

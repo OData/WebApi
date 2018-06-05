@@ -31,7 +31,7 @@ if ($args.Count -eq 0)
     $TestType = 'Nightly'
     $Configuration = 'Release'
 }
-elseif ($args[0] -match 'quick' -or ($args[0] -match '-q')) 
+elseif ($args[0] -match 'quick' -or ($args[0] -match '-q'))
 {
     $TestType = "Quick"
 }

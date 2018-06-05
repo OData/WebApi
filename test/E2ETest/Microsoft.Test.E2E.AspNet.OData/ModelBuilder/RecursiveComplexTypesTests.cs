@@ -219,8 +219,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(RecursiveComplexTypes.UsersController));
-            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("recursive", "recursive", GetEdmModel(configuration));
         }
 

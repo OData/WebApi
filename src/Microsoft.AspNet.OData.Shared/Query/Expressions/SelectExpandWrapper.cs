@@ -26,9 +26,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public PropertyContainer Container { get; set; }
 
         /// <summary>
-        /// An ID to uniquely identify the model in the <see cref="ModelContainer"/>.
+        /// Edm model corresponding to request.
         /// </summary>
-        public string ModelID { get; set; }
+        public IEdmModel Model { get; set; }
 
         /// <inheritdoc />
         public object UntypedInstance { get; set; }
@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
         {
-            IEdmModel model = GetModel();
+            IEdmModel model = Model;
             Type elementType = GetElementType();
             return model.GetEdmTypeReference(elementType);
         }
@@ -64,7 +64,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (UseInstanceForProperties && UntypedInstance != null)
             {
                 _typedEdmEntityObject = _typedEdmEntityObject ??
-                    new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, GetModel());
+                    new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, Model);
 
                 return _typedEdmEntityObject.TryGetPropertyValue(propertyName, out value);
             }
@@ -88,7 +88,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Dictionary<string, object> dictionary = new Dictionary<string, object>();
             IEdmStructuredType type = GetEdmType().AsStructured().StructuredDefinition();
 
-            IPropertyMapper mapper = mapperProvider(GetModel(), type);
+            IPropertyMapper mapper = mapperProvider(Model, type);
             if (mapper == null)
             {
                 throw Error.InvalidOperation(SRResources.InvalidPropertyMapper, typeof(IPropertyMapper).FullName,
@@ -123,12 +123,5 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         protected abstract Type GetElementType();
-
-        private IEdmModel GetModel()
-        {
-            Contract.Assert(ModelID != null);
-
-            return ModelContainer.GetModel(ModelID);
-        }
     }
 }

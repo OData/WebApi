@@ -228,7 +228,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\FilterBinderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\Linq2ObjectsComparisonMethodsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\LinqParameterContainerTest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ModelContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandBinderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />

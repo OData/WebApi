@@ -2980,6 +2980,45 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
+        public void GetEdmModel_CreatesNavigationPropertyBindings_ForRecursiveLoopOfComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<CountryDetails>("countries");
+            builder.EntitySet<Organization>("orgs");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("orgs", typeof(Organization));
+            IEdmEntitySet companies = model.FindDeclaredEntitySet("orgs");
+
+            Assert.Collection(
+                companies.NavigationPropertyBindings,
+                nav => Assert.Equal("HeadquartersAddress/Country", nav.Path.Path));
+        }
+
+        [Fact]
+        public void GetEdmModel_CreatesNavigationPropertyBindings_ForMutuallyRecursiveLoopOfComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Car>("cars");
+            builder.EntitySet<Person>("people");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("people", typeof(Person));
+            IEdmEntitySet people = model.FindDeclaredEntitySet("people");
+
+            Assert.Collection(
+                people.NavigationPropertyBindings,
+                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path),
+                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path));
+        }
+
+        [Fact]
         public void ConventionModelBuilder_Work_With_ExpilitPropertyDeclare()
         {
             // Arrange

@@ -458,10 +458,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             AssertJsonEqual(ExpectedContent, actualContent);
         }
 
-        private static void AssertJsonEqual(string expectedJson, string actualJson) =>
+        private static void AssertJsonEqual(string expectedJson, string actualJson)
+        {
             Assert.Equal(NormalizeJson(expectedJson), NormalizeJson(actualJson));
+        }
 
-        private static string NormalizeJson(string json) => JsonConvert.SerializeObject(JsonConvert.DeserializeObject(json));
+        private static string NormalizeJson(string json)
+        {
+            return JsonConvert.SerializeObject(JsonConvert.DeserializeObject(json));
+        }
     }
 
     namespace RecursiveComplexTypes
@@ -553,7 +558,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             }
 
             [EnableQuery]
-            public IQueryable<RecursiveComplexTypesTests_UserEntity> Get() => Users.AsQueryable();
+            public IQueryable<RecursiveComplexTypesTests_UserEntity> Get()
+            {
+                return Users.AsQueryable();
+            }
         }
     }
 }

@@ -5,65 +5,65 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive
 {
-    public class RecursiveComplexTypesTests_UserEntity
+    public class UserEntity
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Customer Customer { get; set; }
+        public Customer Customer { get; set; }
 
-        public RecursiveComplexTypesTests_Address Address { get; set; }
+        public Address Address { get; set; }
 
-        public RecursiveComplexTypesTests_Directory HomeDirectory { get; set; }
+        public Directory HomeDirectory { get; set; }
 
-        public List<RecursiveComplexTypesTests_Field> CustomFields { get; set; }
+        public List<Field> CustomFields { get; set; }
 
-        public RecursiveComplexTypesTests_Base Base { get; set; }
+        public Base Base { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustCustomer
+    public class JustCustomer
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Customer Customer { get; set; }
+        public Customer Customer { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustAddress
+    public class JustAddress
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Address Address { get; set; }
+        public Address Address { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustHomeDirectory
+    public class JustHomeDirectory
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Directory HomeDirectory { get; set; }
+        public Directory HomeDirectory { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustCustomFields
+    public class JustCustomFields
     {
         public int ID { get; set; }
 
-        public List<RecursiveComplexTypesTests_Field> CustomFields { get; set; }
+        public List<Field> CustomFields { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustBase
+    public class JustBase
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Base Base { get; set; }
+        public Base Base { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_JustDerived
+    public class JustDerived
     {
         public int ID { get; set; }
 
-        public RecursiveComplexTypesTests_Derived Derived { get; set; }
+        public Derived Derived { get; set; }
     }
 
     // Scenario 1: Direct reference (complex type points to itself)
-    public class RecursiveComplexTypesTests_Address
+    public class Address
     {
         public string Street { get; set; }
 
@@ -71,56 +71,56 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive
 
         public string Country { get; set; }
 
-        public RecursiveComplexTypesTests_Address PreviousAddress { get; set; }
+        public Address PreviousAddress { get; set; }
     }
 
     // Scenario 2: Collection (complex type points to itself via a collection)
-    public class RecursiveComplexTypesTests_Field
+    public class Field
     {
         public string Name { get; set; }
 
         public string DataType { get; set; }
 
-        public List<RecursiveComplexTypesTests_Field> SubFields { get; set; }
+        public List<Field> SubFields { get; set; }
     }
 
     // Scenario 3: Composition (complex type points to itself via indirect recursion)
-    public class RecursiveComplexTypesTests_Customer
+    public class Customer
     {
         public string Name { get; set; }
 
-        public List<RecursiveComplexTypesTests_Account> Accounts { get; set; }
+        public List<Account> Accounts { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_Account
+    public class Account
     {
         public int Number { get; set; }
 
-        public RecursiveComplexTypesTests_Customer Owner { get; set; }
+        public Customer Owner { get; set; }
     }
 
     // Scenario 4: Inheritance (complex type has sub-type that points back to the base type via a collection)
-    public class RecursiveComplexTypesTests_File
+    public class File
     {
         public string Name { get; set; }
 
         public int Size { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_Directory : RecursiveComplexTypesTests_File
+    public class Directory : File
     {
-        public List<RecursiveComplexTypesTests_File> Files { get; set; }
+        public List<File> Files { get; set; }
     }
 
     // Scenario 5: Hybrid of mutual recursion and inheritance.
-    public class RecursiveComplexTypesTests_Base
+    public class Base
     {
-        public RecursiveComplexTypesTests_Derived Derived { get; set; }
+        public Derived Derived { get; set; }
     }
 
-    public class RecursiveComplexTypesTests_Derived : RecursiveComplexTypesTests_Base
+    public class Derived : Base
     {
-        public RecursiveComplexTypesTests_Base Base { get; set; }
+        public Base Base { get; set; }
     }
 }
 

@@ -26,18 +26,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void CanBuildModelWithDirectRecursiveReference()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_JustAddress>("justaddress");
+            builder.EntitySet<JustAddress>("justaddress");
             IEdmModel model = builder.GetEdmModel();
 
             var address =
-                model.SchemaElements.First(e => e.Name == typeof(RecursiveComplexTypesTests_Address).Name)
+                model.SchemaElements.First(e => e.Name == typeof(Address).Name)
                 as EdmComplexType;
 
             var previousAddressProperty =
                 address.Properties().Single(p => p.Name == "PreviousAddress") as EdmStructuralProperty;
 
             Assert.Equal(
-                typeof(RecursiveComplexTypesTests_Address).Name,
+                typeof(Address).Name,
                 previousAddressProperty.Type.AsComplex()?.ComplexDefinition().Name);
         }
 
@@ -45,18 +45,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void CanBuildModelWithCollectionRecursiveReference()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_JustCustomFields>("justcustomfields");
+            builder.EntitySet<JustCustomFields>("justcustomfields");
             IEdmModel model = builder.GetEdmModel();
 
             var field =
-                model.SchemaElements.First(e => e.Name == typeof(RecursiveComplexTypesTests_Field).Name)
+                model.SchemaElements.First(e => e.Name == typeof(Field).Name)
                 as EdmComplexType;
 
             var subFieldsProperty =
                 field.Properties().Single(p => p.Name == "SubFields") as EdmStructuralProperty;
 
             Assert.Equal(
-                typeof(RecursiveComplexTypesTests_Field).Name,
+                typeof(Field).Name,
                 subFieldsProperty.Type.AsCollection()?.ElementType().AsComplex()?.ComplexDefinition().Name);
         }
 
@@ -64,17 +64,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void CanBuildModelWithIndirectRecursiveReference()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_JustCustomer>("justcustomer");
+            builder.EntitySet<JustCustomer>("justcustomer");
             IEdmModel model = builder.GetEdmModel();
 
-            string customerTypeName = typeof(RecursiveComplexTypesTests_Customer).Name;
+            string customerTypeName = typeof(Customer).Name;
 
             var customer = model.SchemaElements.First(e => e.Name == customerTypeName) as EdmComplexType;
 
             var accountsProperty =
                 customer.Properties().Single(p => p.Name == "Accounts") as EdmStructuralProperty;
 
-            string accountTypeName = typeof(RecursiveComplexTypesTests_Account).Name;
+            string accountTypeName = typeof(Account).Name;
 
             Assert.Equal(
                 accountTypeName,
@@ -90,11 +90,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void CanBuildModelWithCollectionReferenceViaInheritance()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_JustHomeDirectory>("justhomedirectory");
+            builder.EntitySet<JustHomeDirectory>("justhomedirectory");
             IEdmModel model = builder.GetEdmModel();
 
-            string fileTypeName = typeof(RecursiveComplexTypesTests_File).Name;
-            string directoryTypeName = typeof(RecursiveComplexTypesTests_Directory).Name;
+            string fileTypeName = typeof(File).Name;
+            string directoryTypeName = typeof(Directory).Name;
 
             var file = model.SchemaElements.First(e => e.Name == fileTypeName) as EdmComplexType;
             var directory = model.SchemaElements.First(e => e.Name == directoryTypeName) as EdmComplexType;
@@ -112,12 +112,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void CanBuildModelWithMutuallyRecursiveInheritance()
         {
             var builder = new ODataConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_JustBase>("justbase");
-            builder.EntitySet<RecursiveComplexTypesTests_JustDerived>("justderived");
+            builder.EntitySet<JustBase>("justbase");
+            builder.EntitySet<JustDerived>("justderived");
             IEdmModel model = builder.GetEdmModel();
 
-            string baseTypeName = typeof(RecursiveComplexTypesTests_Base).Name;
-            string derivedTypeName = typeof(RecursiveComplexTypesTests_Derived).Name;
+            string baseTypeName = typeof(Base).Name;
+            string derivedTypeName = typeof(Derived).Name;
 
             var baseType = model.SchemaElements.First(e => e.Name == baseTypeName) as EdmComplexType;
             var derivedType = model.SchemaElements.First(e => e.Name == derivedTypeName) as EdmComplexType;
@@ -141,14 +141,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(RecursiveComplexTypes.UsersController));
+            configuration.AddControllers(typeof(UsersController));
             configuration.MapODataServiceRoute("recursive", "recursive", GetEdmModel(configuration));
         }
 
         private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
             var builder = configuration.CreateConventionModelBuilder();
-            builder.EntitySet<RecursiveComplexTypesTests_UserEntity>("Users");
+            builder.EntitySet<UserEntity>("Users");
             return builder.GetEdmModel();
         }
 
@@ -342,99 +342,96 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    namespace RecursiveComplexTypes
+    public class UsersController : TestODataController
     {
-        public class UsersController : TestODataController
+        public IList<UserEntity> Users { get; set; }
+
+        public UsersController()
         {
-            public IList<RecursiveComplexTypesTests_UserEntity> Users { get; set; }
-
-            public UsersController()
+            Users = Enumerable.Range(0, 2).Select(i => new UserEntity
             {
-                Users = Enumerable.Range(0, 2).Select(i => new RecursiveComplexTypesTests_UserEntity
+                ID = i,
+                Customer = new Customer
                 {
-                    ID = i,
-                    Customer = new RecursiveComplexTypesTests_Customer
+                    Name = string.Format("Customer{0}", i),
+                    Accounts = Enumerable.Range(0, i).Select(j => new Account
                     {
-                        Name = string.Format("Customer{0}", i),
-                        Accounts = Enumerable.Range(0, i).Select(j => new RecursiveComplexTypesTests_Account
+                        Number = j,
+                        Owner = new Customer
                         {
-                            Number = j,
-                            Owner = new RecursiveComplexTypesTests_Customer
-                            {
-                                Name = string.Format("Customer{0}", j)
-                            }
-                        }).ToList()
-                    },
-                    Address = new RecursiveComplexTypesTests_Address
-                    {
-                        Street = "123 Main Street",
-                        City = "Seattle",
-                        Country = "USA",
-                        PreviousAddress = new RecursiveComplexTypesTests_Address
-                        {
-                            Street = "111 West 8th Avenue",
-                            City = "Vancouver",
-                            Country = "Canada"
+                            Name = string.Format("Customer{0}", j)
                         }
-                    },
-                    HomeDirectory = new RecursiveComplexTypesTests_Directory
+                    }).ToList()
+                },
+                Address = new Address
+                {
+                    Street = "123 Main Street",
+                    City = "Seattle",
+                    Country = "USA",
+                    PreviousAddress = new Address
                     {
-                        Name = string.Format("/users/customer{0}", i),
-                        Size = 2048,
-                        Files = Enumerable.Range(0, i).Select(j => new RecursiveComplexTypesTests_File
-                        {
-                            Name = string.Format("users/customer{0}/file{1}", i, j),
-                            Size = 1024 * j
-                        }).Concat(Enumerable.Range(0, 2).Select(j => new RecursiveComplexTypesTests_Directory
-                        {
-                            Name = string.Format("users/customer{0}/subdir{1}", i, j),
-                            Size = 1024 * j,
-                            Files = Enumerable.Range(0, j).Select(k => new RecursiveComplexTypesTests_File
-                            {
-                                Name = string.Format("users/customers{0}/subdir{1}/file{2}", i, j, k),
-                                Size = 1024 * k
-                            }).ToList()
-                        })).ToList()
-                    },
-                    CustomFields = new[]
-                    {
-                        new RecursiveComplexTypesTests_Field
-                        {
-                            Name = "LastLoginDate",
-                            DataType = "DateTime"
-                        },
-                        new RecursiveComplexTypesTests_Field
-                        {
-                            Name = "Referrals",
-                            DataType = "ComplexType",
-                            SubFields = new[]
-                            {
-                                new RecursiveComplexTypesTests_Field
-                                {
-                                    Name = "Name",
-                                    DataType = "String"
-                                },
-                                new RecursiveComplexTypesTests_Field
-                                {
-                                    Name = "ReferralBonus",
-                                    DataType = "Double"
-                                }
-                            }.ToList()
-                        }
-                    }.ToList(),
-                    Base = new RecursiveComplexTypesTests_Derived()
-                    {
-                        Derived = new RecursiveComplexTypesTests_Derived(),
-                        Base = new RecursiveComplexTypesTests_Base()
+                        Street = "111 West 8th Avenue",
+                        City = "Vancouver",
+                        Country = "Canada"
                     }
-                }).ToList();
-            }
+                },
+                HomeDirectory = new Directory
+                {
+                    Name = string.Format("/users/customer{0}", i),
+                    Size = 2048,
+                    Files = Enumerable.Range(0, i).Select(j => new File
+                    {
+                        Name = string.Format("users/customer{0}/file{1}", i, j),
+                        Size = 1024 * j
+                    }).Concat(Enumerable.Range(0, 2).Select(j => new Directory
+                    {
+                        Name = string.Format("users/customer{0}/subdir{1}", i, j),
+                        Size = 1024 * j,
+                        Files = Enumerable.Range(0, j).Select(k => new File
+                        {
+                            Name = string.Format("users/customers{0}/subdir{1}/file{2}", i, j, k),
+                            Size = 1024 * k
+                        }).ToList()
+                    })).ToList()
+                },
+                CustomFields = new[]
+                {
+                    new Field
+                    {
+                        Name = "LastLoginDate",
+                        DataType = "DateTime"
+                    },
+                    new Field
+                    {
+                        Name = "Referrals",
+                        DataType = "ComplexType",
+                        SubFields = new[]
+                        {
+                            new Field
+                            {
+                                Name = "Name",
+                                DataType = "String"
+                            },
+                            new Field
+                            {
+                                Name = "ReferralBonus",
+                                DataType = "Double"
+                            }
+                        }.ToList()
+                    }
+                }.ToList(),
+                Base = new Derived()
+                {
+                    Derived = new Derived(),
+                    Base = new Base()
+                }
+            }).ToList();
+        }
 
-            [EnableQuery]
-            public IQueryable<RecursiveComplexTypesTests_UserEntity> Get()
-            {
-                return Users.AsQueryable();
-            }
+        [EnableQuery]
+        public IQueryable<UserEntity> Get()
+        {
+            return Users.AsQueryable();
         }
     }
 }

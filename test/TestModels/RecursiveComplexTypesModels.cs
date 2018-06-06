@@ -5,63 +5,6 @@ using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive
 {
-    public class UserEntity
-    {
-        public int ID { get; set; }
-
-        public Customer Customer { get; set; }
-
-        public Address Address { get; set; }
-
-        public Directory HomeDirectory { get; set; }
-
-        public List<Field> CustomFields { get; set; }
-
-        public Base Base { get; set; }
-    }
-
-    public class JustCustomer
-    {
-        public int ID { get; set; }
-
-        public Customer Customer { get; set; }
-    }
-
-    public class JustAddress
-    {
-        public int ID { get; set; }
-
-        public Address Address { get; set; }
-    }
-
-    public class JustHomeDirectory
-    {
-        public int ID { get; set; }
-
-        public Directory HomeDirectory { get; set; }
-    }
-
-    public class JustCustomFields
-    {
-        public int ID { get; set; }
-
-        public List<Field> CustomFields { get; set; }
-    }
-
-    public class JustBase
-    {
-        public int ID { get; set; }
-
-        public Base Base { get; set; }
-    }
-
-    public class JustDerived
-    {
-        public int ID { get; set; }
-
-        public Derived Derived { get; set; }
-    }
-
     // Scenario 1: Direct reference (complex type points to itself)
     public class Address
     {

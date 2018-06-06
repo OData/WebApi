@@ -1271,8 +1271,8 @@
     <Compile Include="..\..\..\TestModels\RecursiveComplexTypesModels.cs" >
       <Link>ModelBuilder\RecursiveComplexTypesModels.cs</Link>
     </Compile>
-    <Compile Include="..\ModelBuilder\RecursiveComplexTypesTests.cs">
-      <Link>ModelBuilder\RecursiveComplexTypesTests.cs</Link>
+    <Compile Include="..\ModelBuilder\RecursiveComplexTypesE2ETests.cs">
+      <Link>ModelBuilder\RecursiveComplexTypesE2ETests.cs</Link>
     </Compile>
     <Compile Include="..\ModelBuilder\SpecialCharactersLinkGenerationTests.cs">
       <Link>ModelBuilder\SpecialCharactersLinkGenerationTests.cs</Link>

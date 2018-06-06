@@ -1268,7 +1268,7 @@
     <Compile Include="..\ModelBuilder\PropertyTests.cs">
       <Link>ModelBuilder\PropertyTests.cs</Link>
     </Compile>
-    <Compile Include="..\ModelBuilder\RecursiveComplexTypesModels.cs" >
+    <Compile Include="..\..\..\TestModels\RecursiveComplexTypesModels.cs" >
       <Link>ModelBuilder\RecursiveComplexTypesModels.cs</Link>
     </Compile>
     <Compile Include="..\ModelBuilder\RecursiveComplexTypesTests.cs">

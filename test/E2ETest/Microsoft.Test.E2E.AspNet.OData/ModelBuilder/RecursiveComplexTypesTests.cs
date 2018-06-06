@@ -31,6 +31,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public RecursiveComplexTypesTests_Directory HomeDirectory { get; set; }
 
         public List<RecursiveComplexTypesTests_Field> CustomFields { get; set; }
+
+        public RecursiveComplexTypesTests_Base Base { get; set; }
     }
 
     public class RecursiveComplexTypesTests_JustCustomer
@@ -59,6 +61,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public int ID { get; set; }
 
         public List<RecursiveComplexTypesTests_Field> CustomFields { get; set; }
+    }
+
+    public class RecursiveComplexTypesTests_JustBase
+    {
+        public int ID { get; set; }
+
+        public RecursiveComplexTypesTests_Base Base { get; set; }
+    }
+
+    public class RecursiveComplexTypesTests_JustDerived
+    {
+        public int ID { get; set; }
+
+        public RecursiveComplexTypesTests_Derived Derived { get; set; }
     }
 
     // Scenario 1: Direct reference (complex type points to itself)
@@ -109,6 +125,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
     public class RecursiveComplexTypesTests_Directory : RecursiveComplexTypesTests_File
     {
         public List<RecursiveComplexTypesTests_File> Files { get; set; }
+    }
+
+    // Scenario 5: Hybrid of mutual recursion and inheritance.
+    public class RecursiveComplexTypesTests_Base
+    {
+        public RecursiveComplexTypesTests_Derived Derived { get; set; }
+    }
+
+    public class RecursiveComplexTypesTests_Derived : RecursiveComplexTypesTests_Base
+    {
+        public RecursiveComplexTypesTests_Base Base { get; set; }
     }
 
     public class RecursiveComplexTypesTests : WebHostTestBase
@@ -206,6 +233,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             Assert.Equal(
                 fileTypeName,
                 filesProperty.Type.AsCollection()?.ElementType().AsComplex()?.ComplexDefinition().Name);
+        }
+
+        [Fact]
+        public void CanBuildModelWithMutuallyRecursiveInheritance()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<RecursiveComplexTypesTests_JustBase>("justbase");
+            builder.EntitySet<RecursiveComplexTypesTests_JustDerived>("justderived");
+            IEdmModel model = builder.GetEdmModel();
+
+            string baseTypeName = typeof(RecursiveComplexTypesTests_Base).Name;
+            string derivedTypeName = typeof(RecursiveComplexTypesTests_Derived).Name;
+
+            var baseType = model.SchemaElements.First(e => e.Name == baseTypeName) as EdmComplexType;
+            var derivedType = model.SchemaElements.First(e => e.Name == derivedTypeName) as EdmComplexType;
+
+            Assert.Equal(baseTypeName, derivedType.BaseComplexType()?.Name);
+
+            var baseProperty = derivedType.Properties().Single(p => p.Name == "Base") as EdmStructuralProperty;
+            var derivedProperty = baseType.Properties().Single(p => p.Name == "Derived") as EdmStructuralProperty;
+
+            Assert.Equal(baseTypeName, baseProperty.Type.AsComplex()?.ComplexDefinition().Name);
+            Assert.Equal(derivedTypeName, derivedProperty.Type.AsComplex()?.ComplexDefinition().Name);
         }
     }
 
@@ -306,7 +356,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                         }
                     ]
                 }
-            ]
+            ],
+            ""Base"": {
+                ""Derived"": {
+                    ""Derived"": null,
+                    ""Base"": null
+                },
+                ""Base"": {
+                    ""Derived"": null
+                }
+            }
         },
         {
             ""ID"": 1,
@@ -380,7 +439,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                         }
                     ]
                 }
-            ]
+            ],
+            ""Base"": {
+                ""Derived"": {
+                    ""Derived"": null,
+                    ""Base"": null
+                },
+                ""Base"": {
+                    ""Derived"": null
+                }
+            }
         }
     ]
 }";
@@ -475,7 +543,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                                 }
                             }.ToList()
                         }
-                    }.ToList()
+                    }.ToList(),
+                    Base = new RecursiveComplexTypesTests_Derived()
+                    {
+                        Derived = new RecursiveComplexTypesTests_Derived(),
+                        Base = new RecursiveComplexTypesTests_Base()
+                    }
                 }).ToList();
             }
 

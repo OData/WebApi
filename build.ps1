@@ -43,7 +43,7 @@ elseif ($args[0] -match 'EnableSkipStrongName')
 {
     $TestType = "EnableSkipStrongName"
 }
-else 
+else
 {
     Error("Unknown input ""$args"". It can be empty or ""quick|DisableSkipStrongName|EnableSkipStrongName"".")
     exit

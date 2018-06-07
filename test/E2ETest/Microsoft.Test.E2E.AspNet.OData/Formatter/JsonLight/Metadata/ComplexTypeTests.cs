@@ -28,6 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         {
             configuration.MapODataServiceRoute("Complex", "Complex", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.AddODataQueryFilter();
+            configuration.Select().Expand().Filter().OrderBy().Count().MaxTop(100);
         }
 
         protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -84,6 +85,39 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
                     JsonAssert.PropertyEquals("#Collection(String)", "StringListProperty@odata.type", complexProperty);
                 }
             }
+        }
+
+        [Theory]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=StringListProperty")]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty")]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true")]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true&$select=ComplexProperty")]
+
+        /* $count for nested resource not supported in WebAPI; alternative could be bound function (see BoundFunctionInDollarFilter).
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$filter=StringListProperty/$count gt 0")]
+        */
+
+        /* Error: "A path within the select or expand query option is not supported."
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty/StringListProperty")]
+        */
+
+        /* Error: "Property 'ComplexProperty' on type 'Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Model.EntityWithComplexProperties' is not a navigation property or complex property. Only navigation properties can be expanded."
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$expand=ComplexProperty")]
+        */
+
+        public async Task ODataTypeAnnotationShouldAppearForComplexTypesLikeCollectionAndUserDefinedTypes_xyz(string acceptHeader, string uriPath)
+        {
+            //Arrange
+            string requestUrl = BaseAddress.ToLowerInvariant() + uriPath;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.SetAcceptHeader(acceptHeader);
+
+            //Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+            JObject result = await response.Content.ReadAsObject<JObject>();
+
+            //Assert
+            JsonAssert.ContainsProperty("value", result);
         }
     }
 }

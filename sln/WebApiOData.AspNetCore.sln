@@ -19,9 +19,14 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.Test", "..\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj", "{2B8085F7-3625-489E-A963-E29C2BD1AA76}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.TestModels", "..\test\TestModels\Microsoft.AspNetCore.OData.TestModels\Microsoft.AspNetCore.OData.TestModels.csproj", "{1057BD78-346C-4F43-9831-03559D5AC23F}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.TestModels.Shared", "..\test\TestModels\Microsoft.AspNet.OData.TestModels.Shared\Microsoft.AspNet.OData.TestModels.Shared.shproj", "{D3840E02-A7D9-495C-9D45-EC549380CAFA}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
+		..\test\TestModels\Microsoft.AspNet.OData.TestModels.Shared\Microsoft.AspNet.OData.TestModels.Shared.projitems*{d3840e02-a7d9-495c-9d45-ec549380cafa}*SharedItemsImports = 13
 		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -48,6 +53,12 @@ Global
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1057BD78-346C-4F43-9831-03559D5AC23F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +69,8 @@ Global
 		{0D53FCCE-2173-4FDB-A552-C3BBB71DDC49} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
 		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
+		{1057BD78-346C-4F43-9831-03559D5AC23F} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
+		{D3840E02-A7D9-495C-9D45-EC549380CAFA} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {731B144D-90AE-4567-B337-7CFE9965AACC}

@@ -1268,9 +1268,6 @@
     <Compile Include="..\ModelBuilder\PropertyTests.cs">
       <Link>ModelBuilder\PropertyTests.cs</Link>
     </Compile>
-    <Compile Include="..\..\..\TestModels\RecursiveComplexTypesModels.cs" >
-      <Link>ModelBuilder\RecursiveComplexTypesModels.cs</Link>
-    </Compile>
     <Compile Include="..\ModelBuilder\RecursiveComplexTypesE2ETests.cs">
       <Link>ModelBuilder\RecursiveComplexTypesE2ETests.cs</Link>
     </Compile>
@@ -1567,6 +1564,10 @@
     <ProjectReference Include="..\..\..\..\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj">
       <Project>{3571a6b6-b859-4fa2-a96f-40956bfc3837}</Project>
       <Name>Microsoft.AspNetCore.OData</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\TestModels\Microsoft.AspNetCore.OData.TestModels\Microsoft.AspNetCore.OData.TestModels.csproj">
+      <Project>{d19ed849-3ad9-46cd-b972-3e4a30c35b8e}</Project>
+      <Name>Microsoft.AspNetCore.OData.TestModels</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

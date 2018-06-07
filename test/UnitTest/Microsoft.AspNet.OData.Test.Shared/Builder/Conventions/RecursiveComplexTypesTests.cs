@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive;
+using Microsoft.AspNet.OData.TestModels.Recursive;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;
 using Xunit;

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <Import Project="..\..\..\tools\WebStack.settings.targets" />
+  <PropertyGroup>
+    <OutputPath>$(WebStackRootPath)bin\$(Configuration)\TestModels\AspNetCore\</OutputPath>
+    <CodeAnalysisRuleSet>..\..\Relaxed.ruleset</CodeAnalysisRuleSet>
+    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETCORE;NETCORE2x;NOT_CLS_COMPLIANT</DefineConstants>
+    <RootNamespace>Microsoft.AspNet.OData.TestModels</RootNamespace>
+    <!-- Let's generate our own assembly info -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+  <Import Project="..\Microsoft.AspNet.OData.TestModels.Shared\Microsoft.AspNet.OData.TestModels.Shared.projitems" Label="Shared" />
+
+</Project>

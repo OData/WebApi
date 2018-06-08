@@ -35,7 +35,9 @@
 
   <!-- Unit test assemblies and helpers -->
   <assembly name="Microsoft.AspNet.OData.Test"/>
+  <assembly name="Microsoft.AspNet.OData.TestModels"/>
   <assembly name="Microsoft.AspNetCore.OData.Test"/>
+  <assembly name="Microsoft.AspNetCore.OData.TestModels"/>
   <assembly name="Microsoft.Test.E2E.AspNetCore.OData"/>
   <assembly name="Microsoft.AspNet.Facebook.Test"/>
   <assembly name="Microsoft.Web.Helpers.Test"/>

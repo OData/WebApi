@@ -35,6 +35,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ComplexTypeTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ContainmentPathBuilderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\RecursiveComplexTypesTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\RecursiveComplexTypesModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DynamicPropertyDictionaryAnnotationTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\EdmModelAsserts.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\EdmTypeConfigurationExtensionsTest.cs" />
@@ -103,9 +104,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderHeader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\OrderLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\PropertyAlias.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)\..\..\TestModels\RecursiveComplexTypesModels.cs">
-      <Link>Builder\TestModels\RecursiveComplexTypesModels.cs</Link>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\RecursiveModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\SpecialOrderLine.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\TestModels\Address.cs" />

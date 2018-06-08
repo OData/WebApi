@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.AspNet.OData.TestModels.Recursive
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive
 {
     // Scenario 1: Direct reference (complex type points to itself)
     public class Address

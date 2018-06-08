@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.TestModels.Recursive;
+using Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;

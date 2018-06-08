@@ -138,10 +138,6 @@
       <Project>{a6f9775d-f7e2-424e-8363-79644a73038f}</Project>
       <Name>Microsoft.AspNet.OData</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\TestModels\Microsoft.AspNet.OData.TestModels\Microsoft.AspNet.OData.TestModels.csproj">
-      <Project>{f36c54d2-a268-4b76-86d3-dd8742031e9e}</Project>
-      <Name>Microsoft.AspNet.OData.TestModels</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />

@@ -36,7 +36,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj" />
-    <ProjectReference Include="..\..\TestModels\Microsoft.AspNetCore.OData.TestModels\Microsoft.AspNetCore.OData.TestModels.csproj" />
   </ItemGroup>
 
   <ItemGroup>

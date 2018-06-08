@@ -670,6 +670,9 @@ namespace Microsoft.AspNet.OData
             var enumerator = queryable.GetEnumerator();
             try
             {
+                // ATTEMPT 1: throws here
+                // Exception: 
+                // NotSupportedException: Unable to create a constant value of type 'Microsoft.OData.Edm.EdmModel'. Only primitive types or enumeration types are supported in this context.
                 var result = enumerator.MoveNext() ? enumerator.Current : null;
 
                 if (enumerator.MoveNext())

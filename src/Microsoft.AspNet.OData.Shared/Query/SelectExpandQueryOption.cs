@@ -189,7 +189,35 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, queryable);
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, this);
+            IQueryable result = SelectExpandBinder.Bind(queryable, updatedSettings, this);
+
+            /*
+            // ATTEMPT 2: Attempt to add the model to the SelectExpandWrapper once the object has been created. I didn't find any points
+            // where the SelectExpandWrapper is created and the Bind method is the closest I've traced to it; therefore I have to cast the object
+            // to SelectExpandWrapper first and then add the model. This approach doesn't work as there are some parts of the code later on that
+            // expect Expressions instead of SelectExpandWrapper. (Perhaps there's a way to cast it back? Just thought this recently, haven't tried it.)
+            // This approach is also a bit non-performant as it's converting back and forth between IQueryable and List, but it does certainly cast
+            // to SelectExpandWrapper and we are able to set the Model. There is also an issue later on in a test run where for some reason,
+            // all but one object in the IQueryable have the Model set and therefore throws at that point.
+            //
+            // Example expected type: System.Linq.EnumerableQuery<Microsoft.AspNet.OData.Query.Expressions.SelectExpandBinder.SelectAllAndExpand<Microsoft.AspNet.OData.Test.SelectExpandTestCustomer>>
+            // Resulting type with this change: System.Linq.EnumerableQuery<Microsoft.AspNet.OData.Query.Expressions.SelectExpandWrapper>
+            //
+            // Sample test case to debug that will hit this code path: SelectExpand_Works_WithExpandStar (unit test project)
+            var list = result.OfType<SelectExpandWrapper>().ToList(); // need to assert that all items are actually SelectExpandWrapper
+            foreach (var item in list)
+            {
+                SelectExpandWrapper selectExpandWrapper = item as SelectExpandWrapper;
+                if (selectExpandWrapper != null)
+                {
+                    selectExpandWrapper.Model = Context.Model;
+                }
+            }
+
+            return list.AsQueryable();
+            */
+
+            return result;
         }
 
         /// <summary>
@@ -215,7 +243,19 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, query: null);
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, this);
+            object result = SelectExpandBinder.Bind(entity, updatedSettings, this);
+
+            /*
+            // Part of ATTEMPT 2.
+            // Sample test case that will hit this code path: Levels_Works_WithMaxLevelInNestedExpand (unit test project)
+            SelectExpandWrapper selectExpandWrapper = result as SelectExpandWrapper;
+            if (selectExpandWrapper != null)
+            {
+                selectExpandWrapper.Model = Context.Model;
+            }
+            */
+
+            return result;
         }
 
         /// <summary>

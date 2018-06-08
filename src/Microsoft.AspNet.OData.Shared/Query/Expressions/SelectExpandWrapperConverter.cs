@@ -40,6 +40,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             ISelectExpandWrapper selectExpandWrapper = value as ISelectExpandWrapper;
             if (selectExpandWrapper != null)
             {
+                // ATTEMPT 3: sample unit test throws here: ODataQueryOptions_SetToApplied because
+                // SelectExpandWrapper.Model is null.
                 serializer.Serialize(writer, selectExpandWrapper.ToDictionary(_mapperProvider));
             }
         }

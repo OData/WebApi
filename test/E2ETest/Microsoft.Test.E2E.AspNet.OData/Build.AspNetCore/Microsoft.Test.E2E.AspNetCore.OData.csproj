@@ -1268,6 +1268,12 @@
     <Compile Include="..\ModelBuilder\PropertyTests.cs">
       <Link>ModelBuilder\PropertyTests.cs</Link>
     </Compile>
+    <Compile Include="..\ModelBuilder\RecursiveComplexTypesModels.cs" >
+      <Link>ModelBuilder\RecursiveComplexTypesModels.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBuilder\RecursiveComplexTypesE2ETests.cs">
+      <Link>ModelBuilder\RecursiveComplexTypesE2ETests.cs</Link>
+    </Compile>
     <Compile Include="..\ModelBuilder\SpecialCharactersLinkGenerationTests.cs">
       <Link>ModelBuilder\SpecialCharactersLinkGenerationTests.cs</Link>
     </Compile>

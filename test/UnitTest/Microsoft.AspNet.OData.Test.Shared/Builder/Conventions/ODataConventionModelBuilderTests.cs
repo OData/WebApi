@@ -2964,17 +2964,58 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
-        public void GetEdmModel_ThrowsExpcetion_ForRecursiveLoopOfComplexType()
+        public void GetEdmModel_Works_ForRecursiveLoopOfComplexType()
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.ComplexType<RecursiveEmployee>();
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
-                "propertyInfo",
-                "The complex type 'Microsoft.AspNet.OData.Test.Builder.Conventions.RecursiveEmployee' has a reference to itself " +
-                "through the property 'Manager'. A recursive loop of complex types is not allowed.");
+            IEdmModel model = builder.GetEdmModel();
+            var employeeType = model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(se => se.Name == "RecursiveEmployee");
+            Assert.NotNull(employeeType);
+            var managerProperty = employeeType.FindProperty("Manager");
+            Assert.NotNull(managerProperty);
+            Assert.Equal(employeeType.FullName(), managerProperty.Type.AsComplex().ComplexDefinition().FullName());
+        }
+
+        [Fact]
+        public void GetEdmModel_CreatesNavigationPropertyBindings_ForRecursiveLoopOfComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<CountryDetails>("countries");
+            builder.EntitySet<Organization>("orgs");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("orgs", typeof(Organization));
+            IEdmEntitySet companies = model.FindDeclaredEntitySet("orgs");
+
+            Assert.Collection(
+                companies.NavigationPropertyBindings,
+                nav => Assert.Equal("HeadquartersAddress/Country", nav.Path.Path));
+        }
+
+        [Fact]
+        public void GetEdmModel_CreatesNavigationPropertyBindings_ForMutuallyRecursiveLoopOfComplexTypes()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Car>("cars");
+            builder.EntitySet<Person>("people");
+
+            // Act & Assert
+            IEdmModel model = builder.GetEdmModel();
+
+            model.AssertHasEntitySet("people", typeof(Person));
+            IEdmEntitySet people = model.FindDeclaredEntitySet("people");
+
+            Assert.Collection(
+                people.NavigationPropertyBindings,
+                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path),
+                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path));
         }
 
         [Fact]

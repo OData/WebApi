@@ -29,7 +29,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private ODataQueryContext _context;
         private IEdmModel _model;
         private ODataQuerySettings _settings;
-        private string _modelID;
 
         public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
         {
@@ -42,7 +41,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _selectExpandQuery = selectExpandQuery;
             _context = selectExpandQuery.Context;
             _model = _context.Model;
-            _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
         }
 
@@ -313,10 +311,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
 
-            // Initialize property 'ModelID' on the wrapper class.
-            // source = new Wrapper { ModelID = 'some-guid-id' }
-            wrapperProperty = wrapperType.GetProperty("ModelID");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
+            // Initialize property 'Model' on the wrapper class
+            wrapperProperty = wrapperType.GetProperty("Model");
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_model)));
 
             // Initialize property 'Instance' on the wrapper class
             // source => new Wrapper { Instance = element }

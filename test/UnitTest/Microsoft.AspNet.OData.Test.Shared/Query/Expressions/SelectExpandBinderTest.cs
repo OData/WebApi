@@ -299,8 +299,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Assert
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.NotNull(customerWrapper.ModelID);
-            Assert.Same(_model.Model, ModelContainer.GetModel(customerWrapper.ModelID));
+            Assert.NotNull(customerWrapper.Model);
+            Assert.Same(_model.Model, customerWrapper.Model);
         }
 
         [Theory]

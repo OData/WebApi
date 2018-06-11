@@ -31,7 +31,7 @@ if ($args.Count -eq 0)
     $TestType = 'Nightly'
     $Configuration = 'Release'
 }
-elseif ($args[0] -match 'quick' -or ($args[0] -match '-q')) 
+elseif ($args[0] -match 'quick' -or ($args[0] -match '-q'))
 {
     $TestType = "Quick"
 }
@@ -43,7 +43,7 @@ elseif ($args[0] -match 'EnableSkipStrongName')
 {
     $TestType = "EnableSkipStrongName"
 }
-else 
+else
 {
     Error("Unknown input ""$args"". It can be empty or ""quick|DisableSkipStrongName|EnableSkipStrongName"".")
     exit

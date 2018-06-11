@@ -379,11 +379,6 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType, propertyInfo.Name, ClrType.FullName);
             }
 
-            if (propertyInfo.PropertyType == ClrType)
-            {
-                throw Error.Argument("propertyInfo", SRResources.RecursiveComplexTypesNotAllowed, ClrType.FullName, propertyInfo.Name);
-            }
-
             ValidatePropertyNotAlreadyDefinedInBaseTypes(propertyInfo);
             ValidatePropertyNotAlreadyDefinedInDerivedTypes(propertyInfo);
 
@@ -441,15 +436,6 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
                 ExplicitProperties[propertyInfo] = propertyConfiguration;
-
-                // If the ElementType is the same as this type this is recursive complex type nesting
-                if (propertyConfiguration.ElementType == ClrType)
-                {
-                    throw Error.Argument("propertyInfo",
-                        SRResources.RecursiveComplexTypesNotAllowed,
-                        ClrType.Name,
-                        propertyConfiguration.Name);
-                }
 
                 // If the ElementType is not primitive or enum treat as a ComplexType and Add to the model.
                 IEdmPrimitiveTypeReference edmType =

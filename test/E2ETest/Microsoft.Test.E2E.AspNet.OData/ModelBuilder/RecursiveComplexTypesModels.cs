@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive
 
         public string City { get; set; }
 
-        public string Country { get; set; }
+        public string CountryOrRegion { get; set; }
 
         public Address PreviousAddress { get; set; }
     }

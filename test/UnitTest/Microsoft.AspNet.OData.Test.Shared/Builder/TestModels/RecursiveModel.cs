@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public string City { get; set; }
 
         // Navigation property
-        public CountryDetails Country { get; set; }
+        public CountryDetails CountryDetails { get; set; }
 
         // Recursive reference
         public RecursiveAddress PreviousAddress { get; set; }

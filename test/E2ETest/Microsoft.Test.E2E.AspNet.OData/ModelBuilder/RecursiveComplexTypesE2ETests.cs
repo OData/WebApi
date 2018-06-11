@@ -64,11 +64,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             ""Address"": {
                 ""Street"": ""123 Main Street"",
                 ""City"": ""Seattle"",
-                ""Country"": ""USA"",
+                ""CountryOrRegion"": ""Country Or Region 1"",
                 ""PreviousAddress"": {
                     ""Street"": ""111 West 8th Avenue"",
                     ""City"": ""Vancouver"",
-                    ""Country"": ""Canada"",
+                    ""CountryOrRegion"": ""Country Or Region 2"",
                     ""PreviousAddress"": null
                 }
             },
@@ -143,11 +143,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             ""Address"": {
                 ""Street"": ""123 Main Street"",
                 ""City"": ""Seattle"",
-                ""Country"": ""USA"",
+                ""CountryOrRegion"": ""Country Or Region 1"",
                 ""PreviousAddress"": {
                     ""Street"": ""111 West 8th Avenue"",
                     ""City"": ""Vancouver"",
-                    ""Country"": ""Canada"",
+                    ""CountryOrRegion"": ""Country Or Region 2"",
                     ""PreviousAddress"": null
                 }
             },
@@ -253,12 +253,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                 {
                     Street = "123 Main Street",
                     City = "Seattle",
-                    Country = "USA",
+                    CountryOrRegion = "Country Or Region 1",
                     PreviousAddress = new Address
                     {
                         Street = "111 West 8th Avenue",
                         City = "Vancouver",
-                        Country = "Canada"
+                        CountryOrRegion = "Country Or Region 2"
                     }
                 },
                 HomeDirectory = new Directory

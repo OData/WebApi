@@ -2984,7 +2984,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
-            builder.EntitySet<CountryDetails>("countries");
+            builder.EntitySet<CountryDetails>("countryDetails");
             builder.EntitySet<Organization>("orgs");
 
             // Act & Assert
@@ -2995,7 +2995,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 
             Assert.Collection(
                 companies.NavigationPropertyBindings,
-                nav => Assert.Equal("HeadquartersAddress/Country", nav.Path.Path));
+                nav => Assert.Equal("HeadquartersAddress/CountryDetails", nav.Path.Path));
         }
 
         [Fact]

@@ -28,6 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         {
             configuration.MapODataServiceRoute("Complex", "Complex", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.AddODataQueryFilter();
+            configuration.Select().Expand().Filter().OrderBy().Count().MaxTop(100);
         }
 
         protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -83,6 +84,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
                         "@odata.type", complexProperty);
                     JsonAssert.PropertyEquals("#Collection(String)", "StringListProperty@odata.type", complexProperty);
                 }
+            }
+        }
+
+        [Theory]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=StringListProperty", false)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty", false)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true", true)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true&$select=ComplexProperty", true)]
+        public async Task EnableQueryByAddODataQueryFilter_ShouldWork(string acceptHeader, string uriPath, bool containsCount)
+        {
+            //Arrange
+            string requestUrl = BaseAddress.ToLowerInvariant() + uriPath;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.SetAcceptHeader(acceptHeader);
+
+            //Act
+            HttpResponseMessage response = await Client.SendAsync(request);
+            JObject result = await response.Content.ReadAsObject<JObject>();
+
+            //Assert
+            JsonAssert.ContainsProperty("value", result);
+            if (containsCount)
+            {
+                JsonAssert.ContainsProperty("@odata.count", result);
             }
         }
     }

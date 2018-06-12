@@ -36,6 +36,10 @@ namespace Microsoft.AspNet.OData.Test
             _configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
 
             _configuration.Count().OrderBy().Filter().Expand().MaxTop(null);
+
+            // For GetViaProgramaticEnableQuery
+            _configuration.AddODataQueryFilter(new EnableQueryAttribute());
+
             _configuration.MapODataServiceRoute("odata", "odata", GetEdmModel());
             var server = new HttpServer(_configuration);
             _client = new HttpClient(server);
@@ -120,6 +124,25 @@ namespace Microsoft.AspNet.OData.Test
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             var response = await _client.SendAsync(request);
             Assert.True(response.StatusCode == HttpStatusCode.NotFound);
+        }
+
+        [Fact]
+        public async Task GetMyOrder_MyOrdersViaProgramaticEnableQuery()
+        {
+            // Arrange --- id = 1
+            string url = @"/odata/MyWackyOrders(1)";
+            var requestUri = BaseAddress + url;
+
+            // Act
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            var response = await _client.SendAsync(request);
+            var result = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            // should return Order entity with key value (id + 1)
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains(
+                "http://localhost/odata/$metadata#MyWackyOrders/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/$entity",
+                (string)result["@odata.context"]);
         }
 
         [Fact]
@@ -411,6 +434,8 @@ namespace Microsoft.AspNet.OData.Test
             var builder = new ODataConventionModelBuilder { Namespace = "ns" };
             builder.EntitySet<Client>("Clients");
             builder.EntitySet<MyOrder>("MyOrders");
+            builder.EntitySet<MyOrder>("MyWackyOrders");
+
             var orderLine = builder.EntityType<OrderLine>();
             orderLine.Collection.Function("MostExpensive").Returns<double>();
             orderLine.Action("Tag").Returns<int>();
@@ -501,6 +526,14 @@ namespace Microsoft.AspNet.OData.Test
                     var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId);
                     return SingleResult.Create(result);
                 }
+            }
+
+            [ODataRoute("MyWackyOrders({orderId})")]
+            public SingleResult<MyOrder> GetViaProgramaticEnableQuery(int orderId)
+            {
+                // Wacky Get query by (orderId+1)
+                var result = _myOrders.AsQueryable().Where(mo => mo.ID == (orderId + 1));
+                return SingleResult.Create(result);
             }
 
             [EnableQuery]

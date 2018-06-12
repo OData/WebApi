@@ -528,12 +528,11 @@ namespace Microsoft.AspNet.OData.Test
                 }
             }
 
-//            [EnableQuery]      // Using _configuration.AddODataQueryFilter
             [ODataRoute("MyWackyOrders({orderId})")]
             public SingleResult<MyOrder> GetViaProgramaticEnableQuery(int orderId)
             {
                 // Wacky Get query by (orderId+1)
-                var result = _myOrders.AsQueryable().Where(mo => mo.ID == (orderId+1));
+                var result = _myOrders.AsQueryable().Where(mo => mo.ID == (orderId + 1));
                 return SingleResult.Create(result);
             }
 

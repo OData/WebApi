@@ -88,24 +88,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
         }
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=StringListProperty")]
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty")]
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true")]
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true&$select=ComplexProperty")]
-
-        /* $count for nested resource not supported in WebAPI; alternative could be bound function (see BoundFunctionInDollarFilter).
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$filter=StringListProperty/$count gt 0")]
-        */
-
-        /* Error: "A path within the select or expand query option is not supported."
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty/StringListProperty")]
-        */
-
-        /* Error: "Property 'ComplexProperty' on type 'Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata.Model.EntityWithComplexProperties' is not a navigation property or complex property. Only navigation properties can be expanded."
-        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$expand=ComplexProperty")]
-        */
-
-        public async Task ODataTypeAnnotationShouldAppearForComplexTypesLikeCollectionAndUserDefinedTypes_xyz(string acceptHeader, string uriPath)
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=StringListProperty", false)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$select=ComplexProperty", false)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true", true)]
+        [InlineData("application/json;odata.metadata=full", "/Complex/EntityWithComplexProperties?$count=true&$select=ComplexProperty", true)]
+        public async Task EnableQueryByAddODataQueryFilter_ShouldWork(string acceptHeader, string uriPath, bool containsCount)
         {
             //Arrange
             string requestUrl = BaseAddress.ToLowerInvariant() + uriPath;
@@ -118,6 +105,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
             //Assert
             JsonAssert.ContainsProperty("value", result);
+            if (containsCount)
+            {
+                JsonAssert.ContainsProperty("@odata.count", result);
+            }
         }
     }
 }

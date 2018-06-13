@@ -83,6 +83,9 @@ namespace Microsoft.AspNet.OData.Formatter
 
             // Parameter 3: request
             Request = request;
+
+            // BaseAddressFactory
+            BaseAddressFactory = formatter.BaseAddressFactory;
         }
 
         /// <summary>

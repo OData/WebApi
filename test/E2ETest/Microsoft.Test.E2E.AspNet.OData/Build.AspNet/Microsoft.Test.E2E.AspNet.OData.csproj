@@ -1135,6 +1135,9 @@
     <Compile Include="..\ForeignKey\ForeignKeyTest.cs">
       <Link>ForeignKey\ForeignKeyTest.cs</Link>
     </Compile>
+    <Compile Include="..\Formatter\BaseAddressFactoryTest.cs">
+      <Link>Formatter\BaseAddressFactoryTest.cs</Link>
+    </Compile>
     <Compile Include="..\Formatter\CollectionPropertyTests.cs">
       <Link>Formatter\CollectionPropertyTests.cs</Link>
     </Compile>

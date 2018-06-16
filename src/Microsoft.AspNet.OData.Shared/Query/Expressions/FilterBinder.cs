@@ -67,9 +67,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 throw Error.ArgumentNull("context");
             }
 
-            FilterBinder binder = (context.RequestContainer == null)
-                ? new FilterBinder(querySettings, WebApiAssembliesResolver.Default, context.Model)
-                : context.RequestContainer.GetRequiredService<FilterBinder>();
+            FilterBinder binder = GetOrCreateFilterBinder(context, querySettings);
 
             binder._filterType = filterType;
             binder.BaseQuery = baseQuery;
@@ -88,14 +86,27 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(elementType != null);
             Contract.Assert(context != null);
 
-            FilterBinder binder = (context.RequestContainer == null)
-                ? new FilterBinder(querySettings, WebApiAssembliesResolver.Default, context.Model)
-                : context.RequestContainer.GetRequiredService<FilterBinder>();
+            FilterBinder binder = GetOrCreateFilterBinder(context, querySettings);
 
             binder._filterType = elementType;
             binder.BaseQuery = baseQuery;
 
             return BindOrderByClause(binder, orderBy, elementType);
+        }
+
+        private static FilterBinder GetOrCreateFilterBinder(ODataQueryContext context, ODataQuerySettings querySettings)
+        {
+            FilterBinder binder = null;
+            if (context.RequestContainer != null)
+            {
+                binder = context.RequestContainer.GetRequiredService<FilterBinder>();
+                if (binder != null && binder.Model != context.Model && binder.Model == EdmCoreModel.Instance)
+                {
+                    binder.Model = context.Model;
+                }
+            }
+
+            return binder ?? new FilterBinder(querySettings, WebApiAssembliesResolver.Default, context.Model);
         }
 
         #region For testing purposes only.

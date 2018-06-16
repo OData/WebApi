@@ -24,12 +24,26 @@ public class Order
 }
 {% endhighlight %}
 
-Map route, e.g., in `WebApiConfig.cs`:
+With Edm model built as follows:
 {% highlight csharp %}
 var builder = new ODataConventionModelBuilder(config);
 builder.EntitySet<Customer>("Customers");
 var model = builder.GetEdmModel();
+{% endhighlight %}
+
+To Map route,
+- For Microsoft.AspNet.OData, e.g., in `WebApiConfig.cs`:
+{% highlight csharp %}
 config.MapODataServiceRoute("orest", "orest", model);
+{% endhighlight %}
+
+- For Microsoft.AsnNetCore.OData, e.g., in `Startup.Configure((IApplicationBuilder app, IHostingEnvironment env)` method:
+{% highlight csharp %}
+app.UseMvc(routeBuilder => 
+    {
+        routeBuilder.Select().Expand().Filter().OrderBy().MaxTop(null).Count();
+        routeBuilder.MapODataServiceRoute("orest", "orest", model);
+    });
 {% endhighlight %}
 
 Controller:

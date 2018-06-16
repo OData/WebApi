@@ -11,7 +11,7 @@ Let's have an example to illustrate how to configure navigation property on comp
 
 ### CLR Model
 
-We use the following CRL classes as the CLR model:
+We use the following CLR classes as the CLR model:
 
 {% highlight csharp %}
 
@@ -62,7 +62,7 @@ We can get the following result:
 ```xml
 <ComplexType Name="Address">
   <NavigationProperty Name="CityInfo" Type="ModelLibrary.City" Nullable="false" />"
-  <NavigationProperty Name="Cities" Type="Collection(NS.City)" />"
+  <NavigationProperty Name="Cities" Type="Collection(ModelLibrary.City)" />"
 </ComplexType>
 <EntityType Name="City">
   <Key>

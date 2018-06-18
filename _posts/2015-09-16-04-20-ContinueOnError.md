@@ -26,7 +26,7 @@ Users should call the following API to enable continue on error
         app.UseMvc(routeBuilder =>
         {
            routeBuilder.Select().Expand().Filter().OrderBy().MaxTop(100).Count()
-                        .EnableContinueOnErrorHeader();	 // Additional configuration to enable continue on error.
+                        .EnableContinueOnErrorHeader();  // Additional configuration to enable continue on error.
            routeBuilder.MapODataServiceRoute("ODataRoute", "odata", builder.GetEdmModel());
        });
     {% endhighlight %}

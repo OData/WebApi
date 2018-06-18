@@ -4,7 +4,7 @@ layout: post
 category: "10. Others"
 ---
 
-**Note: This work around is for https://github.com/OData/WebApi/issues/170, which and is not applicable for Microsoft.AspNetCore.OData v7.x.**
+**Note: This work around is for https://github.com/OData/WebApi/issues/170, which is not applicable for Microsoft.AspNetCore.OData v7.x.**
 
 When SingleResult.Create takes in a query that returns an empty result, a SerializationException is being thrown.
 

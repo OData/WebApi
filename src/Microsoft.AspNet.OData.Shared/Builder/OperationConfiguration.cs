@@ -94,9 +94,9 @@ namespace Microsoft.AspNet.OData.Builder
         public IEdmTypeConfiguration ReturnType { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the return is optional or not.
+        /// Gets or sets a value indicating whether the return is nullable or not.
         /// </summary>
-        public bool OptionalReturn { get; set; }
+        public bool ReturnNullable { get; set; }
 
         /// <summary>
         /// The Navigation Source that are returned from.
@@ -157,7 +157,7 @@ namespace Microsoft.AspNet.OData.Builder
             ModelBuilder.EntitySet<TEntityType>(entitySetName);
             NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
-            OptionalReturn = true;
+            ReturnNullable = true;
         }
 
         /// <summary>
@@ -173,7 +173,7 @@ namespace Microsoft.AspNet.OData.Builder
             NavigationSource = ModelBuilder.EntitySets.Single(s => s.Name == entitySetName);
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
-            OptionalReturn = true;
+            ReturnNullable = true;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             ReturnType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TEntityType));
             EntitySetPath = entitySetPath;
-            OptionalReturn = true;
+            ReturnNullable = true;
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Microsoft.AspNet.OData.Builder
             IEdmTypeConfiguration elementType = ModelBuilder.GetTypeConfigurationOrNull(typeof(TElementEntityType));
             ReturnType = new CollectionTypeConfiguration(elementType, clrCollectionType);
             EntitySetPath = entitySetPath;
-            OptionalReturn = true;
+            ReturnNullable = true;
         }
 
         /// <summary>
@@ -211,7 +211,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             IEdmTypeConfiguration configuration = GetOperationTypeConfiguration(clrReturnType);
             ReturnType = configuration;
-            OptionalReturn = EdmLibHelpers.IsNullable(clrReturnType);
+            ReturnNullable = EdmLibHelpers.IsNullable(clrReturnType);
         }
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace Microsoft.AspNet.OData.Builder
             Type clrElementType = typeof(TReturnElementType);
             IEdmTypeConfiguration edmElementType = GetOperationTypeConfiguration(clrElementType);
             ReturnType = new CollectionTypeConfiguration(edmElementType, clrCollectionType);
-            OptionalReturn = EdmLibHelpers.IsNullable(clrElementType);
+            ReturnNullable = EdmLibHelpers.IsNullable(clrElementType);
         }
 
         /// <summary>

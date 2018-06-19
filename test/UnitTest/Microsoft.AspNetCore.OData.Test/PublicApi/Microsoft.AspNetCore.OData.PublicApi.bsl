@@ -1034,8 +1034,8 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 	string Namespace  { public get; public set; }
 	NavigationSourceConfiguration NavigationSource  { public get; public set; }
 	OperationLinkBuilder OperationLinkBuilder  { protected get; protected set; }
-	bool OptionalReturn  { public get; public set; }
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
+	bool ReturnNullable  { public get; public set; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
 	string Title  { public get; public set; }
 

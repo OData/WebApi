@@ -579,7 +579,7 @@ namespace Microsoft.AspNet.OData.Test
             action.Parameter<string>("param");
 
             action = person.Action("NonNullableAction").Returns<FormatterAddress>();
-            action.OptionalReturn = false;
+            action.ReturnNullable = false;
             action.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
             HttpClient client = GetClient(model);
@@ -622,7 +622,7 @@ namespace Microsoft.AspNet.OData.Test
             function.Parameter<string>("param");
 
             function = person.Function("NonNullableFunction").Returns<FormatterAddress>();
-            function.OptionalReturn = false;
+            function.ReturnNullable = false;
             function.Parameter<string>("param").Nullable = false;
             IEdmModel model = builder.GetEdmModel();
             HttpClient client = GetClient(model);

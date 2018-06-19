@@ -1050,9 +1050,15 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
+	string DefaultValue  { public get; public set; }
 	string Name  { public get; protected set; }
 	bool Nullable  { public get; public set; }
+	bool Optional  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
+
+	public ParameterConfiguration HasDefaultValue (string defaultValue)
+	public ParameterConfiguration IsOptional ()
+	public ParameterConfiguration IsRequired ()
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {

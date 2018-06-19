@@ -637,6 +637,100 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public async Task DollarMetadata_Works_WithActionOptionalParameter()
+        {
+            // Arrange
+            const string expectMetadata =
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Action Name=\"ActionWithOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\" Unicode=\"false\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
+                        "<Record>" +
+                          "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
+                        "</Record>" +
+                      "</Annotation>" +
+                    "</Parameter>" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\" Unicode=\"false\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
+                    "</Parameter>" +
+                "</Action>" +
+                "<EntityContainer Name=\"Container\" /></Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            ActionConfiguration action = person.Action("ActionWithOptional");
+            action.Parameter<string>("param1").HasDefaultValue("A default value");
+            action.Parameter<string>("param2").Optional = true;
+            IEdmModel model = builder.GetEdmModel();
+            HttpClient client = GetClient(model);
+
+            // Act
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Contains(expectMetadata.Replace("'", "\""), result);
+        }
+
+        [Fact]
+        public async Task DollarMetadata_Works_WithFunctionOptionalParameter()
+        {
+            // Arrange
+            const string expectMetadata =
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Function Name=\"FunctionWithoutOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
+                "</Function>" +
+                "<Function Name=\"FunctionWithOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\" Unicode=\"false\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
+                        "<Record>" +
+                          "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
+                        "</Record>" +
+                      "</Annotation>" +
+                    "</Parameter>" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\" Unicode=\"false\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
+                    "</Parameter>" +
+                    "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
+                "</Function>" +
+                "<EntityContainer Name=\"Container\" />" +
+            "</Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            FunctionConfiguration function = person.Function("FunctionWithoutOptional").Returns<FormatterAddress>();
+            function.Parameter<string>("param");
+
+            function = person.Function("FunctionWithOptional").Returns<FormatterAddress>();
+            function.Parameter<string>("param1").HasDefaultValue("A default value");
+            function.Parameter<string>("param2").IsOptional();
+            IEdmModel model = builder.GetEdmModel();
+            HttpClient client = GetClient(model);
+
+            // Act
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            string a = await response.Content.ReadAsStringAsync();
+            Assert.Contains(expectMetadata.Replace("'", "\""), await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
         public async Task DollarMetadata_Works_WithAbstractEntityTypeWithoutKey()
         {
             // Arrange

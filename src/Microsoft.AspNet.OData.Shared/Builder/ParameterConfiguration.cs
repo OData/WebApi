@@ -51,5 +51,44 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets or sets a value indicating whether this parameter is nullable or not.
         /// </summary>
         public bool Nullable { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this parameter is optional or not.
+        /// </summary>
+        public bool Optional { get; set; }
+
+        /// <summary>
+        /// Gets or sets a default value for optional parameter.
+        /// </summary>
+        public string DefaultValue { get; set; }
+
+        /// <summary>
+        /// Sets the optional value as true.
+        /// </summary>
+        public ParameterConfiguration IsOptional()
+        {
+            Optional = true;
+            return this;
+        }
+
+        /// <summary>
+        /// Sets the optional value as false.
+        /// </summary>
+        public ParameterConfiguration IsRequired()
+        {
+            Optional = false;
+            return this;
+        }
+
+        /// <summary>
+        ///  Sets the optional value as true, default value as given value.
+        /// </summary>
+        /// <param name="defaultValue">The default value.</param>
+        public ParameterConfiguration HasDefaultValue(string defaultValue)
+        {
+            Optional = true;
+            DefaultValue = defaultValue;
+            return this;
+        }
     }
 }

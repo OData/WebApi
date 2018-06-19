@@ -9,11 +9,27 @@ Since OData Web API V5.7, it supports <strong>[odata.continue-on-error](http://d
 
 ### Enable odata.continue-on-error
 
-Users should call the following API to enable continue on error:
-{% highlight csharp %}
-var configuration = new HttpConfiguration();
-configuration.EnableContinueOnErrorHeader();
-{% endhighlight %}
+Users should call the following API to enable continue on error
+
+- For Microsoft.AspNet.OData (supporting classic ASP.NET Framework):
+
+    {% highlight csharp %}
+        var configuration = new HttpConfiguration();
+        configuration.EnableContinueOnErrorHeader();
+    {% endhighlight %}
+
+- For Microsoft.AspNetCore.OData (supporting ASP.NET Core):
+
+   It can be enabled in the service's HTTP request pipeline configuration method `Configure(IApplicationBuilder app, IHostingEnvironment env)` of the typical `Startup` class:
+
+    {% highlight csharp %}
+        app.UseMvc(routeBuilder =>
+        {
+           routeBuilder.Select().Expand().Filter().OrderBy().MaxTop(100).Count()
+                        .EnableContinueOnErrorHeader();  // Additional configuration to enable continue on error.
+           routeBuilder.MapODataServiceRoute("ODataRoute", "odata", builder.GetEdmModel());
+       });
+    {% endhighlight %}
 
 #### Prefer odata.continue-on-error
 

@@ -5,13 +5,18 @@ description: ""
 category: "4. OData features"
 ---
 
-HttpRequestMessage provides set of exention methods. For services that don't use LINQ or ODataQueryOptions.ApplyTo(), those extention methods can offer lots of help. 
+In Microsoft.AspNet.OData, set of HttpRequestMessage extension methods are provided through HttpRequestMessageExtensions. For services that don't use LINQ or ODataQueryOptions.ApplyTo(), those extension methods can offer lots of help.
 
-## ODataProperties
-OData methods and properties can be GET/SET through ODataProperties, including:
-	 
-<strong>Model</strong>
-The EDM model associated with the request.
+In Microsoft.AspNetCore.OData, which supports ASP.NET Core, set of HttpRequest extension methods are also provided through HttpRequestExtensions.
+
+They are pretty much symmetrical, and the differences will be noted in the examples below. For further details, please refer to `Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensions` and `Microsoft.AspNet.OData.Extensions.HttpRequestExtensions`.
+
+## ODataProperties/IODataFeature
+OData methods and properties can be GET/SET through:
+- ODataProperties (for Microsoft.AspNet.OData) from httpRequestMessage.ODataProperties()
+- IODataFeature (for Microsoft.AspNetCore.OData) from httpRequest.ODataFeature()
+
+Each of them includes the followings:
 
 <strong>Path</strong>
 The ODataPath of the request.
@@ -40,7 +45,13 @@ private string GetServiceRootUri()
   return serviceRootUri;
 }
 {% endhighlight %}
-  
+     
+## GetModel
+For Microsoft.AspNet.OData only, get the EDM model associated with the request.
+{% highlight csharp %}
+IEdmModel model = this.Request.GetModel();
+{% endhighlight %}
+
 ## GetNextPageLink
 Create a link for the next page of results, can be used as the value of `@odata.nextLink`.
 For example, the request Url is `http://localhost/Customers/?$select=Name`.
@@ -58,7 +69,7 @@ ETag etag = this.Request.GetETag(etagHeaderValue);
 {% endhighlight %}
 
 ## CreateErrorResponse
-Create a HttpResponseMessage to represent an error.
+For Microsoft.AspNet.OData only, create a HttpResponseMessage to represent an error.
 {% highlight csharp %}
 public HttpResponseMessage Post()
 {

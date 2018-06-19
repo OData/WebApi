@@ -39,7 +39,7 @@ The response will have all annotations:
   "@Hello.World":"Hello World.",
   "PerId":2,
   "Property.BirthdayAnnotation@odata.type":"#DateTimeOffset",
-  "Age@Property.BirthdayAnnotation":"2010-01-02T00:00:00+08:00",
+  "@Property.BirthdayAnnotation":"2010-01-02T00:00:00+08:00",
   "Age":10,
   "MyGuid":"f99080c0-2f9e-472e-8c72-1a8ecd9f902d",
   "Name":"Asha",

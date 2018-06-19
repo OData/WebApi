@@ -743,6 +743,54 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         [Fact]
+        public void GetEdmModel_SetsOptionalParameter()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
+            var functionBuilder = movie.Function("Watch");
+            functionBuilder.Parameter<int>("int").HasDefaultValue("42");
+            functionBuilder.Parameter<Nullable<int>>("nullableOfInt").HasDefaultValue("null");
+            functionBuilder.Parameter<string>("string").IsOptional();
+            functionBuilder.Parameter<decimal>("decimal");
+            functionBuilder.Parameter<double>("double").IsRequired();
+            functionBuilder.Returns<int>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            //Assert
+            var function = Assert.Single(model.SchemaElements.OfType<IEdmFunction>());
+
+            // int
+            var parameter = function.FindParameter("int");
+            Assert.NotNull(parameter);
+            IEdmOptionalParameter optionalParameter = Assert.IsType<EdmOptionalParameter>(parameter);
+            Assert.Equal("42", optionalParameter.DefaultValueString);
+
+            // int?
+            parameter = function.FindParameter("nullableOfInt");
+            Assert.NotNull(parameter);
+            optionalParameter = Assert.IsType<EdmOptionalParameter>(parameter);
+            Assert.Equal("null", optionalParameter.DefaultValueString);
+
+            // string
+            parameter = function.FindParameter("string");
+            Assert.NotNull(parameter);
+            optionalParameter = Assert.IsType<EdmOptionalParameter>(parameter);
+            Assert.Null(optionalParameter.DefaultValueString);
+
+            // decimal & double
+            foreach (var name in new[] { "decimal", "double" })
+            {
+                parameter = function.FindParameter(name);
+                Assert.NotNull(parameter);
+                Assert.IsNotType<EdmOptionalParameter>(parameter);
+                IEdmOperationParameter operationParameter = Assert.IsType<EdmOperationParameter>(parameter);
+            }
+        }
+
+        [Fact]
         public void GetEdmModel_SetsDateTimeAsParameterType_WorksForDefaultConverter()
         {
             // Arrange

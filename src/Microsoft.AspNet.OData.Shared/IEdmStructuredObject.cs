@@ -8,6 +8,9 @@ namespace Microsoft.AspNet.OData
 {
     /// <summary>
     /// Represents an instance of an <see cref="IEdmStructuredType"/>.
+    /// ATTEMPT 4: attempt to expose an IEdmModel property. Lots of code churn due to inheritance and comes across
+    /// some diamond inheritance problems because some interfaces or classes already define IEdmModel property with
+    /// something conflicting.
     /// </summary>
     public interface IEdmStructuredObject : IEdmObject
     {

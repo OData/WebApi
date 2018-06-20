@@ -61,6 +61,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Gets or sets the <see cref="IEdmStructuredObject"/>.
+        /// </summary>
+        private IEdmStructuredObject edmObject;
+
+        /// <summary>
         /// Gets or sets the <see cref="ODataSerializerContext"/>.
         /// </summary>
         public ODataSerializerContext SerializerContext { get; set; }
@@ -88,6 +93,15 @@ namespace Microsoft.AspNet.OData
             set
             {
                 SerializerContext.Model = value;
+
+                /*
+                // Part of ATTEMPT 5.
+                SelectExpandWrapper selectExpandWrapper = this.edmObject as SelectExpandWrapper;
+                if (selectExpandWrapper != null)
+                {
+                    selectExpandWrapper.Model = this.EdmModel;
+                }
+                */
             }
         }
 
@@ -114,7 +128,39 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the <see cref="IEdmStructuredObject"/> backing this instance.
         /// </summary>
-        public IEdmStructuredObject EdmObject { get; set; }
+        public IEdmStructuredObject EdmObject
+        {
+            get
+            {
+                return edmObject;
+            }
+            set
+            {
+                /*
+                // ATTEMPT 5: this is more or less like Konstantin's change:
+                // https://github.com/kosinsky/WebApi/commit/40020a1121a288fe64255ed7a785c25d010cd4b9#diff-5449bed3a006bfaa5c95f3959bf4cb96R574
+                // There don't seem to be any SelectExpand cases that go through this code path. For the test cases of SelectExpand,
+                // either ResourceContext is never instantiated (I checked this by putting debug points on all constructors of ResourceContext)
+                // or ResourceContext is instantiated but never passes SelectExpand to this set method and because of that, the Model remains null.
+                // Thus Konstantin's fix doesn't seem to be applicable to this code; this means that ATTEMPT 4 as this attempt is a shortcut for that attempt.
+                //
+                // Sample SelectExpand unit test that doesn't instantiate ResourceContext: SelectExpand_WithAllDollarCount_Works
+                // Sample SelectExpand unit test that does instantiate ResourceContext but doesn't pass SelectExpand to this setter: WriteObjectInline_Calls_CreateSelectExpandNode
+                SelectExpandWrapper selectExpandWrapper = value as SelectExpandWrapper;
+                if (selectExpandWrapper != null)
+                {
+                    selectExpandWrapper.Model = EdmModel;
+                    edmObject = selectExpandWrapper;
+                }
+                else
+                {
+                    edmObject = value;
+                }
+                */
+
+                edmObject = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the value of this resource instance.

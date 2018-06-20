@@ -682,6 +682,11 @@ namespace Microsoft.AspNet.OData.Query
         [SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", Justification = "Not intended for public use, only public to enable invocation without security issues.")]
         public static IQueryable<T> LimitResults<T>(IQueryable<T> queryable, int limit, out bool resultsLimited)
         {
+            // ATTEMPT 1: throws here
+            // Exception: 
+            // NotSupportedException: Unable to create a constant value of type 'Microsoft.OData.Edm.EdmModel'. Only primitive types or enumeration types are supported in this context.
+            // 
+            // Sample E2E test that fails: NestedTopSkipOrderByInDollarExpandWorksWithEF
             TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);
             resultsLimited = truncatedCollection.IsTruncated;
             return truncatedCollection.AsQueryable();

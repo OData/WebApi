@@ -30,6 +30,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         public string ModelID { get; set; }
 
+        /// <summary>
+        /// Gets or sets the Edm model.
+        /// </summary>
+        public IEdmModel Model { get; set; }
+
         /// <inheritdoc />
         public object UntypedInstance { get; set; }
 
@@ -42,6 +47,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public IEdmTypeReference GetEdmType()
         {
             IEdmModel model = GetModel();
+            // IEdmModel model = Model;
             Type elementType = GetElementType();
             return model.GetEdmTypeReference(elementType);
         }
@@ -129,6 +135,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(ModelID != null);
 
             return ModelContainer.GetModel(ModelID);
+            // return Model;
         }
     }
 }

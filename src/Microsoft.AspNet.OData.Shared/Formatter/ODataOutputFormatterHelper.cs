@@ -247,6 +247,14 @@ namespace Microsoft.AspNet.OData.Formatter
             IEdmObject edmObject = value as IEdmObject;
             if (edmObject != null)
             {
+                /*
+                // Part of ATTEMPT 3.
+                SelectExpandWrapper selectExpandWrapper = edmObject as SelectExpandWrapper;
+                if (selectExpandWrapper != null)
+                {
+                    selectExpandWrapper.Model = model; // Need to modify the method parameters to pass in model from the caller (WriteToStream method)
+                } 
+                */
                 IEdmTypeReference edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {

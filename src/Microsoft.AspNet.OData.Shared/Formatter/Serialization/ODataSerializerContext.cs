@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
@@ -154,6 +155,29 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
+                /*
+                // ATTEMPT 3: For this attempt, the Model remains null in the SelectExpandWrapper until
+                // we are writing to the response soon. At this point, we still have access to the Edm model
+                // corresponding to the request. Unfortunately not all code paths seem to have access to the model,
+                // so those code paths will throw.
+                // 
+                // This is not an ideal approach in any case; we should try to set the Model close to when the SelectExpandWrapper
+                // is instantiated.
+                //
+                // Sample unit tests that fail: ODataQueryOptions_SetToApplied, QueryComposition_WorkAsExpect_ForOptionalDollarSignPrefixForSystemQuery
+                // Sample E2E case that fails: QueryAnEntryAndIncludeTheRelatedEntriesForAGivenNavigationPropertyInline
+                SelectExpandWrapper selectExpandWrapper = edmObject as SelectExpandWrapper;
+                if (selectExpandWrapper != null)
+                {
+                    if (Model == null)
+                    {
+                        throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
+                    }
+
+                    selectExpandWrapper.Model = Model;
+                }
+                */
+
                 edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {

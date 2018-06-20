@@ -318,6 +318,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             wrapperProperty = wrapperType.GetProperty("ModelID");
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
 
+            /*
+            // ATTEMPT 1: Attempt to bind the a reference to the model in a similar way to the other properties that exist
+            // in SelectExpandWrapper. This passes the unit test suite but fails 26 cases in E2E suite. This throws
+            // in ODataQueryOptions.cs : 686 (TruncatedCollection<T> truncatedCollection = new TruncatedCollection<T>(queryable, limit);)
+            // and in EnableQueryAttribute.cs : 673 (var result = enumerator.MoveNext() ? enumerator.Current : null;)
+            // Exception: 
+            // NotSupportedException: Unable to create a constant value of type 'Microsoft.OData.Edm.EdmModel'. Only primitive types or enumeration types are supported in this context.
+            //
+            // Sample E2E test that fails: NestedTopSkipOrderByInDollarExpandWorksWithEF
+            wrapperProperty = wrapperType.GetProperty("Model");
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_model)));
+            */
+
             // Initialize property 'Instance' on the wrapper class
             // source => new Wrapper { Instance = element }
             wrapperProperty = wrapperType.GetProperty("Instance");

@@ -78,7 +78,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.True(enumerator.MoveNext());
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<Customer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
-            Assert.Same(_queryable.Single(), partialCustomer.Instance);
+            Assert.Null(partialCustomer.Instance);
+            Assert.Equal("NS.Customer", partialCustomer.InstanceType);
             IEnumerable<SelectExpandWrapper<Order>> innerOrders = partialCustomer.Container
                 .ToDictionary(mapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
             Assert.NotNull(innerOrders);
@@ -344,9 +345,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Assert
             Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
-            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+            Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
             SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
-            Assert.Same(customer, customerWrapper.Instance);
+            Assert.Null(customerWrapper.Instance);
+            Assert.Equal("NS.Customer", customerWrapper.InstanceType);
         }
 
         [Fact]

@@ -751,9 +751,9 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var functionBuilder = movie.Function("Watch");
             functionBuilder.Parameter<int>("int").HasDefaultValue("42");
             functionBuilder.Parameter<Nullable<int>>("nullableOfInt").HasDefaultValue("null");
-            functionBuilder.Parameter<string>("string").IsOptional();
+            functionBuilder.Parameter<string>("string").Optional();
             functionBuilder.Parameter<decimal>("decimal");
-            functionBuilder.Parameter<double>("double").IsRequired();
+            functionBuilder.Parameter<double>("double").Required();
             functionBuilder.Returns<int>();
 
             // Act

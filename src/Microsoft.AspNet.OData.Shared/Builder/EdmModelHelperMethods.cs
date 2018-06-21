@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 bool isParameterNullable = parameter.Nullable;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterNullable);
-                if (parameter.Optional)
+                if (parameter.IsOptional)
                 {
                     if (parameter.DefaultValue != null)
                     {

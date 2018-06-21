@@ -664,7 +664,7 @@ namespace Microsoft.AspNet.OData.Test
 
             ActionConfiguration action = person.Action("ActionWithOptional");
             action.Parameter<string>("param1").HasDefaultValue("A default value");
-            action.Parameter<string>("param2").Optional = true;
+            action.Parameter<string>("param2").IsOptional = true;
             IEdmModel model = builder.GetEdmModel();
             HttpClient client = GetClient(model);
 
@@ -716,7 +716,7 @@ namespace Microsoft.AspNet.OData.Test
 
             function = person.Function("FunctionWithOptional").Returns<FormatterAddress>();
             function.Parameter<string>("param1").HasDefaultValue("A default value");
-            function.Parameter<string>("param2").IsOptional();
+            function.Parameter<string>("param2").Optional();
             IEdmModel model = builder.GetEdmModel();
             HttpClient client = GetClient(model);
 

@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets or sets a value indicating whether this parameter is optional or not.
         /// </summary>
-        public bool Optional { get; set; }
+        public bool IsOptional { get; set; }
 
         /// <summary>
         /// Gets or sets a default value for optional parameter.
@@ -65,28 +65,28 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Sets the optional value as true.
         /// </summary>
-        public ParameterConfiguration IsOptional()
+        public ParameterConfiguration Optional()
         {
-            Optional = true;
+            IsOptional = true;
             return this;
         }
 
         /// <summary>
         /// Sets the optional value as false.
         /// </summary>
-        public ParameterConfiguration IsRequired()
+        public ParameterConfiguration Required()
         {
-            Optional = false;
+            IsOptional = false;
             return this;
         }
 
         /// <summary>
-        ///  Sets the optional value as true, default value as given value.
+        /// Sets the optional value as true, default value as given value.
         /// </summary>
         /// <param name="defaultValue">The default value.</param>
         public ParameterConfiguration HasDefaultValue(string defaultValue)
         {
-            Optional = true;
+            IsOptional = true;
             DefaultValue = defaultValue;
             return this;
         }

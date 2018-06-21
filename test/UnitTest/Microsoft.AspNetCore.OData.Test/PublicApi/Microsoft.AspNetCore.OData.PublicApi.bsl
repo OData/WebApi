@@ -1051,14 +1051,14 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
 	string DefaultValue  { public get; public set; }
+	bool IsOptional  { public get; public set; }
 	string Name  { public get; protected set; }
 	bool Nullable  { public get; public set; }
-	bool Optional  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
 
 	public ParameterConfiguration HasDefaultValue (string defaultValue)
-	public ParameterConfiguration IsOptional ()
-	public ParameterConfiguration IsRequired ()
+	public ParameterConfiguration Optional ()
+	public ParameterConfiguration Required ()
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {

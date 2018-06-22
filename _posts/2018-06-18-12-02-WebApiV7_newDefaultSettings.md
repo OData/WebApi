@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "12.1 WebApi 7.0 Default Setting Updates"
-description: "Desgin document for updated default settings for WebApi 7.0"
+description: "Design document for updated default settings for WebApi 7.0"
 category: "12. Design"
 ---
         
@@ -14,8 +14,8 @@ Overview
 OData Layer
 -----------
 
-OData libraries 7.x (current version 7.4.4) contains updates to improve
-usability & compatibility of the library by virtual of exposing options
+OData libraries 7.4.4+ contains updates to improve
+usability & compatibility of the library by virtue of exposing options
 that can be set by the caller of the OData core library (ODL). Related
 to request Uri parsing, the following two simplifications are now
 available when URI parser is configured properly:
@@ -29,7 +29,7 @@ available when URI parser is configured properly:
     function or action identifier in request Uri. When corresponding
     option in ODL Uri parser enabled:
 
-    -   If the function or action identifier containing a namespace
+    -   If the function or action identifier contains a namespace
         qualifier, as in all the original cases, Uri parser uses
         original namespace-qualified semantic to ensure backward
         compatibility;
@@ -119,7 +119,7 @@ builder.EntityType\<Customer\>().Action(\"UpdateAddress\");
 
     > GET /service/InvalidQueryCustomers?\$filter=<span style="color:blue">id</span> eq 5 : HTTP 200
 
-    >GET /service/InvalidQueryCustomers(5)?\$filter=<span style="color:blue">id</span> eq 5 : HTTP 400 "Query
+    > GET /service/InvalidQueryCustomers(5)?\$filter=<span style="color:blue">id</span> eq 5 : HTTP 400 "Query
 options \$filter, \$orderby, \$count, \$skip, and \$top can be applied
 only on collections."
 
@@ -248,7 +248,7 @@ Enable Case-Insensitive for Custom Uri function
 One issue is encountered when trying to bind function call token with
 case-insensitive enabled. The reason is that at the very beginning of
 the function BindAsUriFunction() the name token, when case-insensitive
-is enabled, is coerced to lower case (as shown blow), which is valid for
+is enabled, is coerced to lower case (as shown below), which is valid for
 build-in function (such as 'startswith' and 'geo.distance', etc), but
 might not be valid for custom uri functions.
 
@@ -277,12 +277,9 @@ To implement with the correct behavior for enabled case-insensitive:
 Work Items
 ==========
 
--   [Support unqualified function/action names in WebAPI 7.x by default](https://identitydivision.visualstudio.com/OData/_workitems/edit/423872):
-    containing sub-tasks.
+- WebApi PR
+  - [Set default to allow Unqualified-function/action and case insensitiveness](https://github.com/OData/WebApi/pull/1409)
 
--   [Default case insensitive to true in WebAPI 7.x](https://identitydivision.visualstudio.com/OData/_workitems/edit/423871):
-    containing sub-tasks.
-
-Feature item: [Enable new ODL 7.x functionality and scenarios in WebAPI 7.x release](https://identitydivision.visualstudio.com/OData/_workitems/edit/392398)
-
-Epic: [As a MS Graph workload, I can easily implement compatible and robust API](https://identitydivision.visualstudio.com/OData/_workitems/edit/311630)
+- ODL PRs (for dependency fixes)
+  - [Fix case insensitive search for custom URI functions](https://github.com/OData/odata.net/pull/1156)
+  - [Fix SegmentKeyHandler to include UnqualifiedODataUriResolver proccessing](https://github.com/OData/odata.net/pull/1154)

@@ -167,6 +167,7 @@ namespace WebStack.QA.Test.OData.OpenComplexType.Typed.Client
                 return global::System.Xml.XmlReader.Create(new global::System.IO.StringReader(edmxToParse));
             }
         }
+        /*
 #if !ASTORIA_LIGHT && !PORTABLELIB
         /// <summary>
         /// There are no comments for ResetDataSource in the schema.
@@ -188,6 +189,7 @@ namespace WebStack.QA.Test.OData.OpenComplexType.Typed.Client
                     new global::Microsoft.OData.Client.BodyOperationParameter("ID", ID) }));
         }
 #endif
+*/
     }
     /// <summary>
     /// There are no comments for Account in the schema.
@@ -361,39 +363,42 @@ namespace WebStack.QA.Test.OData.OpenComplexType.Typed.Client
                 this.PropertyChanged(this, new global::System.ComponentModel.PropertyChangedEventArgs(property));
             }
         }
+        /*
 #if !ASTORIA_LIGHT && !PORTABLELIB
-        /// <summary>
-        /// There are no comments for GetAddressFunction in the schema.
-        /// </summary>
-        public global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.Address GetAddressFunction()
-        {
-            global::Microsoft.OData.Client.EntityDescriptor resource = Context.EntityTracker.TryGetEntityDescriptor(this);
-            if (resource == null)
-            {
-                throw new System.Exception("cannot find entity");
-            }
 
-            global::System.Uri requestUri = new global::System.Uri(resource.Identity.OriginalString.Trim('/') + "/WebStack.QA.Test.OData.OpenComplexType.GetAddressFunction");
-            return global::System.Linq.Enumerable.Single(Context.Execute<global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.Address>(requestUri, "GET", true,
-                new global::Microsoft.OData.Client.OperationParameter[] { }));
-        }
-        /// <summary>
-        /// There are no comments for IncreaseAgeAction in the schema.
-        /// </summary>
-        public global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.AccountInfo IncreaseAgeAction()
-        {
-            global::Microsoft.OData.Client.EntityDescriptor resource = Context.EntityTracker.TryGetEntityDescriptor(this);
-            if (resource == null)
-            {
-                throw new System.Exception("cannot find entity");
-            }
+/// <summary>
+/// There are no comments for GetAddressFunction in the schema.
+/// </summary>
+public global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.Address GetAddressFunction()
+{
+    global::Microsoft.OData.Client.EntityDescriptor resource = Context.EntityTracker.TryGetEntityDescriptor(this);
+    if (resource == null)
+    {
+        throw new System.Exception("cannot find entity");
+    }
 
-            global::System.Uri requestUri = new global::System.Uri(resource.EditLink.OriginalString.Trim('/') + "/WebStack.QA.Test.OData.OpenComplexType.IncreaseAgeAction");
-            return global::System.Linq.Enumerable.Single(
-                Context.Execute<global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.AccountInfo>(requestUri, "POST", true,
-                new global::Microsoft.OData.Client.OperationParameter[] { }));
-        }
+    global::System.Uri requestUri = new global::System.Uri(resource.Identity.OriginalString.Trim('/') + "/WebStack.QA.Test.OData.OpenComplexType.GetAddressFunction");
+    return global::System.Linq.Enumerable.Single(Context.Execute<global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.Address>(requestUri, "GET", true,
+        new global::Microsoft.OData.Client.OperationParameter[] { }));
+}
+/// <summary>
+/// There are no comments for IncreaseAgeAction in the schema.
+/// </summary>
+public global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.AccountInfo IncreaseAgeAction()
+{
+    global::Microsoft.OData.Client.EntityDescriptor resource = Context.EntityTracker.TryGetEntityDescriptor(this);
+    if (resource == null)
+    {
+        throw new System.Exception("cannot find entity");
+    }
+
+    global::System.Uri requestUri = new global::System.Uri(resource.EditLink.OriginalString.Trim('/') + "/WebStack.QA.Test.OData.OpenComplexType.IncreaseAgeAction");
+    return global::System.Linq.Enumerable.Single(
+        Context.Execute<global::WebStack.QA.Test.OData.OpenComplexType.Typed.Client.AccountInfo>(requestUri, "POST", true,
+        new global::Microsoft.OData.Client.OperationParameter[] { }));
+}
 #endif
+*/
     }
     /// <summary>
     /// There are no comments for AccountInfo in the schema.

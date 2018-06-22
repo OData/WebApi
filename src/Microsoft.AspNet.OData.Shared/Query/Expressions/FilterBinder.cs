@@ -169,8 +169,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
-            Justification = "These are simple conversion function and cannot be split up.")]
         public virtual Expression Bind(QueryNode node)
         {
             // Recursion guard to avoid stack overflows
@@ -181,88 +179,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (collectionNode != null)
             {
-                switch (node.Kind)
-                {
-                    case QueryNodeKind.CollectionNavigationNode:
-                        CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
-                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
-
-                    case QueryNodeKind.CollectionPropertyAccess:
-                        return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
-
-                    case QueryNodeKind.CollectionComplexNode:
-                        return BindCollectionComplexNode(node as CollectionComplexNode);
-
-                    case QueryNodeKind.CollectionResourceCast:
-                        return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
-
-                    case QueryNodeKind.CollectionFunctionCall:
-                    case QueryNodeKind.CollectionResourceFunctionCall:
-                    case QueryNodeKind.CollectionOpenPropertyAccess:
-                    // Unused or have unknown uses.
-                    default:
-                        throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
-                }
+                return BindCollectionNode(collectionNode);
             }
             else if (singleValueNode != null)
             {
-                switch (node.Kind)
-                {
-                    case QueryNodeKind.BinaryOperator:
-                        return BindBinaryOperatorNode(node as BinaryOperatorNode);
-
-                    case QueryNodeKind.Constant:
-                        return BindConstantNode(node as ConstantNode);
-
-                    case QueryNodeKind.Convert:
-                        return BindConvertNode(node as ConvertNode);
-
-                    case QueryNodeKind.ResourceRangeVariableReference:
-                        return BindRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable);
-
-                    case QueryNodeKind.NonResourceRangeVariableReference:
-                        return BindRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable);
-
-                    case QueryNodeKind.SingleValuePropertyAccess:
-                        return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
-
-                    case QueryNodeKind.SingleComplexNode:
-                        return BindSingleComplexNode(node as SingleComplexNode);
-
-                    case QueryNodeKind.SingleValueOpenPropertyAccess:
-                        return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
-
-                    case QueryNodeKind.UnaryOperator:
-                        return BindUnaryOperatorNode(node as UnaryOperatorNode);
-
-                    case QueryNodeKind.SingleValueFunctionCall:
-                        return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
-
-                    case QueryNodeKind.SingleNavigationNode:
-                        SingleNavigationNode navigationNode = node as SingleNavigationNode;
-                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
-
-                    case QueryNodeKind.Any:
-                        return BindAnyNode(node as AnyNode);
-
-                    case QueryNodeKind.All:
-                        return BindAllNode(node as AllNode);
-
-                    case QueryNodeKind.SingleResourceCast:
-                        return BindSingleResourceCastNode(node as SingleResourceCastNode);
-
-                    case QueryNodeKind.SingleResourceFunctionCall:
-                        return BindSingleResourceFunctionCallNode(node as SingleResourceFunctionCallNode);
-
-                    case QueryNodeKind.NamedFunctionParameter:
-                    case QueryNodeKind.ParameterAlias:
-                    case QueryNodeKind.EntitySet:
-                    case QueryNodeKind.KeyLookup:
-                    case QueryNodeKind.SearchTerm:
-                    // Unused or have unknown uses.
-                    default:
-                        throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
-                }
+                return BindSingleValueNode(singleValueNode);
             }
             else
             {
@@ -472,42 +393,26 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression left = Bind(binaryOperatorNode.Left);
             Expression right = Bind(binaryOperatorNode.Right);
 
-            // handle null propagation only if either of the operands can be null
-            bool isNullPropagationRequired = QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && (IsNullable(left.Type) || IsNullable(right.Type));
-            if (isNullPropagationRequired)
+            return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right);
+        }
+
+        /// <summary>
+        /// Binds an <see cref="InNode"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="InNode"/>.
+        /// </summary>
+        /// <param name="inNode">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        public virtual Expression BindInNode(InNode inNode)
+        {
+            switch(inNode.Right.Kind)
             {
-                // |----------------------------------------------------------------|
-                // |SQL 3VL truth table.                                            |
-                // |----------------------------------------------------------------|
-                // |p       |    q      |    p OR q     |    p AND q    |    p = q  |
-                // |----------------------------------------------------------------|
-                // |True    |   True    |   True        |   True        |   True    |
-                // |True    |   False   |   True        |   False       |   False   |
-                // |True    |   NULL    |   True        |   NULL        |   NULL    |
-                // |False   |   True    |   True        |   False       |   False   |
-                // |False   |   False   |   False       |   False       |   True    |
-                // |False   |   NULL    |   NULL        |   False       |   NULL    |
-                // |NULL    |   True    |   True        |   NULL        |   NULL    |
-                // |NULL    |   False   |   NULL        |   False       |   NULL    |
-                // |NULL    |   NULL    |   Null        |   NULL        |   NULL    |
-                // |--------|-----------|---------------|---------------|-----------|
-
-                // before we start with null propagation, convert the operators to nullable if already not.
-                left = ToNullable(left);
-                right = ToNullable(right);
-
-                bool liftToNull = true;
-                if (left == NullConstant || right == NullConstant)
-                {
-                    liftToNull = false;
-                }
-
-                // Expression trees do a very good job of handling the 3VL truth table if we pass liftToNull true.
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: liftToNull);
-            }
-            else
-            {
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: false);
+                case QueryNodeKind.CollectionConstant:
+                    {
+                        CollectionConstantNode collectionConstantNode = inNode.Right as CollectionConstantNode;
+                        return BindInNode(inNode.Left, collectionConstantNode);
+                    }
+                default:
+                    return BindInNode(inNode.Left, inNode.Right);
             }
         }
 
@@ -1441,6 +1346,292 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Binds a <see cref="SingleValueNode"/> to create a LINQ <see cref="Expression"/> that represents the semantics
+        /// of the <see cref="SingleValueNode"/>.
+        /// </summary>
+        /// <param name="node">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindSingleValueNode(SingleValueNode node)
+        {
+            switch (node.Kind)
+            {
+                case QueryNodeKind.BinaryOperator:
+                    return BindBinaryOperatorNode(node as BinaryOperatorNode);
+
+                case QueryNodeKind.Constant:
+                    return BindConstantNode(node as ConstantNode);
+
+                case QueryNodeKind.Convert:
+                    return BindConvertNode(node as ConvertNode);
+
+                case QueryNodeKind.ResourceRangeVariableReference:
+                    return BindRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable);
+
+                case QueryNodeKind.NonResourceRangeVariableReference:
+                    return BindRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable);
+
+                case QueryNodeKind.SingleValuePropertyAccess:
+                    return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
+
+                case QueryNodeKind.SingleComplexNode:
+                    return BindSingleComplexNode(node as SingleComplexNode);
+
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
+
+                case QueryNodeKind.UnaryOperator:
+                    return BindUnaryOperatorNode(node as UnaryOperatorNode);
+
+                case QueryNodeKind.SingleValueFunctionCall:
+                    return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
+
+                case QueryNodeKind.SingleNavigationNode:
+                    SingleNavigationNode navigationNode = node as SingleNavigationNode;
+                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+
+                case QueryNodeKind.Any:
+                    return BindAnyNode(node as AnyNode);
+
+                case QueryNodeKind.All:
+                    return BindAllNode(node as AllNode);
+
+                case QueryNodeKind.SingleResourceCast:
+                    return BindSingleResourceCastNode(node as SingleResourceCastNode);
+
+                case QueryNodeKind.SingleResourceFunctionCall:
+                    return BindSingleResourceFunctionCallNode(node as SingleResourceFunctionCallNode);
+
+                case QueryNodeKind.In:
+                    return BindInNode(node as InNode);
+
+                case QueryNodeKind.NamedFunctionParameter:
+                case QueryNodeKind.ParameterAlias:
+                case QueryNodeKind.EntitySet:
+                case QueryNodeKind.KeyLookup:
+                case QueryNodeKind.SearchTerm:
+                // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        /// <summary>
+        /// Binds a <see cref="CollectionNode"/> to create a LINQ <see cref="Expression"/> that represents the semantics
+        /// of the <see cref="CollectionNode"/>.
+        /// </summary>
+        /// <param name="node">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindCollectionNode(CollectionNode node)
+        {
+            switch (node.Kind)
+            {
+                case QueryNodeKind.CollectionNavigationNode:
+                    CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
+                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+
+                case QueryNodeKind.CollectionPropertyAccess:
+                    return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
+
+                case QueryNodeKind.CollectionComplexNode:
+                    return BindCollectionComplexNode(node as CollectionComplexNode);
+
+                case QueryNodeKind.CollectionResourceCast:
+                    return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
+
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.CollectionResourceFunctionCall:
+                case QueryNodeKind.CollectionOpenPropertyAccess:
+                case QueryNodeKind.CollectionConstant:
+                // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        /// <summary>
+        /// Creates an expression for the InNode that has a CollectionConstantNode.
+        /// </summary>
+        /// <param name="leftNode">The left node to bind.</param>
+        /// <param name="rightNode">The right node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindInNode(SingleValueNode leftNode, CollectionConstantNode rightNode)
+        {
+            Expression leftEqualsOperand = Bind(leftNode);
+            Expression leftOrOperand = FalseConstant;
+            
+            foreach (ConstantNode node in rightNode.Collection)
+            {
+                Expression rightEqualsOperand = Bind(node);
+                Expression equalsExpression = CreateBinaryExpression(BinaryOperatorKind.Equal, leftEqualsOperand, rightEqualsOperand);
+
+                leftOrOperand = CreateBinaryExpression(BinaryOperatorKind.Or, leftOrOperand, equalsExpression);
+            }
+
+            return leftOrOperand;
+        }
+
+        /// <summary>
+        /// Creates an expression for the InNode that has a CollectionNode.
+        /// </summary>
+        /// <param name="leftNode">The left node to bind.</param>
+        /// <param name="rightNode">The right node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindInNode(SingleValueNode leftNode, CollectionNode rightNode)
+        {
+            ParameterExpression parameterExpression = HandleLambdaParameters(rightNode);
+
+            Expression collection = Bind(rightNode);
+
+            SingleValueNode singleValueNode = null;
+            switch (rightNode.Kind)
+            {
+                case QueryNodeKind.CollectionPropertyAccess:
+                    {
+                        var collectionNode = rightNode as CollectionPropertyAccessNode;
+                        var rangeVariable= new NonResourceRangeVariable(
+                                collectionNode.Property.Name, collectionNode.ItemType, collectionNode);
+                        var rangeVariableNode = new NonResourceRangeVariableReferenceNode(
+                            collectionNode.Property.Name, rangeVariable);
+                        singleValueNode = rangeVariableNode;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionNavigationNode:
+                    {
+                        var collectionNode = rightNode as CollectionNavigationNode;
+                        var rangeVariable = new ResourceRangeVariable(
+                                collectionNode.NavigationProperty.Name, collectionNode.ItemStructuredType, collectionNode.NavigationSource);
+                        var rangeVariableNode = new ResourceRangeVariableReferenceNode(
+                            collectionNode.NavigationProperty.Name, rangeVariable);
+                        singleValueNode = rangeVariableNode;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionResourceFunctionCall:
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.CollectionOpenPropertyAccess:
+                case QueryNodeKind.CollectionResourceCast:
+                case QueryNodeKind.CollectionComplexNode:
+                case QueryNodeKind.CollectionConstant:
+                // CollectionConstant is covered in a separate function
+                default:
+                    throw Error.NotSupported(SRResources.InNodeCollectionNotSupported);
+            }
+
+            BinaryOperatorNode node = new BinaryOperatorNode(BinaryOperatorKind.Equal, leftNode, singleValueNode);
+            Expression body = Bind(node);
+            body = ApplyNullPropagationForFilterBody(body);
+            body = Expression.Lambda(body, parameterExpression);
+
+            Expression any = Any(collection, body);
+
+            ExitLamdbaScope();
+
+            if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(collection.Type))
+            {
+                // IFF(source == null) null; else Any(body);
+                any = ToNullable(any);
+                return Expression.Condition(
+                    test: Expression.Equal(collection, NullConstant),
+                    ifTrue: Expression.Constant(null, any.Type),
+                    ifFalse: any);
+            }
+            else
+            {
+                return any;
+            }
+        }
+
+        private ParameterExpression HandleLambdaParameters(CollectionNode node)
+        {
+            EnterLambdaScope();
+
+            IEdmTypeReference edmTypeReference = node.ItemType;
+            IEdmCollectionTypeReference collectionTypeReference = edmTypeReference as IEdmCollectionTypeReference;
+            if (collectionTypeReference != null)
+            {
+                IEdmCollectionType collectionType = collectionTypeReference.Definition as IEdmCollectionType;
+                if (collectionType != null)
+                {
+                    edmTypeReference = collectionType.ElementType;
+                }
+            }
+
+            string propertyName = null;
+            switch (node.Kind)
+            {
+                case QueryNodeKind.CollectionPropertyAccess:
+                    {
+                        var collectionNode = node as CollectionPropertyAccessNode;
+                        propertyName = collectionNode.Property.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionNavigationNode:
+                    {
+                        var collectionNode = node as CollectionNavigationNode;
+                        propertyName = collectionNode.NavigationProperty.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionResourceFunctionCall:
+                    {
+                        var collectionNode = node as CollectionResourceFunctionCallNode;
+                        propertyName = collectionNode.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionFunctionCall:
+                    {
+                        var collectionNode = node as CollectionFunctionCallNode;
+                        propertyName = collectionNode.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionOpenPropertyAccess:
+                    {
+                        var collectionNode = node as CollectionOpenPropertyAccessNode;
+                        propertyName = collectionNode.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionResourceCast:
+                    {
+                        var collectionNode = node as CollectionResourceCastNode;
+                        propertyName = collectionNode.NavigationSource.Name;
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionComplexNode:
+                    {
+                        var collectionNode = node as CollectionComplexNode;
+                        var resourceRange = collectionNode.Source as ResourceRangeVariableReferenceNode;
+                        if (resourceRange != null)
+                        {
+                            propertyName = resourceRange.Name;
+                        }
+                        else
+                        {
+                            propertyName = collectionNode.Property.Name;
+                        }
+                        
+                        break;
+                    }
+
+                case QueryNodeKind.CollectionConstant:
+                    // CollectionConstant is covered in a separate function
+                default:
+                    throw Error.NotSupported(SRResources.InNodeCollectionNotSupported);
+            }
+
+            ParameterExpression lambdaIt = Expression.Parameter(
+                EdmLibHelpers.GetClrType(edmTypeReference, Model, InternalAssembliesResolver), propertyName);
+            _lambdaParameters.Add(propertyName, lambdaIt);
+
+            return lambdaIt;
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)

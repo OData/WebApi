@@ -181,6 +181,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
+        public static TheoryDataSet<string, IEnumerable<Movie>> InOperatorData
+        {
+            get
+            {
+                var movies = ModelHelper.CreateMovieData();
+                var data = new TheoryDataSet<string, IEnumerable<Movie>>();
+                data.Add("100 in Sales", movies.Where(p => p.Sales.Contains(100)));
+                data.Add("'Quirky' in Tags", movies.Where(p => p.Tags.Contains("Quirky")));
+                data.Add("Director in Actors", movies.Where(p => p.Actors.Contains(p.Director)));
+                data.Add("Producer in Actors", movies.Where(p => p.Actors.Contains(p.Producer)));
+                data.Add("MovieId in (1, 2, 3)", movies.Where(p => (new int[] { 1, 2, 3 }).Contains(p.MovieId)));
+                data.Add("Title in ('movie1','movie3')", movies.Where(p => (new string[] { "movie1", "movie3" }).Contains(p.Title)));
+
+                return data;
+            }
+        }
+
         public static TheoryDataSet<string, IEnumerable<Product>> MixQueries
         {
             get
@@ -411,6 +428,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
                 var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetMovies?$filter=" + filter);
                 var result = await response.Content.ReadAsObject<IEnumerable<Movie>>();
+
+                Assert.Equal(expected.Count(), result.Count());
+                for (int i = 0; i < expected.Count(); i++)
+                {
+                    Assert.Equal(expected.ElementAt(i).MovieId, result.ElementAt(i).MovieId);
+                    Assert.Equal(expected.ElementAt(i).Director.PersonId, result.ElementAt(i).Director.PersonId);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task TestInOperator()
+        {
+            // While this seems ideal for a Theory test case, the IEnumerable<Movie> would need to be serialize-able in
+            // order to generate an Xunit 2.0 test case.
+            var testCases = InOperatorData;
+            foreach (var testCase in testCases)
+            {
+                string filter = (string)testCase[0];
+                IEnumerable<Movie> expected = (IEnumerable<Movie>)testCase[1];
+
+                var response = await this.Client.GetAsync(this.BaseAddress + "/api/FilterTests/GetMovies?$filter=" + filter);
+                var result = await response.Content.ReadAsObject<IEnumerable<Movie>>();
+
+                var list = result.ToList();
+                Assert.NotNull(list);
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)

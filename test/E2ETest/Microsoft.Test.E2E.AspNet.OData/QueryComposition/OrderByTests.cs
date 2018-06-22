@@ -22,6 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
     public class OrderByTests : WebHostTestBase
     {
+
         public OrderByTests(WebHostTestFixture fixture)
             :base(fixture)
         {
@@ -103,6 +104,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                             previousElement.WorkAddress.CountryOrRegion.Name.CompareTo(currentElement.WorkAddress.CountryOrRegion.Name) < 1);
             }
         }
+
+        [Fact]
+        public async Task CanOrderByInOperator()
+        {
+            string orderBy = "Id in RelatedIds";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/OrderByCustomers?$orderby=" + orderBy);
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            dynamic parsedContent = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(parsedContent.value);
+            for (int i = 1; i < parsedContent.value.Count; i++)
+            {
+                dynamic previousElement = parsedContent.value[i - 1];
+                dynamic currentElement = parsedContent.value[i];
+                Assert.Equal(1, previousElement.Address.ZipCode.CompareTo(currentElement.Address.ZipCode));
+            }
+        }
     }
 
     public class OrderByCustomersController : TestODataController
@@ -117,6 +136,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                       {
                           Id = j,
                           Name = "Customer " + i,
+                          RelatedIds = new int[] { 1, 2, 3, 4, 5 },
+                          Friends = new string[] { "Customer 1", "Customer 2", "Customer 3" },
                           CountryOrRegion = new OrderByCountryOrRegion
                           {
                               Name = "CountryOrRegion " + j % 3,
@@ -170,6 +191,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public IEnumerable<int> RelatedIds { get; set; }
+        public IEnumerable<string> Friends { get; set; }
         public OrderByCountryOrRegion CountryOrRegion { get; set; }
         public OrderByAddress Address { get; set; }
         public OrderByAddress WorkAddress { get; set; }

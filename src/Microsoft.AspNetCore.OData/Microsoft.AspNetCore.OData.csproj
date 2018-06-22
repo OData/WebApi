@@ -18,9 +18,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.4.3" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.4.3" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.4.3" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
@@ -63,5 +60,17 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.OData.Core">
+      <HintPath>..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Edm">
+      <HintPath>..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Spatial">
+      <HintPath>..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.Spatial.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

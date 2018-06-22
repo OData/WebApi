@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private ParameterExpression _lambdaParameter;
 
-        private IEnumerable<AggregateExpression> _aggregateExpressions;
+        private IEnumerable<AggregateExpression> _aggregateExpressions = new List<AggregateExpression>();
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;
@@ -48,7 +49,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
-                    _aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.Expressions);
+                    Debug.Assert(aggregateClause != null);
+                    //_aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.Expressions);
                     ResultClrType = typeof(NoGroupByAggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
@@ -59,7 +61,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         if (groupByClause.ChildTransformations.Kind == TransformationNodeKind.Aggregate)
                         {
                             var aggregationNode = (AggregateTransformationNode)groupByClause.ChildTransformations;
-                            _aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.Expressions);
+                            Debug.Assert(aggregationNode != null);
+                            //_aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.Expressions);
                         }
                         else
                         {

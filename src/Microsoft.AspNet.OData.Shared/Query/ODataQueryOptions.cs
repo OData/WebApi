@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
@@ -441,10 +442,11 @@ namespace Microsoft.AspNet.OData.Query
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;
-                foreach (var expr in aggregateClause.Expressions)
-                {
-                    result.Add(expr.Alias);
-                }
+                Debug.Assert(aggregateClause != null);
+                //foreach (var expr in aggregateClause.Expressions)
+                //{
+                //    result.Add(expr.Alias);
+                //}
             }
             else if (lastTransform.Kind == TransformationNodeKind.GroupBy)
             {

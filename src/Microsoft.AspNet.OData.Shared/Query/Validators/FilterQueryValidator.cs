@@ -214,6 +214,28 @@ namespace Microsoft.AspNet.OData.Query.Validators
         }
 
         /// <summary>
+        /// Override this method to restrict the 'in' query inside the filter query.
+        /// </summary>
+        /// <remarks>
+        /// This method is intended to be called from method overrides in subclasses. This method also supports unit-testing scenarios and is not intended to be called from user code.
+        /// Call the Validate method to validate a <see cref="FilterQueryOption"/> instance.
+        /// </remarks>
+        /// <param name="inNode">InNode to validate</param>
+        /// <param name="settings">Settings to check against</param>
+        public virtual void ValidateInNode(InNode inNode, ODataValidationSettings settings)
+        {
+            if (inNode == null)
+            {
+                throw Error.ArgumentNull("inNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+        }
+
+        /// <summary>
         /// Override this method to validate the LogicalOperators such as 'eq', 'ne', 'gt', 'ge', 'lt', 'le', 'and', 'or'.
         /// 
         /// Please note that 'not' is not included here. Please override ValidateUnaryOperatorNode to customize 'not'.
@@ -829,6 +851,11 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
                 case QueryNodeKind.SingleValueOpenPropertyAccess:
                     //no validation on open values?
+                    break;
+
+                case QueryNodeKind.In:
+                    // TODO: any restrictions?
+                    ValidateInNode(node as InNode, settings);
                     break;
 
                 case QueryNodeKind.NamedFunctionParameter:

@@ -33,17 +33,17 @@
     <Reference Include="Microsoft.Data.OData, Version=5.6.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Data.OData.5.6.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Client, Version=7.4.3.20321, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.4.3\lib\net45\Microsoft.OData.Client.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.OData.Client, Version=7.5.0.20530, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Core, Version=7.4.3.20321, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.4.3\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.OData.Core, Version=7.5.0.20530, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=7.4.3.20321, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.4.3\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.OData.Edm, Version=7.5.0.20530, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -57,9 +57,9 @@
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.Hosting.2.0.2\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=7.4.3.20321, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.4.3\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
-      <Private>True</Private>
+    <Reference Include="Microsoft.Spatial, Version=7.5.0.20514, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -1776,7 +1776,7 @@
     </Compile>
     <Compile Include="..\UriParserExtension\UriResolverDependencyTestWithOldDefaultConfig.cs">
       <Link>UriParserExtension\UriResolverDependencyTestWithOldDefaultConfig.cs</Link>
-    </Compile>    
+    </Compile>
     <Compile Include="..\UriParserExtension\UriParserExtensionDataModel.cs">
       <Link>UriParserExtension\UriParserExtensionDataModel.cs</Link>
     </Compile>

@@ -451,6 +451,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
                 this.PropertyChanged(this, new global::System.ComponentModel.PropertyChangedEventArgs(property));
             }
         }
+        /*
 #if !ASTORIA_LIGHT && !PORTABLELIB
         /// <summary>
         /// There are no comments for GetPartnersCount in the schema.
@@ -483,6 +484,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
                 new global::Microsoft.OData.Client.OperationParameter[] {  });
         }
 #endif
+*/
     }
     /// <summary>
     /// There are no comments for Office in the schema.

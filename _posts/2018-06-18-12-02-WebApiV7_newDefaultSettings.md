@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "12.1 WebApi 7.0 Default Setting Updates"
+title: "12.2 WebApi 7.0 Default Setting Updates"
 description: "Design document for updated default settings for WebApi 7.0"
 category: "12. Design"
 ---

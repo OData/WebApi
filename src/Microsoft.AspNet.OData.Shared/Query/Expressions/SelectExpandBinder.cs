@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _selectExpandQuery = selectExpandQuery;
             _context = selectExpandQuery.Context;
             _model = _context.Model;
-            _modelID = ModelContainer.GetModelID(_model);
+            _modelID = _context.ModelId;
             _settings = settings;
         }
 

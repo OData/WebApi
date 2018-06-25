@@ -193,5 +193,15 @@ namespace Microsoft.AspNet.OData
             Contract.Assert(model != null);
             return model;
         }
+
+        /// <summary>
+        /// Register the QueryContext with the Request so that it doesn't get garbage collected early
+        /// </summary>
+        /// <param name="request">The HTTPRequestMessage to register with</param>
+        /// <param name="queryContext">The ODataQueryContext to be registered</param>
+        private static void RegisterContext(HttpRequestMessage request, ODataQueryContext queryContext)
+        {
+            request.ODataProperties().QueryContexts.Add(queryContext);
+        }
     }
 }

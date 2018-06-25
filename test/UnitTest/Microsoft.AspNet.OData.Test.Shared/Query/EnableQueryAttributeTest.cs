@@ -393,6 +393,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customer/?$skip=1");
             var config = RoutingConfigurationFactory.Create();
+            config.EnableDependencyInjection();
             config.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
             request.SetConfiguration(config);
             HttpControllerContext controllerContext = new HttpControllerContext(config, new HttpRouteData(new HttpRoute()), request);

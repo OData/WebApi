@@ -132,6 +132,12 @@ namespace Microsoft.AspNet.OData
         /// <value>Initially an empty <c>IDictionary&lt;string, object&gt;</c>.</value>
         public IDictionary<string, object> RoutingConventionsStore { get; set; } = new Dictionary<string, object>();
 
+        /// <summary>
+        /// Gets the <see cref="ODataQueryContexts"/> used by the request.
+        /// </summary>
+        /// <value>The list of <see cref="ODataQueryContexts"/>.</value>
+        public IList<ODataQueryContext> QueryContexts { get; } = new List<ODataQueryContext>();
+
         /// <inheritdoc/>
         public void Dispose()
         {

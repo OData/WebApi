@@ -483,6 +483,8 @@ public class Microsoft.AspNet.OData.ODataQueryContext {
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; }
 	ODataPath Path  { public get; }
 	System.IServiceProvider RequestContainer  { public get; }
+
+	protected virtual void Finalize ()
 }
 
 public class Microsoft.AspNet.OData.ODataSwaggerConverter {

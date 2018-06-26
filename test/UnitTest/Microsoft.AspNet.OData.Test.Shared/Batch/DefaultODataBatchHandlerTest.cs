@@ -413,7 +413,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             HttpResponseException errorResponse = ExceptionAssert.Throws<HttpResponseException>(
                 () => batchHandler.ValidateRequest(request));
             Assert.Equal(HttpStatusCode.BadRequest, errorResponse.Response.StatusCode);
-            Assert.Equal("The batch request must have 'multipart/mixed' as the media type.",
+            Assert.Equal("The batch request must have 'multipart/mixed' or 'application/json' as the media type.",
                 (await errorResponse.Response.Content.ReadAsAsync<HttpError>()).Message);
         }
 

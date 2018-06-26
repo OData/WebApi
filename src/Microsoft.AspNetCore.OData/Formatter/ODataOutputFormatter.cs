@@ -112,6 +112,7 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 return false;
             }
+            type = TypeHelper.GetTaskInnerTypeOrSelf(type);
 
             ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
@@ -145,6 +146,7 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 throw Error.ArgumentNull("type");
             }
+            type = TypeHelper.GetTaskInnerTypeOrSelf(type);
 
             HttpRequest request = context.HttpContext.Request;
             if (request == null)
@@ -192,6 +194,7 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 throw Error.ArgumentNull("type");
             }
+            type = TypeHelper.GetTaskInnerTypeOrSelf(type);
 
             HttpRequest request = context.HttpContext.Request;
             if (request == null)

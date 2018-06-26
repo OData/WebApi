@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
@@ -213,6 +214,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         public ITestActionResult Get()
         {
             return Ok(_db.People);
+        }
+
+        [EnableQuery]
+        public async Task<TestSingleResult<EfPerson>> Get(int key)
+        {
+            return await Task.FromResult(TestSingleResult.Create(_db.People.Where(c => c.Id == key)));
         }
     }
 }

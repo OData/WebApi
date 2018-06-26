@@ -36,7 +36,8 @@ namespace Microsoft.AspNet.OData.Batch
         private const string ChangeSetIdKey = "ChangesetId";
         private const string ContentIdKey = "ContentId";
         private const string ContentIdMappingKey = "ContentIdMapping";
-        private const string BatchMediaType = "multipart/mixed";
+        private const string BatchMediaTypeMime = "multipart/mixed";
+        private const string BatchMediaTypeJson = "application/json";
         private const string Boundary = "boundary";
 
         /// <summary>
@@ -208,6 +209,7 @@ namespace Microsoft.AspNet.OData.Batch
             Contract.Assert(request != null);
 
             HttpResponse response = request.HttpContext.Response;
+
             if (request.Body == null)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
@@ -217,24 +219,35 @@ namespace Microsoft.AspNet.OData.Batch
 
             RequestHeaders headers = request.GetTypedHeaders();
             MediaTypeHeaderValue contentType = headers.ContentType;
+
             if (contentType == null)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
                 await response.WriteAsync(SRResources.BatchRequestMissingContentType);
                 return false;
             }
-            if (!String.Equals(contentType.MediaType.ToString(), BatchMediaType, StringComparison.OrdinalIgnoreCase))
+
+            string mediaType = contentType.MediaType.ToString();
+            bool isMimeBatch = String.Equals(mediaType, BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase);
+            bool isJsonBatch = String.Equals(mediaType, BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase);
+
+            if (!isMimeBatch && !isJsonBatch)
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
-                await response.WriteAsync(Error.Format(SRResources.BatchRequestInvalidMediaType, BatchMediaType));
+                await response.WriteAsync(Error.Format(SRResources.BatchRequestInvalidMediaType,
+                    $"{BatchMediaTypeMime} or {BatchMediaTypeJson}"));
                 return false;
             }
-            NameValueHeaderValue boundary = contentType.Parameters.FirstOrDefault(p => String.Equals(p.Name.ToString(), Boundary, StringComparison.OrdinalIgnoreCase));
-            if (boundary == null || String.IsNullOrEmpty(boundary.Value.ToString()))
+
+            if (isMimeBatch)
             {
-                response.StatusCode = (int)HttpStatusCode.BadRequest;
-                await response.WriteAsync(SRResources.BatchRequestMissingBoundary);
-                return false;
+                NameValueHeaderValue boundary = contentType.Parameters.FirstOrDefault(p => String.Equals(p.Name.ToString(), Boundary, StringComparison.OrdinalIgnoreCase));
+                if (boundary == null || String.IsNullOrEmpty(boundary.Value.ToString()))
+                {
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    await response.WriteAsync(SRResources.BatchRequestMissingBoundary);
+                    return false;
+                }
             }
 
             return true;

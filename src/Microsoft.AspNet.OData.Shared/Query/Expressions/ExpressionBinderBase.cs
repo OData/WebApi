@@ -243,6 +243,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 return source;
             }
+            else if(conversionType == typeof(DateTimeOffset?) && source.Type == typeof(Date))
+            {
+                return source;
+            }
             else if (source == NullConstant)
             {
                 return source;

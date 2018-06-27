@@ -239,8 +239,91 @@ Content-Type: application/json;odata.metadata=minimal
             }
             Assert.Equal(3, subResponseCount);
         }
-    }
 
+        [Fact]
+        public async Task CanHandleAutomicityGroupRequestsAndUngroupedRequest_JsonBatch()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/DefaultBatch/$batch", this.BaseAddress);
+            string absoluteUri = this.BaseAddress + "/DefaultBatch/DefaultBatchCustomer";
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+{
+    ""requests"": [{
+            ""id"": ""1"",
+            ""atomicityGroup"": ""f7de7314-2f3d-4422-b840-ada6d6de0f18"",
+            ""method"": ""POST"",
+            ""url"": """ + absoluteUri + @""",
+            ""headers"": {
+                ""OData-Version"": ""4.0"",
+                ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                ""Accept"": ""application/json;odata.metadata=minimal""
+            },
+            ""body"": {
+                ""Id"":11,
+                ""Name"":""CreatedByJsonBatch_11""
+            }
+        }, {
+            ""id"": ""2"",
+            ""atomicityGroup"": ""f7de7314-2f3d-4422-b840-ada6d6de0f18"",
+            ""method"": ""POST"",
+            ""url"": """ + absoluteUri + @""",
+            ""headers"": {
+                ""OData-Version"": ""4.0"",
+                ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                ""Accept"": ""application/json;odata.metadata=minimal""
+            },
+            ""body"": {
+                ""Id"":12,
+                ""Name"":""CreatedByJsonBatch_12""
+            }
+        }, {
+            ""id"": ""3"",
+            ""method"": ""POST"",
+            ""url"": """ + absoluteUri + @""",
+            ""headers"": {
+                ""OData-Version"": ""4.0"",
+                ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                ""Accept"": ""application/json;odata.metadata=minimal""
+            },
+            ""body"": {
+                ""Id"":13,
+                ""Name"":""CreatedByJsonBatch_3""
+            }
+        }
+    ]
+}");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            Assert.Equal(201, operationMessage.StatusCode);
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(3, subResponseCount);
+        }
+    }
 
     public class DefaultBatchHandlerQueryBatchTests : WebHostTestBase
     {

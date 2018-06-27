@@ -74,18 +74,20 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         [Fact]
-        [Trait("Description", "ODataModelBuilder can't create nested complex type properties (that infinitely recurse)")]
-        public void CreateInfiniteRecursiveComplexTypeDefinitionFails()
+        [Trait("Description", "ODataModelBuilder can create nested complex type properties (that infinitely recurse)")]
+        public void CreateInfiniteRecursiveComplexTypeDefinitionSucceeds()
         {
-            var builder = new ODataModelBuilder()
-                .Add_RecursiveZipCode_ComplexType();
+            var builder = new ODataModelBuilder().Add_RecursiveZipCode_ComplexType();
 
             var zipCode = builder.ComplexType<RecursiveZipCode>();
+            zipCode.ComplexProperty(z => z.Recursive);
 
-            ExceptionAssert.ThrowsArgument(
-                () => zipCode.ComplexProperty(z => z.Recursive),
-                "propertyInfo",
-                "The complex type 'Microsoft.AspNet.OData.Test.Builder.TestModels.RecursiveZipCode' has a reference to itself through the property 'Recursive'. A recursive loop of complex types is not allowed.");
+            var model = builder.GetServiceModel();
+            var recursiveZipCodeType = model.SchemaElements.OfType<IEdmComplexType>().SingleOrDefault(se => se.Name == "RecursiveZipCode");
+            Assert.NotNull(recursiveZipCodeType);
+            var recursiveZipCodeProperty = recursiveZipCodeType.FindProperty("Recursive");
+            Assert.NotNull(recursiveZipCodeProperty);
+            Assert.Equal(recursiveZipCodeType.FullName(), recursiveZipCodeProperty.Type.AsComplex().ComplexDefinition().FullName());
         }
 
         [Fact]

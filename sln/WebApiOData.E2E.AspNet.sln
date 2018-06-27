@@ -18,6 +18,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Shar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Test.E2E.AspNet.OData", "..\test\E2ETest\Microsoft.Test.E2E.AspNet.OData\Build.AspNet\Microsoft.Test.E2E.AspNet.OData.csproj", "{436F2E52-4CBC-41E5-BD47-66C16184A214}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{D7B0F2DE-65A1-4AA1-889A-02A2DAC75EF8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetODataSample.Web", "..\samples\AspNetODataSample.Web\AspNetODataSample.Web.csproj", "{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{a6f9775d-f7e2-424e-8363-79644a73038f}*SharedItemsImports = 4
@@ -86,6 +90,30 @@ Global
 		{436F2E52-4CBC-41E5-BD47-66C16184A214}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{436F2E52-4CBC-41E5-BD47-66C16184A214}.Release|x86.ActiveCfg = Release|Any CPU
 		{436F2E52-4CBC-41E5-BD47-66C16184A214}.Release|x86.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|Any CPU.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|Mixed Platforms.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|x86.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeAnalysis|x86.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|Any CPU.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|Mixed Platforms.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|x86.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.CodeCoverage|x86.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Debug|x86.Build.0 = Debug|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|x86.ActiveCfg = Release|Any CPU
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -94,5 +122,6 @@ Global
 		{A6F9775D-F7E2-424E-8363-79644A73038F} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
 		{B6B951B6-C3F0-4B8E-8955-E039145E7DEC} = {F4C937D2-3BD0-4F6B-B75F-A526A7FD978B}
 		{436F2E52-4CBC-41E5-BD47-66C16184A214} = {DD61AE62-B084-4A8C-AE1E-615A62BA645D}
+		{8D2B5B0E-9CE1-4708-8024-2DBCAD51D9ED} = {D7B0F2DE-65A1-4AA1-889A-02A2DAC75EF8}
 	EndGlobalSection
 EndGlobal

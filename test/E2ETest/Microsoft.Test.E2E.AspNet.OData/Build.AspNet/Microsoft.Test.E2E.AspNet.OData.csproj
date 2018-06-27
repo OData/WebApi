@@ -1143,6 +1143,9 @@
     <Compile Include="..\ForeignKey\ForeignKeyTest.cs">
       <Link>ForeignKey\ForeignKeyTest.cs</Link>
     </Compile>
+    <Compile Include="..\Formatter\BaseAddressFactoryTest.cs">
+      <Link>Formatter\BaseAddressFactoryTest.cs</Link>
+    </Compile>
     <Compile Include="..\Formatter\CollectionPropertyTests.cs">
       <Link>Formatter\CollectionPropertyTests.cs</Link>
     </Compile>
@@ -1419,6 +1422,12 @@
     <Compile Include="..\ModelBuilder\PropertyTests.cs">
       <Link>ModelBuilder\PropertyTests.cs</Link>
     </Compile>
+    <Compile Include="..\ModelBuilder\RecursiveComplexTypesModels.cs" >
+      <Link>ModelBuilder\RecursiveComplexTypesModels.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBuilder\RecursiveComplexTypesE2ETests.cs">
+      <Link>ModelBuilder\RecursiveComplexTypesE2ETests.cs</Link>
+    </Compile>
     <Compile Include="..\ModelBuilder\SpecialCharactersLinkGenerationTests.cs">
       <Link>ModelBuilder\SpecialCharactersLinkGenerationTests.cs</Link>
     </Compile>
@@ -1556,6 +1565,9 @@
     </Compile>
     <Compile Include="..\QueryComposition\SelectExpandTests.cs">
       <Link>QueryComposition\SelectExpandTests.cs</Link>
+    </Compile>
+    <Compile Include="..\QueryComposition\SelectExpandEFTests.cs">
+      <Link>QueryComposition\SelectExpandEFTests.cs</Link>
     </Compile>
     <Compile Include="..\QueryComposition\SelectTypeExplosionTests.cs">
       <Link>QueryComposition\SelectTypeExplosionTests.cs</Link>

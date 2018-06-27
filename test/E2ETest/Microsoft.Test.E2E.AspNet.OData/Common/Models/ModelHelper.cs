@@ -203,6 +203,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     MovieId = 1,
                     Title = "movie1",
                     Summary = "summary1",
+                    MainGenre = Genre.Adventure,
                     Actors = new Person[]
                     {
                         mike,
@@ -211,13 +212,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     Director = kevin,
                     Tags = new string[] { "Quirky" },
                     Showings = showingTheaters,
-                    Sales = new int[] { 100, 200, 300 }
+                    Sales = new int[] { 100, 200, 300 },
+                    Genres = new Genre[] { Genre.Adventure, Genre.Comedy, Genre.Drama, Genre.Horror },
                 },
                 new Movie 
                 {
                     MovieId = 2,
                     Title = "movie2",
                     Summary = "summary2",
+                    MainGenre = Genre.Adventure,
                     Actors = new Person[] 
                     {
                         kevin
@@ -225,13 +228,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     Director = kevin,
                     Tags = new string[] { "Fiction" },
                     Showings = showingTheaters,
-                    Sales = new int[] { 200, 300, 400 }
+                    Sales = new int[] { 200, 300, 400 },
+                    Genres = new Genre[] { Genre.Adventure, Genre.Comedy },
                 },
                 new Movie 
                 {
                     MovieId = 3,
                     Title = "movie3",
                     Summary = "summary3",
+                    MainGenre = Genre.Drama,
                     Actors = new Person[] 
                     {
                         mike,
@@ -242,13 +247,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     Producer = kevin,
                     Tags = new string[] { "Animation" },
                     Showings = showingTheaters,
-                    Sales = new int[] { 1, 2, 3 }
+                    Sales = new int[] { 1, 2, 3 },
+                    Genres = new Genre[] { Genre.Drama, Genre.Horror },
                 },
                 new Movie
                 {
                     MovieId = 4,
                     Title = "movie4",
                     Summary = "summary4",
+                    MainGenre = Genre.Comedy,
                     Actors = new Teenager[]
                     {
                         jill,
@@ -258,13 +265,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     Producer = james,
                     Tags = new string[] { "Fun" },
                     Showings = showingTheaters,
-                    Sales = new int[] { 1, 2, 3 }
+                    Sales = new int[] { 1, 2, 3 },
+                    Genres = new Genre[] { Genre.Adventure, Genre.Drama },
                 },
                 new Movie
                 {
                     MovieId = 5,
                     Title = "movie5",
                     Summary = "summary5",
+                    MainGenre = Genre.Adventure,
                     Actors = new Person[]
                     {
                         jill,
@@ -275,7 +284,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                     Producer = james,
                     Tags = new string[] { "Boring" },
                     Showings = showingTheaters,
-                    Sales = new int[] { 1, 2, 3 }
+                    Sales = new int[] { 1, 2, 3 },
+                    Genres = new Genre[] { Genre.Comedy, Genre.Horror },
                 },
             };
         }

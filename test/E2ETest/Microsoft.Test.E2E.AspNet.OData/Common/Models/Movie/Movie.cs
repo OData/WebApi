@@ -10,12 +10,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
         public int MovieId { get; set; }
         public string Title { get; set; }
         public string Summary { get; set; }
+        public Genre MainGenre { get; set; }
         public IEnumerable<Person> Actors { get; set; }
         public IEnumerable<string> Tags { get; set; }
         public Person Director { get; set; }
         public Person Producer { get; set; }
         public IEnumerable<Theater> Showings { get; set; }
         public IEnumerable<int> Sales { get; set; }
+        public IEnumerable<Genre> Genres { get; set; }
     }
 
     public class Person
@@ -40,5 +42,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
     {
         public int TheaterId { get; set; }
         public string Name { get; set; }
+    }
+
+    public enum Genre
+    {
+        Adventure,
+        Horror,
+        Comedy,
+        Drama,
     }
 }

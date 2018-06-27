@@ -193,6 +193,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 data.Add("Producer in Actors", movies.Where(p => p.Actors.Contains(p.Producer)));
                 data.Add("MovieId in (1, 2, 3)", movies.Where(p => (new int[] { 1, 2, 3 }).Contains(p.MovieId)));
                 data.Add("Title in ('movie1','movie3')", movies.Where(p => (new string[] { "movie1", "movie3" }).Contains(p.Title)));
+                data.Add("MainGenre in Genres", movies.Where(p => p.Genres.Contains(p.MainGenre)));
 
                 return data;
             }

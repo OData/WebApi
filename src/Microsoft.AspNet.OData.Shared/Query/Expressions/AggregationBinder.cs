@@ -48,7 +48,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
+#pragma warning disable CS0618 // Type or member is obsolete
                     _aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.Expressions);
+#pragma warning restore CS0618 // Type or member is obsolete
                     ResultClrType = typeof(NoGroupByAggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
@@ -59,7 +61,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         if (groupByClause.ChildTransformations.Kind == TransformationNodeKind.Aggregate)
                         {
                             var aggregationNode = (AggregateTransformationNode)groupByClause.ChildTransformations;
+#pragma warning disable CS0618 // Type or member is obsolete
                             _aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.Expressions);
+#pragma warning restore CS0618 // Type or member is obsolete
                         }
                         else
                         {

@@ -441,7 +441,9 @@ namespace Microsoft.AspNet.OData.Query
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;
+#pragma warning disable CS0618 // Type or member is obsolete
                 foreach (var expr in aggregateClause.Expressions)
+#pragma warning restore CS0618 // Type or member is obsolete
                 {
                     result.Add(expr.Alias);
                 }

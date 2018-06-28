@@ -127,7 +127,7 @@ namespace Microsoft.AspNet.OData.Results
             HttpResponseMessage response = await result.ExecuteAsync(cancellationToken);
             response.Headers.Location = LocationHeader;
             ResultHelpers.AddEntityId(response, () => GenerateEntityId(Request));
-
+            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(Request));
             return response;
         }
 

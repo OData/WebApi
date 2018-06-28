@@ -500,6 +500,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                     string.Format("Response code is not right, expected: {0}, actual: {1}", HttpStatusCode.NoContent, response.StatusCode));
                 Assert.True(response.Headers.Contains("OData-EntityId"), "The response should contain Header 'OData-EntityId'");
                 Assert.True(response.Headers.Contains("Location"), "The response should contain Header 'Location'");
+                Assert.True(response.Headers.Contains("OData-Version"), "The response should contain Header 'OData-Version'");
             }
         }
 

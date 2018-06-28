@@ -100,7 +100,9 @@ namespace Microsoft.AspNet.OData.Results
         public virtual async Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             IHttpActionResult result = GetInnerActionResult();
-            return await result.ExecuteAsync(cancellationToken);
+            var response = await result.ExecuteAsync(cancellationToken);
+            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(Request));
+            return response;
         }
 
         internal IHttpActionResult GetInnerActionResult()

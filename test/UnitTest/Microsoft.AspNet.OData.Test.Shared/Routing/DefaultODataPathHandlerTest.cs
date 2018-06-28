@@ -1842,8 +1842,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("CustomersWithMultiKeys(Key1=1)")]
         [InlineData("CustomersWithMultiKeys(Key2=2)")]
         [InlineData("CustomersWithMultiKeys(Key3=3)")]
-        // Update cases in this test after ODL isuse is resolved: https://github.com/OData/odata.net/issues/1153.
-        //        [InlineData("CustomersWithMultiKeys(Key1=1,Key2=2,Key3=3)")]
+        [InlineData("CustomersWithMultiKeys(Key1=1,Key2=2,Key3=3)")]
         public void CannotParse_UnmatchedCountOfKeys(string path)
         {
             // Arrange
@@ -1857,7 +1856,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             // Act & Assert
             ExceptionAssert.Throws<ODataException>(
                 () => _parser.Parse(model.Model, _serviceRoot, path),
-                "Bad Request - Error in query syntax.");
+                "The number of keys specified in the URI does not match number of key properties for the resource 'NS.CustomerWithMultiKeys'.");
         }
 
         [Theory]

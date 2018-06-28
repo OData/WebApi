@@ -115,4 +115,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     internal class NoGroupByAggregationWrapper : GroupByWrapper
     {
     }
+
+    internal class EntitySetAggregationWrapper : GroupByWrapper
+    {
+    }    
 }

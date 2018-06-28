@@ -151,6 +151,18 @@
     <Compile Include="..\Aggregation\AggregationTests.cs">
       <Link>Aggregation\AggregationTests.cs</Link>
     </Compile>
+    <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
+      <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
+    </Compile>
+    <Compile Include="..\EntitySetAggregation\EntitySetAggregationDataModel.cs">
+      <Link>EntitySetAggregation\EntitySetAggregationDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\EntitySetAggregation\EntitySetAggregationEdmModel.cs">
+      <Link>EntitySetAggregation\EntitySetAggregationEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\EntitySetAggregation\EntitySetAggregationTests.cs">
+      <Link>EntitySetAggregation\EntitySetAggregationTests.cs</Link>
+    </Compile>
     <Compile Include="..\Aggregation\PagedAggregationTests.cs">
       <Link>Aggregation\PagedAggregationTests.cs</Link>
     </Compile>

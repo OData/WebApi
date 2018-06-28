@@ -382,16 +382,6 @@ namespace Microsoft.AspNet.OData.Query
                 result = orderBy.ApplyTo(result, querySettings);
             }
 
-            if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
-            {
-                result = Skip.ApplyTo(result, querySettings);
-            }
-
-            if (IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top))
-            {
-                result = Top.ApplyTo(result, querySettings);
-            }
-
             AddAutoSelectExpandProperties();
 
             if (SelectExpand != null)
@@ -401,6 +391,16 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     result = tempResult;
                 }
+            }
+
+            if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
+            {
+                result = Skip.ApplyTo(result, querySettings);
+            }
+
+            if (IsAvailableODataQueryOption(Top, AllowedQueryOptions.Top))
+            {
+                result = Top.ApplyTo(result, querySettings);
             }
 
             int pageSize = -1;

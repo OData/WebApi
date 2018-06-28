@@ -58,6 +58,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
             Assert.Equal(expect, String.Join(",", content["value"].Select(e => e["Id"].ToString())));
         }
+
+        [Fact]
+        public async Task CanQuerySingleEntityFromTaskReturnTypeInControllerOnEf()
+        {
+            string requestUri = string.Format("{0}/odata/EfPeople(1)", BaseAddress);
+
+            HttpResponseMessage response = await Client.GetAsync(requestUri);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            JObject content = await response.Content.ReadAsObject<JObject>();
+
+            Assert.Equal("1", (string)content["Id"]);
+        }
     }
 
     public class MyConverter : ODataPayloadValueConverter

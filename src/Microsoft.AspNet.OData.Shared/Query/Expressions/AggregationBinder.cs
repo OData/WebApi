@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
@@ -49,8 +48,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 case TransformationNodeKind.Aggregate:
                     var aggregateClause = this._transformation as AggregateTransformationNode;
-                    Debug.Assert(aggregateClause != null);
-                    //_aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.Expressions);
+                    _aggregateExpressions = FixCustomMethodReturnTypes(aggregateClause.AggregateExpressions.OfType<AggregateExpression>());
                     ResultClrType = typeof(NoGroupByAggregationWrapper);
                     break;
                 case TransformationNodeKind.GroupBy:
@@ -61,8 +59,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         if (groupByClause.ChildTransformations.Kind == TransformationNodeKind.Aggregate)
                         {
                             var aggregationNode = (AggregateTransformationNode)groupByClause.ChildTransformations;
-                            Debug.Assert(aggregationNode != null);
-                            //_aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.Expressions);
+                            _aggregateExpressions = FixCustomMethodReturnTypes(aggregationNode.AggregateExpressions.OfType<AggregateExpression>());
                         }
                         else
                         {
@@ -163,12 +160,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private IQueryable BindSelect(IQueryable grouping)
         {
             // Should return following expression
-            // .Select($it => New DynamicType2() 
+            // .Select($it => New DynamicType2()
             //                  {
             //                      GroupByContainer = $it.Key.GroupByContainer // If groupby section present
             //                      Container => new AggregationPropertyContainer() {
-            //                          Name = "Alias1", 
-            //                          Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty), 
+            //                          Name = "Alias1",
+            //                          Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty),
             //                          Next = new LastInChain() {
             //                              Name = "Alias2",
             //                              Value = $it.AsQuaryable().Sum(i => i.AggregatableProperty)
@@ -314,7 +311,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         var averageMethod = averageGenericMethod.MakeGenericMethod(this._elementType);
                         aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
 
-                        // For Dynamic properties cast back to object 
+                        // For Dynamic properties cast back to object
                         if (propertyAccessor.Type == typeof(object))
                         {
                             aggregationExpression = Expression.Convert(aggregationExpression, typeof(object));
@@ -472,7 +469,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // .GroupBy($it => new DynamicTypeWrapper()
                 //                                      {
                 //                                           GroupByContainer => new AggregationPropertyContainer() {
-                //                                               Name = "Prop1", 
+                //                                               Name = "Prop1",
                 //                                               Value = $it.Prop1,
                 //                                               Next = new AggregationPropertyContainer() {
                 //                                                   Name = "Prop2",
@@ -483,7 +480,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 //                                                   }
                 //                                               }
                 //                                           }
-                //                                      }) 
+                //                                      })
                 List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments(_groupingProperties);
 
                 var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");

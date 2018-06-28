@@ -1918,15 +1918,6 @@ namespace Microsoft.AspNet.OData.Common
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The complex type &apos;{0}&apos; has a reference to itself through the property &apos;{1}&apos;. A recursive loop of complex types is not allowed..
-        /// </summary>
-        internal static string RecursiveComplexTypesNotAllowed {
-            get {
-                return ResourceManager.GetString("RecursiveComplexTypesNotAllowed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Found unexpected parameter &apos;{0}&apos;..
         /// </summary>
         internal static string ReferenceNavigationPropertyExpandFilterVisitorUnexpectedParameter {

@@ -315,7 +315,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             FunctionConfiguration function = builder.Function("MyFunction").Returns<Address>();
 
             // Assert
-            Assert.True(function.OptionalReturn);
+            Assert.True(function.ReturnNullable);
         }
 
         [Fact]
@@ -324,10 +324,10 @@ namespace Microsoft.AspNet.OData.Test.Builder
             // Arrange & Act
             ODataModelBuilder builder = new ODataModelBuilder();
             FunctionConfiguration function = builder.Function("MyFunction").Returns<Address>();
-            function.OptionalReturn = false;
+            function.ReturnNullable = false;
 
             // Assert
-            Assert.False(function.OptionalReturn);
+            Assert.False(function.ReturnNullable);
         }
 
         [Fact]
@@ -729,7 +729,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
             EntityTypeConfiguration<Movie> movie = builder.EntitySet<Movie>("Movies").EntityType;
             movie.Function("Watch1").Returns<Address>();
-            movie.Function("Watch2").Returns<Address>().OptionalReturn = false;
+            movie.Function("Watch2").Returns<Address>().ReturnNullable = false;
 
             // Act
             IEdmModel model = builder.GetEdmModel();

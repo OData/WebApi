@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -32,7 +33,8 @@ namespace Microsoft.AspNet.OData.Batch
         private const string ChangeSetIdKey = "ChangesetId";
         private const string ContentIdKey = "ContentId";
         private const string ContentIdMappingKey = "ContentIdMapping";
-        private const string BatchMediaType = "multipart/mixed";
+        private const string BatchMediaTypeMime = "multipart/mixed";
+        private const string BatchMediaTypeJson = "application/json";
         private const string Boundary = "boundary";
 
         /// <summary>
@@ -215,16 +217,29 @@ namespace Microsoft.AspNet.OData.Batch
                     HttpStatusCode.BadRequest,
                     SRResources.BatchRequestMissingContentType));
             }
-            if (!String.Equals(contentType.MediaType, BatchMediaType, StringComparison.OrdinalIgnoreCase))
+
+            bool isMimeBatch = String.Equals(contentType.MediaType, BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase);
+            bool isJsonBatch = String.Equals(contentType.MediaType, BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase);
+
+            if (!isMimeBatch && !isJsonBatch)
             {
                 throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                        Error.Format(SRResources.BatchRequestInvalidMediaType, BatchMediaType)));
+                        Error.Format(
+                            SRResources.BatchRequestInvalidMediaType,
+                            BatchMediaTypeMime,
+                            BatchMediaTypeJson)));
             }
-            NameValueHeaderValue boundary = contentType.Parameters.FirstOrDefault(p => String.Equals(p.Name, Boundary, StringComparison.OrdinalIgnoreCase));
-            if (boundary == null || String.IsNullOrEmpty(boundary.Value))
+
+            if (isMimeBatch)
             {
-                throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest,
-                    SRResources.BatchRequestMissingBoundary));
+                NameValueHeaderValue boundary = contentType.Parameters.FirstOrDefault(
+                        p => String.Equals(p.Name, Boundary, StringComparison.OrdinalIgnoreCase));
+
+                if (boundary == null || String.IsNullOrEmpty(boundary.Value))
+                {
+                    throw new HttpResponseException(request.CreateErrorResponse(HttpStatusCode.BadRequest,
+                        SRResources.BatchRequestMissingBoundary));
+                }
             }
         }
 

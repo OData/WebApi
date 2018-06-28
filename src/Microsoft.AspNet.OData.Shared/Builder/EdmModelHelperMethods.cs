@@ -270,7 +270,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 IEdmTypeReference returnReference = GetEdmTypeReference(edmTypeMap,
                     operationConfiguration.ReturnType,
-                    operationConfiguration.ReturnType != null && operationConfiguration.OptionalReturn);
+                    operationConfiguration.ReturnType != null && operationConfiguration.ReturnNullable);
                 IEdmExpression expression = GetEdmEntitySetExpression(edmNavigationSourceMap, operationConfiguration);
                 IEdmPathExpression pathExpression = operationConfiguration.EntitySetPath != null
                     ? new EdmPathExpression(operationConfiguration.EntitySetPath)

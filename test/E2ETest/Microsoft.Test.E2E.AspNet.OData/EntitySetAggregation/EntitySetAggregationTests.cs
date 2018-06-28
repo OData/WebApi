@@ -49,7 +49,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             
             var value = result["value"];
@@ -189,7 +188,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var value = result["value"];
 

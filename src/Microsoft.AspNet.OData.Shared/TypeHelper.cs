@@ -456,6 +456,16 @@ namespace Microsoft.AspNet.OData
             return result;
         }
 
+        internal static Type GetTaskInnerTypeOrSelf(Type type)
+        {
+            if (IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(Task<>))
+            {
+                return type.GetGenericArguments().First();
+            }
+
+            return type;
+        }
+
         private static Type GetInnerGenericType(Type interfaceType)
         {
             // Getting the type T definition if the returning type implements IEnumerable<T>

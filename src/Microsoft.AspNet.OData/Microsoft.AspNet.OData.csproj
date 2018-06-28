@@ -164,6 +164,7 @@
       <Link>Properties\SRResources.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
+      <LastGenOutput>SRResources1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="..\Microsoft.AspNet.OData.Shared\Common\CommonWebApiResources.Designer.cs">
       <Link>Properties\CommonWebApiResources.Designer.cs</Link>

@@ -124,7 +124,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("ActionNotBoundToEntity", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to {0} type of aggregation is not supported..
+        /// </summary>
+        internal static string AggregateKindNotSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("AggregateKindNotSupported", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Aggregation method &apos;{0}&apos; is not supported..
         /// </summary>

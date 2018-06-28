@@ -16,6 +16,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 
@@ -197,11 +198,17 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Register the QueryContext with the Request so that it doesn't get garbage collected early
         /// </summary>
-        /// <param name="request">The HTTPRequestMessage to register with</param>
+        /// <param name="request">The request message to register with</param>
         /// <param name="queryContext">The ODataQueryContext to be registered</param>
-        private static void RegisterContext(HttpRequestMessage request, ODataQueryContext queryContext)
+        private static void RegisterContext(IWebApiRequestMessage request, ODataQueryContext queryContext)
         {
-            request.ODataProperties().QueryContexts.Add(queryContext);
+            HttpRequestScope httpRequestScope = request.RequestContainer.GetService(typeof(HttpRequestScope)) as HttpRequestScope;
+            HttpRequestMessage httpRequest = httpRequestScope == null ? null : httpRequestScope.HttpRequest;
+
+            if (httpRequest != null)
+            {
+                httpRequest.ODataProperties().QueryContexts.Add(queryContext);
+            }
         }
     }
 }

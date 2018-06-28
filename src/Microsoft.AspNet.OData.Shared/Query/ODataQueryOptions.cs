@@ -441,7 +441,7 @@ namespace Microsoft.AspNet.OData.Query
             if (lastTransform.Kind == TransformationNodeKind.Aggregate)
             {
                 var aggregateClause = lastTransform as AggregateTransformationNode;
-                foreach (var expr in aggregateClause.Expressions)
+                foreach (var expr in aggregateClause.AggregateExpressions)
                 {
                     result.Add(expr.Alias);
                 }

@@ -9,6 +9,8 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
@@ -60,6 +62,20 @@ namespace Microsoft.AspNet.OData.Results
             {
                 response.Headers.TryAddWithoutValidation(EntityIdHeaderName, entityId().ToString());
             }
+        }
+
+        public static void AddServiceVersion(HttpResponseMessage response, Func<string> version)
+        {
+            if (response.StatusCode == HttpStatusCode.NoContent)
+            {
+                response.Headers.TryAddWithoutValidation(ODataVersionConstraint.ODataServiceVersionHeader, version());
+            }
+        }
+
+        internal static string GetVersionString(HttpRequestMessage request)
+        {
+            ODataVersion? serviceVersion = request.ODataProperties().ODataServiceVersion;
+            return ODataUtils.ODataVersionToString(serviceVersion ?? ODataVersionConstraint.DefaultODataVersion);
         }
     }
 }

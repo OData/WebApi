@@ -34,11 +34,13 @@ namespace Microsoft.AspNet.OData.Results
         }
 
         /// <inheritdoc/>
-        public virtual Task ExecuteResultAsync(ActionContext context)
+        public async virtual Task ExecuteResultAsync(ActionContext context)
         {
+            HttpResponse response = context.HttpContext.Response;
             HttpRequest request = context.HttpContext.Request;
             IActionResult result = GetInnerActionResult(request);
-            return result.ExecuteResultAsync(context);
+            await result.ExecuteResultAsync(context);
+            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(request));
         }
 
         internal IActionResult GetInnerActionResult(HttpRequest request)

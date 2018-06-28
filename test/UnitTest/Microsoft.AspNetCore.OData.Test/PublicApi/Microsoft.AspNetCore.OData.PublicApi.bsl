@@ -2799,6 +2799,9 @@ public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IActionResult
 public class Microsoft.AspNet.OData.Results.UpdatedODataResult`1 : IActionResult {
 	public UpdatedODataResult`1 (T entity)
 
+	[
+	AsyncStateMachineAttribute(),
+	]
 	public virtual System.Threading.Tasks.Task ExecuteResultAsync (Microsoft.AspNetCore.Mvc.ActionContext context)
 }
 

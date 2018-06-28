@@ -1721,17 +1721,6 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=2.0.1.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Net.Http.Headers.2.0.1\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Client">
-      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.OData.Core">
-      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.OData.Edm">
-      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.OData.Edm.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Spatial">
-      <HintPath>..\..\..\..\..\..\odatanet\feature-InOperator\bin\AnyCPU\Debug\Product\.NETPortable\v4.5\Microsoft.Spatial.dll</HintPath>
     <Reference Include="Microsoft.OData.Client, Version=7.5.0.20627, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.5.0\lib\netstandard1.1\Microsoft.OData.Client.dll</HintPath>
     </Reference>

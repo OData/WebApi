@@ -830,17 +830,6 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to The Id link builder for the entity set &apos;{0}&apos; returned null. An Id link is required for the OData-EntityId header..
-        /// </summary>
-        internal static string InNodeLiteralCollectionSupportsPrimitivesOnly
-        {
-            get
-            {
-                return ResourceManager.GetString("InNodeLiteralCollectionSupportsPrimitivesOnly", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to The attribute routing template contains invalid segment &apos;{0}&apos;..
         /// </summary>
         internal static string InvalidAttributeRoutingTemplateSegment {

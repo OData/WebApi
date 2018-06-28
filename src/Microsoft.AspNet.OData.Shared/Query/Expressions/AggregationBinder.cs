@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private ParameterExpression _lambdaParameter;
 
-        private IEnumerable<AggregateExpression> _aggregateExpressions = new List<AggregateExpression>();
+        private IEnumerable<AggregateExpression> _aggregateExpressions;
         private IEnumerable<GroupByPropertyNode> _groupingProperties;
 
         private Type _groupByClrType;

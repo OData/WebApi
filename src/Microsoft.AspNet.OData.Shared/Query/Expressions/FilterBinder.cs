@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -345,25 +346,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         public virtual Expression BindCollectionConstantNode(CollectionConstantNode node)
         {
-            Expression source = null;
-            if (node.ItemType.IsInt16() || node.ItemType.IsInt32() || node.ItemType.IsInt64())
+            // It's fine if the collection is empty; the returned value will be an empty list.
+            object value = node.Collection.FirstOrDefault()?.Value;
+
+            Type constantType = RetrieveClrTypeForConstant(node.ItemType, value);
+            Type listType = typeof(List<>).MakeGenericType(constantType);
+            IList downcastedList = Activator.CreateInstance(listType) as IList;
+
+            // Getting a LINQ expression to dynamically cast each item in the Collection during runtime is tricky,
+            // so use a foreach loop and do an implicit cast from object to the CLR type of ItemType.
+            foreach (ConstantNode item in node.Collection)
             {
-                source = Expression.Constant(node.Collection.Select(a => a.Value).Cast<int>());
-            }
-            else if (node.ItemType.IsBoolean())
-            {
-                source = Expression.Constant(node.Collection.Select(a => a.Value).Cast<bool>());
-            }
-            else if (node.ItemType.IsString())
-            {
-                source = Expression.Constant(node.Collection.Select(a => a.Value).Cast<string>());
-            }
-            else
-            {
-                throw Error.NotSupported(SRResources.InNodeLiteralCollectionSupportsPrimitivesOnly);
+                downcastedList.Add(item.Value);
             }
 
-            return source;
+            return Expression.Constant(downcastedList);
         }
 
         private Expression BindCastSourceNode(QueryNode sourceNode)
@@ -502,33 +499,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return NullConstant;
             }
 
-            Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, Model, InternalAssembliesResolver);
-            object value = constantNode.Value;
-
-            if (constantNode.TypeReference != null && constantNode.TypeReference.IsEnum())
-            {
-                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
-                string strValue = odataEnumValue.Value;
-                Contract.Assert(strValue != null);
-
-                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-                value = Enum.Parse(constantType, strValue);
-            }
-
-            if (constantNode.TypeReference != null &&
-                constantNode.TypeReference.IsNullable &&
-                (constantNode.TypeReference.IsDate() || constantNode.TypeReference.IsTimeOfDay()))
-            {
-                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-            }
+            Type constantType = RetrieveClrTypeForConstant(constantNode.TypeReference, constantNode.Value);
 
             if (QuerySettings.EnableConstantParameterization)
             {
-                return LinqParameterContainer.Parameterize(constantType, value);
+                return LinqParameterContainer.Parameterize(constantType, constantNode.Value);
             }
             else
             {
-                return Expression.Constant(value, constantType);
+                return Expression.Constant(constantNode.Value, constantType);
             }
         }
 
@@ -1520,6 +1499,30 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 default:
                     throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
             }
+        }
+
+        private Type RetrieveClrTypeForConstant(IEdmTypeReference edmTypeReference, object value)
+        {
+            Type constantType = EdmLibHelpers.GetClrType(edmTypeReference, Model, InternalAssembliesResolver);
+
+            if (value != null && edmTypeReference != null && edmTypeReference.IsEnum())
+            {
+                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
+                string strValue = odataEnumValue.Value;
+                Contract.Assert(strValue != null);
+
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
+                value = Enum.Parse(constantType, strValue);
+            }
+
+            if (edmTypeReference != null &&
+                edmTypeReference.IsNullable &&
+                (edmTypeReference.IsDate() || edmTypeReference.IsTimeOfDay()))
+            {
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
+            }
+
+            return constantType;
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)

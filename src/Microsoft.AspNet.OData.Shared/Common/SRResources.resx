@@ -778,9 +778,6 @@
   <data name="IdLinkNullForEntityIdHeader" xml:space="preserve">
     <value>The Id link builder for the entity set '{0}' returned null. An Id link is required for the OData-EntityId header.</value>
   </data>
-  <data name="InNodeLiteralCollectionSupportsPrimitivesOnly" xml:space="preserve">
-    <value>The right operand of the IN operator supports literal collections of primitives only.</value>
-  </data>
   <data name="NestedCollectionsNotSupported" xml:space="preserve">
     <value>The type '{0}' is a nested collection type. Nested collection types are not allowed.</value>
   </data>

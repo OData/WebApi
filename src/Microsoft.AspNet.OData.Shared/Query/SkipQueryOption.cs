@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            return ExpressionHelpers.Skip(query, Value, Context.ElementClrType, querySettings.EnableConstantParameterization);
+            return ExpressionHelpers.Skip(query, Value, query.ElementType, querySettings.EnableConstantParameterization);
         }
     }
 }

@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
-using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -351,7 +349,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else
             {
-                throw Error.NotSupported(SRResources.InNodeCollectionNotSupported);
+                throw Error.NotSupported(SRResources.InNodeLiteralCollectionSupportsPrimitivesOnly);
             }
 
             return source;

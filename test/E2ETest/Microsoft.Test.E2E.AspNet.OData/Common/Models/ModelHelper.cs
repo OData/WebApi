@@ -210,6 +210,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                         tom
                     },
                     Director = kevin,
+                    Producer = tom,
                     Tags = new string[] { "Quirky" },
                     Showings = showingTheaters,
                     Sales = new int[] { 100, 200, 300 },
@@ -226,6 +227,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models
                         kevin
                     },
                     Director = kevin,
+                    Producer = jill,
                     Tags = new string[] { "Fiction" },
                     Showings = showingTheaters,
                     Sales = new int[] { 200, 300, 400 },

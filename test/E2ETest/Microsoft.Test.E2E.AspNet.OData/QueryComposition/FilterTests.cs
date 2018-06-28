@@ -194,6 +194,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 data.Add("MovieId in (1, 2, 3)", movies.Where(p => (new int[] { 1, 2, 3 }).Contains(p.MovieId)));
                 data.Add("Title in ('movie1','movie3')", movies.Where(p => (new string[] { "movie1", "movie3" }).Contains(p.Title)));
                 data.Add("MainGenre in Genres", movies.Where(p => p.Genres.Contains(p.MainGenre)));
+                data.Add("Director/Partner in Actors", movies.Where(p => p.Actors.Contains(p.Director.Partner)));
+                data.Add("Director/LastVisited in Producer/FavoriteTheaters", movies.Where(
+                    p => p.Producer.FavoriteTheaters.Contains(p.Director.LastVisited)));
 
                 return data;
             }

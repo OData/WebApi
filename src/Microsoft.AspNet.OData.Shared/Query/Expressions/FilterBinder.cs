@@ -347,20 +347,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public virtual Expression BindCollectionConstantNode(CollectionConstantNode node)
         {
             // It's fine if the collection is empty; the returned value will be an empty list.
-            object value = node.Collection.FirstOrDefault()?.Value;
-
-            Type constantType = RetrieveClrTypeForConstant(node.ItemType, value);
-            Type listType = typeof(List<>).MakeGenericType(constantType);
-            IList downcastedList = Activator.CreateInstance(listType) as IList;
-
-            // Getting a LINQ expression to dynamically cast each item in the Collection during runtime is tricky,
-            // so use a foreach loop and do an implicit cast from object to the CLR type of ItemType.
-            foreach (ConstantNode item in node.Collection)
+            ConstantNode firstNode = node.Collection.FirstOrDefault();
+            object value = null;
+            if (firstNode != null)
             {
-                downcastedList.Add(item.Value);
+                value = firstNode.Value;
             }
 
-            return Expression.Constant(downcastedList);
+            Type constantType = RetrieveClrTypeForConstant(node.ItemType, ref value);
+            Type listType = typeof(List<>).MakeGenericType(constantType);
+            IList castedList = Activator.CreateInstance(listType) as IList;
+
+            // Getting a LINQ expression to dynamically cast each item in the Collection during runtime is tricky,
+            // so using a foreach loop and doing an implicit cast from object to the CLR type of ItemType.
+            foreach (ConstantNode item in node.Collection)
+            {
+                castedList.Add(item.Value);
+            }
+
+            return Expression.Constant(castedList);
         }
 
         private Expression BindCastSourceNode(QueryNode sourceNode)
@@ -499,15 +504,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return NullConstant;
             }
 
-            Type constantType = RetrieveClrTypeForConstant(constantNode.TypeReference, constantNode.Value);
+            object value = constantNode.Value;
+            Type constantType = RetrieveClrTypeForConstant(constantNode.TypeReference, ref value);
 
             if (QuerySettings.EnableConstantParameterization)
             {
-                return LinqParameterContainer.Parameterize(constantType, constantNode.Value);
+                return LinqParameterContainer.Parameterize(constantType, value);
             }
             else
             {
-                return Expression.Constant(constantNode.Value, constantType);
+                return Expression.Constant(value, constantType);
             }
         }
 
@@ -1501,7 +1507,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        private Type RetrieveClrTypeForConstant(IEdmTypeReference edmTypeReference, object value)
+        private Type RetrieveClrTypeForConstant(IEdmTypeReference edmTypeReference, ref object value)
         {
             Type constantType = EdmLibHelpers.GetClrType(edmTypeReference, Model, InternalAssembliesResolver);
 

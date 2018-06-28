@@ -43,6 +43,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -163,7 +164,6 @@
       <Link>Properties\SRResources.resx</Link>
       <Generator>ResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
-      <LastGenOutput>SRResources1.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="..\Microsoft.AspNet.OData.Shared\Common\CommonWebApiResources.Designer.cs">
       <Link>Properties\CommonWebApiResources.Designer.cs</Link>

@@ -375,9 +375,7 @@ namespace Microsoft.AspNet.OData
         {
             if (!_querySettings.PageSize.HasValue && responseValue != null)
             {
-                HttpRequestScope httpRequestScope = request.RequestContainer.GetService(typeof(HttpRequestScope)) as HttpRequestScope;
-                HttpRequestMessage httpRequest = httpRequestScope == null ? null : httpRequestScope.HttpRequest;
-                GetModelBoundPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path, createErrorAction, httpRequest);
+                GetModelBoundPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request, createErrorAction);
             }
 
             // Apply the query if there are any query options, if there is a page size set, in the case of
@@ -495,18 +493,17 @@ namespace Microsoft.AspNet.OData
         /// <param name="singleResultCollection">The content as SingleResult.Queryable.</param>
         /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
         /// <param name="modelFunction">A function to get the model.</param>
-        /// <param name="path">The OData path.</param>
-        /// <param name="request">The HttpRequestMessage</param>
+        /// <param name="request">The request message</param>
         /// <returns></returns>
         private static ODataQueryContext GetODataQueryContext(
             object responseValue,
             IQueryable singleResultCollection,
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
-            ODataPath path,
-            HttpRequestMessage request)
+            IWebApiRequestMessage request)
         {
             Type elementClrType = GetElementType(responseValue, singleResultCollection, actionDescriptor);
+            ODataPath path = request.Context.Path;
 
             IEdmModel model = modelFunction(elementClrType);
             if (model == null)
@@ -515,10 +512,7 @@ namespace Microsoft.AspNet.OData
             }
 
             ODataQueryContext queryContext = new ODataQueryContext(model, elementClrType, path);
-            if (request != null)
-            {
-                RegisterContext(request, queryContext);
-            }
+            RegisterContext(request, queryContext);
 
             return queryContext;
         }
@@ -530,23 +524,21 @@ namespace Microsoft.AspNet.OData
         /// <param name="singleResultCollection">The content as SingleResult.Queryable.</param>
         /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
         /// <param name="modelFunction">A function to get the model.</param>
-        /// <param name="path">The OData path.</param>
+        /// <param name="request">The request message.</param>
         /// <param name="createErrorAction">A function used to generate error response.</param>
-        /// <param name="request">The HttpRequestMessage.</param>
         private void GetModelBoundPageSize(
             object responseValue,
             IQueryable singleResultCollection,
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
-            ODataPath path,
-            Action<HttpStatusCode, string, Exception> createErrorAction,
-            HttpRequestMessage request)
+            IWebApiRequestMessage request,
+            Action<HttpStatusCode, string, Exception> createErrorAction)
         {
             ODataQueryContext queryContext = null;
 
             try
             {
-                queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, path, request);
+                queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request);
             }
             catch (InvalidOperationException e)
             {
@@ -584,9 +576,8 @@ namespace Microsoft.AspNet.OData
             IWebApiRequestMessage request,
             Func<ODataQueryContext, ODataQueryOptions> createQueryOptionFunction)
         {
-            HttpRequestScope httpRequestScope = request.RequestContainer.GetService(typeof(HttpRequestScope)) as HttpRequestScope;
-            HttpRequestMessage httpRequest = httpRequestScope == null ? null : httpRequestScope.HttpRequest;
-            ODataQueryContext queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path, httpRequest);
+            ODataQueryContext queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request);
+            RegisterContext(request, queryContext);
 
             // Create and validate the query options.
             ODataQueryOptions queryOptions = createQueryOptionFunction(queryContext);

@@ -8,10 +8,10 @@ using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Query.Expressions;
 
 namespace Microsoft.AspNet.OData
 {

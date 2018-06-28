@@ -233,13 +233,20 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(dynamicTypeProperties != null);
 
             var properties = new List<ODataProperty>();
-            var dynamicObject = graph as DynamicTypeWrapper ?? (graph as IEnumerable<DynamicTypeWrapper>).Single();
+            var dynamicObject = graph as DynamicTypeWrapper;
+            if (dynamicObject == null)
+            {
+                var dynamicEnumerable = (graph as IEnumerable<DynamicTypeWrapper>);
+                if (dynamicEnumerable != null)
+                {
+                    dynamicObject = dynamicEnumerable.SingleOrDefault();
+                }
+            }
             if (dynamicObject != null)
             {
                 foreach (var prop in dynamicObject.Values)
                 {
                     if (prop.Value != null
-                        //&& EdmLibHelpers.IsDynamicTypeWrapper(prop.Value.GetType())
                         && (prop.Value is DynamicTypeWrapper || (prop.Value is IEnumerable<DynamicTypeWrapper>)))
                     {
                         IEdmProperty edmProperty = entityType.Properties()

@@ -246,7 +246,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 case AggregateExpressionKind.EntitySetAggregate:
                     return CreateEntitySetAggregateExpression(accum, expression as EntitySetAggregateExpression, baseType);
                 default:
-                    throw new ODataException("This type of aggregation is not supported.");
+                    throw new ODataException(Error.Format(SRResources.AggregateKindNotSupported, expression.AggregateKind));
             }
         }
 
@@ -317,9 +317,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             var wrapperProperty = nestedResultType.GetProperty("Container");
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
 
-            var initilizedMember =
+            var initializedMember =
                 Expression.MemberInit(Expression.New(nestedResultType), wrapperTypeMemberAssignments);
-            var selectLambda = Expression.Lambda(initilizedMember, innerAccum);
+            var selectLambda = Expression.Lambda(initializedMember, innerAccum);
 
             // Get select method
             MethodInfo selectMethod =

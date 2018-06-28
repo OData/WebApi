@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
@@ -7,13 +10,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 {
     public class CustomersController : TestODataController
     {
-        private readonly AggregationContext _db = new AggregationContext();
+        private readonly EntitySetAggregationContext _db = new EntitySetAggregationContext();
 
         [EnableQuery]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
-            var db = new AggregationContext();
+            var db = new EntitySetAggregationContext();
             return db.Customers;
         }
 
@@ -21,7 +24,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
         public TestSingleResult<Customer> Get(int key)
         {
             ResetDataSource();
-            var db = new AggregationContext();
+            var db = new EntitySetAggregationContext();
             return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
         }
 

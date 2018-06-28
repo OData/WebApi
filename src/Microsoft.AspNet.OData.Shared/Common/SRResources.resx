@@ -883,4 +883,7 @@
   <data name="MissingNonODataContainer" xml:space="preserve">
     <value>Cannot find the services container for the non-OData route. This can occur when using OData components on the non-OData route and is usually a configuration issue. Call EnableDependencyInjection() to enable OData components on non-OData routes. This may also occur when a request was mistakenly handled by the ASP.NET Core routing layer instead of the OData routing layer, for instance the URL does not include the OData route prefix configured via a call to MapODataServiceRoute().</value>
   </data>
+  <data name="AggregateKindNotSupported" xml:space="preserve">
+    <value>{0} type of aggregation is not supported.</value>
+  </data>  
 </root>

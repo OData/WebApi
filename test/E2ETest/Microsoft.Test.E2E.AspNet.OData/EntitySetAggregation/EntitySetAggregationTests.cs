@@ -1,4 +1,7 @@
-﻿using System.Net;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -85,9 +88,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 
             // OBS: DB uses sequential ID
             // Each Customer has 2 orders that cost 25*CustomerId and 75*CustomerId
-            Assert.Equal(1*(25+75)+2*(25+75)+3*(25+75), totalPrice);
-            // Sum of the 6 Orders IDs, ignoreFunctionCalls
-            Assert.Equal(1+2+3+4+5+6, totalId); 
+            Assert.Equal(1 * (25 + 75) + 2 * (25 + 75) + 3 * (25 + 75), totalPrice);
+            // Sum of the 6 Orders IDs
+            Assert.Equal(1 + 2 + 3 + 4 + 5 + 6, totalId); 
         }
 
         [Fact]
@@ -115,9 +118,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 
             // OBS: DB uses sequential ID
             // Each Customer has 2 orders that cost 25*CustomerId and 75*CustomerId
-            Assert.Equal(1*(25+75)+2*(25+75)+3*(25+75), totalPrice);
+            Assert.Equal(1 * (25 + 75) + 2 * (25 + 75) + 3 * (25 + 75), totalPrice);
             // Sum of the first 3 Customers IDs
-            Assert.Equal(1+2+3, totalId); 
+            Assert.Equal(1 + 2 + 3, totalId); 
         }
 
         [Fact]
@@ -142,7 +145,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
             var orders = value.First["Orders"];
             var TotalPrice = orders.First["TotalPrice"].ToObject<int>();
 
-            Assert.Equal((1+4+9)*(25*25+75*75), TotalPrice);
+            Assert.Equal((1 + 4 + 9) * (25 * 25 + 75 * 75), TotalPrice);
         }
 
         [Fact]
@@ -167,9 +170,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
             var orders = value.First["Orders"];
             var TotalPrice = orders.First["TotalPrice"].ToObject<int>();
 
-            Assert.Equal(1*(25+75)+2*(25+75)+3*(25+75), TotalPrice);
+            Assert.Equal(1 * (25 + 75) + 2 * (25 + 75) + 3 * (25 + 75), TotalPrice);
         }
-
 
         [Fact]
         public async Task AggregationOnEntitySetWorksWithGroupby()

@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
         }
-        
+
         internal Expression CreateConvertExpression(ConvertNode convertNode, Expression source)
         {
             Type conversionType = EdmLibHelpers.GetClrType(convertNode.TypeReference, Model, InternalAssembliesResolver);

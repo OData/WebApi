@@ -828,7 +828,7 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("IdLinkNullForEntityIdHeader", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to The attribute routing template contains invalid segment &apos;{0}&apos;..
         /// </summary>

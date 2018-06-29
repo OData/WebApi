@@ -30,6 +30,9 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
+        private static MethodInfo _queryableContainsMethod = GenericMethodOf(_ => Queryable.Contains<int>(default(IQueryable<int>), default(int)));
+        private static MethodInfo _enumerableContainsMethod = GenericMethodOf(_ => Enumerable.Contains<int>(default(IEnumerable<int>), default(int)));
+
         private static MethodInfo _queryableEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>)));
         private static MethodInfo _queryableNonEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
         private static MethodInfo _queryableAllMethod = GenericMethodOf(_ => Queryable.All(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
@@ -189,6 +192,16 @@ namespace Microsoft.AspNet.OData
         public static MethodInfo QueryableWhereGeneric
         {
             get { return _whereMethod; }
+        }
+
+        public static MethodInfo QueryableContainsGeneric
+        {
+            get { return _queryableContainsMethod; }
+        }
+
+        public static MethodInfo EnumerableContainsGeneric
+        {
+            get { return _enumerableContainsMethod; }
         }
 
         public static MethodInfo QueryableSelectGeneric

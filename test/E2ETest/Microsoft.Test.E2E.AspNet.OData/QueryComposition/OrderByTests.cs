@@ -23,7 +23,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     public class OrderByTests : WebHostTestBase
     {
         public OrderByTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 

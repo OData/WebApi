@@ -89,6 +89,18 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
+        /// Translate an InNode.
+        /// </summary>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The translated node.</returns>
+        public override QueryNode Visit(InNode nodeIn)
+        {
+            return new InNode(
+                (SingleValueNode)nodeIn.Left.Accept(this),
+                (CollectionNode)nodeIn.Right.Accept(this));
+        }
+
+        /// <summary>
         /// Translate a CollectionFunctionCallNode.
         /// </summary>
         /// <param name="nodeIn">The node to be translated.</param>
@@ -160,6 +172,16 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="nodeIn">The node to be translated.</param>
         /// <returns>The original node.</returns>
         public override QueryNode Visit(ConstantNode nodeIn)
+        {
+            return nodeIn;
+        }
+
+        /// <summary>
+        /// Translate a CollectionConstantNode.
+        /// </summary>
+        /// <param name="nodeIn">The node to be translated.</param>
+        /// <returns>The original node.</returns>
+        public override QueryNode Visit(CollectionConstantNode nodeIn)
         {
             return nodeIn;
         }

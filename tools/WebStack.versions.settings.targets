@@ -5,8 +5,8 @@
   <PropertyGroup>
     <VersionMajor Condition="'$(VersionMajor)' == ''">7</VersionMajor>
     <VersionMinor Condition="'$(VersionMinor)' == ''">0</VersionMinor>
-    <VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
-    <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">1</VersionBuild>
+    <VersionRelease Condition="'$(VersionRelease)' == ''">beta</VersionRelease>
   </PropertyGroup>
 
   <!-- For NuGet Package Dependencies -->

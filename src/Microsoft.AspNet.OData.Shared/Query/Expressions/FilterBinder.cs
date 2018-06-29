@@ -485,7 +485,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression singleValue = Bind(inNode.Left);
             Expression collection = Bind(inNode.Right);
 
-            return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+            if (IsIQueryable(collection.Type))
+            {
+                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+            }
+            else
+            {
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+            }
         }
 
         /// <summary>

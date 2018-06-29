@@ -20,7 +20,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
         /// Initialize a new Container object.
         /// </summary>
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Microsoft.OData.Client.Design.T4", "1.0.0")]
-        public Container(global::System.Uri serviceRoot) : 
+        public Container(global::System.Uri serviceRoot) :
                 base(serviceRoot, global::Microsoft.OData.Client.ODataProtocolVersion.V4)
         {
             this.ResolveName = new global::System.Func<global::System.Type, string>(this.ResolveNameFromType);
@@ -465,7 +465,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
 
             global::System.Uri requestUri = new global::System.Uri(resource.Identity.OriginalString.Trim('/') + "/Microsoft.Test.E2E.AspNet.OData.Singleton.GetPartnersCount");
             return global::System.Linq.Enumerable.Single(Context.Execute<int>(requestUri, "GET", true,
-                new global::Microsoft.OData.Client.OperationParameter[] {  }));
+                new global::Microsoft.OData.Client.OperationParameter[] { }));
         }
         /// <summary>
         /// There are no comments for ResetDataSource in the schema.
@@ -480,7 +480,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Singleton.Client
 
             global::System.Uri requestUri = new global::System.Uri(resource.EditLink.OriginalString.Trim('/') + "/Microsoft.Test.E2E.AspNet.OData.Singleton.ResetDataSource");
             Context.Execute(requestUri, "POST",
-                new global::Microsoft.OData.Client.OperationParameter[] {  });
+                new global::Microsoft.OData.Client.OperationParameter[] { });
         }
 #endif
     }

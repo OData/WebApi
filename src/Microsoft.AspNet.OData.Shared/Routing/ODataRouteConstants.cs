@@ -62,5 +62,10 @@ namespace Microsoft.AspNet.OData.Routing
         /// Route data key for the dynamic property name when manipulating open type.
         /// </summary>
         public static readonly string DynamicProperty = "dynamicProperty";
+
+        /// <summary>
+        /// Route data key for the OData optional parameters.
+        /// </summary>
+        public static readonly string OptionalParameters = typeof(ODataOptionalParameter).FullName;
     }
 }

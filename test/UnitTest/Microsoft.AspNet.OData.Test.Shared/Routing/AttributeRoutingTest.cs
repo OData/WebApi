@@ -56,6 +56,9 @@ namespace Microsoft.AspNet.OData.Test.Routing
             "GetCustomer(ID=9,City=MyCity,)")]
         [InlineData("GET", "http://localhost/Customers(42)/Account/DynamicPropertyName", "GetDynamicPropertyFromAccount_42_DynamicPropertyName")]
         [InlineData("GET", "http://localhost/Customers(42)/Orders(24)/DynamicPropertyName", "GetDynamicPropertyFromOrder_42_24_DynamicPropertyName")]
+        [InlineData("GET", "http://localhost/Customers/NS.GetWholeSalary(minSalary=7)", "GetWholeSalary(7,0,9)")]
+        [InlineData("GET", "http://localhost/Customers/NS.GetWholeSalary(minSalary=7,maxSalary=1)", "GetWholeSalary(7,1,9)")]
+        [InlineData("GET", "http://localhost/Customers/NS.GetWholeSalary(minSalary=7,maxSalary=2,aveSalary=5)", "GetWholeSalary(7,2,5)")]
         public async Task AttributeRouting_SelectsExpectedControllerAndAction(string method, string requestUri,
             string expectedResult)
         {
@@ -71,7 +74,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
             HttpClient client = TestServerFactory.CreateClient(server);
 
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod(method), requestUri);
-            //request.ODataProperties().RouteName = HttpRouteCollectionExtensions.RouteName;
 
             // Act
             var response = await client.SendAsync(request);
@@ -202,6 +204,27 @@ namespace Microsoft.AspNet.OData.Test.Routing
             public string GetSalary([FromODataUri] int id)
             {
                 return "GetSalary_" + id;
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers/NS.GetWholeSalary(minSalary={min})")]
+            public string GetWholeSalaryWithOptionalParameters(int min)
+            {
+                return GetWholeSalaryWithOptionalParameters(min, 0);
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max})")]
+            public string GetWholeSalaryWithOptionalParameters(int min, int max)
+            {
+                return GetWholeSalaryWithOptionalParameters(min, max, 9);
+            }
+
+            [HttpGet]
+            [ODataRoute("Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max},aveSalary={ave})")]
+            public string GetWholeSalaryWithOptionalParameters(int min, int max, int ave)
+            {
+                return "GetWholeSalary(" + min + "," + max + "," + ave + ")";
             }
 
             [HttpGet]

@@ -154,6 +154,24 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.Contains("9.9", responseString);
         }
 
+        [Theory]
+        [InlineData("", "9")]
+        [InlineData("param=1", "1")]
+        [InlineData("param=9", "9")]
+        public async Task AttributeRouting_TopFunctionWithOptionalParameter(string param, string expected)
+        {
+            // Arrange
+            string requestUri = "http://localhost/OptionalFunction(" + param + ")";
+
+            // Act
+            var response = await _client.GetAsync(requestUri);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains(expected, responseString);
+        }
+
         [Fact]
         public async Task AttriubteRouting_TopActionWithoutParametersOnPrimitiveType()
         {
@@ -253,6 +271,11 @@ namespace Microsoft.AspNet.OData.Test.Routing
             entityFunction.Parameter<ConventionOrder>("order");
             entityFunction.Returns<string>();
 
+            // Top level function import with optional parameter
+            FunctionConfiguration optionalFunction = builder.Function("OptionalFunction");
+            optionalFunction.Parameter<int>("param").HasDefaultValue("9");
+            optionalFunction.Returns<string>();
+
             return builder.GetEdmModel();
         }
     }
@@ -323,6 +346,20 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             Assert.NotNull(order);
             return order.Price.ToString(CultureInfo.InvariantCulture);
+        }
+
+        [HttpGet]
+        [ODataRoute("OptionalFunction()")]
+        public string OptionalFunction()
+        {
+            return OptionalFunction(9);
+        }
+
+        [HttpGet]
+        [ODataRoute("OptionalFunction(param={p})")]
+        public string OptionalFunction(int p)
+        {
+            return p.ToString();
         }
     }
 

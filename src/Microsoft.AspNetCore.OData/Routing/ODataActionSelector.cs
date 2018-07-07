@@ -95,6 +95,10 @@ namespace Microsoft.AspNet.OData.Routing
                                 !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
                         })));
 
+                // retrieve the optional parameters
+                routeData.Values.TryGetValue(ODataRouteConstants.OptionalParameters, out object wrapper);
+                ODataOptionalParameter optionalWrapper = wrapper as ODataOptionalParameter;
+
                 // Find the action with the all matched parameters from available keys including
                 // matches with no parameters. Ordered first by the total number of matched
                 // parameters followed by the total number of parameters.  Ignore case of
@@ -107,7 +111,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => !c.FilteredParameters.Any() || c.FilteredParameters.All(p => availableKeys.Contains(p.Name.ToLowerInvariant())))
+                    .Where(c => !c.FilteredParameters.Any() || TryMatch(c.FilteredParameters, availableKeys, optionalWrapper))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount);
 
@@ -119,6 +123,32 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             return _innerSelector.SelectBestCandidate(context, candidates);
+        }
+
+        private bool TryMatch(IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper)
+        {
+            // use the parameter name to match.
+            foreach(var p in parameters)
+            {
+                string parameterName = p.Name.ToLowerInvariant();
+                if (availableKeys.Contains(parameterName))
+                {
+                    continue;
+                }
+
+                ControllerParameterDescriptor cP = p as ControllerParameterDescriptor;
+                if (cP != null && optionalWrapper != null)
+                {
+                    if (cP.ParameterInfo.IsOptional && optionalWrapper.OptionalParameters.Any(o => o.Name.ToLowerInvariant() == parameterName))
+                    {
+                        continue;
+                    }
+                }
+
+                return false;
+            }
+
+            return true;
         }
 
         private class ActionIdAndParameters

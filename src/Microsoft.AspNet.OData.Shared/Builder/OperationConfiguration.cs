@@ -233,7 +233,7 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
-        /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the operation "isBindable".
+        /// Specifies the bindingParameter name and type.
         /// </summary>
         internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType)
         {

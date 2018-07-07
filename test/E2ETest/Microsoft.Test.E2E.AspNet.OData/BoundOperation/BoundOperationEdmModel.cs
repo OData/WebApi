@@ -27,6 +27,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
                 .Returns<int>()
                 .Parameter<string>("Name");
 
+            // Overload with one optional parameter
+            var salaryRangeCount = entityTypeConfigurationOfEmployee.Collection.Function("GetWholeSalary")
+                .Returns<int>();
+            salaryRangeCount.Parameter<double>("minSalary");
+            salaryRangeCount.Parameter<double>("maxSalary").IsOptional = true;
+            salaryRangeCount.Parameter<double>("aveSalary").HasDefaultValue("8.9");
+
             // Function bound to a collection of derived EntityType.
             entityTypeConfigurationOfManager.Collection.Function("GetCount")
                 .Returns<int>();
@@ -94,8 +101,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             entityTypeConfigurationOfManager.Action("IncreaseSalary")
                 .Returns<int>();
 
+            // Action with optional parameters
+            var action = entityTypeConfigurationOfManager.Action("IncreaseWholeSalary")
+                .Returns<int>();
+            action.Parameter<double>("minSalary");
+            action.Parameter<double>("maxSalary").IsOptional = true;
+            action.Parameter<double>("aveSalary").HasDefaultValue("8.9");
+
             // Action with primitive and collection of primitive parameters
-            var action = entityTypeConfigurationOfEmployee.Collection.Action("PrimitiveAction");
+            action = entityTypeConfigurationOfEmployee.Collection.Action("PrimitiveAction");
             action.Parameter<int>("param");
             action.Parameter<double?>("price"); // nullable
             action.Parameter<string>("name"); // nullable

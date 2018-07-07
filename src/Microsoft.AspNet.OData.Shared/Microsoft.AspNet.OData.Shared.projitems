@@ -245,6 +245,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataPathParameterBindingAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataPathRouteConstraint.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataPathSegmentExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataOptionalParameter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataParameterHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataRoute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataVersionConstraint.cs" />

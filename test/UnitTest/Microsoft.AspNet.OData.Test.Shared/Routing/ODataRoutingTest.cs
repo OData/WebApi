@@ -286,6 +286,11 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "Products(1)/Default.CopyProductByCity(city='any')", "CopyProductByCity(1, any)" },
                     { "GET", "Products(1)/Default.CopyProductByCity(city='123any')", "CopyProductByCity(1, 123any)" },
                     { "GET", "Products(1)/Default.CopyProductByCity(city='any123')",  "CopyProductByCity(1, any123)" },
+
+                    // test optional parameter routing (white space is intentional.)
+                    { "GET", "Products/Default.GetCount(minSalary=1.1)",                               "GetCount(1.1, 0, 1200.99)" },
+                    { "GET", "Products/Default.GetCount(minSalary=1.2, maxSalary=2.9)",                "GetCount(1.2, 2.9, 1200.99)" },
+                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" }
                 };
             }
         }
@@ -776,6 +781,22 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             return String.Format(CultureInfo.InvariantCulture, "TopProductIdByCityAndModel({0}, {1}, {2})", key, city, model);
         }
+
+        [AcceptVerbs("GET")]
+        public string GetCount(double minSalary, double maxSalary = 0.0, double aveSalary = 1200.99)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetCount({0}, {1}, {2})", minSalary, maxSalary, aveSalary);
+        }
+
+#if NETCORE
+        // Use this method to make sure it can't be picked up by OData action selector.
+        // However, the multiple functions in same controller is not allowed in ASP.NET.
+        [AcceptVerbs("GET")]
+        public string GetCount(string minSalary)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetCount({0})", minSalary);
+        }
+#endif
 
         [AcceptVerbs("GET")]
         public string TopProductOfAll()

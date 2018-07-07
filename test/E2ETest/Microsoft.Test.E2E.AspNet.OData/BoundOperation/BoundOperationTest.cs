@@ -67,7 +67,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             configuration.EnsureInitialized();
         }
 
-#if !NETCORE // TODO #939: Enable this test for AspNetCore
         [Theory]
         [InlineData("AttributeRouting")]
         [InlineData("ConventionRouting")]
@@ -86,7 +85,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             var edmModel = reader.ReadMetadataDocument();
 
             // Assert
-
             #region functions
             // Function GetCount
             var iEdmOperationsOfGetCount = edmModel.FindDeclaredOperations("Default.GetCount");
@@ -139,6 +137,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             // Entity & collection of Entity
             AssertEntityOperation(edmModel, "Default.EntityFunction");
 
+            // Function with optional parameters
+            AssertOperationWithOptionalParameter(edmModel, "Default.GetWholeSalary");
+
             #endregion
 
             #region actions
@@ -156,7 +157,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             increaseSalary = iEdmOperationOfIncreaseSalary.Where(a => a.Parameters.Count() == 1
                 && a.Parameters.First().Type.Definition.ToString().Equals(CollectionOfManager));
             Assert.NotNull(increaseSalary);
-
 
             //    Employee.IncreaseSalary()
             increaseSalary = iEdmOperationOfIncreaseSalary.Where(a => a.Parameters.Count() == 1
@@ -179,13 +179,42 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 
             // Entity & collection of Entity
             AssertEntityOperation(edmModel, "Default.EntityAction");
+
+            // Action with optional parameters
+            AssertOperationWithOptionalParameter(edmModel, "Default.IncreaseWholeSalary");
+
             #endregion
 
             // ActionImport: ResetDataSource
             Assert.Single(edmModel.EntityContainer.OperationImports());
-
         }
-#endif
+
+        private static void AssertOperationWithOptionalParameter(IEdmModel edmModel, string opertionName)
+        {
+            IEdmOperation primitiveFunc = Assert.Single(edmModel.FindDeclaredOperations(opertionName));
+            Assert.Equal(4, primitiveFunc.Parameters.Count());
+
+            // non-optional parameter
+            IEdmOperationParameter parameter = Assert.Single(primitiveFunc.Parameters.Where(e => e.Name == "minSalary"));
+            Assert.Equal("Edm.Double", parameter.Type.FullName());
+            Assert.False(parameter.Type.IsNullable);
+
+            // optional parameter without default value
+            parameter = Assert.Single(primitiveFunc.Parameters.Where(e => e.Name == "maxSalary"));
+            Assert.NotNull(parameter);
+            Assert.Equal("Edm.Double", parameter.Type.FullName());
+            IEdmOptionalParameter optionalParameterInfo = Assert.IsAssignableFrom<IEdmOptionalParameter>(parameter);
+            Assert.NotNull(optionalParameterInfo);
+            Assert.Null(optionalParameterInfo.DefaultValueString);
+
+            // optional parameter with default value
+            parameter = Assert.Single(primitiveFunc.Parameters.Where(e => e.Name == "aveSalary"));
+            Assert.NotNull(parameter);
+            Assert.Equal("Edm.Double", parameter.Type.FullName());
+            optionalParameterInfo = Assert.IsAssignableFrom<IEdmOptionalParameter>(parameter);
+            Assert.NotNull(optionalParameterInfo);
+            Assert.Equal("8.9", optionalParameterInfo.DefaultValueString);
+        }
 
         private static void AssertPrimitiveOperation(IEdmModel edmModel, string opertionName)
         {
@@ -344,6 +373,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains("/$metadata#Edm.Int32", responseString);
             Assert.Contains(string.Format(@"""value"":{0}", expectedCount), responseString);
+        }
+
+        [Theory]
+        [InlineData("ConventionRouting/Employees/Default.GetWholeSalary(minSalary=6.8)", "(6.8, 0, 8.9)")]
+        [InlineData("AttributeRouting/Employees/Default.GetWholeSalary(minSalary=6.8)", "(6.8, 0, 8.9)")]
+        [InlineData("ConventionRouting/Employees/Default.GetWholeSalary(minSalary=1.09,maxSalary=7.3)", "(1.09, 7.3, 8.9)")]
+        [InlineData("AttributeRouting/Employees/Default.GetWholeSalary(minSalary=1.09,maxSalary=7.3)", "(1.09, 7.3, 8.9)")]
+        [InlineData("ConventionRouting/Employees/Default.GetWholeSalary(minSalary=8.1,maxSalary=1.1,aveSalary=3.3)", "(8.1, 1.1, 3.3)")]
+        [InlineData("AttributeRouting/Employees/Default.GetWholeSalary(minSalary=8.1,maxSalary=1.1,aveSalary=3.3)", "(8.1, 1.1, 3.3)")]
+        public async Task FunctionWithOptionalParamsBoundToEntityType(string url, string expected)
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/{1}", this.BaseAddress, url);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+
+            // Act
+            HttpResponseMessage response = await Client.GetAsync(requestUri);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Contains("/$metadata#Edm.String", responseString);
+            Assert.Contains(string.Format(@"""value"":""GetWholeSalary{0}""", expected), responseString);
         }
 
         [Theory]

@@ -831,6 +831,10 @@ namespace Microsoft.AspNet.OData.Query.Validators
                     //no validation on open values?
                     break;
 
+                case QueryNodeKind.In:
+                    // No setting validations
+                    break;
+
                 case QueryNodeKind.NamedFunctionParameter:
                 case QueryNodeKind.ParameterAlias:
                 case QueryNodeKind.EntitySet:

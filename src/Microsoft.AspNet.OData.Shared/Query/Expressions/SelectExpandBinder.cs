@@ -332,13 +332,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             wrapperProperty = wrapperType.GetProperty("ModelID");
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
 
-            // Initialize property 'Instance' on the wrapper class
-            // source => new Wrapper { Instance = element }
-            wrapperProperty = wrapperType.GetProperty("Instance");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
-
             if (IsSelectAll(selectExpandClause))
             {
+                // Initialize property 'Instance' on the wrapper class
+                wrapperProperty = wrapperType.GetProperty("Instance");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+
                 wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;
@@ -350,6 +349,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (typeName != null)
                 {
                     isTypeNamePropertySet = true;
+                    wrapperProperty = wrapperType.GetProperty("InstanceType");
+                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, typeName));
                 }
             }
 
@@ -679,7 +680,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal static Expression CreateTypeNameExpression(Expression source, IEdmEntityType elementType, IEdmModel model)
         {
             IReadOnlyList<IEdmEntityType> derivedTypes = GetAllDerivedTypes(elementType, model);
-
             if (derivedTypes.Count == 0)
             {
                 // no inheritance.

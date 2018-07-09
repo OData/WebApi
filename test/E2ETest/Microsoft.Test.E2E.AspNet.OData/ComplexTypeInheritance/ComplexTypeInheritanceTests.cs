@@ -112,6 +112,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 response.StatusCode,
                 requestUri,
                 contentOfString));
+
+            Assert.Equal("4.0", response.Headers.GetValues("OData-Version").Single());
             JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
             string name = (string)contentOfJObject["Name"];
             Assert.True("Name4" == name);

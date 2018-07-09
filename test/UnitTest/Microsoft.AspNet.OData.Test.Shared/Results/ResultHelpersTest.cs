@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Results;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
@@ -20,6 +21,7 @@ namespace Microsoft.AspNet.OData.Test.Results
     {
         private readonly TestEntity _entity = new TestEntity();
         private readonly Uri _entityId = new Uri("http://entity_id");
+        private readonly string _version = "4.0.1.101";
 
         [Fact]
         public void GenerateODataLink_ThrowsIdLinkNullForEntityIdHeader_IfEntitySetLinkBuilderReturnsNull()
@@ -71,6 +73,42 @@ namespace Microsoft.AspNet.OData.Test.Results
             Assert.False(response.Headers.ContainsKey(ResultHelpers.EntityIdHeaderName));
 #else
             Assert.False(response.Headers.Contains(ResultHelpers.EntityIdHeaderName));
+#endif
+        }
+
+        [Fact]
+        public void AddServiceVersion_AddsODataVersion_IfResponseStatusCodeIsNoContent()
+        {
+            // Arrange
+            var response = ResponseFactory.Create(HttpStatusCode.NoContent);
+
+            // Act
+            ResultHelpers.AddServiceVersion(response, () => _version);
+
+            // Assert
+#if NETCORE
+            var versionHeaderValues = response.Headers[ODataVersionConstraint.ODataServiceVersionHeader].ToList();
+#else
+            var versionHeaderValues = response.Headers.GetValues(ODataVersionConstraint.ODataServiceVersionHeader).ToList();
+#endif
+            Assert.Single(versionHeaderValues);
+            Assert.Equal(_version, versionHeaderValues.Single());
+        }
+
+        [Fact]
+        public void AddServiceVersion_DoesNotAddServiceVersion_IfResponseStatusCodeIsOtherThanNoContent()
+        {
+            // Arrange
+            var response = ResponseFactory.Create(HttpStatusCode.OK);
+
+            // Act
+            ResultHelpers.AddServiceVersion(response, () => _version);
+
+            // Assert
+#if NETCORE
+            Assert.False(response.Headers.ContainsKey(ODataVersionConstraint.ODataServiceVersionHeader));
+#else
+            Assert.False(response.Headers.Contains(ODataVersionConstraint.ODataServiceVersionHeader));
 #endif
         }
 

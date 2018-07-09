@@ -23,11 +23,15 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _enumerableThenByDescendingMethod = GenericMethodOf(_ => Enumerable.ThenByDescending<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
+        private static MethodInfo _enumerableGroupByMethod = GenericMethodOf(_ => Enumerable.GroupBy<int, int>(default(IQueryable<int>), default(Func<int, int>)));        
         private static MethodInfo _groupByMethod = GenericMethodOf(_ => Queryable.GroupBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int), default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
+
+        private static MethodInfo _queryableContainsMethod = GenericMethodOf(_ => Queryable.Contains<int>(default(IQueryable<int>), default(int)));
+        private static MethodInfo _enumerableContainsMethod = GenericMethodOf(_ => Enumerable.Contains<int>(default(IEnumerable<int>), default(int)));
 
         private static MethodInfo _queryableEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>)));
         private static MethodInfo _queryableNonEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
@@ -39,6 +43,9 @@ namespace Microsoft.AspNet.OData
 
         private static MethodInfo _enumerableOfTypeMethod = GenericMethodOf(_ => Enumerable.OfType<int>(default(IEnumerable)));
         private static MethodInfo _queryableOfTypeMethod = GenericMethodOf(_ => Queryable.OfType<int>(default(IQueryable)));
+
+        private static MethodInfo _enumerableSelectManyMethod = GenericMethodOf(_ => Enumerable.SelectMany<int, int>(default(IEnumerable<int>), default(Func<int, IEnumerable<int>>)));
+        private static MethodInfo _queryableSelectManyMethod = GenericMethodOf(_ => Queryable.SelectMany<int, int>(default(IQueryable<int>), default(Expression<Func<int, IEnumerable<int>>>)));
 
         private static MethodInfo _enumerableSelectMethod = GenericMethodOf(_ => Enumerable.Select<int, int>(default(IEnumerable<int>), i => i));
         private static MethodInfo _queryableSelectMethod = GenericMethodOf(_ => Queryable.Select<int, int>(default(IQueryable<int>), i => i));
@@ -152,6 +159,11 @@ namespace Microsoft.AspNet.OData
             get { return _groupByMethod; }
         }
 
+        public static MethodInfo EnumerableGroupByGeneric
+        {
+            get { return _enumerableGroupByMethod; }
+        }
+
         public static MethodInfo QueryableAggregateGeneric
         {
             get { return _aggregateMethod; }
@@ -182,6 +194,16 @@ namespace Microsoft.AspNet.OData
             get { return _whereMethod; }
         }
 
+        public static MethodInfo QueryableContainsGeneric
+        {
+            get { return _queryableContainsMethod; }
+        }
+
+        public static MethodInfo EnumerableContainsGeneric
+        {
+            get { return _enumerableContainsMethod; }
+        }
+
         public static MethodInfo QueryableSelectGeneric
         {
             get { return _queryableSelectMethod; }
@@ -190,6 +212,16 @@ namespace Microsoft.AspNet.OData
         public static MethodInfo EnumerableSelectGeneric
         {
             get { return _enumerableSelectMethod; }
+        }
+        
+        public static MethodInfo QueryableSelectManyGeneric
+        {
+            get { return _queryableSelectManyMethod; }
+        }
+
+        public static MethodInfo EnumerableSelectManyGeneric
+        {
+            get { return _enumerableSelectManyMethod; }
         }
 
         public static MethodInfo QueryableEmptyAnyGeneric

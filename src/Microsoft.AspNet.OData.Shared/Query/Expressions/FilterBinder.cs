@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -180,8 +181,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
-            Justification = "These are simple conversion function and cannot be split up.")]
         public virtual Expression Bind(QueryNode node)
         {
             // Recursion guard to avoid stack overflows
@@ -192,88 +191,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (collectionNode != null)
             {
-                switch (node.Kind)
-                {
-                    case QueryNodeKind.CollectionNavigationNode:
-                        CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
-                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
-
-                    case QueryNodeKind.CollectionPropertyAccess:
-                        return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
-
-                    case QueryNodeKind.CollectionComplexNode:
-                        return BindCollectionComplexNode(node as CollectionComplexNode);
-
-                    case QueryNodeKind.CollectionResourceCast:
-                        return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
-
-                    case QueryNodeKind.CollectionFunctionCall:
-                    case QueryNodeKind.CollectionResourceFunctionCall:
-                    case QueryNodeKind.CollectionOpenPropertyAccess:
-                    // Unused or have unknown uses.
-                    default:
-                        throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
-                }
+                return BindCollectionNode(collectionNode);
             }
             else if (singleValueNode != null)
             {
-                switch (node.Kind)
-                {
-                    case QueryNodeKind.BinaryOperator:
-                        return BindBinaryOperatorNode(node as BinaryOperatorNode);
-
-                    case QueryNodeKind.Constant:
-                        return BindConstantNode(node as ConstantNode);
-
-                    case QueryNodeKind.Convert:
-                        return BindConvertNode(node as ConvertNode);
-
-                    case QueryNodeKind.ResourceRangeVariableReference:
-                        return BindRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable);
-
-                    case QueryNodeKind.NonResourceRangeVariableReference:
-                        return BindRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable);
-
-                    case QueryNodeKind.SingleValuePropertyAccess:
-                        return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
-
-                    case QueryNodeKind.SingleComplexNode:
-                        return BindSingleComplexNode(node as SingleComplexNode);
-
-                    case QueryNodeKind.SingleValueOpenPropertyAccess:
-                        return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
-
-                    case QueryNodeKind.UnaryOperator:
-                        return BindUnaryOperatorNode(node as UnaryOperatorNode);
-
-                    case QueryNodeKind.SingleValueFunctionCall:
-                        return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
-
-                    case QueryNodeKind.SingleNavigationNode:
-                        SingleNavigationNode navigationNode = node as SingleNavigationNode;
-                        return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
-
-                    case QueryNodeKind.Any:
-                        return BindAnyNode(node as AnyNode);
-
-                    case QueryNodeKind.All:
-                        return BindAllNode(node as AllNode);
-
-                    case QueryNodeKind.SingleResourceCast:
-                        return BindSingleResourceCastNode(node as SingleResourceCastNode);
-
-                    case QueryNodeKind.SingleResourceFunctionCall:
-                        return BindSingleResourceFunctionCallNode(node as SingleResourceFunctionCallNode);
-
-                    case QueryNodeKind.NamedFunctionParameter:
-                    case QueryNodeKind.ParameterAlias:
-                    case QueryNodeKind.EntitySet:
-                    case QueryNodeKind.KeyLookup:
-                    case QueryNodeKind.SearchTerm:
-                    // Unused or have unknown uses.
-                    default:
-                        throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
-                }
+                return BindSingleValueNode(singleValueNode);
             }
             else
             {
@@ -416,6 +338,36 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return OfType(source, clrType);
         }
 
+        /// <summary>
+        /// Binds a <see cref="CollectionConstantNode"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="CollectionConstantNode"/>.
+        /// </summary>
+        /// <param name="node">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        public virtual Expression BindCollectionConstantNode(CollectionConstantNode node)
+        {
+            // It's fine if the collection is empty; the returned value will be an empty list.
+            ConstantNode firstNode = node.Collection.FirstOrDefault();
+            object value = null;
+            if (firstNode != null)
+            {
+                value = firstNode.Value;
+            }
+
+            Type constantType = RetrieveClrTypeForConstant(node.ItemType, ref value);
+            Type listType = typeof(List<>).MakeGenericType(constantType);
+            IList castedList = Activator.CreateInstance(listType) as IList;
+
+            // Getting a LINQ expression to dynamically cast each item in the Collection during runtime is tricky,
+            // so using a foreach loop and doing an implicit cast from object to the CLR type of ItemType.
+            foreach (ConstantNode item in node.Collection)
+            {
+                castedList.Add(item.Value);
+            }
+
+            return Expression.Constant(castedList);
+        }
+
         private Expression BindCastSourceNode(QueryNode sourceNode)
         {
             Expression source;
@@ -523,6 +475,27 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         /// <summary>
+        /// Binds an <see cref="InNode"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="InNode"/>.
+        /// </summary>
+        /// <param name="inNode">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        public virtual Expression BindInNode(InNode inNode)
+        {
+            Expression singleValue = Bind(inNode.Left);
+            Expression collection = Bind(inNode.Right);
+
+            if (IsIQueryable(collection.Type))
+            {
+                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+            }
+            else
+            {
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+            }
+        }
+
+        /// <summary>
         /// Binds a <see cref="ConstantNode"/> to create a LINQ <see cref="Expression"/> that
         /// represents the semantics of the <see cref="ConstantNode"/>.
         /// </summary>
@@ -538,25 +511,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return NullConstant;
             }
 
-            Type constantType = EdmLibHelpers.GetClrType(constantNode.TypeReference, Model, InternalAssembliesResolver);
             object value = constantNode.Value;
-
-            if (constantNode.TypeReference != null && constantNode.TypeReference.IsEnum())
-            {
-                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
-                string strValue = odataEnumValue.Value;
-                Contract.Assert(strValue != null);
-
-                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-                value = Enum.Parse(constantType, strValue);
-            }
-
-            if (constantNode.TypeReference != null &&
-                constantNode.TypeReference.IsNullable &&
-                (constantNode.TypeReference.IsDate() || constantNode.TypeReference.IsTimeOfDay()))
-            {
-                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-            }
+            Type constantType = RetrieveClrTypeForConstant(constantNode.TypeReference, ref value);
 
             if (QuerySettings.EnableConstantParameterization)
             {
@@ -1452,6 +1408,134 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Binds a <see cref="SingleValueNode"/> to create a LINQ <see cref="Expression"/> that represents the semantics
+        /// of the <see cref="SingleValueNode"/>.
+        /// </summary>
+        /// <param name="node">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindSingleValueNode(SingleValueNode node)
+        {
+            switch (node.Kind)
+            {
+                case QueryNodeKind.BinaryOperator:
+                    return BindBinaryOperatorNode(node as BinaryOperatorNode);
+
+                case QueryNodeKind.Constant:
+                    return BindConstantNode(node as ConstantNode);
+
+                case QueryNodeKind.Convert:
+                    return BindConvertNode(node as ConvertNode);
+
+                case QueryNodeKind.ResourceRangeVariableReference:
+                    return BindRangeVariable((node as ResourceRangeVariableReferenceNode).RangeVariable);
+
+                case QueryNodeKind.NonResourceRangeVariableReference:
+                    return BindRangeVariable((node as NonResourceRangeVariableReferenceNode).RangeVariable);
+
+                case QueryNodeKind.SingleValuePropertyAccess:
+                    return BindPropertyAccessQueryNode(node as SingleValuePropertyAccessNode);
+
+                case QueryNodeKind.SingleComplexNode:
+                    return BindSingleComplexNode(node as SingleComplexNode);
+
+                case QueryNodeKind.SingleValueOpenPropertyAccess:
+                    return BindDynamicPropertyAccessQueryNode(node as SingleValueOpenPropertyAccessNode);
+
+                case QueryNodeKind.UnaryOperator:
+                    return BindUnaryOperatorNode(node as UnaryOperatorNode);
+
+                case QueryNodeKind.SingleValueFunctionCall:
+                    return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
+
+                case QueryNodeKind.SingleNavigationNode:
+                    SingleNavigationNode navigationNode = node as SingleNavigationNode;
+                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+
+                case QueryNodeKind.Any:
+                    return BindAnyNode(node as AnyNode);
+
+                case QueryNodeKind.All:
+                    return BindAllNode(node as AllNode);
+
+                case QueryNodeKind.SingleResourceCast:
+                    return BindSingleResourceCastNode(node as SingleResourceCastNode);
+
+                case QueryNodeKind.SingleResourceFunctionCall:
+                    return BindSingleResourceFunctionCallNode(node as SingleResourceFunctionCallNode);
+
+                case QueryNodeKind.In:
+                    return BindInNode(node as InNode);
+
+                case QueryNodeKind.NamedFunctionParameter:
+                case QueryNodeKind.ParameterAlias:
+                case QueryNodeKind.EntitySet:
+                case QueryNodeKind.KeyLookup:
+                case QueryNodeKind.SearchTerm:
+                // Unused or have unknown uses.
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        /// <summary>
+        /// Binds a <see cref="CollectionNode"/> to create a LINQ <see cref="Expression"/> that represents the semantics
+        /// of the <see cref="CollectionNode"/>.
+        /// </summary>
+        /// <param name="node">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        private Expression BindCollectionNode(CollectionNode node)
+        {
+            switch (node.Kind)
+            {
+                case QueryNodeKind.CollectionNavigationNode:
+                    CollectionNavigationNode navigationNode = node as CollectionNavigationNode;
+                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+
+                case QueryNodeKind.CollectionPropertyAccess:
+                    return BindCollectionPropertyAccessNode(node as CollectionPropertyAccessNode);
+
+                case QueryNodeKind.CollectionComplexNode:
+                    return BindCollectionComplexNode(node as CollectionComplexNode);
+
+                case QueryNodeKind.CollectionResourceCast:
+                    return BindCollectionResourceCastNode(node as CollectionResourceCastNode);
+
+                case QueryNodeKind.CollectionConstant:
+                    return BindCollectionConstantNode(node as CollectionConstantNode);
+
+                case QueryNodeKind.CollectionFunctionCall:
+                case QueryNodeKind.CollectionResourceFunctionCall:
+                case QueryNodeKind.CollectionOpenPropertyAccess:
+                default:
+                    throw Error.NotSupported(SRResources.QueryNodeBindingNotSupported, node.Kind, typeof(FilterBinder).Name);
+            }
+        }
+
+        private Type RetrieveClrTypeForConstant(IEdmTypeReference edmTypeReference, ref object value)
+        {
+            Type constantType = EdmLibHelpers.GetClrType(edmTypeReference, Model, InternalAssembliesResolver);
+
+            if (value != null && edmTypeReference != null && edmTypeReference.IsEnum())
+            {
+                ODataEnumValue odataEnumValue = (ODataEnumValue)value;
+                string strValue = odataEnumValue.Value;
+                Contract.Assert(strValue != null);
+
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
+                value = Enum.Parse(constantType, strValue);
+            }
+
+            if (edmTypeReference != null &&
+                edmTypeReference.IsNullable &&
+                (edmTypeReference.IsDate() || edmTypeReference.IsTimeOfDay()))
+            {
+                constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
+            }
+
+            return constantType;
         }
 
         private ParameterExpression HandleLambdaParameters(IEnumerable<RangeVariable> rangeVariables)

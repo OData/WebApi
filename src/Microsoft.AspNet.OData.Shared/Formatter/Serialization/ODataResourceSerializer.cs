@@ -234,11 +234,20 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             var properties = new List<ODataProperty>();
             var dynamicObject = graph as DynamicTypeWrapper;
+            if (dynamicObject == null)
+            {
+                var dynamicEnumerable = (graph as IEnumerable<DynamicTypeWrapper>);
+                if (dynamicEnumerable != null)
+                {
+                    dynamicObject = dynamicEnumerable.SingleOrDefault();
+                }
+            }
             if (dynamicObject != null)
             {
                 foreach (var prop in dynamicObject.Values)
                 {
-                    if (prop.Value != null && EdmLibHelpers.IsDynamicTypeWrapper(prop.Value.GetType()))
+                    if (prop.Value != null
+                        && (prop.Value is DynamicTypeWrapper || (prop.Value is IEnumerable<DynamicTypeWrapper>)))
                     {
                         IEdmProperty edmProperty = entityType.Properties()
                             .FirstOrDefault(p => p.Name.Equals(prop.Key));
@@ -279,7 +288,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             foreach (var property in dynamicTypeProperties.Keys)
             {
                 var resourceContext = new ResourceContext(writeContext, expectedType.AsEntity(), graph);
-                if (entityType.NavigationProperties().Any(p => p.Type.Equals(property.Type)))
+                if (entityType.NavigationProperties().Any(p => p.Type.Equals(property.Type)) && !(property.Type is EdmCollectionTypeReference))
                 {
                     var navigationProperty = entityType.NavigationProperties().FirstOrDefault(p => p.Type.Equals(property.Type));
                     var navigationLink = CreateNavigationLink(navigationProperty, resourceContext);

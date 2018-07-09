@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="property">The name of the property.</param>
         /// <param name="declaringType">The declaring EDM type of the property.</param>
-        protected PropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
+        protected PropertyConfiguration(PropertyDescriptor property, StructuralTypeConfiguration declaringType)
         {
             if (property == null)
             {
@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets the mapping CLR <see cref="PropertyInfo"/>.
         /// </summary>
-        public PropertyInfo PropertyInfo { get; private set; }
+        public PropertyDescriptor PropertyInfo { get; private set; }
 
         /// <summary>
         /// Gets the CLR <see cref="Type"/> of the property.

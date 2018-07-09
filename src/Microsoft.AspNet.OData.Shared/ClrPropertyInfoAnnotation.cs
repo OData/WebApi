@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 
@@ -23,12 +24,26 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("clrPropertyInfo");
             }
 
-            ClrPropertyInfo = clrPropertyInfo;
+            ClrPropertyInfo = new PropertyDescriptor(clrPropertyInfo);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ClrPropertyInfoAnnotation"/> class.
+        /// </summary>
+        /// <param name="propertyDescriptor">The backing CLR property info for the EDM property.</param>
+        public ClrPropertyInfoAnnotation(PropertyDescriptor propertyDescriptor)
+        {
+            if (propertyDescriptor == null)
+            {
+                throw Error.ArgumentNull("propetyDescriptor");
+            }
+
+            ClrPropertyInfo = propertyDescriptor;
         }
 
         /// <summary>
         /// Gets the backing CLR property info for the EDM property.
         /// </summary>
-        public PropertyInfo ClrPropertyInfo { get; private set; }
+        public PropertyDescriptor ClrPropertyInfo { get; private set; }
     }
 }

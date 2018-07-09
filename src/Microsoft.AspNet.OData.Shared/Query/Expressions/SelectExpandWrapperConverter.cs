@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
@@ -58,7 +59,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             public string MapProperty(string propertyName)
             {
                 IEdmProperty property = _type.Properties().Single(s => s.Name == propertyName);
-                PropertyInfo info = GetPropertyInfo(property);
+                PropertyDescriptor info = GetPropertyInfo(property);
                 JsonPropertyAttribute jsonProperty = GetJsonProperty(info);
                 if (jsonProperty != null && !String.IsNullOrWhiteSpace(jsonProperty.PropertyName))
                 {
@@ -70,7 +71,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
-            private PropertyInfo GetPropertyInfo(IEdmProperty property)
+            private PropertyDescriptor GetPropertyInfo(IEdmProperty property)
             {
                 ClrPropertyInfoAnnotation clrPropertyAnnotation = _model.GetAnnotationValue<ClrPropertyInfoAnnotation>(property);
                 if (clrPropertyAnnotation != null)
@@ -84,10 +85,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 PropertyInfo info = clrTypeAnnotation.ClrType.GetProperty(property.Name);
                 Contract.Assert(info != null);
 
-                return info;
+                return new PropertyDescriptor(info);
             }
 
-            private static JsonPropertyAttribute GetJsonProperty(PropertyInfo property)
+            private static JsonPropertyAttribute GetJsonProperty(PropertyDescriptor property)
             {
                 return property.GetCustomAttributes(typeof(JsonPropertyAttribute), inherit: false)
                        .OfType<JsonPropertyAttribute>().SingleOrDefault();

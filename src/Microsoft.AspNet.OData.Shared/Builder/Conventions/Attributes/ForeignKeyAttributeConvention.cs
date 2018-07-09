@@ -97,7 +97,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                 {
                     Type dependentType = Nullable.GetUnderlyingType(dependent.PropertyInfo.PropertyType) ?? dependent.PropertyInfo.PropertyType;
                     PrimitivePropertyConfiguration principal = principalEntity.Keys.FirstOrDefault(
-                            k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
+                            k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo.MemberInfo));
 
                     if (principal != null)
                     {
@@ -136,7 +136,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 
             Type dependentType = Nullable.GetUnderlyingType(dependent.PropertyInfo.PropertyType) ?? dependent.PropertyInfo.PropertyType;
             PrimitivePropertyConfiguration principal = principalEntity.Keys.FirstOrDefault(
-                k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo));
+                k => k.PropertyInfo.PropertyType == dependentType && navProperty.PrincipalProperties.All(p => p != k.PropertyInfo.MemberInfo));
             if (principal != null)
             {
                 navProperty.HasConstraint(dependent.PropertyInfo, principal.PropertyInfo);

@@ -65,7 +65,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                 {
                     if (!property.AddedExplicitly)
                     {
-                        edmTypeConfiguration.RemoveProperty(property.PropertyInfo);
+                        edmTypeConfiguration.RemoveProperty(property.PropertyInfo.PropertyInfo);
                     }
                 }
             }

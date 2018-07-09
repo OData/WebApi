@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
             PropertyConfiguration key = GetKeyProperty(entity);
             if (key != null)
             {
-                entity.HasKey(key.PropertyInfo);
+                entity.HasKey(key.PropertyInfo.PropertyInfo);
             }
         }
 

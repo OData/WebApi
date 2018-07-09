@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo);
+                structuralTypeConfiguration.RemoveProperty(edmProperty.PropertyInfo.PropertyInfo);
             }
         }
     }

@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(PropertyKind.Collection, configuration.Kind);
             Assert.Equal(elementType, configuration.ElementType);
             Assert.Equal(elementType, configuration.RelatedClrType);
-            Assert.Equal(property, configuration.PropertyInfo);
+            Assert.Equal(property, configuration.PropertyInfo.PropertyInfo);
             Assert.Equal(property.Name, configuration.Name);
             Assert.Equal(structuralType.Object, configuration.DeclaringType);
         }
@@ -83,7 +83,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         {
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>();
             CollectionPropertyConfiguration configuration = new CollectionPropertyConfiguration(property, structuralType.Object);
-            Assert.Same(property, configuration.PropertyInfo);
+            Assert.Same(property, configuration.PropertyInfo.PropertyInfo);
             Assert.Same(elementType, configuration.ElementType);
             Assert.Same(property.Name, configuration.Name);
         }

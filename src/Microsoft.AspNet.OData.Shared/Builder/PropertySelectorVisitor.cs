@@ -6,21 +6,24 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
     internal class PropertySelectorVisitor : ExpressionVisitor
     {
-        private List<PropertyInfo> _properties = new List<PropertyInfo>();
+        private List<MemberInfo> _properties = new List<MemberInfo>();
+        private readonly bool includeExtensionProperty;
 
         [SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Class is internal, virtual call okay")]
-        internal PropertySelectorVisitor(Expression exp)
+        internal PropertySelectorVisitor(Expression exp, bool includeExtensionProperty)
         {
+            this.includeExtensionProperty = includeExtensionProperty;
             Visit(exp);
         }
 
-        public PropertyInfo Property
+        public MemberInfo Property
         {
             get
             {
@@ -28,7 +31,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        public ICollection<PropertyInfo> Properties
+        public ICollection<MemberInfo> Properties
         {
             get
             {
@@ -59,14 +62,50 @@ namespace Microsoft.AspNet.OData.Builder
             return node;
         }
 
-        public static PropertyInfo GetSelectedProperty(Expression exp)
+        protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            return new PropertySelectorVisitor(exp).Property;
+            if (node == null)
+            {
+                throw Error.ArgumentNull("node");
+            }
+
+            MethodInfo minfo = node.Method;
+
+            if (!IsExtensionProperty(minfo))
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeProperties, TypeHelper.GetReflectedType(node.Method).FullName, node.Method.Name);
+            }
+
+            if (node.Arguments.First().NodeType != ExpressionType.Parameter)
+            {
+                throw Error.InvalidOperation(SRResources.MemberExpressionsMustBeBoundToLambdaParameter);
+            }
+
+            _properties.Add(minfo);
+            return node;
         }
 
-        public static ICollection<PropertyInfo> GetSelectedProperties(Expression exp)
+        private static bool IsExtensionProperty(MethodInfo methodInfo)
         {
-            return new PropertySelectorVisitor(exp).Properties;
+            return methodInfo!=null
+                && methodInfo.IsStatic
+                && methodInfo.IsDefined(typeof(ExtensionAttribute), false)
+                && methodInfo.GetParameters().Length == 1;
+        }
+
+        public static PropertyInfo GetSelectedProperty(Expression exp)
+        {
+            return GetSelectedProperty(exp, false) as PropertyInfo;
+        }
+
+        public static MemberInfo GetSelectedProperty(Expression exp, bool includeExtensionProperty)
+        {
+            return new PropertySelectorVisitor(exp, includeExtensionProperty).Property;
+        }
+
+        public static ICollection<MemberInfo> GetSelectedProperties(Expression exp, bool includeExtensionProperty=false)
+        {
+            return new PropertySelectorVisitor(exp, includeExtensionProperty).Properties;
         }
 
         public override Expression Visit(Expression exp)
@@ -82,6 +121,11 @@ namespace Microsoft.AspNet.OData.Builder
                 case ExpressionType.MemberAccess:
                 case ExpressionType.Lambda:
                     return base.Visit(exp);
+                case ExpressionType.Call:
+                    if (includeExtensionProperty)
+                        return base.Visit(exp);
+                    else
+                        goto default;
                 default:
                     throw Error.NotSupported(SRResources.UnsupportedExpressionNodeType);
             }

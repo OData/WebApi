@@ -184,8 +184,22 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 source = Expression.TypeAs(source, castType);
             }
 
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
-            Expression propertyValue = Expression.Property(source, propertyName);
+            var propDescr = EdmLibHelpers.GetClrPropertyDescriptor(property, _model);
+            string propertyName = null;
+            Expression propertyValue;
+            if (propDescr != null)
+            {
+                propertyName = propDescr.Name;
+                if (propDescr.PropertyInfo != null)
+                    propertyValue = Expression.Property(source, propDescr.PropertyInfo);
+                else
+                    propertyValue = Expression.Call(propDescr.MethodInfo, source);
+            }
+            else
+            {
+                propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
+                propertyValue = Expression.Property(source, propertyName);
+            }
             Type nullablePropertyType = TypeHelper.ToNullable(propertyValue.Type);
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 

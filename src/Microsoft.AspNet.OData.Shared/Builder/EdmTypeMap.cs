@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Builder
     {
         public EdmTypeMap(
             Dictionary<Type, IEdmType> edmTypes,
-            Dictionary<PropertyInfo, IEdmProperty> edmProperties,
+            Dictionary<PropertyDescriptor, IEdmProperty> edmProperties,
             Dictionary<IEdmProperty, QueryableRestrictions> edmPropertiesRestrictions,
             Dictionary<IEdmProperty, ModelBoundQuerySettings> edmPropertiesQuerySettings,
             Dictionary<IEdmStructuredType, ModelBoundQuerySettings> edmStructuredTypeQuerySettings,
@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Builder
 
         public Dictionary<Type, IEdmType> EdmTypes { get; private set; }
 
-        public Dictionary<PropertyInfo, IEdmProperty> EdmProperties { get; private set; }
+        public Dictionary<PropertyDescriptor, IEdmProperty> EdmProperties { get; private set; }
 
         public Dictionary<IEdmProperty, QueryableRestrictions> EdmPropertiesRestrictions { get; private set; }
 

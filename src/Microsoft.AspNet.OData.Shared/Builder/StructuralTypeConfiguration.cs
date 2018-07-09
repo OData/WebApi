@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         protected StructuralTypeConfiguration()
         {
-            ExplicitProperties = new Dictionary<PropertyInfo, PropertyConfiguration>();
+            ExplicitProperties = new Dictionary<PropertyDescriptor, PropertyConfiguration>();
             RemovedProperties = new List<PropertyInfo>();
             QueryConfiguration = new QueryConfiguration();
         }
@@ -213,7 +213,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets the collection of explicitly added properties.
         /// </summary>
-        protected internal IDictionary<PropertyInfo, PropertyConfiguration> ExplicitProperties { get; private set; }
+        protected internal IDictionary<PropertyDescriptor, PropertyConfiguration> ExplicitProperties { get; private set; }
 
         /// <summary>
         /// Gets the base type of this structural type.
@@ -312,7 +312,7 @@ namespace Microsoft.AspNet.OData.Builder
                         propertyConfiguration = new PrecisionPropertyConfiguration(propertyInfo, this);
                     }
                 }
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                ExplicitProperties[propertyConfiguration.PropertyInfo] = propertyConfiguration;
             }
 
             return propertyConfiguration;
@@ -355,10 +355,15 @@ namespace Microsoft.AspNet.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new EnumPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                ExplicitProperties[propertyConfiguration.PropertyInfo] = propertyConfiguration;
             }
 
             return propertyConfiguration;
+        }
+
+        internal ComplexPropertyConfiguration AddComplexProperty(PropertyDescriptor propertyDescriptor)
+        {
+            return AddComplexProperty(propertyDescriptor.PropertyInfo);
         }
 
         /// <summary>
@@ -394,13 +399,18 @@ namespace Microsoft.AspNet.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new ComplexPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                ExplicitProperties[propertyConfiguration.PropertyInfo] = propertyConfiguration;
                 // Make sure the complex type is in the model.
 
                 ModelBuilder.AddComplexType(propertyInfo.PropertyType);
             }
 
             return propertyConfiguration;
+        }
+
+        internal CollectionPropertyConfiguration AddCollectionProperty(PropertyDescriptor propertyDescriptor)
+        {
+            return AddCollectionProperty(propertyDescriptor.PropertyInfo);
         }
 
         /// <summary>
@@ -435,7 +445,7 @@ namespace Microsoft.AspNet.OData.Builder
             if (propertyConfiguration == null)
             {
                 propertyConfiguration = new CollectionPropertyConfiguration(propertyInfo, this);
-                ExplicitProperties[propertyInfo] = propertyConfiguration;
+                ExplicitProperties[propertyConfiguration.PropertyInfo] = propertyConfiguration;
 
                 // If the ElementType is not primitive or enum treat as a ComplexType and Add to the model.
                 IEdmPrimitiveTypeReference edmType =
@@ -491,6 +501,20 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Removes the given property.
         /// </summary>
+        /// <param name="propertyDescriptor">The property being removed.</param>
+        public virtual void RemoveProperty(PropertyDescriptor propertyDescriptor)
+        {
+            if (propertyDescriptor == null)
+            {
+                throw new ArgumentNullException("propertyDescriptor");
+            }
+
+            RemoveProperty(propertyDescriptor.PropertyInfo);
+        }
+
+        /// <summary>
+        /// Removes the given property.
+        /// </summary>
         /// <param name="propertyInfo">The property being removed.</param>
         public virtual void RemoveProperty(PropertyInfo propertyInfo)
         {
@@ -528,6 +552,18 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
+            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(navigationProperty);
+            return AddNavigationProperty(propertyDescriptor, multiplicity, containsTarget: false);
+        }
+
+        /// <summary>
+        /// Adds a non-contained EDM navigation property to this entity type.
+        /// </summary>
+        /// <param name="navigationProperty">The backing CLR property.</param>
+        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
+        /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
+        public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity)
+        {
             return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: false);
         }
 
@@ -539,17 +575,29 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
+            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(navigationProperty);
+            return AddNavigationProperty(propertyDescriptor, multiplicity, containsTarget: true);
+        }
+
+        /// <summary>
+        /// Adds a contained EDM navigation property to this entity type.
+        /// </summary>
+        /// <param name="navigationProperty">The backing CLR property.</param>
+        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
+        /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
+        public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity)
+        {
             return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: true);
         }
 
-        private NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity, bool containsTarget)
+        private NavigationPropertyConfiguration AddNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity, bool containsTarget)
         {
             if (navigationProperty == null)
             {
                 throw Error.ArgumentNull("navigationProperty");
             }
 
-            if (!TypeHelper.GetReflectedType(navigationProperty).IsAssignableFrom(ClrType))
+            if (!navigationProperty.ReflectedType.IsAssignableFrom(ClrType))
             {
                 throw Error.Argument("navigationProperty", SRResources.PropertyDoesNotBelongToType, navigationProperty.Name, ClrType.FullName);
             }
@@ -608,7 +656,7 @@ namespace Microsoft.AspNet.OData.Builder
             return propertyConfiguration;
         }
 
-        internal void ValidatePropertyNotAlreadyDefinedInBaseTypes(PropertyInfo propertyInfo)
+        internal void ValidatePropertyNotAlreadyDefinedInBaseTypes(MemberInfo propertyInfo)
         {
             PropertyConfiguration baseProperty =
                 this.DerivedProperties().FirstOrDefault(p => p.Name == propertyInfo.Name);
@@ -619,7 +667,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        internal void ValidatePropertyNotAlreadyDefinedInDerivedTypes(PropertyInfo propertyInfo)
+        internal void ValidatePropertyNotAlreadyDefinedInDerivedTypes(MemberInfo propertyInfo)
         {
             foreach (StructuralTypeConfiguration derivedType in ModelBuilder.DerivedTypes(this))
             {

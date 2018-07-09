@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="property">The property of the configuration.</param>
         /// <param name="declaringType">The declaring type of the property.</param>
         protected StructuralPropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
-            : base(property, declaringType)
+            : base(new PropertyDescriptor(property), declaringType)
         {
             OptionalProperty = EdmLibHelpers.IsNullable(property.PropertyType);
         }

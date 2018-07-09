@@ -1889,6 +1889,19 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpResponseExtensions {
 ExtensionAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExtensions {
+	public static readonly string DefaultRouteName = "odata"
+	public static readonly string DefaultRoutePrefix = "odata"
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, Microsoft.OData.Edm.IEdmModel model)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, string routeName, string routePrerix, Microsoft.OData.Edm.IEdmModel model)
+
 	[
 	ExtensionAttribute(),
 	]

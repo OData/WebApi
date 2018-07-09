@@ -246,7 +246,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             // Append the optional parameters into RouteData.
             ODataOptionalParameter optional = new ODataOptionalParameter();
-            foreach(var p in function.Parameters.OfType<IEdmOptionalParameter>())
+            foreach (var p in function.Parameters.OfType<IEdmOptionalParameter>())
             {
                 if (!functionSegment.Parameters.Any(c => c.Name == p.Name))
                 {

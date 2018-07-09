@@ -644,7 +644,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 
             // Assert
             Assert.Single(resourceSet.Actions);
-            Assert.Equal(2, resourceSet.Functions.Count());
+            Assert.Equal(3, resourceSet.Functions.Count());
         }
 
         [Theory]

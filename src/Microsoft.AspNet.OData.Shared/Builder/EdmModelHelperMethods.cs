@@ -176,6 +176,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 Type typeCast = TypeHelper.AsType(bindingInfo);
                 PropertyInfo propertyInfo = bindingInfo as PropertyInfo;
+                MethodInfo methodInfo = bindingInfo as MethodInfo;
 
                 if (typeCast != null)
                 {
@@ -185,6 +186,11 @@ namespace Microsoft.AspNet.OData.Builder
                 else if (propertyInfo != null)
                 {
                     PropertyDescriptor propDescr = new PropertyDescriptor(propertyInfo);
+                    bindings.Add(edmMap.EdmProperties[propDescr].Name);
+                }
+                else if (methodInfo != null)
+                {
+                    PropertyDescriptor propDescr = new PropertyDescriptor(methodInfo);
                     bindings.Add(edmMap.EdmProperties[propDescr].Name);
                 }
             }

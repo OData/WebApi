@@ -31,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             var salaryRangeCount = entityTypeConfigurationOfEmployee.Collection.Function("GetWholeSalary")
                 .Returns<int>();
             salaryRangeCount.Parameter<double>("minSalary");
-            salaryRangeCount.Parameter<double>("maxSalary").IsOptional = true;
+            salaryRangeCount.Parameter<double>("maxSalary").Optional();
             salaryRangeCount.Parameter<double>("aveSalary").HasDefaultValue("8.9");
 
             // Function bound to a collection of derived EntityType.
@@ -105,7 +105,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             var action = entityTypeConfigurationOfManager.Action("IncreaseWholeSalary")
                 .Returns<int>();
             action.Parameter<double>("minSalary");
-            action.Parameter<double>("maxSalary").IsOptional = true;
+            action.Parameter<double>("maxSalary").Optional();
             action.Parameter<double>("aveSalary").HasDefaultValue("8.9");
 
             // Action with primitive and collection of primitive parameters

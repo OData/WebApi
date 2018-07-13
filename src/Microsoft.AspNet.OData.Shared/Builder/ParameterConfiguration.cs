@@ -55,12 +55,12 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets or sets a value indicating whether this parameter is optional or not.
         /// </summary>
-        public bool IsOptional { get; set; }
+        public bool IsOptional { get; protected set; }
 
         /// <summary>
         /// Gets or sets a default value for optional parameter.
         /// </summary>
-        public string DefaultValue { get; set; }
+        public string DefaultValue { get; protected set; }
 
         /// <summary>
         /// Sets the optional value as true.

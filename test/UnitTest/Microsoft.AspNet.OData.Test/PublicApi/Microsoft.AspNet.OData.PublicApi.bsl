@@ -2348,6 +2348,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	public static bool IsSystemQueryOption (string queryOptionName)
 	public static bool IsSystemQueryOption (string queryOptionName, bool isDollarSignOptional)
 	public static IQueryable`1 LimitResults (IQueryable`1 queryable, int limit, out System.Boolean& resultsLimited)
+	public static IQueryable`1 LimitResults (IQueryable`1 queryable, int limit, bool parameterize, out System.Boolean& resultsLimited)
 	public virtual void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -2527,7 +2528,9 @@ public class Microsoft.AspNet.OData.Query.TruncatedCollection`1 : List`1, IColle
 	public TruncatedCollection`1 (IEnumerable`1 source, int pageSize)
 	public TruncatedCollection`1 (IQueryable`1 source, int pageSize)
 	public TruncatedCollection`1 (IEnumerable`1 source, int pageSize, System.Nullable`1[[System.Int64]] totalCount)
+	public TruncatedCollection`1 (IQueryable`1 source, int pageSize, bool parameterize)
 	public TruncatedCollection`1 (IQueryable`1 source, int pageSize, System.Nullable`1[[System.Int64]] totalCount)
+	public TruncatedCollection`1 (IQueryable`1 source, int pageSize, System.Nullable`1[[System.Int64]] totalCount, bool parameterize)
 
 	bool IsTruncated  { public virtual get; }
 	int PageSize  { public virtual get; }

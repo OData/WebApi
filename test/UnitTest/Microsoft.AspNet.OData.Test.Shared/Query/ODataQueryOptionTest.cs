@@ -755,7 +755,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var context = new ODataQueryContext(model, typeof(Customer));
 
             bool resultsLimited;
-            IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, out resultsLimited) as IQueryable<Customer>;
+            IQueryable<Customer> result = ODataQueryOptions.LimitResults(queryable, limit, false, out resultsLimited) as IQueryable<Customer>;
 
             Assert.Equal(Math.Min(limit, 4), result.Count());
             Assert.Equal(resultsLimitedExpected, resultsLimited);

@@ -220,6 +220,7 @@ Content-Type: application/json;odata.metadata=minimal
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("multipart/mixed", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
@@ -304,6 +305,7 @@ Content-Type: application/json;odata.metadata=minimal
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))

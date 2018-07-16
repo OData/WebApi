@@ -824,6 +824,7 @@ public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchH
 
 public class Microsoft.AspNet.OData.Batch.ODataBatchContent : System.Net.Http.HttpContent, IDisposable {
 	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer, System.Net.Http.Headers.MediaTypeHeaderValue contentType)
 
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 

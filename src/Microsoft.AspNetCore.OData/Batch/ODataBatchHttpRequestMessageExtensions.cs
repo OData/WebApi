@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData;
 
@@ -52,7 +54,8 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("request");
             }
 
-            return request.ContentType?.StartsWith("multipart/", StringComparison.OrdinalIgnoreCase) ?? false;
+            return (request.ContentType != null &&
+                (request.ContentType.StartsWith(BatchMediaTypeMime) || request.ContentType.StartsWith(BatchMediaTypeJson)));
         }
 
         /// <summary>
@@ -188,12 +191,21 @@ namespace Microsoft.AspNet.OData.Batch
             writerSettings.MessageQuotas = messageQuotas;
 
             HttpResponse response = request.HttpContext.Response;
-            response.StatusCode = (int)HttpStatusCode.OK;
 
-            // Need to get the stream from ODataBatchContent.
-            // maybe use the shared class to define bahaviour and put
-            // HttpContent and public stream getter in platform-specific?
-            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer);
+            StringValues acceptHeader = request.Headers["Accept"];
+            string contentType = null;
+            if (StringValues.IsNullOrEmpty(acceptHeader)
+                || acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
+            {
+                contentType = String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid());
+            }
+            else if (acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase)))
+            {
+                contentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
+            }
+
+            response.StatusCode = (int)HttpStatusCode.OK;
+            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer, contentType);
             foreach (var header in batchContent.Headers)
             {
                 // Copy headers from batch content, overwriting any existing headers.

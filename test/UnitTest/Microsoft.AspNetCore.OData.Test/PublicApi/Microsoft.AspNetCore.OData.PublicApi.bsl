@@ -860,6 +860,7 @@ public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchH
 
 public class Microsoft.AspNet.OData.Batch.ODataBatchContent {
 	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer, string contentType)
 
 	Microsoft.AspNetCore.Http.HeaderDictionary Headers  { public get; }
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }

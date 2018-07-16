@@ -5,10 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 
@@ -29,9 +31,29 @@ namespace Microsoft.AspNet.OData.Batch
         /// <param name="requestContainer">The dependency injection container for the request.</param>
         /// <remarks>This signature uses types that are AspNet-specific.</remarks>
         public ODataBatchContent(IEnumerable<ODataBatchResponseItem> responses, IServiceProvider requestContainer)
+           : this(responses, requestContainer, null /*contentType*/)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataBatchContent"/> class.
+        /// </summary>
+        /// <param name="responses">The batch responses.</param>
+        /// <param name="requestContainer">The dependency injection container for the request.</param>
+        /// <param name="contentType">The response content type.</param>
+        /// <remarks>This signature uses types that are AspNet-specific.</remarks>
+        public ODataBatchContent(IEnumerable<ODataBatchResponseItem> responses, IServiceProvider requestContainer,
+            MediaTypeHeaderValue contentType)
         {
             this.Initialize(responses, requestContainer);
-            Headers.ContentType = MediaTypeHeaderValue.Parse(String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
+
+            if (contentType == null)
+            {
+                contentType = MediaTypeHeaderValue.Parse(
+                    String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid()));
+            }
+
+            Headers.ContentType = contentType;
             ODataVersion version = _writerSettings.Version ?? ODataVersionConstraint.DefaultODataVersion;
             Headers.TryAddWithoutValidation(ODataVersionConstraint.ODataServiceVersionHeader, ODataUtils.ODataVersionToString(version));
         }

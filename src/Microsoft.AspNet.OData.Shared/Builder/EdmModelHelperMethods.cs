@@ -185,12 +185,12 @@ namespace Microsoft.AspNet.OData.Builder
                 }
                 else if (propertyInfo != null)
                 {
-                    PropertyDescriptor propDescr = new PropertyDescriptor(propertyInfo);
+                    MemberDescriptor propDescr = new MemberDescriptor(propertyInfo);
                     bindings.Add(edmMap.EdmProperties[propDescr].Name);
                 }
                 else if (methodInfo != null)
                 {
-                    PropertyDescriptor propDescr = new PropertyDescriptor(methodInfo);
+                    MemberDescriptor propDescr = new MemberDescriptor(methodInfo);
                     bindings.Add(edmMap.EdmProperties[propDescr].Name);
                 }
             }
@@ -431,7 +431,7 @@ namespace Microsoft.AspNet.OData.Builder
             model.AddClrTypeAnnotations(edmTypes);
 
             // add annotation for properties
-            Dictionary<PropertyDescriptor, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
+            Dictionary<MemberDescriptor, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
             model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
@@ -495,12 +495,12 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        private static void AddClrPropertyInfoAnnotations(this EdmModel model, Dictionary<PropertyDescriptor, IEdmProperty> edmProperties)
+        private static void AddClrPropertyInfoAnnotations(this EdmModel model, Dictionary<MemberDescriptor, IEdmProperty> edmProperties)
         {
-            foreach (KeyValuePair<PropertyDescriptor, IEdmProperty> edmPropertyMap in edmProperties)
+            foreach (KeyValuePair<MemberDescriptor, IEdmProperty> edmPropertyMap in edmProperties)
             {
                 IEdmProperty edmProperty = edmPropertyMap.Value;
-                PropertyDescriptor clrProperty = edmPropertyMap.Key;
+                MemberDescriptor clrProperty = edmPropertyMap.Key;
                 if (clrProperty.MethodInfo != null || edmProperty.Name != clrProperty.Name)
                 {
                     model.SetAnnotationValue(edmProperty, new ClrPropertyInfoAnnotation(clrProperty));

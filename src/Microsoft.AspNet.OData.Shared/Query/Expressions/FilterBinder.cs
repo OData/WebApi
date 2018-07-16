@@ -634,9 +634,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
-            PropertyDescriptor propertyDescriptor = EdmLibHelpers.GetClrPropertyDescriptor(property, Model);
-            string propertyName = propertyDescriptor!=null
-                                    ? propertyDescriptor.MemberInfo.Name
+            MemberDescriptor memberDescriptor = EdmLibHelpers.GetClrMemberDescriptor(property, Model);
+            string propertyName = memberDescriptor!=null
+                                    ? memberDescriptor.MemberInfo.Name
                                     : EdmLibHelpers.GetClrPropertyName(property, Model);
             propertyPath = propertyPath ?? propertyName;
 
@@ -646,7 +646,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Expression propertyAccessExpression = null;
 
                 propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) 
-                                                ?? CreatePropertyAccessExpression(source, propertyName, propertyDescriptor);
+                                                ?? CreatePropertyAccessExpression(source, propertyName, memberDescriptor);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -661,11 +661,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else
             {
                 return GetFlattenedPropertyExpression(propertyPath) 
-                        ?? ConvertNonStandardPrimitives(CreatePropertyAccessExpression(source, propertyName, propertyDescriptor));
+                        ?? ConvertNonStandardPrimitives(CreatePropertyAccessExpression(source, propertyName, memberDescriptor));
             }
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, string propertyName, PropertyDescriptor propertyDescriptor)
+        private Expression CreatePropertyAccessExpression(Expression source, string propertyName, MemberDescriptor propertyDescriptor)
         {
             if (propertyDescriptor != null)
             {

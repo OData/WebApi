@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             Mock<TProperty> propertyConfiguration;
             if(typeof(TProperty) == typeof(PropertyConfiguration))
             {
-                Mock<PropertyDescriptor> propertyDescriptor = new Mock<PropertyDescriptor>(property.Object);
+                Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(property.Object);
                 propertyConfiguration = new Mock<TProperty>(propertyDescriptor.Object, structuralType.Object);
             }
             else if (typeof(TProperty) == typeof(NavigationPropertyConfiguration))

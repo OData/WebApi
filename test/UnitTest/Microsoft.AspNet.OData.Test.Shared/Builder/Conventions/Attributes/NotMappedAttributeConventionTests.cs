@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new NotMappedAttribute() });
 
-            Mock<PropertyDescriptor> propertyDescriptor = new Mock<PropertyDescriptor>(property.Object);
+            Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(property.Object);
 
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
@@ -53,7 +53,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("Property");
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(propertyInfo);
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(propertyInfo);
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);
 

@@ -46,9 +46,9 @@ namespace Microsoft.AspNet.OData.Test.Common
             return this;
         }
 
-        public PropertyDescriptor AsPropertyDescriptor()
+        public MemberDescriptor AsPropertyDescriptor()
         {
-            return new PropertyDescriptor(this);
+            return new MemberDescriptor(this);
         }
     }
 }

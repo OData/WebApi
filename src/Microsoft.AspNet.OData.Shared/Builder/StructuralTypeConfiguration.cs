@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <remarks>The default constructor is intended for use by unit testing only.</remarks>
         protected StructuralTypeConfiguration()
         {
-            ExplicitProperties = new Dictionary<PropertyDescriptor, PropertyConfiguration>();
+            ExplicitProperties = new Dictionary<MemberDescriptor, PropertyConfiguration>();
             RemovedProperties = new List<PropertyInfo>();
             QueryConfiguration = new QueryConfiguration();
         }
@@ -213,7 +213,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets the collection of explicitly added properties.
         /// </summary>
-        protected internal IDictionary<PropertyDescriptor, PropertyConfiguration> ExplicitProperties { get; private set; }
+        protected internal IDictionary<MemberDescriptor, PropertyConfiguration> ExplicitProperties { get; private set; }
 
         /// <summary>
         /// Gets the base type of this structural type.
@@ -361,7 +361,7 @@ namespace Microsoft.AspNet.OData.Builder
             return propertyConfiguration;
         }
 
-        internal ComplexPropertyConfiguration AddComplexProperty(PropertyDescriptor propertyDescriptor)
+        internal ComplexPropertyConfiguration AddComplexProperty(MemberDescriptor propertyDescriptor)
         {
             return AddComplexProperty(propertyDescriptor.PropertyInfo);
         }
@@ -408,7 +408,7 @@ namespace Microsoft.AspNet.OData.Builder
             return propertyConfiguration;
         }
 
-        internal CollectionPropertyConfiguration AddCollectionProperty(PropertyDescriptor propertyDescriptor)
+        internal CollectionPropertyConfiguration AddCollectionProperty(MemberDescriptor propertyDescriptor)
         {
             return AddCollectionProperty(propertyDescriptor.PropertyInfo);
         }
@@ -502,7 +502,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// Removes the given property.
         /// </summary>
         /// <param name="propertyDescriptor">The property being removed.</param>
-        public virtual void RemoveProperty(PropertyDescriptor propertyDescriptor)
+        public virtual void RemoveProperty(MemberDescriptor propertyDescriptor)
         {
             if (propertyDescriptor == null)
             {
@@ -552,7 +552,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(navigationProperty);
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(navigationProperty);
             return AddNavigationProperty(propertyDescriptor, multiplicity, containsTarget: false);
         }
 
@@ -562,7 +562,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="navigationProperty">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
-        public virtual NavigationPropertyConfiguration AddNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity)
+        public virtual NavigationPropertyConfiguration AddNavigationProperty(MemberDescriptor navigationProperty, EdmMultiplicity multiplicity)
         {
             return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: false);
         }
@@ -575,7 +575,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(navigationProperty);
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(navigationProperty);
             return AddNavigationProperty(propertyDescriptor, multiplicity, containsTarget: true);
         }
 
@@ -585,12 +585,12 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="navigationProperty">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/> of the navigation property.</param>
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
-        public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity)
+        public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(MemberDescriptor navigationProperty, EdmMultiplicity multiplicity)
         {
             return AddNavigationProperty(navigationProperty, multiplicity, containsTarget: true);
         }
 
-        private NavigationPropertyConfiguration AddNavigationProperty(PropertyDescriptor navigationProperty, EdmMultiplicity multiplicity, bool containsTarget)
+        private NavigationPropertyConfiguration AddNavigationProperty(MemberDescriptor navigationProperty, EdmMultiplicity multiplicity, bool containsTarget)
         {
             if (navigationProperty == null)
             {

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -500,14 +501,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
         {
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            MemberDescriptor memberDescriptor = EdmLibHelpers.GetClrMemberDescriptor(property, Model);
+            string propertyName = memberDescriptor != null
+                                    ? memberDescriptor.MemberInfo.Name
+                                    : EdmLibHelpers.GetClrPropertyName(property, Model);
             propertyPath = propertyPath ?? propertyName;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
                 source != this._lambdaParameter)
             {
                 Expression cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
-                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath) ?? Expression.Property(cleanSource, propertyName);
+                propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath)
+                        ?? CreatePropertyAccessExpression(source, propertyName, memberDescriptor);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -521,8 +526,22 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else
             {
-                return GetFlattenedPropertyExpression(propertyPath) ?? ConvertNonStandardPrimitives(Expression.Property(source, propertyName));
+                return GetFlattenedPropertyExpression(propertyPath) 
+                    ?? ConvertNonStandardPrimitives(CreatePropertyAccessExpression(source, propertyName, memberDescriptor));
             }
+        }
+
+        private Expression CreatePropertyAccessExpression(Expression source, string propertyName, MemberDescriptor memberDescriptor)
+        {
+            if (memberDescriptor != null)
+            {
+                if (memberDescriptor.MethodInfo != null)
+                    return Expression.Call(null, memberDescriptor.MethodInfo, source);
+                else
+                    return Expression.Property(source, memberDescriptor.PropertyInfo);
+            }
+            else
+                return Expression.Property(source, propertyName);
         }
 
         private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)

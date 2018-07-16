@@ -184,16 +184,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 source = Expression.TypeAs(source, castType);
             }
 
-            var propDescr = EdmLibHelpers.GetClrPropertyDescriptor(property, _model);
+            var memberDescriptor = EdmLibHelpers.GetClrMemberDescriptor(property, _model);
             string propertyName = null;
             Expression propertyValue;
-            if (propDescr != null)
+            if (memberDescriptor != null)
             {
-                propertyName = propDescr.Name;
-                if (propDescr.PropertyInfo != null)
-                    propertyValue = Expression.Property(source, propDescr.PropertyInfo);
+                propertyName = memberDescriptor.Name;
+                if (memberDescriptor.PropertyInfo != null)
+                    propertyValue = Expression.Property(source, memberDescriptor.PropertyInfo);
                 else
-                    propertyValue = Expression.Call(propDescr.MethodInfo, source);
+                    propertyValue = Expression.Call(memberDescriptor.MethodInfo, source);
             }
             else
             {

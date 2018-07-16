@@ -16,13 +16,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
         private string _name = "name";
         private StructuralTypeConfiguration _declaringType;
         private PropertyInfo _propertyInfo;
-        private PropertyDescriptor _propertyDescriptor;
+        private MemberDescriptor _propertyDescriptor;
 
         public PropertyConfigurationTest()
         {
             Mock<PropertyInfo> mockPropertyInfo = new Mock<PropertyInfo>();
             _propertyInfo = mockPropertyInfo.Object;
-            Mock<PropertyDescriptor> mockPropertyDescriptor = new Mock<PropertyDescriptor>(_propertyInfo);
+            Mock<MemberDescriptor> mockPropertyDescriptor = new Mock<MemberDescriptor>(_propertyInfo);
             _propertyDescriptor = mockPropertyDescriptor.Object;
             Mock<StructuralTypeConfiguration> mockTypeConfig = new Mock<StructuralTypeConfiguration>();
             _declaringType = mockTypeConfig.Object;

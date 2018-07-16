@@ -694,7 +694,7 @@ namespace Microsoft.AspNet.OData.Formatter
             ClrPropertyInfoAnnotation annotation = edmModel.GetAnnotationValue<ClrPropertyInfoAnnotation>(edmProperty);
             if (annotation != null)
             {
-                PropertyDescriptor propDescr = annotation.ClrPropertyInfo;
+                MemberDescriptor propDescr = annotation.ClrPropertyInfo;
                 if (propDescr != null)
                 {
                     propertyName = propDescr.Name;
@@ -704,7 +704,7 @@ namespace Microsoft.AspNet.OData.Formatter
             return propertyName;
         }
 
-        public static PropertyDescriptor GetClrPropertyDescriptor(IEdmProperty edmProperty, IEdmModel edmModel)
+        public static MemberDescriptor GetClrMemberDescriptor(IEdmProperty edmProperty, IEdmModel edmModel)
         {
             if (edmProperty == null)
             {

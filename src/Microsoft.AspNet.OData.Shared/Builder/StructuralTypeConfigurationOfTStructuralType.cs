@@ -765,8 +765,8 @@ namespace Microsoft.AspNet.OData.Builder
             PropertyInfo pinfo = navigationProperty as PropertyInfo;
             MethodInfo minfo = navigationProperty as MethodInfo;
 
-            PropertyDescriptor propDescr = pinfo!=null ? new PropertyDescriptor(pinfo)
-                                                       : new PropertyDescriptor(minfo);
+            MemberDescriptor propDescr = pinfo!=null ? new MemberDescriptor(pinfo)
+                                                       : new MemberDescriptor(minfo);
             return _configuration.AddNavigationProperty(propDescr, multiplicity);
         }
 
@@ -776,8 +776,8 @@ namespace Microsoft.AspNet.OData.Builder
             PropertyInfo pinfo = navigationProperty as PropertyInfo;
             MethodInfo minfo = navigationProperty as MethodInfo;
 
-            PropertyDescriptor propDescr = pinfo != null ? new PropertyDescriptor(pinfo)
-                                                       : new PropertyDescriptor(minfo);
+            MemberDescriptor propDescr = pinfo != null ? new MemberDescriptor(pinfo)
+                                                       : new MemberDescriptor(minfo);
             return _configuration.AddContainedNavigationProperty(propDescr, multiplicity);
         }
 

@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             _convention.Apply(entity, builder);
 
             // Assert
-            Assert.Contains(new PropertyDescriptor(propertyInfo), entity.ExplicitProperties.Keys);
+            Assert.Contains(new MemberDescriptor(propertyInfo), entity.ExplicitProperties.Keys);
             Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
         }
 

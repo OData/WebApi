@@ -437,7 +437,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.Name).Returns(name);
 
-            Mock<PropertyDescriptor> propertyDescriptor = new Mock<PropertyDescriptor>(propertyInfo.Object);
+            Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(propertyInfo.Object);
 
             Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyDescriptor.Object, declaringType);
             return property.Object;

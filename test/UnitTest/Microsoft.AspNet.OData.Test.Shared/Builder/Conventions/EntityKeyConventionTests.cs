@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         {
             // Arrange
             Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName));
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName));
             Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyDescriptor, mockEntityType.Object);
 
             mockEntityType.Setup(e => e.Name).Returns("SampleEntity");
@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         {
             // Arrange
             Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId"));
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId"));
             Mock<PropertyConfiguration> property =
                 new Mock<PropertyConfiguration>(propertyDescriptor,
                     mockEntityType.Object);

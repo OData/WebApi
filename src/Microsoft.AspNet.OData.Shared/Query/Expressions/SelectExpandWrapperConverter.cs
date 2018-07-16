@@ -59,8 +59,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             public string MapProperty(string propertyName)
             {
                 IEdmProperty property = _type.Properties().Single(s => s.Name == propertyName);
-                PropertyDescriptor info = GetPropertyInfo(property);
-                JsonPropertyAttribute jsonProperty = GetJsonProperty(info);
+                MemberDescriptor descriptor = GetMemberDescriptor(property);
+                JsonPropertyAttribute jsonProperty = GetJsonProperty(descriptor);
                 if (jsonProperty != null && !String.IsNullOrWhiteSpace(jsonProperty.PropertyName))
                 {
                     return jsonProperty.PropertyName;
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
-            private PropertyDescriptor GetPropertyInfo(IEdmProperty property)
+            private MemberDescriptor GetMemberDescriptor(IEdmProperty property)
             {
                 ClrPropertyInfoAnnotation clrPropertyAnnotation = _model.GetAnnotationValue<ClrPropertyInfoAnnotation>(property);
                 if (clrPropertyAnnotation != null)
@@ -85,12 +85,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 PropertyInfo info = clrTypeAnnotation.ClrType.GetProperty(property.Name);
                 Contract.Assert(info != null);
 
-                return new PropertyDescriptor(info);
+                return new MemberDescriptor(info);
             }
 
-            private static JsonPropertyAttribute GetJsonProperty(PropertyDescriptor property)
+            private static JsonPropertyAttribute GetJsonProperty(MemberDescriptor memberDescriptor)
             {
-                return property.GetCustomAttributes(typeof(JsonPropertyAttribute), inherit: false)
+                return memberDescriptor.GetCustomAttributes(typeof(JsonPropertyAttribute), inherit: false)
                        .OfType<JsonPropertyAttribute>().SingleOrDefault();
             }
         }

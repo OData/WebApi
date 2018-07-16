@@ -1,44 +1,45 @@
-﻿using Microsoft.AspNet.OData.Common;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
-    /// Property descriptor
+    /// Member descriptor
     /// </summary>
-    public class PropertyDescriptor
+    public class MemberDescriptor
     {
-        private readonly PropertyInfo _propertyInfo;
-        private readonly MethodInfo _methodInfo;
+        private readonly MemberInfo _memberInfo;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyDescriptor"/> class.
+        /// Initializes a new instance of the <see cref="MemberDescriptor"/> class.
         /// </summary>
         /// <param name="propertyInfo">Property information</param>
-        public PropertyDescriptor(PropertyInfo propertyInfo)
+        public MemberDescriptor(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
             {
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            this._propertyInfo = propertyInfo;
+            this._memberInfo = propertyInfo;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PropertyDescriptor"/> class.
+        /// Initializes a new instance of the <see cref="MemberDescriptor"/> class.
         /// </summary>
-        /// <param name="methodInfo">Extension property information</param>
-        public PropertyDescriptor(MethodInfo methodInfo)
+        /// <param name="methodInfo">Extension method information</param>
+        public MemberDescriptor(MethodInfo methodInfo)
         {
-            if(methodInfo==null)
+            if(methodInfo == null)
             {
                 throw Error.ArgumentNull("methodInfo");
             }
-            this._methodInfo = methodInfo;
+            this._memberInfo = methodInfo;
         }
 
         /// <summary>
@@ -48,9 +49,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                if (_propertyInfo != null)
-                    return _propertyInfo;
-                return _methodInfo;
+                return _memberInfo;
             }
         }
 
@@ -61,7 +60,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                return _propertyInfo;
+                return _memberInfo as PropertyInfo;
             }
         }
 
@@ -72,7 +71,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                return _methodInfo;
+                return _memberInfo as MethodInfo;
             }
         }
 
@@ -94,9 +93,9 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                if (_propertyInfo != null)
-                    return _propertyInfo.PropertyType;
-                return _methodInfo.ReturnType;
+                if (PropertyInfo != null)
+                    return PropertyInfo.PropertyType;
+                return MethodInfo.ReturnType;
             }
         }
 
@@ -107,9 +106,9 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                if (_propertyInfo != null)
-                    return _propertyInfo.DeclaringType;
-                return _methodInfo.GetParameters()[0].ParameterType;
+                if (PropertyInfo != null)
+                    return PropertyInfo.DeclaringType;
+                return MethodInfo.GetParameters()[0].ParameterType;
             }
         }
 
@@ -120,14 +119,14 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                if (_propertyInfo != null)
-                    return TypeHelper.GetReflectedType(_propertyInfo);
-                return _methodInfo.GetParameters()[0].ParameterType;
+                if (PropertyInfo != null)
+                    return TypeHelper.GetReflectedType(PropertyInfo);
+                return MethodInfo.GetParameters()[0].ParameterType;
             }
         }
 
         /// <inheritdoc/>
-        public static implicit operator MemberInfo(PropertyDescriptor propertyDescriptor)
+        public static implicit operator MemberInfo(MemberDescriptor propertyDescriptor)
         {
             return propertyDescriptor.MemberInfo;
         }
@@ -161,7 +160,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            PropertyDescriptor propDescr = obj as PropertyDescriptor;
+            MemberDescriptor propDescr = obj as MemberDescriptor;
             if (propDescr == null)
                 return false;
 

@@ -24,14 +24,14 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("clrPropertyInfo");
             }
 
-            ClrPropertyInfo = new PropertyDescriptor(clrPropertyInfo);
+            ClrPropertyInfo = new MemberDescriptor(clrPropertyInfo);
         }
 
         /// <summary>
         /// Initializes a new instance of <see cref="ClrPropertyInfoAnnotation"/> class.
         /// </summary>
         /// <param name="propertyDescriptor">The backing CLR property info for the EDM property.</param>
-        public ClrPropertyInfoAnnotation(PropertyDescriptor propertyDescriptor)
+        public ClrPropertyInfoAnnotation(MemberDescriptor propertyDescriptor)
         {
             if (propertyDescriptor == null)
             {
@@ -44,6 +44,6 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets the backing CLR property info for the EDM property.
         /// </summary>
-        public PropertyDescriptor ClrPropertyInfo { get; private set; }
+        public MemberDescriptor ClrPropertyInfo { get; private set; }
     }
 }

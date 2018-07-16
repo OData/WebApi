@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="propertyDecriptor">The backing CLR property.</param>
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
         /// <param name="declaringType">The declaring structural type.</param>
-        public NavigationPropertyConfiguration(PropertyDescriptor propertyDecriptor, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
+        public NavigationPropertyConfiguration(MemberDescriptor propertyDecriptor, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
             : base(propertyDecriptor, declaringType)
         {
             if (propertyDecriptor == null)
@@ -65,13 +65,13 @@ namespace Microsoft.AspNet.OData.Builder
             OnDeleteAction = EdmOnDeleteAction.None;
         }
 
-        private static PropertyDescriptor CreatePropertyDescriptor(PropertyInfo property)
+        private static MemberDescriptor CreatePropertyDescriptor(PropertyInfo property)
         {
             if(property == null)
             {
                 throw Error.ArgumentNull("property");
             }
-            return new PropertyDescriptor(property);
+            return new MemberDescriptor(property);
         }
 
         /// <summary>
@@ -219,8 +219,8 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="dependentPropertyInfo">The dependent property info for the referential constraint.</param>
         /// <param name="principalPropertyInfo">The principal property info for the referential constraint.</param>
-        public NavigationPropertyConfiguration HasConstraint(PropertyDescriptor dependentPropertyInfo,
-            PropertyDescriptor principalPropertyInfo)
+        public NavigationPropertyConfiguration HasConstraint(MemberDescriptor dependentPropertyInfo,
+            MemberDescriptor principalPropertyInfo)
         {
             return HasConstraint(dependentPropertyInfo.PropertyInfo, principalPropertyInfo.PropertyInfo);
         }

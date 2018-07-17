@@ -600,7 +600,8 @@ namespace Microsoft.AspNet.OData.Builder
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
             foreach (var baseType in entityTypeConfig.BaseTypes())
             {
-                concurrencyPropertyies = concurrencyPropertyies.Concat(baseType.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken));
+                concurrencyPropertyies = concurrencyPropertyies.Concat(
+                    baseType.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken));
             }
 
             IList<IEdmStructuralProperty> edmProperties = new List<IEdmStructuralProperty>();

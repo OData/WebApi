@@ -115,8 +115,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
             Assert.True(response.IsSuccessStatusCode);
             var jsonResult = await response.Content.ReadAsObject<JObject>();
             var derivedEtags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
-
-            Assert.StartsWith("W/\"bnVsbA==", String.Concat(derivedEtags));
+            Assert.Equal(10, derivedEtags.Count());
+            Assert.Equal("W/\"bnVsbA==\"", derivedEtags.First());
         }
     }
 }

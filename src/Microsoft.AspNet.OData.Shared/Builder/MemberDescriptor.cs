@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 
@@ -128,10 +129,19 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Cast MemberDescriptor to MemberInfo.
         /// </summary>
-        /// <param name="memberDescriptor"></param>
+        /// <param name="memberDescriptor">The object to compare with the current object.</param>
         public static implicit operator MemberInfo(MemberDescriptor memberDescriptor)
         {
             return memberDescriptor.MemberInfo;
+        }
+
+        /// <summary>
+        /// Returns a member information that represents the current object.
+        /// </summary>
+        /// <returns>A member information that represents the current object.</returns>
+        public MemberInfo ToMemberInfo()
+        {
+            return MemberInfo;
         }
 
         /// <summary>
@@ -149,9 +159,20 @@ namespace Microsoft.AspNet.OData.Builder
         /// Retrieves a collection of custom attributes of a specified type that are applied to a specified member.
         /// </summary>
         /// <typeparam name="T">The type of attribute to search for.</typeparam>
+        /// <returns>A collection of the custom attributes that are applied to element and that match T, or an empty collection if no such attributes exist. </returns>
+        public IEnumerable<T> GetCustomAttributes<T>()
+            where T : Attribute
+        {
+            return GetCustomAttributes<T>(false);
+        }
+
+        /// <summary>
+        /// Retrieves a collection of custom attributes of a specified type that are applied to a specified member.
+        /// </summary>
+        /// <typeparam name="T">The type of attribute to search for.</typeparam>
         /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
         /// <returns>A collection of the custom attributes that are applied to element and that match T, or an empty collection if no such attributes exist. </returns>
-        public IEnumerable<T> GetCustomAttributes<T>(bool inherit=false)
+        public IEnumerable<T> GetCustomAttributes<T>(bool inherit)
             where T:Attribute
         {
             return MemberInfo.GetCustomAttributes<T>(inherit);
@@ -161,9 +182,20 @@ namespace Microsoft.AspNet.OData.Builder
         /// Retrieves a custom attribute of a specified type that is applied to a specified member, and optionally inspects the ancestors of that member.
         /// </summary>
         /// <typeparam name="T">The type of attribute to search for.</typeparam>
+        /// <returns>A custom attribute that matches T, or null if no such attribute is found.</returns>
+        public T GetCustomAttribute<T>()
+            where T : Attribute
+        {
+            return GetCustomAttribute<T>(false);
+        }
+
+        /// <summary>
+        /// Retrieves a custom attribute of a specified type that is applied to a specified member, and optionally inspects the ancestors of that member.
+        /// </summary>
+        /// <typeparam name="T">The type of attribute to search for.</typeparam>
         /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
         /// <returns>A custom attribute that matches T, or null if no such attribute is found.</returns>
-        public T GetCustomAttribute<T>(bool inherit = false)
+        public T GetCustomAttribute<T>(bool inherit)
             where T : Attribute
         {
             return MemberInfo.GetCustomAttribute<T>(inherit);
@@ -181,7 +213,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Determines whether the specified object is equal to the current object.
         /// </summary>
-        /// <param name="obj">The object to compare with the current object. </param>
+        /// <param name="obj">The object to compare with the current object.</param>
         /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj)
         {

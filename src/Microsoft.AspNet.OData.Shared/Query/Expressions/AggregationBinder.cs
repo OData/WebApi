@@ -512,7 +512,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Expression cleanSource = RemoveInnerNullPropagation(source);
                 Expression propertyAccessExpression = null;
                 propertyAccessExpression = GetFlattenedPropertyExpression(propertyPath)
-                        ?? CreatePropertyAccessExpression(source, propertyName, memberDescriptor);
+                        ?? CreatePropertyAccessExpression(cleanSource, propertyName, memberDescriptor);
 
                 // source.property => source == null ? null : [CastToNullable]RemoveInnerNullPropagation(source).property
                 // Notice that we are checking if source is null already. so we can safely remove any null checks when doing source.Property
@@ -531,7 +531,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, string propertyName, MemberDescriptor memberDescriptor)
+        private static Expression CreatePropertyAccessExpression(Expression source, string propertyName, MemberDescriptor memberDescriptor)
         {
             if (memberDescriptor != null)
             {

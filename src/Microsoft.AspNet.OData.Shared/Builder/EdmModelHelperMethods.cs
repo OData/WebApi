@@ -596,17 +596,17 @@ namespace Microsoft.AspNet.OData.Builder
         {
             EntityTypeConfiguration entityTypeConfig = navigationSourceConfiguration.EntityType;
 
-            IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
+            IEnumerable<StructuralPropertyConfiguration> concurrencyProperties =
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
             foreach (var baseType in entityTypeConfig.BaseTypes())
             {
-                concurrencyPropertyies = concurrencyPropertyies.Concat(
+                concurrencyProperties = concurrencyProperties.Concat(
                     baseType.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken));
             }
 
             IList<IEdmStructuralProperty> edmProperties = new List<IEdmStructuralProperty>();
 
-            foreach (StructuralPropertyConfiguration property in concurrencyPropertyies)
+            foreach (StructuralPropertyConfiguration property in concurrencyProperties)
             {
                 IEdmProperty value;
                 if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))

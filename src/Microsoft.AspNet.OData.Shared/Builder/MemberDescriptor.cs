@@ -113,7 +113,7 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
-        /// Return the reflected type from a member info.
+        /// Returns the reflected type from a member info.
         /// </summary>
         public Type ReflectedType
         {
@@ -125,39 +125,64 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        /// <inheritdoc/>
-        public static implicit operator MemberInfo(MemberDescriptor propertyDescriptor)
+        /// <summary>
+        /// Cast MemberDescriptor to MemberInfo.
+        /// </summary>
+        /// <param name="memberDescriptor"></param>
+        public static implicit operator MemberInfo(MemberDescriptor memberDescriptor)
         {
-            return propertyDescriptor.MemberInfo;
+            return memberDescriptor.MemberInfo;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Retrieves an array of the custom attributes applied to an assembly. A parameter specifies the assembly.
+        /// </summary>
+        /// <param name="type">The type of attribute to search for. Only attributes that are assignable to this type are returned. </param>
+        /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
+        /// <returns>An array of custom attributes applied to this member, or an array with zero elements if no attributes assignable to attributeType have been applied.</returns>
         public object[] GetCustomAttributes(Type type, bool inherit)
         {
             return MemberInfo.GetCustomAttributes(type, inherit);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Retrieves a collection of custom attributes of a specified type that are applied to a specified member.
+        /// </summary>
+        /// <typeparam name="T">The type of attribute to search for.</typeparam>
+        /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
+        /// <returns>A collection of the custom attributes that are applied to element and that match T, or an empty collection if no such attributes exist. </returns>
         public IEnumerable<T> GetCustomAttributes<T>(bool inherit=false)
             where T:Attribute
         {
             return MemberInfo.GetCustomAttributes<T>(inherit);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Retrieves a custom attribute of a specified type that is applied to a specified member, and optionally inspects the ancestors of that member.
+        /// </summary>
+        /// <typeparam name="T">The type of attribute to search for.</typeparam>
+        /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
+        /// <returns>A custom attribute that matches T, or null if no such attribute is found.</returns>
         public T GetCustomAttribute<T>(bool inherit = false)
             where T : Attribute
         {
             return MemberInfo.GetCustomAttribute<T>(inherit);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Serves hash function. 
+        /// </summary>
+        /// <returns>Hash code.</returns>
         public override int GetHashCode()
         {
             return MemberInfo.GetHashCode();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current object. </param>
+        /// <returns>true if the specified object is equal to the current object; otherwise, false.</returns>
         public override bool Equals(object obj)
         {
             MemberDescriptor propDescr = obj as MemberDescriptor;

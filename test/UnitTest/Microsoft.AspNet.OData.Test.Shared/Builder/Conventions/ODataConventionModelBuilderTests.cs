@@ -405,6 +405,47 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.Equal("Name", path);
         }
 
+        public class BaseTypeWithConcurrencyCheckAttribute
+        {
+            public int ID { get; set; }
+
+            [ConcurrencyCheck]
+            public string Name { get; set; }
+        }
+
+        public class SubTypeWithoutConcurrencyCheckAttribute : BaseTypeWithConcurrencyCheckAttribute
+        {
+            public string SubName { get; set; }
+        }
+
+        [Fact]
+        public void ModelBuilder_BaseTypeWithConcurrencyCheckAttribute_HasVocabuaryAnnotationOnDerivedEntitySet()
+        {
+            // Arrange
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
+            modelBuilder.EntitySet<SubTypeWithoutConcurrencyCheckAttribute>("SubEntities");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            var entitySet = model.FindDeclaredEntitySet("SubEntities");
+            Assert.NotNull(entitySet);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Single(properties.Elements);
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.PathSegments);
+            Assert.Equal("Name", path);
+        }
+
         [Fact]
         public void ModelBuilder_ProductWithTimestampAttribute()
         {

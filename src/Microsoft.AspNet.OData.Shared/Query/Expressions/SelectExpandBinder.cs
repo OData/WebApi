@@ -309,6 +309,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             PropertyInfo wrapperProperty;
+            Expression wrapperPropertyValueExpression;
             bool isInstancePropertySet = false;
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
@@ -316,7 +317,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // Initialize property 'ModelID' on the wrapper class.
             // source = new Wrapper { ModelID = 'some-guid-id' }
             wrapperProperty = wrapperType.GetProperty("ModelID");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
+            wrapperPropertyValueExpression = _settings.EnableConstantParameterization ?
+                LinqParameterContainer.Parameterize(typeof(string), _modelID) :
+                Expression.Constant(_modelID);
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, wrapperPropertyValueExpression));
 
             if (IsSelectAll(selectExpandClause))
             {

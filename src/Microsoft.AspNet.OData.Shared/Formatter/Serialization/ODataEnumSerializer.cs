@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -87,6 +88,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     value = ((EdmEnumObject)graph).Value;
                 }
+            }
+
+            // Enum member maybe support camel case. So, try to use the Edm member name to create Enum value.
+            var member = enumType.EnumDefinition().Members
+                .FirstOrDefault(m => String.Equals(m.Name, value, StringComparison.OrdinalIgnoreCase));
+            if (member != null)
+            {
+                value = member.Name;
             }
 
             ODataEnumValue enumValue = new ODataEnumValue(value, enumType.FullName());

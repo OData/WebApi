@@ -21,6 +21,7 @@ namespace AspNetCoreODataSample.Web.Controllers
                 {
                     { "abc", "abcValue" }
                 }
+                MyLevel = Level.High
             };
 
             return Ok(m);

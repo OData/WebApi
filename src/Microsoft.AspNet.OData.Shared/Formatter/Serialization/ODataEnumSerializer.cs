@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
             }
 
-            // Enum member maybe support camel case. So, try to use the Edm member name to create Enum value.
+            // Enum member supports model alias case. So, try to use the Edm member name to create Enum value.
             var member = enumType.EnumDefinition().Members
                 .FirstOrDefault(m => String.Equals(m.Name, value, StringComparison.OrdinalIgnoreCase));
             if (member != null)

@@ -14,7 +14,7 @@ namespace AspNetCoreODataSample.Web.Models
         [EnumMember(Value = "medium")]
         Medium,
 
-        [EnumMember(Value = "high")]
+        [EnumMember(Value = "veryhigh")]
         High
     }
 }

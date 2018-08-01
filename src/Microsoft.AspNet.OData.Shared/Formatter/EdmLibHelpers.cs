@@ -704,6 +704,22 @@ namespace Microsoft.AspNet.OData.Formatter
             return propertyName;
         }
 
+        public static ClrEnumMemberAnnotation GetClrEnumMemberAnnotation(this IEdmModel edmModel)
+        {
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            ClrEnumMemberAnnotation annotation = edmModel.GetAnnotationValue<ClrEnumMemberAnnotation>(edmModel);
+            if (annotation != null)
+            {
+                return annotation;
+            }
+
+            return null;
+        }
+
         public static PropertyInfo GetDynamicPropertyDictionary(IEdmStructuredType edmType, IEdmModel edmModel)
         {
             if (edmType == null)

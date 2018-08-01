@@ -26,5 +26,11 @@ namespace AspNetCoreODataSample.Web.Controllers
 
             return Ok(m);
         }
+
+        [EnableQuery]
+        public IActionResult Post([FromBody]Person person)
+        {
+            return Created(person);
+        }
     }
 }

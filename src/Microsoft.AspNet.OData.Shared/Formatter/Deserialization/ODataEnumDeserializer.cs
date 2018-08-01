@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -59,10 +60,32 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 item = property.Value;
             }
 
+            IEdmEnumTypeReference enumTypeReference = (IEdmEnumTypeReference)edmType;
+            ODataEnumValue enumValue = item as ODataEnumValue;
             if (readContext.IsUntyped)
             {
                 Contract.Assert(edmType.TypeKind() == EdmTypeKind.Enum);
-                return new EdmEnumObject((IEdmEnumTypeReference)edmType, ((ODataEnumValue)item).Value);
+                return new EdmEnumObject(enumTypeReference, enumValue.Value);
+            }
+
+            // Enum member supports model alias case. So, try to use the Edm member name to retrieve the Enum value.
+            var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation();
+            if (memberMapAnnotation != null)
+            {
+                IEdmEnumType enumType = enumTypeReference.EnumDefinition();
+
+                if (enumValue != null)
+                {
+                    IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == enumValue.Value);
+                    if (enumMember != null)
+                    {
+                        var clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
+                        if (clrMember != null)
+                        {
+                            return clrMember;
+                        }
+                    }
+                }
             }
 
             Type clrType = EdmLibHelpers.GetClrType(edmType, readContext.Model);

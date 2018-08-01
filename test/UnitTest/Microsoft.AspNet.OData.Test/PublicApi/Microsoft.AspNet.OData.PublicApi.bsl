@@ -196,6 +196,13 @@ public sealed class Microsoft.AspNet.OData.ODataUriFunctions {
 	public static bool RemoveCustomUriFunction (string functionName, Microsoft.OData.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
 }
 
+public class Microsoft.AspNet.OData.ClrEnumMemberAnnotation {
+	public ClrEnumMemberAnnotation (System.Collections.Generic.IDictionary`2[[System.Enum],[Microsoft.OData.Edm.IEdmEnumMember]] map)
+
+	public System.Enum GetClrEnumMember (Microsoft.OData.Edm.IEdmEnumMember edmEnumMember)
+	public Microsoft.OData.Edm.IEdmEnumMember GetEdmEnumMember (System.Enum clrEnumMemberInfo)
+}
+
 public class Microsoft.AspNet.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 

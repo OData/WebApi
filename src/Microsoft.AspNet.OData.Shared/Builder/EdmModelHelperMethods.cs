@@ -440,6 +440,13 @@ namespace Microsoft.AspNet.OData.Builder
             // add annotation for properties
             Dictionary<PropertyInfo, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
+
+            // add Enum mapping annotation
+            if (edmTypeMap.EnumMembers != null && edmTypeMap.EnumMembers.Any())
+            {
+                model.SetAnnotationValue(model, new ClrEnumMemberAnnotation(edmTypeMap.EnumMembers));
+            }
+
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
             model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
             model.AddStructuredTypeQuerySettings(edmTypeMap.EdmStructuredTypeQuerySettings);

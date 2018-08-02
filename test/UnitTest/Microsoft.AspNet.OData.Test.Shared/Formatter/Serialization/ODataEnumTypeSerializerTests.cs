@@ -3,8 +3,11 @@
 
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using System.Linq;
+using System.Runtime.Serialization;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
@@ -60,5 +63,39 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.NotNull(annotation);
             Assert.Null(annotation.TypeName);
         }
+
+        [Fact]
+        public void CreateODataEnumValue_ReturnsCorrectEnumMember()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EnumType<BookCategory>().Namespace = "NS";
+            IEdmModel model = builder.GetEdmModel();
+            IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
+
+            var provider = new DefaultODataSerializerProvider(new MockContainer());
+            ODataEnumSerializer serializer = new ODataEnumSerializer(provider);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model
+            };
+
+            // Act
+            ODataEnumValue value = serializer.CreateODataEnumValue(BookCategory.Newspaper,
+                new EdmEnumTypeReference(enumType, false), writeContext);
+
+            // Assert
+            Assert.NotNull(value);
+            Assert.Equal("news", value.Value);
+        }
+    }
+
+    [DataContract(Name = "category")]
+    public enum BookCategory
+    {
+        [EnumMember(Value = "cartoon")]
+        Cartoon,
+        [EnumMember(Value = "news")]
+        Newspaper
     }
 }

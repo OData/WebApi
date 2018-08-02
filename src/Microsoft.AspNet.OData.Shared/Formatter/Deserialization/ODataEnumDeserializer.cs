@@ -61,6 +61,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             IEdmEnumTypeReference enumTypeReference = (IEdmEnumTypeReference)edmType;
+            IEdmEnumType enumType = enumTypeReference.EnumDefinition();
             ODataEnumValue enumValue = item as ODataEnumValue;
             if (readContext.IsUntyped)
             {
@@ -69,11 +70,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             // Enum member supports model alias case. So, try to use the Edm member name to retrieve the Enum value.
-            var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation();
+            var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation(enumType);
             if (memberMapAnnotation != null)
             {
-                IEdmEnumType enumType = enumTypeReference.EnumDefinition();
-
                 if (enumValue != null)
                 {
                     IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == enumValue.Value);

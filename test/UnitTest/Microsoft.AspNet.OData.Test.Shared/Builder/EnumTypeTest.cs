@@ -1084,12 +1084,20 @@ namespace Microsoft.AspNet.OData.Test.Builder
             // Assert
             IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
             Assert.NotNull(enumType);
-            Assert.Equal(3, enumType.Members.Count());
+            Assert.Equal(4, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("happy"));
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("sad"));
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("KeepDefaultName"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("soso"));
+
+            var annotation = model.GetClrEnumMemberAnnotation(enumType);
+            Assert.NotNull(annotation);
+
+            IEdmEnumMember enumMember = enumType.Members.Single(m => m.Name.Equals("soso"));
+            Assert.Same(enumMember, annotation.GetEdmEnumMember(Life.NotTooBad));
+            Assert.Equal(Life.NotTooBad, annotation.GetClrEnumMember(enumMember));
         }
 
         [Fact]
@@ -1118,13 +1126,14 @@ namespace Microsoft.AspNet.OData.Test.Builder
             // Assert
             IEdmEnumType enumType = model.SchemaElements.OfType<IEdmEnumType>().Single();
             Assert.NotNull(enumType);
-            Assert.Equal(4, enumType.Members.Count());
+            Assert.Equal(5, enumType.Members.Count());
             Assert.Equal("Feelings", enumType.Name);
             Assert.Equal("Test", enumType.Namespace);
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("happy"));
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("sad"));
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("JustSoSo"));
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("KeepDefaultName"));
+            Assert.Contains(enumType.Members, (m) => m.Name.Equals("soso"));
         }
 
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
@@ -1192,10 +1201,16 @@ namespace Microsoft.AspNet.OData.Test.Builder
     {
         [EnumMember(Value = "happy")]
         Happy = 1,
+
         [EnumMember(Value = "sad")]
         Sad = 2,
+
         JustSoSo = 3,
+
         [EnumMember]
-        KeepDefaultName
+        KeepDefaultName = 4,
+
+        [EnumMember(Value = "soso")]
+        NotTooBad
     }
 }

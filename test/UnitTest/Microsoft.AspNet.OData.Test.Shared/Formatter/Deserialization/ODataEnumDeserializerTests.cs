@@ -3,6 +3,7 @@
 
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
@@ -68,6 +69,32 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal("Blue", color.Value);
         }
 
+        [Fact]
+        public void ReadFromStreamAsync_ModelAlias()
+        {
+            // Arrange
+            string content = "{\"@odata.type\":\"#NS.level\",\"value\":\"veryhigh\"}";
+
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.EnumType<Level>().Namespace = "NS";
+            IEdmModel model = builder.GetEdmModel();
+
+            ODataEnumDeserializer deserializer = new ODataEnumDeserializer();
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = typeof(Level)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model),
+                typeof(Level), readContext);
+
+            // Assert
+            Level level = Assert.IsType<Level>(value);
+            Assert.Equal(Level.High, level);
+        }
+
         private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)
         {
             return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
@@ -96,6 +123,15 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Red,
             Blue,
             Green
+        }
+
+        [DataContract(Name = "level")]
+        public enum Level
+        {
+            [EnumMember(Value = "low")]
+            Low,
+            [EnumMember(Value = "veryhigh")]
+            High
         }
     }
 }

@@ -440,13 +440,7 @@ namespace Microsoft.AspNet.OData.Builder
             // add annotation for properties
             Dictionary<PropertyInfo, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
-
-            // add Enum mapping annotation
-            if (edmTypeMap.EnumMembers != null && edmTypeMap.EnumMembers.Any())
-            {
-                model.SetAnnotationValue(model, new ClrEnumMemberAnnotation(edmTypeMap.EnumMembers));
-            }
-
+            model.AddClrEnumMemberInfoAnnotations(edmTypeMap);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
             model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
             model.AddStructuredTypeQuerySettings(edmTypeMap.EdmStructuredTypeQuerySettings);
@@ -519,6 +513,21 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     model.SetAnnotationValue(edmProperty, new ClrPropertyInfoAnnotation(clrProperty));
                 }
+            }
+        }
+
+        private static void AddClrEnumMemberInfoAnnotations(this EdmModel model, EdmTypeMap edmTypeMap)
+        {
+            if (edmTypeMap.EnumMembers == null || !edmTypeMap.EnumMembers.Any())
+            {
+                return;
+            }
+
+            var enumGroupBy = edmTypeMap.EnumMembers.GroupBy(e => e.Key.GetType(), e => e);
+            foreach (var enumGroup in enumGroupBy)
+            {
+                IEdmType edmType = edmTypeMap.EdmTypes[enumGroup.Key];
+                model.SetAnnotationValue(edmType, new ClrEnumMemberAnnotation(enumGroup.ToDictionary(e => e.Key, e => e.Value)));
             }
         }
 

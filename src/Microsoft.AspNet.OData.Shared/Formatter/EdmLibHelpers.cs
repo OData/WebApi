@@ -704,14 +704,14 @@ namespace Microsoft.AspNet.OData.Formatter
             return propertyName;
         }
 
-        public static ClrEnumMemberAnnotation GetClrEnumMemberAnnotation(this IEdmModel edmModel)
+        public static ClrEnumMemberAnnotation GetClrEnumMemberAnnotation(this IEdmModel edmModel, IEdmEnumType enumType)
         {
             if (edmModel == null)
             {
                 throw Error.ArgumentNull("edmModel");
             }
 
-            ClrEnumMemberAnnotation annotation = edmModel.GetAnnotationValue<ClrEnumMemberAnnotation>(edmModel);
+            ClrEnumMemberAnnotation annotation = edmModel.GetAnnotationValue<ClrEnumMemberAnnotation>(enumType);
             if (annotation != null)
             {
                 return annotation;

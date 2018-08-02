@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             // Enum member supports model alias case. So, try to use the Edm member name to create Enum value.
-            var memberMapAnnotation = writeContext.Model.GetClrEnumMemberAnnotation();
+            var memberMapAnnotation = writeContext.Model.GetClrEnumMemberAnnotation(enumType.EnumDefinition());
             if (memberMapAnnotation != null)
             {
                 var edmEnumMember = memberMapAnnotation.GetEdmEnumMember((Enum)graph);

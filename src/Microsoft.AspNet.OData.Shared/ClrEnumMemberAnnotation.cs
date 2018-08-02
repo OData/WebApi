@@ -9,12 +9,12 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Represents a mapping from an <see cref="IEdmEnumMember"/> to a CLR Enum member.
+    /// Represents a mapping betwwen an <see cref="IEdmEnumMember"/> and a CLR Enum member.
     /// </summary>
     public class ClrEnumMemberAnnotation
     {
-        private IDictionary<Enum, IEdmEnumMember> _maps;
-        private IDictionary<IEdmEnumMember, Enum> _reverseMaps;
+        private IDictionary<Enum, IEdmEnumMember> _map;
+        private IDictionary<IEdmEnumMember, Enum> _reverseMap;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ClrEnumMemberAnnotation"/> class.
@@ -27,11 +27,11 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("map");
             }
 
-            _maps = map;
-            _reverseMaps = new Dictionary<IEdmEnumMember, Enum>();
+            _map = map;
+            _reverseMap = new Dictionary<IEdmEnumMember, Enum>();
             foreach (var item in map)
             {
-                _reverseMaps.Add(item.Value, item.Key);
+                _reverseMap.Add(item.Value, item.Key);
             }
         }
 
@@ -43,12 +43,8 @@ namespace Microsoft.AspNet.OData
         public IEdmEnumMember GetEdmEnumMember(Enum clrEnumMemberInfo)
         {
             IEdmEnumMember value;
-            if (_maps.TryGetValue(clrEnumMemberInfo, out value))
-            {
-                return value;
-            }
-
-            return null;
+            _map.TryGetValue(clrEnumMemberInfo, out value);
+            return value;
         }
 
         /// <summary>
@@ -59,12 +55,8 @@ namespace Microsoft.AspNet.OData
         public Enum GetClrEnumMember(IEdmEnumMember edmEnumMember)
         {
             Enum value;
-            if (_reverseMaps.TryGetValue(edmEnumMember, out value))
-            {
-                return value;
-            }
-
-            return null;
+            _reverseMap.TryGetValue(edmEnumMember, out value);
+            return value;
         }
     }
 }

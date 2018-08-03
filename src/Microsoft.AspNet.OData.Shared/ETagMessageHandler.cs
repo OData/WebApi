@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData
             IEdmEntityTypeReference typeReference = GetTypeReference(model, edmType, value);
             if (typeReference != null)
             {
-                ResourceContext context = CreateInstanceContext(typeReference, value);
+                ResourceContext context = CreateInstanceContext(model, typeReference, value);
                 context.EdmModel = model;
                 context.NavigationSource = path.NavigationSource;
                 return CreateETag(context, etagHandler);
@@ -116,12 +116,15 @@ namespace Microsoft.AspNet.OData
             return handler.CreateETag(properties);
         }
 
-        private static ResourceContext CreateInstanceContext(IEdmEntityTypeReference reference, object value)
+        private static ResourceContext CreateInstanceContext(IEdmModel model, IEdmEntityTypeReference reference, object value)
         {
             Contract.Assert(reference != null);
             Contract.Assert(value != null);
 
-            ODataSerializerContext serializerCtx = new ODataSerializerContext();
+            ODataSerializerContext serializerCtx = new ODataSerializerContext
+            {
+                Model = model
+            };
             return new ResourceContext(serializerCtx, reference, value);
         }
 

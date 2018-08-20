@@ -129,8 +129,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else
                 {
-                    BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
                     SelectAllDynamicProperties = false;
+                    BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
                 }
 
                 BuildExpansions(selectExpandClause, allNavigationProperties);
@@ -267,6 +267,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     SelectedStructuralProperties = allStructuralProperties;
                     SelectedComplexProperties = allNestedProperties;
                     SelectedNavigationProperties = allNavigationProperties;
+                    SelectAllDynamicProperties = true;
                     continue;
                 }
 

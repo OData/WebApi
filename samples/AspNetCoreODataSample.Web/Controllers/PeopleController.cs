@@ -17,7 +17,7 @@ namespace AspNetCoreODataSample.Web.Controllers
             {
                 FirstName = keyFirstName,
                 LastName = keyLastName,
-                Dynamics = new Dictionary<string, object>
+                DynamicProperties = new Dictionary<string, object>
                 {
                     { "abc", "abcValue" }
                 }

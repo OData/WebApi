@@ -129,6 +129,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else
                 {
+                    // Explicitly set SelectAllDynamicProperties as false, while the BuildSelections method will set it as true
+                    // if it meets the select all condition.
                     SelectAllDynamicProperties = false;
                     BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
                 }

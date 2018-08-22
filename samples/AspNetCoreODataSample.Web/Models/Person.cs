@@ -10,6 +10,6 @@ namespace AspNetCoreODataSample.Web.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public IDictionary<string, object> Dynamics { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; }
     }
 }

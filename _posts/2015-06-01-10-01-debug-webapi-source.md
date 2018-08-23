@@ -9,8 +9,7 @@ If you want to debug **OData Lib, WebAPI, Restier** source, open `DEBUG` -> `Opt
 
 1. Uncheck `Enable Just My Code (Managed only)`.
 2. Uncheck `Enable .NET Framework source stepping`.
-3. Uncheck `Require source files to exactly match the original version`. One can find the source code for particular releases at https://github.com/OData/WebApi/tags. You can use these source files to properly step through your debugging session.
-4. Check `Enable source server support`.
+3. One can find the source code for particular releases at https://github.com/OData/WebApi/tags. You can use these source files to properly step through your debugging session.
 
 Setup your symbol source in `Symbols` tab:
 

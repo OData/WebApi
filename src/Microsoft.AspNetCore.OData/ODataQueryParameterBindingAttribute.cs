@@ -110,6 +110,10 @@ namespace Microsoft.AspNet.OData
 
             public static bool IsODataQueryOptions(Type parameterType)
             {
+                if (parameterType == null)
+                {
+                    return false;
+                }
                 return ((parameterType == typeof(ODataQueryOptions)) ||
                         (parameterType.IsGenericType &&
                          parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>)));

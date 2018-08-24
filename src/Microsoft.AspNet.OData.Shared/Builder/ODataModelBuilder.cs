@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public ODataModelBuilder()
         {
-            Namespace = "Default";
+            _namespace = "Default";
             ContainerName = "Container";
             DataServiceVersion = _defaultDataServiceVersion;
             MaxDataServiceVersion = _defaultMaxDataServiceVersion;

@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test
         public async Task GetSpecialOrderLines_Containment()
         {
             // Arrange
-            var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines/Microsoft.AspNet.OData.Test.Builder.TestModels.SpecialOrderLine";
+            var requestUri = BaseAddress + "/odata/MyOrders(1)/OrderLines/ns.SpecialOrderLine";
 
             // Act
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
@@ -71,12 +71,12 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains(
-                "http://localhost/odata/$metadata#MyOrders(1)/OrderLines/Microsoft.AspNet.OData.Test.Builder.TestModels.SpecialOrderLine",
+                "http://localhost/odata/$metadata#MyOrders(1)/OrderLines/ns.SpecialOrderLine",
                 (string)result["@odata.context"]);
         }
 
         [Theory]
-        [InlineData("/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder")]
+        [InlineData("/odata/MyOrders(2)/ns.MySpecialOrder")]
         [InlineData("/odata/MyOrders(2)")]
         public async Task GetMyOrder_WithOrWithoutCastType_Containment(string url)
         {
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Contains(
-                "http://localhost/odata/$metadata#MyOrders/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/$entity",
+                "http://localhost/odata/$metadata#MyOrders/ns.MySpecialOrder/$entity",
                 (string)result["@odata.context"]);
         }
 
@@ -201,9 +201,9 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("http://localhost/odata/MyOrders(1)/OrderLines/$ref", myOrder["OrderLines@odata.associationLink"]);
             var mySpecialOrder = array[1];
             Assert.Equal("http://localhost/odata/MyOrders(2)", mySpecialOrder["@odata.id"]);
-            Assert.Equal("http://localhost/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder", mySpecialOrder["@odata.editLink"]);
-            Assert.Equal("http://localhost/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/OrderLines", mySpecialOrder["OrderLines@odata.navigationLink"]);
-            Assert.Equal("http://localhost/odata/MyOrders(2)/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder/OrderLines/$ref", mySpecialOrder["OrderLines@odata.associationLink"]);
+            Assert.Equal("http://localhost/odata/MyOrders(2)/ns.MySpecialOrder", mySpecialOrder["@odata.editLink"]);
+            Assert.Equal("http://localhost/odata/MyOrders(2)/ns.MySpecialOrder/OrderLines", mySpecialOrder["OrderLines@odata.navigationLink"]);
+            Assert.Equal("http://localhost/odata/MyOrders(2)/ns.MySpecialOrder/OrderLines/$ref", mySpecialOrder["OrderLines@odata.associationLink"]);
         }
 
         [Fact]
@@ -253,15 +253,15 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("ns.Tag", tag["title"]);
             Assert.Equal("http://localhost/odata/MyOrders(1)/OrderLines(2)/ns.Tag", tag["target"]);
             orderLine = orderLines[1];
-            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.SpecialOrderLine", orderLine["@odata.type"]);
+            Assert.Equal("#ns.SpecialOrderLine", orderLine["@odata.type"]);
             Assert.Equal("MyOrders(1)/OrderLines(22)", orderLine["@odata.id"]);
             Assert.Equal(
-                "MyOrders(1)/OrderLines(22)/Microsoft.AspNet.OData.Test.Builder.TestModels.SpecialOrderLine",
+                "MyOrders(1)/OrderLines(22)/ns.SpecialOrderLine",
                 orderLine["@odata.editLink"]);
             tag = orderLine["#ns.Tag"];
             Assert.Equal("ns.Tag", tag["title"]);
             Assert.Equal(
-                "http://localhost/odata/MyOrders(1)/OrderLines(22)/Microsoft.AspNet.OData.Test.Builder.TestModels.OrderLine/ns.Tag",
+                "http://localhost/odata/MyOrders(1)/OrderLines(22)/ns.OrderLine/ns.Tag",
                 tag["target"]);
         }
 
@@ -504,7 +504,7 @@ namespace Microsoft.AspNet.OData.Test
             }
 
             [EnableQuery]
-            [ODataRoute("MyOrders({orderId})/Microsoft.AspNet.OData.Test.Builder.TestModels.MySpecialOrder")]
+            [ODataRoute("MyOrders({orderId})/ns.MySpecialOrder")]
             public SingleResult<MySpecialOrder> GetMySpecialOrder(int orderId)
             {
                 var result = _myOrders.AsQueryable().Where(mo => mo.ID == orderId).OfType<MySpecialOrder>();
@@ -517,7 +517,7 @@ namespace Microsoft.AspNet.OData.Test
                 return _orderLines.AsQueryable().Where(orderLine => orderLine.OrderId == orderId);
             }
 
-            [ODataRoute("MyOrders({orderId})/OrderLines/Microsoft.AspNet.OData.Test.Builder.TestModels.SpecialOrderLine")]
+            [ODataRoute("MyOrders({orderId})/OrderLines/ns.SpecialOrderLine")]
             public IQueryable<SpecialOrderLine> GetSpecialOrderLines(int orderId)
             {
                 return _orderLines.AsQueryable().Where(orderLine => orderLine.OrderId == orderId).OfType<SpecialOrderLine>();

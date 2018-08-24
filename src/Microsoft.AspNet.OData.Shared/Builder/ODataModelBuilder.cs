@@ -53,7 +53,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (string.IsNullOrEmpty(value))
+                if (String.IsNullOrEmpty(value))
                 {
                     throw Error.PropertyNull();
                 }

@@ -18,7 +18,6 @@ namespace Microsoft.AspNet.OData.Builder
     /// </summary>
     public abstract class StructuralTypeConfiguration : IEdmTypeConfiguration
     {
-        private const string DefaultNamespace = "Default";
         private string _namespace;
         private string _name;
         private PropertyInfo _dynamicPropertyDictionary;
@@ -58,7 +57,9 @@ namespace Microsoft.AspNet.OData.Builder
             ClrType = clrType;
             ModelBuilder = modelBuilder;
             _name = clrType.EdmName();
-            _namespace = clrType.Namespace ?? DefaultNamespace;
+
+            // Use the namespace is uder specified one, otherwise use CLR Namespace. If CLR Namespace is null we fallback to "Default"
+            _namespace = modelBuilder.HasAssignedNamespace ? modelBuilder.Namespace : clrType.Namespace ?? modelBuilder.Namespace;
         }
 
         /// <summary>

@@ -560,12 +560,12 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Action Name=\"NullableAction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
                 "</Action>" +
                 "<Action Name=\"NonNullableAction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Action>" +
                 "<EntityContainer Name=\"Container\" /></Schema>" +
@@ -602,12 +602,12 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Function Name=\"NullableFunction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
                 "</Function>" +
                 "<Function Name=\"NonNullableFunction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Function>" +
                 "<EntityContainer Name=\"Container\" />" +
@@ -644,14 +644,14 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Action Name=\"ActionWithOptional\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param1\" Type=\"Edm.String\" Unicode=\"false\">" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\">" +
                       "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
                         "<Record>" +
                           "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
                         "</Record>" +
                       "</Annotation>" +
                     "</Parameter>" +
-                    "<Parameter Name=\"param2\" Type=\"Edm.String\" Unicode=\"false\">" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\">" +
                       "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
                     "</Parameter>" +
                 "</Action>" +
@@ -686,19 +686,19 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Function Name=\"FunctionWithoutOptional\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
                 "</Function>" +
                 "<Function Name=\"FunctionWithOptional\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param1\" Type=\"Edm.String\" Unicode=\"false\">" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\">" +
                       "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
                         "<Record>" +
                           "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
                         "</Record>" +
                       "</Annotation>" +
                     "</Parameter>" +
-                    "<Parameter Name=\"param2\" Type=\"Edm.String\" Unicode=\"false\">" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\">" +
                       "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
                     "</Parameter>" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +

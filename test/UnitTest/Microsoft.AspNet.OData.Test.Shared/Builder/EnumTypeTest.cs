@@ -1127,6 +1127,38 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Contains(enumType.Members, (m) => m.Name.Equals("KeepDefaultName"));
         }
 
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToEnumType_AssignedNamespace()
+        {
+            // Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
+            {
+                Namespace = expectedNamespace
+            };
+
+            // Assert
+            Assert.Equal(expectedNamespace, modelBuilder.EnumType<ValueOutOfRangeEnum>().Namespace);
+            Assert.Equal("Test", modelBuilder.EnumType<Life>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToEnumType_DefaultNamespace()
+        {
+            // Act.
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            // Assert
+            Assert.Equal(typeof(Life).Namespace, modelBuilder.EnumType<ValueOutOfRangeEnum>().Namespace);
+            Assert.Equal("Test", modelBuilder.EnumType<Life>().Namespace);
+        }
+
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
         {
             var builder = ODataConventionModelBuilderFactory.Create();

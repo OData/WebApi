@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
         /// </summary>
         [Fact]
-        public void NamespaceAssignment_AutoAssignsNamespaceToEntity_AssignedNamespace()
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_AssignedNamespace()
         {
             // Act.
             string expectedNamespace = "TestingNamespace";
@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         /// Tests the namespace assignment logic to ensure that default CLR namespace is used if user does not assign one.
         /// </summary>
         [Fact]
-        public void NamespaceAssignment_AutoAssignsNamespaceToEntity_DefaultNamespace()
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_DefaultNamespace()
         {
             // Act.
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -99,6 +99,30 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(typeof(OrderLine).Namespace, modelBuilder.EntityType<OrderLine>().Namespace);
             Assert.Equal(typeof(OrderHeader).Namespace, modelBuilder.EntityType<OrderHeader>().Namespace);
             Assert.Equal(typeof(ZipCode).Namespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to check the order in which namespace is assigned matters.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_NamespaceAssignedAfterAddingEntities()
+        {
+            // Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            modelBuilder.EntitySet<Client>("clients");
+
+            modelBuilder.Namespace = expectedNamespace;
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            // Client was registered explicitly so picks up the namespace. Auto discovery is done at model generation hence uses the assigned namespace
+            Assert.Equal(typeof(Client).Namespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
         }
     }
 }

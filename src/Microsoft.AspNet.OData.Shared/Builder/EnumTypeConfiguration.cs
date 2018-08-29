@@ -17,7 +17,6 @@ namespace Microsoft.AspNet.OData.Builder
     /// </summary>
     public class EnumTypeConfiguration : IEdmTypeConfiguration
     {
-        private const string DefaultNamespace = "Default";
         private string _namespace;
         private string _name;
         private NullableEnumTypeConfiguration nullableEnumTypeConfiguration = null;
@@ -46,7 +45,11 @@ namespace Microsoft.AspNet.OData.Builder
             UnderlyingType = Enum.GetUnderlyingType(clrType);
             ModelBuilder = builder;
             _name = clrType.EdmName();
-            _namespace = clrType.Namespace ?? DefaultNamespace;
+
+            // Use the namespace is uder specified one, otherwise use CLR Namespace. If CLR Namespace is null we fallback to "Default"
+            // This can still be overriden by using DataContract attribute.
+            _namespace = builder.HasAssignedNamespace ? builder.Namespace : clrType.Namespace ?? builder.Namespace;
+
             ExplicitMembers = new Dictionary<Enum, EnumMemberConfiguration>();
             RemovedMembers = new List<Enum>();
         }

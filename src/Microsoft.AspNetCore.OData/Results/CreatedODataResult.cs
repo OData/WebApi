@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Results
     /// <remarks>This action result handles content negotiation and the HTTP prefer header. It generates a location
     /// header containing the edit link of the created entity and, if response has status code: NoContent, also
     /// generates an OData-EntityId header.</remarks>
-    public class CreatedODataResult<T> : IActionResult
+    public class CreatedODataResult<T> : IActionResult, IInnerActionResult
     {
         private readonly T _innerResult;
 
@@ -51,8 +51,8 @@ namespace Microsoft.AspNet.OData.Results
             ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(request));
         }
 
-        // internal just for unit test.
-        internal IActionResult GetInnerActionResult(HttpRequest request)
+        /// <inheritdoc/>
+        public IActionResult GetInnerActionResult(HttpRequest request)
         {
             if (RequestPreferenceHelpers.RequestPrefersReturnNoContent(new WebApiRequestHeaders(request.Headers)))
             {

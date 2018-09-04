@@ -239,6 +239,29 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public async Task Get_OpenEntityTypeWithSelectWildcard()
+        {
+            // Arrange
+            const string RequestUri = "http://localhost/odata/SimpleOpenCustomers(1)?$select=*";
+            var controllers = new[] { typeof(SimpleOpenCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            var client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, RequestUri);
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(result["Token"]);
+            Assert.NotNull(result["MyList"]);
+        }
+
+        [Fact]
         public async Task Post_OpenEntityType()
         {
             // Arrange

@@ -203,6 +203,13 @@ public sealed class Microsoft.AspNet.OData.ODataUriFunctions {
 	public static bool RemoveCustomUriFunction (string functionName, Microsoft.OData.UriParser.FunctionSignatureWithReturnType functionSignature, System.Reflection.MethodInfo methodInfo)
 }
 
+public class Microsoft.AspNet.OData.ClrEnumMemberAnnotation {
+	public ClrEnumMemberAnnotation (System.Collections.Generic.IDictionary`2[[System.Enum],[Microsoft.OData.Edm.IEdmEnumMember]] map)
+
+	public System.Enum GetClrEnumMember (Microsoft.OData.Edm.IEdmEnumMember edmEnumMember)
+	public Microsoft.OData.Edm.IEdmEnumMember GetEdmEnumMember (System.Enum clrEnumMemberInfo)
+}
+
 public class Microsoft.AspNet.OData.ClrPropertyInfoAnnotation {
 	public ClrPropertyInfoAnnotation (MemberDescriptor propertyDescriptor)
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
@@ -861,6 +868,7 @@ public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchH
 
 public class Microsoft.AspNet.OData.Batch.ODataBatchContent {
 	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer)
+	public ODataBatchContent (System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] responses, System.IServiceProvider requestContainer, string contentType)
 
 	Microsoft.AspNetCore.Http.HeaderDictionary Headers  { public get; }
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
@@ -1051,9 +1059,15 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
+	string DefaultValue  { public get; protected set; }
+	bool IsOptional  { public get; protected set; }
 	string Name  { public get; protected set; }
 	bool Nullable  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
+
+	public ParameterConfiguration HasDefaultValue (string defaultValue)
+	public ParameterConfiguration Optional ()
+	public ParameterConfiguration Required ()
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
@@ -1914,6 +1928,19 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpResponseExtensions {
 ExtensionAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExtensions {
+	public static readonly string DefaultRouteName = "odata"
+	public static readonly string DefaultRoutePrefix = "odata"
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, Microsoft.OData.Edm.IEdmModel model)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, string routeName, string routePrerix, Microsoft.OData.Edm.IEdmModel model)
+
 	[
 	ExtensionAttribute(),
 	]
@@ -2878,6 +2905,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
+	public static readonly string OptionalParameters = "Microsoft.AspNet.OData.Routing.ODataOptionalParameter"
 	public static readonly string RelatedKey = "relatedKey"
 	public static readonly string VersionConstraintName = "ODataVersionConstraint"
 }

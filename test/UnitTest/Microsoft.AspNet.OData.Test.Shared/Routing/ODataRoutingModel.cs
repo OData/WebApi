@@ -83,6 +83,11 @@ namespace Microsoft.AspNet.OData.Test.Routing
             topProductIdByCityAndModel.Parameter<int>("model");
             topProductIdByCityAndModel.Returns<string>();
 
+            FunctionConfiguration optionFunctions = builder.EntityType<Product>().Collection.Function("GetCount").Returns<int>();
+            optionFunctions.Parameter<double>("minSalary");
+            optionFunctions.Parameter<double>("maxSalary").Optional();
+            optionFunctions.Parameter<double>("aveSalary").Optional().HasDefaultValue("1200.99");
+
             // function bound to a collection of entities
             FunctionConfiguration topProductOfAll = builder.EntityType<Product>().Collection.Function("TopProductOfAll");
             topProductOfAll.Returns<string>();

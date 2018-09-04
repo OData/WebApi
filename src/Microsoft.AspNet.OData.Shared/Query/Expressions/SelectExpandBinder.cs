@@ -364,16 +364,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
-                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
+                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0 || isSelectingOpenTypeSegments)
                 {
-                    wrapperProperty = wrapperType.GetProperty("Container");
-                    Contract.Assert(wrapperProperty != null);
-
                     Expression propertyContainerCreation =
                         BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
 
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
-                    isContainerPropertySet = true;
+                    if (propertyContainerCreation != null)
+                    {
+                        wrapperProperty = wrapperType.GetProperty("Container");
+                        Contract.Assert(wrapperProperty != null);
+
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
+                        isContainerPropertySet = true;
+                    }
                 }
             }
 
@@ -389,7 +392,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return false;
             }
 
-            if (selectExpandClause.AllSelected)
+            if (IsSelectAll(selectExpandClause))
             {
                 return true;
             }
@@ -512,24 +515,26 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (isSelectingOpenTypeSegments)
             {
                 var dynamicPropertyDictionary = EdmLibHelpers.GetDynamicPropertyDictionary(elementType, _model);
-
-                Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
-                Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
-                Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
-                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                if (dynamicPropertyDictionary != null)
                 {
-                    // source == null ? null : propertyValue
-                    propertyValue = Expression.Condition(
-                        test: Expression.Equal(source, Expression.Constant(value: null)),
-                        ifTrue: Expression.Constant(value: null, type: TypeHelper.ToNullable(propertyValue.Type)),
-                        ifFalse: nullablePropertyValue);
-                }
-                else
-                {
-                    propertyValue = nullablePropertyValue;
-                }
+                    Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
+                    Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
+                    Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
+                    if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                    {
+                        // source == null ? null : propertyValue
+                        propertyValue = Expression.Condition(
+                            test: Expression.Equal(source, Expression.Constant(value: null)),
+                            ifTrue: Expression.Constant(value: null, type: TypeHelper.ToNullable(propertyValue.Type)),
+                            ifFalse: nullablePropertyValue);
+                    }
+                    else
+                    {
+                        propertyValue = nullablePropertyValue;
+                    }
 
-                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                }
             }
 
             // create a property container that holds all these property names and values.
@@ -562,7 +567,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return null;
             }
 
-            if (projection.AllSelected || !propertyToExpand.ToEntityType().Key().Any())
+            if (IsSelectAll(projection) || !propertyToExpand.ToEntityType().Key().Any())
             {
                 return Expression.Equal(propertyValue, Expression.Constant(null));
             }

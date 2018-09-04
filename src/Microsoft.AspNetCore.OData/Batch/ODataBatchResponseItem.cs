@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Batch
                 batchResponse.SetHeader(header.Key, String.Join(",", header.Value.ToArray()));
             }
 
-            if (context.Response.Body != null)
+            if (context.Response.Body != null && context.Response.Body.Length != 0)
             {
                 using (Stream stream = batchResponse.GetStream())
                 {

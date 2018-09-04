@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -86,6 +87,17 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (graph.GetType() == typeof(EdmEnumObject))
                 {
                     value = ((EdmEnumObject)graph).Value;
+                }
+            }
+
+            // Enum member supports model alias case. So, try to use the Edm member name to create Enum value.
+            var memberMapAnnotation = writeContext.Model.GetClrEnumMemberAnnotation(enumType.EnumDefinition());
+            if (memberMapAnnotation != null)
+            {
+                var edmEnumMember = memberMapAnnotation.GetEdmEnumMember((Enum)graph);
+                if (edmEnumMember != null)
+                {
+                    value = edmEnumMember.Name;
                 }
             }
 

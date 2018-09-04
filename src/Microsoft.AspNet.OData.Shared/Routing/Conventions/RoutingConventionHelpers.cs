@@ -243,6 +243,21 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 AddFunctionParameters(function, name, value, controllerContext.RouteData,
                     routingConventionsStore, null);
             }
+
+            // Append the optional parameters into RouteData.
+            ODataOptionalParameter optional = new ODataOptionalParameter();
+            foreach (var optionalParameter in function.Parameters.OfType<IEdmOptionalParameter>())
+            {
+                if (!functionSegment.Parameters.Any(c => c.Name == optionalParameter.Name))
+                {
+                    optional.Add(optionalParameter);
+                }
+            }
+
+            if (optional.OptionalParameters.Any())
+            {
+                controllerContext.RouteData.Add(ODataRouteConstants.OptionalParameters, optional);
+            }
         }
 
         public static void AddFunctionParameters(IEdmFunction function, string paramName, object paramValue, 

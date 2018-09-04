@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNet.OData;
@@ -271,6 +272,27 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             }
 
             return Ok();
+        }
+
+        [HttpGet]
+        [ODataRoute("Employees/Default.GetWholeSalary(minSalary={min})")]
+        public string GetWholeSalaryWithMin(double min)
+        {
+            return GetWholeSalary(min);
+        }
+
+        [HttpGet]
+        [ODataRoute("Employees/Default.GetWholeSalary(minSalary={min},maxSalary={max})")]
+        public string GetWholeSalaryWithMinAndMax(double min, double max)
+        {
+            return GetWholeSalary(min, max);
+        }
+
+        [HttpGet]
+        [ODataRoute("Employees/Default.GetWholeSalary(minSalary={minSalary},maxSalary={maxSalary},aveSalary={aveSalary})")]
+        public string GetWholeSalary(double minSalary, double maxSalary = 0, double aveSalary = 8.9)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetWholeSalary({0}, {1}, {2})", minSalary, maxSalary, aveSalary);
         }
 
         private static void VerifyEmployee(Employee employee)

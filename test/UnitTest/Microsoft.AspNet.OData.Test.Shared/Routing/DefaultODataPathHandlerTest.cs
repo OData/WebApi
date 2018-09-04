@@ -2283,6 +2283,9 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("Orders(24)/DynamicPropertyName", "Orders({ID})/{propertyname:dynamicproperty}", new string[] { "ID:24", "propertyname:DynamicPropertyName" })]
         [InlineData("RootOrder/DynamicPropertyName", "RootOrder/{propertyname:dynamicproperty}", new string[] { "propertyname:DynamicPropertyName" })]
         [InlineData("Customers(42)/Orders(24)/DynamicPropertyName", "Customers({ID})/Orders({key})/{propertyname:dynamicproperty}", new string[] { "ID:42", "key:24", "propertyname:DynamicPropertyName" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7)", "Customers/NS.GetWholeSalary(minSalary={min})", new string[] { "min:7" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max})", new string[] { "min:7", "max:8" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8,aveSalary=9)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max},aveSalary={ave})", new string[] { "min:7", "max:8", "ave:9" })]
         public void ParseTemplate(string path, string template, string[] keyValues)
         {
             // Arrange

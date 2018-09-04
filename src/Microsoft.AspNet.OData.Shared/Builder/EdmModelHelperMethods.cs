@@ -204,8 +204,22 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 bool isParameterNullable = parameter.Nullable;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterNullable);
-                IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
-                operation.AddParameter(operationParameter);
+                if (parameter.IsOptional)
+                {
+                    if (parameter.DefaultValue != null)
+                    {
+                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference, parameter.DefaultValue);
+                    }
+                    else
+                    {
+                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference);
+                    }
+                }
+                else
+                {
+                    IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
+                    operation.AddParameter(operationParameter);
+                }
             }
         }
 
@@ -433,6 +447,7 @@ namespace Microsoft.AspNet.OData.Builder
             // add annotation for properties
             Dictionary<MemberDescriptor, IEdmProperty> edmProperties = edmTypeMap.EdmProperties;
             model.AddClrPropertyInfoAnnotations(edmProperties);
+            model.AddClrEnumMemberInfoAnnotations(edmTypeMap);
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
             model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
             model.AddStructuredTypeQuerySettings(edmTypeMap.EdmStructuredTypeQuerySettings);
@@ -505,6 +520,21 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     model.SetAnnotationValue(edmProperty, new ClrPropertyInfoAnnotation(clrProperty));
                 }
+            }
+        }
+
+        private static void AddClrEnumMemberInfoAnnotations(this EdmModel model, EdmTypeMap edmTypeMap)
+        {
+            if (edmTypeMap.EnumMembers == null || !edmTypeMap.EnumMembers.Any())
+            {
+                return;
+            }
+
+            var enumGroupBy = edmTypeMap.EnumMembers.GroupBy(e => e.Key.GetType(), e => e);
+            foreach (var enumGroup in enumGroupBy)
+            {
+                IEdmType edmType = edmTypeMap.EdmTypes[enumGroup.Key];
+                model.SetAnnotationValue(edmType, new ClrEnumMemberAnnotation(enumGroup.ToDictionary(e => e.Key, e => e.Value)));
             }
         }
 
@@ -589,12 +619,17 @@ namespace Microsoft.AspNet.OData.Builder
         {
             EntityTypeConfiguration entityTypeConfig = navigationSourceConfiguration.EntityType;
 
-            IEnumerable<StructuralPropertyConfiguration> concurrencyPropertyies =
+            IEnumerable<StructuralPropertyConfiguration> concurrencyProperties =
                 entityTypeConfig.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken);
+            foreach (var baseType in entityTypeConfig.BaseTypes())
+            {
+                concurrencyProperties = concurrencyProperties.Concat(
+                    baseType.Properties.OfType<StructuralPropertyConfiguration>().Where(property => property.ConcurrencyToken));
+            }
 
             IList<IEdmStructuralProperty> edmProperties = new List<IEdmStructuralProperty>();
 
-            foreach (StructuralPropertyConfiguration property in concurrencyPropertyies)
+            foreach (StructuralPropertyConfiguration property in concurrencyProperties)
             {
                 IEdmProperty value;
                 if (edmTypeMap.EdmProperties.TryGetValue(property.PropertyInfo, out value))
@@ -860,8 +895,9 @@ namespace Microsoft.AspNet.OData.Builder
                 }
                 else if (configuration.Kind == EdmTypeKind.Primitive)
                 {
-                    PrimitiveTypeConfiguration primitiveTypeConfiguration = configuration as PrimitiveTypeConfiguration;
-                    return new EdmPrimitiveTypeReference(primitiveTypeConfiguration.EdmPrimitiveType, nullable);
+                    PrimitiveTypeConfiguration primitiveTypeConfiguration = (PrimitiveTypeConfiguration)configuration;
+                    EdmPrimitiveTypeKind typeKind = EdmTypeBuilder.GetTypeKind(primitiveTypeConfiguration.ClrType);
+                    return EdmCoreModel.Instance.GetPrimitive(typeKind, nullable);
                 }
                 else
                 {

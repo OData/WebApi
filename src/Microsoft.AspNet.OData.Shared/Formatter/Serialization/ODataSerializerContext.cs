@@ -2,7 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
@@ -159,6 +161,22 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, edmObject.GetType().FullName,
                         typeof(IEdmObject).Name);
+                }
+            }
+            else if (typeof(IEnumerable).IsAssignableFrom(type) &&
+                typeof(IEdmObject).IsAssignableFrom(type.GetGenericArguments().FirstOrDefault()))
+            {
+                IEnumerable list = instance as IEnumerable;
+                IEnumerator enumerator = list.GetEnumerator();
+                if (enumerator.MoveNext())
+                {
+                    IEdmObject edo = (IEdmObject)enumerator.Current;
+                    IEdmCollectionType edmCollection = new EdmCollectionType(edo.GetEdmType());
+                    edmType = new EdmCollectionTypeReference(edmCollection);
+                }
+                else
+                {
+                    edmType = null;
                 }
             }
             else

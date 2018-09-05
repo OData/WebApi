@@ -166,17 +166,24 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             else if (typeof(IEnumerable).IsAssignableFrom(type) &&
                 typeof(IEdmObject).IsAssignableFrom(type.GetGenericArguments().FirstOrDefault()))
             {
+                edmType = null;
                 IEnumerable list = instance as IEnumerable;
-                IEnumerator enumerator = list.GetEnumerator();
-                if (enumerator.MoveNext())
+                if (list != null)
                 {
-                    IEdmObject edo = (IEdmObject)enumerator.Current;
-                    IEdmCollectionType edmCollection = new EdmCollectionType(edo.GetEdmType());
-                    edmType = new EdmCollectionTypeReference(edmCollection);
+                    IEnumerator enumerator = list.GetEnumerator();
+                    if (enumerator.MoveNext())
+                    {
+                        IEdmObject edo = (IEdmObject)enumerator.Current;
+                        IEdmCollectionType edmCollection = new EdmCollectionType(edo.GetEdmType());
+                        edmType = new EdmCollectionTypeReference(edmCollection);
+                    }
                 }
-                else
+
+                if (edmType == null)
                 {
-                    edmType = null;
+                    Type innerType = type.GetGenericArguments().FirstOrDefault();
+                    string innerTypeName = innerType == null ? null : innerType.Name;
+                    throw Error.InvalidOperation(SRResources.EdmTypeCannotBeNull, type.FullName, innerTypeName);
                 }
             }
             else

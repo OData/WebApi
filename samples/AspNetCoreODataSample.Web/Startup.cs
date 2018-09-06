@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using AspNetCoreODataSample.Web.Models;
+using Microsoft.OData;
 
 namespace AspNetCoreODataSample.Web
 {
@@ -41,7 +42,7 @@ namespace AspNetCoreODataSample.Web
             app.UseMvc(builder =>
             {
                 builder.Select().Expand().Filter().OrderBy().MaxTop(100).Count();
-
+                builder.SetUrlKeyDelimiter(ODataUrlKeyDelimiter.Slash);
                 builder.MapODataServiceRoute("odata1", "efcore", model);
 
                 builder.MapODataServiceRoute("odata2", "inmem", model);

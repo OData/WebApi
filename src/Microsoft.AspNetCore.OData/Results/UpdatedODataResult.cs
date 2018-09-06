@@ -10,11 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Microsoft.AspNet.OData.Results
 {
-    internal interface IInnerActionResult
-    {
-        IActionResult GetInnerActionResult(HttpRequest request);
-    }
-
     /// <summary>
     /// Represents an action result that is a response to a PUT, PATCH, or a MERGE operation on an OData entity.
     /// </summary>

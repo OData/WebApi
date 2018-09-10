@@ -13,6 +13,7 @@
     <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
+    <iconUrl>http://static.tumblr.com/hgchgxz/9ualgdf98/icon.png</iconUrl>
     <dependencies>
       <dependency id="Microsoft.AspNet.WebApi.Client" version="$AspNetPackageDependency$" />
       <dependency id="Microsoft.AspNet.WebApi.Core" version="$AspNetPackageDependency$" />

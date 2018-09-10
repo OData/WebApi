@@ -46,7 +46,8 @@ namespace Microsoft.AspNet.OData.Builder
             ModelBuilder = builder;
             _name = clrType.EdmName();
 
-            // Use the namespace is uder specified one, otherwise use CLR Namespace. If CLR Namespace is null we fallback to "Default"
+            // Use the namespace if one was provided in builder by the user, otherwise fallback to CLR Namespace.
+            // If CLR Namespace is null we fallback to "Default"
             // This can still be overriden by using DataContract attribute.
             _namespace = builder.HasAssignedNamespace ? builder.Namespace : clrType.Namespace ?? builder.Namespace;
 

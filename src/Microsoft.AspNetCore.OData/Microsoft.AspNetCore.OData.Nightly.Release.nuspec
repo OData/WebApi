@@ -13,6 +13,7 @@
     <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNetCore WebApi OData</tags>
+    <iconUrl>http://static.tumblr.com/hgchgxz/9ualgdf98/icon.png</iconUrl>
     <dependencies>
         <group targetFramework=".NETStandard2.0">
           <dependency id="Microsoft.AspNetCore.Mvc.Core" version="$AspNetCorePackageDependency$" />

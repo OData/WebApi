@@ -141,6 +141,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         {
                             prefix = "PostTo";
                             segment = tempSegment;
+                            cast = tempCast;
                         }
                         break;
                     case ODataRequestMethod.Put:

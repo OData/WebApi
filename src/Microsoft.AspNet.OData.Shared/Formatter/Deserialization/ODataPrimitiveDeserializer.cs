@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("primitiveProperty");
             }
 
-            return primitiveProperty.Value;
+            return EdmPrimitiveHelpers.ConvertPrimitiveValue(primitiveProperty.Value,readContext.ResourceType);
         }
     }
 }

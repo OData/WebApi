@@ -88,6 +88,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         prefix = "Get";
                         segment = tempSegment;
                         break;
+                    case ODataRequestMethod.Post:
+                        //Allow post only to collection properties
+                        if (tempSegment.Property.Type.IsCollection())
+                        {
+                            prefix = "PostTo";
+                            segment = tempSegment;
+                        }
+                        break;
                     case ODataRequestMethod.Put:
                         prefix = "PutTo";
                         segment = tempSegment;
@@ -126,6 +134,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         prefix = "Get";
                         segment = tempSegment;
                         cast = tempCast;
+                        break;
+                    case ODataRequestMethod.Post:
+                        //Allow post only to collection properties
+                        if (tempSegment.Property.Type.IsCollection())
+                        {
+                            prefix = "PostTo";
+                            segment = tempSegment;
+                        }
                         break;
                     case ODataRequestMethod.Put:
                         prefix = "PutTo";

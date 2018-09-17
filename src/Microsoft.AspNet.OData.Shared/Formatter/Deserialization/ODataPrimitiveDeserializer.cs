@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmTypeReference edmType = readContext.GetEdmType(type);
             Contract.Assert(edmType != null);
 
-            ODataProperty property = messageReader.ReadProperty();
+            ODataProperty property = messageReader.ReadProperty(edmType);
             return ReadInline(property, edmType, readContext);
         }
 

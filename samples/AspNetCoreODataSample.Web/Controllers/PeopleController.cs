@@ -20,7 +20,7 @@ namespace AspNetCoreODataSample.Web.Controllers
                 DynamicProperties = new Dictionary<string, object>
                 {
                     { "abc", "abcValue" }
-                }
+                },
                 MyLevel = Level.High
             };
 

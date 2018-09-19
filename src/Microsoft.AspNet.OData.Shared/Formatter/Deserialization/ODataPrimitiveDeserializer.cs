@@ -66,8 +66,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 throw Error.ArgumentNull("primitiveProperty");
             }
+            //Try and change the value appropriately if type is specified
+            if ( readContext!=null && readContext.ResourceType != null)
+            {
+                return EdmPrimitiveHelpers.ConvertPrimitiveValue(primitiveProperty.Value, readContext.ResourceType);
+            }
 
-            return EdmPrimitiveHelpers.ConvertPrimitiveValue(primitiveProperty.Value,readContext.ResourceType);
+            return primitiveProperty.Value; 
         }
     }
 }

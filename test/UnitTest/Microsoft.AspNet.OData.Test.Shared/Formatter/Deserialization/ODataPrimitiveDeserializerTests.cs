@@ -184,12 +184,20 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
             settings.SetContentType(ODataFormat.Json);
 
+            Type type = obj == null ? typeof(int) : obj.GetType();
+
+            //Cast to appropriate type
+            if(edmType== "Edm.Binary" && obj.GetType()==typeof(string))
+            {
+                type = typeof(byte[]);
+            }
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
-            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model, ResourceType = type };
 
-            Type type = obj == null ? typeof(int) : obj.GetType();
+            
             serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 
@@ -217,12 +225,14 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
             settings.SetContentType(ODataFormat.Json);
 
+            Type type = obj == null ? typeof(int) : expected.GetType();
+
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
-            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model };
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model, ResourceType = type };
 
-            Type type = obj == null ? typeof(int) : expected.GetType();
+            
             serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 

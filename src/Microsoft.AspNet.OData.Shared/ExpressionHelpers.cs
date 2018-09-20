@@ -27,13 +27,22 @@ namespace Microsoft.AspNet.OData
             Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
 
             Expression skipQuery = Expression.Call(null, skipMethod, new[] { query.Expression, skipValueExpression });
-            return query.Provider.CreateQuery(skipQuery);
+
+            var createMethod = query.Provider.GetType().GetMethods()
+                .First(x => x.Name == "CreateQuery" && x.IsGenericMethod)
+                .MakeGenericMethod(type);
+
+            return createMethod.Invoke(query.Provider, new[] { skipQuery }) as IQueryable;
         }
 
         public static IQueryable Take(IQueryable query, int count, Type type, bool parameterize)
         {
             Expression takeQuery = Take(query.Expression, count, type, parameterize);
-            return query.Provider.CreateQuery(takeQuery);
+            var createMethod = query.Provider.GetType().GetMethods()
+                .First(x => x.Name == "CreateQuery" && x.IsGenericMethod)
+                .MakeGenericMethod(type);
+
+            return createMethod.Invoke(query.Provider, new[] { takeQuery }) as IQueryable;
         }
 
         public static Expression Skip(Expression source, int count, Type type, bool parameterize)

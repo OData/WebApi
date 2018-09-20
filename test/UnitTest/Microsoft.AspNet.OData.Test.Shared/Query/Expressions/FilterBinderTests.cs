@@ -598,6 +598,15 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void AnyOnNavigation_Contradiction()
+        {
+            var filters = VerifyQueryDeserialization(
+               "Category/QueryableProducts/any(P: false)",
+               "$it => $it.Category.QueryableProducts.Any(P => False)",
+               NotTesting);
+        }
+
+        [Fact]
         public void AnyOnNavigation_NullCollection()
         {
             var filters = VerifyQueryDeserialization(

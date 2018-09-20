@@ -28,8 +28,10 @@ namespace Microsoft.AspNet.OData
 
             Expression skipQuery = Expression.Call(null, skipMethod, new[] { query.Expression, skipValueExpression });
 
-            var createMethod = query.Provider.GetType().GetMethods()
-                .First(x => x.Name == "CreateQuery" && x.IsGenericMethod)
+            var createMethod = query.Provider.GetType().GetInterface(nameof(IQueryProvider))
+                .GetTypeInfo()
+                .GetDeclaredMethods("CreateQuery")
+                .First(x => x.IsGenericMethod)
                 .MakeGenericMethod(type);
 
             return createMethod.Invoke(query.Provider, new[] { skipQuery }) as IQueryable;
@@ -38,8 +40,10 @@ namespace Microsoft.AspNet.OData
         public static IQueryable Take(IQueryable query, int count, Type type, bool parameterize)
         {
             Expression takeQuery = Take(query.Expression, count, type, parameterize);
-            var createMethod = query.Provider.GetType().GetMethods()
-                .First(x => x.Name == "CreateQuery" && x.IsGenericMethod)
+            var createMethod = query.Provider.GetType().GetInterface(nameof(IQueryProvider))
+                .GetTypeInfo()
+                .GetDeclaredMethods("CreateQuery")
+                .First(x => x.IsGenericMethod)
                 .MakeGenericMethod(type);
 
             return createMethod.Invoke(query.Provider, new[] { takeQuery }) as IQueryable;

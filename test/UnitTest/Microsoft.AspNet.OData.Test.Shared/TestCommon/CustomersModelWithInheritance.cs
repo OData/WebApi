@@ -47,6 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             customer.AddStructuralProperty("SimpleEnum", simpleEnum.ToEdmTypeReference(isNullable: false));
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
             customer.AddStructuralProperty("Account", new EdmComplexTypeReference(account, isNullable: true));
+            customer.AddStructuralProperty("OtherAccounts", new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(account, true))));
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);
@@ -116,7 +117,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             model.AddElement(tag);
 
             // entity sets
-            EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
+            EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritanceModelWithInheritance");
             model.AddElement(container);
             EdmEntitySet customers = container.AddEntitySet("Customers", customer);
             EdmEntitySet orders = container.AddEntitySet("Orders", order);

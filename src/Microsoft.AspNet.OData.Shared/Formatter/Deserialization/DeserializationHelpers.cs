@@ -35,7 +35,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             if (!isDynamicProperty && edmProperty == null)
             {
-                throw new ODataException("Does not support untyped value in non-open type.");
+                throw new ODataException(
+                    Error.Format(SRResources.CannotDeserializeUnknownProperty, property.Name, resourceType.Definition));
             }
 
             // dynamic properties have null values

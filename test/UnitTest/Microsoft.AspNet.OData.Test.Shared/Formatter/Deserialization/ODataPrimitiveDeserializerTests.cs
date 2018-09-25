@@ -186,12 +186,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             Type type = obj == null ? typeof(int) : obj.GetType();
 
-            //Cast to appropriate type
-            if(edmType== "Edm.Binary" && obj.GetType()==typeof(string))
-            {
-                type = typeof(byte[]);
-            }
-
             ODataMessageWriter messageWriter = new ODataMessageWriter(message as IODataResponseMessage, settings, model);
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };

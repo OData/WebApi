@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             model.AddElement(tag);
 
             // entity sets
-            EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritanceModelWithInheritance");
+            EdmEntityContainer container = new EdmEntityContainer("NS", "ModelWithInheritance");
             model.AddElement(container);
             EdmEntitySet customers = container.AddEntitySet("Customers", customer);
             EdmEntitySet orders = container.AddEntitySet("Orders", order);

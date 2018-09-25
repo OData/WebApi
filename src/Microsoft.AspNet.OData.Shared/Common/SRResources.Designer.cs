@@ -263,6 +263,15 @@ namespace Microsoft.AspNet.OData.Common
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The property &apos;{0}&apos; does not exist on type &apos;{1}&apos;. Make sure to only use property names that are defined by the type..
+        /// </summary>
+        internal static string CannotDeserializeUnknownProperty {
+            get {
+                return ResourceManager.GetString("CannotDeserializeUnknownProperty", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Cannot define keys on type &apos;{0}&apos; deriving from &apos;{1}&apos;. The base type in the entity inheritance hierarchy already contains keys..
         /// </summary>
         internal static string CannotDefineKeysOnDerivedTypes {

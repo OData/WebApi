@@ -287,6 +287,33 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             resource.Verify();
         }
 
+        [Fact]
+        public void ApplyProperty_FailsWithUsefulErrorMessageOnUnknownProperty()
+        {
+            // Arrange
+            const string HelpfulErrorMessage =
+                "The property 'Unknown' does not exist on type 'namespace.name'. Make sure to only use property names " +
+                "that are defined by the type.";
+
+            var property = new ODataProperty { Name = "Unknown", Value = "Value" };
+            var entityType = new EdmComplexType("namespace", "name");
+            entityType.AddStructuralProperty("Known", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+
+            var entityTypeReference = new EdmComplexTypeReference(entityType, isNullable: false);
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() =>
+                DeserializationHelpers.ApplyProperty(
+                    property,
+                    entityTypeReference,
+                    resource: null,
+                    deserializerProvider: null,
+                    readContext: null));
+
+            // Assert
+            Assert.Equal(HelpfulErrorMessage, exception.Message);
+        }
+
         private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)
         {
             Mock<IEdmProperty> property = new Mock<IEdmProperty>();

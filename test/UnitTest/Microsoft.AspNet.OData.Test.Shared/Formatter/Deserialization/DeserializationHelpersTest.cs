@@ -291,6 +291,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         public void ApplyProperty_FailsWithUsefulErrorMessageOnUnknownProperty()
         {
             // Arrange
+            const string HelpfulErrorMessage =
+                "The property 'Unknown' does not exist on type 'namespace.name'. Make sure to only use property names " +
+                "that are defined by the type.";
+
             var property = new ODataProperty { Name = "Unknown", Value = "Value" };
             var entityType = new EdmComplexType("namespace", "name");
             entityType.AddStructuralProperty("Known", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
@@ -307,10 +311,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                     readContext: null));
 
             // Assert
-            const string HelpfulErrorMessage =
-                "The property 'Unknown' does not exist on type 'namespace.name'. Make sure to only use property names " +
-                "that are defined by the type.";
-
             Assert.Equal(HelpfulErrorMessage, exception.Message);
         }
 

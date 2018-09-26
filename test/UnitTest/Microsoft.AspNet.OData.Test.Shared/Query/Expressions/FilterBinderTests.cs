@@ -597,12 +597,15 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             new { WithNullPropagation = false, WithoutNullPropagation = false });
         }
 
-        [Fact]
-        public void AnyOnNavigation_Contradiction()
+        [Theory]
+        [InlineData("Category/QueryableProducts/any(P: false)", "$it => False")]
+        [InlineData("Category/QueryableProducts/any(P: false and P/ProductName eq 'Snacks')", "$it => $it.Category.QueryableProducts.Any(P => (False AndAlso (P.ProductName == \"Snacks\")))")]
+        [InlineData("Category/QueryableProducts/any(P: true)", "$it => $it.Category.QueryableProducts.Any()")]
+        public void AnyOnNavigation_Contradiction(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization(
-               "Category/QueryableProducts/any(P: false)",
-               "$it => $it.Category.QueryableProducts.Any(P => False)",
+               filter,
+               expression,
                NotTesting);
         }
 

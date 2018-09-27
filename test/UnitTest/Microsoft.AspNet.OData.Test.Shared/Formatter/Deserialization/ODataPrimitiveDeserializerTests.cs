@@ -250,7 +250,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
             
             // Act
-            object value = deserializer.Read(ODataEnumDeserializerTests.GetODataMessageReader(ODataEnumDeserializerTests.GetODataMessage(content), model), type, readContext);
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
 
             // Assert
             Assert.Equal(value,expected);
@@ -274,7 +274,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataEnumDeserializerTests.GetODataMessageReader(ODataEnumDeserializerTests.GetODataMessage(content), model), type, readContext);
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
 
             // Assert
             Assert.Equal(value, expected);

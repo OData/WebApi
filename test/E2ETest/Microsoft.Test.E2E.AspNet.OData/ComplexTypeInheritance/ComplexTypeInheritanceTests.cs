@@ -21,7 +21,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
     public class ComplexTypeInheritanceTests : WebHostTestBase
     {
         public ComplexTypeInheritanceTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -46,6 +46,65 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 }
                 return data;
             }
+        }
+
+        public static TheoryDataSet<string, string, string> NewCollectionMembers
+        {
+            get
+            {
+                return new TheoryDataSet<string, string, string>
+               {
+
+                   { "convention", @"
+{
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+        'HasBorder':true,'Vertexes':[
+            {'X':21,'Y':12},
+            {'X':32,'Y':23},
+            {'X':14,'Y':41}
+        ]
+}",
+                   "OptionalShapes" },
+
+
+                   { "explicit", @"
+{
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+        'HasBorder':true,'Vertexes':[
+            {'X':21,'Y':12},
+            {'X':32,'Y':23},
+            {'X':14,'Y':41}
+        ]
+}",
+                   "OptionalShapes"
+                   },
+
+
+                   { "convention", @"
+{
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
+        'HasBorder':true,
+        'Width':3,
+        'Height':4,
+        'TopLeft':{ 'X':1,'Y':2}
+}",
+                    
+                   "PolygonalShapes" },
+
+                   { "explicit", @"
+{
+            '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
+            'HasBorder':true,
+            'Width':3,
+            'Height':4,
+            'TopLeft':{ 'X':1,'Y':2}
+}",
+                   "PolygonalShapes"
+                   },
+
+                };
+            }
+
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
@@ -540,26 +599,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         }
 
         [Theory]
-        [InlineData("convention")]
-        [InlineData("explicit")]
-        // POST ~/Windows(3)/OptonalShapes
-        public async Task PostToCollectionComplexTypeProperty(string modelMode)
+        [MemberData(nameof(NewCollectionMembers))]
+        // POST ~/Windows(3)/OptionalShapes
+        public async Task PostToCollectionComplexTypeProperty(string modelMode, string jObject, string targetPropertyResource)
         {
             //Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
-            string requestUri = serviceRootUri + "/Windows(3)/OptionalShapes";
+            string requestUri = serviceRootUri + "/Windows(3)/"+ targetPropertyResource;
+            int count = 0;
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestForPost.Content = new StringContent(content:jObject, encoding: Encoding.UTF8, mediaType: "application/json");
 
-            requestForPost.Content = new StringContent(content: @"
-{
-    '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
-    'HasBorder':true,'Vertexes':[
-        {'X':21,'Y':12},
-        {'X':32,'Y':23},
-        {'X':14,'Y':41}
-      ]
-}
-", encoding: Encoding.UTF8, mediaType: "application/json");
+            using (HttpResponseMessage getResponse = await this.Client.GetAsync(requestUri))
+            {
+                getResponse.EnsureSuccessStatusCode();
+
+                var json = await getResponse.Content.ReadAsObject<JObject>();
+                var state=json.GetValue("value") as JArray;
+                count = state.Count;
+            }
 
             //Act & Assert
             HttpResponseMessage response = await Client.SendAsync(requestForPost);
@@ -573,13 +631,44 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                     contentOfString));
 
             JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
-            Assert.True(3 == contentOfJObject.Count,
+            var result = contentOfJObject.GetValue("value") as JArray;
+
+            Assert.True(count+1 == result.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}",
-                3,
+                count+1,
                 contentOfJObject.Count,
                 requestUri,
                 contentOfString));
         }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        public async Task PostToCollection_WithBasePayloadShouldReturnNull(string modelMode)
+        {
+
+            //Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)/PolygonalShapes";
+
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestForPost.Content = new StringContent(content: @"
+{
+            '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape',
+            'HasBorder':true,
+            'Width':3,
+            'Height':4,
+            'TopLeft':{ 'X':1,'Y':2}
+}", encoding: Encoding.UTF8, mediaType: "application/json");
+
+            //Act & Assert
+            HttpResponseMessage response = await Client.SendAsync(requestForPost);
+            JObject json = await response.Content.ReadAsObject<JObject>();
+            var result = json.GetValue("value") as JArray;
+
+            Assert.Null(result);
+        }
+
 
         [Theory]
         [InlineData("convention")]

@@ -199,6 +199,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             return Ok(window.OptionalShapes);
         }
 
+        public ITestActionResult GetPolygonalShapes(int key)
+        {
+            Window window = _windows.FirstOrDefault(e => e.Id == key);
+            if (window == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(window.PolygonalShapes);
+        }
+
         [ODataRoute("Windows({key})/OptionalShapes/Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle")]
         public ITestActionResult GetOptionalShapesOfCircle(int key)
         {
@@ -244,6 +255,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             window.OptionalShapes = shapes.ToList();
             return Ok(shapes);
         }
+
         [HttpPost]
         public ITestActionResult PostToOptionalShapes(int key, [FromBody]Shape newShape)
         {
@@ -253,7 +265,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 return NotFound();
             }
             window.OptionalShapes.Add(newShape);
-            return Created(window);
+            return Ok(window.OptionalShapes);
+        }
+
+
+        [HttpPost]
+        public ITestActionResult PostToPolygonalShapes(int key, [FromBody]Polygon newPolygon)
+        {
+            Window window = _windows.Single(w => w.Id == key);
+            if (window == null)
+            {
+                return NotFound();
+            }
+            if (newPolygon == null)
+            {
+                return Ok(newPolygon);
+            }
+            window.PolygonalShapes.Add(newPolygon);
+            return Ok(window.PolygonalShapes);
         }
 
         [HttpPatch]

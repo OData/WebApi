@@ -542,6 +542,48 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
+        // POST ~/Windows(3)/OptonalShapes
+        public async Task PostToCollectionComplexTypeProperty(string modelMode)
+        {
+            //Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)/OptionalShapes";
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+
+            requestForPost.Content = new StringContent(content: @"
+{
+    '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+    'HasBorder':true,'Vertexes':[
+        {'X':21,'Y':12},
+        {'X':32,'Y':23},
+        {'X':14,'Y':41}
+      ]
+}
+", encoding: Encoding.UTF8, mediaType: "application/json");
+
+            //Act & Assert
+            HttpResponseMessage response = await Client.SendAsync(requestForPost);
+            string contentOfString = await response.Content.ReadAsStringAsync();
+
+            Assert.True(HttpStatusCode.OK == response.StatusCode,
+                String.Format("\nExpected status code: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
+                    HttpStatusCode.Created,
+                    response.StatusCode,
+                    requestUri,
+                    contentOfString));
+
+            JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
+            Assert.True(3 == contentOfJObject.Count,
+                String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}",
+                3,
+                contentOfJObject.Count,
+                requestUri,
+                contentOfString));
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
         // PUT ~/Widnows(1)/CurrentShape
         public async Task PutCurrentShape(string modelMode)
         {

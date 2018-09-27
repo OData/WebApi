@@ -253,9 +253,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 return NotFound();
             }
             window.OptionalShapes.Add(newShape);
-            return Ok(newShape);
+            return Created(window);
         }
-
 
         [HttpPatch]
         public ITestActionResult PatchToOptionalShapes(int key, [FromBody]Delta<Shape> shapes)

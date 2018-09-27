@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
@@ -411,6 +412,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                 var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
                 Assert.Equal<int>(4, result.Count);
+            }
+        }
+
+
+
+        [Fact]
+        public async Task PostToEnumCollection()
+        {
+            await ResetDatasource();
+            //Arrange
+            string requestUri = this.BaseAddress + "/convention/Employees/2/SkillSet?$format=application/json;odata.metadata=none";
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+
+            requestForPost.Content = new StringContent(content: @"{
+                    'value':'Sql'
+                    }", encoding: Encoding.UTF8, mediaType: "application/json");
+           
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+                Assert.Single(result);
             }
         }
 

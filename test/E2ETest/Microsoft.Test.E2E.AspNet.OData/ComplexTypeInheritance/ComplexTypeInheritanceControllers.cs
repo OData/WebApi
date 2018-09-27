@@ -253,7 +253,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 return NotFound();
             }
             window.OptionalShapes.Add(newShape);
-            return OK(newShape);
+            return Ok(newShape);
         }
 
 

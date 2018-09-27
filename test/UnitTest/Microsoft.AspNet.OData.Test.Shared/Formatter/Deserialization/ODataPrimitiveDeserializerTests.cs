@@ -40,7 +40,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
     public class ODataPrimitiveDeserializerTests
     {
         private IEdmPrimitiveTypeReference _edmIntType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
-
         public static TheoryDataSet<object, object> NonEdmPrimitiveData
         {
             get
@@ -234,6 +233,51 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.NotNull(edmType);
             Assert.NotNull(value);
             Assert.Equal(obj, deserializer.Read(messageReader, type, readContext));
+        }
+
+        [Theory]
+        [InlineData("{\"value\":\"FgQF\"}", typeof(byte[]), new byte[] { 22, 4, 5 })]
+        public void ReadFromStreamAsync_RawPrimitive(string content, Type type, object expected)
+        {
+            // Arrange
+            IEdmModel model = CreateModel();
+
+            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = type
+            };
+            
+            // Act
+            object value = deserializer.Read(ODataEnumDeserializerTests.GetODataMessageReader(ODataEnumDeserializerTests.GetODataMessage(content), model), type, readContext);
+
+            // Assert
+            Assert.Equal(value,expected);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_RawGuid()
+        {
+            // Arrange
+            string content = "{\"value\":\"f4b787c7-920d-4993-a584-ceb68968058c\"}";
+            Type type = typeof(Guid);
+            object expected = new Guid("f4b787c7-920d-4993-a584-ceb68968058c");
+
+            IEdmModel model = CreateModel();
+
+            ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = model,
+                ResourceType = type
+            };
+
+            // Act
+            object value = deserializer.Read(ODataEnumDeserializerTests.GetODataMessageReader(ODataEnumDeserializerTests.GetODataMessage(content), model), type, readContext);
+
+            // Assert
+            Assert.Equal(value, expected);
         }
 
         [Theory]

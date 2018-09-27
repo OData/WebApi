@@ -46,6 +46,28 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
+        public void ReadFromStreamAsync_RawValue()
+        {
+            // Arrange
+            string content = "{\"value\":\"Blue\"}";
+
+            ODataEnumDeserializer deserializer = new ODataEnumDeserializer();
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(Color)
+            };
+
+            // Act
+            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+                typeof(Color), readContext);
+
+            // Assert
+            Color color = Assert.IsType<Color>(value);
+            Assert.Equal(Color.Blue, color);
+        }
+
+        [Fact]
         public void ReadFromStreamAsync_ForUnType()
         {
             // Arrange
@@ -95,12 +117,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(Level.High, level);
         }
 
-        private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)
+        public static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)
         {
             return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
         }
 
-        private static IODataRequestMessage GetODataMessage(string content)
+        public static IODataRequestMessage GetODataMessage(string content)
         {
             // While NetCore does not use this for AspNet, it can be used here to create
             // an HttpRequestODataMessage, which is a Test type that implments IODataRequestMessage

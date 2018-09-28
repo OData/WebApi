@@ -259,7 +259,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [HttpPost]
         public ITestActionResult PostToOptionalShapes(int key, [FromBody]Shape newShape)
         {
-            Window window = _windows.Single(w => w.Id == key);
+            Window window = _windows.FirstOrDefault(w => w.Id == key);
             if (window == null)
             {
                 return NotFound();
@@ -272,7 +272,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [HttpPost]
         public ITestActionResult PostToPolygonalShapes(int key, [FromBody]Polygon newPolygon)
         {
-            Window window = _windows.Single(w => w.Id == key);
+            Window window = _windows.FirstOrDefault(w => w.Id == key);
             if (window == null)
             {
                 return NotFound();

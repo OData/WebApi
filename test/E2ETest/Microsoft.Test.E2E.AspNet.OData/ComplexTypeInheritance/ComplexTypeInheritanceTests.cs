@@ -644,7 +644,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
-        public async Task PostToCollection_WithBasePayloadShouldReturnNull(string modelMode)
+        public async Task PostToCollection_WithBasePayloadThrowsError(string modelMode)
         {
 
             //Arrange
@@ -663,10 +663,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 
             //Act & Assert
             HttpResponseMessage response = await Client.SendAsync(requestForPost);
-            JObject json = await response.Content.ReadAsObject<JObject>();
-            var result = json.GetValue("value") as JArray;
 
-            Assert.Null(result);
+            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
         }
 
 

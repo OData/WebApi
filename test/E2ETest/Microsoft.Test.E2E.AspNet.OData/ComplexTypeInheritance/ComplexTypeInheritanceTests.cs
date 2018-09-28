@@ -644,33 +644,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]
-        public async Task PostToCollection_WithBasePayloadThrowsError(string modelMode)
-        {
-
-            //Arrange
-            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
-            string requestUri = serviceRootUri + "/Windows(3)/PolygonalShapes";
-
-            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            requestForPost.Content = new StringContent(content: @"
-{
-            '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Shape',
-            'HasBorder':true,
-            'Width':3,
-            'Height':4,
-            'TopLeft':{ 'X':1,'Y':2}
-}", encoding: Encoding.UTF8, mediaType: "application/json");
-
-            //Act & Assert
-            HttpResponseMessage response = await Client.SendAsync(requestForPost);
-
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-        }
-
-
-        [Theory]
-        [InlineData("convention")]
-        [InlineData("explicit")]
         // PUT ~/Widnows(1)/CurrentShape
         public async Task PutCurrentShape(string modelMode)
         {

@@ -124,7 +124,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
             return Ok(files);
         }
         
-
         [HttpPost]
         public ITestActionResult CopyFiles(int key, [FromBody]ODataActionParameters parameters)
         {
@@ -154,7 +153,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
         public ITestActionResult PostToModifiedDates(int key, [FromBody]DateTime newDateTime)
         {
             File file = _files.FirstOrDefault(f => f.FileId == key);
-            if(file == null)
+            if (file == null)
             {
                 return NotFound();
             }

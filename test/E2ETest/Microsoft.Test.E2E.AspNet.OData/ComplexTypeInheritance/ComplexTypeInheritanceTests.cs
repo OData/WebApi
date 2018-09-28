@@ -21,7 +21,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
     public class ComplexTypeInheritanceTests : WebHostTestBase
     {
         public ComplexTypeInheritanceTests(WebHostTestFixture fixture)
-            : base(fixture)
+            :base(fixture)
         {
         }
 

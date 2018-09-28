@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
@@ -81,6 +82,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
             Assert.Equal(EdmTypeKind.Collection, modifiedDates.Type.TypeKind());
             Assert.Equal("Collection(Edm.DateTimeOffset)", modifiedDates.Type.Definition.FullTypeName());
             Assert.False(modifiedDates.Type.IsNullable);
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        public async Task PostToDateTimeCollection(string modelMode)
+        {
+            await ResetDatasource();
+            //Arrange
+            string requestUri = string.Format("{0}/{1}/Files/1/ModifiedDates", this.BaseAddress, modelMode);
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+
+            requestForPost.Content = new StringContent(content: @"{
+                    'value':'2014-10-16T01:02:03Z'
+                    }", encoding: Encoding.UTF8, mediaType: "application/json");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+                Assert.Equal(4,result.Count);
+            }
         }
 
         #region CRUD on DateTime related entity

@@ -237,6 +237,14 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
         [Theory]
         [InlineData("{\"value\":\"FgQF\"}", typeof(byte[]), new byte[] { 22, 4, 5 })]
+        [InlineData("{\"value\":1}", typeof(Int16), (Int16)1)]
+        [InlineData("{\"value\":1}", typeof(Int32), 1)]
+        [InlineData("{\"value\":1}", typeof(Int64), (Int64)1)]
+        [InlineData("{\"value\":\"true\"}", typeof(Boolean), true)]
+        [InlineData("{\"value\":5}", typeof(SByte), (SByte)5)]
+        [InlineData("{\"value\":201}", typeof(Byte), (Byte)201)]
+        [InlineData("{\"value\":1.1}", typeof(Double), 1.1)]
+        [InlineData("{\"value\":1.1}", typeof(Single), (Single)1.1)]
         public void ReadFromStreamAsync_RawPrimitive(string content, Type type, object expected)
         {
             // Arrange
@@ -253,7 +261,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
 
             // Assert
-            Assert.Equal(value,expected);
+            Assert.Equal(expected,value);
         }
 
         [Fact]
@@ -277,7 +285,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
 
             // Assert
-            Assert.Equal(value, expected);
+            Assert.Equal(expected,value);
         }
 
         [Theory]

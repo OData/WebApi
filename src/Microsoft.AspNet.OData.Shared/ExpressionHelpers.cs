@@ -30,6 +30,15 @@ namespace Microsoft.AspNet.OData
             return query.Provider.CreateQuery(skipQuery);
         }
 
+        public static IQueryable SkipWhile<T>(IQueryable query, T count, Type type, bool parameterize)
+        {
+            MethodInfo skipWhileMethod = ExpressionHelperMethods.QueryableSkipGeneric.MakeGenericMethod(type);
+            Expression skipValueExpression = parameterize ? LinqParameterContainer.Parameterize(typeof(int), count) : Expression.Constant(count);
+
+            Expression skipQuery = Expression.Call(null, skipWhileMethod, new[] { query.Expression, skipValueExpression });
+            return query.Provider.CreateQuery(skipQuery);
+        }
+
         public static IQueryable Take(IQueryable query, int count, Type type, bool parameterize)
         {
             Expression takeQuery = Take(query.Expression, count, type, parameterize);

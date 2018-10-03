@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData
                 queryBuilder.Append('&');
             }
 
-            queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
+            queryBuilder.AppendFormat("$skiptoken={0}", nextPageSkip);
 
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {

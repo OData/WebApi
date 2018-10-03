@@ -28,6 +28,8 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int), default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
+        private static MethodInfo _skipwhileMethod = GenericMethodOf(_ => Queryable.SkipWhile<int>(default(IQueryable<int>), default(Expression<Func<int,bool>>)));
+        private static MethodInfo _enumerableSkipWhileMethod = GenericMethodOf(_ => Enumerable.SkipWhile<int>(default(IEnumerable<int>), default(Func<int, bool>)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
 
         private static MethodInfo _queryableContainsMethod = GenericMethodOf(_ => Queryable.Contains<int>(default(IQueryable<int>), default(int)));

@@ -4,6 +4,7 @@
 #if NETCORE
 using System;
 using System.IO;
+using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -21,7 +22,6 @@ using System;
 using System.Data.Linq;
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;

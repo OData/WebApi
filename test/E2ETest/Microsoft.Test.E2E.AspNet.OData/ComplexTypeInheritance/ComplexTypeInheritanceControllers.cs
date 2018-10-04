@@ -269,7 +269,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             return Updated(window.OptionalShapes);
         }
 
-
         [HttpPost]
         public ITestActionResult PostToPolygonalShapes(int key, [FromBody]Polygon newPolygon)
         {

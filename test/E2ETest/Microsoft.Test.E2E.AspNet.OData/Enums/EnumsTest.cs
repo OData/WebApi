@@ -418,14 +418,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
         [Fact]
         public async Task PostToEnumCollection()
         {
-            await ResetDatasource();
             //Arrange
+            await ResetDatasource();
             string requestUri = this.BaseAddress + "/convention/Employees/2/SkillSet?$format=application/json;odata.metadata=none";
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
             int count = 0;
             requestForPost.Content = new StringContent(content: @"{
                     'value':'Sql'
                     }", encoding: Encoding.UTF8, mediaType: "application/json");
+            //Get the count before the post
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 response.EnsureSuccessStatusCode();

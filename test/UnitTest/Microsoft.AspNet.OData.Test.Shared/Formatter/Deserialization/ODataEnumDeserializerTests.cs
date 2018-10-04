@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Net.Http;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -34,7 +35,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), _edmModel),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
                 typeof(Color), readContext);
 
             // Assert
@@ -56,7 +57,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), _edmModel),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
                 typeof(Color), readContext);
 
             // Assert
@@ -78,7 +79,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), _edmModel),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
                 typeof(Color), readContext);
 
             // Assert
@@ -106,7 +107,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), model),
                 typeof(Level), readContext);
 
             // Assert

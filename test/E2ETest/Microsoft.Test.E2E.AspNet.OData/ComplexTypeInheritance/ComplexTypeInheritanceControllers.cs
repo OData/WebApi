@@ -264,8 +264,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             {
                 return NotFound();
             }
+            Assert.NotNull(newShape);
             window.OptionalShapes.Add(newShape);
-            return Ok(window.OptionalShapes);
+            return Updated(window.OptionalShapes);
         }
 
 
@@ -277,12 +278,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             {
                 return NotFound();
             }
-            if (newPolygon == null)
-            {
-                return Ok(newPolygon);
-            }
+            Assert.NotNull(newPolygon);
             window.PolygonalShapes.Add(newPolygon);
-            return Ok(window.PolygonalShapes);
+            return Updated(window.PolygonalShapes);
         }
 
         [HttpPatch]

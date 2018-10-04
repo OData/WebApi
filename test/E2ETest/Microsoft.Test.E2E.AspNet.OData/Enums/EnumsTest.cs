@@ -438,7 +438,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             //Act
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
             }
 
             //Assert

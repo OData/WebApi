@@ -16,13 +16,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
         }
 
-        internal static IODataRequestMessage GetODataMessage(string content)
+        internal static IODataRequestMessage GetODataMessage(string content, HttpRequestMessage request)
         {
             // While NetCore does not use this for AspNet, it can be used here to create
             // an HttpRequestODataMessage, which is a Test type that implments IODataRequestMessage
             // wrapped around an HttpRequestMessage.
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address");
-
             request.Content = new StringContent(content);
             request.Headers.Add("OData-Version", "4.0");
 

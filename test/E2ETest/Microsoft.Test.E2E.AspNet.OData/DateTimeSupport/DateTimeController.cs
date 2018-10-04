@@ -166,7 +166,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
             {
                 string s = e.HelpLink;
             }
-            return Ok(newDateTime);
+            return Updated(newDateTime);
         }
 
         [ODataRoute("ResetDataSource")]

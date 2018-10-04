@@ -20,6 +20,7 @@ using Xunit;
 using System;
 using System.Data.Linq;
 using System.IO;
+using System.Net.Http;
 using System.Text;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -259,7 +260,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
             
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address")), model), type, readContext);
 
             // Assert
             Assert.Equal(expected,value);
@@ -283,7 +284,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content), model), type, readContext);
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address")), model), type, readContext);
 
             // Assert
             Assert.Equal(expected,value);

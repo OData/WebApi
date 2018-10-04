@@ -623,22 +623,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             HttpResponseMessage response = await Client.SendAsync(requestForPost);
             string contentOfString = await response.Content.ReadAsStringAsync();
 
-            Assert.True(HttpStatusCode.OK == response.StatusCode,
+            Assert.True(HttpStatusCode.NoContent == response.StatusCode,
                 String.Format("\nExpected status code: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
-                    HttpStatusCode.Created,
+                    HttpStatusCode.NoContent,
                     response.StatusCode,
                     requestUri,
                     contentOfString));
-
-            JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
-            var result = contentOfJObject.GetValue("value") as JArray;
-
-            Assert.True(count+1 == result.Count,
-                String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}",
-                count+1,
-                contentOfJObject.Count,
-                requestUri,
-                contentOfString));
         }
 
         [Theory]

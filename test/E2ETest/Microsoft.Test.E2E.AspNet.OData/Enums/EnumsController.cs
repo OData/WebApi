@@ -129,7 +129,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             }
 
             employee.SkillSet.Add(newSkill);
-            return Ok(employee);
+            return Updated(employee);
         }
 
         public ITestActionResult Put(int key, [FromBody]Employee employee)

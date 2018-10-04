@@ -415,8 +415,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             }
         }
 
-
-
         [Fact]
         public async Task PostToEnumCollection()
         {
@@ -424,23 +422,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             //Arrange
             string requestUri = this.BaseAddress + "/convention/Employees/2/SkillSet?$format=application/json;odata.metadata=none";
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
-
+            int count = 0;
             requestForPost.Content = new StringContent(content: @"{
                     'value':'Sql'
                     }", encoding: Encoding.UTF8, mediaType: "application/json");
-           
-            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
-
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
-                Assert.Single(result);
+                count = result.Count;
+            }
+
+            //Act
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Assert
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+                Assert.True(count + 1 == result.Count,
+                    String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2}",
+                    count + 1,
+                    result.Count,
+                    requestUri));
             }
         }
 

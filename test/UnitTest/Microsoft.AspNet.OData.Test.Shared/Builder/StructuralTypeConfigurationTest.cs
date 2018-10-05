@@ -4,7 +4,6 @@
 using System;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
-using Microsoft.AspNet.OData.Test.Builder.TestModelss;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 using Xunit;
@@ -63,7 +62,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_AssignedNamespace()
         {
-            // Act.
+            // Arrange & Act.
             string expectedNamespace = "TestingNamespace";
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
             {
@@ -82,12 +81,38 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration
+        /// but individual types can have namespaces assigned to them as well.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_AssignedNamespaceAndClassNamespace()
+        {
+            // Arrange & Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
+            {
+                Namespace = expectedNamespace
+            };
+
+            modelBuilder.EntitySet<Client>("clients");
+            modelBuilder.EntitySet<MyOrder>("orders").EntityType.Namespace = "DifferentNamespace";
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal("DifferentNamespace", modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
         /// Tests the namespace assignment logic to ensure that default CLR namespace is used if user does not assign one.
         /// </summary>
         [Fact]
         public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_DefaultNamespace()
         {
-            // Act.
+            // Arrange & Act.
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
 
             modelBuilder.EntitySet<Client>("clients");
@@ -107,7 +132,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_NamespaceAssignedAfterAddingEntities()
         {
-            // Act.
+            // Arrange & Act.
             string expectedNamespace = "TestingNamespace";
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
 

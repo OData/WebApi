@@ -14,7 +14,6 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
-using Microsoft.AspNet.OData.Test.Builder.TestModelss;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json.Linq;

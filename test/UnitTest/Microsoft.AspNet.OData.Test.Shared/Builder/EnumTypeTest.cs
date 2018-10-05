@@ -1133,7 +1133,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void NamespaceAssignment_AutoAssignsNamespaceToEnumType_AssignedNamespace()
         {
-            // Act.
+            // Arrange and Act.
             string expectedNamespace = "TestingNamespace";
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
             {
@@ -1151,7 +1151,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void NamespaceAssignment_AutoAssignsNamespaceToEnumType_DefaultNamespace()
         {
-            // Act.
+            // Arrange and Act.
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
 
             // Assert

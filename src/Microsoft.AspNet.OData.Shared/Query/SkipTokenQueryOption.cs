@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Query
     public class SkipTokenQueryOption
     {
 
-        private int? _value;
+        private string _value;
         private ODataQueryOptionParser _queryOptionParser;
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$skip", rawValue } });
+                new Dictionary<string, string> { { "$skiptoken", rawValue } });
         }
 
         /// <summary>
@@ -88,28 +88,18 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Gets the value of the $skiptoken as a parsed integer.
         /// </summary>
-        public int Value
+        public string Value
         {
             get
             {
                 if (_value == null)
                 {
-                    long? skipValue = _queryOptionParser.ParseSkip();
+                    string skipValue = _queryOptionParser.ParseSkipToken();
 
-                    if (skipValue.HasValue && skipValue > Int32.MaxValue)
-                    {
-                        throw new ODataException(Error.Format(
-                            SRResources.SkipTopLimitExceeded,
-                            Int32.MaxValue,
-                            AllowedQueryOptions.Skip,
-                            RawValue));
-                    }
 
-                    _value = (int?)skipValue;
+                    _value = skipValue;
                 }
-
-                Contract.Assert(_value.HasValue);
-                return _value.Value;
+                return _value;
             }
         }
 
@@ -164,7 +154,7 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
             //return ExpressionHelpers.Where(query, () =>  ,query.ElementType)
-            return ExpressionHelpers.Skip(query, Value, query.ElementType, querySettings.EnableConstantParameterization);
+            return ExpressionHelpers.SkipWhile<string>(query, Value, query.ElementType, querySettings.EnableConstantParameterization);
         }
     }
 }

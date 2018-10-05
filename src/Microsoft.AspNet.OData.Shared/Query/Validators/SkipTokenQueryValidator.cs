@@ -45,4 +45,3 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
 
 }
-}

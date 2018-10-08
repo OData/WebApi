@@ -509,7 +509,23 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            return new ODataQueryContext(model, elementClrType, path);
+            var typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
+            IEdmType elementType = null;
+            if (typeMappingHandler != null)
+            {
+                elementType = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
+                if (elementType is IEdmCollectionType collection)
+                {
+                    elementType = collection.ElementType.Definition;
+                }
+            }
+
+            if (elementType == null)
+            {
+                elementType = model.GetEdmType(elementClrType);
+            }
+
+            return new ODataQueryContext(model, elementType, elementClrType, path);
         }
 
         /// <summary>
@@ -732,8 +748,24 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            IEdmEntityType baseEntityType = model.GetEdmType(elementClrType) as IEdmEntityType;
-            IEdmStructuredType structuredType = model.GetEdmType(elementClrType) as IEdmStructuredType;
+            var typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
+            IEdmType type = null;
+            if (typeMappingHandler != null)
+            {
+                type = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
+                if (type is IEdmCollectionType collection)
+                {
+                    type = collection.ElementType.Definition;
+                }
+            }
+
+            if (type == null)
+            {
+                type = model.GetEdmType(elementClrType);
+            }
+
+            IEdmEntityType baseEntityType = type as IEdmEntityType;
+            IEdmStructuredType structuredType = type as IEdmStructuredType;
             IEdmProperty property = null;
             if (path != null)
             {

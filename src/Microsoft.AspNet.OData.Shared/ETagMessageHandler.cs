@@ -76,14 +76,7 @@ namespace Microsoft.AspNet.OData
                 return null;
             }
 
-            IEdmObject edmObject = value as IEdmEntityObject;
-            if (edmObject != null)
-            {
-                IEdmTypeReference edmTypeReference = edmObject.GetEdmType();
-                return edmTypeReference.AsEntity();
-            }
-
-            IEdmTypeReference reference = EdmLibHelpers.GetEdmTypeReference(model, value.GetType());
+            IEdmTypeReference reference = model.GetEdmTypeReference(value);
             if (reference != null && reference.Definition.IsOrInheritsFrom(edmType))
             {
                 return (IEdmEntityTypeReference)reference;

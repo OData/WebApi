@@ -172,7 +172,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
             // derived property using cast
-            if (elementType != declaringType)
+            if (!elementType.IsOrInheritsFrom(declaringType))
             {
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
@@ -674,7 +674,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (derivedTypes.Count == 0)
             {
                 // no inheritance.
-                return null;
+                return Expression.Constant(elementType.FullTypeName());
             }
             else
             {

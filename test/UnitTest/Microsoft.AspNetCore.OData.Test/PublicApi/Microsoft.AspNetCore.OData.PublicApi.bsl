@@ -45,6 +45,13 @@ public interface Microsoft.AspNet.OData.IEdmEntityObject : IEdmObject, IEdmStruc
 public interface Microsoft.AspNet.OData.IEdmEnumObject : IEdmObject {
 }
 
+public interface Microsoft.AspNet.OData.IEdmModelClrTypeMappingHandler {
+	Microsoft.OData.Edm.IEdmCollectionType MapClrEnumerableToEdmCollection (Microsoft.OData.Edm.IEdmModel edmModel, System.Type clrType, System.Type elementClrType)
+	Microsoft.OData.Edm.IEdmType MapClrInstanceToEdmType (Microsoft.OData.Edm.IEdmModel edmModel, object clrInstance)
+	Microsoft.OData.Edm.IEdmTypeReference MapClrInstanceToEdmTypeReference (Microsoft.OData.Edm.IEdmModel edmModel, object clrInstance)
+	Microsoft.OData.Edm.IEdmType MapClrTypeToEdmType (Microsoft.OData.Edm.IEdmModel edmModel, System.Type clrType)
+}
+
 public interface Microsoft.AspNet.OData.IEdmObject {
 	Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 }
@@ -529,6 +536,7 @@ public class Microsoft.AspNet.OData.ODataOptions {
 public class Microsoft.AspNet.OData.ODataQueryContext {
 	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, ODataPath path)
 	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, System.Type elementClrType, ODataPath path)
+	public ODataQueryContext (Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.Edm.IEdmType elementType, System.Type elementClrType, ODataPath path)
 
 	DefaultQuerySettings DefaultQuerySettings  { public get; }
 	System.Type ElementClrType  { public get; }

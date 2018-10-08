@@ -108,11 +108,10 @@ namespace Microsoft.AspNet.OData.Results
 
         private static IEdmEntityTypeReference GetEntityType(IEdmModel model, object entity)
         {
-            Type entityType = entity.GetType();
-            IEdmTypeReference edmType = model.GetEdmTypeReference(entityType);
+            IEdmTypeReference edmType = model.GetEdmTypeReference(entity);
             if (edmType == null)
             {
-                throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, entityType.FullName);
+                throw Error.InvalidOperation(SRResources.ResourceTypeNotInModel, entity.GetType().FullName);
             }
             if (!edmType.IsEntity())
             {

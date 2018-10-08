@@ -121,6 +121,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Contract.Assert(edmModel != null);
             Contract.Assert(clrType != null);
 
+            var typeMappingHandler = edmModel.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(edmModel);
             IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
             if (primitiveType != null)
             {
@@ -142,6 +143,15 @@ namespace Microsoft.AspNet.OData.Formatter
                             elementClrType = entityType;
                         }
 
+                        if (typeMappingHandler != null)
+                        {
+                            var edmType = typeMappingHandler.MapClrEnumerableToEdmCollection(edmModel, clrType, elementClrType);
+                            if (edmType != null)
+                            {
+                                return edmType;
+                            }
+                        }
+
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
                         {
@@ -157,17 +167,30 @@ namespace Microsoft.AspNet.OData.Formatter
                 }
 
                 // search for the ClrTypeAnnotation and return it if present
-                IEdmType returnType =
-                    edmModel
-                    .SchemaElements
-                    .OfType<IEdmType>()
-                    .Select(edmType => new { EdmType = edmType, Annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType) })
-                    .Where(tuple => tuple.Annotation != null && tuple.Annotation.ClrType == clrType)
-                    .Select(tuple => tuple.EdmType)
-                    .SingleOrDefault();
+                IEdmType returnType = null;
+
+                if (typeMappingHandler != null)
+                {
+                    returnType = typeMappingHandler.MapClrTypeToEdmType(edmModel, clrType);
+                }
+
+                if (returnType == null)
+                {
+                    returnType = edmModel
+                        .SchemaElements
+                        .OfType<IEdmType>()
+                        .Select(edmType => new {EdmType = edmType, Annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType)})
+                        .Where(tuple => tuple.Annotation != null && tuple.Annotation.ClrType == clrType)
+                        .Select(tuple => tuple.EdmType)
+                        .SingleOrDefault();
+                }
 
                 // default to the EdmType with the same name as the ClrType name
-                returnType = returnType ?? edmModel.FindType(clrType.EdmFullName());
+                if (returnType == null)
+                {
+                    returnType = edmModel.FindType(clrType.EdmFullName());
+                }
+                
 
                 if (TypeHelper.GetBaseType(clrType) != null)
                 {
@@ -176,6 +199,39 @@ namespace Microsoft.AspNet.OData.Formatter
                 }
                 return returnType;
             }
+        }
+
+        public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, object clrInstance)
+        {
+            return GetEdmTypeReference(edmModel, clrInstance, clrInstance.GetType());
+        }
+
+        public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, object clrInstance, Type clrType)
+        {
+            IEdmTypeReference typeReference = null;
+
+            IEdmObject edmObject = clrInstance as IEdmEntityObject;
+            if (edmObject != null)
+            {
+                typeReference = edmObject.GetEdmType();
+            }
+
+            if (typeReference == null)
+            {
+                var typeMappingHandler = edmModel.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(edmModel);
+                if (typeMappingHandler != null)
+                {
+                    typeReference = typeMappingHandler.MapClrInstanceToEdmTypeReference(edmModel, clrInstance);
+                }
+            }
+
+
+            if (typeReference == null)
+            {
+                typeReference = edmModel.GetEdmTypeReference(clrType);
+            }
+
+            return typeReference;
         }
 
         public static IEdmTypeReference GetEdmTypeReference(this IEdmModel edmModel, Type clrType)

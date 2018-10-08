@@ -64,6 +64,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEdmModelClrTypeMappingHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />

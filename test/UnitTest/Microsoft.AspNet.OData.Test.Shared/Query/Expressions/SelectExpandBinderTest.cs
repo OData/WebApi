@@ -815,7 +815,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
-        public void CreateTypeNameExpression_ReturnsNull_IfTypeHasNoDerivedTypes()
+        public void CreateTypeNameExpression_ReturnsFullTypeName_IfTypeHasNoDerivedTypes()
         {
             // Arrange
             IEdmEntityType baseType = new EdmEntityType("NS", "BaseType");
@@ -828,7 +828,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Expression result = SelectExpandBinder.CreateTypeNameExpression(source, baseType, model);
 
             // Assert
-            Assert.Null(result);
+            Assert.Equal(ExpressionType.Constant, result.NodeType);
+            Assert.Equal(baseType.FullTypeName(), (result as ConstantExpression).Value);
         }
 
         //[Fact]

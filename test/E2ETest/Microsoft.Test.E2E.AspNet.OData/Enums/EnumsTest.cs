@@ -421,12 +421,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             //Arrange
             await ResetDatasource();
             string requestUri = this.BaseAddress + "/convention/Employees/2/SkillSet?$format=application/json;odata.metadata=none";
-            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            int count = 0;
-            requestForPost.Content = new StringContent(content: @"{
-                    'value':'Sql'
-                    }", encoding: Encoding.UTF8, mediaType: "application/json");
             //Get the count before the post
+            int count = 0;
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 response.EnsureSuccessStatusCode();
@@ -435,6 +431,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                 var result = json.GetValue("value") as JArray;
                 count = result.Count;
             }
+
+            //Setup the post request
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestForPost.Content = new StringContent(content: @"{
+                    'value':'Sql'
+                    }", encoding: Encoding.UTF8, mediaType: "application/json");
 
             //Act
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))

@@ -253,7 +253,6 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Empty(SelectActionHelper.GetRouteData(request).Values);
         }
 
-
         [Theory]
         [InlineData("Get", "Get")]
         [InlineData("Put", "PutTo")]
@@ -276,7 +275,6 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Single(SelectActionHelper.GetRouteData(request).Values);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
         }
-
 
         [Theory]
         [InlineData("Get", "Get")]

@@ -123,7 +123,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
 
             return Ok(files);
         }
-        
+
         [HttpPost]
         public ITestActionResult CopyFiles(int key, [FromBody]ODataActionParameters parameters)
         {
@@ -157,16 +157,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
             {
                 return NotFound();
             }
-            try
-            {
-                file.ModifiedDates.Add(newDateTime);
-
-            }
-            catch (Exception e)
-            {
-                string s = e.HelpLink;
-            }
-            return Updated(newDateTime);
+            file.ModifiedDates.Add(newDateTime);
+            return Updated(file.ModifiedDates);
         }
 
         [ODataRoute("ResetDataSource")]

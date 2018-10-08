@@ -192,7 +192,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataMessageReader messageReader = new ODataMessageReader(message as IODataResponseMessage, new ODataMessageReaderSettings(), model);
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model, ResourceType = type };
-
             
             serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
@@ -207,7 +206,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [MemberData(nameof(EdmPrimitiveData))]
         public void Read_Primitive(object obj, string edmType, string value)
         {
-                    // Arrange
+            // Arrange
             IEdmModel model = CreateModel();
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
             ODataPrimitiveDeserializer deserializer = new ODataPrimitiveDeserializer();

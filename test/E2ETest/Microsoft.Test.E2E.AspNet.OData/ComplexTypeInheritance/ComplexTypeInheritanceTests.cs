@@ -48,14 +48,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
         }
 
-        public static TheoryDataSet<string, string, string,bool> NewCollectionMembers
+        public static TheoryDataSet<string, string, string,bool> PostToCollectionNewComplextTypeMembers
         {
             get
             {
-                return new TheoryDataSet<string, string, string,bool>
-               {
-
-                   { "convention", @"
+                string[] modes = new string[] { "convention", "explicit" };
+                string[] targets = { "OptionalShapes", "PolygonalShapes" };
+                bool[] representations = { true, false };
+                string[] objects = new string[]
+                {
+                    @"
 {
         '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
         'HasBorder':true,'Vertexes':[
@@ -64,24 +66,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             {'X':14,'Y':41}
         ]
 }",
-                   "OptionalShapes", true
-                    },
-
-
-                   { "explicit", @"
-{
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
-        'HasBorder':true,'Vertexes':[
-            {'X':21,'Y':12},
-            {'X':32,'Y':23},
-            {'X':14,'Y':41}
-        ]
-}" ,
-                   "OptionalShapes",true
-                   },
-
-
-                   { "convention", @"
+                    @"
 {
         '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
         'HasBorder':true,
@@ -89,71 +74,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         'Height':4,
         'TopLeft':{ 'X':1,'Y':2}
 }",
-                    
-                   "PolygonalShapes", true
-                    },
-
-                   { "explicit", @"
-{
-            '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
-            'HasBorder':true,
-            'Width':3,
-            'Height':4,
-            'TopLeft':{ 'X':1,'Y':2}
-}",
-                   "PolygonalShapes", true
-                   },
-
-                   { "convention", @"
-{
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
-        'HasBorder':true,'Vertexes':[
-            {'X':21,'Y':12},
-            {'X':32,'Y':23},
-            {'X':14,'Y':41}
-        ]
-}",
-                   "OptionalShapes", false
-                    },
-
-
-                   { "explicit", @"
-{
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
-        'HasBorder':true,'Vertexes':[
-            {'X':21,'Y':12},
-            {'X':32,'Y':23},
-            {'X':14,'Y':41}
-        ]
-}" ,
-                   "OptionalShapes",false
-                   },
-
-
-                   { "convention", @"
-{
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
-        'HasBorder':true,
-        'Width':3,
-        'Height':4,
-        'TopLeft':{ 'X':1,'Y':2}
-}",
-
-                   "PolygonalShapes", false
-                   },
-
-                   { "explicit", @"
-{
-            '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
-            'HasBorder':true,
-            'Width':3,
-            'Height':4,
-            'TopLeft':{ 'X':1,'Y':2}
-}",
-                   "PolygonalShapes", false
-                   },
-
                 };
+
+                TheoryDataSet<string, string, string, bool> data = new TheoryDataSet<string, string, string, bool>();
+
+                foreach(string mode in modes)
+                {
+                    foreach(string obj in objects)
+                    {
+                        foreach(string target in targets)
+                            foreach(bool representation in representations)
+                            {
+                                data.Add(mode, obj, target, representation);
+                            }
+                    }
+                }
+                return data;
             }
 
         }
@@ -650,14 +586,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         }
 
         [Theory]
-        [MemberData(nameof(NewCollectionMembers))]
+        [MemberData(nameof(PostToCollectionNewComplextTypeMembers))]
         // POST ~/Windows(3)/OptionalShapes
         public async Task PostToCollectionComplexTypeProperty(string modelMode, string jObject, string targetPropertyResource, bool returnRepresentation)
         {
             //Arrange
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(3)/"+ targetPropertyResource;
+
+            //send a get request to get the current count
             int count = 0;
+            using (HttpResponseMessage getResponse = await this.Client.GetAsync(requestUri))
+            {
+                getResponse.EnsureSuccessStatusCode();
+
+                var json = await getResponse.Content.ReadAsObject<JObject>();
+                var state = json.GetValue("value") as JArray;
+                count = state.Count;
+            }
 
             //Setup the post request
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
@@ -667,20 +613,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 requestForPost.Headers.Add("Prefer", "return=representation");
             }
 
-            //send a get request to get the current count
-            using (HttpResponseMessage getResponse = await this.Client.GetAsync(requestUri))
-            {
-                getResponse.EnsureSuccessStatusCode();
-
-                var json = await getResponse.Content.ReadAsObject<JObject>();
-                var state=json.GetValue("value") as JArray;
-                count = state.Count;
-            }
-
             //Act & Assert
             HttpResponseMessage response = await Client.SendAsync(requestForPost);
             string contentOfString = await response.Content.ReadAsStringAsync();
-
 
             if(returnRepresentation)
             {

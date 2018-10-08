@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         internal IEdmTypeReference GetEdmType(object instance, Type type)
         {
-            IEdmTypeReference edmType;
+            IEdmTypeReference edmType = null;
 
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
@@ -168,27 +168,36 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
                 }
 
-                _typeMappingCache = _typeMappingCache ?? Model.GetTypeMappingCache();
-                edmType = _typeMappingCache.GetEdmType(type, Model);
+                IEdmModelClrTypeMappingHandler typeMappingHandler = Model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(Model);
+                if (typeMappingHandler != null)
+                {
+                    edmType = typeMappingHandler.MapClrInstanceToEdmTypeReference(Model, instance);
+                }
 
                 if (edmType == null)
                 {
-                    if (instance != null)
-                    {
-                        edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
-                    }
+                    _typeMappingCache = _typeMappingCache ?? Model.GetTypeMappingCache();
+                    edmType = _typeMappingCache.GetEdmType(type, Model);
 
                     if (edmType == null)
                     {
-                        throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                        if (instance != null)
+                        {
+                            edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        }
+
+                        if (edmType == null)
+                        {
+                            throw Error.InvalidOperation(SRResources.ClrTypeNotInModel, type);
+                        }
                     }
-                }
-                else if (instance != null)
-                {
-                    IEdmTypeReference actualType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
-                    if (actualType != null && actualType != edmType)
+                    else if (instance != null)
                     {
-                        edmType = actualType;
+                        IEdmTypeReference actualType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        if (actualType != null && actualType != edmType)
+                        {
+                            edmType = actualType;
+                        }
                     }
                 }
             }

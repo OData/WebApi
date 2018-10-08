@@ -60,6 +60,8 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Edm
             // Register base type of interiors and ignore user-defined properties 
             // they are defined below according to the current DB confiuration
             var interiorTypeConfiguration = builder.EntityType<Interior>();
+            interiorTypeConfiguration.Ignore(i => i.DefinitionID);
+            interiorTypeConfiguration.Ignore(i => i.Definition);
             interiorTypeConfiguration.Ignore(i => i.StringProperty1);
             interiorTypeConfiguration.Ignore(i => i.StringProperty2);
             interiorTypeConfiguration.Ignore(i => i.StringProperty3);

@@ -46,10 +46,12 @@ public interface Microsoft.AspNet.OData.IEdmEnumObject : IEdmObject {
 }
 
 public interface Microsoft.AspNet.OData.IEdmModelClrTypeMappingHandler {
+	void InitializeClrInstanceForDeserialization (Microsoft.OData.Edm.IEdmModel edmModel, Microsoft.OData.Edm.IEdmStructuredTypeReference typeReference, object clrInstance)
 	Microsoft.OData.Edm.IEdmCollectionType MapClrEnumerableToEdmCollection (Microsoft.OData.Edm.IEdmModel edmModel, System.Type clrType, System.Type elementClrType)
 	Microsoft.OData.Edm.IEdmType MapClrInstanceToEdmType (Microsoft.OData.Edm.IEdmModel edmModel, object clrInstance)
 	Microsoft.OData.Edm.IEdmTypeReference MapClrInstanceToEdmTypeReference (Microsoft.OData.Edm.IEdmModel edmModel, object clrInstance)
 	Microsoft.OData.Edm.IEdmType MapClrTypeToEdmType (Microsoft.OData.Edm.IEdmModel edmModel, System.Type clrType)
+	Microsoft.OData.Edm.IEdmTypeReference MapClrTypeToTypeReference (Microsoft.OData.Edm.IEdmModel edmModel, System.Type clrType, ODataPath path)
 }
 
 public interface Microsoft.AspNet.OData.IEdmObject {

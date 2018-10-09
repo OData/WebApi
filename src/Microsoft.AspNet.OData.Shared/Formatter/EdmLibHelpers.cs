@@ -1125,5 +1125,12 @@ namespace Microsoft.AspNet.OData.Formatter
                     String.Join("_", type.GetGenericArguments().Select(t => MangleClrTypeName(t))));
             }
         }
+
+        public static IEdmType UnwrapCollectionType(IEdmType type)
+        {
+            return type is IEdmCollectionType collection 
+                ? collection.ElementType.Definition 
+                : type;
+        }
     }
 }

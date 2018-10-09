@@ -509,15 +509,12 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            var typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
             IEdmType elementType = null;
+            IEdmModelClrTypeMappingHandler typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
             if (typeMappingHandler != null)
             {
                 elementType = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
-                if (elementType is IEdmCollectionType collection)
-                {
-                    elementType = collection.ElementType.Definition;
-                }
+                elementType = EdmLibHelpers.UnwrapCollectionType(elementType);
             }
 
             if (elementType == null)
@@ -748,15 +745,12 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            var typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
             IEdmType type = null;
+            IEdmModelClrTypeMappingHandler typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
             if (typeMappingHandler != null)
             {
                 type = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
-                if (type is IEdmCollectionType collection)
-                {
-                    type = collection.ElementType.Definition;
-                }
+                type = EdmLibHelpers.UnwrapCollectionType(type);
             }
 
             if (type == null)

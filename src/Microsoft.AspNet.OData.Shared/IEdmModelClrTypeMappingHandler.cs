@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -20,6 +21,15 @@ namespace Microsoft.AspNet.OData
         /// <returns>The <see cref="IEdmType"/> that corresponds for the given CLR type or <code>null</code> if default mapping should be performed.</returns>
         IEdmType MapClrTypeToEdmType(IEdmModel edmModel, Type clrType);
 
+        /// <summary>
+        /// Maps a given CLR type to its corresponding <see cref="IEdmTypeReference"/>. 
+        /// </summary>
+        /// <param name="edmModel">The EDM model for which the conversion should be performed.</param>
+        /// <param name="clrType">The CLR type that should be mapped.</param>
+        /// <param name="path">The OData path that can be used to obtain further information about the requested type.</param>
+        /// <returns></returns>
+        IEdmTypeReference MapClrTypeToTypeReference(IEdmModel edmModel, Type clrType, ODataPath path);
+        
         /// <summary>
         /// Maps a given CLR collection to its corresponding <see cref="IEdmCollectionType"/>
         /// </summary>
@@ -48,5 +58,13 @@ namespace Microsoft.AspNet.OData
         /// <param name="clrInstance">The CLR object for which the mapping should be performed.</param>
         /// <returns>The <see cref="IEdmTypeReference"/> that corresponds for the given CLR instance or <code>null</code> if default mapping should be performed.</returns>
         IEdmTypeReference MapClrInstanceToEdmTypeReference(IEdmModel edmModel, object clrInstance);
+
+        /// <summary>
+        /// Initializes a newly created CLR object before the deserialization starts. 
+        /// </summary>
+        /// <param name="edmModel">The EDM model defining the <paramref name="typeReference" />.</param>
+        /// <param name="typeReference">The EDM type being deserialized. </param>
+        /// <param name="clrInstance">The CLR object into which the properties will be filled</param>
+        void InitializeClrInstanceForDeserialization(IEdmModel edmModel, IEdmStructuredTypeReference typeReference, object clrInstance);
     }
 }

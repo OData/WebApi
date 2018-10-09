@@ -41,21 +41,6 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Utils
                     .ActionDescriptors.Items.OfType<ControllerActionDescriptor>()
                     .Where(c => c.ControllerName == ControllerName);
 
-                if (odataPath.PathTemplate == "~/entityset/key/navigation")
-                {
-                    if (routeContext.HttpContext.Request.Method.ToUpperInvariant() == "GET")
-                    {
-                        NavigationPropertySegment navigationPathSegment = (NavigationPropertySegment)odataPath.Segments.Last();
-
-                        routeContext.RouteData.Values["navigation"] = navigationPathSegment.NavigationProperty.Name;
-
-                        KeySegment keyValueSegment = (KeySegment)odataPath.Segments[1];
-                        routeContext.RouteData.Values[ODataRouteConstants.Key] = keyValueSegment.Keys.First().Value;
-
-                        return actionDescriptors.Where(c => c.ActionName == "GetNavigation");
-                    }
-                }
-
                 SelectControllerResult controllerResult = new SelectControllerResult(ControllerName, null);
                 IList<IODataRoutingConvention> routingConventions = ODataRoutingConventions.CreateDefault();
                 foreach (NavigationSourceRoutingConvention nsRouting in routingConventions.OfType<NavigationSourceRoutingConvention>())

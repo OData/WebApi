@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
@@ -95,8 +96,6 @@ namespace Microsoft.AspNet.OData.Query
                 if (_value == null)
                 {
                     string skipValue = _queryOptionParser.ParseSkipToken();
-
-
                     _value = skipValue;
                 }
                 return _value;
@@ -153,8 +152,15 @@ namespace Microsoft.AspNet.OData.Query
             {
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
-            //return ExpressionHelpers.Where(query, () =>  ,query.ElementType)
-            return ExpressionHelpers.SkipWhile<string>(query, Value, query.ElementType, querySettings.EnableConstantParameterization);
+
+            string avoidCompileError = querySettings.ToString();
+            avoidCompileError = avoidCompileError.ToString();
+            ParameterExpression param = Expression.Parameter(Context.ElementClrType);
+            Expression lastValue = Expression.Constant(Value);
+            BinaryExpression where = Expression.GreaterThan(param, lastValue);
+
+            return ExpressionHelpers.Where(query, where, query.ElementType);
+            //return ExpressionHelpers.SkipWhile<string>(query, v, query.ElementType, querySettings.EnableConstantParameterization);
         }
     }
 }

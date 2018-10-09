@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -49,7 +49,8 @@ namespace Microsoft.AspNet.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = SkipTokenQueryValidator.GetSkipQueryValidator(context);
+            ParseKeyValuePairs(rawValue);
+            Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
             _queryOptionParser = queryOptionParser;
         }
 
@@ -68,7 +69,7 @@ namespace Microsoft.AspNet.OData.Query
 
             Context = context;
             RawValue = rawValue;
-            Validator = SkipTokenQueryValidator.GetSkipQueryValidator(context);
+            Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
                 context.ElementType,
@@ -76,10 +77,28 @@ namespace Microsoft.AspNet.OData.Query
                 new Dictionary<string, string> { { "$skiptoken", rawValue } });
         }
 
+        private void ParseKeyValuePairs(string rawValue)
+        {
+            KeyValuePairs = new Dictionary<string, object>();
+            string[] keyValues = rawValue.Split(',');
+            foreach(string keyAndValue in keyValues)
+            {
+                string[] pieces = keyAndValue.Split('=');
+                object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
+                KeyValuePairs.Add(pieces[0], value);
+            }
+
+        }
+
         /// <summary>
         /// Gets the given <see cref="ODataQueryContext"/>.
         /// </summary>
         public ODataQueryContext Context { get; private set; }
+
+        /// <summary>
+        /// Stores the key value pairs for the skiptoken query option
+        /// </summary>
+        public IDictionary<string, object> KeyValuePairs;
 
         /// <summary>
         /// Gets the raw $skiptoken value.
@@ -153,13 +172,25 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
-            string avoidCompileError = querySettings.ToString();
-            avoidCompileError = avoidCompileError.ToString();
+            bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
-            Expression lastValue = Expression.Constant(Value);
-            BinaryExpression where = Expression.GreaterThan(param, lastValue);
+            Expression where = null;
+            int count = 0;
 
-            return ExpressionHelpers.Where(query, where, query.ElementType);
+            foreach (KeyValuePair<string,object> item in KeyValuePairs)
+            {
+                MemberExpression property = Expression.Property(param, item.Key);
+                object value = item.Value;
+                Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
+                BinaryExpression compare = (count == KeyValuePairs.Keys.Count - 1) ? BinaryExpression.GreaterThan(property, constant) : BinaryExpression.GreaterThanOrEqual(property, constant);
+                where = where == null ? compare : Expression.AndAlso(where, compare);
+
+                count++;
+            }
+
+            Expression whereLambda = Expression.Lambda(where, param);
+
+            return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
             //return ExpressionHelpers.SkipWhile<string>(query, v, query.ElementType, querySettings.EnableConstantParameterization);
         }
     }

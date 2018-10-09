@@ -15,11 +15,11 @@ namespace Microsoft.AspNet.OData.Query.Validators
         /// <summary>
         /// Validates a <see cref="SkipTokenQueryOption" />.
         /// </summary>
-        /// <param name="skiptokenQueryOption">The $skip query.</param>
+        /// <param name="skipToken">The $skip query.</param>
         /// <param name="validationSettings">The validation settings.</param>
-        public virtual void Validate(SkipTokenQueryOption skiptokenQueryOption, ODataValidationSettings validationSettings)
+        public virtual void Validate(SkipTokenQueryOption skipToken, ODataValidationSettings validationSettings)
         {
-            if (skiptokenQueryOption == null)
+            if (skipToken == null)
             {
                 throw Error.ArgumentNull("skipQueryOption");
             }
@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
             //See what additional checks need to be in place given the validation settings
         }
 
-        internal static SkipTokenQueryValidator GetSkipQueryValidator(ODataQueryContext context)
+        internal static SkipTokenQueryValidator GetSkipTokenQueryValidator(ODataQueryContext context)
         {
             if (context == null || context.RequestContainer == null)
             {

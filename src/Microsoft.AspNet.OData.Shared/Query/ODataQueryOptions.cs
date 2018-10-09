@@ -123,6 +123,11 @@ namespace Microsoft.AspNet.OData.Query
         public SkipQueryOption Skip { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="SkipTokenQueryOption"/>.
+        /// </summary>
+        public SkipTokenQueryOption SkipToken { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="TopQueryOption"/>.
         /// </summary>
         public TopQueryOption Top { get; private set; }
@@ -391,6 +396,11 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     result = tempResult;
                 }
+            }
+
+            if (IsAvailableODataQueryOption(SkipToken,AllowedQueryOptions.SkipToken))
+            {
+                result = SkipToken.ApplyTo(result, querySettings);
             }
 
             if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
@@ -901,6 +911,7 @@ namespace Microsoft.AspNet.OData.Query
                         break;
                     case "$skiptoken":
                         RawValues.SkipToken = kvp.Value;
+                        SkipToken = new SkipTokenQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$deltatoken":
                         RawValues.DeltaToken = kvp.Value;

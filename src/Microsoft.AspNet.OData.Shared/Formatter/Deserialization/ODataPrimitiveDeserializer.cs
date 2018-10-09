@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmTypeReference edmType = readContext.GetEdmType(type);
             Contract.Assert(edmType != null);
 
-            ODataProperty property = messageReader.ReadProperty();
+            ODataProperty property = messageReader.ReadProperty(edmType);
             return ReadInline(property, edmType, readContext);
         }
 
@@ -65,6 +65,17 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (primitiveProperty == null)
             {
                 throw Error.ArgumentNull("primitiveProperty");
+            }
+
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            //Try and change the value appropriately if type is specified
+            if (readContext.ResourceType != null && primitiveProperty.Value != null)
+            {
+                return EdmPrimitiveHelpers.ConvertPrimitiveValue(primitiveProperty.Value, readContext.ResourceType);
             }
 
             return primitiveProperty.Value;

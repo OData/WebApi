@@ -47,6 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             customer.AddStructuralProperty("SimpleEnum", simpleEnum.ToEdmTypeReference(isNullable: false));
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
             customer.AddStructuralProperty("Account", new EdmComplexTypeReference(account, isNullable: true));
+            customer.AddStructuralProperty("OtherAccounts", new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(account, true))));
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);

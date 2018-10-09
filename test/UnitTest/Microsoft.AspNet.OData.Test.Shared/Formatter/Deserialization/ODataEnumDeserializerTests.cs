@@ -2,11 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Xunit;
 
@@ -37,7 +35,29 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
+                typeof(Color), readContext);
+
+            // Assert
+            Color color = Assert.IsType<Color>(value);
+            Assert.Equal(Color.Blue, color);
+        }
+
+        [Fact]
+        public void ReadFromStreamAsync_RawValue()
+        {
+            // Arrange
+            string content = "{\"value\":\"Blue\"}";
+
+            ODataEnumDeserializer deserializer = new ODataEnumDeserializer();
+            ODataDeserializerContext readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                ResourceType = typeof(Color)
+            };
+
+            // Act
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
                 typeof(Color), readContext);
 
             // Assert
@@ -59,7 +79,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), _edmModel),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), _edmModel),
                 typeof(Color), readContext);
 
             // Assert
@@ -87,35 +107,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             // Act
-            object value = deserializer.Read(GetODataMessageReader(GetODataMessage(content), model),
+            object value = deserializer.Read(ODataDeserializationTestsCommon.GetODataMessageReader(ODataDeserializationTestsCommon.GetODataMessage(content, new HttpRequestMessage(new HttpMethod("Post"), "http://localhost/OData/TestUri")), model),
                 typeof(Level), readContext);
 
             // Assert
             Level level = Assert.IsType<Level>(value);
             Assert.Equal(Level.High, level);
-        }
-
-        private static ODataMessageReader GetODataMessageReader(IODataRequestMessage oDataRequestMessage, IEdmModel edmModel)
-        {
-            return new ODataMessageReader(oDataRequestMessage, new ODataMessageReaderSettings(), edmModel);
-        }
-
-        private static IODataRequestMessage GetODataMessage(string content)
-        {
-            // While NetCore does not use this for AspNet, it can be used here to create
-            // an HttpRequestODataMessage, which is a Test type that implments IODataRequestMessage
-            // wrapped around an HttpRequestMessage.
-            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), "http://localhost/OData/Suppliers(1)/Address");
-
-            request.Content = new StringContent(content);
-            request.Headers.Add("OData-Version", "4.0");
-
-            MediaTypeWithQualityHeaderValue mediaType = new MediaTypeWithQualityHeaderValue("application/json");
-            mediaType.Parameters.Add(new NameValueHeaderValue("odata.metadata", "full"));
-            request.Headers.Accept.Add(mediaType);
-            request.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-
-            return new HttpRequestODataMessage(request);
         }
 
         public enum Color

@@ -118,6 +118,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return Created(employee);
         }
 
+        [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
+        public ITestActionResult PostToSkillSet(int key, [FromBody]Skill newSkill)
+        {
+            Employee employee = Employees.FirstOrDefault(e => e.ID == key);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            employee.SkillSet.Add(newSkill);
+            return Updated(employee.SkillSet);
+        }
+
         public ITestActionResult Put(int key, [FromBody]Employee employee)
         {
             employee.ID = key;

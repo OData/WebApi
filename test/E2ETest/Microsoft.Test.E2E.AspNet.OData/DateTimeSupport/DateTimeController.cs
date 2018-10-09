@@ -27,7 +27,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
                 Name = "File #" + e,
                 CreatedDate = utcDateTime.AddYears(e),
                 DeleteDate = e % 2 == 0 ? (DateTime?)null : localDateTime.AddHours(e * 5),
-                ModifiedDates = new []{ utcDateTime, localDateTime, unspecifiedDateTime }
+                ModifiedDates = new List<DateTime>(){ utcDateTime, localDateTime, unspecifiedDateTime }
             }).ToList();
         }
 
@@ -137,6 +137,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
             createdDate.AddYears(1).AddHours(9);
 
             return Ok(createdDate);
+        }
+
+        [HttpGet]
+        public ITestActionResult GetModifiedDates(int key)
+        {
+            File file = _files.FirstOrDefault(f => f.FileId == key);
+            if (file == null)
+            {
+                return NotFound();
+            }
+            return Ok(file.ModifiedDates);
+        }
+
+        [HttpPost]
+        public ITestActionResult PostToModifiedDates(int key, [FromBody]DateTime newDateTime)
+        {
+            File file = _files.FirstOrDefault(f => f.FileId == key);
+            if (file == null)
+            {
+                return NotFound();
+            }
+            file.ModifiedDates.Add(newDateTime);
+            return Updated(file.ModifiedDates);
         }
 
         [ODataRoute("ResetDataSource")]

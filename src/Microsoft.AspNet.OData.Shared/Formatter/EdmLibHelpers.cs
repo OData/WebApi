@@ -1128,9 +1128,8 @@ namespace Microsoft.AspNet.OData.Formatter
 
         public static IEdmType UnwrapCollectionType(IEdmType type)
         {
-            return type is IEdmCollectionType collection 
-                ? collection.ElementType.Definition 
-                : type;
+            IEdmCollectionType collection = type as IEdmCollectionType;
+            return collection == null ? type : collection.ElementType.Definition;
         }
     }
 }

@@ -3,6 +3,8 @@ using System.Linq;
 using AspNetCoreODataSample.DynamicModels.Web.Models;
 using Microsoft.AspNet.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace AspNetCoreODataSample.DynamicModels.Web.Edm
 {
@@ -17,6 +19,28 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Edm
             {
                 return edmModel.FindDeclaredType(InteriorType.FullName);
             }
+            return null;
+        }
+
+        public IEdmTypeReference MapClrTypeToTypeReference(IEdmModel edmModel, Type clrType, ODataPath path)
+        {
+            if (!(path.Segments.FirstOrDefault() is EntitySetSegment entitySetSegment))
+            {
+                // if there is no entity set requested, we cannot resolve the EDM type to use 
+                return null;
+            }
+
+            // unwrap which entity was requested
+            var collectionType = (IEdmCollectionType)entitySetSegment.EntitySet.Type;
+            var elementType = collectionType.ElementType.Definition;
+            switch (elementType.TypeKind)
+            {
+                case EdmTypeKind.Entity:
+                    return new EdmEntityTypeReference((IEdmEntityType) elementType, true);
+                case EdmTypeKind.Complex:
+                    return new EdmComplexTypeReference((IEdmComplexType) elementType, true);
+            }
+
             return null;
         }
 
@@ -66,6 +90,17 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Edm
                 }
             }
             return null;
+        }
+
+        public void InitializeClrInstanceForDeserialization(IEdmModel edmModel, IEdmStructuredTypeReference typeReference,
+            object clrInstance)
+        {
+            InteriorDefinitionAnnotation annotation;
+            if (clrInstance is Interior interior &&
+                (annotation = edmModel.GetAnnotationValue<InteriorDefinitionAnnotation>(typeReference.Definition)) != null)
+            {
+                interior.DefinitionID = annotation.DefinitionID;
+            }
         }
     }
 }

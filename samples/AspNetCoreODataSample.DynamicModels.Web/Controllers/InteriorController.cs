@@ -40,7 +40,7 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
             return SingleResult.Create(GetInterior().Where(i => i.ID == key).Select(i => i.Room));
         }
 
-        public IActionResult Post(Interior entity)
+        public IActionResult Post([FromBody] Interior entity)
         {
             if (!ModelState.IsValid)
             {
@@ -59,7 +59,7 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
             return Created(entity);
         }
 
-        public IActionResult Patch([FromODataUri] int key, Delta<Interior> entity)
+        public IActionResult Patch([FromODataUri] int key, [FromBody] Delta<Interior> entity)
         {
             if (!ModelState.IsValid)
             {
@@ -76,7 +76,7 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
             return Updated(entity);
         }
 
-        public IActionResult Put([FromODataUri] int key, Interior entity)
+        public IActionResult Put([FromODataUri] int key, [FromBody] Interior entity)
         {
             if (!ModelState.IsValid)
             {
@@ -87,6 +87,11 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
             {
                 ModelState.AddModelError<Interior>(e => e.Definition, "Could not determine type of interior, please specify the type.");
                 return BadRequest(ModelState);
+            }
+
+            if (entity.ID == 0)
+            {
+                entity.ID = key;
             }
 
             if (key != entity.ID)

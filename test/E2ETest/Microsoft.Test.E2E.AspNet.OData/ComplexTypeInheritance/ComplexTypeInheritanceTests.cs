@@ -48,6 +48,52 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
         }
 
+        public static TheoryDataSet<string, string, string,bool> PostToCollectionNewComplexTypeMembers
+        {
+            get
+            {
+                string[] modes = new string[] { "convention", "explicit" };
+                string[] targets = { "OptionalShapes", "PolygonalShapes" };
+                bool[] representations = { true, false };
+                string[] objects = new string[]
+                {
+                    @"
+{
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Polygon',
+        'HasBorder':true,'Vertexes':[
+            {'X':21,'Y':12},
+            {'X':32,'Y':23},
+            {'X':14,'Y':41}
+        ]
+}",
+                    @"
+{
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Rectangle',
+        'HasBorder':true,
+        'Width':3,
+        'Height':4,
+        'TopLeft':{ 'X':1,'Y':2}
+}",
+                };
+
+                TheoryDataSet<string, string, string, bool> data = new TheoryDataSet<string, string, string, bool>();
+
+                foreach(string mode in modes)
+                {
+                    foreach(string obj in objects)
+                    {
+                        foreach(string target in targets)
+                            foreach(bool representation in representations)
+                            {
+                                data.Add(mode, obj, target, representation);
+                            }
+                    }
+                }
+                return data;
+            }
+
+        }
+
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(WindowsController), typeof(MetadataController) };
@@ -537,6 +583,62 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 contentOfJObject.Count,
                 requestUri,
                 contentOfString));
+        }
+
+        [Theory]
+        [MemberData(nameof(PostToCollectionNewComplexTypeMembers))]
+        // POST ~/Windows(3)/OptionalShapes
+        public async Task PostToCollectionComplexTypeProperty(string modelMode, string jObject, string targetPropertyResource, bool returnRepresentation)
+        {
+            //Arrange
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)/"+ targetPropertyResource;
+
+            //send a get request to get the current count
+            int count = 0;
+            using (HttpResponseMessage getResponse = await this.Client.GetAsync(requestUri))
+            {
+                getResponse.EnsureSuccessStatusCode();
+
+                var json = await getResponse.Content.ReadAsObject<JObject>();
+                var state = json.GetValue("value") as JArray;
+                count = state.Count;
+            }
+
+            //Set up the post request
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            requestForPost.Content = new StringContent(content:jObject, encoding: Encoding.UTF8, mediaType: "application/json");
+            if (returnRepresentation)
+            {
+                requestForPost.Headers.Add("Prefer", "return=representation");
+            }
+
+            //Act & Assert
+            HttpResponseMessage response = await Client.SendAsync(requestForPost);
+            string contentOfString = await response.Content.ReadAsStringAsync();
+
+            if(returnRepresentation)
+            {
+                JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
+                var result = contentOfJObject.GetValue("value") as JArray;
+            
+                Assert.True(count + 1 == result.Count,
+                    String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
+                    HttpStatusCode.NoContent,
+                    result.Count,
+                    requestUri,
+                    contentOfString));
+            }
+            else
+            {
+                Assert.True(HttpStatusCode.NoContent == response.StatusCode,
+                    String.Format("\nExpected status code: {0},\n actual: {1},\n request uri: {2},\n message: {3}",
+                    HttpStatusCode.NoContent,
+                    response.StatusCode,
+                    requestUri,
+                    contentOfString));
+            }
+
         }
 
         [Theory]

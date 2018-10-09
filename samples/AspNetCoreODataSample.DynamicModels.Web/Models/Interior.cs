@@ -12,6 +12,9 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Models
         public int DefinitionID { get; set; }
         public InteriorDefinition Definition { get; set; }
 
+        [ForeignKey(nameof(Room))]
+        public int RoomId { get; set; }
+        public Room Room { get; set; }
 
         public string StringProperty1 { get; set; }
         public string StringProperty2 { get; set; }

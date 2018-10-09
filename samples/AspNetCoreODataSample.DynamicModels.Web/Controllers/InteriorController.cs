@@ -5,6 +5,7 @@ using AspNetCoreODataSample.DynamicModels.Web.Models;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -27,14 +28,87 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
         }
 
         [EnableQuery]
-        public ActionResult Get(int key)
+        public SingleResult<Interior> Get([FromODataUri] int key)
         {
-            var item = GetInterior().SingleOrDefault(p => p.ID == key);
-            if (item == null)
+            return SingleResult.Create(GetInterior().Where(p => p.ID == key));
+        }
+
+        // GET /Interior(1)/Room
+        [EnableQuery]
+        public SingleResult<Room> GetRoom([FromODataUri] int key)
+        {
+            return SingleResult.Create(GetInterior().Where(i => i.ID == key).Select(i => i.Room));
+        }
+
+        public IActionResult Post(Interior entity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (entity.DefinitionID == 0)
+            {
+                ModelState.AddModelError<Interior>(e => e.Definition, "Could not determine type of interior, please specify the type.");
+                return BadRequest(ModelState);
+            }
+
+            entity.ID = 0;
+            _context.Add(entity);
+            _context.SaveChanges();
+            return Created(entity);
+        }
+
+        public IActionResult Patch([FromODataUri] int key, Delta<Interior> entity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var existing = GetInterior().SingleOrDefault(i => i.ID == key);
+            if (existing == null)
             {
                 return NotFound();
             }
-            return Ok(item);
+            entity.Patch(existing);
+            _context.SaveChanges();
+            return Updated(entity);
+        }
+
+        public IActionResult Put([FromODataUri] int key, Interior entity)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (entity.DefinitionID == 0)
+            {
+                ModelState.AddModelError<Interior>(e => e.Definition, "Could not determine type of interior, please specify the type.");
+                return BadRequest(ModelState);
+            }
+
+            if (key != entity.ID)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(entity).State = EntityState.Modified;
+            _context.SaveChanges();
+            return Updated(entity);
+        }
+
+        public IActionResult Delete([FromODataUri] int key)
+        {
+            var interior = GetInterior().SingleOrDefault(i => i.ID == key);
+            if (interior == null)
+            {
+                return NotFound();
+            }
+            _context.Interior.Remove(interior);
+            _context.SaveChanges();
+            return NoContent();
         }
 
         private IQueryable<Interior> GetInterior()

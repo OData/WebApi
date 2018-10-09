@@ -30,5 +30,12 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Controllers
             }
             return Ok(item);
         }
+
+        // GET /Rooms(1)/Interior
+        [EnableQuery]
+        public IQueryable<Interior> GetInterior([FromODataUri] int key)
+        {
+            return _context.Rooms.Where(i => i.ID == key).SelectMany(i => i.Interior);
+        }
     }
 }

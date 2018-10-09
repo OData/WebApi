@@ -251,6 +251,8 @@ namespace AspNetCoreODataSample.DynamicModels.Web
                         {
                             Definition = tableDefinition,
                             DefinitionID = tableDefinition.ID,
+                            Room = room,
+                            RoomId = room.ID,
 
                             StringProperty1 = deskManufacturers[random.Next(deskManufacturers.Length)],
                             StringProperty2 = deskModels[random.Next(deskModels.Length)],
@@ -270,6 +272,8 @@ namespace AspNetCoreODataSample.DynamicModels.Web
                         {
                             Definition = chairDefinition,
                             DefinitionID = chairDefinition.ID,
+                            Room = room,
+                            RoomId = room.ID,
 
                             StringProperty1 = chairManufacturers[random.Next(deskManufacturers.Length)],
                             StringProperty2 = chairModels[random.Next(deskModels.Length)],

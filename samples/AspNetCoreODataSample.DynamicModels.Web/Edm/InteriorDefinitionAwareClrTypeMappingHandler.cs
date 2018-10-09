@@ -44,6 +44,12 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Edm
                 return new EdmCollectionTypeReference(wrapper.EdmCollectionType);
             }
 
+            // handle IQueryable wrappers in SingleResult
+            if (clrInstance is SingleResult<Interior> single && single.Queryable is IEdmTypedIQueryableWrapper singleWrapper)
+            {
+                return new EdmCollectionTypeReference(singleWrapper.EdmCollectionType);
+            }
+
             // handle Interior instances
             if (clrInstance is Interior interior)
             {

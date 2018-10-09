@@ -47,12 +47,12 @@ namespace AspNetCoreODataSample.DynamicModels.Web.Edm
             builder.EntityType<House>();
             builder.EntitySet<House>("Houses");
             builder.EntityType<Room>();
-            builder.EntitySet<House>("Rooms");
+            builder.EntitySet<Room>("Rooms");
 
             // Interior definition (user-defined properties)
             builder.EntityType<InteriorDefinition>()
                 .HasMany(d => d.Properties).AutomaticallyExpand(true);
-            builder.EntitySet<House>("InteriorDefinitions");
+            builder.EntitySet<InteriorDefinition>("InteriorDefinitions");
 
             builder.EntityType<InteriorPropertyDefinition>();
             builder.EnumType<InteriorPropertyType>();

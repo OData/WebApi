@@ -314,14 +314,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataSerializerContext writeContext = new ODataSerializerContext { RootElementName = "Property", Model = model };
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = model, ResourceType = type };
 
-            
             serializer.WriteObject(obj, type, messageWriter, writeContext);
             stream.Seek(0, SeekOrigin.Begin);
 
             // Act && Assert
             Assert.Equal(expected, deserializer.Read(messageReader, type, readContext));
         }
-
 
         [Theory]
         [MemberData(nameof(NonEdmPrimitiveData))]

@@ -138,6 +138,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
 
             return Ok(createdDate);
         }
+
         [HttpGet]
         public ITestActionResult GetModifiedDates(int key)
         {

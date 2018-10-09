@@ -48,7 +48,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
         }
 
-        public static TheoryDataSet<string, string, string,bool> PostToCollectionNewComplextTypeMembers
+        public static TheoryDataSet<string, string, string,bool> PostToCollectionNewComplexTypeMembers
         {
             get
             {
@@ -586,7 +586,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         }
 
         [Theory]
-        [MemberData(nameof(PostToCollectionNewComplextTypeMembers))]
+        [MemberData(nameof(PostToCollectionNewComplexTypeMembers))]
         // POST ~/Windows(3)/OptionalShapes
         public async Task PostToCollectionComplexTypeProperty(string modelMode, string jObject, string targetPropertyResource, bool returnRepresentation)
         {
@@ -605,7 +605,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 count = state.Count;
             }
 
-            //Setup the post request
+            //Set up the post request
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestForPost.Content = new StringContent(content:jObject, encoding: Encoding.UTF8, mediaType: "application/json");
             if (returnRepresentation)

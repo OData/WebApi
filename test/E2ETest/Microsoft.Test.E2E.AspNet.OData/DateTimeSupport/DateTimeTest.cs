@@ -89,15 +89,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
         [InlineData("explicit")]
         public async Task PostToDateTimeCollection(string modelMode)
         {
-            await ResetDatasource();
             //Arrange
+            await ResetDatasource();
             string requestUri = string.Format("{0}/{1}/Files/1/ModifiedDates", this.BaseAddress, modelMode);
-            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
 
+            //Get the count of elements in the collection
+            int count = 0;
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+                count = result.Count;
+            }
+
+            //Set up the post request 
+            var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestForPost.Content = new StringContent(content: @"{
                     'value':'2014-10-16T01:02:03Z'
                     }", encoding: Encoding.UTF8, mediaType: "application/json");
-
+            
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -109,7 +120,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
 
                 var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
-                Assert.Equal(4,result.Count);
+                Assert.Equal(count+1,result.Count);
             }
         }
 

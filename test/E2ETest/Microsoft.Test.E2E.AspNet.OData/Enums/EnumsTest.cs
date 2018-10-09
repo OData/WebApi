@@ -432,7 +432,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
                 count = result.Count;
             }
 
-            //Setup the post request
+            //Set up the post request
             var requestForPost = new HttpRequestMessage(HttpMethod.Post, requestUri);
             requestForPost.Content = new StringContent(content: @"{
                     'value':'Sql'

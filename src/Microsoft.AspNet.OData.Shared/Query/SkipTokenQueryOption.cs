@@ -223,9 +223,13 @@ namespace Microsoft.AspNet.OData.Query
                 key = entity.Key();
             }
             string skipTokenvalue = "";
-            foreach(IEdmStructuralProperty property in key)
+            int count = 0;
+            int lastIndex = key.Count() - 1;
+            foreach (IEdmStructuralProperty property in key)
             {
-                skipTokenvalue += property.Name + "=" + lastMember.GetType().GetProperty(property.Name).GetValue(lastMember, null).ToString() + ",";
+                bool islast = count == lastIndex;
+                skipTokenvalue += property.Name + "=" + lastMember.GetType().GetProperty(property.Name).GetValue(lastMember, null).ToString() +  (islast ? "":" ,");
+                count++;
             }
 
             return skipTokenvalue;

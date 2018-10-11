@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue="")
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData
             {
                 string key = kvp.Key;
                 string value = kvp.Value;
-                switch (key)
+                switch (key.ToLower())
                 {
                     case "$top":
                         int top;
@@ -40,16 +40,21 @@ namespace Microsoft.AspNet.OData
                             value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                         }
                         break;
-                    case "$skip":
-                        int skip;
-                        if (Int32.TryParse(value, out skip))
-                        {
-                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                            nextPageSkip += skip;
-                        }
-                        continue;
+                    //    case "$skip":
+                    //        int skip;
+                    //        if (Int32.TryParse(value, out skip))
+                    //        {
+                    //            // We increase skip by the pageSize because that's the number of results we're returning in the current page
+                    //            nextPageSkip += skip;
+                    //        }
+                    //        continue;
                     default:
                         break;
+                }
+
+                if(key.ToLower()=="$skip" || key.ToLower()=="$skiptoken")
+                {
+                    continue;
                 }
 
                 if (key.Length > 0 && key[0] == '$')
@@ -69,7 +74,7 @@ namespace Microsoft.AspNet.OData
                 queryBuilder.Append('&');
             }
 
-            queryBuilder.AppendFormat("$skiptoken={0}", nextPageSkip);
+            queryBuilder.AppendFormat("$skiptoken={0}", skipTokenValue);
 
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {

@@ -264,8 +264,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="request">The request on which to base the next page link.</param>
         /// <param name="pageSize">The number of results allowed per page.</param>
+        /// <param name="skipTokenValue"></param>
         /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(this HttpRequest request, int pageSize)
+        public static Uri GetNextPageLink(this HttpRequest request, int pageSize, string skipTokenValue="")
         {
             if (request == null)
             {
@@ -282,7 +283,7 @@ namespace Microsoft.AspNet.OData.Extensions
             }
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
 
-            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize);
+            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, skipTokenValue);
         }
 
         /// <summary>

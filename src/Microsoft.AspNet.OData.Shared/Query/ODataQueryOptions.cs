@@ -432,7 +432,7 @@ namespace Microsoft.AspNet.OData.Query
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize);
+                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize,skipTokenValue);
                     InternalRequest.Context.NextLink = nextPageLink;
                 }
             }

@@ -427,6 +427,8 @@ namespace Microsoft.AspNet.OData.Query
             {
                 bool resultsLimited;
                 result = LimitResults(result, pageSize, out resultsLimited);
+                string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result,this.Context.Model);
+               
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {

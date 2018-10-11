@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData;
@@ -22,6 +24,8 @@ namespace Microsoft.AspNet.OData.Query
 
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
+        private static readonly MethodInfo _fetchLastItemInResults = typeof(SkipTokenQueryOption).GetMethod("FetchLastItemInResults");
+
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -84,8 +88,15 @@ namespace Microsoft.AspNet.OData.Query
             foreach(string keyAndValue in keyValues)
             {
                 string[] pieces = keyAndValue.Split('=');
-                object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
-                KeyValuePairs.Add(pieces[0], value);
+                if (!String.IsNullOrWhiteSpace(pieces[1]))
+                {
+                    object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
+                    if (!String.IsNullOrWhiteSpace(pieces[0]))
+                    {
+                        KeyValuePairs.Add(pieces[0], value);
+                    }
+                }
+                
             }
 
         }
@@ -192,6 +203,52 @@ namespace Microsoft.AspNet.OData.Query
 
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
             //return ExpressionHelpers.SkipWhile<string>(query, v, query.ElementType, querySettings.EnableConstantParameterization);
+        }
+
+        /// <summary>
+        /// Bad Documentation
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public static string GetSkipTokenValue(IQueryable result, IEdmModel model)
+        {
+            object lastMember = FetchLast(result);
+            IEdmType edmType = EdmLibHelpers.GetEdmType(model, lastMember.GetType());
+            IEdmEntityType entity = edmType as IEdmEntityType;
+
+            IEnumerable<IEdmStructuralProperty> key = null;
+            if (entity != null)
+            {
+                key = entity.Key();
+            }
+            string skipTokenvalue = "";
+            foreach(IEdmStructuralProperty property in key)
+            {
+                skipTokenvalue += property.Name + "=" + lastMember.GetType().GetProperty(property.Name).GetValue(lastMember, null).ToString() + ",";
+            }
+
+            return skipTokenvalue;
+        }
+
+        private static object FetchLast(IQueryable queryable)
+        {
+            MethodInfo genericMethod = _fetchLastItemInResults.MakeGenericMethod(queryable.ElementType);
+            object[] args = new object[] { queryable };
+            object results = genericMethod.Invoke(null, args);
+            return results;
+        }
+        /// <summary>
+        /// XML doc, make it public to avoid security issues
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="records"></param>
+        /// <returns></returns>
+        public static T FetchLastItemInResults<T>(IQueryable<T> records)
+        {
+            T[] arr = records.AsArray();
+            return arr[arr.Length - 1];
+
         }
     }
 }

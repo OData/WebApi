@@ -78,9 +78,10 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Get the next page link for a given page size.
         /// </summary>
-        /// <param name="pageSize">The page size.</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="skipTokenValue">value that must be assigned to skipToken</param>
         /// <returns></returns>
-        Uri GetNextPageLink(int pageSize);
+        Uri GetNextPageLink(int pageSize, string skipTokenValue);
 
         /// <summary>
         /// Get a list of content Id mappings associated with the request.

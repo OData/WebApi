@@ -13,7 +13,7 @@ In client-driven, the client decides how many records it wants to load and asks 
 Currently, WebAPI uses $skip for server-driven paging which is a slight deviation from the OData standard and can be problematic when the data source can get updated concurrently. For instance, a deletion of a record may cause the last record to be send down to the client twice. 
 
 
-###Proposed Solution
+### Proposed Solution
 WebAPI will now implement $skiptoken. When a collection of entity is requested which requires paging, we will assign the key value of the last sent entity to $skiptoken in the nextlink url. While processing a request with $skiptoken, we will add another condition (the key of the entity to be greater than the value specied to the skiptoken) to the predicate. 
 
-###Techinical details
+### Techinical details

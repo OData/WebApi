@@ -25,5 +25,10 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or Sets a value indicating if value should be emitted for dynamic properties which are null.
         /// </summary>
         bool NullDynamicPropertyIsEnabled { get; }
+
+        /// <summary>
+        /// Gets or Sets a value which determines if skip or skipToken gets used for server-side paging.
+        /// </summary>
+        bool UseSkipTokenForServerSidePaging { get; set; }
     }
 }

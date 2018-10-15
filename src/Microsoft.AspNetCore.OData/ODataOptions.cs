@@ -26,5 +26,10 @@ namespace Microsoft.AspNet.OData
         /// Gets or Sets a value indicating if batch requests should continue on error.
         /// </summary>
         public bool EnableContinueOnErrorHeader { get; set; }
+
+        /// <summary>
+        /// Gets or Sets a value which determines if skip or skipToken gets used for server-side paging.
+        /// </summary>
+        public bool UseSkipTokenForServerSidePaging { get; set; }
     }
 }

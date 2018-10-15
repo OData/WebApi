@@ -214,7 +214,12 @@ namespace Microsoft.AspNet.OData.Query
         public static string GetSkipTokenValue(IQueryable result, IEdmModel model)
         {
             object lastMember = FetchLast(result);
-            IEdmType edmType = EdmLibHelpers.GetEdmType(model, lastMember.GetType());
+            IEdmStructuredObject last = lastMember as IEdmStructuredObject;
+            ResourceContext resource = new ResourceContext();
+
+            IEdmType edmType = GetTypeFromObject(lastMember,model);
+
+            //Type ClrType = lastMember.GetType();
             IEdmEntityType entity = edmType as IEdmEntityType;
 
             IEnumerable<IEdmStructuralProperty> key = null;
@@ -222,17 +227,37 @@ namespace Microsoft.AspNet.OData.Query
             {
                 key = entity.Key();
             }
+            if(key == null)
+            {
+                return String.Empty;
+            }
+
+
             string skipTokenvalue = "";
             int count = 0;
             int lastIndex = key.Count() - 1;
             foreach (IEdmStructuralProperty property in key)
             {
                 bool islast = count == lastIndex;
-                skipTokenvalue += property.Name + "=" + lastMember.GetType().GetProperty(property.Name).GetValue(lastMember, null).ToString() +  (islast ? "":" ,");
+                object value;
+                last.TryGetPropertyValue(property.Name, out value);
+                skipTokenvalue += property.Name + "=" + value.ToString() +  (islast ? "":" ,");
                 count++;
             }
 
             return skipTokenvalue;
+        }
+
+        private static IEdmType GetTypeFromObject(object obj, IEdmModel model)
+        {
+            SelectExpandWrapper selectExpand = obj as SelectExpandWrapper;
+            if (selectExpand != null)
+            {
+                return selectExpand.GetEdmType(model);
+            }
+
+            Type ClrType = obj.GetType();
+            return EdmLibHelpers.GetEdmType(model, ClrType);
         }
 
         private static object FetchLast(IQueryable queryable)

@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.OData.Adapters
 
             this.NullDynamicPropertyIsEnabled = options.NullDynamicPropertyIsEnabled;
             this.UrlKeyDelimiter = options.UrlKeyDelimiter;
+            this.UseSkipTokenForServerSidePaging = options.UseSkipTokenForServerSidePaging;
         }
 
         /// <summary>
@@ -37,5 +38,10 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Gets or Sets a value indicating if value should be emitted for dynamic properties which are null.
         /// </summary>
         public bool NullDynamicPropertyIsEnabled { get; private set; }
+
+        /// <summary>
+        /// Gets or Sets a value which determines if skip or skipToken gets used for server-side paging.
+        /// </summary>
+        public bool UseSkipTokenForServerSidePaging { get; set; }
     }
 }

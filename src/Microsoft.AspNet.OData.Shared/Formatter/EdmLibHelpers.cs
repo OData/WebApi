@@ -179,7 +179,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     returnType = edmModel
                         .SchemaElements
                         .OfType<IEdmType>()
-                        .Select(edmType => new {EdmType = edmType, Annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType)})
+                        .Select(edmType => new { EdmType = edmType, Annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType) })
                         .Where(tuple => tuple.Annotation != null && tuple.Annotation.ClrType == clrType)
                         .Select(tuple => tuple.EdmType)
                         .SingleOrDefault();
@@ -191,7 +191,6 @@ namespace Microsoft.AspNet.OData.Formatter
                     returnType = edmModel.FindType(clrType.EdmFullName());
                 }
                 
-
                 if (TypeHelper.GetBaseType(clrType) != null)
                 {
                     // go up the inheritance tree to see if we have a mapping defined for the base type.
@@ -224,7 +223,6 @@ namespace Microsoft.AspNet.OData.Formatter
                     typeReference = typeMappingHandler.MapClrInstanceToEdmTypeReference(edmModel, clrInstance);
                 }
             }
-
 
             if (typeReference == null)
             {

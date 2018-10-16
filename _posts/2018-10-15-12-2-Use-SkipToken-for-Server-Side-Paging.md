@@ -31,7 +31,7 @@ We will not use $skiptoken if the requested resource is not an entity type. Rath
 
 #### Generating the nextlink
 The next link generation method in ___GetNextPageHelper___ static class will take in the $skiptoken value along with other query parameters and generate the link by doing special handling for $skip, $skiptoken and $top. It will pass on the other query options as they were in the original request.
-##### 1. Handling $skip
+##### 1. Handle $skip
 We will omit the $skip value if the service is configured to support $skiptoken and a collection of entity is being requested. This is because the first response would have applied the $skip query option to the results already. 
 ##### 2. Handle $top
 We will reduce the value of $top query option by the page size if it is greater than the page size.   

@@ -4,16 +4,16 @@ title: "12.2 Use $skiptoken for server side paging "
 description: "WebAPI to use $skiptoken for server side paging"
 category: "12. Design"
 ---
-# Use $skiptoken for server side paging
+# Use $skiptoken for server-driven paging
 
 ### Background
-Loading large data can be slow. Services often rely on pagination to load the data incrementally to improve the response times and the user experience. Paging can be server-driven or client-driven.
+Loading large data can be slow. Services often rely on pagination to load the data incrementally to improve the response times and the user experience. Paging can be server-driven or client-driven:
 #### Client-driven paging
 In client-driven, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top tokens in conjunction.
 #### Server-driven paging
-In server-driven paging, the client asks for a collection of entities, and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to identify the last loaded record.
+In server-driven paging, the client asks for a collection of entities and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to identify the last loaded record.
 ### Problem
-Currently, WebAPI uses $skip for server-driven paging which is a slight deviation from the OData standard and can be problematic when the data source can get updated concurrently. For instance, a deletion of a record may cause the last record to be send down to the client twice. 
+Currently, WebAPI uses $skip for server-driven paging which is a slight deviation from the OData standard and can be problematic when the data source can get updated concurrently. For instance, a deletion of a record may cause the last record to be sent down to the client twice. 
 ### Proposed Solution
 WebAPI will now implement $skiptoken. When a collection of entity is requested which requires paging, we will assign the key value of the last sent entity to $skiptoken in the nextlink url. While processing a request with $skiptoken, we will add another condition (the key of the entity to be greater than the value specified to the skiptoken) to the predicate. 
 
@@ -32,7 +32,7 @@ We will not use $skiptoken if the requested resource is not an entity type. Rath
 #### Generating the nextlink
 The next link generation method in ___GetNextPageHelper___ static class will take in the $skiptoken value along with other query parameters and generate the link by doing special handling for $skip, $skiptoken and $top. It will pass on the other query options as they were in the original request.
 ##### 1. Handling $skip
-We will omit the $skip value if the service is configured to support $skiptoken and a collection of entity is being requested. We will omit the skip query option in the next link because the first response would have applied the $skip query option to the results. 
+We will omit the $skip value if the service is configured to support $skiptoken and a collection of entity is being requested. This is because the first response would have applied the $skip query option to the results already. 
 ##### 2. Handle $top
 We will reduce the value of $top query option by the page size if it is greater than the page size.   
 ##### 3. Handle $skiptoken
@@ -46,11 +46,14 @@ In the process, ___IWebApiRequestMessage___ will be modified and GetNextPageLink
 #### Configuration to use $skiptoken or $skip for server-driven paging
 We will allow services to configure if they want to use $skiptoken or $skip for paging.
 
-### Additional details and on going investigation (Updates can be made to this design)
+### Additional obscured details and ongoing investigation
 Consistently exposing the configuration for both Classic and Core.
-Delimiter in the value of a key property.
-ODataFeedSerializer 
-Stable sort.
+
+Delimiter in the value of a key property. 
+
+ODataFeedSerializer  
+
+Stable sort. 
 
 
 

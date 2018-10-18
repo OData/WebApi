@@ -11,7 +11,7 @@ Loading large data can be slow. Services often rely on pagination to load the da
 #### Client-driven paging
 In client-driven paging, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top tokens in conjunction. For instance, if a client needs to request 10 records from 71-80, it can send a similar request as below:
 
-`~/Products/$skip=70&$top=10`
+`GET ~/Products/$skip=70&$top=10`
 #### Server-driven paging
 In server-driven paging, the client asks for a collection of entities and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to identify the last loaded record.
 ### Problem

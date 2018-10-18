@@ -9,23 +9,24 @@ category: "12. Design"
 ### Background
 Loading large data can be slow. Services often rely on pagination to load the data incrementally to improve the response times and the user experience. Paging can be server-driven or client-driven:
 #### Client-driven paging
-In client-driven, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top tokens in conjunction.
+In client-driven paging, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top tokens in conjunction. For instance, if a client needs to request 10 records from 71-80, it can send a similar request as below:
+
+`~/Products/$skip=70&$top=10`
 #### Server-driven paging
 In server-driven paging, the client asks for a collection of entities and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to identify the last loaded record.
 ### Problem
 Currently, WebAPI uses $skip for server-driven paging which is a slight deviation from the OData standard and can be problematic when the data source can get updated concurrently. For instance, a deletion of a record may cause the last record to be sent down to the client twice. 
 ### Proposed Solution
 WebAPI will now implement $skiptoken. When a collection of entity is requested which requires paging, we will assign the key value of the last sent entity to $skiptoken in the nextlink url. While processing a request with $skiptoken, we will add another condition (the key of the entity to be greater than the value specified to the skiptoken) to the predicate. 
-
 ### Technical details
 After all the query options have been applied, we determine if the results need pagination. If the results need pagination, we will pass the key value of the last result to the method that generates the nextpage link.   
 
 #### Format of the nextlink
 The nextlink may contain $skiptoken if the result needs to be paginated. In WebAPI the $skiptoken value will be the key property and key value separated by a delimiter(:). For entities with composite or multi-part keys, each key property and value pair will be comma separated.
 ```
-~/Products?$skiptoken=Id:'27'
-~/Books?$skiptoken=ISBN:'978-2-121-87758-1"',CopyNumber:'11'
-~/Products?$skiptoken=Id:'25'&$top=40
+~/Products?$skiptoken=Id:27
+~/Books?$skiptoken=ISBN:978-2-121-87758-1,CopyNumber:11
+~/Products?$skiptoken=Id:25&$top=40
 ```
 We will not use $skiptoken if the requested resource is not an entity type. Rather, normal skip will be used. 
 

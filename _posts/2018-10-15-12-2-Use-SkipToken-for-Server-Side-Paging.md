@@ -40,8 +40,9 @@ We will reduce the value of $top query option by the page size if it is greater 
 The value for the $skiptoken will be updated to new value passed in which is the key value for the last record sent. If the skiptoken value is not sent, we will revert to the previous logic and use $skip for paging instead.
 
 #### Parsing $skiptoken and generating the Linq expression
-New classes will be created for ___SkipTokenQueryOption___ and __SkipTokenQueryValidator__. ___SkipTokenQuery___ option will contain the overridden methods to create LINQ expressions based on the $skiptoken value.
-The ___SkipTokenQuery___ class will be utilized by ___ODataQueryOption___ to pass the token value to the nextlink generator helper methods.
+New classes will be created for ___SkipTokenQueryOption___ and __SkipTokenQueryValidator__. ___SkipTokenQuery___ option will contain the  methods to create and apply the LINQ expression based on the $skiptoken value.
+#### Generating the $skiptoken
+The ___SkipTokenQueryOption___ class will be utilized by ___ODataQueryOption___ to pass the token value to the nextlink generator helper methods.
 In the process, ___IWebApiRequestMessage___ will be modified and GetNextPageLink method will now accept an optional parameter for the $skiptoken value.
 
 #### Configuration to use $skiptoken or $skip for server-driven paging

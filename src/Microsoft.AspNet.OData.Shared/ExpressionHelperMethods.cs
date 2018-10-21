@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
+        private static MethodInfo _enumerableWhereMethod = GenericMethodOf(_ => Enumerable.Where<int>(default(IEnumerable<int>), default(Func<int, bool>)));
 
         private static MethodInfo _queryableEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>)));
         private static MethodInfo _queryableNonEmptyAnyMethod = GenericMethodOf(_ => Queryable.Any<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
@@ -47,6 +48,7 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _enumerableTakeMethod = GenericMethodOf(_ => Enumerable.Take<int>(default(IEnumerable<int>), default(int)));
 
         private static MethodInfo _queryableAsQueryableMethod = GenericMethodOf(_ => Queryable.AsQueryable<int>(default(IEnumerable<int>)));
+        private static MethodInfo _queryableToListMethod = GenericMethodOf(_ => Enumerable.ToList<int>(default(IEnumerable<int>)));
 
         private static MethodInfo _toQueryableMethod = GenericMethodOf(_ => ExpressionHelperMethods.ToQueryable<int>(default(int)));
 
@@ -182,6 +184,11 @@ namespace Microsoft.AspNet.OData
             get { return _whereMethod; }
         }
 
+        public static MethodInfo EnumerableWhereGeneric
+        {
+            get { return _enumerableWhereMethod; }
+        }
+
         public static MethodInfo QueryableSelectGeneric
         {
             get { return _queryableSelectMethod; }
@@ -235,6 +242,11 @@ namespace Microsoft.AspNet.OData
         public static MethodInfo QueryableAsQueryable
         {
             get { return _queryableAsQueryableMethod; }
+        }
+
+        public static MethodInfo QueryableToList
+        {
+            get { return _queryableToListMethod; }
         }
 
         public static MethodInfo EntityAsQueryable

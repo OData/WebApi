@@ -636,7 +636,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             Assert.Equal(
                 string.Format(
                     "IIF((value({0}) == null), null, IIF((value({0}).Orders == null), null, " +
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
+                    "value({0}).Orders.Where($it => ($it.ID == value({1}).TypedProperty))))",
                     customer.Type,
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
                 filterInExpand.ToString());
@@ -671,7 +671,7 @@ namespace Microsoft.Test.AspNet.OData.Query.Expressions
             // Assert
             Assert.Equal(
                 string.Format(
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value(" +
+                    "value({0}).Orders.Where($it => ($it.ID == value(" +
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
                     customer.Type),
                 filterInExpand.ToString());

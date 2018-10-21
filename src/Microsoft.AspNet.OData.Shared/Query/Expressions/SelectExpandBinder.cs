@@ -210,17 +210,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 if (isCollection)
                 {
-                    Expression filterSource =
-                        typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
-                            ? Expression.Call(
-                                ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
-                                nullablePropertyValue)
-                            : nullablePropertyValue;
+                    Expression filterSource = nullablePropertyValue;
 
                     // TODO: Implement proper support for $select/$expand after $apply
                     Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context, querySettings);
                     filterResult = Expression.Call(
-                        ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
+                        ExpressionHelperMethods.EnumerableWhereGeneric.MakeGenericMethod(clrElementType),
                         filterSource,
                         filterPredicate);
 
@@ -647,7 +642,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             // expression
             //      source.Select((ElementType element) => new Wrapper { })
-            Expression selectedExpresion = Expression.Call(GetSelectMethod(elementType, projection.Type), source, selector);
+            var selectMethod = GetSelectMethod(elementType, projection.Type);
+            var methodCallExpression = Expression.Call(selectMethod, source, selector);
+            Expression selectedExpresion = Expression.Call(ExpressionHelperMethods.QueryableToList.MakeGenericMethod(projection.Type), methodCallExpression);
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {

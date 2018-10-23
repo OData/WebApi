@@ -2,9 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
@@ -400,18 +402,63 @@ namespace Microsoft.AspNet.OData.Builder
             Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
             Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression) where TTargetEntity : class
         {
-            NavigationPropertyConfiguration navigation =
-                GetOrCreateNavigationProperty(navigationPropertyExpression, EdmMultiplicity.ZeroOrOne);
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.ZeroOrOne,
+                null);
+        }
 
-            IDictionary<PropertyInfo, PropertyInfo> referentialConstraints =
-                PropertyPairSelectorVisitor.GetSelectedProperty(referentialConstraintExpression);
+        /// <summary>
+        /// Configures an optional relationship with referential constraint from this structural type.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t =&gt; t.Customer</c> and in Visual Basic .NET <c>Function(t) t.Customer</c>.</param>
+        /// <param name="referentialConstraintExpression">A lambda expression representing the referential constraint. For example,
+        ///  in C# <c>(o, c) =&gt; o.CustomerId == c.Id</c> and in Visual Basic .NET <c>Function(o, c) c.CustomerId == c.Id</c>.</param>
+        /// <param name="partnerExpression">The partner expression for this relationship.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration HasOptional<TTargetEntity>(
+            Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
+            Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
+            Expression<Func<TTargetEntity, IEnumerable<TStructuralType>>> partnerExpression) where TTargetEntity : class
+        {
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.ZeroOrOne,
+                partnerExpression);
+        }
 
-            foreach (KeyValuePair<PropertyInfo, PropertyInfo> constraint in referentialConstraints)
-            {
-                navigation.HasConstraint(constraint);
-            }
-
-            return navigation;
+        /// <summary>
+        /// Configures an optional relationship with referential constraint from this structural type.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t =&gt; t.Customer</c> and in Visual Basic .NET <c>Function(t) t.Customer</c>.</param>
+        /// <param name="referentialConstraintExpression">A lambda expression representing the referential constraint. For example,
+        ///  in C# <c>(o, c) =&gt; o.CustomerId == c.Id</c> and in Visual Basic .NET <c>Function(o, c) c.CustomerId == c.Id</c>.</param>
+        /// <param name="partnerExpression">The partner expression for this relationship.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration HasOptional<TTargetEntity>(
+            Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
+            Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
+            Expression<Func<TTargetEntity, TStructuralType>> partnerExpression) where TTargetEntity : class
+        {
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.ZeroOrOne,
+                partnerExpression);
         }
 
         /// <summary>
@@ -435,6 +482,33 @@ namespace Microsoft.AspNet.OData.Builder
         /// For example, in C# <c>t =&gt; t.Customer</c> and in Visual Basic .NET <c>Function(t) t.Customer</c>.</param>
         /// <param name="referentialConstraintExpression">A lambda expression representing the referential constraint. For example,
         ///  in C# <c>(o, c) =&gt; o.CustomerId == c.Id</c> and in Visual Basic .NET <c>Function(o, c) c.CustomerId == c.Id</c>.</param>
+        /// <param name="partnerExpression">The partner expression for this relationship.</param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration HasRequired<TTargetEntity>(
+            Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
+            Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
+            Expression<Func<TTargetEntity, IEnumerable<TStructuralType>>> partnerExpression) where TTargetEntity : class
+        {
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.One,
+                partnerExpression
+                );
+        }
+
+        /// <summary>
+        /// Configures a required relationship with referential constraint from this structural type.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t =&gt; t.Customer</c> and in Visual Basic .NET <c>Function(t) t.Customer</c>.</param>
+        /// <param name="referentialConstraintExpression">A lambda expression representing the referential constraint. For example,
+        ///  in C# <c>(o, c) =&gt; o.CustomerId == c.Id</c> and in Visual Basic .NET <c>Function(o, c) c.CustomerId == c.Id</c>.</param>
         /// <returns>A configuration object that can be used to further configure the relationship.</returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
             Justification = "Nested generic appropriate here")]
@@ -444,8 +518,46 @@ namespace Microsoft.AspNet.OData.Builder
             Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
             Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression) where TTargetEntity : class
         {
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.One,
+                null
+                );
+        }
+
+        /// <summary>
+        /// Configures a required relationship with referential constraint from this structural type.
+        /// </summary>
+        /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>
+        /// <param name="navigationPropertyExpression">A lambda expression representing the navigation property for the relationship.
+        /// For example, in C# <c>t =&gt; t.Customer</c> and in Visual Basic .NET <c>Function(t) t.Customer</c>.</param>
+        /// <param name="referentialConstraintExpression">A lambda expression representing the referential constraint. For example,
+        ///  in C# <c>(o, c) =&gt; o.CustomerId == c.Id</c> and in Visual Basic .NET <c>Function(o, c) c.CustomerId == c.Id</c>.</param>
+        /// <param name="partnerExpression"></param>
+        /// <returns>A configuration object that can be used to further configure the relationship.</returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generic appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "Explicit Expression generic type is more clear")]
+        public NavigationPropertyConfiguration HasRequired<TTargetEntity>(
+            Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
+            Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
+            Expression<Func<TTargetEntity, TStructuralType>> partnerExpression) where TTargetEntity : class
+        {
+            return HasNavigationProperty(
+                navigationPropertyExpression,
+                referentialConstraintExpression,
+                EdmMultiplicity.One,
+                partnerExpression);
+        }
+
+        private NavigationPropertyConfiguration HasNavigationProperty<TTargetEntity>(Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
+            Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression, EdmMultiplicity multiplicity, Expression partnerProperty)
+            where TTargetEntity : class
+        {
             NavigationPropertyConfiguration navigation =
-                GetOrCreateNavigationProperty(navigationPropertyExpression, EdmMultiplicity.One);
+                GetOrCreateNavigationProperty(navigationPropertyExpression, multiplicity);
 
             IDictionary<PropertyInfo, PropertyInfo> referentialConstraints =
                 PropertyPairSelectorVisitor.GetSelectedProperty(referentialConstraintExpression);
@@ -453,6 +565,28 @@ namespace Microsoft.AspNet.OData.Builder
             foreach (KeyValuePair<PropertyInfo, PropertyInfo> constraint in referentialConstraints)
             {
                 navigation.HasConstraint(constraint);
+            }
+
+            if (partnerProperty != null)
+            {
+                var partnerPropertyInfo = PropertySelectorVisitor.GetSelectedProperty(partnerProperty);
+                if (typeof(IEnumerable).IsAssignableFrom(partnerPropertyInfo.PropertyType))
+                {
+                    _configuration.ModelBuilder
+                        .EntityType<TTargetEntity>().HasMany((Expression<Func<TTargetEntity, IEnumerable<TStructuralType>>>)partnerProperty);
+                }
+                else
+                {
+                    _configuration.ModelBuilder
+                        .EntityType<TTargetEntity>().HasRequired((Expression<Func<TTargetEntity, TStructuralType>>)partnerProperty);
+                }
+                var prop = _configuration.ModelBuilder
+                        .EntityType<TTargetEntity>()
+                        .Properties
+                        .First(p => p.Name == partnerPropertyInfo.Name)
+                    as NavigationPropertyConfiguration;
+
+                navigation.Partner = prop;
             }
 
             return navigation;

@@ -415,7 +415,6 @@ namespace Microsoft.AspNet.OData.Builder
                 var props = new Dictionary<IEdmProperty, NavigationPropertyConfiguration>();
                 if (type is EdmEntityType entityType && navProp.Partner != null)
                 {
-                    //entityType.SetNavigationPropertyPartner(navInfo, null, getInfo(navProp.Partner), null);
                     var edmProperty = entityType.AddBidirectionalNavigation(navInfo,
                         getInfo(navProp.Partner)
                     );

@@ -28,6 +28,7 @@ The nextlink may contain $skiptoken if the result needs to be paginated. In WebA
 ~/Books?$skiptoken=ISBN:978-2-121-87758-1,CopyNumber:11
 ~/Products?$skiptoken=Id:25&$top=40
 ~/Products?$orderby=Name&$skiptoken=Name:'KitKat',Id:25&$top=40
+~/Cars(id)/Colors?$skip=4
 ```
 We will not use $skiptoken if the requested resource is not an entity type. Rather, normal skip will be used. 
 
@@ -52,20 +53,21 @@ Or (Prop1=value1 AND Prop2>value2)
 Or (Prop1=value1 AND Prop2=value2 AND Id1>Val)
 Or (Prop1=value1 AND Prop2=value2 AND Id1=idVal1 AND Id2>idVal2)
 ```
+Note that the greater than operator will be swapped for less than operator if the order is descending. 
 #### Generating the $skiptoken
 The ___SkipTokenQueryOption___ class will be utilized by ___ODataQueryOption___ to pass the token value to the nextlink generator helper methods.
-In the process, ___IWebApiRequestMessage___ will be modified and GetNextPageLink method will now accept an optional parameter for the $skiptoken value.
+In the process, ___IWebApiRequestMessage___ will be modified and GetNextPageLink method will be overloaded to now accept another parameter for the $skiptoken value.
 
 #### Configuration to use $skiptoken or $skip for server-driven paging
 We will allow services to configure if they want to use $skiptoken or $skip for paging per route as there can be performance issues with a large database with multipart keys. By default, we will use $skip.
 
 Moreover, we will ensure stable sorting if the query is configured for using $skiptoken. 
-### Additional obscured details and ongoing investigation
+### Additional obscured details and open questions
 Consistently exposing the configuration for both Classic and Core.
 
-Delimiter in the value of a key property. 
+Handle delimiter in the value of a key property. Should we just use the property values?
 
-ODataFeedSerializer  
+Should we allow the entire $skiptoken handler be configurable? 
 
 
 

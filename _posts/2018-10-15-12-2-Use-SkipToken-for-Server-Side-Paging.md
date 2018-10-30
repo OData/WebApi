@@ -22,7 +22,7 @@ WebAPI will now implement $skiptoken. When a collection of entity is requested w
 After all the query options have been applied, we determine if the results need pagination. If the results need pagination, we will pass the generated skiptoken value based off of the last result to the method that generates the nextpage link.   
 
 #### Format of the nextlink
-The nextlink may contain $skiptoken if the result needs to be paginated. In WebAPI the $skiptoken value will be the key property and key value separated by a delimiter(:). For entities with composite or multi-part keys, each key property and value pair will be comma separated.
+The nextlink may contain $skiptoken if the result needs to be paginated. In WebAPI the $skiptoken value will be a list of pairs, where the pair consists of a property name and property value separated by a delimiter(:). The orderby property and value pairs will be followed by key property and value pairs in the value for $skiptoken. Each property and value pair will be comma separated.
 ```
 ~/Products?$skiptoken=Id:27
 ~/Books?$skiptoken=ISBN:978-2-121-87758-1,CopyNumber:11
@@ -32,14 +32,20 @@ The nextlink may contain $skiptoken if the result needs to be paginated. In WebA
 ```
 We will not use $skiptoken if the requested resource is not an entity type. Rather, normal skip will be used. 
 
+This is the default format but services can define their own format for the $skiptoken as well but in that case, they will have to parse and generate the skiptoken value themselves.
+
 #### Generating the nextlink
 The next link generation method in ___GetNextPageHelper___ static class will take in the $skiptoken value along with other query parameters and generate the link by doing special handling for $skip, $skiptoken and $top. It will pass on the other query options as they were in the original request.
+
 ##### 1. Handle $skip
 We will omit the $skip value if the service is configured to support $skiptoken and a collection of entity is being requested. This is because the first response would have applied the $skip query option to the results already. 
 ##### 2. Handle $top
 We will reduce the value of $top query option by the page size if it is greater than the page size.   
 ##### 3. Handle $skiptoken
-The value for the $skiptoken will be updated to new value passed in which is the key value for the last record sent. If the skiptoken value is not sent, we will revert to the previous logic and use $skip for paging instead.
+The value for the $skiptoken will be updated to new value passed in which is the key value for the last record sent. If the skiptoken value is not sent, we will call the existing method and use $skip for paging instead.
+
+#### Routing
+Since we will only be modifying the query options from the original request to generate the nextlink, the routing will remain same as the original request. 
 
 #### Parsing $skiptoken and generating the Linq expression
 New classes will be created for ___SkipTokenQueryOption___ and __SkipTokenQueryValidator__. ___SkipTokenQuery___ option will contain the  methods to create and apply the LINQ expression based on the $skiptoken value. To give an example, for a query like the following:
@@ -62,14 +68,27 @@ In the process, ___IWebApiRequestMessage___ will be modified and GetNextPageLink
 We will allow services to configure if they want to use $skiptoken or $skip for paging per route as there can be performance issues with a large database with multipart keys. By default, we will use $skip.
 
 Moreover, we will ensure stable sorting if the query is configured for using $skiptoken. 
-### Additional obscured details and open questions
-Consistently exposing the configuration for both Classic and Core.
+### Additional details and discussions
+##### 1.	How would a developer implement paging without using EnableQuery attribute? What about stable ordering in that case?
+a.	 The new SkipTokenQueryOption class will provide 2 methods-
 
-Handle delimiter in the value of a key property. Should we just use the property values?
+   i.	GenerateSkipTokenValue – which would require the EDM model, the results as IQuerable and OrderbyQueryOption.
 
-Should we allow the entire $skiptoken handler be configurable? 
+   ii.	ApplyTo -  applies the LINQ expression for $skiptoken.
+   
+ For developers having non-linq data sources, they can generate the skiptoken value using the new class and use this class in their own implementation of the filtering that ApplyTo does. 
 
+b.	To ensure stable ordering, we will provide a public method on ODataQueryOptions -  GenerateStableOrderQueryOption: It will output an OrderbyQueryOption which can be passed to the skiptoken generator. 
 
+Developers not using the EnableQuery attribute will have to generate their own OrderbyQueryOption and generate the skiptoken value themselves.  
 
+##### 2.	Should the nextlink modify the list of orderby properties to ensure stable ordering?
+Currently, the way the code is structured, a lot of the information about the current query ($apply and $orderby) would need to be passed down to the nextlink generator to append to the orderby and moreover, it will make it very cumbersome for developers not using the enable query attribute to use it.
+
+Instead, we will expose methods on ODataQueryOption that will enable developers to generate their orderby clauses for stable sorting.
+
+##### 3. Parameterizing the nextlink instead of using skiptoken?
+Currently, the developers not using the enable query attribute generate the next link by using GetNextPageLink extension method on the request. Considering that the data source can even be linq incompatible, I am not sure how this will look like for such developers.
+Moreover, the need to filter the results based on a certain value fits more into the QueryOption paradigm. 
 
 

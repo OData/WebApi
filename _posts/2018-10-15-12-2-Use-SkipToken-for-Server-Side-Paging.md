@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "12.2 Use $skiptoken for server side paging "
+title: "12.3 Use $skiptoken for server side paging "
 description: "WebAPI to use $skiptoken for server side paging"
 category: "12. Design"
 ---

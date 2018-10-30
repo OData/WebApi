@@ -177,15 +177,15 @@ OData service objects into the container's builder. For example, default
 service of type ODataUriResolver is registered as one instance of
 ODataUriResolver as follows:
 
-> public static IContainerBuilder AddDefaultODataServices(this IContainerBuilder builder)
+> publicÂ staticÂ IContainerBuilderÂ AddDefaultODataServices(thisÂ IContainerBuilderÂ builder)
 >
 > {
 >
 > //.........
 >
-> builder.AddService(ServiceLifetime.Singleton, 
+> builder.AddService(ServiceLifetime.Singleton,Â 
 >
-> sp =\> ODataUriResolver.GetUriResolver(null));
+> spÂ =\>Â ODataUriResolver.GetUriResolver(null));
 >
 > //.........
 >
@@ -207,25 +207,25 @@ ODataUriResolver as follows:
         the container builder with WebApi's new default for
         *UnqualifiedODataUriResover with EnableCaseInsensitive=true*.
 
-        > protected IContainerBuilder CreateContainerBuilderWithCoreServices()
+        > protectedÂ IContainerBuilderÂ CreateContainerBuilderWithCoreServices()
         >
         > {
         > 
         >     //......
         >
-        >     builder.AddDefaultODataServices();
+        > Â Â Â Â builder.AddDefaultODataServices();
         >
-        >     // Set Uri resolver to by default enabling unqualified functions/actions and case insensitive match.
+        > Â Â Â Â //Â SetÂ UriÂ resolverÂ toÂ byÂ defaultÂ enablingÂ unqualifiedÂ functions/actionsÂ andÂ caseÂ insensitiveÂ match.
         >
-        >     builder.AddService(
+        > Â Â Â Â builder.AddService(
         >
-        >         ServiceLifetime.Singleton,
+        > Â Â Â Â Â Â Â Â ServiceLifetime.Singleton,
         >
-        >         typeof(ODataUriResolver),
+        > Â Â Â Â Â Â Â Â typeof(ODataUriResolver),
         >
-        >         sp =\> new UnqualifiedODataUriResolver {EnableCaseInsensitive = true});
+        > Â Â Â Â Â Â Â Â spÂ =\>Â newÂ UnqualifiedODataUriResolverÂ {EnableCaseInsensitiveÂ =Â true});
         >
-        >     return builder;
+        > Â Â Â Â returnÂ builder;
         >
         > }
 
@@ -234,13 +234,13 @@ ODataUriResolver as follows:
     the'configureAction' argument of the following method from
     HttpConfigurationExtensions:
 
-        > internal static IServiceProvider CreateODataRootContainer(this HttpConfiguration configuration, string routeName, Action\<IContainerBuilder\> configureAction)
+        > internalÂ staticÂ IServiceProviderÂ CreateODataRootContainer(thisÂ HttpConfigurationÂ configuration, stringÂ routeName,Â Action\<IContainerBuilder\>Â configureAction)
 
 ###  ODataUriParser configuration with injected ODataUriResolver dependency
 
 When WebApi parses the request Uri, instance of ODataDefaultPathHandler is created with associated service provider container, which is further used to create ODataUriParser with injected dependency of ODataUriResolver.
 
-    public ODataUriParser(IEdmModel model, Uri relativeUri, IServiceProvider container)
+    publicÂ ODataUriParser(IEdmModelÂ model,Â UriÂ relativeUri,Â IServiceProviderÂ container)
 
 Enable Case-Insensitive for Custom Uri function
 -----------------------------------------------
@@ -252,21 +252,21 @@ is enabled, is coerced to lower case (as shown below), which is valid for
 build-in function (such as 'startswith' and 'geo.distance', etc), but
 might not be valid for custom uri functions.
 
-> private QueryNode BindAsUriFunction(FunctionCallToken functionCallToken, List\<QueryNode\> argumentNodes)
+> privateÂ QueryNodeÂ BindAsUriFunction(FunctionCallTokenÂ functionCallToken,Â List\<QueryNode\>Â argumentNodes)
 >
 > {
 >
->     if (functionCallToken.Source != null)
+> Â Â Â Â ifÂ (functionCallToken.SourceÂ !=Â null)
 >
->     {
+> Â Â Â Â {
 >
->         // the parent must be null for a Uri function.
+> Â Â Â Â Â Â Â Â //Â theÂ parentÂ mustÂ beÂ nullÂ forÂ aÂ UriÂ function.
 >
->         throw new ODataException(ODataErrorStrings.FunctionCallBinder\_UriFunctionMustHaveHaveNullParent(functionCallToken.Name));
+> Â Â Â Â Â Â Â Â throwÂ newÂ ODataException(ODataErrorStrings.FunctionCallBinder\_UriFunctionMustHaveHaveNullParent(functionCallToken.Name));
 >
->     }
+> Â Â Â Â }
 >
->     string functionCallTokenName = this.state.Configuration.EnableCaseInsensitiveUriFunctionIdentifier ? functionCallToken.Name.ToLowerInvariant() : functionCallToken.Name;
+> Â Â Â Â stringÂ functionCallTokenNameÂ =Â this.state.Configuration.EnableCaseInsensitiveUriFunctionIdentifierÂ ?Â functionCallToken.Name.ToLowerInvariant()Â :Â functionCallToken.Name;
 
 To implement with the correct behavior for enabled case-insensitive:
 

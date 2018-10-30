@@ -88,7 +88,7 @@ Currently, the way the code is structured, a lot of the information about the cu
 Instead, we will expose methods on ODataQueryOption that will enable developers to generate their orderby clauses for stable sorting.
 
 #### 3. Parameterizing the nextlink instead of using skiptoken?
-Currently, the developers not using the enable query attribute generate the next link by using GetNextPageLink extension method on the request. Considering that the data source can even be linq incompatible, I am not sure how this will look like for such developers.
-Moreover, the need to filter the results based on a certain value fits more into the QueryOption paradigm. 
+Currently, the developers not using the enable query attribute generate the next link by using GetNextPageLink extension method on the request. Considering that the data source can even be linq incompatible, this will be a significant deviation from the current implementation for such developers.
+Moreover, the need to filter the results based on a certain value fits more into the QueryOption paradigm and makes it more suitable for customers supporting linq.  
 
 

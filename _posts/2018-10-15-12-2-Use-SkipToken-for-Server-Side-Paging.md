@@ -48,7 +48,7 @@ The value for the $skiptoken will be updated to new value passed in which is the
 Since we will only be modifying the query options from the original request to generate the nextlink, the routing will remain same as the original request. 
 
 #### Parsing $skiptoken and generating the Linq expression
-New classes will be created for ___SkipTokenQueryOption___ and __SkipTokenQueryValidator__. ___SkipTokenQuery___ option will contain the  methods to create and apply the LINQ expression based on the $skiptoken value. To give an example, for a query like the following:
+New classes will be created for ___SkipTokenQueryOption___ and __SkipTokenQueryValidator__. ___SkipTokenQueryOption___ will contain the  methods to create and apply the LINQ expression based on the $skiptoken value. To give an example, for a query like the following:
 
 `GET ~/EntitySet?$orderby=Prop1,Prop2&$skiptoken=Prop1:value1,Prop2:value2,Id1:idVal1,Id2:idVal2`
 

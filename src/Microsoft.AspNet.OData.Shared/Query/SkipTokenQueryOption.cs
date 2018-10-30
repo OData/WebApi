@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.OData.Query
             string[] keyValues = rawValue.Split(',');
             foreach(string keyAndValue in keyValues)
             {
-                string[] pieces = keyAndValue.Split('=');
+                string[] pieces = keyAndValue.Split(':');
                 if (!String.IsNullOrWhiteSpace(pieces[1]))
                 {
                     object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
@@ -215,7 +215,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             object lastMember = FetchLast(result);
             IEdmStructuredObject last = lastMember as IEdmStructuredObject;
-            ResourceContext resource = new ResourceContext();
+//ResourceContext resource = new ResourceContext();
 
             IEdmType edmType = GetTypeFromObject(lastMember,model);
 
@@ -239,9 +239,10 @@ namespace Microsoft.AspNet.OData.Query
             foreach (IEdmStructuralProperty property in key)
             {
                 bool islast = count == lastIndex;
-                object value;
-                last.TryGetPropertyValue(property.Name, out value);
-                skipTokenvalue += property.Name + "=" + value.ToString() +  (islast ? "":" ,");
+                object value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
+                //last.TryGetPropertyValue(property.Name, out value);
+                
+                skipTokenvalue += property.Name + ":" + value.ToString() +  (islast ? "":" ,");
                 count++;
             }
 

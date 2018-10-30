@@ -26,9 +26,9 @@ namespace Microsoft.AspNet.OData
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                string key = kvp.Key;
+                string key = kvp.Key; // Make it case insensitive. 
                 string value = kvp.Value;
-                switch (key.ToLower())
+                switch (key)
                 {
                     case "$top":
                         int top;
@@ -40,19 +40,19 @@ namespace Microsoft.AspNet.OData
                             value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                         }
                         break;
-                    //    case "$skip":
-                    //        int skip;
-                    //        if (Int32.TryParse(value, out skip))
-                    //        {
-                    //            // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                    //            nextPageSkip += skip;
-                    //        }
-                    //        continue;
+                    case "$skip":
+                        int skip;
+                        if (Int32.TryParse(value, out skip))
+                        {
+                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
+                            nextPageSkip += skip;
+                        }
+                        continue;
                     default:
                         break;
                 }
 
-                if(key.ToLower()=="$skip" || key.ToLower()=="$skiptoken")
+                if(key=="$skip" || key=="$skiptoken")
                 {
                     continue;
                 }

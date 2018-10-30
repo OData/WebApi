@@ -120,12 +120,23 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Get the next page link for a given page size.
         /// </summary>
         /// <param name="pageSize">The page size.</param>
+        /// <param name="skipTokenValue">value for the skiptoken</param>
+        /// <returns></returns>
+        public Uri GetNextPageLink(int pageSize, string skipTokenValue)
+        {
+            return this.innerRequest.GetNextPageLink(pageSize,skipTokenValue);
+        }
+
+
+        /// <summary>
+        /// Get the next page link for a given page size.
+        /// </summary>
+        /// <param name="pageSize">The page size.</param>
         /// <returns></returns>
         public Uri GetNextPageLink(int pageSize)
         {
             return this.innerRequest.GetNextPageLink(pageSize);
         }
-
         /// <summary>
         /// Creates an ETag from concurrency property names and values.
         /// </summary>

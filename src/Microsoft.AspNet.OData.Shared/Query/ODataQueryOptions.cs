@@ -426,12 +426,12 @@ namespace Microsoft.AspNet.OData.Query
             if (pageSize > 0)
             {
                 bool resultsLimited;
-                result = LimitResults(result, pageSize, out resultsLimited);
-                string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result,this.Context.Model);
-               
+                result = LimitResults(result, pageSize, out resultsLimited);               
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
+                    string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result, this.Context.Model);
+
                     Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize,skipTokenValue);
                     InternalRequest.Context.NextLink = nextPageLink;
                 }

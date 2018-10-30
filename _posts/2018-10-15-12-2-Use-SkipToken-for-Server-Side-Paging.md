@@ -69,12 +69,12 @@ We will allow services to configure if they want to use $skiptoken or $skip for 
 
 Moreover, we will ensure stable sorting if the query is configured for using $skiptoken. 
 ### Additional details and discussions
-##### 1.	How would a developer implement paging without using EnableQuery attribute? What about stable ordering in that case?
+#### 1.	How would a developer implement paging without using EnableQuery attribute? What about stable ordering in that case?
 a.	 The new SkipTokenQueryOption class will provide 2 methods-
 
-   i.	GenerateSkipTokenValue – which would require the EDM model, the results as IQuerable and OrderbyQueryOption.
+      i.	GenerateSkipTokenValue – requires the EDM model, the results as IQuerable and OrderbyQueryOption.
 
-   ii.	ApplyTo -  applies the LINQ expression for $skiptoken.
+      ii.	ApplyTo -  applies the LINQ expression for $skiptoken.
    
  For developers having non-linq data sources, they can generate the skiptoken value using the new class and use this class in their own implementation of the filtering that ApplyTo does. 
 
@@ -82,12 +82,12 @@ b.	To ensure stable ordering, we will provide a public method on ODataQueryOptio
 
 Developers not using the EnableQuery attribute will have to generate their own OrderbyQueryOption and generate the skiptoken value themselves.  
 
-##### 2.	Should the nextlink modify the list of orderby properties to ensure stable ordering?
+#### 2.	Should the nextlink modify the list of orderby properties to ensure stable ordering?
 Currently, the way the code is structured, a lot of the information about the current query ($apply and $orderby) would need to be passed down to the nextlink generator to append to the orderby and moreover, it will make it very cumbersome for developers not using the enable query attribute to use it.
 
 Instead, we will expose methods on ODataQueryOption that will enable developers to generate their orderby clauses for stable sorting.
 
-##### 3. Parameterizing the nextlink instead of using skiptoken?
+#### 3. Parameterizing the nextlink instead of using skiptoken?
 Currently, the developers not using the enable query attribute generate the next link by using GetNextPageLink extension method on the request. Considering that the data source can even be linq incompatible, I am not sure how this will look like for such developers.
 Moreover, the need to filter the results based on a certain value fits more into the QueryOption paradigm. 
 

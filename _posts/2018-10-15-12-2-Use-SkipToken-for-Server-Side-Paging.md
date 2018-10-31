@@ -9,11 +9,11 @@ category: "12. Design"
 ### Background
 Loading large data can be slow. Services often rely on pagination to load the data incrementally to improve the response times and the user experience. Paging can be server-driven or client-driven:
 #### Client-driven paging
-In client-driven paging, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top tokens in conjunction. For instance, if a client needs to request 10 records from 71-80, it can send a similar request as below:
+In client-driven paging, the client decides how many records it wants to load and asks the server that many records. That is achieved by using $skip and $top query options in conjunction. For instance, if a client needs to request 10 records from 71-80, it can send a similar request as below:
 
 `GET ~/Products/$skip=70&$top=10`
 #### Server-driven paging
-In server-driven paging, the client asks for a collection of entities and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to identify the last loaded record.
+In server-driven paging, the client asks for a collection of entities and the server sends back partial results as well as a nextlink to use to retrieve more results. The nextlink is an opaque link which may use $skiptoken to store state about the request, such as the last read entity.
 ### Problem
 Currently, WebAPI uses $skip for server-driven paging which is a slight deviation from the OData standard and can be problematic when the data source can get updated concurrently. For instance, a deletion of a record may cause the last record to be sent down to the client twice. 
 ### Proposed Solution
@@ -40,7 +40,7 @@ The next link generation method in ___GetNextPageHelper___ static class will tak
 ##### 1. Handle $skip
 We will omit the $skip value if the service is configured to support $skiptoken and a collection of entity is being requested. This is because the first response would have applied the $skip query option to the results already. 
 ##### 2. Handle $top
-We will reduce the value of $top query option by the page size if it is greater than the page size.   
+The next link will only appear if the page size is less than the $top query option. We will reduce the value of $top query option by the page size while generating the next link.   
 ##### 3. Handle $skiptoken
 The value for the $skiptoken will be updated to new value passed in which is the key value for the last record sent. If the skiptoken value is not sent, we will call the existing method and use $skip for paging instead.
 
@@ -75,6 +75,8 @@ a.	 The new SkipTokenQueryOption class will provide 2 methods-
       i.	GenerateSkipTokenValue – requires the EDM model, the results as IQuerable and OrderbyQueryOption.
 
       ii.	ApplyTo -  applies the LINQ expression for $skiptoken.
+      
+      iii.  ParseSkipTokenValue - Populates the dictionary of property-value pairs on the class 
    
  For developers having non-linq data sources, they can generate the skiptoken value using the new class and use this class in their own implementation of the filtering that ApplyTo does. 
 

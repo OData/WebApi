@@ -9,7 +9,6 @@ using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;

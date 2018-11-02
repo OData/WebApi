@@ -23,10 +23,17 @@ namespace Microsoft.AspNet.OData
             StringBuilder queryBuilder = new StringBuilder();
 
             int nextPageSkip = pageSize;
+            
+            //If no value for skiptoken is provided; revert to using skip 
+            bool useSkipToken = true;
+            if(String.IsNullOrWhiteSpace(skipTokenValue))
+            {
+                useSkipToken = false;
+            }
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                string key = kvp.Key; // Make it case insensitive. 
+                string key = kvp.Key;//.ToLowerInvariant(); // Make it case insensitive. 
                 string value = kvp.Value;
                 switch (key)
                 {
@@ -41,18 +48,22 @@ namespace Microsoft.AspNet.OData
                         }
                         break;
                     case "$skip":
-                        int skip;
-                        if (Int32.TryParse(value, out skip))
+                        //Need to increment skip only if we are not using skiptoken 
+                        if (!useSkipToken) 
                         {
-                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                            nextPageSkip += skip;
+                            if (Int32.TryParse(value, out int skip))
+                            {
+                                // We increase skip by the pageSize because that's the number of results we're returning in the current page
+                                nextPageSkip += skip;
+                            }
+
                         }
                         continue;
                     default:
                         break;
                 }
 
-                if(key=="$skip" || key=="$skiptoken")
+                if ( (key=="$skip" && useSkipToken) || (key=="$skiptoken" && useSkipToken))
                 {
                     continue;
                 }

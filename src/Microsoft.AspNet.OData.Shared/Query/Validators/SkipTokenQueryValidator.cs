@@ -38,9 +38,6 @@ namespace Microsoft.AspNet.OData.Query.Validators
             {
                 return new SkipTokenQueryValidator();
             }
-
-            context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
-
             return context.RequestContainer.GetRequiredService<SkipTokenQueryValidator>();
         }
     }

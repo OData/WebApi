@@ -267,10 +267,6 @@ namespace Microsoft.AspNet.OData.Extensions
 
             DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
             defaultQuerySettings.EnableSkipToken = true;
-            //if (!maxTopValue.HasValue || maxTopValue > 0)
-            //{
-            //    ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = maxTopValue;
-            //}
 
             return builder;
         }
@@ -286,7 +282,7 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableCount = setting == QueryOptionSetting.Allowed;
+            defaultQuerySettings.EnableSkipToken = setting == QueryOptionSetting.Allowed;
 
             return builder;
         }

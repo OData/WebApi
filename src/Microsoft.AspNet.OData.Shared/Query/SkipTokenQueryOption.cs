@@ -78,12 +78,13 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$skiptoken", rawValue } });
+                new Dictionary<string, string> { { "$skiptoken", rawValue } },
+                context.RequestContainer);
         }
 
         private void ParseKeyValuePairs(string rawValue)
         {
-            KeyValuePairs = new Dictionary<string, object>();
+            PropertyValuePairs = new Dictionary<string, object>();
             string[] keyValues = rawValue.Split(',');
             foreach(string keyAndValue in keyValues)
             {
@@ -93,7 +94,7 @@ namespace Microsoft.AspNet.OData.Query
                     object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
                     if (!String.IsNullOrWhiteSpace(pieces[0]))
                     {
-                        KeyValuePairs.Add(pieces[0], value);
+                        PropertyValuePairs.Add(pieces[0], value);
                     }
                 }
                 
@@ -109,7 +110,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Stores the key value pairs for the skiptoken query option
         /// </summary>
-        public IDictionary<string, object> KeyValuePairs;
+        public IDictionary<string, object> PropertyValuePairs;
 
         /// <summary>
         /// Gets the raw $skiptoken value.
@@ -142,21 +143,23 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
+        /// <param name="orderBy">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings)
+        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
-            return ApplyToCore(query, querySettings) as IOrderedQueryable<T>;
+            return ApplyToCore(query, querySettings, orderBy) as IOrderedQueryable<T>;
         }
 
         /// <summary>
-        /// Apply the $skip query to the given IQueryable.
+        /// Apply the $skiptoken query to the given IQueryable.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
+        /// <param name="orderBy">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
-            return ApplyToCore(query, querySettings);
+            return ApplyToCore(query, querySettings,orderBy);
         }
 
         /// <summary>
@@ -176,33 +179,71 @@ namespace Microsoft.AspNet.OData.Query
             }
         }
 
-        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings)
+        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
             if (Context.ElementClrType == null)
             {
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
+            IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderBy);
             bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
             Expression where = null;
             int count = 0;
-
-            foreach (KeyValuePair<string,object> item in KeyValuePairs)
+            /* We will create a where lambda of the following form -
+             * Where (true AND Prop1>Value1)
+             * OR (true AND Prop1=Value1 AND Prop2>Value2)
+             * OR (true AND Prop1=Value1 AND Prop2=Value2 AND Prop3>Value3)
+             * and so on...
+             * Adding the first true to simplify implementation.
+             */
+            Expression lastEquality = Expression.Constant(true);
+            foreach (KeyValuePair<string,object> item in PropertyValuePairs)
             {
-                MemberExpression property = Expression.Property(param, item.Key);
+                string key = item.Key;
+                MemberExpression property = Expression.Property(param, key);
                 object value = item.Value;
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                BinaryExpression compare = (count == KeyValuePairs.Keys.Count - 1) ? BinaryExpression.GreaterThan(property, constant) : BinaryExpression.GreaterThanOrEqual(property, constant);
-                where = where == null ? compare : Expression.AndAlso(where, compare);
+                BinaryExpression compare;
+                
+                if (directionMap.ContainsKey(key))
+                {
+                    compare = directionMap[key] == OrderByDirection.Descending ? BinaryExpression.LessThan(property, constant) : BinaryExpression.GreaterThan(property, constant);
+                }
+                else
+                {
+                    compare = BinaryExpression.GreaterThan(property, constant);
+                }
+                Expression condition = Expression.AndAlso(lastEquality, compare);
+                //BinaryExpression compare = (count == PropertyValuePairs.Keys.Count - 1) ? BinaryExpression.GreaterThan(property, constant) : BinaryExpression.GreaterThanOrEqual(property, constant);
+                where = where == null ? condition : Expression.OrElse(where, condition);
 
+                lastEquality = Expression.AndAlso(lastEquality, BinaryExpression.Equal(property, constant));
                 count++;
             }
 
             Expression whereLambda = Expression.Lambda(where, param);
 
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
-            //return ExpressionHelpers.SkipWhile<string>(query, v, query.ElementType, querySettings.EnableConstantParameterization);
+        }
+
+        private IDictionary<string, OrderByDirection> PopulateDirections(OrderByQueryOption orderBy)
+        {
+            IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
+            if (orderBy == null)
+            {
+                return directions;
+            }
+
+            foreach(OrderByPropertyNode node in orderBy.OrderByNodes)
+            {
+                if (node!= null)
+                {
+                    directions[node.Property.Name] = node.Direction;
+                }
+            }
+            return directions; 
         }
 
         /// <summary>
@@ -210,43 +251,65 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="result"></param>
         /// <param name="model"></param>
+        /// <param name="orderByQueryOption"></param>
         /// <returns></returns>
-        public static string GetSkipTokenValue(IQueryable result, IEdmModel model)
+        public static string GetSkipTokenValue(IQueryable result, IEdmModel model, OrderByQueryOption orderByQueryOption)
         {
             object lastMember = FetchLast(result);
-            IEdmStructuredObject last = lastMember as IEdmStructuredObject;
-//ResourceContext resource = new ResourceContext();
-
-            IEdmType edmType = GetTypeFromObject(lastMember,model);
-
-            //Type ClrType = lastMember.GetType();
-            IEdmEntityType entity = edmType as IEdmEntityType;
-
-            IEnumerable<IEdmStructuralProperty> key = null;
-            if (entity != null)
-            {
-                key = entity.Key();
-            }
-            if(key == null)
-            {
-                return String.Empty;
-            }
-
-
+            object value;
+            IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember,model, orderByQueryOption);
+           
             string skipTokenvalue = "";
+            if (propertiesForSkipToken == null)
+            {
+                return skipTokenvalue;
+            }
+
             int count = 0;
-            int lastIndex = key.Count() - 1;
-            foreach (IEdmStructuralProperty property in key)
+            int lastIndex = propertiesForSkipToken.Count() - 1;
+            foreach (IEdmProperty property in propertiesForSkipToken)
             {
                 bool islast = count == lastIndex;
-                object value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
-                //last.TryGetPropertyValue(property.Name, out value);
-                
+                IEdmStructuredObject obj = lastMember as IEdmStructuredObject;
+                if (obj != null)
+                {
+                    obj.TryGetPropertyValue(property.Name, out value);
+                }
+                else
+                {
+                    value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
+                }
                 skipTokenvalue += property.Name + ":" + value.ToString() +  (islast ? "":" ,");
                 count++;
             }
 
             return skipTokenvalue;
+        }
+
+        private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
+        {
+            IEdmType edmType = GetTypeFromObject(lastMember, model);
+
+            IEdmEntityType entity = edmType as IEdmEntityType;
+
+            if(entity == null)
+            {
+                return null;
+            }
+
+            IList<IEdmProperty> key = entity.Key().AsIList<IEdmProperty>();
+            if (orderByQueryOption!=null)
+            {
+                IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList<IEdmProperty>();
+                foreach (IEdmProperty subKey in key)
+                {
+                    orderByProps.Add(subKey);
+                }
+
+                return orderByProps.AsEnumerable<IEdmProperty>();
+            }
+            return key.AsEnumerable<IEdmProperty>();
+            
         }
 
         private static IEdmType GetTypeFromObject(object obj, IEdmModel model)

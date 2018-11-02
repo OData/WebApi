@@ -387,6 +387,11 @@ namespace Microsoft.AspNet.OData.Query
                 result = orderBy.ApplyTo(result, querySettings);
             }
 
+            if (IsAvailableODataQueryOption(SkipToken, AllowedQueryOptions.SkipToken))
+            {
+                result = SkipToken.ApplyTo(result, querySettings, orderBy);
+            }
+
             AddAutoSelectExpandProperties();
 
             if (SelectExpand != null)
@@ -396,11 +401,6 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     result = tempResult;
                 }
-            }
-
-            if (IsAvailableODataQueryOption(SkipToken,AllowedQueryOptions.SkipToken))
-            {
-                result = SkipToken.ApplyTo(result, querySettings);
             }
 
             if (IsAvailableODataQueryOption(Skip, AllowedQueryOptions.Skip))
@@ -425,14 +425,23 @@ namespace Microsoft.AspNet.OData.Query
 
             if (pageSize > 0)
             {
+                Uri nextPageLink;
                 bool resultsLimited;
                 result = LimitResults(result, pageSize, out resultsLimited);               
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result, this.Context.Model);
+                    DefaultQuerySettings settings= Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
+                    if (settings.EnableSkipToken)
+                    {
+                        string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result, this.Context.Model, OrderBy);
+                        nextPageLink = InternalRequest.GetNextPageLink(pageSize, skipTokenValue);
+                    }
+                    else
+                    {
+                        nextPageLink = InternalRequest.GetNextPageLink(pageSize);
+                    }
 
-                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize,skipTokenValue);
                     InternalRequest.Context.NextLink = nextPageLink;
                 }
             }

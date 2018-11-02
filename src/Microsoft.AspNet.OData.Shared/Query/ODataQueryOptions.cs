@@ -721,7 +721,8 @@ namespace Microsoft.AspNet.OData.Query
                     Context.Model,
                     Context.ElementType,
                     Context.NavigationSource,
-                    queryParameters);
+                    queryParameters,
+                    Context.RequestContainer);
                 var originalSelectExpand = SelectExpand;
                 SelectExpand = new SelectExpandQueryOption(
                     autoSelectRawValue,
@@ -931,7 +932,8 @@ namespace Microsoft.AspNet.OData.Query
                         Context.Model,
                         Context.ElementType,
                         Context.NavigationSource,
-                        new Dictionary<string, string> { { "$count", "true" } }));
+                        new Dictionary<string, string> { { "$count", "true" } },
+                        Context.RequestContainer));
             }
         }
 

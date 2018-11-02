@@ -46,6 +46,13 @@ namespace Microsoft.AspNet.OData.Test.Query
 
                     // Navigational properties
                     { "Orders/any(order: order/OrderId eq 12)", new int[] { 1 } },
+
+                    // case insensitive forms
+                    { "NaME eq 'Highest'", new int[] { 2 } },
+                    { "AdDrEsS/CiTy eq 'redmond'", new int[] { 1 } },
+                    { "AlIaSeS/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
+                    { "OrDeRs/any(order: order/OrDeRId eq 12)", new int[] { 1 } },
+
                 };
             }
         }

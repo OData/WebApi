@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
@@ -139,8 +140,10 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
         }
 
-        [Fact]
-        public void SelectExpandClause_Property_ParsesWithEdmTypeAndNavigationSource()
+        [Theory]
+        [InlineData("ID,Name,SimpleEnum,Orders", "Orders")]
+        [InlineData("iD,NaMe,SiMpLeEnUm,OrDeRs", "OrDeRs")]
+        public void SelectExpandClause_Property_ParsesWithEdmTypeAndNavigationSource(string select, string expand)
         {
             // Arrange
             IEdmModel model = _model.Model;
@@ -148,14 +151,20 @@ namespace Microsoft.AspNet.OData.Test.Query
             ODataPath odataPath = new ODataPath(new EntitySetSegment(_model.Customers));
             ODataQueryContext context = new ODataQueryContext(model, _model.Customer, odataPath);
             context.RequestContainer = new MockContainer();
-            SelectExpandQueryOption option = new SelectExpandQueryOption("ID,Name,SimpleEnum,Orders", "Orders", context);
+            SelectExpandQueryOption option = new SelectExpandQueryOption(select, expand, context);
 
             // Act
             SelectExpandClause selectExpandClause = option.SelectExpandClause;
 
             // Assert
             Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<PathSelectItem>());
-            Assert.NotEmpty(selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
+            IEnumerable<string> ids = selectExpandClause.SelectedItems.OfType<PathSelectItem>()
+                .Select(p => (p.SelectedPath.FirstSegment as PropertySegment)?.Identifier);
+            Assert.Equal(new []{"ID", "Name", "SimpleEnum"}, ids.OfType<string>().ToArray());
+
+            IEnumerable<ExpandedNavigationSelectItem> expands = selectExpandClause.SelectedItems.OfType<ExpandedNavigationSelectItem>();
+            Assert.NotEmpty(expands);
+            Assert.Equal("Orders", expands.Single().NavigationSource.Name);
         }
 
         [Theory]

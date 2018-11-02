@@ -100,7 +100,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } },
+                context.RequestContainer);
         }
 
         /// <summary>

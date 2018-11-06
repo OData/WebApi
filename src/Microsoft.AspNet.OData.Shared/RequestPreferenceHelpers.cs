@@ -66,8 +66,7 @@ namespace Microsoft.AspNet.OData
             }
             else
             {
-                maxPageSize = maxPageSize.ToLower();
-                int index = maxPageSize.IndexOf(preferenceHeaderName) + preferenceHeaderName.Length;
+                int index = maxPageSize.IndexOf(preferenceHeaderName,System.StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
                 string value = "";
                 if(maxPageSize[index++]=='=')
                 {

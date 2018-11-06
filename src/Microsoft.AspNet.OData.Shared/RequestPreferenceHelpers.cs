@@ -81,7 +81,7 @@ namespace Microsoft.AspNet.OData
                     return pageSize;
                 }
             }
-            return failed; 
+            return failed;
         }
         internal static string GetRequestPreferHeader(IWebApiHeaders headers)
         {

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
-using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -375,7 +374,7 @@ namespace Microsoft.AspNet.OData
         {
             if (!_querySettings.PageSize.HasValue && responseValue != null)
             {
-                GetPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request, createErrorAction);
+                GetModelBoundPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path, createErrorAction);
             }
 
             // Apply the query if there are any query options, if there is a page size set, in the case of
@@ -520,18 +519,18 @@ namespace Microsoft.AspNet.OData
         /// <param name="singleResultCollection">The content as SingleResult.Queryable.</param>
         /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
         /// <param name="modelFunction">A function to get the model.</param>
-        /// <param name="request">WebApi Request Message.</param>
+        /// <param name="path">The OData path.</param>
         /// <param name="createErrorAction">A function used to generate error response.</param>
-        private void GetPageSize(
+        private void GetModelBoundPageSize(
             object responseValue,
             IQueryable singleResultCollection,
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
-            IWebApiRequestMessage request,
+            ODataPath path,
             Action<HttpStatusCode, string, Exception> createErrorAction)
         {
             ODataQueryContext queryContext = null;
-            ODataPath path = request.Context.Path;
+
             try
             {
                 queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, path);
@@ -551,10 +550,6 @@ namespace Microsoft.AspNet.OData
             if (querySettings != null && querySettings.PageSize.HasValue)
             {
                 _querySettings.ModelBoundPageSize = querySettings.PageSize;
-            }
-            else if (RequestPreferenceHelpers.RequestPrefersMaxPageSize(request.Headers, out int pageSize))
-            {
-                _querySettings.PageSize = pageSize;
             }
         }
 

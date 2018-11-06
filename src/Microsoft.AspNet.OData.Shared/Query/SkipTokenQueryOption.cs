@@ -204,19 +204,37 @@ namespace Microsoft.AspNet.OData.Query
                 string key = item.Key;
                 MemberExpression property = Expression.Property(param, key);
                 object value = item.Value;
+
+                Expression compare=null;
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                BinaryExpression compare;
-                
-                if (directionMap.ContainsKey(key))
+                if (false)
                 {
-                    compare = directionMap[key] == OrderByDirection.Descending ? BinaryExpression.LessThan(property, constant) : BinaryExpression.GreaterThan(property, constant);
+                    //Expression<Func<string, bool>> StringGreaterThan = x => x.CompareTo(value) > 0;
+                    //Expression<Func<string, bool>> StringLessThan = x => x.CompareTo(value) < 0;
+
+                    //if (directionMap.ContainsKey(key))
+                    //{
+                    //    compare = directionMap[key] == OrderByDirection.Descending ? StringLessThan : StringGreaterThan;
+                    //}
+                    //else
+                    //{
+                    //    compare = StringGreaterThan;
+                    //}
+                    //compare = BinaryExpression.MakeBinary(ExpressionType.Lambda, compare, property);
                 }
                 else
                 {
-                    compare = BinaryExpression.GreaterThan(property, constant);
+                    if (directionMap.ContainsKey(key))
+                    {
+                        compare = directionMap[key] == OrderByDirection.Descending ? BinaryExpression.LessThan(property, constant) : BinaryExpression.GreaterThan(property, constant);
+                    }
+                    else
+                    {
+                        compare = BinaryExpression.GreaterThan(property, constant);
+                    }
                 }
+               
                 Expression condition = Expression.AndAlso(lastEquality, compare);
-                //BinaryExpression compare = (count == PropertyValuePairs.Keys.Count - 1) ? BinaryExpression.GreaterThan(property, constant) : BinaryExpression.GreaterThanOrEqual(property, constant);
                 where = where == null ? condition : Expression.OrElse(where, condition);
 
                 lastEquality = Expression.AndAlso(lastEquality, BinaryExpression.Equal(property, constant));

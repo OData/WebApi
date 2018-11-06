@@ -43,6 +43,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         IWebApiOptions Options { get; }
 
         /// <summary>
+        /// Get the options associated with the request.
+        /// </summary>
+        IWebApiHeaders Headers { get; }
+
+        /// <summary>
         /// The request container associated with the request.
         /// </summary>
         IServiceProvider RequestContainer { get; }

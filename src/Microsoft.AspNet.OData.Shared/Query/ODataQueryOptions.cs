@@ -413,6 +413,11 @@ namespace Microsoft.AspNet.OData.Query
                 pageSize = querySettings.ModelBoundPageSize.Value;
             }
 
+            if (RequestPreferenceHelpers.RequestPrefersMaxPageSize(InternalRequest.Headers, out int preferredPageSize))
+            {
+                pageSize = Math.Min(pageSize, preferredPageSize);
+            }
+
             if (pageSize > 0)
             {
                 bool resultsLimited;

@@ -12,6 +12,8 @@ namespace Microsoft.AspNet.OData
         public const string PreferHeaderName = "Prefer";
         public const string ReturnContentHeaderValue = "return=representation";
         public const string ReturnNoContentHeaderValue = "return=minimal";
+        public const string ODataMaxPageSize = "odata.maxpagesize";
+        public const string MaxPageSize = "maxpagesize";
 
         internal static bool RequestPrefersReturnContent(IWebApiHeaders headers)
         {
@@ -33,6 +35,45 @@ namespace Microsoft.AspNet.OData
             return false;
         }
 
+        internal static bool RequestPrefersMaxPageSize(IWebApiHeaders headers, out int pageSize)
+        {
+            pageSize = -1;
+            IEnumerable<string> preferences = null;
+            if (headers.TryGetValues(PreferHeaderName, out preferences))
+            {
+                pageSize = GetMaxPageSize(preferences, MaxPageSize);
+                if (pageSize >= 0)
+                {
+                    return true;
+                }
+                //maxpagesize gets supersedes odata.maxpagesize
+                pageSize = GetMaxPageSize(preferences, ODataMaxPageSize);
+                if (pageSize >= 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private static int GetMaxPageSize(IEnumerable<string> Preferences, string preferenceHeaderName)
+        {
+            const int failed = -1;
+            string maxPageSize = Preferences.FirstOrDefault(s => s.StartsWith(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrEmpty(maxPageSize))
+            {
+                return failed;
+            }
+            else
+            {
+                string[] values = maxPageSize.Split('=');
+                if (int.TryParse(values[1], out int pageSize))
+                {
+                    return pageSize;
+                }
+            }
+            return failed; 
+        }
         internal static string GetRequestPreferHeader(IWebApiHeaders headers)
         {
             IEnumerable<string> values;

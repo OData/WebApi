@@ -40,6 +40,7 @@ namespace Microsoft.AspNet.OData.Adapters
             }
 
             this.innerRequest = request;
+            this.Headers = new WebApiRequestHeaders(request.Headers);
 
             HttpRequestMessageProperties context = request.ODataProperties();
             if (context != null)
@@ -58,6 +59,11 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Gets the contents of the HTTP message.
         /// </summary>
         public IWebApiContext Context { get; private set; }
+
+        /// <summary>
+        /// WebAPI headers associated with the request
+        /// </summary>
+        public IWebApiHeaders Headers { get; private set; }
 
         /// <summary>
         /// Gets a value indicating if this is a count request.

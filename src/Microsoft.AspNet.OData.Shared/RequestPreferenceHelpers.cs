@@ -59,15 +59,24 @@ namespace Microsoft.AspNet.OData
         private static int GetMaxPageSize(IEnumerable<string> Preferences, string preferenceHeaderName)
         {
             const int failed = -1;
-            string maxPageSize = Preferences.FirstOrDefault(s => s.StartsWith(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase));
+            string maxPageSize = Preferences.FirstOrDefault(s => s.Contains(preferenceHeaderName));
             if (string.IsNullOrEmpty(maxPageSize))
             {
                 return failed;
             }
             else
             {
-                string[] values = maxPageSize.Split('=');
-                if (int.TryParse(values[1], out int pageSize))
+                maxPageSize = maxPageSize.ToLower();
+                int index = maxPageSize.IndexOf(preferenceHeaderName) + preferenceHeaderName.Length;
+                string value = "";
+                if(maxPageSize[index++]=='=')
+                {
+                    while (index < maxPageSize.Length && char.IsDigit(maxPageSize[index]))
+                    {
+                        value += maxPageSize[index++];
+                    }
+                }
+                if (int.TryParse(value, out int pageSize))
                 {
                     return pageSize;
                 }

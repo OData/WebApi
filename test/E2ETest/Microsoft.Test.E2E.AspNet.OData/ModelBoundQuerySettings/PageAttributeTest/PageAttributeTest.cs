@@ -111,12 +111,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData(CustomerBaseUrl)]
-        [InlineData(ModelBoundCustomerBaseUrl)]
-        public async Task PageSizeOnEntityType(string url)
+        [InlineData(CustomerBaseUrl,true)]
+        [InlineData(ModelBoundCustomerBaseUrl,true)]
+        [InlineData(CustomerBaseUrl, false)]
+        [InlineData(ModelBoundCustomerBaseUrl, false)]
+        public async Task PageSizeOnEntityType(string url, bool usePreferPageSize)
         {
             string queryUrl = string.Format(url, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            if (usePreferPageSize)
+            {
+                request.Headers.Add("prefer", "odata.maxpagesize=1");
+            }
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpClient client = new HttpClient();
 
@@ -124,26 +130,55 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             string result = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains(string.Format(url, "") + "?$skip=1", result);
+            Assert.Contains(string.Format(url, "") + "?$skip=" + (usePreferPageSize? "1":"2"), result);
         }
 
         [Theory]
-        [InlineData(CustomerBaseUrl, "?$expand=Orders")]
-        [InlineData(CustomerBaseUrl, "(1)/Orders")]
-        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders")]
-        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders")]
-        public async Task PageSizeOnProperty(string url, string expand)
+        [InlineData(CustomerBaseUrl, "?$expand=Orders",true)]
+        [InlineData(CustomerBaseUrl, "(1)/Orders",true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders",true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders",true)]
+        [InlineData(CustomerBaseUrl, "?$expand=Orders", false)]
+        [InlineData(CustomerBaseUrl, "(1)/Orders", false)]
+        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", false)]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders", false)]
+        public async Task PageSizeOnProperty(string url, string expand, bool usePreferPageSize)
         {
             string queryUrl = string.Format(url + expand, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            if (usePreferPageSize)
+            {
+                request.Headers.Add("prefer", "maxpagesize=1");
+            }
             HttpClient client = new HttpClient();
 
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Contains("Orders?$skip=1", result);
+            Assert.Contains("$skip=" + (usePreferPageSize ? "1" : "2"), result);
+        }
+
+        [Theory]
+        [InlineData(CustomerBaseUrl)]
+        [InlineData(CustomerBaseUrl + "(1)/Orders")]
+        [InlineData(ModelBoundCustomerBaseUrl)]
+        [InlineData(ModelBoundCustomerBaseUrl + "?$expand=Orders")]
+        public async Task MaxPageSizeTrumpsODataMaxPageSize(string url)
+        {
+            string queryUrl = string.Format(url, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            request.Headers.Add("prefer", "maxpagesize=1");
+            request.Headers.Add("prefer", "odata.maxpagesize=2");
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("$skip=1", result);
         }
     }
 }

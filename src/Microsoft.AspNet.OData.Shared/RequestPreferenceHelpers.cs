@@ -75,7 +75,8 @@ namespace Microsoft.AspNet.OData
                         value += maxPageSize[index++];
                     }
                 }
-                if (int.TryParse(value, out int pageSize))
+                int pageSize = -1;
+                if (int.TryParse(value, out pageSize))
                 {
                     return pageSize;
                 }

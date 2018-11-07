@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;
@@ -56,32 +57,32 @@ namespace Microsoft.AspNet.OData
             return false;
         }
 
-        private static int GetMaxPageSize(IEnumerable<string> Preferences, string preferenceHeaderName)
+        private static int GetMaxPageSize(IEnumerable<string> preferences, string preferenceHeaderName)
         {
-            const int failed = -1;
-            string maxPageSize = Preferences.FirstOrDefault(s => s.Contains(preferenceHeaderName));
-            if (string.IsNullOrEmpty(maxPageSize))
+            const int Failed = -1;
+            string maxPageSize = preferences.FirstOrDefault(s => s.Contains(preferenceHeaderName));
+            if (String.IsNullOrEmpty(maxPageSize))
             {
-                return failed;
+                return Failed;
             }
             else
             {
-                int index = maxPageSize.IndexOf(preferenceHeaderName,System.StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
-                string value = "";
-                if(maxPageSize[index++]=='=')
+                int index = maxPageSize.IndexOf(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
+                string value = string.Empty;
+                if (maxPageSize[index++] == '=')
                 {
-                    while (index < maxPageSize.Length && char.IsDigit(maxPageSize[index]))
+                    while (index < maxPageSize.Length && Char.IsDigit(maxPageSize[index]))
                     {
                         value += maxPageSize[index++];
                     }
                 }
                 int pageSize = -1;
-                if (int.TryParse(value, out pageSize))
+                if (Int32.TryParse(value, out pageSize))
                 {
                     return pageSize;
                 }
             }
-            return failed;
+            return Failed;
         }
         internal static string GetRequestPreferHeader(IWebApiHeaders headers)
         {

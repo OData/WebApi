@@ -68,7 +68,7 @@ namespace Microsoft.AspNet.OData
             else
             {
                 int index = maxPageSize.IndexOf(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
-                string value = string.Empty;
+                String value = String.Empty;
                 if (maxPageSize[index++] == '=')
                 {
                     while (index < maxPageSize.Length && Char.IsDigit(maxPageSize[index]))

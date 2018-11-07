@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData
             IEnumerable<string> preferences = null;
             if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
-                return preferences.Contains(ReturnContentHeaderValue);
+                return (preferences.FirstOrDefault(s => s.IndexOf(ReturnContentHeaderValue, StringComparison.OrdinalIgnoreCase) >= 0) != null);
             }
             return false;
         }
@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData
             IEnumerable<string> preferences = null;
             if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
-                return preferences.Contains(ReturnNoContentHeaderValue);
+                return (preferences.FirstOrDefault(s => s.IndexOf(ReturnNoContentHeaderValue, StringComparison.OrdinalIgnoreCase) >=0) != null);
             }
             return false;
         }
@@ -60,14 +60,14 @@ namespace Microsoft.AspNet.OData
         private static int GetMaxPageSize(IEnumerable<string> preferences, string preferenceHeaderName)
         {
             const int Failed = -1;
-            string maxPageSize = preferences.FirstOrDefault(s => s.IndexOf(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase) >= 0);
+            string maxPageSize = preferences.FirstOrDefault(s => s.IndexOf(preferenceHeaderName, StringComparison.OrdinalIgnoreCase) >= 0);
             if (String.IsNullOrEmpty(maxPageSize))
             {
                 return Failed;
             }
             else
             {
-                int index = maxPageSize.IndexOf(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
+                int index = maxPageSize.IndexOf(preferenceHeaderName, StringComparison.OrdinalIgnoreCase) + preferenceHeaderName.Length;
                 String value = String.Empty;
                 if (maxPageSize[index++] == '=')
                 {

@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData
         private static int GetMaxPageSize(IEnumerable<string> preferences, string preferenceHeaderName)
         {
             const int Failed = -1;
-            string maxPageSize = preferences.FirstOrDefault(s => s.Contains(preferenceHeaderName));
+            string maxPageSize = preferences.FirstOrDefault(s => s.IndexOf(preferenceHeaderName, System.StringComparison.OrdinalIgnoreCase) >= 0);
             if (String.IsNullOrEmpty(maxPageSize))
             {
                 return Failed;

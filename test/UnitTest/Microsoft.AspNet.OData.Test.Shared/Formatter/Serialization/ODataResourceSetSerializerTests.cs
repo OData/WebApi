@@ -647,6 +647,23 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.Equal(3, resourceSet.Functions.Count());
         }
 
+        [Fact]
+        public void SetODataFeatureTotalCountValueNull()
+        {
+            // Arrange
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(_serializerProvider);
+            var request = RequestFactory.Create();
+            request.ODataContext().TotalCount = null;
+
+            var result = new object[0];
+
+            // Act
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext { Request = request });
+
+            // Assert
+            Assert.Null(resourceSet.Count);
+        }
+
         [Theory]
         [InlineData(ODataMetadataLevel.MinimalMetadata)]
         [InlineData(ODataMetadataLevel.NoMetadata)]

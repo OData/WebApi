@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.OData
             set
             {
                 this.totalCount = value;
-                this.totalCountSet = true;
+                this.totalCountSet = value.HasValue;
             }
         }
 

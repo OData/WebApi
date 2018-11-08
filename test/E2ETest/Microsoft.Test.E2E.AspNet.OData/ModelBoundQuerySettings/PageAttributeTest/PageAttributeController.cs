@@ -56,11 +56,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                     {
                         new Order
                         {
-                            Id = i * 2 - 1
+                            Id = i * 3 - 2
                         },
                         new Order
                         {
-                            Id = i * 2
+                            Id = i * 3 - 1
+                        },
+                        new Order
+                        {
+                            Id = i * 3
                         }
                     },
                 };

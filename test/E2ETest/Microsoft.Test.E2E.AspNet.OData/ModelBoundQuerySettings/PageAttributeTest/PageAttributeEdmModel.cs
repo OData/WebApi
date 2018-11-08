@@ -8,7 +8,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest
 {
-    [Page(MaxTop = 5, PageSize = 1)]
+    [Page(MaxTop = 5, PageSize = 2)]
     public class Customer
     {
         public int Id { get; set; }
@@ -19,7 +19,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         public Address Address { get; set; }
         
-        [Page(MaxTop = 2, PageSize = 1)]
+        [Page(MaxTop = 2, PageSize = 2)]
         public List<Order> Orders { get; set; }
 
         public List<Address> Addresses { get; set; }
@@ -65,8 +65,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         {
             var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Customer>("Customers")
-                .EntityType.Page(5, 1);
-            builder.EntityType<Customer>().HasMany(p => p.Orders).Page(2, 1);
+                .EntityType.Page(5, 2);
+            builder.EntityType<Customer>().HasMany(p => p.Orders).Page(2, 2);
 
             builder.EntitySet<Order>("Orders");
             builder.EntityType<Order>().HasMany(p => p.Customers).Page();

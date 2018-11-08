@@ -170,7 +170,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             string queryUrl = string.Format(url, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
-            request.Headers.Add("prefer", "maxpagesize=1");
+            request.Headers.Add("prefer", "maxPaGesize=1");
             request.Headers.Add("prefer", "odata.maxpagesize=2");
             HttpClient client = new HttpClient();
 

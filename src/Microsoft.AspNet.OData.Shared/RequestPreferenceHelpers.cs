@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData
             IEnumerable<string> preferences = null;
             if (headers.TryGetValues(PreferHeaderName, out preferences))
             {
-                return (preferences.FirstOrDefault(s => s.IndexOf(ReturnNoContentHeaderValue, StringComparison.OrdinalIgnoreCase) >=0) != null);
+                return (preferences.FirstOrDefault(s => s.IndexOf(ReturnNoContentHeaderValue, StringComparison.OrdinalIgnoreCase) >= 0) != null);
             }
             return false;
         }

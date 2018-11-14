@@ -78,7 +78,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$orderby", rawValue }, { "$apply", applyRaw } });
+                new Dictionary<string, string> { { "$orderby", rawValue }, { "$apply", applyRaw } },
+                context.RequestContainer);
             _queryOptionParser.ParseApply();
         }
 
@@ -102,7 +103,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$orderby", rawValue } });
+                new Dictionary<string, string> { { "$orderby", rawValue } },
+                context.RequestContainer);
         }
 
         internal OrderByQueryOption(OrderByQueryOption orderBy)

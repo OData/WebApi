@@ -98,7 +98,6 @@ namespace Microsoft.AspNet.OData.Test.Query
         [InlineData("BadPropertyName")]
         [InlineData("''")]
         [InlineData(" ")]
-        [InlineData("customerid")]
         [InlineData("CustomerId,CustomerId")]
         [InlineData("CustomerId,Name,CustomerId")]
         public void ApplyInValidOrderbyQueryThrows(string orderbyValue)
@@ -109,6 +108,28 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ExceptionAssert.Throws<ODataException>(() =>
                 orderby.ApplyTo(ODataQueryOptionTest.Customers));
+        }
+
+        [Theory]
+        [InlineData("customerid")]
+        [InlineData("cUsToMeRiD")]
+        [InlineData("CUSTOMERID")]
+        public void CanApplyOrderByQueryCaseInsensitive(string orderbyValue)
+        {
+            var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
+            var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
+            var orderby = new OrderByQueryOption(orderbyValue, context);
+
+            var customers = (new List<Customer>{
+                new Customer { CustomerId = 2, Name = "Aaron" },
+                new Customer { CustomerId = 1, Name = "Andy" },
+                new Customer { CustomerId = 3, Name = "Alex" }
+            }).AsQueryable();
+
+            var results = orderby.ApplyTo(customers).ToArray();
+            Assert.Equal(1, results[0].CustomerId);
+            Assert.Equal(2, results[1].CustomerId);
+            Assert.Equal(3, results[2].CustomerId);
         }
 
         [Fact]

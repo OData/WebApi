@@ -72,7 +72,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$filter", rawValue } });
+                new Dictionary<string, string> { { "$filter", rawValue } },
+                context.RequestContainer);
         }
 
         /// <summary>

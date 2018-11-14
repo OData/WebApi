@@ -19,6 +19,8 @@ namespace Microsoft.AspNet.OData.Extensions
         // also clearly ties the property to code in this assembly.
         private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
 
+        private static readonly object SyncLock = new object();
+
         internal static IEdmModel GetEdmModel(this ActionDescriptor actionDescriptor, HttpRequest request, Type entityClrType)
         {
             if (actionDescriptor == null)
@@ -51,7 +53,14 @@ namespace Microsoft.AspNet.OData.Extensions
                 EntityTypeConfiguration entityTypeConfiguration = builder.AddEntityType(entityClrType);
                 builder.AddEntitySet(entityClrType.Name, entityTypeConfiguration);
                 model = builder.GetEdmModel();
-                actionDescriptor.Properties.Add(key, model);
+
+                lock (SyncLock)
+                {
+                    if (!actionDescriptor.Properties.ContainsKey(key))
+                    {
+                        actionDescriptor.Properties.Add(key, model);
+                    }
+                }
             }
 
             return model;

@@ -64,6 +64,8 @@ namespace Microsoft.AspNet.OData
 
         private static MethodInfo _distinctMethod = GenericMethodOf(_ => Queryable.Distinct<int>(default(IQueryable<int>)));
 
+        private static MethodInfo _createQueryGenericMethod = GetCreateQueryGenericMethod();
+
         //Unlike the Sum method, the return types are not unique and do not match the input type of the expression.
         //Inspecting the 2nd parameters expression's function's 2nd argument is too specific for the GetQueryableAggregationMethods        
         private static Dictionary<Type, MethodInfo> _averageMethods = new Dictionary<Type, MethodInfo>()
@@ -289,6 +291,11 @@ namespace Microsoft.AspNet.OData
             get { return _safeConvertToDecimalMethod; }
         }
 
+        public static MethodInfo CreateQueryGeneric
+        {
+            get { return _createQueryGenericMethod; }
+        }
+
         public static decimal? SafeConvertToDecimal(object value)
         {
             if (value == null || value == DBNull.Value)
@@ -337,6 +344,14 @@ namespace Microsoft.AspNet.OData
                 .Where(m => m.Name == methodName)
                 .Where(m => m.GetParameters().Count() == 2)
                 .ToDictionary(m => m.ReturnType);
+        }
+
+        private static MethodInfo GetCreateQueryGenericMethod()
+        {
+            return typeof(IQueryProvider).GetTypeInfo()
+                .GetDeclaredMethods("CreateQuery")
+                .Where(m => m.IsGenericMethod)
+                .FirstOrDefault();
         }
     }
 }

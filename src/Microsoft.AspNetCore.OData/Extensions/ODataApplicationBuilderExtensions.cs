@@ -56,10 +56,10 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder "/> to use.</param>
         /// <param name="routeName">The given OData route name.</param>
-        /// <param name="routePrerix">The given OData route prefix.</param>
+        /// <param name="routePrefix">The given OData route prefix.</param>
         /// <param name="model">The <see cref="IEdmModel"/> to use.</param>
         /// <returns>The <see cref="IApplicationBuilder "/>.</returns>
-        public static IApplicationBuilder UseOData(this IApplicationBuilder app, string routeName, string routePrerix, IEdmModel model)
+        public static IApplicationBuilder UseOData(this IApplicationBuilder app, string routeName, string routePrefix, IEdmModel model)
         {
             if (app == null)
             {
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 b.Select().Expand().Filter().OrderBy().MaxTop(MaxTop).Count();
 
-                b.MapODataServiceRoute(routeName, routePrerix, model);
+                b.MapODataServiceRoute(routeName, routePrefix, model);
             });
         }
 

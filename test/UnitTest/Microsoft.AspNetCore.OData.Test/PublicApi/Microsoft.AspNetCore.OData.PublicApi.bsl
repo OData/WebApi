@@ -1914,7 +1914,7 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExt
 	[
 	ExtensionAttribute(),
 	]
-	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, string routeName, string routePrerix, Microsoft.OData.Edm.IEdmModel model)
+	public static Microsoft.AspNetCore.Builder.IApplicationBuilder UseOData (Microsoft.AspNetCore.Builder.IApplicationBuilder app, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model)
 
 	[
 	ExtensionAttribute(),

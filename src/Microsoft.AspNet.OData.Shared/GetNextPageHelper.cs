@@ -85,8 +85,14 @@ namespace Microsoft.AspNet.OData
                 queryBuilder.Append('&');
             }
 
-            queryBuilder.AppendFormat("$skiptoken={0}", skipTokenValue);
-
+            if (useSkipToken)
+            {
+                queryBuilder.AppendFormat("$skiptoken={0}", skipTokenValue);
+            }
+            else
+            {
+                queryBuilder.AppendFormat("$skip={0}", nextPageSkip );
+            }
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {
                 Query = queryBuilder.ToString()

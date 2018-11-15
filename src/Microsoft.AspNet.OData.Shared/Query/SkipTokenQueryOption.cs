@@ -207,19 +207,21 @@ namespace Microsoft.AspNet.OData.Query
 
                 Expression compare=null;
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                if (false)
+                if (value.GetType() == typeof(string))
                 {
+                    Expression StringGreaterThan = Expression.Lambda<Func<string, bool>> (Expression.GreaterThanOrEqual(property, constant), new[] { param });
+                    Expression StringLessThan = Expression.Lambda<Func<string, bool>>(Expression.GreaterThanOrEqual(property, constant), new[] { param });
                     //Expression<Func<string, bool>> StringGreaterThan = x => x.CompareTo(value) > 0;
                     //Expression<Func<string, bool>> StringLessThan = x => x.CompareTo(value) < 0;
 
-                    //if (directionMap.ContainsKey(key))
-                    //{
-                    //    compare = directionMap[key] == OrderByDirection.Descending ? StringLessThan : StringGreaterThan;
-                    //}
-                    //else
-                    //{
-                    //    compare = StringGreaterThan;
-                    //}
+                    if (directionMap.ContainsKey(key))
+                    {
+                        compare = directionMap[key] == OrderByDirection.Descending ? StringLessThan : StringGreaterThan;
+                    }
+                    else
+                    {
+                        compare = StringGreaterThan;
+                    }
                     //compare = BinaryExpression.MakeBinary(ExpressionType.Lambda, compare, property);
                 }
                 else

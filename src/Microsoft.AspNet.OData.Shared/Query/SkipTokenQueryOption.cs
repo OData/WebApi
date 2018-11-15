@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             PropertyValuePairs = new Dictionary<string, object>();
             string[] keyValues = rawValue.Split(',');
-            foreach(string keyAndValue in keyValues)
+            foreach (string keyAndValue in keyValues)
             {
                 string[] pieces = keyAndValue.Split(':');
                 if (!String.IsNullOrWhiteSpace(pieces[1]))
@@ -97,7 +97,7 @@ namespace Microsoft.AspNet.OData.Query
                         PropertyValuePairs.Add(pieces[0], value);
                     }
                 }
-                
+
             }
 
         }
@@ -159,7 +159,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
-            return ApplyToCore(query, querySettings,orderBy);
+            return ApplyToCore(query, querySettings, orderBy);
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
-
+            ExpressionBinderBase binder = new FilterBinder(Context.RequestContainer);
             IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderBy);
             bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
@@ -199,47 +199,27 @@ namespace Microsoft.AspNet.OData.Query
              * Adding the first true to simplify implementation.
              */
             Expression lastEquality = Expression.Constant(true);
-            foreach (KeyValuePair<string,object> item in PropertyValuePairs)
+            foreach (KeyValuePair<string, object> item in PropertyValuePairs)
             {
                 string key = item.Key;
                 MemberExpression property = Expression.Property(param, key);
                 object value = item.Value;
 
-                Expression compare=null;
+                Expression compare = null;
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                if (value.GetType() == typeof(string))
+                if (directionMap.ContainsKey(key))
                 {
-                    Expression StringGreaterThan = Expression.Lambda<Func<string, bool>> (Expression.GreaterThanOrEqual(property, constant), new[] { param });
-                    Expression StringLessThan = Expression.Lambda<Func<string, bool>>(Expression.GreaterThanOrEqual(property, constant), new[] { param });
-                    //Expression<Func<string, bool>> StringGreaterThan = x => x.CompareTo(value) > 0;
-                    //Expression<Func<string, bool>> StringLessThan = x => x.CompareTo(value) < 0;
-
-                    if (directionMap.ContainsKey(key))
-                    {
-                        compare = directionMap[key] == OrderByDirection.Descending ? StringLessThan : StringGreaterThan;
-                    }
-                    else
-                    {
-                        compare = StringGreaterThan;
-                    }
-                    //compare = BinaryExpression.MakeBinary(ExpressionType.Lambda, compare, property);
+                    compare = directionMap[key] == OrderByDirection.Descending ? binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true) : binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
                 }
                 else
                 {
-                    if (directionMap.ContainsKey(key))
-                    {
-                        compare = directionMap[key] == OrderByDirection.Descending ? BinaryExpression.LessThan(property, constant) : BinaryExpression.GreaterThan(property, constant);
-                    }
-                    else
-                    {
-                        compare = BinaryExpression.GreaterThan(property, constant);
-                    }
+                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
                 }
-               
+
                 Expression condition = Expression.AndAlso(lastEquality, compare);
                 where = where == null ? condition : Expression.OrElse(where, condition);
 
-                lastEquality = Expression.AndAlso(lastEquality, BinaryExpression.Equal(property, constant));
+                lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
                 count++;
             }
 
@@ -256,14 +236,14 @@ namespace Microsoft.AspNet.OData.Query
                 return directions;
             }
 
-            foreach(OrderByPropertyNode node in orderBy.OrderByNodes)
+            foreach (OrderByPropertyNode node in orderBy.OrderByNodes)
             {
-                if (node!= null)
+                if (node != null)
                 {
                     directions[node.Property.Name] = node.Direction;
                 }
             }
-            return directions; 
+            return directions;
         }
 
         /// <summary>
@@ -277,8 +257,8 @@ namespace Microsoft.AspNet.OData.Query
         {
             object lastMember = FetchLast(result);
             object value;
-            IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember,model, orderByQueryOption);
-           
+            IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByQueryOption);
+
             string skipTokenvalue = "";
             if (propertiesForSkipToken == null)
             {
@@ -290,6 +270,7 @@ namespace Microsoft.AspNet.OData.Query
             foreach (IEdmProperty property in propertiesForSkipToken)
             {
                 bool islast = count == lastIndex;
+                bool isString = false;
                 IEdmStructuredObject obj = lastMember as IEdmStructuredObject;
                 if (obj != null)
                 {
@@ -299,7 +280,12 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
                 }
-                skipTokenvalue += property.Name + ":" + value.ToString() +  (islast ? "":" ,");
+                if (value.GetType() == typeof(string))
+                {
+                    isString = true;
+                }
+                
+                        skipTokenvalue += property.Name + ":" + (isString ? "\'" : "") + value.ToString() + (isString ? "\'" : "") + (islast ? "" : ",");
                 count++;
             }
 
@@ -312,13 +298,13 @@ namespace Microsoft.AspNet.OData.Query
 
             IEdmEntityType entity = edmType as IEdmEntityType;
 
-            if(entity == null)
+            if (entity == null)
             {
                 return null;
             }
 
             IList<IEdmProperty> key = entity.Key().AsIList<IEdmProperty>();
-            if (orderByQueryOption!=null)
+            if (orderByQueryOption != null)
             {
                 IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList<IEdmProperty>();
                 foreach (IEdmProperty subKey in key)
@@ -329,7 +315,7 @@ namespace Microsoft.AspNet.OData.Query
                 return orderByProps.AsEnumerable<IEdmProperty>();
             }
             return key.AsEnumerable<IEdmProperty>();
-            
+
         }
 
         private static IEdmType GetTypeFromObject(object obj, IEdmModel model)

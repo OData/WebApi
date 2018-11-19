@@ -17,6 +17,8 @@ namespace Microsoft.AspNet.OData.Builder
     /// </summary>
     public class ODataModelBuilder
     {
+        private const string DefaultNamespace = "Default";
+
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
         private static readonly Version _defaultMaxDataServiceVersion = EdmConstants.EdmVersion4;
 
@@ -29,23 +31,45 @@ namespace Microsoft.AspNet.OData.Builder
 
         private Version _dataServiceVersion;
         private Version _maxDataServiceVersion;
+        private string _namespace;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataModelBuilder"/> class.
         /// </summary>
         public ODataModelBuilder()
         {
-            Namespace = "Default";
+            _namespace = DefaultNamespace;
             ContainerName = "Container";
             DataServiceVersion = _defaultDataServiceVersion;
             MaxDataServiceVersion = _defaultMaxDataServiceVersion;
             BindingOptions = NavigationPropertyBindingOption.None;
+            HasAssignedNamespace = false;
         }
 
         /// <summary>
         /// Gets or sets the namespace that will be used for the resulting model
         /// </summary>
-        public string Namespace { get; set; }
+        public string Namespace
+        {
+            get
+            {
+                return _namespace;
+            }
+            set
+            {
+                // If user chooses to set the namespace to null, we revert back to 'Default' namespace.
+                if (String.IsNullOrEmpty(value))
+                {
+                    this.HasAssignedNamespace = false;
+                    _namespace = DefaultNamespace;
+                }
+                else
+                {
+                    this.HasAssignedNamespace = true;
+                    _namespace = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets the name of the container that will hold all the navigation sources, actions and functions
@@ -142,6 +166,14 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets or sets the navigation property binding options.
         /// </summary>
         public NavigationPropertyBindingOption BindingOptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the <see cref="Namespace"/> was auto assigned or is using a value assigned by user.
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if the <see cref="Namespace"/> is using user assigned value; otherwise, <c>false</c>.
+        /// </value>
+        internal bool HasAssignedNamespace { get; private set; }
 
         /// <summary>
         /// Registers an entity type as part of the model and returns an object that can be used to configure the entity type.

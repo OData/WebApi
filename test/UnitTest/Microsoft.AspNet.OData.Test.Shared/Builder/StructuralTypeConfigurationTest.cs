@@ -81,6 +81,31 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_SettingNamespaceToNullOrEmptyRevertsItToDefault()
+        {
+            // Arrange & Act.
+            ODataConventionModelBuilder modelBuilderWithNullNamespace = new ODataConventionModelBuilder()
+            {
+                Namespace = null
+            };
+
+            // Assert
+            Assert.Equal("Default", modelBuilderWithNullNamespace.Namespace);
+
+
+            ODataConventionModelBuilder modelBuilderWithEmptyNamespace = new ODataConventionModelBuilder()
+            {
+                Namespace = string.Empty
+            };
+
+            // Assert
+            Assert.Equal("Default", modelBuilderWithEmptyNamespace.Namespace);
+        }
+
+        /// <summary>
         /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration
         /// but individual types can have namespaces assigned to them as well.
         /// </summary>

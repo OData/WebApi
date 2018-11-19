@@ -16,6 +16,8 @@ namespace Microsoft.AspNet.OData.Builder
     /// </summary>
     public class ODataModelBuilder
     {
+        private const string DefaultNamespace = "Default";
+
         private static readonly Version _defaultDataServiceVersion = EdmConstants.EdmVersion4;
         private static readonly Version _defaultMaxDataServiceVersion = EdmConstants.EdmVersion4;
 
@@ -35,11 +37,12 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public ODataModelBuilder()
         {
-            _namespace = "Default";
+            _namespace = DefaultNamespace;
             ContainerName = "Container";
             DataServiceVersion = _defaultDataServiceVersion;
             MaxDataServiceVersion = _defaultMaxDataServiceVersion;
             BindingOptions = NavigationPropertyBindingOption.None;
+            HasAssignedNamespace = false;
         }
 
         /// <summary>
@@ -53,13 +56,17 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
+                // If user chooses to set the namespace to null, we revert back to 'Default' namespace.
                 if (String.IsNullOrEmpty(value))
                 {
-                    throw Error.PropertyNull();
+                    this.HasAssignedNamespace = false;
+                    _namespace = DefaultNamespace;
                 }
-
-                this.HasAssignedNamespace = true;
-                _namespace = value;
+                else
+                {
+                    this.HasAssignedNamespace = true;
+                    _namespace = value;
+                }
             }
         }
 

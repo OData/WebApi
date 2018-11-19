@@ -730,6 +730,9 @@
   <data name="EntityTypeDoesntHaveKeyDefined" xml:space="preserve">
     <value>The entity '{0}' does not have a key defined.</value>
   </data>
+  <data name="CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined" xml:space="preserve">
+    <value>The entity type '{0}' of navigation property '{1}' on structural type '{2}' does not have a key defined.</value>
+  </data>
   <data name="InvalidPropertyMapper" xml:space="preserve">
     <value>The mapper provider must return a valid '{0}' instance for the given '{1}' IEdmType.</value>
   </data>
@@ -810,6 +813,9 @@
   </data>
   <data name="NavigationSourceTypeHasNoKeys" xml:space="preserve">
     <value>The entity set or singleton '{0}' is based on type '{1}' that has no keys defined.</value>
+  </data>
+  <data name="EntitySetTypeHasNoKeys" xml:space="preserve">
+    <value>The entity set '{0}' is based on type '{1}' that has no keys defined.</value>
   </data>
   <data name="ParameterTypeIsNotCollection" xml:space="preserve">
     <value>The type '{0}' of the parameter '{1}' must be a collection.</value>

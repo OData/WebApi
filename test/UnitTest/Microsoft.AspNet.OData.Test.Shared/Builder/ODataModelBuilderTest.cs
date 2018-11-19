@@ -435,14 +435,22 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         [Fact]
-        public void Validate_Throws_If_Entity_Doesnt_Have_Key_Defined()
+        public void GetEdmModel_ForSingletonOnEntityTypeWithoutKey()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
-            builder.EntityType<Customer>();
+            builder.EntityType<Customer>().Property(c => c.Name);
+            builder.Singleton<Customer>("Me");
 
-            // Act & Assert
-            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(), "The entity 'Customer' does not have a key defined.");
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            IEdmEntityType customer = model.SchemaElements.OfType<IEdmEntityType>().Single();
+            Assert.NotNull(customer);
+            Assert.Empty(customer.Key());
+
+            Assert.NotNull(model.FindDeclaredSingleton("Me"));
         }
 
         [Fact]
@@ -458,6 +466,30 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // Assert
             Assert.NotNull(model);
+        }
+
+        [Fact]
+        public void Validate_DoesntThrows_If_Entity_Doesnt_Have_Key_Defined()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Customer>();
+
+            // Act & Assert
+            ExceptionAssert.DoesNotThrow(() => builder.GetEdmModel());
+        }
+
+        [Fact]
+        public void Validate_Throws_If_EntityWithoutKeyDefined_UsedToDefineEntitySet()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<Customer>();
+            builder.EntitySet<Customer>("Customers");
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "The entity set 'Customers' is based on type 'Microsoft.AspNet.OData.Test.Common.Models.Customer' that has no keys defined.");
         }
 
         [Fact]
@@ -682,6 +714,47 @@ namespace Microsoft.AspNet.OData.Test.Builder
             ExceptionAssert.Throws<NotSupportedException>(() => roleType.HasRequired(c => c.User,
                 (c, r) => c.UserKey1 == r.PrincipalUserKey1 && r.PrincipalUserKey3),
                 "Unsupported Expression NodeType 'MemberAccess'.");
+        }
+
+        [Fact]
+        public void GetEdmModel_ThrowsException_CollectionNavigationPropertyDefinedWithEntityTypeWithoutKey()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<MultiRole>().Property(c => c.UserKey1);
+            var user = builder.EntityType<MultiUser>();
+            user.HasMany(u => u.Roles);
+
+            // Act & Assert
+            ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
+                "The entity type 'Microsoft.AspNet.OData.Test.Builder.MultiRole' of " +
+                "navigation property 'Roles' on structural type 'Microsoft.AspNet.OData.Test.Builder.MultiUser' " +
+                "does not have a key defined.");
+        }
+
+        [Fact]
+        public void GetEdmModel_Work_SingletNavigationPropertyDefinedWithEntityTypeWithoutKey()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntityType<MultiUser>().Property(c => c.UserId2);
+            var role = builder.EntityType<MultiRole>();
+            role.HasOptional(r => r.User);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            var userType = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(t => t.Name == "MultiUser");
+            Assert.NotNull(userType);
+            Assert.Empty(userType.Key());
+
+            var roleType = model.SchemaElements.OfType<IEdmEntityType>().FirstOrDefault(t => t.Name == "MultiRole");
+            Assert.NotNull(roleType);
+            Assert.Empty(roleType.Key());
+            var navigationProperty = roleType.NavigationProperties().FirstOrDefault(n => n.Name == "User");
+            Assert.NotNull(navigationProperty);
+            Assert.Equal(EdmMultiplicity.ZeroOrOne, navigationProperty.TargetMultiplicity());
         }
 
         class MultiUser

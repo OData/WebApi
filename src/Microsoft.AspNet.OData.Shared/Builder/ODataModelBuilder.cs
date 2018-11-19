@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Validation;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -608,20 +609,29 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("model");
             }
 
-            foreach (IEdmEntityType entity in model.SchemaElementsAcrossModels().OfType<IEdmEntityType>())
+            // The type of entity set should have key(s) defined.
+            foreach (IEdmEntitySet entitySet in model.EntityContainer.Elements.OfType<IEdmEntitySet>())
             {
-                if (!entity.IsAbstract && !entity.Key().Any())
+                if (!entitySet.EntityType().Key().Any())
                 {
-                    throw Error.InvalidOperation(SRResources.EntityTypeDoesntHaveKeyDefined, entity.Name);
+                    throw Error.InvalidOperation(SRResources.EntitySetTypeHasNoKeys, entitySet.Name,
+                        entitySet.EntityType().FullName());
                 }
             }
 
-            foreach (IEdmNavigationSource navigationSource in model.EntityContainer.Elements.OfType<IEdmNavigationSource>())
+            // The type of collection navigation property should have key(s) defined.
+            foreach (IEdmStructuredType structuredType in model.SchemaElementsAcrossModels().OfType<IEdmStructuredType>())
             {
-                if (!navigationSource.EntityType().Key().Any())
+                foreach (var navigationProperty in structuredType.DeclaredNavigationProperties())
                 {
-                    throw Error.InvalidOperation(SRResources.NavigationSourceTypeHasNoKeys, navigationSource.Name,
-                        navigationSource.EntityType().FullName());
+                    if (navigationProperty.TargetMultiplicity() == EdmMultiplicity.Many)
+                    {
+                        IEdmEntityType entityType = navigationProperty.ToEntityType();
+                        if (!entityType.Key().Any())
+                        {
+                            throw Error.InvalidOperation(SRResources.CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined, entityType.FullTypeName(), navigationProperty.Name, structuredType.FullTypeName());
+                        }
+                    }
                 }
             }
         }

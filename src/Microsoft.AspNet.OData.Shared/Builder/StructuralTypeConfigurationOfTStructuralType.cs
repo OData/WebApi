@@ -493,12 +493,7 @@ namespace Microsoft.AspNet.OData.Builder
             Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
             Expression<Func<TTargetEntity, IEnumerable<TStructuralType>>> partnerExpression) where TTargetEntity : class
         {
-            return HasNavigationProperty(
-                navigationPropertyExpression,
-                referentialConstraintExpression,
-                EdmMultiplicity.One,
-                partnerExpression
-                );
+            return HasNavigationProperty(navigationPropertyExpression, referentialConstraintExpression, EdmMultiplicity.One, partnerExpression);
         }
 
         /// <summary>
@@ -518,12 +513,7 @@ namespace Microsoft.AspNet.OData.Builder
             Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,
             Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression) where TTargetEntity : class
         {
-            return HasNavigationProperty(
-                navigationPropertyExpression,
-                referentialConstraintExpression,
-                EdmMultiplicity.One,
-                null
-                );
+            return HasNavigationProperty(navigationPropertyExpression, referentialConstraintExpression, EdmMultiplicity.One, null);
         }
 
         /// <summary>
@@ -545,11 +535,7 @@ namespace Microsoft.AspNet.OData.Builder
             Expression<Func<TStructuralType, TTargetEntity, bool>> referentialConstraintExpression,
             Expression<Func<TTargetEntity, TStructuralType>> partnerExpression) where TTargetEntity : class
         {
-            return HasNavigationProperty(
-                navigationPropertyExpression,
-                referentialConstraintExpression,
-                EdmMultiplicity.One,
-                partnerExpression);
+            return HasNavigationProperty(navigationPropertyExpression, referentialConstraintExpression, EdmMultiplicity.One, partnerExpression);
         }
 
         private NavigationPropertyConfiguration HasNavigationProperty<TTargetEntity>(Expression<Func<TStructuralType, TTargetEntity>> navigationPropertyExpression,

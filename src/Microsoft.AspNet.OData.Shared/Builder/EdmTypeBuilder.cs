@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
     internal class EdmTypeBuilder
     {
         private readonly List<IEdmTypeConfiguration> _configurations;
@@ -413,11 +414,10 @@ namespace Microsoft.AspNet.OData.Builder
 
                 var navInfo = getInfo(navProp);
                 var props = new Dictionary<IEdmProperty, NavigationPropertyConfiguration>();
-                if (type is EdmEntityType entityType && navProp.Partner != null)
+                EdmEntityType entityType = type as EdmEntityType;
+                if (entityType != null && navProp.Partner != null)
                 {
-                    var edmProperty = entityType.AddBidirectionalNavigation(navInfo,
-                        getInfo(navProp.Partner)
-                    );
+                    var edmProperty = entityType.AddBidirectionalNavigation(navInfo, getInfo(navProp.Partner));
                     var partnerEdmProperty = (navInfo.Target as EdmEntityType).Properties().Single(p => p.Name == navProp.Partner.Name);
                     props.Add(edmProperty, navProp);
                     props.Add(partnerEdmProperty, navProp.Partner);

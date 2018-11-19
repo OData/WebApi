@@ -342,7 +342,7 @@ namespace Microsoft.AspNet.OData.Test.Builderr
 
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(() => builder.GetEdmModel(),
-                "The entity set or singleton 'Customers' is based on type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Customer' that has no keys defined.");
+                "The entity set 'Customers' is based on type 'Microsoft.AspNet.OData.Test.Builder.TestModels.Customer' that has no keys defined.");
         }
 
         [Fact]

@@ -659,6 +659,17 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("EntityTypeDoesntHaveKeyDefined", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; of navigation property &apos;{1}&apos; on structural type &apos;{2}&apos; does not have a key defined..
+        /// </summary>
+        internal static string CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined
+        {
+            get
+            {
+                return ResourceManager.GetString("CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The entity type &apos;{0}&apos; does not match the expected entity type &apos;{1}&apos; as set on the query context..
@@ -1374,6 +1385,17 @@ namespace Microsoft.AspNet.OData.Common
         internal static string NavigationSourceTypeHasNoKeys {
             get {
                 return ResourceManager.GetString("NavigationSourceTypeHasNoKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entity set &apos;{0}&apos; is based on type &apos;{1}&apos; that has no keys defined..
+        /// </summary>
+        internal static string EntitySetTypeHasNoKeys
+        {
+            get
+            {
+                return ResourceManager.GetString("EntitySetTypeHasNoKeys", resourceCulture);
             }
         }
         

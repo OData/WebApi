@@ -63,19 +63,47 @@ $LOGDIR = $ENLISTMENT_ROOT + "\bin"
 # Default to use Visual Studio 2015
 $VS14MSBUILD=$PROGRAMFILESX86 + "\MSBuild\14.0\Bin\MSBuild.exe"
 $VSTEST = $PROGRAMFILESX86 + "\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe"
-$SN = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\sn.exe"
-$SNx64 = $PROGRAMFILESX86 + "\Microsoft SDKs\Windows\v8.1A\bin\NETFX 4.5.1 Tools\x64\sn.exe"
+
+# Figure out the directory and path for SN.exe
+$SN = $null
+$SNx64 = $null
+ForEach ($directory in [System.IO.Directory]::EnumerateDirectories($PROGRAMFILESX86 + "\Microsoft SDKs\Windows"))
+{
+    ForEach($sdkVersionDirectory in [System.IO.Directory]::EnumerateDirectories($directory + "\bin"))
+    {
+        if([System.IO.File]::Exists($sdkVersionDirectory + "\sn.exe") -and [System.IO.File]::Exists($sdkVersionDirectory + "\x64\sn.exe"))
+        {
+            $SN = $sdkVersionDirectory + "\sn.exe"
+            $SNx64 = $sdkVersionDirectory + "\x64\sn.exe"
+            break
+        }
+    }
+}
 
 # Use Visual Studio 2017 compiler for .NET Core and .NET Standard. Because VS2017 has different paths for different
 # versions, we have to check for each version. Meanwhile, the dotnet CLI is required to run the .NET Core unit tests in this script.
+# Furthurmore, Visual Studio 2017 has a Preview version as well which uses Microsoft Visual Studio\Preview as path instead of \2017
+$VS15VARIANTS = "2017", "Preview"
+$VS15VARIANTPATH = $null
+ForEach ($variant in $VS15VARIANTS)
+{
+    $tempVSPath = ($PROGRAMFILESX86 + "\Microsoft Visual Studio\{0}") -f $variant
+	if([System.IO.Directory]::Exists($tempVSPath))
+    {
+        $VS15VARIANTPATH = $tempVSPath
+        break
+    }
+}
+
 $VS15VERSIONS = "Enterprise", "Professional", "Community"
 $VS15MSBUILD = $null
 ForEach ($version in $VS15VERSIONS)
 {
-    $tempMSBuildPath = ($PROGRAMFILESX86 + "\Microsoft Visual Studio\2017\{0}\MSBuild\15.0\Bin\MSBuild.exe") -f $version
+    $tempMSBuildPath = ($VS15VARIANTPATH + "\{0}\MSBuild\15.0\Bin\MSBuild.exe") -f $version
     if([System.IO.File]::Exists($tempMSBuildPath))
     {
         $VS15MSBUILD = $tempMSBuildPath
+        $VSTEST = ($VS15VARIANTPATH + "\{0}\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe") -f $version
         break
     }
 }
@@ -311,6 +339,12 @@ Function RunBuild ($sln, $vsToolVersion)
     if($vsToolVersion -eq '15.0')
     {
         $MSBUILD=$VS15MSBUILD
+    }
+
+    # If VS2015 is not present, try to use VS2017
+    if(![System.IO.File]::Exists($MSBUILD))
+    {
+        $MSBUILD = $VS15MSBUILD
     }
 
     & $MSBUILD $slnpath /t:$Build /m /nr:false /fl "/p:Platform=Any CPU" $Conf /p:Desktop=true `

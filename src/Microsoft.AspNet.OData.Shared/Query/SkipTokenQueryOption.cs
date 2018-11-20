@@ -24,8 +24,8 @@ namespace Microsoft.AspNet.OData.Query
 
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
+        private IDictionary<string, object> _propertyValuePairs;
         private static readonly MethodInfo _fetchLastItemInResults = typeof(SkipTokenQueryOption).GetMethod("FetchLastItemInResults");
-
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -84,7 +84,7 @@ namespace Microsoft.AspNet.OData.Query
 
         private void ParseKeyValuePairs(string rawValue)
         {
-            PropertyValuePairs = new Dictionary<string, object>();
+            _propertyValuePairs = new Dictionary<string, object>();
             string[] keyValues = rawValue.Split(',');
             foreach (string keyAndValue in keyValues)
             {
@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.OData.Query
                     object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
                     if (!String.IsNullOrWhiteSpace(pieces[0]))
                     {
-                        PropertyValuePairs.Add(pieces[0], value);
+                        _propertyValuePairs.Add(pieces[0], value);
                     }
                 }
 
@@ -106,11 +106,6 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets the given <see cref="ODataQueryContext"/>.
         /// </summary>
         public ODataQueryContext Context { get; private set; }
-
-        /// <summary>
-        /// Stores the key value pairs for the skiptoken query option
-        /// </summary>
-        public IDictionary<string, object> PropertyValuePairs;
 
         /// <summary>
         /// Gets the raw $skiptoken value.
@@ -199,7 +194,7 @@ namespace Microsoft.AspNet.OData.Query
              * Adding the first true to simplify implementation.
              */
             Expression lastEquality = Expression.Constant(true);
-            foreach (KeyValuePair<string, object> item in PropertyValuePairs)
+            foreach (KeyValuePair<string, object> item in _propertyValuePairs)
             {
                 string key = item.Key;
                 MemberExpression property = Expression.Property(param, key);
@@ -228,7 +223,7 @@ namespace Microsoft.AspNet.OData.Query
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
         }
 
-        private IDictionary<string, OrderByDirection> PopulateDirections(OrderByQueryOption orderBy)
+        private static IDictionary<string, OrderByDirection> PopulateDirections(OrderByQueryOption orderBy)
         {
             IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
             if (orderBy == null)

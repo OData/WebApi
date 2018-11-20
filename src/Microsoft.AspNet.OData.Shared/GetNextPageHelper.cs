@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                string key = kvp.Key;//.ToLowerInvariant(); // Make it case insensitive. 
+                string key = kvp.Key.ToLowerInvariant();
                 string value = kvp.Value;
                 switch (key)
                 {
@@ -51,7 +51,8 @@ namespace Microsoft.AspNet.OData
                         //Need to increment skip only if we are not using skiptoken 
                         if (!useSkipToken) 
                         {
-                            if (Int32.TryParse(value, out int skip))
+                            int skip = 0;
+                            if (Int32.TryParse(value, out skip))
                             {
                                 // We increase skip by the pageSize because that's the number of results we're returning in the current page
                                 nextPageSkip += skip;

@@ -219,7 +219,7 @@ namespace Microsoft.AspNet.OData.Test.Common
         public static ODataModelBuilder Add_CompanyEmployees_Relationship(this ODataModelBuilder builder)
         {
             builder.EntityType<Company>().HasMany(c => c.ComplanyEmployees);
-            builder.EntityType<Company>().HasRequired(c => c.CEO);
+            builder.EntityType<Company>().HasRequired(c => c.CEO, (company, employee) => company.CEOID == employee.EmployeeID, employee => employee.IsCeoOf);
             return builder;
         }
 

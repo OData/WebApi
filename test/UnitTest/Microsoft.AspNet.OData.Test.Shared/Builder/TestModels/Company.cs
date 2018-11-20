@@ -14,6 +14,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public Address HeadQuarterAddress { get; set; }
         [Singleton]
         public Employee CEO { get; set; }
+        public int CEOID { get; set; }
         public List<Employee> ComplanyEmployees { get; set; }
         public List<Customer> Customers { get; set; }
         public List<Address> Subsidiaries { get; set; }

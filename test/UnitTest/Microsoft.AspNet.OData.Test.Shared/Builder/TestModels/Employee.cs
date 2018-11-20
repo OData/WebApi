@@ -13,6 +13,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public string EmployeeName { get; set; }
         public Decimal BaseSalary { get; set; }
         public DateTimeOffset Birthday { get; set; }
+        public IList<Company> IsCeoOf { get; set; }
+        public int WorkCompanyId { get; set; }
         public Company WorkCompany { get; set; }
         [Singleton]
         public Employee Boss { get; set; }

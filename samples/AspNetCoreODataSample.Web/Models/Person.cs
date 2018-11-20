@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AspNetCoreODataSample.Web.Models
 {
@@ -11,6 +12,7 @@ namespace AspNetCoreODataSample.Web.Models
 
         public string LastName { get; set; }
 
+        //[NotMapped]
         public IDictionary<string, object> DynamicProperties { get; set; }
 
         public Level MyLevel { get; set; }

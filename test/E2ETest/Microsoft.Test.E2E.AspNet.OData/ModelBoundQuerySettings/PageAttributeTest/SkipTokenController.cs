@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
-namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttribute.SkipTokenTest
+namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
     public class CustomersController : TestODataController
     {

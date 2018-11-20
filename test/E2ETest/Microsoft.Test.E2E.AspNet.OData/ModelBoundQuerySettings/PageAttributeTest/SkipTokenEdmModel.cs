@@ -7,7 +7,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
-namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttribute.SkipTokenTest
+namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
     [Page(PageSize = 2)]
     public class Customer

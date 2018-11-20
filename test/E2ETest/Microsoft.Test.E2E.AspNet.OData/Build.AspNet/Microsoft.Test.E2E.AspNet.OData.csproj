@@ -1384,6 +1384,15 @@
     <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs">
       <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
     </Compile>
+	<Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenController.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeController.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenEdmModel.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenTest.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
+    </Compile>
     <Compile Include="..\ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs">
       <Link>ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs</Link>
     </Compile>

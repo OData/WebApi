@@ -9,7 +9,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttribute.SkipTokenTest
+namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
     public class SkipTokenTest : WebHostTestBase
     {

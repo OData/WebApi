@@ -16,6 +16,10 @@ namespace AspNetCoreODataSample.Web.Models
             {
                 var builder = new ODataConventionModelBuilder();
                 builder.EntitySet<Movie>("Movies");
+                var movieStar = builder.EntitySet<MovieStar>("MovieStars").EntityType;
+                movieStar.HasOptional(_ => _.Movie,
+                    (person, movie) => person.MovieId == movie.ID, movie => movie.Stars);
+                movieStar.HasKey(x => new { x.FirstName, x.LastName });
                 _edmModel = builder.GetEdmModel();
             }
 

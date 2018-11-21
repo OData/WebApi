@@ -115,6 +115,7 @@ namespace Microsoft.AspNet.OData.Query
                 _maxTop = value;
             }
         }
+
         /// <summary>
         /// Gets or sets a value indicating whether the service will use skiptoken or not.
         /// </summary>

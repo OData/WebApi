@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue="")
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue = "")
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.OData
             
             //If no value for skiptoken is provided; revert to using skip 
             bool useSkipToken = true;
-            if(String.IsNullOrWhiteSpace(skipTokenValue))
+            if (String.IsNullOrWhiteSpace(skipTokenValue))
             {
                 useSkipToken = false;
             }
@@ -60,14 +60,13 @@ namespace Microsoft.AspNet.OData
                                 // We increase skip by the pageSize because that's the number of results we're returning in the current page
                                 nextPageSkip += skip;
                             }
-
                         }
                         continue;
                     default:
                         break;
                 }
 
-                if ( (key=="$skip" && useSkipToken) || (key=="$skiptoken" && useSkipToken))
+                if ((key=="$skip" && useSkipToken) || (key == "$skiptoken" && useSkipToken))
                 {
                     continue;
                 }
@@ -95,7 +94,7 @@ namespace Microsoft.AspNet.OData
             }
             else
             {
-                queryBuilder.AppendFormat("$skip={0}", nextPageSkip );
+                queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
             }
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {

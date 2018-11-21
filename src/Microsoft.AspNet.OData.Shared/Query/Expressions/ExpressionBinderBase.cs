@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public abstract class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
-        internal static readonly MethodInfo GuidCompareMethodInfo = typeof(ExpressionBinderBase).GetMethod("GuidCompare", new[] { typeof(Guid), typeof(Guid)});
+        internal static readonly MethodInfo GuidCompareMethodInfo = typeof(ExpressionBinderBase).GetMethod("GuidCompare", new[] { typeof(Guid), typeof(Guid) });
         internal static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         internal static readonly Expression NullConstant = Expression.Constant(null);
@@ -1060,7 +1060,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else if (secondValue != null)
             {
-                return (-1)* secondValue.CompareTo(firstValue);
+                return (-1) * secondValue.CompareTo(firstValue);
             }
             return 0;
         }

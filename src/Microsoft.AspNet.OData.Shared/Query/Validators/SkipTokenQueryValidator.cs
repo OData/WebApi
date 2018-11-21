@@ -28,7 +28,6 @@ namespace Microsoft.AspNet.OData.Query.Validators
             {
                 throw Error.ArgumentNull("validationSettings");
             }
-
             //See what additional checks need to be in place given the validation settings
         }
 
@@ -41,6 +40,4 @@ namespace Microsoft.AspNet.OData.Query.Validators
             return context.RequestContainer.GetRequiredService<SkipTokenQueryValidator>();
         }
     }
-
-
 }

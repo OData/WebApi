@@ -430,7 +430,7 @@ namespace Microsoft.AspNet.OData.Query
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    DefaultQuerySettings settings= Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
+                    DefaultQuerySettings settings = Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
                     if (settings.EnableSkipToken)
                     {
                         string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result, this.Context.Model, OrderBy);

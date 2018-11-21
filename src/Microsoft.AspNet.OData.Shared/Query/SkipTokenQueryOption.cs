@@ -88,7 +88,7 @@ namespace Microsoft.AspNet.OData.Query
             foreach (string keyAndValue in keyValues)
             {
                 string[] pieces = keyAndValue.Split(new char[] { ':' }, 2);
-                if (pieces.Length> 1 && !String.IsNullOrWhiteSpace(pieces[1]))
+                if (pieces.Length > 1 && !String.IsNullOrWhiteSpace(pieces[1]))
                 {
                     IEdmTypeReference type = EdmLibHelpers.GetTypeReferenceOfProperty(Context.Model, Context.ElementClrType, pieces[0]);
                     object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, Context.Model, type);
@@ -256,7 +256,7 @@ namespace Microsoft.AspNet.OData.Query
             object value;
             IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByQueryOption);
 
-            string skipTokenvalue = "";
+            String skipTokenvalue = String.Empty;
             if (propertiesForSkipToken == null)
             {
                 return skipTokenvalue;
@@ -277,7 +277,7 @@ namespace Microsoft.AspNet.OData.Query
                     value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
                 }
 
-                string uriLiteral = "";
+                String uriLiteral = String.Empty;
                 if (TypeHelper.IsEnum(value.GetType()))
                 {
                     ODataEnumValue enumValue = new ODataEnumValue(value.ToString(), value.GetType().FullName);
@@ -287,7 +287,7 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
                 }
-                skipTokenvalue += property.Name + ":" + uriLiteral + (islast ? "" : ",");
+                skipTokenvalue += property.Name + ":" + uriLiteral + (islast ? String.Empty : ",");
                 count++;
             }
 
@@ -325,8 +325,8 @@ namespace Microsoft.AspNet.OData.Query
                 return selectExpand.GetEdmType(model);
             }
 
-            Type ClrType = obj.GetType();
-            return EdmLibHelpers.GetEdmType(model, ClrType);
+            Type clrType = obj.GetType();
+            return EdmLibHelpers.GetEdmType(model, clrType);
         }
 
         private static object FetchLast(IQueryable queryable)

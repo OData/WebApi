@@ -225,7 +225,6 @@ namespace Microsoft.AspNet.OData.Extensions
             return GetNextPageHelper.GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize);
         }
 
-
         /// <summary>
         /// Creates a link for the next page of results; To be used as the value of @odata.nextLink.
         /// </summary>

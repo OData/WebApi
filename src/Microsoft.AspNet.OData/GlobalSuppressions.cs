@@ -29,4 +29,3 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "type", Target = "Microsoft.AspNet.OData.Query.Expressions.PropertyContainer", Justification = "Using generated classes to simulate b-tree.")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "member", Target = "Microsoft.AspNet.OData.Query.Expressions.PropertyContainer.#.cctor()", Justification = "Using generated classes to simulate b-tree.")]
 [assembly: SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Scope = "member", Target = "Microsoft.AspNet.OData.GetNextPageHelper.#GetNextPageLink(System.Uri,System.Collections.Generic.IEnumerable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.String>>,System.Int32,System.String)")]
-

@@ -21,7 +21,6 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     public class SkipTokenQueryOption
     {
-
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
         private IDictionary<string, object> _propertyValuePairs;
@@ -98,9 +97,7 @@ namespace Microsoft.AspNet.OData.Query
                         _propertyValuePairs.Add(pieces[0], value);
                     }
                 }
-
             }
-
         }
 
         /// <summary>
@@ -339,6 +336,7 @@ namespace Microsoft.AspNet.OData.Query
             object results = genericMethod.Invoke(null, args);
             return results;
         }
+
         /// <summary>
         /// XML doc, make it public to avoid security issues
         /// </summary>
@@ -349,8 +347,6 @@ namespace Microsoft.AspNet.OData.Query
         {
             T[] arr = records.AsArray();
             return arr[arr.Length - 1];
-
         }
     }
 }
-

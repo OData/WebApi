@@ -128,7 +128,6 @@ namespace Microsoft.AspNet.OData.Adapters
             return this.Context.NextLink;
         }
 
-
         /// <summary>
         /// Get the next page link for a given page size.
         /// </summary>
@@ -138,6 +137,7 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             return this.innerRequest.GetNextPageLink(pageSize);
         }
+
         /// <summary>
         /// Creates an ETag from concurrency property names and values.
         /// </summary>

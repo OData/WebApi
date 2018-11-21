@@ -89,7 +89,7 @@ namespace Microsoft.AspNet.OData.Query
             foreach (string keyAndValue in keyValues)
             {
                 string[] pieces = keyAndValue.Split(new char[] { ':' }, 2);
-                if (!String.IsNullOrWhiteSpace(pieces[1]))
+                if (pieces.Length> 1 && !String.IsNullOrWhiteSpace(pieces[1]))
                 {
                     IEdmTypeReference type = EdmLibHelpers.GetTypeReferenceOfProperty(Context.Model, Context.ElementClrType, pieces[0]);
                     object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, Context.Model, type);

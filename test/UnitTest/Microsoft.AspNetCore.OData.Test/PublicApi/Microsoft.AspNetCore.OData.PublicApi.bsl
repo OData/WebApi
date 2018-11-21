@@ -524,6 +524,7 @@ public class Microsoft.AspNet.OData.ODataOptions {
 	bool EnableContinueOnErrorHeader  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
+	bool UseSkipTokenForServerSidePaging  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.ODataQueryContext {
@@ -1846,7 +1847,7 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize)
+	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, params string skipTokenValue)
 
 	[
 	ExtensionAttribute(),
@@ -2070,6 +2071,16 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtension
 	ExtensionAttribute(),
 	]
 	public static Microsoft.AspNetCore.Routing.IRouteBuilder SetUrlKeyDelimiter (Microsoft.AspNetCore.Routing.IRouteBuilder builder, Microsoft.OData.ODataUrlKeyDelimiter urlKeyDelimiter)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IRouteBuilder SkipToken (Microsoft.AspNetCore.Routing.IRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IRouteBuilder SkipToken (Microsoft.AspNetCore.Routing.IRouteBuilder builder, QueryOptionSetting setting)
 }
 
 [
@@ -2368,7 +2379,7 @@ public enum Microsoft.AspNet.OData.Query.AllowedQueryOptions : int {
 	Select = 4
 	Skip = 32
 	SkipToken = 256
-	Supported = 1279
+	Supported = 1535
 	Top = 16
 }
 
@@ -2443,6 +2454,7 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	bool EnableFilter  { public get; public set; }
 	bool EnableOrderBy  { public get; public set; }
 	bool EnableSelect  { public get; public set; }
+	bool EnableSkipToken  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
@@ -2501,6 +2513,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; }
 	SelectExpandQueryOption SelectExpand  { public get; }
 	SkipQueryOption Skip  { public get; }
+	SkipTokenQueryOption SkipToken  { public get; }
 	TopQueryOption Top  { public get; }
 	ODataQueryValidator Validator  { public get; public set; }
 
@@ -2676,6 +2689,21 @@ public class Microsoft.AspNet.OData.Query.SkipQueryOption {
 
 	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
+	public void Validate (ODataValidationSettings validationSettings)
+}
+
+public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
+	public SkipTokenQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
+
+	ODataQueryContext Context  { public get; }
+	string RawValue  { public get; }
+	SkipTokenQueryValidator Validator  { public get; public set; }
+	string Value  { public get; }
+
+	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public static T FetchLastItemInResults (IQueryable`1 records)
+	public static string GetSkipTokenValue (System.Linq.IQueryable result, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -3408,6 +3436,7 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
+	public static int GuidCompare (System.Guid firstValue, System.Guid secondValue)
 }
 
 public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
@@ -3490,6 +3519,12 @@ public class Microsoft.AspNet.OData.Query.Validators.SkipQueryValidator {
 	public SkipQueryValidator ()
 
 	public virtual void Validate (SkipQueryOption skipQueryOption, ODataValidationSettings validationSettings)
+}
+
+public class Microsoft.AspNet.OData.Query.Validators.SkipTokenQueryValidator {
+	public SkipTokenQueryValidator ()
+
+	public virtual void Validate (SkipTokenQueryOption skipToken, ODataValidationSettings validationSettings)
 }
 
 public class Microsoft.AspNet.OData.Query.Validators.TopQueryValidator {

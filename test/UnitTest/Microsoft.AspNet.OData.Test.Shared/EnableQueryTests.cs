@@ -43,7 +43,7 @@ namespace Microsoft.AspNet.OData.Test
             {
                 return new TheoryDataSet<string, string>
                 {
-                    {"?$skiptoken=5", "SkipToken"},
+                    {"?$deltatoken=5", "DeltaToken"},
                 };
             }
         }

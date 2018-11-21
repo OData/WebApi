@@ -135,7 +135,8 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public Uri GetNextPageLink(int pageSize)
         {
-            return this.innerRequest.GetNextPageLink(pageSize);
+            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize);
+            return this.Context.NextLink;
         }
 
         /// <summary>

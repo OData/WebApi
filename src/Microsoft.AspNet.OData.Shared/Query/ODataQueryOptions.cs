@@ -425,7 +425,6 @@ namespace Microsoft.AspNet.OData.Query
 
             if (pageSize > 0)
             {
-                Uri nextPageLink;
                 bool resultsLimited;
                 result = LimitResults(result, pageSize, out resultsLimited);               
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
@@ -435,14 +434,12 @@ namespace Microsoft.AspNet.OData.Query
                     if (settings.EnableSkipToken)
                     {
                         string skipTokenValue = SkipTokenQueryOption.GetSkipTokenValue(result, this.Context.Model, OrderBy);
-                        nextPageLink = InternalRequest.GetNextPageLink(pageSize, skipTokenValue);
+                        InternalRequest.GetNextPageLink(pageSize, skipTokenValue);
                     }
                     else
                     {
-                        nextPageLink = InternalRequest.GetNextPageLink(pageSize);
+                        InternalRequest.GetNextPageLink(pageSize);
                     }
-
-                    InternalRequest.Context.NextLink = nextPageLink;
                 }
             }
 

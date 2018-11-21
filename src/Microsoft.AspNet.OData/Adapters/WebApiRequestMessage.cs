@@ -124,7 +124,8 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public Uri GetNextPageLink(int pageSize, string skipTokenValue)
         {
-            return this.innerRequest.GetNextPageLink(pageSize,skipTokenValue);
+            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize, skipTokenValue);
+            return this.Context.NextLink;
         }
 
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
@@ -52,6 +53,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                         Name = "City" + i,
                         Street = "Street" + i,
                     },
+                    Token = i%2 == 0 ? Guid.Parse("d1b6a349-e6d6-4fb2-91c6-8b2eceda85c7") : Guid.Parse("5af3c516-2d3c-4033-95af-07591f18439c"),
+                    Skill = i%2 == 0 ? Enums.Skill.CSharp : Enums.Skill.Sql,
+                    DateTimeOfBirth = new DateTimeOffset(2000, 1, i, 0, 0, 0, new TimeSpan()),
                     Orders = new List<Order>
                     {
                         new Order
@@ -67,6 +71,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                             Id = i * 3
                         }
                     },
+                    Addresses = new List<Address>()
+                    {
+                        new Address
+                        {
+                            Name = "CityA" + i
+                        },
+                        new Address
+                        {
+                            Name = "CityB" + i
+                        },
+                        new Address
+                        {
+                            Name = "CityC" + i
+                        },
+                    }
                 };
 
                 _customers.Add(customer);
@@ -78,7 +97,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
     {
         private List<Order> _orders;
         private List<SpecialOrder> _specialOrders;
-        
+
         [EnableQuery]
         public List<Order> Get()
         {

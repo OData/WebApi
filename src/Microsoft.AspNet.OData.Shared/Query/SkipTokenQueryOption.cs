@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Query
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
-        /// <param name="rawValue">The raw value for $skip query. It can be null or empty.</param>
+        /// <param name="rawValue">The raw value for $skiptoken query. It can be null or empty.</param>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
         /// <param name="queryOptionParser">The <see cref="ODataQueryOptionParser"/> which is used to parse the query option.</param>
         public SkipTokenQueryOption(string rawValue, ODataQueryContext context, ODataQueryOptionParser queryOptionParser)
@@ -88,10 +88,11 @@ namespace Microsoft.AspNet.OData.Query
             string[] keyValues = rawValue.Split(',');
             foreach (string keyAndValue in keyValues)
             {
-                string[] pieces = keyAndValue.Split(':');
+                string[] pieces = keyAndValue.Split(new char[] { ':' }, 2);
                 if (!String.IsNullOrWhiteSpace(pieces[1]))
                 {
-                    object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401);
+                    IEdmTypeReference type = EdmLibHelpers.GetTypeReferenceOfProperty(Context.Model, Context.ElementClrType, pieces[0]);
+                    object value = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, Context.Model, type);
                     if (!String.IsNullOrWhiteSpace(pieces[0]))
                     {
                         _propertyValuePairs.Add(pieces[0], value);
@@ -201,6 +202,11 @@ namespace Microsoft.AspNet.OData.Query
                 object value = item.Value;
 
                 Expression compare = null;
+                ODataEnumValue enumValue = value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    value = enumValue.Value;
+                }
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
                 if (directionMap.ContainsKey(key))
                 {
@@ -219,7 +225,6 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             Expression whereLambda = Expression.Lambda(where, param);
-
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
         }
 
@@ -265,7 +270,6 @@ namespace Microsoft.AspNet.OData.Query
             foreach (IEdmProperty property in propertiesForSkipToken)
             {
                 bool islast = count == lastIndex;
-                bool isString = false;
                 IEdmStructuredObject obj = lastMember as IEdmStructuredObject;
                 if (obj != null)
                 {
@@ -275,12 +279,18 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     value = lastMember.GetType().GetProperty(property.Name).GetValue(lastMember);
                 }
-                if (value.GetType() == typeof(string))
+
+                string uriLiteral = "";
+                if (TypeHelper.IsEnum(value.GetType()))
                 {
-                    isString = true;
+                    ODataEnumValue enumValue = new ODataEnumValue(value.ToString(), value.GetType().FullName);
+                    uriLiteral = ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V401, model);
                 }
-                
-                        skipTokenvalue += property.Name + ":" + (isString ? "\'" : "") + value.ToString() + (isString ? "\'" : "") + (islast ? "" : ",");
+                else
+                {
+                    uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
+                }
+                skipTokenvalue += property.Name + ":" + uriLiteral + (islast ? "" : ",");
                 count++;
             }
 
@@ -290,9 +300,7 @@ namespace Microsoft.AspNet.OData.Query
         private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
         {
             IEdmType edmType = GetTypeFromObject(lastMember, model);
-
             IEdmEntityType entity = edmType as IEdmEntityType;
-
             if (entity == null)
             {
                 return null;
@@ -301,16 +309,15 @@ namespace Microsoft.AspNet.OData.Query
             IList<IEdmProperty> key = entity.Key().AsIList<IEdmProperty>();
             if (orderByQueryOption != null)
             {
-                IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList<IEdmProperty>();
+                IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList();
                 foreach (IEdmProperty subKey in key)
                 {
                     orderByProps.Add(subKey);
                 }
 
-                return orderByProps.AsEnumerable<IEdmProperty>();
+                return orderByProps.AsEnumerable();
             }
-            return key.AsEnumerable<IEdmProperty>();
-
+            return key.AsEnumerable();
         }
 
         private static IEdmType GetTypeFromObject(object obj, IEdmModel model)

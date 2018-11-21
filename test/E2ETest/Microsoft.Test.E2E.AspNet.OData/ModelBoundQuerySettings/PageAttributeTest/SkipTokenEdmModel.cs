@@ -22,7 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         public Guid Token { get; set; }
 
-        public byte[] Binary { get; set; }
+        public Enums.Skill Skill { get; set; }
 
         public DateTimeOffset DateTimeOfBirth { get; set; }
 
@@ -48,6 +48,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         public string SpecialName { get; set; }
     }
 
+    [Page(PageSize =2)]
     public class Address
     {
         public string Name { get; set; }

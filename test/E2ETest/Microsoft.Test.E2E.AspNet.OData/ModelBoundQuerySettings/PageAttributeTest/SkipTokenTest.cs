@@ -32,7 +32,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Fact]
-        public async Task PageSizeOnEntityType()
+        public async Task GenerateSkiptokenOnEntityType()
         {
             string queryUrl = string.Format(CustomerBaseUrl, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -47,7 +47,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Fact]
-        public async Task PageSizeOnProperty()
+        public async Task GenerateSkiptokenOnEntityProperty()
         {
             string queryUrl = string.Format(CustomerBaseUrl + "(1)/Orders", BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -67,7 +67,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         [InlineData("?$filter=Id gt 2", "$skiptoken=Id:4")]
         [InlineData("?$orderby=Name desc", "$skiptoken=Name:'Customer8',Id:8")]
         [InlineData("?$orderby=Name desc&$filter=Id gt 2&$expand=Orders", "$skiptoken=Name:'Customer8',Id:8")]
-        public async Task WithQueryOptions(string queryOption, string expected)
+        public async Task GenerateSkiptokenWithQueryOptions(string queryOption, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + queryOption, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -107,7 +107,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         [InlineData("?$top=5", "$top=3&$skiptoken=Id:2")]
         [InlineData("?$skip=2&$top=5", "$top=3&$skiptoken=Id:4")]
         [InlineData("?$TOP=5&$sKiP=2", "$top=3&$skiptoken=Id:4")]
-        public async Task SkipAndTopWithSkipToken(string url, string expected)
+        public async Task SkipAndTopWithSkiptoken(string url, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + url, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -121,6 +121,71 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             Assert.Contains(expected, result);
         }
 
+        [Fact]
+        public async Task VerifyLastSetDoesNotHaveNextLink()
+        {
+            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby=Name&$skiptoken=Name:'Customer8',Id:8", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
 
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.DoesNotContain("nextLink", result);
+        }
+
+        [Theory]
+        [InlineData("Token", "$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:3")]
+        [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth:2000-01-02T00:00:00Z,Id:2")]
+        [InlineData("Skill", "$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4")]
+        public async Task GenerateSkiptokenWithDifferentPrimitive(string property, string expected)
+        {
+            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby="+ property, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
+        }
+
+        [Theory]
+        [InlineData("?$orderby=Token&$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:3", "$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:7")]
+        [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth:2000-01-02T00:00:00Z,Id:2", "$skiptoken=DateTimeOfBirth:2000-01-04T00:00:00Z,Id:4")]
+        [InlineData("?$orderby=Skill&$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4", "$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:8")]
+        public async Task ConsumeSkiptokenWithOtherPrimitives(string nextLink, string expected)
+        {
+            string queryUrl = string.Format(CustomerBaseUrl + nextLink, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
+        }
+
+        [Fact]
+        public async Task ComplexCollectionShouldStillUseSkip()
+        {
+            string queryUrl = string.Format(CustomerBaseUrl + "(1)/Addresses", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.DoesNotContain("$skiptoken", result);
+            Assert.Contains("?$skip=2", result);
+        }
     }
 }

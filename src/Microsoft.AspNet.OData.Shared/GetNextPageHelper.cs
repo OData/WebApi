@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData
                         break;
                 }
 
-                if ((key=="$skip" && useSkipToken) || (key == "$skiptoken" && useSkipToken))
+                if ((key == "$skip" && useSkipToken) || (key == "$skiptoken" && useSkipToken))
                 {
                     continue;
                 }

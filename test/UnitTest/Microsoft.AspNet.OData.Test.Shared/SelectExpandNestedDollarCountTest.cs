@@ -112,9 +112,31 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Contains("\"Categories@odata.count\":9", payload); // Categories
         }
 
-        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
+        [Fact]
+        public async Task SelectExpand_WithOneLevelNestedDollarCount_HandleNullPropagationFalse_Works()
         {
-            var controllers = new[] { typeof(MsCustomersController), typeof(MetadataController) };
+            // Arrange
+            string uri = "/odata/MsOrders?$expand=Categories($count=true)";
+
+            // Act
+            HttpResponseMessage response = await GetResponse(uri, AcceptJson);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            string payload = await response.Content.ReadAsStringAsync();
+
+            Assert.DoesNotContain("\"Orders@odata.count\":5,", payload); // Top (Orders)
+            Assert.Contains("\"Categories@odata.count\":9", payload); // Categories
+        }
+
+        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader, bool handleNullPropagation = true)
+        {
+            var controllers = new[] {
+                typeof(MsCustomersController),
+                typeof(MsOrdersController),
+                typeof(MetadataController) };
             var server = TestServerFactory.Create(controllers, configuration =>
             {
 #if NETFX
@@ -169,6 +191,31 @@ namespace Microsoft.AspNet.OData.Test
         public ITestActionResult Get()
         {
             return Ok(_customers);
+        }
+    }
+
+    public class MsOrdersController : TestODataController
+    {
+        private static IList<MsOrder> _orders;
+
+        static MsOrdersController()
+        {
+            _orders =  Enumerable.Range(1, 5).Select(j => new MsOrder
+            {
+                Id = j,
+                Title = "Title" + j,
+                Categories = Enumerable.Range(1, 9).Select(k => new MsCategory
+                {
+                    Id = k,
+                    Category = k % 2 == 0 ? "Book" : "Video"
+                }).ToList()
+            }).ToList();
+        }
+
+        [EnableQuery(PageSize = 2, HandleNullPropagation = OData.Query.HandleNullPropagationOption.False)]
+        public ITestActionResult Get()
+        {
+            return Ok(_orders);
         }
     }
 

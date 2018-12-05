@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
         /// <summary>
         /// Validates a <see cref="SkipTokenQueryOption" />.
         /// </summary>
-        /// <param name="skipToken">The $skip query.</param>
+        /// <param name="skipToken">The $skiptoken query.</param>
         /// <param name="validationSettings">The validation settings.</param>
         public virtual void Validate(SkipTokenQueryOption skipToken, ODataValidationSettings validationSettings)
         {

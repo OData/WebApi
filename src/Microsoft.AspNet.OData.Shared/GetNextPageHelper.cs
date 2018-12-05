@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue = "")
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -23,18 +23,19 @@ namespace Microsoft.AspNet.OData
             StringBuilder queryBuilder = new StringBuilder();
 
             int nextPageSkip = pageSize;
-            
+
             //If no value for skiptoken is provided; revert to using skip 
-            bool useSkipToken = true;
-            if (String.IsNullOrWhiteSpace(skipTokenValue))
-            {
-                useSkipToken = false;
-            }
+            bool useSkipToken = !String.IsNullOrWhiteSpace(skipTokenValue);
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
                 string key = kvp.Key.ToLowerInvariant();
                 string value = kvp.Value;
+
+                if ((key == "$skip" && useSkipToken) || (key == "$skiptoken"))
+                {
+                    continue;
+                }
                 switch (key)
                 {
                     case "$top":
@@ -52,23 +53,16 @@ namespace Microsoft.AspNet.OData
                         break;
                     case "$skip":
                         //Need to increment skip only if we are not using skiptoken 
-                        if (!useSkipToken) 
+
+                        int skip;
+                        if (Int32.TryParse(value, out skip))
                         {
-                            int skip = 0;
-                            if (Int32.TryParse(value, out skip))
-                            {
-                                // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                                nextPageSkip += skip;
-                            }
+                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
+                            nextPageSkip += skip;
                         }
                         continue;
                     default:
                         break;
-                }
-
-                if ((key == "$skip" && useSkipToken) || (key == "$skiptoken" && useSkipToken))
-                {
-                    continue;
                 }
 
                 if (key.Length > 0 && key[0] == '$')

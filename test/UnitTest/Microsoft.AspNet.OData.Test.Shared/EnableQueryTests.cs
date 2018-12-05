@@ -32,6 +32,7 @@ namespace Microsoft.AspNet.OData.Test
                     {"?$count=true", "Count"},
                     {"?$select=Id", "Select"},
                     {"?$expand=Orders", "Expand"},
+                    {"?$skiptoken=Id:5", "SkipToken"},
                 };
             }
         }

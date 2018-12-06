@@ -108,5 +108,14 @@ namespace Microsoft.AspNet.OData.Adapters
             get { return this.innerFeature.TotalCountFunc; }
             set { this.innerFeature.TotalCountFunc = value; }
         }
+
+        /// <summary>
+        /// Gets or sets the total count function for the OData response.
+        /// </summary>
+        public Func<object,Uri> NextLinkFunc
+        {
+            get { return this.innerFeature.NextLinkFunc; }
+            set { this.innerFeature.NextLinkFunc = value; }
+        }
     }
 }

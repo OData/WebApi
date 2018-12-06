@@ -129,11 +129,12 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Get the next page link for a given page size.
         /// </summary>
         /// <param name="pageSize">The page size.</param>
-        /// <param name="skiptokenValue">value that needs to be assigned to skipToken</param>
+        /// <param name="lastValue">The last object that was sent.</param>
+        /// <param name="objToSkipTokenValue">Function that takes in the last object and returns the skiptoken value string.</param>
         /// <returns></returns>
-        public Uri GetNextPageLink(int pageSize, string skiptokenValue)
+        public Uri GetNextPageLink(int pageSize, object lastValue, Func<object, string> objToSkipTokenValue)
         {
-            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize,skiptokenValue);
+            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize, lastValue, objToSkipTokenValue);
             return this.Context.NextLink;
         }
 

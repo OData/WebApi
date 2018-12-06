@@ -230,9 +230,10 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="request">The request on which to base the next page link.</param>
         /// <param name="pageSize">The number of results allowed per page.</param>
-        /// <param name="skipTokenValue">Value for the skipToken.</param>
+        /// <param name="lastValue">The object </param>
+        /// <param name="objToSkipTokenValue">Function that extracts out the skiptoken value from the object</param>
         /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(this HttpRequestMessage request, int pageSize, string skipTokenValue)
+        public static Uri GetNextPageLink(this HttpRequestMessage request, int pageSize, object lastValue, Func<object, string> objToSkipTokenValue)
         {
             if (request == null || request.RequestUri == null)
             {
@@ -246,7 +247,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentUriNotAbsolute("request", requestUri);
             }
 
-            return GetNextPageHelper.GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize, skipTokenValue);
+            return GetNextPageHelper.GetNextPageLink(requestUri, request.GetQueryNameValuePairs(), pageSize, lastValue, objToSkipTokenValue);
         }
 
         /// <summary>

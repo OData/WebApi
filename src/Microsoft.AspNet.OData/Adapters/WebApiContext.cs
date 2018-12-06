@@ -115,5 +115,14 @@ namespace Microsoft.AspNet.OData.Adapters
             get { return this.innerContext.TotalCountFunc; }
             set { this.innerContext.TotalCountFunc = value; }
         }
+
+        /// <summary>
+        /// Value based Func that generates the skiptoken value
+        /// </summary>
+        public Func<object, Uri> NextLinkFunc
+        {
+            get { return this.innerContext.NextLinkFunc; }
+            set { this.innerContext.NextLinkFunc = value; }
+        }
     }
 }

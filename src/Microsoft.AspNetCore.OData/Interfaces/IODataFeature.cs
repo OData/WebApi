@@ -70,6 +70,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         Func<long> TotalCountFunc { get; set; }
 
         /// <summary>
+        /// Gets or sets the total count function for the OData response.
+        /// </summary>
+        Func<object,Uri> NextLinkFunc { get; set; }
+
+        /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.
         /// </summary>
         ApplyClause ApplyClause { get; set; }

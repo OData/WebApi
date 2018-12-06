@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, string skipTokenValue = null)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object lastValue = null, Func<object,string> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -24,7 +24,8 @@ namespace Microsoft.AspNet.OData
 
             int nextPageSkip = pageSize;
 
-            //If no value for skiptoken is provided; revert to using skip 
+            String skipTokenValue = objectToSkipTokenValue == null ? null: objectToSkipTokenValue(lastValue);
+            //If no value for skiptoken can be extracted; revert to using skip 
             bool useSkipToken = !String.IsNullOrWhiteSpace(skipTokenValue);
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)

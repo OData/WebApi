@@ -139,7 +139,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         [Theory]
         [InlineData("Token", "$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:3")]
         [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth:2000-01-02T00:00:00Z,Id:2")]
-        [InlineData("Skill", "$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4")]
+        [InlineData("Skill", "$skiptoken=Skill:'enumType'Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4")]
         public async Task GenerateSkiptokenWithDifferentPrimitive(string property, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + "?$orderby="+ property, BaseAddress);
@@ -157,7 +157,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         [Theory]
         [InlineData("?$orderby=Token&$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:3", "$skiptoken=Token:5af3c516-2d3c-4033-95af-07591f18439c,Id:7")]
         [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth:2000-01-02T00:00:00Z,Id:2", "$skiptoken=DateTimeOfBirth:2000-01-04T00:00:00Z,Id:4")]
-        [InlineData("?$orderby=Skill&$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4", "$skiptoken=Skill:Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:8")]
+        [InlineData("?$orderby=Skill&$skiptoken=Skill:'enumType'Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:4", "$skiptoken=Skill:'enumType'Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id:8")]
         public async Task ConsumeSkiptokenWithOtherPrimitives(string nextLink, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + nextLink, BaseAddress);

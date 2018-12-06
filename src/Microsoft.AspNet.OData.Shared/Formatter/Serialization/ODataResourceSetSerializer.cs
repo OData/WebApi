@@ -123,11 +123,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // save this for later to support JSON odata.streaming.
             Uri nextPageLink = resourceSet.NextPageLink;
             resourceSet.NextPageLink = null;
-
+            object lastMember = null;
             writer.WriteStart(resourceSet);
 
             foreach (object item in enumerable)
             {
+                lastMember = item;
                 if (item == null || item is NullEdmComplexObject)
                 {
                     if (elementType.IsEntity())
@@ -154,6 +155,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (nextPageLink != null)
             {
                 resourceSet.NextPageLink = nextPageLink;
+            }
+            else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
+            {
+                resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLinkFunc(lastMember);
             }
 
             writer.WriteEnd();

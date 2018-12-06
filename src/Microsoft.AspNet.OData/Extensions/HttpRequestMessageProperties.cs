@@ -36,6 +36,7 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
+        private const string NextLinkFuncKey = "Microsoft.AspNet.OData.NextLinkFunc";
 
         private HttpRequestMessage _request;
 
@@ -60,6 +61,24 @@ namespace Microsoft.AspNet.OData.Extensions
             set
             {
                 _request.Properties[TotalCountFuncKey] = value;
+            }
+        }
+
+        internal Func<object,Uri> NextLinkFunc
+        {
+            get
+            {
+                object nextLinkFunc;
+                if (_request.Properties.TryGetValue(NextLinkFuncKey, out nextLinkFunc))
+                {
+                    return (Func<object,Uri>)nextLinkFunc;
+                }
+
+                return null;
+            }
+            set
+            {
+                _request.Properties[NextLinkFuncKey] = value;
             }
         }
 

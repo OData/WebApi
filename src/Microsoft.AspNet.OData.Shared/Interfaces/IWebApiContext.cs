@@ -36,6 +36,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         Uri DeltaLink { get; set; }
 
         /// <summary>
+        /// Value based Func that generates the skiptoken value
+        /// </summary>
+        Func<object,Uri> NextLinkFunc { get; set; }
+
+        /// <summary>
         /// Gets the OData path.
         /// </summary>
         ODataPath Path { get; }

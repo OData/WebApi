@@ -123,7 +123,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <param name="lastValue">The last object that was sent.</param>
         /// <param name="objToSkipTokenValue">Function that takes in the last object and returns the skiptoken value string.</param>
         /// <returns></returns>
-        public Uri GetNextPageLink(int pageSize, object lastValue, Func<object,string> objToSkipTokenValue)
+        public Uri GetNextPageLink(int pageSize, object lastValue, Func<object, string> objToSkipTokenValue)
         {
             this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize, lastValue, objToSkipTokenValue);
             return this.Context.NextLink;

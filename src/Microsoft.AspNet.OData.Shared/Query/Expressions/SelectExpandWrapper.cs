@@ -58,18 +58,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return model.GetEdmTypeReference(elementType);
         }
 
-        public IEdmType GetEdmType(IEdmModel model)
-        {
-            if (InstanceType != null)
-            {
-                IEdmEntityType entityType = model.FindType(InstanceType) as IEdmEntityType;
-                return entityType;
-            }
-
-            Type elementType = GetElementType();
-            return model.GetEdmType(elementType);
-        }
-
         /// <inheritdoc />
         public bool TryGetPropertyValue(string propertyName, out object value)
         {

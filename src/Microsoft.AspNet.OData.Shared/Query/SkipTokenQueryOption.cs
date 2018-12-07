@@ -92,7 +92,7 @@ namespace Microsoft.AspNet.OData.Query
                     object value = null;
                     if (pieces[1].StartsWith("'enumType'"))
                     {
-                        string enumValue = pieces[1].Remove(0,10);
+                        string enumValue = pieces[1].Remove(0, 10);
                         IEdmTypeReference type = EdmLibHelpers.GetTypeReferenceOfProperty(Context.Model, Context.ElementClrType, pieces[0]);
                         value = ODataUriUtils.ConvertFromUriLiteral(enumValue, ODataVersion.V401, Context.Model, type);
                     }
@@ -119,7 +119,7 @@ namespace Microsoft.AspNet.OData.Query
         public string RawValue { get; private set; }
 
         /// <summary>
-        /// Gets the value of the $skiptoken as a parsed integer.
+        /// Gets the value of the $skiptoken.
         /// </summary>
         public string Value
         {
@@ -191,7 +191,6 @@ namespace Microsoft.AspNet.OData.Query
             bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
             Expression where = null;
-            int count = 0;
             /* We will create a where lambda of the following form -
              * Where (true AND Prop1>Value1)
              * OR (true AND Prop1=Value1 AND Prop2>Value2)
@@ -226,7 +225,6 @@ namespace Microsoft.AspNet.OData.Query
                 where = where == null ? condition : Expression.OrElse(where, condition);
 
                 lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
-                count++;
             }
 
             Expression whereLambda = Expression.Lambda(where, param);
@@ -254,14 +252,13 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Returns a function that converts an object to a skiptoken value string
         /// </summary>
-        /// <param name="model"></param>
-        /// <param name="orderByQueryOption"></param>
+        /// <param name="model">The edm model.</param>
+        /// <param name="orderByQueryOption">QueryOption </param>
         /// <returns></returns>
-        public static Func<object,string> GetSkipTokenFunc(IEdmModel model, OrderByQueryOption orderByQueryOption)
+        public static Func<object, string> GetSkipTokenFunc(IEdmModel model, OrderByQueryOption orderByQueryOption)
         {
-            Func<object, string> GenerateSkipToken = lastMember =>
+            Func<object, string> generateSkipToken = lastMember =>
             {
-
                 object value;
                 IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByQueryOption);
 
@@ -300,12 +297,9 @@ namespace Microsoft.AspNet.OData.Query
                     skipTokenvalue += property.Name + ":" + uriLiteral + (islast ? String.Empty : ",");
                     count++;
                 }
-
                 return skipTokenvalue;
             };
-
-            return GenerateSkipToken;
-            
+            return generateSkipToken;
         }
 
         private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
@@ -336,7 +330,8 @@ namespace Microsoft.AspNet.OData.Query
             SelectExpandWrapper selectExpand = obj as SelectExpandWrapper;
             if (selectExpand != null)
             {
-                return selectExpand.GetEdmType(model);
+                IEdmTypeReference typeReference = selectExpand.GetEdmType();
+                return typeReference.Definition;
             }
 
             Type clrType = obj.GetType();

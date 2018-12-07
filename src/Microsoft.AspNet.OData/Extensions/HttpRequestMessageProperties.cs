@@ -64,14 +64,14 @@ namespace Microsoft.AspNet.OData.Extensions
             }
         }
 
-        internal Func<object,Uri> NextLinkFunc
+        internal Func<object, Uri> NextLinkFunc
         {
             get
             {
                 object nextLinkFunc;
                 if (_request.Properties.TryGetValue(NextLinkFuncKey, out nextLinkFunc))
                 {
-                    return (Func<object,Uri>)nextLinkFunc;
+                    return (Func<object, Uri>)nextLinkFunc;
                 }
 
                 return null;

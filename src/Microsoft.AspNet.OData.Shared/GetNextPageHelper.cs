@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object lastValue = null, Func<object,string> objectToSkipTokenValue = null)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object lastValue = null, Func<object, string> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -33,10 +33,6 @@ namespace Microsoft.AspNet.OData
                 string key = kvp.Key.ToLowerInvariant();
                 string value = kvp.Value;
 
-                if ((key == "$skip" && useSkipToken) || (key == "$skiptoken"))
-                {
-                    continue;
-                }
                 switch (key)
                 {
                     case "$top":
@@ -53,14 +49,19 @@ namespace Microsoft.AspNet.OData
                         }
                         break;
                     case "$skip":
+                        if (useSkipToken)
+                        {
+                            continue;
+                        }
                         //Need to increment skip only if we are not using skiptoken 
-
                         int skip;
                         if (Int32.TryParse(value, out skip))
                         {
                             // We increase skip by the pageSize because that's the number of results we're returning in the current page
                             nextPageSkip += skip;
                         }
+                        continue;
+                    case "$skiptoken":
                         continue;
                     default:
                         break;

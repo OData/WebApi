@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData
 
             int nextPageSkip = pageSize;
 
-            String skipTokenValue = objectToSkipTokenValue == null ? null: objectToSkipTokenValue(lastValue);
+            String skipTokenValue = objectToSkipTokenValue == null ? null : objectToSkipTokenValue(lastValue);
             //If no value for skiptoken can be extracted; revert to using skip 
             bool useSkipToken = !String.IsNullOrWhiteSpace(skipTokenValue);
 

@@ -53,8 +53,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                         Name = "City" + i,
                         Street = "Street" + i,
                     },
-                    Token = i%2 == 0 ? Guid.Parse("d1b6a349-e6d6-4fb2-91c6-8b2eceda85c7") : Guid.Parse("5af3c516-2d3c-4033-95af-07591f18439c"),
-                    Skill = i%2 == 0 ? Enums.Skill.CSharp : Enums.Skill.Sql,
+                    Token = i % 2 == 0 ? Guid.Parse("d1b6a349-e6d6-4fb2-91c6-8b2eceda85c7") : Guid.Parse("5af3c516-2d3c-4033-95af-07591f18439c"),
+                    Skill = i % 2 == 0 ? Enums.Skill.CSharp : Enums.Skill.Sql,
                     DateTimeOfBirth = new DateTimeOffset(2000, 1, i, 0, 0, 0, new TimeSpan()),
                     Orders = new List<Order>
                     {
@@ -85,9 +85,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                         {
                             Name = "CityC" + i
                         },
-                    }
+                    },
                 };
-
+                customer.DynamicProperties["DynamicProperty1"] = 10 - i;
                 _customers.Add(customer);
             }
         }

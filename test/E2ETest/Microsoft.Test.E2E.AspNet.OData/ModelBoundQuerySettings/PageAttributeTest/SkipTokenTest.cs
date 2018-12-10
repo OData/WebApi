@@ -187,5 +187,39 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             Assert.DoesNotContain("$skiptoken", result);
             Assert.Contains("?$skip=2", result);
         }
+
+        [Theory]
+        [InlineData("?$expand=Orders($orderby=Name)&$skiptoken=Id:2", "$skiptoken=Id:4")]
+        public async Task OrderByInExpandOnNestedProperty(string nextLink, string expected)
+        {
+            string queryUrl = string.Format(CustomerBaseUrl + nextLink, BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
+        }
+
+        [Fact]
+        public async Task OrderByUntypedPropertyShouldUseSkip()
+        {
+
+            string queryUrl = string.Format(CustomerBaseUrl + "?$orderBy=DynamicProperty1", BaseAddress);
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.DoesNotContain("$skiptoken", result);
+            Assert.Contains("&$skip=2", result);
+        }
     }
 }

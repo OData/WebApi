@@ -284,7 +284,11 @@ namespace Microsoft.AspNet.OData.Query
                     }
 
                     String uriLiteral = String.Empty;
-                    if (TypeHelper.IsEnum(value.GetType()))
+                    if (value == null)
+                    {
+                        uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401);
+                    }
+                    else if (TypeHelper.IsEnum(value.GetType()))
                     {
                         ODataEnumValue enumValue = new ODataEnumValue(value.ToString(), value.GetType().FullName);
                         uriLiteral = ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V401, model);
@@ -314,6 +318,13 @@ namespace Microsoft.AspNet.OData.Query
             IList<IEdmProperty> key = entity.Key().AsIList<IEdmProperty>();
             if (orderByQueryOption != null)
             {
+                OrderByOpenPropertyNode orderByOpenType = orderByQueryOption.OrderByNodes.OfType<OrderByOpenPropertyNode>().LastOrDefault();
+                if (orderByOpenType != null)
+                {
+                    //SkipToken will not support ordering on dynamic properties
+                    return null;
+                }
+
                 IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList();
                 foreach (IEdmProperty subKey in key)
                 {

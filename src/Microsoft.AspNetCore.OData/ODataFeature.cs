@@ -119,7 +119,12 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
-        public Func<object, Uri> NextLinkFunc { get; set; }
+        public int PageSize { get; set; }
+
+        /// <summary>
+        /// Gets or sets the total count function for the OData response.
+        /// </summary>
+        public Func<object, String> NextLinkFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.

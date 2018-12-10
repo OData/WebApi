@@ -65,6 +65,12 @@ namespace Microsoft.AspNet.OData.Interfaces
         long? TotalCount { get; set; }
 
         /// <summary>
+        /// Gets or sets the PageSize for the OData response.
+        /// </summary>
+        /// <value><c>null</c> if no count should be sent back to the client.</value>
+        int PageSize { get; set; }
+
+        /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
         Func<long> TotalCountFunc { get; set; }
@@ -72,7 +78,7 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
-        Func<object,Uri> NextLinkFunc { get; set; }
+        Func<object, String> NextLinkFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.

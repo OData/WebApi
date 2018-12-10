@@ -38,7 +38,12 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Value based Func that generates the skiptoken value
         /// </summary>
-        Func<object, Uri> NextLinkFunc { get; set; }
+        Func<object, String> NextLinkFunc { get; set; }
+
+        /// <summary>
+        /// Value based Func that generates the skiptoken value
+        /// </summary>
+        int PageSize { get; set; }
 
         /// <summary>
         /// Gets the OData path.

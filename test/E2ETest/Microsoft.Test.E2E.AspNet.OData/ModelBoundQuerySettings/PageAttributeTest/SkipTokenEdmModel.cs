@@ -12,6 +12,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
     [Page(PageSize = 2)]
     public class Customer
     {
+        public Customer()
+        {
+            DynamicProperties = new Dictionary<string, object>();
+        }
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -30,6 +34,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         public List<Order> Orders { get; set; }
 
         public List<Address> Addresses { get; set; }
+
+        public Dictionary<string, object> DynamicProperties { get; set; }
+
     }
 
     public class Order

@@ -37,6 +37,8 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
         private const string NextLinkFuncKey = "Microsoft.AspNet.OData.NextLinkFunc";
+        private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
+
 
         private HttpRequestMessage _request;
 
@@ -64,14 +66,14 @@ namespace Microsoft.AspNet.OData.Extensions
             }
         }
 
-        internal Func<object, Uri> NextLinkFunc
+        internal Func<object, String> NextLinkFunc
         {
             get
             {
                 object nextLinkFunc;
                 if (_request.Properties.TryGetValue(NextLinkFuncKey, out nextLinkFunc))
                 {
-                    return (Func<object, Uri>)nextLinkFunc;
+                    return (Func<object, String>)nextLinkFunc;
                 }
 
                 return null;
@@ -79,6 +81,26 @@ namespace Microsoft.AspNet.OData.Extensions
             set
             {
                 _request.Properties[NextLinkFuncKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the page size.
+        /// </summary>
+        public int PageSize
+        {
+            get
+            {
+                object pageSize;
+                if (_request.Properties.TryGetValue(NextLinkFuncKey, out pageSize))
+                {
+                    return (int) pageSize;
+                }
+                return -1;
+            }
+            set
+            {
+                _request.Properties[PageSizeKey] = value;
             }
         }
 

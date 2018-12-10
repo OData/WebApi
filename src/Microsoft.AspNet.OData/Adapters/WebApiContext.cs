@@ -108,6 +108,15 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets or sets the page size.
+        /// </summary>
+        public int PageSize
+        {
+            get { return this.innerContext.PageSize; }
+            set { this.innerContext.PageSize = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
         public Func<long> TotalCountFunc
@@ -119,7 +128,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// Value based Func that generates the skiptoken value
         /// </summary>
-        public Func<object, Uri> NextLinkFunc
+        public Func<object, String> NextLinkFunc
         {
             get { return this.innerContext.NextLinkFunc; }
             set { this.innerContext.NextLinkFunc = value; }

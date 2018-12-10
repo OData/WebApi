@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData
     internal static partial class GetNextPageHelper
     {
         /// <remarks>This signature uses types that are AspNetCore-specific.</remarks>
-        internal static Uri GetNextPageLink(Uri requestUri, int pageSize)
+        internal static Uri GetNextPageLink(Uri requestUri, int pageSize, object lastValue = null, Func<object, String> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(requestUri.IsAbsoluteUri);
@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.OData
             IEnumerable<KeyValuePair<string, string>> queryParameters = queryValues.SelectMany(
                 kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
 
-            return GetNextPageLink(requestUri, queryParameters, pageSize);
+            return GetNextPageLink(requestUri, queryParameters, pageSize, lastValue, objectToSkipTokenValue);
         }
     }
 }

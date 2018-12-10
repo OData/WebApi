@@ -101,6 +101,16 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets or sets the total count for the OData response.
+        /// </summary>
+        /// <value><c>null</c> if no count should be sent back to the client.</value>
+        public int PageSize
+        {
+            get { return this.innerFeature.PageSize; }
+            set { this.innerFeature.PageSize = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
         public Func<long> TotalCountFunc
@@ -112,7 +122,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// Gets or sets the total count function for the OData response.
         /// </summary>
-        public Func<object,Uri> NextLinkFunc
+        public Func<object, String> NextLinkFunc
         {
             get { return this.innerFeature.NextLinkFunc; }
             set { this.innerFeature.NextLinkFunc = value; }

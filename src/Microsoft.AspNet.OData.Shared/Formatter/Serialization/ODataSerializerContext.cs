@@ -116,6 +116,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public ResourceContext ExpandedResource { get; set; }
 
         /// <summary>
+        /// Function that generates the NextLink
+        /// </summary>
+        public Func<object, Uri> NextLinkFunc { get; set; }
+
+        /// <summary>
         /// Gets or sets the complex property being nested or navigation property being expanded.
         /// </summary>
         public IEdmProperty EdmProperty { get; set; }

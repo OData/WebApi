@@ -95,8 +95,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceSetType != null);
 
             IEdmStructuredTypeReference elementType = GetResourceType(resourceSetType);
-            NextLinkInfo nextLinkInfo = new NextLinkInfo();
-            ODataResourceSet resourceSet = CreateResourceSetWithNextLinkInfo(enumerable, resourceSetType.AsCollection(), writeContext, out nextLinkInfo);
+            ODataResourceSet resourceSet = CreateResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
             if (resourceSet == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
@@ -158,9 +157,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 resourceSet.NextPageLink = nextPageLink;
             }
 
-            if (nextLinkInfo.ShouldApplyNextLinkFunc)
+            if (writeContext.NextLinkFunc != null)
             {
-                resourceSet.NextPageLink = nextLinkInfo.GenerateNextLink(lastMember);
+                resourceSet.NextPageLink = writeContext.NextLinkFunc(lastMember);
             }
 
             writer.WriteEnd();
@@ -181,85 +180,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 TypeName = resourceSetType.FullName()
             };
 
-            IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
-            if (writeContext.NavigationSource != null && structuredType.IsEntity())
-            {
-                ResourceSetContext resourceSetContext = ResourceSetContext.Create(writeContext, resourceSetInstance);
-                IEdmEntityType entityType = structuredType.AsEntity().EntityDefinition();
-                var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
-                var odataOperations = CreateODataOperations(operations, resourceSetContext, writeContext);
-                foreach (var odataOperation in odataOperations)
-                {
-                    ODataAction action = odataOperation as ODataAction;
-                    if (action != null)
-                    {
-                        resourceSet.AddAction(action);
-                    }
-                    else
-                    {
-                        resourceSet.AddFunction((ODataFunction)odataOperation);
-                    }
-                }
-            }
-
-            if (writeContext.ExpandedResource == null)
-            {
-                // If we have more OData format specific information apply it now, only if we are the root feed.
-                PageResult odataResourceSetAnnotations = resourceSetInstance as PageResult;
-                if (odataResourceSetAnnotations != null)
-                {
-                    resourceSet.Count = odataResourceSetAnnotations.Count;
-                    resourceSet.NextPageLink = odataResourceSetAnnotations.NextPageLink;
-                }
-                else if (writeContext.Request != null)
-                {
-                    resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
-                    resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
-
-                    long? countValue = writeContext.InternalRequest.Context.TotalCount;
-                    if (countValue.HasValue)
-                    {
-                        resourceSet.Count = countValue.Value;
-                    }
-                }
-            }
-            else
-            {
-                // nested resourceSet
-                ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
-                if (truncatedCollection != null && truncatedCollection.IsTruncated)
-                {
-                    resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
-                }
-
-                ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
-                if (countOptionCollection != null && countOptionCollection.TotalCount != null)
-                {
-                    resourceSet.Count = countOptionCollection.TotalCount;
-                }
-            }
-
-            return resourceSet;
-        }
-
-        /// <summary>
-        /// Create the <see cref="ODataResourceSet"/> to be written for the given resourceSet instance.
-        /// </summary>
-        /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
-        /// <param name="resourceSetType">The EDM type of the resourceSet being written.</param>
-        /// <param name="writeContext">The serializer context.</param>
-        /// <param name="nextLinkInfo">The information that will be required for generating a nextLink.</param>
-        /// <returns>The created <see cref="ODataResourceSet"/> object.</returns>
-        public virtual ODataResourceSet CreateResourceSetWithNextLinkInfo(IEnumerable resourceSetInstance, IEdmCollectionTypeReference resourceSetType,
-            ODataSerializerContext writeContext, out NextLinkInfo nextLinkInfo)
-        {
-            ODataResourceSet resourceSet = new ODataResourceSet
-            {
-                TypeName = resourceSetType.FullName()
-            };
-
-            nextLinkInfo = new NextLinkInfo();
-
+            writeContext.NextLinkFunc = null; 
             IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
             if (writeContext.NavigationSource != null && structuredType.IsEntity())
             {
@@ -295,20 +216,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (writeContext.InternalRequest.Context.NextLink != null)
                     {
                         resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
-                        nextLinkInfo.ShouldApplyNextLinkFunc = false;
                     }
-                    else
+                    else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
                     {
-                        if (writeContext.InternalRequest.Context.NextLinkFunc != null)
+                        writeContext.NextLinkFunc = lastMember =>
                         {
-                            nextLinkInfo.ShouldApplyNextLinkFunc = true;
-                            nextLinkInfo.GenerateNextLink = lastMember =>
-                            {
-                                return writeContext.InternalRequest.GetNextPageLink(writeContext.InternalRequest.Context.PageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
-                            };
-                        }
+                            return writeContext.InternalRequest.GetNextPageLink(writeContext.InternalRequest.Context.PageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
+                        };
                     }
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
+
                     long? countValue = writeContext.InternalRequest.Context.TotalCount;
                     if (countValue.HasValue)
                     {
@@ -322,12 +239,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
                 if (truncatedCollection != null && truncatedCollection.IsTruncated)
                 {
-                    nextLinkInfo.IsTruncated = true;
-                    nextLinkInfo.ShouldApplyNextLinkFunc = true;
-                    nextLinkInfo.GenerateNextLink = lastMember =>
-                    {
-                        return GetNestedNextPageLink(writeContext, truncatedCollection.PageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
-                    };
+                        resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
 
                 ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
@@ -336,7 +248,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     resourceSet.Count = countOptionCollection.TotalCount;
                 }
             }
-
             return resourceSet;
         }
 
@@ -430,7 +341,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize, object lastValue = null, Func<object, String> objectToSkipTokenValue = null)
+        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
 
@@ -441,7 +352,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize, lastValue, objectToSkipTokenValue);
+                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;
@@ -461,31 +372,5 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, resourceSetType.FullName());
             throw new SerializationException(message);
         }
-    }
-
-    /// <summary>
-    /// Info needed for NextLink 
-    /// </summary>
-    public class NextLinkInfo
-    {
-        /// <summary>
-        /// Page Size used for the resource to limit the results 
-        /// </summary>
-        public int PageSize { get; set; }
-
-        /// <summary>
-        /// Determines whether the results were limited or not.
-        /// </summary>
-        public bool IsTruncated { get; set; }
-
-        /// <summary>
-        /// Indicates if the NextLink function should be applied to generate the next link. 
-        /// </summary>
-        public bool ShouldApplyNextLinkFunc { get; set; }
-
-        /// <summary>
-        /// Function that generates the NextLink from an object
-        /// </summary>
-        public Func<object, Uri> GenerateNextLink { get; set; }
     }
 }

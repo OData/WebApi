@@ -39,7 +39,6 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string NextLinkFuncKey = "Microsoft.AspNet.OData.NextLinkFunc";
         private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
 
-
         private HttpRequestMessage _request;
 
         internal HttpRequestMessageProperties(HttpRequestMessage request)
@@ -94,7 +93,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 object pageSize;
                 if (_request.Properties.TryGetValue(NextLinkFuncKey, out pageSize))
                 {
-                    return (int) pageSize;
+                    return (int)pageSize;
                 }
                 return -1;
             }

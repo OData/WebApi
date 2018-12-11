@@ -260,6 +260,10 @@ namespace Microsoft.AspNet.OData.Query
             Func<object, string> generateSkipToken = lastMember =>
             {
                 object value;
+                if (lastMember == null)
+                {
+                    return String.Empty;
+                }
                 IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByQueryOption);
 
                 String skipTokenvalue = String.Empty;

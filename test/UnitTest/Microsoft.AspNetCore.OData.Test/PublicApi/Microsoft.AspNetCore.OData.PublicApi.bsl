@@ -490,6 +490,8 @@ public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
+	System.Func`2[[System.Object],[System.String]] NextLinkFunc  { public virtual get; public virtual set; }
+	int PageSize  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
 	System.IServiceProvider RequestContainer  { public virtual get; public virtual set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public virtual get; public virtual set; }
@@ -524,7 +526,6 @@ public class Microsoft.AspNet.OData.ODataOptions {
 	bool EnableContinueOnErrorHeader  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
-	bool UseSkipTokenForServerSidePaging  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.ODataQueryContext {
@@ -1847,7 +1848,7 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, params string skipTokenValue)
+	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, params object lastValue, params System.Func`2[[System.Object],[System.String]] objectToSkipTokenValue)
 
 	[
 	ExtensionAttribute(),
@@ -2284,6 +2285,8 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
+	System.Func`2[[System.Object],[System.String]] NextLinkFunc  { public abstract get; public abstract set; }
+	int PageSize  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }
 	System.IServiceProvider RequestContainer  { public abstract get; public abstract set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public abstract get; public abstract set; }
@@ -2456,6 +2459,18 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	bool EnableSelect  { public get; public set; }
 	bool EnableSkipToken  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
+}
+
+public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenImplementation {
+	public DefaultSkipTokenImplementation ()
+	public DefaultSkipTokenImplementation (ODataQueryContext context)
+
+	ODataQueryContext Context  { public virtual get; public virtual set; }
+
+	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public virtual string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	public virtual void ProcessSkipTokenValue (string rawValue)
 }
 
 public class Microsoft.AspNet.OData.Query.ExpandConfiguration {
@@ -2702,8 +2717,7 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 
 	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
-	public static T FetchLastItemInResults (IQueryable`1 records)
-	public static string GetSkipTokenValue (System.Linq.IQueryable result, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	public string GenerateSkipTokenValue (object obj, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -3390,6 +3404,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
+	System.Func`2[[System.Object],[System.Uri]] NextLinkFunc  { public get; public set; }
 	ODataPath Path  { public get; public set; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; public set; }
 	string RootElementName  { public get; public set; }

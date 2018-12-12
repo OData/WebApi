@@ -51,6 +51,9 @@ namespace Microsoft.AspNet.OData.Extensions
             builder.AddService<SkipTokenQueryValidator>(ServiceLifetime.Singleton);
             builder.AddService<TopQueryValidator>(ServiceLifetime.Singleton);
 
+            // QueryOption
+            builder.AddService<DefaultSkipTokenImplementation>(ServiceLifetime.Singleton);
+
             // SerializerProvider and DeserializerProvider.
             builder.AddService<ODataSerializerProvider, DefaultODataSerializerProvider>(ServiceLifetime.Singleton);
             builder.AddService<ODataDeserializerProvider, DefaultODataDeserializerProvider>(ServiceLifetime.Singleton);

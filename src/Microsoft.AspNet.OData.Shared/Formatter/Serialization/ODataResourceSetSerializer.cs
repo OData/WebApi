@@ -219,10 +219,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
                     else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
                     {
-                        writeContext.NextLinkFunc = lastMember =>
-                        {
-                            return writeContext.InternalRequest.GetNextPageLink(writeContext.InternalRequest.Context.PageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
-                        };
+                        object lastMember = GetLastObjectFromResourceSet(resourceSetInstance);
+                        int pageSize = writeContext.InternalRequest.Context.PageSize;
+                        resourceSet.NextPageLink = writeContext.InternalRequest.GetNextPageLink(pageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
                     }
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
@@ -249,6 +248,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
             }
             return resourceSet;
+        }
+
+        private object GetLastObjectFromResourceSet(IEnumerable resourceSetInstance)
+        {
+            object lastMember = null;
+            foreach(object current in resourceSetInstance)
+            {
+                lastMember = current;
+            }
+            return lastMember;
         }
 
         /// <summary>

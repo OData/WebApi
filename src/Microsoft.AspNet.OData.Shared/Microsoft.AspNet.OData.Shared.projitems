@@ -64,9 +64,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ISkipTokenImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenImplementation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">
       <AutoGen>True</AutoGen>

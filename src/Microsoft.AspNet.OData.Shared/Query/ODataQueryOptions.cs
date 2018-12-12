@@ -433,7 +433,8 @@ namespace Microsoft.AspNet.OData.Query
                     DefaultQuerySettings settings = Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
                     if (settings.EnableSkipToken)
                     {
-                        Func<object, string> getSkipTokenValue = SkipTokenQueryOption.GetSkipTokenFunc(this.Context.Model, OrderBy);
+                        ISkipTokenImplementation skipTokenGenerator = SkipTokenQueryOption.GetSkipTokenImplementation(Context);
+                        Func<object, string> getSkipTokenValue = (lastMember) => skipTokenGenerator.GenerateSkipTokenValue(lastMember, this.Context.Model, OrderBy);
                         InternalRequest.Context.PageSize = pageSize;
                         InternalRequest.Context.NextLinkFunc = getSkipTokenValue;
                     }

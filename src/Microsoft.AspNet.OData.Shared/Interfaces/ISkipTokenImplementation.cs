@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.OData.Interfaces
         string GenerateSkipTokenValue(object obj, IEdmModel model, OrderByQueryOption orderByQueryOption);
 
         /// <summary>
-        /// Gets called when 
+        /// Hook for processing skiptoken value, it gets invoked when the query option is created.
         /// </summary>
         /// <param name="rawValue"></param>
         void ProcessSkipTokenValue(string rawValue);

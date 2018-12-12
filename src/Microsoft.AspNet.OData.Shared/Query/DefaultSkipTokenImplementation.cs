@@ -19,26 +19,14 @@ namespace Microsoft.AspNet.OData.Query
     public class DefaultSkipTokenImplementation : ISkipTokenImplementation
     {
         private IDictionary<string, object> _propertyValuePairs;
-
-        /// <summary>
-        /// Initialize a new instance of <see cref="DefaultSkipTokenImplementation"/>
-        /// </summary>
-        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
-        public DefaultSkipTokenImplementation(ODataQueryContext context)
-        {
-            if (context == null)
-            {
-                throw Error.ArgumentNull("context");
-            }
-            Context = context;
-        }
+        private const char _commaDelimter = ',';
 
         /// <summary>
         /// Initialize a new instance of <see cref="DefaultSkipTokenImplementation"/>
         /// </summary>
         public DefaultSkipTokenImplementation()
         {
-
+            PropertyDelimiter = ':';
         }
 
         /// <summary>
@@ -48,10 +36,10 @@ namespace Microsoft.AspNet.OData.Query
         public void ProcessSkipTokenValue(string rawValue)
         {
             _propertyValuePairs = new Dictionary<string, object>();
-            string[] keyValues = rawValue.Split(',');
+            string[] keyValues = rawValue.Split(_commaDelimter);
             foreach (string keyAndValue in keyValues)
             {
-                string[] pieces = keyAndValue.Split(new char[] { ':' }, 2);
+                string[] pieces = keyAndValue.Split(new char[] { PropertyDelimiter }, 2);
                 if (pieces.Length > 1 && !String.IsNullOrWhiteSpace(pieces[1]))
                 {
                     object value = null;
@@ -78,6 +66,10 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         public ODataQueryContext Context { get; set; }
 
+        /// <summary>
+        /// Delimiter used to separate property and value, exposing for the purpose of testing
+        /// </summary>
+        public char PropertyDelimiter { get; set; }
 
         /// <summary>
         /// Apply the $skiptoken query to the given IQueryable.
@@ -224,7 +216,7 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
                 }
-                skipTokenvalue += property.Name + ":" + uriLiteral + (islast ? String.Empty : ",");
+                skipTokenvalue += property.Name + PropertyDelimiter + uriLiteral + (islast ? String.Empty : _commaDelimter.ToString());
                 count++;
             }
             return skipTokenvalue;

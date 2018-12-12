@@ -1,11 +1,14 @@
-﻿using System.Linq;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System.Linq;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Interfaces
 {
     /// <summary>
-    /// Allows for custom implementations of SkipToken with a custom format and application specific filtering
+    /// Allows for custom implementations of SkipToken with a custom format and application specific filtering.
     /// </summary>
     public interface ISkipTokenImplementation
     {

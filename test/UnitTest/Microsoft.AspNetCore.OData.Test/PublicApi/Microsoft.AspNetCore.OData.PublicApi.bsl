@@ -2303,7 +2303,7 @@ public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenImplementation {
 
 	IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
 	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
-	string GenerateSkipTokenValue (object obj, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
 	void ProcessSkipTokenValue (string rawValue)
 }
 
@@ -2726,7 +2726,7 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 
 	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
-	public string GenerateSkipTokenValue (object obj, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	public string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 

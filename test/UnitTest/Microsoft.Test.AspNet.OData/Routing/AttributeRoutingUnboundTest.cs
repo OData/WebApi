@@ -149,7 +149,7 @@ namespace Microsoft.Test.AspNet.OData.Routing
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Contains("9.9", responseString);
+            Assert.Contains((9.9).ToString(), responseString);
         }
 
         [Fact]

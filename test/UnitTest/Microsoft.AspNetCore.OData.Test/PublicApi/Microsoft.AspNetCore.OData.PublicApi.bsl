@@ -2298,6 +2298,15 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
 }
 
+public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenImplementation {
+	ODataQueryContext Context  { public abstract get; public abstract set; }
+
+	IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	string GenerateSkipTokenValue (object obj, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	void ProcessSkipTokenValue (string rawValue)
+}
+
 [
 FlagsAttribute(),
 ]
@@ -2463,9 +2472,9 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 
 public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenImplementation {
 	public DefaultSkipTokenImplementation ()
-	public DefaultSkipTokenImplementation (ODataQueryContext context)
 
 	ODataQueryContext Context  { public virtual get; public virtual set; }
+	char PropertyDelimiter  { public get; public set; }
 
 	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)

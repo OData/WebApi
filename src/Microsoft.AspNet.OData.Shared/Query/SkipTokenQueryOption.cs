@@ -4,11 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -24,9 +21,7 @@ namespace Microsoft.AspNet.OData.Query
     {
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
-        private ISkipTokenImplementation SkipToken;
-
-
+        private ISkipTokenImplementation skipToken;
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -55,9 +50,9 @@ namespace Microsoft.AspNet.OData.Query
             Context = context;
             RawValue = rawValue;
             Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
-            SkipToken = GetSkipTokenImplementation(context);
-            SkipToken.ProcessSkipTokenValue(rawValue);
-            SkipToken.Context = context;
+            skipToken = GetSkipTokenImplementation(context);
+            skipToken.ProcessSkipTokenValue(rawValue);
+            skipToken.Context = context;
             _queryOptionParser = queryOptionParser;
         }
 
@@ -125,7 +120,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
-            return SkipToken.ApplyTo<T>(query, querySettings, orderBy);
+            return skipToken.ApplyTo<T>(query, querySettings, orderBy);
         }
 
         /// <summary>
@@ -137,7 +132,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
         {
-            return SkipToken.ApplyTo(query, querySettings, orderBy);
+            return skipToken.ApplyTo(query, querySettings, orderBy);
         }
 
         /// <summary>
@@ -160,13 +155,13 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Returns a function that converts an object to a skiptoken value string
         /// </summary>
-        /// <param name="obj">Object based on which the value of the skiptoken is generated.</param>
+        /// <param name="lastMember">Object based on which the value of the skiptoken is generated.</param>
         /// <param name="model">The edm model.</param>
         /// <param name="orderByQueryOption">QueryOption </param>
         /// <returns></returns>
-        public string GenerateSkipTokenValue(Object obj, IEdmModel model, OrderByQueryOption orderByQueryOption)
+        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
         {
-            return SkipToken.GenerateSkipTokenValue(obj, model, orderByQueryOption);
+            return skipToken.GenerateSkipTokenValue(lastMember, model, orderByQueryOption);
         }
 
         internal static ISkipTokenImplementation GetSkipTokenImplementation(ODataQueryContext context)

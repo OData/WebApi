@@ -2148,6 +2148,15 @@ public class Microsoft.AspNet.OData.Formatter.QueryStringMediaTypeMapping : Syst
 	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
 }
 
+public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenImplementation {
+	ODataQueryContext Context  { public abstract get; public abstract set; }
+
+	IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	void ProcessSkipTokenValue (string rawValue)
+}
+
 [
 FlagsAttribute(),
 ]
@@ -2309,6 +2318,18 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	bool EnableSelect  { public get; public set; }
 	bool EnableSkipToken  { public get; public set; }
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
+}
+
+public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenImplementation {
+	public DefaultSkipTokenImplementation ()
+
+	ODataQueryContext Context  { public virtual get; public virtual set; }
+	char PropertyDelimiter  { public get; public set; }
+
+	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+	public virtual string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	public virtual void ProcessSkipTokenValue (string rawValue)
 }
 
 public class Microsoft.AspNet.OData.Query.ExpandConfiguration {
@@ -2552,7 +2573,7 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 
 	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
-	public static System.Func`2[[System.Object],[System.String]] GetSkipTokenFunc (Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
+	public string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, OrderByQueryOption orderByQueryOption)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 

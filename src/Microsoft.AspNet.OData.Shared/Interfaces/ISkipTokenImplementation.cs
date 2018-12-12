@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNet.OData.Query;
+﻿using System.Linq;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Interfaces
 {
-    interface ISkipTokenImplementation
+    /// <summary>
+    /// Allows for custom implementations of SkipToken with a custom format and application specific filtering
+    /// </summary>
+    public interface ISkipTokenImplementation
     {
         /// <summary>
         /// Apply the $skiptoken query to the given IQueryable.
@@ -30,11 +30,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Returns a function that converts an object to a skiptoken value string
         /// </summary>
-        /// <param name="obj">Object based on which the value of the skiptoken is generated.</param>
+        /// <param name="lastMember">Object based on which the value of the skiptoken is generated.</param>
         /// <param name="model">The edm model.</param>
         /// <param name="orderByQueryOption">QueryOption</param>
         /// <returns></returns>
-        string GenerateSkipTokenValue(object obj, IEdmModel model, OrderByQueryOption orderByQueryOption);
+        string GenerateSkipTokenValue(object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption);
 
         /// <summary>
         /// Hook for processing skiptoken value, it gets invoked when the query option is created.

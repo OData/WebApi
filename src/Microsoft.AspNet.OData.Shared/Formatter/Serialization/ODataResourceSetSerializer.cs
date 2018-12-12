@@ -238,7 +238,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
                 if (truncatedCollection != null && truncatedCollection.IsTruncated)
                 {
-                        resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
+                    resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
 
                 ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
@@ -250,10 +250,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return resourceSet;
         }
 
-        private object GetLastObjectFromResourceSet(IEnumerable resourceSetInstance)
+        private static object GetLastObjectFromResourceSet(IEnumerable resourceSetInstance)
         {
             object lastMember = null;
-            foreach(object current in resourceSetInstance)
+            foreach (object current in resourceSetInstance)
             {
                 lastMember = current;
             }

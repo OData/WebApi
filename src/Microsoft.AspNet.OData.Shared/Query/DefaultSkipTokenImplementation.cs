@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNet.OData.Common;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Query
     public class DefaultSkipTokenImplementation : ISkipTokenImplementation
     {
         private IDictionary<string, object> _propertyValuePairs;
-        private const char _commaDelimter = ',';
+        private const char CommaDelimiter = ',';
 
         /// <summary>
         /// Initialize a new instance of <see cref="DefaultSkipTokenImplementation"/>
@@ -36,7 +36,7 @@ namespace Microsoft.AspNet.OData.Query
         public void ProcessSkipTokenValue(string rawValue)
         {
             _propertyValuePairs = new Dictionary<string, object>();
-            string[] keyValues = rawValue.Split(_commaDelimter);
+            string[] keyValues = rawValue.Split(CommaDelimiter);
             foreach (string keyAndValue in keyValues)
             {
                 string[] pieces = keyAndValue.Split(new char[] { PropertyDelimiter }, 2);
@@ -216,7 +216,7 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
                 }
-                skipTokenvalue += property.Name + PropertyDelimiter + uriLiteral + (islast ? String.Empty : _commaDelimter.ToString());
+                skipTokenvalue += property.Name + PropertyDelimiter + uriLiteral + (islast ? String.Empty : CommaDelimiter.ToString());
                 count++;
             }
             return skipTokenvalue;

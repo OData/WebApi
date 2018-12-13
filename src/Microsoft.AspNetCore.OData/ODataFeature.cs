@@ -122,11 +122,6 @@ namespace Microsoft.AspNet.OData
         public int PageSize { get; set; }
 
         /// <summary>
-        /// Gets or sets the total count function for the OData response.
-        /// </summary>
-        public Func<object, String> NextLinkFunc { get; set; }
-
-        /// <summary>
         /// Gets the implementation for skiptoken for generating a value
         /// </summary>
         public ISkipTokenImplementation SkipTokenGenerator { get; set; }

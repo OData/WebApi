@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
@@ -33,11 +34,13 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string RoutingConventionsStoreKey = "Microsoft.AspNet.OData.RoutingConventionsStore";
         private const string RoutingConventionsKey = "Microsoft.AspNet.OData.RoutingConventions";
         private const string SelectExpandClauseKey = "Microsoft.AspNet.OData.SelectExpandClause";
+        private const string OrderByClauseKey = "Microsoft.AspNet.OData.OrderByClause";
         private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
-        private const string NextLinkFuncKey = "Microsoft.AspNet.OData.NextLinkFunc";
+        private const string SkipTokenGeneratorKey = "Microsoft.AspNet.OData.SkipTokenGenerator";
         private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
+        
 
         private HttpRequestMessage _request;
 
@@ -65,24 +68,6 @@ namespace Microsoft.AspNet.OData.Extensions
             }
         }
 
-        internal Func<object, String> NextLinkFunc
-        {
-            get
-            {
-                object nextLinkFunc;
-                if (_request.Properties.TryGetValue(NextLinkFuncKey, out nextLinkFunc))
-                {
-                    return (Func<object, String>)nextLinkFunc;
-                }
-
-                return null;
-            }
-            set
-            {
-                _request.Properties[NextLinkFuncKey] = value;
-            }
-        }
-
         /// <summary>
         /// Gets or sets the page size.
         /// </summary>
@@ -91,7 +76,7 @@ namespace Microsoft.AspNet.OData.Extensions
             get
             {
                 object pageSize;
-                if (_request.Properties.TryGetValue(NextLinkFuncKey, out pageSize))
+                if (_request.Properties.TryGetValue(PageSizeKey, out pageSize))
                 {
                     return (int)pageSize;
                 }
@@ -102,6 +87,8 @@ namespace Microsoft.AspNet.OData.Extensions
                 _request.Properties[PageSizeKey] = value;
             }
         }
+
+
 
         /// <summary>
         /// Gets or sets the route name for generating OData links.
@@ -173,6 +160,22 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Gets or sets the next link for the OData response.
         /// </summary>
         /// <value><c>null</c> if no next link should be sent back to the client.</value>
+        public ISkipTokenImplementation SkipTokenGenerator
+        {
+            get
+            {
+                return GetValueOrNull<ISkipTokenImplementation>(SkipTokenGeneratorKey);
+            }
+            set
+            {
+                _request.Properties[SkipTokenGeneratorKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the next link for the OData response.
+        /// </summary>
+        /// <value><c>null</c> if no next link should be sent back to the client.</value>
         public Uri NextLink
         {
             get
@@ -220,6 +223,28 @@ namespace Microsoft.AspNet.OData.Extensions
                 }
 
                 _request.Properties[SelectExpandClauseKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the parsed OData <see cref="OrderByClause"/> of the request. The
+        /// <see cref="ODataResourceSet "/> will use this information (if any) while writing the response for
+        /// this request.
+        /// </summary>
+        public OrderByClause OrderByClause
+        {
+            get
+            {
+                return GetValueOrNull<OrderByClause>(OrderByClauseKey);
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _request.Properties[OrderByClauseKey] = value;
             }
         }
 

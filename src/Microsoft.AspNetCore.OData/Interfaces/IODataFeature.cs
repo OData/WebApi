@@ -76,11 +76,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         Func<long> TotalCountFunc { get; set; }
 
         /// <summary>
-        /// Gets or sets the total count function for the OData response.
-        /// </summary>
-        Func<object, String> NextLinkFunc { get; set; }
-
-        /// <summary>
         /// Gets the implementation for skiptoken for generating a value
         /// </summary>
         ISkipTokenImplementation SkipTokenGenerator { get; set; }

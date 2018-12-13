@@ -47,9 +47,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="resource"></param>
         /// <param name="selectExpandClause"></param>
-        /// <param name="orderby"></param>
+        /// <param name="orderByClause"></param>
         /// <param name="edmProperty"></param>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderby)
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause)
         {
             if (resource == null)
             {
@@ -70,7 +70,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
-            OrderByClause = orderby;
+            OrderByClause = orderByClause;
             EdmProperty = edmProperty; // should be nested property
 
             if (context.NavigationSource != null)
@@ -134,11 +134,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the resource that is being expanded.
         /// </summary>
         public ResourceContext ExpandedResource { get; set; }
-
-        /// <summary>
-        /// Function that generates the NextLink
-        /// </summary>
-        public Func<object, Uri> NextLinkFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the complex property being nested or navigation property being expanded.

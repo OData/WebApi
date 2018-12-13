@@ -123,12 +123,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // save this for later to support JSON odata.streaming.
             Uri nextPageLink = resourceSet.NextPageLink;
             resourceSet.NextPageLink = null;
-            object lastMember = null;
             writer.WriteStart(resourceSet);
 
             foreach (object item in enumerable)
             {
-                lastMember = item;
                 if (item == null || item is NullEdmComplexObject)
                 {
                     if (elementType.IsEntity())
@@ -174,7 +172,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 TypeName = resourceSetType.FullName()
             };
 
-            writeContext.NextLinkFunc = null; 
             IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
             if (writeContext.NavigationSource != null && structuredType.IsEntity())
             {

@@ -129,15 +129,6 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the total count function for the OData response.
-        /// </summary>
-        public Func<object, String> NextLinkFunc
-        {
-            get { return this.innerFeature.NextLinkFunc; }
-            set { this.innerFeature.NextLinkFunc = value; }
-        }
-
-        /// <summary>
         /// Gets the implementation for skiptoken for generating a value
         /// </summary>
         public ISkipTokenImplementation SkipTokenGenerator

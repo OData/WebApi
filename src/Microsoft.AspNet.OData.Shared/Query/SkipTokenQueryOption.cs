@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -21,7 +23,8 @@ namespace Microsoft.AspNet.OData.Query
     {
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
-        private ISkipTokenImplementation skipToken;
+        private SkipTokenHandler skipToken;
+        private IDictionary<string, object> _propertyValuePairs;
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -47,11 +50,10 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("queryOptionParser");
             }
 
-            Context = context;
             RawValue = rawValue;
             Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
             skipToken = GetSkipTokenImplementation(context);
-            skipToken.ProcessSkipTokenValue(rawValue);
+            _propertyValuePairs = skipToken.ProcessSkipTokenValue(rawValue);
             skipToken.Context = context;
             _queryOptionParser = queryOptionParser;
         }
@@ -69,7 +71,6 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNullOrEmpty("rawValue");
             }
 
-            Context = context;
             RawValue = rawValue;
             Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
             _queryOptionParser = new ODataQueryOptionParser(
@@ -79,11 +80,6 @@ namespace Microsoft.AspNet.OData.Query
                 new Dictionary<string, string> { { "$skiptoken", rawValue } },
                 context.RequestContainer);
         }
-
-        /// <summary>
-        /// Gets the given <see cref="ODataQueryContext"/>.
-        /// </summary>
-        public ODataQueryContext Context { get; private set; }
 
         /// <summary>
         /// Gets the raw $skiptoken value.
@@ -117,10 +113,10 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
+        /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
         public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo<T>(query, querySettings, orderByNodes);
+            return skipToken.ApplyTo<T>(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -129,14 +125,15 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
+        /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
             return skipToken.ApplyTo(query, querySettings, orderByNodes);
         }
 
+
         /// <summary>
-        /// Validate the skip query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
+        /// Validate the skiptoken query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
         /// </summary>
         /// <param name="validationSettings">The <see cref="ODataValidationSettings"/> instance which contains all the validation settings.</param>
         public void Validate(ODataValidationSettings validationSettings)
@@ -152,25 +149,13 @@ namespace Microsoft.AspNet.OData.Query
             }
         }
 
-        /// <summary>
-        /// Returns a function that converts an object to a skiptoken value string
-        /// </summary>
-        /// <param name="lastMember">Object based on which the value of the skiptoken is generated.</param>
-        /// <param name="model">The edm model.</param>
-        /// <param name="orderByNodes">QueryOption </param>
-        /// <returns></returns>
-        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
-        {
-            return skipToken.GenerateSkipTokenValue(lastMember, model, orderByNodes);
-        }
-
-        internal static ISkipTokenImplementation GetSkipTokenImplementation(ODataQueryContext context)
+        internal static SkipTokenHandler GetSkipTokenImplementation(ODataQueryContext context)
         {
             if (context == null || context.RequestContainer == null)
             {
-                return new DefaultSkipTokenImplementation();
+                return new DefaultSkipTokenHandler();
             }
-            return context.RequestContainer.GetRequiredService<DefaultSkipTokenImplementation>();
+            return context.RequestContainer.GetRequiredService<SkipTokenHandler>();
         }
     }
 }

@@ -134,8 +134,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public Uri GetNextPageLink(int pageSize, object lastValue, Func<object, string> objToSkipTokenValue)
         {
-            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize, lastValue, objToSkipTokenValue);
-            return this.Context.NextLink;
+            return this.innerRequest.GetNextPageLink(pageSize, lastValue, objToSkipTokenValue);
         }
 
         /// <summary>
@@ -145,8 +144,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public Uri GetNextPageLink(int pageSize)
         {
-            this.Context.NextLink = this.innerRequest.GetNextPageLink(pageSize);
-            return this.Context.NextLink;
+            return this.innerRequest.GetNextPageLink(pageSize);
         }
 
         /// <summary>

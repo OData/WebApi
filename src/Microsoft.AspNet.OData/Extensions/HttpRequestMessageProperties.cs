@@ -9,7 +9,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
@@ -34,13 +36,12 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string RoutingConventionsStoreKey = "Microsoft.AspNet.OData.RoutingConventionsStore";
         private const string RoutingConventionsKey = "Microsoft.AspNet.OData.RoutingConventions";
         private const string SelectExpandClauseKey = "Microsoft.AspNet.OData.SelectExpandClause";
-        private const string OrderByClauseKey = "Microsoft.AspNet.OData.OrderByClause";
+        private const string QueryOptionsKey = "Microsoft.AspNet.OData.QueryOptions";
         private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
-        private const string SkipTokenGeneratorKey = "Microsoft.AspNet.OData.SkipTokenGenerator";
+        private const string NextLinkFuncKey = "Microsoft.AspNet.OData.NextLinkFunc";
         private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
-        
 
         private HttpRequestMessage _request;
 
@@ -87,8 +88,6 @@ namespace Microsoft.AspNet.OData.Extensions
                 _request.Properties[PageSizeKey] = value;
             }
         }
-
-
 
         /// <summary>
         /// Gets or sets the route name for generating OData links.
@@ -160,15 +159,21 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Gets or sets the next link for the OData response.
         /// </summary>
         /// <value><c>null</c> if no next link should be sent back to the client.</value>
-        public ISkipTokenImplementation SkipTokenGenerator
+        public Func<object, ODataSerializerContext, Uri> NextLinkFunc
         {
             get
             {
-                return GetValueOrNull<ISkipTokenImplementation>(SkipTokenGeneratorKey);
+                object nextLinkFunc;
+                if (_request.Properties.TryGetValue(NextLinkFuncKey, out nextLinkFunc))
+                {
+                    return (Func<object, ODataSerializerContext, Uri>)nextLinkFunc;
+                }
+
+                return null;
             }
             set
             {
-                _request.Properties[SkipTokenGeneratorKey] = value;
+                _request.Properties[NextLinkFuncKey] = value;
             }
         }
 
@@ -227,15 +232,15 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Gets or sets the parsed OData <see cref="OrderByClause"/> of the request. The
+        /// Gets or sets the parsed OData <see cref="ODataQueryOptions"/> of the request. The
         /// <see cref="ODataResourceSet "/> will use this information (if any) while writing the response for
         /// this request.
         /// </summary>
-        public OrderByClause OrderByClause
+        public ODataQueryOptions QueryOptions
         {
             get
             {
-                return GetValueOrNull<OrderByClause>(OrderByClauseKey);
+                return GetValueOrNull<ODataQueryOptions>(QueryOptionsKey);
             }
             set
             {
@@ -244,7 +249,7 @@ namespace Microsoft.AspNet.OData.Extensions
                     throw Error.ArgumentNull("value");
                 }
 
-                _request.Properties[OrderByClauseKey] = value;
+                _request.Properties[QueryOptionsKey] = value;
             }
         }
 

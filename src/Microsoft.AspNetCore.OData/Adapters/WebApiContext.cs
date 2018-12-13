@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
@@ -46,6 +48,15 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerFeature.NextLink; }
             set { this.innerFeature.NextLink = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the next link function for the OData response.
+        /// </summary>
+        public Func<object, ODataSerializerContext, Uri> NextLinkFunc
+        {
+            get { return this.innerFeature.NextLinkFunc; }
+            set { this.innerFeature.NextLinkFunc = value; }
         }
 
         /// <summary>
@@ -94,10 +105,10 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
         /// </summary>
-        public OrderByClause OrderByClause
+        public ODataQueryOptions QueryOptions
         {
-            get { return this.innerFeature.OrderByClause; }
-            set { this.innerFeature.OrderByClause = value; }
+            get { return this.innerFeature.QueryOptions; }
+            set { this.innerFeature.QueryOptions = value; }
         }
 
         /// <summary>
@@ -126,15 +137,6 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerFeature.TotalCountFunc; }
             set { this.innerFeature.TotalCountFunc = value; }
-        }
-
-        /// <summary>
-        /// Gets the implementation for skiptoken for generating a value
-        /// </summary>
-        public ISkipTokenImplementation SkipTokenGenerator
-        {
-            get { return this.innerFeature.SkipTokenGenerator; }
-            set { this.innerFeature.SkipTokenGenerator = value; }
         }
     }
 }

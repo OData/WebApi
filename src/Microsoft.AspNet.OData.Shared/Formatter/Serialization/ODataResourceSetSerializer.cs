@@ -9,6 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -124,9 +125,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Uri nextPageLink = resourceSet.NextPageLink;
             resourceSet.NextPageLink = null;
             writer.WriteStart(resourceSet);
-
+            object lastMember = null;
             foreach (object item in enumerable)
             {
+                lastMember = item;
                 if (item == null || item is NullEdmComplexObject)
                 {
                     if (elementType.IsEntity())
@@ -153,6 +155,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (nextPageLink != null)
             {
                 resourceSet.NextPageLink = nextPageLink;
+            }
+            else if (writeContext.InternalRequest != null && writeContext.InternalRequest.Context.NextLinkFunc != null)
+            {
+                resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLinkFunc(lastMember, writeContext);
             }
             writer.WriteEnd();
         }
@@ -204,17 +210,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
+
                     if (writeContext.InternalRequest.Context.NextLink != null)
                     {
                         resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
-                    }
-                    else if (writeContext.InternalRequest.Context.SkipTokenGenerator != null)
-                    {
-                        object lastMember = GetLastObjectFromResourceSet(resourceSetInstance);
-                        int pageSize = writeContext.InternalRequest.Context.PageSize;
-                        IList <OrderByNode> orderByNodes = OrderByNode.CreateCollection(writeContext.OrderByClause);
-                        Func<object, string> objectToSkipTokenValue = (lastObject) => { return writeContext.InternalRequest.Context.SkipTokenGenerator.GenerateSkipTokenValue(lastObject, writeContext.Model, orderByNodes); }; // writeContext.OrderByClause,
-                        resourceSet.NextPageLink = writeContext.InternalRequest.GetNextPageLink(pageSize, lastMember, objectToSkipTokenValue);
                     }
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
@@ -346,15 +345,33 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
-
+            //string queryOptions = OData.Node
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
+           //TODO: Create nextlink for nested resource while preserving queryoptions
+            // IWebApiUrlHelper urlHelper = writeContext.InternalUrlHelper;
+            //string serviceRoot = urlHelper.CreateODataLink(
+            //    writeContext.InternalRequest.Context.RouteName,
+            //    writeContext.InternalRequest.PathHandler,
+            //    new List<ODataPathSegment>());
+           // Uri serviceRootUri = new Uri(serviceRoot);
+           // ODataUriParser parser = new ODataUriParser(writeContext.Model, serviceRootUri, navigationLink);
+           // ODataUri newUri = parser.ParseUri();
+           // newUri.SelectAndExpand = writeContext.SelectExpandClause;
+           // if (writeContext.SelectExpandClause != null)
+           // {
+           //     foreach(ExpandedNavigationSelectItem item in writeContext.SelectExpandClause.SelectedItems)
+           //     {
+           //         newUri.OrderBy = item.OrderByOption;
+           //         newUri.Filter = item.FilterOption;
+           //     }
+           // }
+           //// Uri finalNestedUri = newUri.BuildUri(ODataUrlKeyDelimiter.Slash);
             if (navigationLink != null)
             {
-                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
+                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

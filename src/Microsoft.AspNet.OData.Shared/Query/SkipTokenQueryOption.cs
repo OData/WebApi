@@ -207,7 +207,6 @@ namespace Microsoft.AspNet.OData.Query
             return directions;
         }
 
-
         /// <summary>
         /// Validate the skip query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
         /// </summary>

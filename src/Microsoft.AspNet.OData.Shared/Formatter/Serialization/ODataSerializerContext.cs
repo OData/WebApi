@@ -42,12 +42,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
-        /// <param name="resource"></param>
-        /// <param name="selectExpandClause"></param>
-        /// <param name="orderByClause"></param>
-        /// <param name="edmProperty"></param>
+        /// <param name="resource">The resource whose navigation property is being expanded.</param>
+        /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
+        /// <param name="edmProperty">The complex property being nested or the navigation property being expanded.
+        /// If the resource property is the dynamic complex, the resource property is null.
+        /// </param>
+        /// <param name="orderByClause">The <see cref="OrderByClause"/> for the navigation property being expanded.</param>
         public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause)
         {
             if (resource == null)

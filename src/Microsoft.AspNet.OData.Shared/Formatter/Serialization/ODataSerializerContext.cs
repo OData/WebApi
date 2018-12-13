@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using OrderByClause = Microsoft.OData.UriParser.OrderByClause;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
@@ -37,7 +38,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </param>
         /// <remarks>This constructor is used to construct the serializer context for writing nested and expanded properties.</remarks>
         public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty)
-            : this(resource, selectExpandClause, edmProperty, null)
+            : this(resource, selectExpandClause, edmProperty, null, null)
         {
         }
 
@@ -46,9 +47,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="resource"></param>
         /// <param name="selectExpandClause"></param>
-        /// <param name="orderByClause"></param>
         /// <param name="edmProperty"></param>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause)
+        /// <param name="orderByClause"></param>
+        /// <param name="expandedItem"></param>
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause, ExpandedNavigationSelectItem expandedItem)
         {
             if (resource == null)
             {
@@ -70,6 +72,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
             OrderByClause = orderByClause;
+            ExpandedNavigationSelectItem = expandedItem;
             EdmProperty = edmProperty; // should be nested property
 
             if (context.NavigationSource != null)
@@ -123,6 +126,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the <see cref="SelectExpandClause"/>.
         /// </summary>
         public SelectExpandClause SelectExpandClause { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ExpandedNavigationSelectItem"/>.
+        /// </summary>
+        public ExpandedNavigationSelectItem ExpandedNavigationSelectItem { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="OrderByClause"/>.

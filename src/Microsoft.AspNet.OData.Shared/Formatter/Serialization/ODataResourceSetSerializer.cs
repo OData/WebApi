@@ -354,13 +354,25 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
+            navigationLink.Query = GenerateQueryParamsForExpandedItem(writeContext.ExpandedNavigationSelectItem);
             if (navigationLink != null)
             {
                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;
+        }
+
+        private static string GenerateQueryFromExpandedItem(ExpandedNavigationSelectItem expandedNavigationSelectItem)
+        {
+            string result
+            if (expandedNavigationSelectItem != null)
+            {
+                if (expandedNavigationSelectItem.OrderByOption != null)
+                {
+                    
+                }
+            }
         }
 
         private static IEdmStructuredTypeReference GetResourceType(IEdmTypeReference resourceSetType)

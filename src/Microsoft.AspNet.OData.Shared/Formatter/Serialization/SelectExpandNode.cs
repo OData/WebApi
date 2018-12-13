@@ -27,6 +27,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>();
+            ExpandedNavigationPropertiesWithExpandedItem = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
@@ -40,6 +41,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public SelectExpandNode(SelectExpandNode selectExpandNodeToCopy)
         {
             ExpandedNavigationProperties = new Dictionary<IEdmNavigationProperty, SelectExpandClause>(selectExpandNodeToCopy.ExpandedNavigationProperties);
+            ExpandedNavigationPropertiesWithExpandedItem = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedNavigationPropertiesWithExpandedItem);
             SelectedActions = new HashSet<IEdmAction>(selectExpandNodeToCopy.SelectedActions);
             SelectAllDynamicProperties = selectExpandNodeToCopy.SelectAllDynamicProperties;
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>(selectExpandNodeToCopy.SelectedComplexProperties);
@@ -158,6 +160,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public IDictionary<IEdmNavigationProperty, SelectExpandClause> ExpandedNavigationProperties { get; private set; }
 
         /// <summary>
+        /// Gets the list of EDM navigation properties to be expanded in the response.
+        /// </summary>
+        public IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> ExpandedNavigationPropertiesWithExpandedItem { get; private set; }
+
+        /// <summary>
         /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
         /// </summary>
         public ISet<IEdmStructuralProperty> SelectedComplexProperties { get; private set; }
@@ -195,6 +202,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (allNavigationProperties.Contains(navigationProperty))
                     {
                         ExpandedNavigationProperties.Add(navigationProperty, expandItem.SelectAndExpand);
+                        ExpandedNavigationPropertiesWithExpandedItem.Add(navigationProperty, expandItem);
                     }
                 }
             }

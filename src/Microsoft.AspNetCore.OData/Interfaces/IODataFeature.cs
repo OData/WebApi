@@ -78,7 +78,7 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Gets the implementation for skiptoken for generating a value
         /// </summary>
-        ISkipTokenImplementation SkipTokenGenerator { get; set; }
+        ISkipTokenHandler SkipTokenGenerator { get; set; }
 
         /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.

@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Query
     /// <summary>
     /// Default implementation for skip token
     /// </summary>
-    public class DefaultSkipTokenImplementation : ISkipTokenImplementation
+    public class DefaultSkipTokenImplementation : ISkipTokenHandler
     {
         private IDictionary<string, object> _propertyValuePairs;
         private const char CommaDelimiter = ',';
@@ -32,10 +32,10 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
-        /// Process SkipToken Value
+        /// Process SkipToken Value to create 
         /// </summary>
         /// <param name="rawValue"></param>
-        public void ProcessSkipTokenValue(string rawValue)
+        public IDictionary<string, object> ProcessSkipTokenValue(string rawValue)
         {
             _propertyValuePairs = new Dictionary<string, object>();
             string[] keyValues = rawValue.Split(CommaDelimiter);
@@ -61,6 +61,7 @@ namespace Microsoft.AspNet.OData.Query
                     }
                 }
             }
+            return _propertyValuePairs;
         }
 
         /// <summary>
@@ -72,99 +73,6 @@ namespace Microsoft.AspNet.OData.Query
         /// Delimiter used to separate property and value, exposing for the purpose of testing
         /// </summary>
         public char PropertyDelimiter { get; set; }
-
-        /// <summary>
-        /// Apply the $skiptoken query to the given IQueryable.
-        /// </summary>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
-        {
-            return ApplyToCore(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
-        }
-
-        /// <summary>
-        /// Apply the $skiptoken query to the given IQueryable.
-        /// </summary>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
-        {
-            return ApplyToCore(query, querySettings, orderByNodes);
-        }
-
-        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
-        {
-            if (Context.ElementClrType == null)
-            {
-                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
-            }
-            ExpressionBinderBase binder = new FilterBinder(Context.RequestContainer);
-            IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderByNodes);
-            bool parameterizeConstant = querySettings.EnableConstantParameterization;
-            ParameterExpression param = Expression.Parameter(Context.ElementClrType);
-            Expression where = null;
-            /* We will create a where lambda of the following form -
-             * Where (true AND Prop1>Value1)
-             * OR (true AND Prop1=Value1 AND Prop2>Value2)
-             * OR (true AND Prop1=Value1 AND Prop2=Value2 AND Prop3>Value3)
-             * and so on...
-             * Adding the first true to simplify implementation.
-             */
-            Expression lastEquality = Expression.Constant(true);
-            foreach (KeyValuePair<string, object> item in _propertyValuePairs)
-            {
-                string key = item.Key;
-                MemberExpression property = Expression.Property(param, key);
-                object value = item.Value;
-
-                Expression compare = null;
-                ODataEnumValue enumValue = value as ODataEnumValue;
-                if (enumValue != null)
-                {
-                    value = enumValue.Value;
-                }
-                Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                if (directionMap.ContainsKey(key))
-                {
-                    compare = directionMap[key] == OrderByDirection.Descending ? binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true) : binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
-                }
-                else
-                {
-                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
-                }
-
-                Expression condition = Expression.AndAlso(lastEquality, compare);
-                where = where == null ? condition : Expression.OrElse(where, condition);
-
-                lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
-            }
-
-            Expression whereLambda = Expression.Lambda(where, param);
-            return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
-        }
-
-        private static IDictionary<string, OrderByDirection> PopulateDirections(IList<OrderByNode> orderByNodes)
-        {
-            IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
-            if (orderByNodes == null)
-            {
-                return directions;
-            }
-
-            foreach (OrderByPropertyNode node in orderByNodes)
-            {
-                if (node != null)
-                {
-                    directions[node.Property.Name] = node.Direction;
-                }
-            }
-            return directions;
-        }
 
         /// <summary>
         /// Returns a function that converts an object to a skiptoken value string

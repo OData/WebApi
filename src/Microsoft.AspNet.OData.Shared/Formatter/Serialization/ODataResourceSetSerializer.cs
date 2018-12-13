@@ -357,7 +357,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (navigationLink != null)
             {
-                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
+                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
             }
 
             return null;

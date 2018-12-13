@@ -498,7 +498,7 @@ public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	string RouteName  { public virtual get; public virtual set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
-	ISkipTokenImplementation SkipTokenGenerator  { public virtual get; public virtual set; }
+	ISkipTokenHandler SkipTokenGenerator  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public virtual get; public virtual set; }
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public virtual get; public virtual set; }
@@ -2294,19 +2294,17 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	string RouteName  { public abstract get; public abstract set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
-	ISkipTokenImplementation SkipTokenGenerator  { public abstract get; public abstract set; }
+	ISkipTokenHandler SkipTokenGenerator  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public abstract get; public abstract set; }
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
 }
 
-public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenImplementation {
+public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenHandler {
 	ODataQueryContext Context  { public abstract get; public abstract set; }
 
-	IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	void ProcessSkipTokenValue (string rawValue)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
 
 [
@@ -2472,16 +2470,14 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
-public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenImplementation {
+public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenHandler {
 	public DefaultSkipTokenImplementation ()
 
 	ODataQueryContext Context  { public virtual get; public virtual set; }
 	char PropertyDelimiter  { public get; public set; }
 
-	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	public virtual string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	public virtual void ProcessSkipTokenValue (string rawValue)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
 
 public class Microsoft.AspNet.OData.Query.ExpandConfiguration {

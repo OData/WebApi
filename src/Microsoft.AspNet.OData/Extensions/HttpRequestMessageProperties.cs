@@ -157,11 +157,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Gets or sets the next link for the OData response.
         /// </summary>
         /// <value><c>null</c> if no next link should be sent back to the client.</value>
-        public ISkipTokenImplementation SkipTokenGenerator
+        public ISkipTokenHandler SkipTokenGenerator
         {
             get
             {
-                return GetValueOrNull<ISkipTokenImplementation>(SkipTokenGeneratorKey);
+                return GetValueOrNull<ISkipTokenHandler>(SkipTokenGeneratorKey);
             }
             set
             {

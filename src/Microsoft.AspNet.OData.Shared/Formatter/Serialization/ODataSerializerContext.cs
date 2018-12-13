@@ -125,7 +125,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public SelectExpandClause SelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="SelectExpandClause"/>.
+        /// Gets or sets the <see cref="OrderByClause"/>.
         /// </summary>
         public OrderByClause OrderByClause { get; set; }
 

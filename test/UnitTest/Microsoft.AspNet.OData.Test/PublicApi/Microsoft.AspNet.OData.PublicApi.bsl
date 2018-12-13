@@ -2039,7 +2039,7 @@ public class Microsoft.AspNet.OData.Extensions.HttpRequestMessageProperties {
 	string RouteName  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public get; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
-	ISkipTokenImplementation SkipTokenGenerator  { public get; public set; }
+	ISkipTokenHandler SkipTokenGenerator  { public get; public set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public get; public set; }
 }
 
@@ -2150,13 +2150,11 @@ public class Microsoft.AspNet.OData.Formatter.QueryStringMediaTypeMapping : Syst
 	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
 }
 
-public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenImplementation {
+public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenHandler {
 	ODataQueryContext Context  { public abstract get; public abstract set; }
 
-	IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	void ProcessSkipTokenValue (string rawValue)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
 
 [
@@ -2322,16 +2320,14 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
-public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenImplementation {
+public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenHandler {
 	public DefaultSkipTokenImplementation ()
 
 	ODataQueryContext Context  { public virtual get; public virtual set; }
 	char PropertyDelimiter  { public get; public set; }
 
-	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	public virtual string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	public virtual void ProcessSkipTokenValue (string rawValue)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
 
 public class Microsoft.AspNet.OData.Query.ExpandConfiguration {

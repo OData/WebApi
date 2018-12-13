@@ -438,7 +438,7 @@ namespace Microsoft.AspNet.OData.Query
                     DefaultQuerySettings settings = Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
                     if (settings.EnableSkipToken)
                     {
-                        ISkipTokenImplementation skipTokenGenerator = SkipTokenQueryOption.GetSkipTokenImplementation(Context);
+                        ISkipTokenHandler skipTokenGenerator = SkipTokenQueryOption.GetSkipTokenImplementation(Context);
                         InternalRequest.Context.PageSize = pageSize;
                         if (orderBy != null)
                         {

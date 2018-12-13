@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -21,7 +23,8 @@ namespace Microsoft.AspNet.OData.Query
     {
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
-        private ISkipTokenImplementation skipToken;
+        private ISkipTokenHandler skipToken;
+        private IDictionary<string, object> _propertyValuePairs;
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -51,7 +54,7 @@ namespace Microsoft.AspNet.OData.Query
             RawValue = rawValue;
             Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
             skipToken = GetSkipTokenImplementation(context);
-            skipToken.ProcessSkipTokenValue(rawValue);
+            _propertyValuePairs = skipToken.ProcessSkipTokenValue(rawValue);
             skipToken.Context = context;
             _queryOptionParser = queryOptionParser;
         }
@@ -120,7 +123,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo<T>(query, querySettings, orderByNodes);
+            return ApplyToCore(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -132,8 +135,78 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo(query, querySettings, orderByNodes);
+            return ApplyToCore(query, querySettings, orderByNodes);
         }
+
+        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
+        {
+            if (Context.ElementClrType == null)
+            {
+                throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
+            }
+            ExpressionBinderBase binder = new FilterBinder(Context.RequestContainer);
+            IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderByNodes);
+            bool parameterizeConstant = querySettings.EnableConstantParameterization;
+            ParameterExpression param = Expression.Parameter(Context.ElementClrType);
+            Expression where = null;
+            /* We will create a where lambda of the following form -
+             * Where (true AND Prop1>Value1)
+             * OR (true AND Prop1=Value1 AND Prop2>Value2)
+             * OR (true AND Prop1=Value1 AND Prop2=Value2 AND Prop3>Value3)
+             * and so on...
+             * Adding the first true to simplify implementation.
+             */
+            Expression lastEquality = Expression.Constant(true);
+            foreach (KeyValuePair<string, object> item in _propertyValuePairs)
+            {
+                string key = item.Key;
+                MemberExpression property = Expression.Property(param, key);
+                object value = item.Value;
+
+                Expression compare = null;
+                ODataEnumValue enumValue = value as ODataEnumValue;
+                if (enumValue != null)
+                {
+                    value = enumValue.Value;
+                }
+                Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
+                if (directionMap.ContainsKey(key))
+                {
+                    compare = directionMap[key] == OrderByDirection.Descending ? binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true) : binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
+                }
+                else
+                {
+                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
+                }
+
+                Expression condition = Expression.AndAlso(lastEquality, compare);
+                where = where == null ? condition : Expression.OrElse(where, condition);
+
+                lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
+            }
+
+            Expression whereLambda = Expression.Lambda(where, param);
+            return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
+        }
+
+        private static IDictionary<string, OrderByDirection> PopulateDirections(IList<OrderByNode> orderByNodes)
+        {
+            IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
+            if (orderByNodes == null)
+            {
+                return directions;
+            }
+
+            foreach (OrderByPropertyNode node in orderByNodes)
+            {
+                if (node != null)
+                {
+                    directions[node.Property.Name] = node.Direction;
+                }
+            }
+            return directions;
+        }
+
 
         /// <summary>
         /// Validate the skip query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
@@ -164,7 +237,7 @@ namespace Microsoft.AspNet.OData.Query
             return skipToken.GenerateSkipTokenValue(lastMember, model, orderByNodes);
         }
 
-        internal static ISkipTokenImplementation GetSkipTokenImplementation(ODataQueryContext context)
+        internal static ISkipTokenHandler GetSkipTokenImplementation(ODataQueryContext context)
         {
             if (context == null || context.RequestContainer == null)
             {

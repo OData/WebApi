@@ -11,26 +11,8 @@ namespace Microsoft.AspNet.OData.Interfaces
     /// <summary>
     /// Allows for custom implementations of SkipToken with a custom format and application specific filtering.
     /// </summary>
-    public interface ISkipTokenImplementation
+    public interface ISkipTokenHandler
     {
-        /// <summary>
-        /// Apply the $skiptoken query to the given IQueryable.
-        /// </summary>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes);
-
-        /// <summary>
-        /// Apply the $skiptoken query to the given IQueryable.
-        /// </summary>
-        /// <param name="query">The original <see cref="IQueryable"/>.</param>
-        /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderByNodes">Information about the orderby query option.</param>
-        /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes);
-
         /// <summary>
         /// Returns a function that converts an object to a skiptoken value string
         /// </summary>
@@ -41,10 +23,10 @@ namespace Microsoft.AspNet.OData.Interfaces
         string GenerateSkipTokenValue(object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes);
 
         /// <summary>
-        /// Hook for processing skiptoken value, it gets invoked when the query option is created.
+        /// Process skiptoken value to create a dictionary that contains objects converted from the string values with property names as the keys.
         /// </summary>
         /// <param name="rawValue"></param>
-        void ProcessSkipTokenValue(string rawValue);
+        IDictionary<string, object> ProcessSkipTokenValue(string rawValue);
 
         /// <summary>
         /// Gets and sets the given <see cref="ODataQueryContext"/>.

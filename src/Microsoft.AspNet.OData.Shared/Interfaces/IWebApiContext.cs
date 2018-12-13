@@ -80,6 +80,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// SkipTokenGenerator implementation
         /// </summary>
-        ISkipTokenImplementation SkipTokenGenerator { get; set; }
+        ISkipTokenHandler SkipTokenGenerator { get; set; }
     }
 }

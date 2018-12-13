@@ -137,7 +137,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// SkipTokenGenerator implementation
         /// </summary>
-        public ISkipTokenImplementation SkipTokenGenerator
+        public ISkipTokenHandler SkipTokenGenerator
         {
             get { return this.innerContext.SkipTokenGenerator; }
             set { this.innerContext.SkipTokenGenerator = value; }

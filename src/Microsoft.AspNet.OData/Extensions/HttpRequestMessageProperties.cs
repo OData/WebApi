@@ -40,7 +40,6 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
         private const string SkipTokenGeneratorKey = "Microsoft.AspNet.OData.SkipTokenGenerator";
         private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
-        
 
         private HttpRequestMessage _request;
 
@@ -87,8 +86,6 @@ namespace Microsoft.AspNet.OData.Extensions
                 _request.Properties[PageSizeKey] = value;
             }
         }
-
-
 
         /// <summary>
         /// Gets or sets the route name for generating OData links.

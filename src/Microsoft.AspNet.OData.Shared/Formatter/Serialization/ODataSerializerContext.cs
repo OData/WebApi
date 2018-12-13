@@ -7,8 +7,8 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
-using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 using OrderByClause = Microsoft.OData.UriParser.OrderByClause;
+using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -39,7 +39,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty)
             : this(resource, selectExpandClause, edmProperty, null)
         {
-
         }
 
         /// <summary>

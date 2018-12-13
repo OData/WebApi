@@ -116,11 +116,11 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderBy">Information about the orderby query option.</param>
+        /// <param name="orderByNodes">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo<T>(query, querySettings, orderBy);
+            return skipToken.ApplyTo<T>(query, querySettings, orderByNodes);
         }
 
         /// <summary>
@@ -128,11 +128,11 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderBy">Information about the orderby query option.</param>
+        /// <param name="orderByNodes">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo(query, querySettings, orderBy);
+            return skipToken.ApplyTo(query, querySettings, orderByNodes);
         }
 
         /// <summary>
@@ -157,11 +157,11 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="lastMember">Object based on which the value of the skiptoken is generated.</param>
         /// <param name="model">The edm model.</param>
-        /// <param name="orderByQueryOption">QueryOption </param>
+        /// <param name="orderByNodes">QueryOption </param>
         /// <returns></returns>
-        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
+        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.GenerateSkipTokenValue(lastMember, model, orderByQueryOption);
+            return skipToken.GenerateSkipTokenValue(lastMember, model, orderByNodes);
         }
 
         internal static ISkipTokenImplementation GetSkipTokenImplementation(ODataQueryContext context)

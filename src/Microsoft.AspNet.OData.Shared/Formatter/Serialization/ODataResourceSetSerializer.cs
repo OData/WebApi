@@ -156,12 +156,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 resourceSet.NextPageLink = nextPageLink;
             }
-
-            if (writeContext.NextLinkFunc != null)
-            {
-                resourceSet.NextPageLink = writeContext.NextLinkFunc(lastMember);
-            }
-
             writer.WriteEnd();
         }
 
@@ -217,11 +211,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     {
                         resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                     }
-                    else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
+                    else if (writeContext.InternalRequest.Context.SkipTokenGenerator != null)
                     {
                         object lastMember = GetLastObjectFromResourceSet(resourceSetInstance);
                         int pageSize = writeContext.InternalRequest.Context.PageSize;
-                        resourceSet.NextPageLink = writeContext.InternalRequest.GetNextPageLink(pageSize, lastMember, writeContext.InternalRequest.Context.NextLinkFunc);
+                        IList <OrderByNode> orderByNodes = OrderByNode.CreateCollection(writeContext.OrderByClause);
+                        Func<object, string> objectToSkipTokenValue = (lastObject) => { return writeContext.InternalRequest.Context.SkipTokenGenerator.GenerateSkipTokenValue(lastObject, writeContext.Model, orderByNodes); }; // writeContext.OrderByClause,
+                        resourceSet.NextPageLink = writeContext.InternalRequest.GetNextPageLink(pageSize, lastMember, objectToSkipTokenValue);
                     }
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 

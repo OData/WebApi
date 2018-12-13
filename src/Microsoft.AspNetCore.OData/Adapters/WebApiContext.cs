@@ -92,6 +92,15 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
+        /// </summary>
+        public OrderByClause OrderByClause
+        {
+            get { return this.innerFeature.OrderByClause; }
+            set { this.innerFeature.OrderByClause = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the total count for the OData response.
         /// </summary>
         /// <value><c>null</c> if no count should be sent back to the client.</value>
@@ -126,6 +135,15 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerFeature.NextLinkFunc; }
             set { this.innerFeature.NextLinkFunc = value; }
+        }
+
+        /// <summary>
+        /// Gets the implementation for skiptoken for generating a value
+        /// </summary>
+        public ISkipTokenImplementation SkipTokenGenerator
+        {
+            get { return this.innerFeature.SkipTokenGenerator; }
+            set { this.innerFeature.SkipTokenGenerator = value; }
         }
     }
 }

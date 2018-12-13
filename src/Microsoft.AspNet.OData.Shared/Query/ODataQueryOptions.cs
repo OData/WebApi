@@ -389,7 +389,12 @@ namespace Microsoft.AspNet.OData.Query
 
             if (IsAvailableODataQueryOption(SkipToken, AllowedQueryOptions.SkipToken))
             {
-                result = SkipToken.ApplyTo(result, querySettings, orderBy);
+                IList<OrderByNode> orderByNodes = null;
+                if (orderBy != null)
+                {
+                    orderByNodes = orderBy.OrderByNodes;
+                }
+                result = SkipToken.ApplyTo(result, querySettings, orderByNodes);
             }
 
             AddAutoSelectExpandProperties();
@@ -434,9 +439,12 @@ namespace Microsoft.AspNet.OData.Query
                     if (settings.EnableSkipToken)
                     {
                         ISkipTokenImplementation skipTokenGenerator = SkipTokenQueryOption.GetSkipTokenImplementation(Context);
-                        Func<object, string> getSkipTokenValue = (lastMember) => skipTokenGenerator.GenerateSkipTokenValue(lastMember, this.Context.Model, OrderBy);
                         InternalRequest.Context.PageSize = pageSize;
-                        InternalRequest.Context.NextLinkFunc = getSkipTokenValue;
+                        if (orderBy != null)
+                        {
+                            InternalRequest.Context.OrderByClause = orderBy.OrderByClause;
+                        }
+                        InternalRequest.Context.SkipTokenGenerator = skipTokenGenerator;
                     }
                     else
                     {

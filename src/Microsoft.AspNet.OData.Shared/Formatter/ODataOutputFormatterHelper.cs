@@ -185,6 +185,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
                 writeContext.SelectExpandClause = internalRequest.Context.SelectExpandClause;
+                writeContext.OrderByClause = internalRequest.Context.OrderByClause;
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }

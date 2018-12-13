@@ -78,11 +78,11 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderBy">Information about the orderby query option.</param>
+        /// <param name="orderByNodes">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+        public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return ApplyToCore(query, querySettings, orderBy) as IOrderedQueryable<T>;
+            return ApplyToCore(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -90,21 +90,21 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderBy">Information about the orderby query option.</param>
+        /// <param name="orderByNodes">Information about the orderby query option.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skip query has been applied to.</returns>
-        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+        public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return ApplyToCore(query, querySettings, orderBy);
+            return ApplyToCore(query, querySettings, orderByNodes);
         }
 
-        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, OrderByQueryOption orderBy)
+        private IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
             if (Context.ElementClrType == null)
             {
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
             ExpressionBinderBase binder = new FilterBinder(Context.RequestContainer);
-            IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderBy);
+            IDictionary<string, OrderByDirection> directionMap = PopulateDirections(orderByNodes);
             bool parameterizeConstant = querySettings.EnableConstantParameterization;
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
             Expression where = null;
@@ -148,15 +148,15 @@ namespace Microsoft.AspNet.OData.Query
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
         }
 
-        private static IDictionary<string, OrderByDirection> PopulateDirections(OrderByQueryOption orderBy)
+        private static IDictionary<string, OrderByDirection> PopulateDirections(IList<OrderByNode> orderByNodes)
         {
             IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
-            if (orderBy == null)
+            if (orderByNodes == null)
             {
                 return directions;
             }
 
-            foreach (OrderByPropertyNode node in orderBy.OrderByNodes)
+            foreach (OrderByPropertyNode node in orderByNodes)
             {
                 if (node != null)
                 {
@@ -171,16 +171,16 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="lastMember"> Object based on which SkipToken value will be generated.</param>
         /// <param name="model">The edm model.</param>
-        /// <param name="orderByQueryOption">QueryOption </param>
+        /// <param name="orderByNodes">QueryOption </param>
         /// <returns></returns>
-        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
+        public string GenerateSkipTokenValue(Object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
         {
             object value;
             if (lastMember == null)
             {
                 return String.Empty;
             }
-            IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByQueryOption);
+            IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByNodes);
 
             String skipTokenvalue = String.Empty;
             if (propertiesForSkipToken == null)
@@ -224,7 +224,7 @@ namespace Microsoft.AspNet.OData.Query
             return skipTokenvalue;
         }
 
-        private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, OrderByQueryOption orderByQueryOption)
+        private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
         {
             IEdmType edmType = GetTypeFromObject(lastMember, model);
             IEdmEntityType entity = edmType as IEdmEntityType;
@@ -234,16 +234,16 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             IList<IEdmProperty> key = entity.Key().AsIList<IEdmProperty>();
-            if (orderByQueryOption != null)
+            if (orderByNodes != null)
             {
-                OrderByOpenPropertyNode orderByOpenType = orderByQueryOption.OrderByNodes.OfType<OrderByOpenPropertyNode>().LastOrDefault();
+                OrderByOpenPropertyNode orderByOpenType = orderByNodes.OfType<OrderByOpenPropertyNode>().LastOrDefault();
                 if (orderByOpenType != null)
                 {
                     //SkipToken will not support ordering on dynamic properties
                     return null;
                 }
 
-                IList<IEdmProperty> orderByProps = orderByQueryOption.OrderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList();
+                IList<IEdmProperty> orderByProps = orderByNodes.OfType<OrderByPropertyNode>().Select(p => p.Property).AsIList();
                 foreach (IEdmProperty subKey in key)
                 {
                     orderByProps.Add(subKey);

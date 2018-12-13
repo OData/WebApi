@@ -67,6 +67,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         SelectExpandClause SelectExpandClause { get; set; }
 
         /// <summary>
+        /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
+        /// </summary>
+        OrderByClause OrderByClause { get; set; }
+
+        /// <summary>
         /// Gets or sets the total count for the OData response.
         /// </summary>
         /// <value><c>null</c> if no count should be sent back to the client.</value>
@@ -76,5 +81,10 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the total count function for the OData response.
         /// </summary>
         Func<long> TotalCountFunc { get; set; }
+
+        /// <summary>
+        /// SkipTokenGenerator implementation
+        /// </summary>
+        ISkipTokenImplementation SkipTokenGenerator { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
+using OrderByClause = Microsoft.OData.UriParser.OrderByClause;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -36,6 +37,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </param>
         /// <remarks>This constructor is used to construct the serializer context for writing nested and expanded properties.</remarks>
         public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty)
+            : this(resource, selectExpandClause, edmProperty, null)
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="resource"></param>
+        /// <param name="selectExpandClause"></param>
+        /// <param name="orderby"></param>
+        /// <param name="edmProperty"></param>
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderby)
         {
             if (resource == null)
             {
@@ -56,6 +70,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
+            OrderByClause = orderby;
             EdmProperty = edmProperty; // should be nested property
 
             if (context.NavigationSource != null)
@@ -109,6 +124,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the <see cref="SelectExpandClause"/>.
         /// </summary>
         public SelectExpandClause SelectExpandClause { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="SelectExpandClause"/>.
+        /// </summary>
+        public OrderByClause OrderByClause { get; set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

@@ -127,6 +127,11 @@ namespace Microsoft.AspNet.OData
         public Func<object, String> NextLinkFunc { get; set; }
 
         /// <summary>
+        /// Gets the implementation for skiptoken for generating a value
+        /// </summary>
+        public ISkipTokenImplementation SkipTokenGenerator { get; set; }
+
+        /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.
         /// </summary>
         public ApplyClause ApplyClause { get; set; }
@@ -135,6 +140,11 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
         /// </summary>
         public SelectExpandClause SelectExpandClause { get; set; }
+
+        /// <summary>
+        /// Gets or sets the parsed OData <see cref="OrderByClause"/> of the request.
+        /// </summary>
+        public OrderByClause OrderByClause { get; set; }
 
         /// <summary>
         /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.

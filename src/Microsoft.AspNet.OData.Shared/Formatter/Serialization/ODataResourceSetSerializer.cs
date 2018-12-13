@@ -212,8 +212,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     {
                         object lastMember = GetLastObjectFromResourceSet(resourceSetInstance);
                         int pageSize = writeContext.InternalRequest.Context.PageSize;
-                        IList <OrderByNode> orderByNodes = OrderByNode.CreateCollection(writeContext.OrderByClause);
-                        Func<object, string> objectToSkipTokenValue = (lastObject) => { return writeContext.InternalRequest.Context.SkipTokenGenerator.GenerateSkipTokenValue(lastObject, writeContext.Model, orderByNodes); }; // writeContext.OrderByClause,
+                        IList<OrderByNode> orderByNodes = OrderByNode.CreateCollection(writeContext.OrderByClause);
+                        Func<object, string> objectToSkipTokenValue = (lastObject) => 
+                        {
+                            return writeContext.InternalRequest.Context.SkipTokenGenerator.GenerateSkipTokenValue(lastObject, writeContext.Model, orderByNodes);
+                        };
                         resourceSet.NextPageLink = writeContext.InternalRequest.GetNextPageLink(pageSize, lastMember, objectToSkipTokenValue);
                     }
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;

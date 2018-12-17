@@ -150,13 +150,14 @@ namespace Microsoft.AspNet.OData.Query
             ParameterExpression param = Expression.Parameter(Context.ElementClrType);
             Expression where = null;
             /* We will create a where lambda of the following form -
-             * Where (true AND Prop1>Value1)
-             * OR (true AND Prop1=Value1 AND Prop2>Value2)
-             * OR (true AND Prop1=Value1 AND Prop2=Value2 AND Prop3>Value3)
+             * Where (Prop1>Value1)
+             * OR (Prop1=Value1 AND Prop2>Value2)
+             * OR (Prop1=Value1 AND Prop2=Value2 AND Prop3>Value3)
              * and so on...
              * Adding the first true to simplify implementation.
              */
-            Expression lastEquality = Expression.Constant(true);
+            Expression lastEquality = null;
+            bool firstProperty = true;
             foreach (KeyValuePair<string, object> item in _propertyValuePairs)
             {
                 string key = item.Key;
@@ -179,10 +180,18 @@ namespace Microsoft.AspNet.OData.Query
                     compare = binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
                 }
 
-                Expression condition = Expression.AndAlso(lastEquality, compare);
-                where = where == null ? condition : Expression.OrElse(where, condition);
-
-                lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
+                if (firstProperty)
+                {
+                    lastEquality = binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true);
+                    where = compare;
+                    firstProperty = false;
+                }
+                else
+                {
+                    Expression condition = Expression.AndAlso(lastEquality, compare);
+                    where = where == null ? condition : Expression.OrElse(where, condition);
+                    lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
+                }
             }
 
             Expression whereLambda = Expression.Lambda(where, param);

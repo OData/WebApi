@@ -76,7 +76,6 @@
       <DependentUpon>PropertyContainer.generated.tt</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperOfT.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\Interfaces\ISkipTokenConsumer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\SkipTokenQueryOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\SkipTokenQueryValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestMethod.cs" />

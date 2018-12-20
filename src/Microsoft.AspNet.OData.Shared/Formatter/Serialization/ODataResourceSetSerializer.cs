@@ -210,7 +210,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-
                     if (writeContext.InternalRequest.Context.NextLink != null)
                     {
                         resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
@@ -240,16 +239,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
             }
             return resourceSet;
-        }
-
-        private static object GetLastObjectFromResourceSet(IEnumerable resourceSetInstance)
-        {
-            object lastMember = null;
-            foreach (object current in resourceSetInstance)
-            {
-                lastMember = current;
-            }
-            return lastMember;
         }
 
         /// <summary>

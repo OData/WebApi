@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                 }
-                else if(writeContext.InternalRequest.Context.NextLinkFunc != null)
+                else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
                 {
                     // Collection serializer is called only for collection of primitive values - A null object will be supplied since it is a non-entity value
                     collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLinkFunc(null, writeContext);

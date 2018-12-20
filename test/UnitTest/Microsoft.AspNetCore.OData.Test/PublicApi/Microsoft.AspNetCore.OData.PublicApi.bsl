@@ -490,15 +490,15 @@ public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
-	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public virtual get; public virtual set; }
+	System.Func`3[[System.Object],[Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext],[System.Uri]] NextLinkFunc  { public virtual get; public virtual set; }
 	int PageSize  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
+	ODataQueryOptions QueryOptions  { public virtual get; public virtual set; }
 	System.IServiceProvider RequestContainer  { public virtual get; public virtual set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public virtual get; public virtual set; }
 	string RouteName  { public virtual get; public virtual set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
-	ISkipTokenHandler SkipTokenGenerator  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public virtual get; public virtual set; }
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public virtual get; public virtual set; }
@@ -2286,25 +2286,18 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
-	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public abstract get; public abstract set; }
+	System.Func`3[[System.Object],[Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext],[System.Uri]] NextLinkFunc  { public abstract get; public abstract set; }
 	int PageSize  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }
+	ODataQueryOptions QueryOptions  { public abstract get; public abstract set; }
 	System.IServiceProvider RequestContainer  { public abstract get; public abstract set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public abstract get; public abstract set; }
 	string RouteName  { public abstract get; public abstract set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
-	ISkipTokenHandler SkipTokenGenerator  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
 	System.Func`1[[System.Int64]] TotalCountFunc  { public abstract get; public abstract set; }
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
-}
-
-public interface Microsoft.AspNet.OData.Interfaces.ISkipTokenHandler {
-	ODataQueryContext Context  { public abstract get; public abstract set; }
-
-	string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
 
 [
@@ -2435,6 +2428,18 @@ public abstract class Microsoft.AspNet.OData.Query.OrderByNode {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] CreateCollection (Microsoft.OData.UriParser.OrderByClause orderByClause)
 }
 
+public abstract class Microsoft.AspNet.OData.Query.SkipTokenHandler {
+	protected SkipTokenHandler ()
+
+	ODataQueryContext Context  { public get; public set; }
+
+	public abstract IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
+	public abstract System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
+	public abstract System.Uri GenerateNextPageLink (object lastMember, ODataSerializerContext context)
+	public abstract string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
+	public abstract System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
+}
+
 public class Microsoft.AspNet.OData.Query.ApplyQueryOption {
 	public ApplyQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
@@ -2470,12 +2475,14 @@ public class Microsoft.AspNet.OData.Query.DefaultQuerySettings {
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
-public class Microsoft.AspNet.OData.Query.DefaultSkipTokenImplementation : ISkipTokenHandler {
-	public DefaultSkipTokenImplementation ()
+public class Microsoft.AspNet.OData.Query.DefaultSkipTokenHandler : SkipTokenHandler {
+	public DefaultSkipTokenHandler ()
 
-	ODataQueryContext Context  { public virtual get; public virtual set; }
 	char PropertyDelimiter  { public get; public set; }
 
+	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
+	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
+	public virtual System.Uri GenerateNextPageLink (object lastMember, ODataSerializerContext context)
 	public virtual string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ProcessSkipTokenValue (string rawValue)
 }
@@ -2717,14 +2724,12 @@ public class Microsoft.AspNet.OData.Query.SkipQueryOption {
 public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 	public SkipTokenQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
-	ODataQueryContext Context  { public get; }
 	string RawValue  { public get; }
 	SkipTokenQueryValidator Validator  { public get; public set; }
 	string Value  { public get; }
 
 	public IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	public System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
-	public string GenerateSkipTokenValue (object lastMember, Microsoft.OData.Edm.IEdmModel model, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.OrderByNode]] orderByNodes)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -3403,7 +3408,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSeri
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext {
 	public ODataSerializerContext ()
 	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty edmProperty)
-	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty edmProperty, Microsoft.OData.UriParser.OrderByClause orderByClause)
+	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty edmProperty, ODataQueryOptions queryOptions)
 
 	Microsoft.OData.Edm.IEdmProperty EdmProperty  { public get; public set; }
 	ResourceContext ExpandedResource  { public get; public set; }
@@ -3412,8 +3417,8 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
 	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
-	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public get; public set; }
 	ODataPath Path  { public get; public set; }
+	ODataQueryOptions QueryOptions  { public get; public set; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; public set; }
 	string RootElementName  { public get; public set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }

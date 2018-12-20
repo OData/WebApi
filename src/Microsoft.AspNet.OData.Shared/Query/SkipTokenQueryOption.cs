@@ -131,7 +131,6 @@ namespace Microsoft.AspNet.OData.Query
             return skipToken.ApplyTo(query, querySettings, orderByNodes);
         }
 
-
         /// <summary>
         /// Validate the skiptoken query based on the given <paramref name="validationSettings"/>. It throws an ODataException if validation failed.
         /// </summary>

@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
@@ -29,6 +31,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the next link for the OData response.
         /// </summary>
         Uri NextLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the function for next link for the OData response.
+        /// </summary>
+        Func<object, ODataSerializerContext, Uri> NextLinkFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the delta link for the OData response.
@@ -64,7 +71,7 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
         /// </summary>
-        OrderByClause OrderByClause { get; set; }
+        ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the total count for the OData response.
@@ -76,10 +83,5 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the total count function for the OData response.
         /// </summary>
         Func<long> TotalCountFunc { get; set; }
-
-        /// <summary>
-        /// SkipTokenGenerator implementation
-        /// </summary>
-        ISkipTokenHandler SkipTokenGenerator { get; set; }
     }
 }

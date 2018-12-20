@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
-using OrderByClause = Microsoft.OData.UriParser.OrderByClause;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
@@ -49,8 +49,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="edmProperty">The complex property being nested or the navigation property being expanded.
         /// If the resource property is the dynamic complex, the resource property is null.
         /// </param>
-        /// <param name="orderByClause">The <see cref="OrderByClause"/> for the navigation property being expanded.</param>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause)
+        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> for the navigation property being expanded.</param>
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, ODataQueryOptions queryOptions)
         {
             if (resource == null)
             {
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
-            OrderByClause = orderByClause;
+            QueryOptions = queryOptions;
             EdmProperty = edmProperty; // should be nested property
 
             if (context.NavigationSource != null)
@@ -127,9 +127,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public SelectExpandClause SelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="OrderByClause"/>.
+        /// Gets or sets the <see cref="ODataQueryOptions"/>.
         /// </summary>
-        public OrderByClause OrderByClause { get; set; }
+        public ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

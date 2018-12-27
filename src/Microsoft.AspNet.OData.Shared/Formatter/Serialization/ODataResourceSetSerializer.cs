@@ -9,6 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -213,7 +214,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         object lastMember = GetLastObjectFromResourceSet(resourceSetInstance);
                         int pageSize = writeContext.InternalRequest.Context.PageSize;
                         IList<OrderByNode> orderByNodes = OrderByNode.CreateCollection(writeContext.OrderByClause);
-                        Func<object, string> objectToSkipTokenValue = (lastObject) => 
+                        Func<object, string> objectToSkipTokenValue = (lastObject) =>
                         {
                             return writeContext.InternalRequest.Context.SkipTokenGenerator.GenerateSkipTokenValue(lastObject, writeContext.Model, orderByNodes);
                         };
@@ -354,7 +355,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-            navigationLink.Query = GenerateQueryParamsForExpandedItem(writeContext.ExpandedNavigationSelectItem);
+            Uri nestedResource = GenerateQueryFromExpandedItem(writeContext, navigationLink);
             if (navigationLink != null)
             {
                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
@@ -363,16 +364,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return null;
         }
 
-        private static string GenerateQueryFromExpandedItem(ExpandedNavigationSelectItem expandedNavigationSelectItem)
+        private static Uri GenerateQueryFromExpandedItem(ODataSerializerContext writeContext, Uri navigationLink)
         {
-            string result
-            if (expandedNavigationSelectItem != null)
+            IWebApiUrlHelper urlHelper = writeContext.InternalUrlHelper;
+            string serviceRoot = urlHelper.CreateODataLink(
+                writeContext.InternalRequest.Context.RouteName,
+                writeContext.InternalRequest.PathHandler,
+                new List<ODataPathSegment>());
+            Uri serviceRootUri = new Uri(serviceRoot);
+            ODataUriParser parser = new ODataUriParser(writeContext.Model, serviceRootUri, navigationLink);
+            ODataUri newUri = parser.ParseUri();
+            newUri.SelectAndExpand = writeContext.SelectExpandClause;
+            if (writeContext.ExpandedNavigationSelectItem != null)
             {
-                if (expandedNavigationSelectItem.OrderByOption != null)
-                {
-                    
-                }
+                newUri.OrderBy = writeContext.ExpandedNavigationSelectItem.OrderByOption;
+                newUri.Filter = writeContext.ExpandedNavigationSelectItem.FilterOption;
+                newUri.Skip = writeContext.ExpandedNavigationSelectItem.SkipOption;
+                newUri.Top = writeContext.ExpandedNavigationSelectItem.TopOption;
             }
+
+            return newUri.BuildUri(ODataUrlKeyDelimiter.Slash);
         }
 
         private static IEdmStructuredTypeReference GetResourceType(IEdmTypeReference resourceSetType)

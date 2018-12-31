@@ -334,30 +334,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
-            //string queryOptions = OData.Node
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-           //TODO: Create nextlink for nested resource while preserving queryoptions
-            // IWebApiUrlHelper urlHelper = writeContext.InternalUrlHelper;
-            //string serviceRoot = urlHelper.CreateODataLink(
-            //    writeContext.InternalRequest.Context.RouteName,
-            //    writeContext.InternalRequest.PathHandler,
-            //    new List<ODataPathSegment>());
-           // Uri serviceRootUri = new Uri(serviceRoot);
-           // ODataUriParser parser = new ODataUriParser(writeContext.Model, serviceRootUri, navigationLink);
-           // ODataUri newUri = parser.ParseUri();
-           // newUri.SelectAndExpand = writeContext.SelectExpandClause;
-           // if (writeContext.SelectExpandClause != null)
-           // {
-           //     foreach(ExpandedNavigationSelectItem item in writeContext.SelectExpandClause.SelectedItems)
-           //     {
-           //         newUri.OrderBy = item.OrderByOption;
-           //         newUri.Filter = item.FilterOption;
-           //     }
-           // }
-           //// Uri finalNestedUri = newUri.BuildUri(ODataUrlKeyDelimiter.Slash);
+            //TODO 1722: Create nextlink for nested resource while preserving query options
             if (navigationLink != null)
             {
                 return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);

@@ -23,8 +23,7 @@ namespace Microsoft.AspNet.OData.Query
     {
         private string _value;
         private ODataQueryOptionParser _queryOptionParser;
-        private SkipTokenHandler skipToken;
-        private IDictionary<string, object> _propertyValuePairs;
+        private SkipTokenHandler skipTokenHandler;
 
         /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skip value and
@@ -52,9 +51,9 @@ namespace Microsoft.AspNet.OData.Query
 
             RawValue = rawValue;
             Validator = SkipTokenQueryValidator.GetSkipTokenQueryValidator(context);
-            skipToken = GetSkipTokenImplementation(context);
-            _propertyValuePairs = skipToken.ProcessSkipTokenValue(rawValue);
-            skipToken.Context = context;
+            skipTokenHandler = GetSkipTokenImplementation(context);
+            skipTokenHandler.ProcessSkipTokenValue(rawValue);
+            skipTokenHandler.Context = context;
             _queryOptionParser = queryOptionParser;
         }
 
@@ -116,7 +115,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
         public IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo<T>(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
+            return skipTokenHandler.ApplyTo<T>(query, querySettings, orderByNodes) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -128,7 +127,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
         public IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
         {
-            return skipToken.ApplyTo(query, querySettings, orderByNodes);
+            return skipTokenHandler.ApplyTo(query, querySettings, orderByNodes);
         }
 
         /// <summary>

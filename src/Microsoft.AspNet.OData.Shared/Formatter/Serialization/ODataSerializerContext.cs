@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
-using OrderByClause = Microsoft.OData.UriParser.OrderByClause;
 using SelectExpandClause = Microsoft.OData.UriParser.SelectExpandClause;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
@@ -43,14 +43,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
         /// </summary>
-        /// <param name="resource"></param>
-        /// <param name="selectExpandClause"></param>
-        /// <param name="edmProperty"></param>
-        /// <param name="orderByClause"></param>
-        /// <param name="expandedItem"></param>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, OrderByClause orderByClause, ExpandedNavigationSelectItem expandedItem)
+        /// <param name="resource">The resource whose navigation property is being expanded.</param>
+        /// <param name="selectExpandClause">The <see cref="SelectExpandClause"/> for the navigation property being expanded.</param>
+        /// <param name="edmProperty">The complex property being nested or the navigation property being expanded.
+        /// If the resource property is the dynamic complex, the resource property is null.
+        /// </param>
+        /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> for the navigation property being expanded.</param>
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, ODataQueryOptions queryOptions)
         {
             if (resource == null)
             {
@@ -133,9 +134,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public ExpandedNavigationSelectItem ExpandedNavigationSelectItem { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="OrderByClause"/>.
+        /// Gets or sets the <see cref="ODataQueryOptions"/>.
         /// </summary>
-        public OrderByClause OrderByClause { get; set; }
+        public ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

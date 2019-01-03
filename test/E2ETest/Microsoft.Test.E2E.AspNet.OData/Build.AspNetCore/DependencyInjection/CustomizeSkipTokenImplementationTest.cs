@@ -32,7 +32,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
                 builder.AddService(ServiceLifetime.Singleton, sp => EdmModel.GetEdmModel(configuration))
                        .AddService<IEnumerable<IODataRoutingConvention>>(ServiceLifetime.Singleton, sp =>
                            ODataRoutingConventions.CreateDefaultWithAttributeRouting("customskiptoken", configuration))
-                        .AddService<DefaultSkipTokenImplementation, MySkipTokenImplementation>(ServiceLifetime.Singleton));
+                        .AddService<SkipTokenHandler, MySkipTokenImplementation>(ServiceLifetime.Singleton));
         }
 
         [Theory]
@@ -54,7 +54,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
         }
     }
 
-    public class MySkipTokenImplementation : DefaultSkipTokenImplementation
+    public class MySkipTokenImplementation : DefaultSkipTokenHandler
     {
         public MySkipTokenImplementation()
             : base()

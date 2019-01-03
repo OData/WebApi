@@ -5,7 +5,9 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
@@ -56,6 +58,15 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets or sets the next link function for the OData response.
+        /// </summary>
+        public Func<object, ODataSerializerContext, Uri> NextLinkFunc
+        {
+            get { return this.innerContext.NextLinkFunc; }
+            set { this.innerContext.NextLinkFunc = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the delta link for the OData response.
         /// </summary>
         public Uri DeltaLink
@@ -99,12 +110,12 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the parsed OData <see cref="OrderByClause"/> of the request.
+        /// Gets or sets the parsed OData <see cref="ODataQueryOptions"/> of the request.
         /// </summary>
-        public OrderByClause OrderByClause
+        public ODataQueryOptions QueryOptions
         {
-            get { return this.innerContext.OrderByClause; }
-            set { this.innerContext.OrderByClause = value; }
+            get { return this.innerContext.QueryOptions; }
+            set { this.innerContext.QueryOptions = value; }
         }
 
         /// <summary>
@@ -132,15 +143,6 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerContext.TotalCountFunc; }
             set { this.innerContext.TotalCountFunc = value; }
-        }
-
-        /// <summary>
-        /// SkipTokenGenerator implementation
-        /// </summary>
-        public ISkipTokenHandler SkipTokenGenerator
-        {
-            get { return this.innerContext.SkipTokenGenerator; }
-            set { this.innerContext.SkipTokenGenerator = value; }
         }
     }
 }

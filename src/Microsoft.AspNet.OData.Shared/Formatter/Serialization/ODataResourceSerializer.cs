@@ -773,7 +773,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 selectExpandClause = expandedNavigationSelectItem.SelectAndExpand;
             }
-           
+
             object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
             if (propertyValue == null || propertyValue is NullEdmComplexObject)
@@ -800,7 +800,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             else
             {
                 // create the serializer context for the complex and expanded item.
-                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty, resourceContext.SerializerContext.OrderByClause, expandedNavigationSelectItem);
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty, resourceContext.SerializerContext.QueryOptions);
 
                 // write object.
                 ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(edmProperty.Type);

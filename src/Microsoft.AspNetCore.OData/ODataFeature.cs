@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,6 +62,11 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the next link for the OData response.
         /// </summary>
         public Uri NextLink { get; set; }
+
+        /// <summary>
+        /// Gets or sets the next link function for the OData response.
+        /// </summary>
+        public Func<object, ODataSerializerContext, Uri> NextLinkFunc { get; set; }
 
         /// <summary>
         /// Gets or sets the batch route data.
@@ -124,7 +131,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets the implementation for skiptoken for generating a value
         /// </summary>
-        public ISkipTokenHandler SkipTokenGenerator { get; set; }
+        public ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the parsed OData <see cref="ApplyClause"/> of the request.
@@ -135,11 +142,6 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
         /// </summary>
         public SelectExpandClause SelectExpandClause { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parsed OData <see cref="OrderByClause"/> of the request.
-        /// </summary>
-        public OrderByClause OrderByClause { get; set; }
 
         /// <summary>
         /// Gets the data store used by <see cref="IODataRoutingConvention"/>s to store any custom route data.

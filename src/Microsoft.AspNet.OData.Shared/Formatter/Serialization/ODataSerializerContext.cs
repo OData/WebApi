@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// If the resource property is the dynamic complex, the resource property is null.
         /// </param>
         /// <param name="queryOptions">The <see cref="ODataQueryOptions"/> for the navigation property being expanded.</param>
-        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, ODataQueryOptions queryOptions)
+        public ODataSerializerContext(ResourceContext resource, SelectExpandClause selectExpandClause, IEdmProperty edmProperty, ODataQueryOptions queryOptions, ExpandedNavigationSelectItem expandedItem)
         {
             if (resource == null)
             {
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ExpandedResource = resource; // parent resource
             SelectExpandClause = selectExpandClause;
-            OrderByClause = orderByClause;
+            QueryOptions = queryOptions;
             ExpandedNavigationSelectItem = expandedItem;
             EdmProperty = edmProperty; // should be nested property
 

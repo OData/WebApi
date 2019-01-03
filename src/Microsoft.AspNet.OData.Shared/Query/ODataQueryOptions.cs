@@ -438,14 +438,12 @@ namespace Microsoft.AspNet.OData.Query
                     DefaultQuerySettings settings = Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
                     if (settings.EnableSkipToken)
                     {
-                        SkipTokenHandler skipTokenGenerator = Context.RequestContainer.GetRequiredService<SkipTokenHandler>();
                         InternalRequest.Context.PageSize = pageSize;
                         InternalRequest.Context.QueryOptions = this;
-                        InternalRequest.Context.NextLinkFunc = skipTokenGenerator.GenerateNextPageLink;
                     }
                     else
                     {
-                        InternalRequest.Context.NextLinkFunc = (a, b) => { return InternalRequest.GetNextPageLink(pageSize); };
+                        InternalRequest.Context.NextLink =  InternalRequest.GetNextPageLink(pageSize);
                     }
                 }
             }

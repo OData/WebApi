@@ -51,15 +51,6 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the next link function for the OData response.
-        /// </summary>
-        public Func<object, ODataSerializerContext, Uri> NextLinkFunc
-        {
-            get { return this.innerFeature.NextLinkFunc; }
-            set { this.innerFeature.NextLinkFunc = value; }
-        }
-
-        /// <summary>
         /// Gets or sets the delta link for the OData response.
         /// </summary>
         public Uri DeltaLink

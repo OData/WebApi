@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -90,10 +91,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                 }
-                else if (writeContext.InternalRequest.Context.NextLinkFunc != null)
+                else if (writeContext.InternalRequest.Context.QueryOptions != null)
                 {
                     // Collection serializer is called only for collection of primitive values - A null object will be supplied since it is a non-entity value
-                    collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLinkFunc(null, writeContext);
+                    SkipTokenHandler skipTokenHandler = SkipTokenQueryOption.GetSkipTokenImplementation(writeContext.QueryOptions.Context);
+                    collectionStart.NextPageLink = skipTokenHandler.GenerateNextPageLink(null, writeContext);
                 }
 
                 if (writeContext.InternalRequest.Context.TotalCount != null)

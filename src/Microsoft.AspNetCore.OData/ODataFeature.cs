@@ -64,11 +64,6 @@ namespace Microsoft.AspNet.OData
         public Uri NextLink { get; set; }
 
         /// <summary>
-        /// Gets or sets the next link function for the OData response.
-        /// </summary>
-        public Func<object, ODataSerializerContext, Uri> NextLinkFunc { get; set; }
-
-        /// <summary>
         /// Gets or sets the batch route data.
         /// </summary>
         public RouteValueDictionary BatchRouteData { get; set; }

@@ -96,7 +96,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceSetType != null);
 
             IEdmStructuredTypeReference elementType = GetResourceType(resourceSetType);
-            ODataResourceSet resourceSet = CreateResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
+            ODataPagedResourceSet pagedResourceSet = CreatePagedResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
+            ODataResourceSet resourceSet = pagedResourceSet.ResourceSet;
+
             if (resourceSet == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
@@ -156,9 +158,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 resourceSet.NextPageLink = nextPageLink;
             }
-            else if (writeContext.InternalRequest != null && writeContext.InternalRequest.Context.NextLinkFunc != null)
+            else if (pagedResourceSet.NextLinkFunction != null)
             {
-                resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLinkFunc(lastMember, writeContext);
+                resourceSet.NextPageLink = pagedResourceSet.NextLinkFunction(lastMember);
             }
             writer.WriteEnd();
         }
@@ -210,10 +212,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else if (writeContext.Request != null)
                 {
-                    if (writeContext.InternalRequest.Context.NextLink != null)
-                    {
-                        resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
-                    }
+                    resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
                     resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
 
                     long? countValue = writeContext.InternalRequest.Context.TotalCount;
@@ -231,13 +230,100 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
+
                 ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
                 if (countOptionCollection != null && countOptionCollection.TotalCount != null)
                 {
                     resourceSet.Count = countOptionCollection.TotalCount;
                 }
             }
+
             return resourceSet;
+        }
+
+        /// <summary>
+        /// Create the <see cref="ODataPagedResourceSet"/> to be written for the given resourceSet instance.
+        /// </summary>
+        /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
+        /// <param name="resourceSetType">The EDM type of the resourceSet being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The created <see cref="ODataResourceSet"/> object.</returns>
+        internal ODataPagedResourceSet CreatePagedResourceSet(IEnumerable resourceSetInstance, IEdmCollectionTypeReference resourceSetType,
+            ODataSerializerContext writeContext)
+        {
+            ODataPagedResourceSet pagedResourceSet = new ODataPagedResourceSet(); 
+            ODataResourceSet resourceSet = new ODataResourceSet
+            {
+                TypeName = resourceSetType.FullName()
+            };
+            pagedResourceSet.ResourceSet = resourceSet;
+
+            IEdmStructuredTypeReference structuredType = GetResourceType(resourceSetType).AsStructured();
+            if (writeContext.NavigationSource != null && structuredType.IsEntity())
+            {
+                ResourceSetContext resourceSetContext = ResourceSetContext.Create(writeContext, resourceSetInstance);
+                IEdmEntityType entityType = structuredType.AsEntity().EntityDefinition();
+                var operations = writeContext.Model.GetAvailableOperationsBoundToCollection(entityType);
+                var odataOperations = CreateODataOperations(operations, resourceSetContext, writeContext);
+                foreach (var odataOperation in odataOperations)
+                {
+                    ODataAction action = odataOperation as ODataAction;
+                    if (action != null)
+                    {
+                        resourceSet.AddAction(action);
+                    }
+                    else
+                    {
+                        resourceSet.AddFunction((ODataFunction)odataOperation);
+                    }
+                }
+            }
+
+            if (writeContext.ExpandedResource == null)
+            {
+                // If we have more OData format specific information apply it now, only if we are the root feed.
+                PageResult odataResourceSetAnnotations = resourceSetInstance as PageResult;
+                if (odataResourceSetAnnotations != null)
+                {
+                    resourceSet.Count = odataResourceSetAnnotations.Count;
+                    resourceSet.NextPageLink = odataResourceSetAnnotations.NextPageLink;
+                }
+                else if (writeContext.Request != null)
+                {
+                    if (writeContext.InternalRequest.Context.NextLink != null)
+                    {
+                        resourceSet.NextPageLink = writeContext.InternalRequest.Context.NextLink;
+                    }
+                    else if (writeContext.InternalRequest.Context.PageSize > 0)
+                    {
+                        SkipTokenHandler skipTokenHandler = SkipTokenQueryOption.GetSkipTokenImplementation(writeContext.InternalRequest.Context.QueryOptions.Context);
+                        pagedResourceSet.NextLinkFunction = (obj) => { return skipTokenHandler.GenerateNextPageLink(obj, writeContext); };
+                    }
+                    resourceSet.DeltaLink = writeContext.InternalRequest.Context.DeltaLink;
+
+                    long? countValue = writeContext.InternalRequest.Context.TotalCount;
+                    if (countValue.HasValue)
+                    {
+                        resourceSet.Count = countValue.Value;
+                    }
+                }
+            }
+            else
+            {
+                // nested resourceSet
+                ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
+                if (truncatedCollection != null && truncatedCollection.IsTruncated)
+                {
+                   pagedResourceSet.NextLinkFunction = (obj) => { return GetNestedNextPageLink(writeContext, truncatedCollection.PageSize, obj); };
+                }
+
+                ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
+                if (countOptionCollection != null && countOptionCollection.TotalCount != null)
+                {
+                    resourceSet.Count = countOptionCollection.TotalCount;
+                }
+            }
+            return pagedResourceSet;
         }
 
         /// <summary>
@@ -330,24 +416,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
+        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize, object obj = null)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-            Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
-
-            if (navigationLink != null)
+            IList<OrderByNode> orderByNodes = null;
+            Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink, out orderByNodes);
+            SkipTokenHandler handler = SkipTokenQueryOption.GetSkipTokenImplementation(writeContext.QueryOptions.Context);
+            Func<object, string> skipTokenGenerator = (member) => { return handler.GenerateSkipTokenValue(member, writeContext.Model, orderByNodes);  };
+            if (nestedNextLink != null)
             {
-                return GetNextPageHelper.GetNextPageLink(nestedNextLink, pageSize);
+                return GetNextPageHelper.GetNextPageLink(nestedNextLink, pageSize, obj, skipTokenGenerator);
             }
 
             return null;
         }
 
-        private static Uri GenerateQueryFromExpandedItem(ODataSerializerContext writeContext, Uri navigationLink)
+        private static Uri GenerateQueryFromExpandedItem(ODataSerializerContext writeContext, Uri navigationLink, out IList<OrderByNode> orderByNodes)
         {
             IWebApiUrlHelper urlHelper = writeContext.InternalUrlHelper;
             string serviceRoot = urlHelper.CreateODataLink(
@@ -366,6 +454,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 newUri.Top = writeContext.ExpandedNavigationSelectItem.TopOption;
             }
 
+            if (newUri.OrderBy != null)
+            {
+                orderByNodes = OrderByNode.CreateCollection(newUri.OrderBy);
+            }
+            else
+            {
+                orderByNodes = null;
+            }
+            
             return newUri.BuildUri(ODataUrlKeyDelimiter.Slash);
         }
 
@@ -383,5 +480,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, resourceSetType.FullName());
             throw new SerializationException(message);
         }
+    }
+
+    /// <summary>
+    /// Wrapper around ODataResourceSet to include NextLinkFunction untill we can enhance OData class.
+    /// </summary>
+    internal class ODataPagedResourceSet
+    {
+        public Func<object, Uri> NextLinkFunction { get; set; }
+
+        public ODataResourceSet ResourceSet { get; set; }
     }
 }

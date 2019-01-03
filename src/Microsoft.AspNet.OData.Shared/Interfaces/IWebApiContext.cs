@@ -33,11 +33,6 @@ namespace Microsoft.AspNet.OData.Interfaces
         Uri NextLink { get; set; }
 
         /// <summary>
-        /// Gets or sets the function for next link for the OData response.
-        /// </summary>
-        Func<object, ODataSerializerContext, Uri> NextLinkFunc { get; set; }
-
-        /// <summary>
         /// Gets or sets the delta link for the OData response.
         /// </summary>
         Uri DeltaLink { get; set; }

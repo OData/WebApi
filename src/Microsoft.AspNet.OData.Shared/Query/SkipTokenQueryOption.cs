@@ -147,7 +147,12 @@ namespace Microsoft.AspNet.OData.Query
             }
         }
 
-        internal static SkipTokenHandler GetSkipTokenImplementation(ODataQueryContext context)
+        /// <summary>
+        /// Returns the handler for skip token
+        /// </summary>
+        /// <param name="context">The <see cref="ODataQueryContext"/> instance of the query.</param>
+        /// <returns></returns>
+        public static SkipTokenHandler GetSkipTokenImplementation(ODataQueryContext context)
         {
             if (context == null || context.RequestContainer == null)
             {

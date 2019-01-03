@@ -435,11 +435,10 @@ namespace Microsoft.AspNet.OData.Query
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    DefaultQuerySettings settings = Context.RequestContainer.GetRequiredService<DefaultQuerySettings>();
+                    DefaultQuerySettings settings = Context.DefaultQuerySettings;
                     if (settings.EnableSkipToken)
                     {
                         InternalRequest.Context.PageSize = pageSize;
-                        InternalRequest.Context.QueryOptions = this;
                     }
                     else
                     {
@@ -448,6 +447,7 @@ namespace Microsoft.AspNet.OData.Query
                 }
             }
 
+            InternalRequest.Context.QueryOptions = this;
             return result;
         }
 

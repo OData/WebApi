@@ -424,9 +424,18 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
             IList<OrderByNode> orderByNodes = null;
+            Func<object, string> skipTokenGenerator = null;
             Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink, out orderByNodes);
-            SkipTokenHandler handler = SkipTokenQueryOption.GetSkipTokenImplementation(writeContext.QueryOptions.Context);
-            Func<object, string> skipTokenGenerator = (member) => { return handler.GenerateSkipTokenValue(member, writeContext.Model, orderByNodes);  };
+            if (writeContext.QueryOptions != null)
+            {
+                DefaultQuerySettings settings = writeContext.QueryOptions.Context.DefaultQuerySettings;
+                if (settings.EnableSkipToken)
+                {
+                    SkipTokenHandler handler = SkipTokenQueryOption.GetSkipTokenImplementation(writeContext.QueryOptions.Context);
+                    skipTokenGenerator = (member) => { return handler.GenerateSkipTokenValue(member, writeContext.Model, orderByNodes); };
+                }
+            }
+
             if (nestedNextLink != null)
             {
                 return GetNextPageHelper.GetNextPageLink(nestedNextLink, pageSize, obj, skipTokenGenerator);

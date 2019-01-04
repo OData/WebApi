@@ -14,39 +14,56 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
-            Contract.Assert(requestUri.IsAbsoluteUri);
 
             StringBuilder queryBuilder = new StringBuilder();
 
             int nextPageSkip = pageSize;
 
+            String skipTokenValue = objectToSkipTokenValue == null ? null : objectToSkipTokenValue(instance);
+            //If no value for skiptoken can be extracted; revert to using skip 
+            bool useDefaultSkip = String.IsNullOrWhiteSpace(skipTokenValue);
+
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                string key = kvp.Key;
+                string key = kvp.Key.ToLowerInvariant();
                 string value = kvp.Value;
+
                 switch (key)
                 {
                     case "$top":
                         int top;
                         if (Int32.TryParse(value, out top))
                         {
-                            // There is no next page if the $top query option's value is less than or equal to the page size.
+                            // There is no next page if the $top query option's value is less than or equal to the page size. You should not call this API if top <= pagesize.
                             Contract.Assert(top > pageSize);
                             // We decrease top by the pageSize because that's the number of results we're returning in the current page
-                            value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
+                            if (top > pageSize)
+                            {
+                                value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
+                            }
+                            else
+                            {
+                                return null;
+                            }
                         }
                         break;
                     case "$skip":
-                        int skip;
-                        if (Int32.TryParse(value, out skip))
+                        if (useDefaultSkip)
                         {
-                            // We increase skip by the pageSize because that's the number of results we're returning in the current page
-                            nextPageSkip += skip;
+                            //Need to increment skip only if we are not using skiptoken 
+                            int skip;
+                            if (Int32.TryParse(value, out skip))
+                            {
+                                // We increase skip by the pageSize because that's the number of results we're returning in the current page
+                                nextPageSkip += skip;
+                            }
                         }
+                        continue;
+                    case "$skiptoken":
                         continue;
                     default:
                         break;
@@ -61,6 +78,7 @@ namespace Microsoft.AspNet.OData
                 {
                     key = Uri.EscapeDataString(key);
                 }
+
                 value = Uri.EscapeDataString(value);
 
                 queryBuilder.Append(key);
@@ -69,12 +87,20 @@ namespace Microsoft.AspNet.OData
                 queryBuilder.Append('&');
             }
 
-            queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
+            if (useDefaultSkip)
+            {
+                queryBuilder.AppendFormat("$skip={0}", nextPageSkip);
+            }
+            else
+            {
+                queryBuilder.AppendFormat("$skiptoken={0}", skipTokenValue);
+            }
 
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {
                 Query = queryBuilder.ToString()
             };
+
             return uriBuilder.Uri;
         }
     }

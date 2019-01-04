@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 ServiceRoot = baseAddress,
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
-                SelectAndExpand = internalRequest.Context.SelectExpandClause,
+                SelectAndExpand = internalRequest.Context.ProcessedSelectExpandClause,
                 Apply = internalRequest.Context.ApplyClause,
                 Path = (path == null || IsOperationPath(path)) ? null : path.Path,
             };
@@ -184,7 +184,8 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet;
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
-                writeContext.SelectExpandClause = internalRequest.Context.SelectExpandClause;
+                writeContext.SelectExpandClause = internalRequest.Context.ProcessedSelectExpandClause;
+                writeContext.QueryOptions = internalRequest.Context.QueryOptions;
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }

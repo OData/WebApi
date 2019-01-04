@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
@@ -83,12 +84,37 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
+        /// Gets or sets the processed OData <see cref="SelectExpandClause"/> of the request. It will be different from QueryOptions.SelectExpand. SelectExpandClause as the $level is processed in this clause. 
         /// </summary>
-        public SelectExpandClause SelectExpandClause
+        public SelectExpandClause ProcessedSelectExpandClause
         {
             get { return this.innerFeature.SelectExpandClause; }
             set { this.innerFeature.SelectExpandClause = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the parsed <see cref="ODataQueryOptions"/> of the request.
+        /// </summary>
+        public ODataQueryOptions QueryOptions
+        {
+            get
+            {
+                ODataFeature feature = this.innerFeature as ODataFeature;
+                if (feature != null)
+                {
+                    return feature.QueryOptions;
+                }
+
+                return null;
+            }
+            set
+            {
+                ODataFeature feature = this.innerFeature as ODataFeature;
+                if (feature != null)
+                {
+                    feature.QueryOptions = value;
+                }
+            }
         }
 
         /// <summary>
@@ -98,6 +124,31 @@ namespace Microsoft.AspNet.OData.Adapters
         public long? TotalCount
         {
             get { return this.innerFeature.TotalCount; }
+        }
+
+        /// <summary>
+        /// Page size to be used by skiptoken implementation for the top-level resource for the request. 
+        /// </summary>
+        public int PageSize
+        {
+            get
+            {
+                ODataFeature feature = this.innerFeature as ODataFeature;
+                if (feature != null)
+                {
+                    return feature.PageSize;
+                }
+
+                return 0;
+            }
+            set
+            {
+                ODataFeature feature = this.innerFeature as ODataFeature;
+                if (feature != null)
+                {
+                    feature.PageSize = value;
+                }
+            }
         }
 
         /// <summary>

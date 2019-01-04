@@ -46,6 +46,8 @@ namespace Microsoft.AspNet.OData.Query
 
         private bool _enableNoDollarSignQueryOptions = false;
 
+        private OrderByQueryOption _stableOrderBy;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
@@ -121,6 +123,11 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets the <see cref="SkipQueryOption"/>.
         /// </summary>
         public SkipQueryOption Skip { get; private set; }
+
+        /// <summary>
+        /// Gets the <see cref="SkipTokenQueryOption"/>.
+        /// </summary>
+        public SkipTokenQueryOption SkipToken { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="TopQueryOption"/>.
@@ -321,14 +328,11 @@ namespace Microsoft.AspNet.OData.Query
 
             // First apply $apply
             // Section 3.15 of the spec http://docs.oasis-open.org/odata/odata-data-aggregation-ext/v4.0/cs01/odata-data-aggregation-ext-v4.0-cs01.html#_Toc378326311
-            ApplyClause apply = null;
-
             if (IsAvailableODataQueryOption(Apply, AllowedQueryOptions.Apply))
             {
                 result = Apply.ApplyTo(result, querySettings);
                 InternalRequest.Context.ApplyClause = Apply.ApplyClause;
                 this.Context.ElementClrType = Apply.ResultClrType;
-                apply = Apply.ApplyClause;
             }
 
             // Construct the actual query and apply them in the following order: filter, orderby, skip, top
@@ -370,16 +374,18 @@ namespace Microsoft.AspNet.OData.Query
                 // properties necessary to make a stable sort.
                 // Instead of failing early here if we cannot generate the OrderBy,
                 // let the IQueryable backend fail (if it has to).
-                List<string> applySortOptions = GetApplySortOptions(apply);
 
-                orderBy = orderBy == null
-                            ? GenerateDefaultOrderBy(Context, applySortOptions)
-                            : EnsureStableSortOrderBy(orderBy, Context, applySortOptions);
+                orderBy = GenerateStableOrderByQueryOption();
             }
 
             if (IsAvailableODataQueryOption(orderBy, AllowedQueryOptions.OrderBy))
             {
                 result = orderBy.ApplyTo(result, querySettings);
+            }
+
+            if (IsAvailableODataQueryOption(SkipToken, AllowedQueryOptions.SkipToken))
+            {
+                result = SkipToken.ApplyTo(result, querySettings, this);
             }
 
             AddAutoSelectExpandProperties();
@@ -403,6 +409,13 @@ namespace Microsoft.AspNet.OData.Query
                 result = Top.ApplyTo(result, querySettings);
             }
 
+            result = ApplyPaging(result, querySettings);
+
+            return result;
+        }
+
+        internal IQueryable ApplyPaging(IQueryable result, ODataQuerySettings querySettings)
+        {
             int pageSize = -1;
             if (querySettings.PageSize.HasValue)
             {
@@ -423,15 +436,33 @@ namespace Microsoft.AspNet.OData.Query
             {
                 bool resultsLimited;
                 result = LimitResults(result, pageSize, out resultsLimited);
-                if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
+                if (resultsLimited && InternalRequest.RequestUri != null &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize);
-                    InternalRequest.Context.NextLink = nextPageLink;
+                    InternalRequest.Context.PageSize = pageSize;
                 }
             }
 
+            InternalRequest.Context.QueryOptions = this;
+
             return result;
+        }
+
+        internal OrderByQueryOption GenerateStableOrderByQueryOption()
+        {
+            if (_stableOrderBy != null)
+            {
+                return _stableOrderBy;
+            }
+
+            ApplyClause apply = Apply != null ? Apply.ApplyClause : null;
+            List<string> applySortOptions = GetApplySortOptions(apply);
+
+            _stableOrderBy = OrderBy == null
+                ? GenerateDefaultOrderBy(Context, applySortOptions)
+                : EnsureStableSortOrderBy(OrderBy, Context, applySortOptions);
+
+            return _stableOrderBy;
         }
 
         private static List<string> GetApplySortOptions(ApplyClause apply)
@@ -908,6 +939,7 @@ namespace Microsoft.AspNet.OData.Query
                         break;
                     case "$skiptoken":
                         RawValues.SkipToken = kvp.Value;
+                        SkipToken = new SkipTokenQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$deltatoken":
                         RawValues.DeltaToken = kvp.Value;
@@ -964,14 +996,14 @@ namespace Microsoft.AspNet.OData.Query
                         SelectExpand.Context);
                 }
 
-                SelectExpandClause processedClause = SelectExpand.ProcessLevels();
+                SelectExpandClause processedClause = SelectExpand.ProcessedSelectExpandClause;
                 SelectExpandQueryOption newSelectExpand = new SelectExpandQueryOption(
                     SelectExpand.RawSelect,
                     SelectExpand.RawExpand,
                     SelectExpand.Context,
                     processedClause);
 
-                InternalRequest.Context.SelectExpandClause = processedClause;
+                InternalRequest.Context.ProcessedSelectExpandClause = processedClause;
 
                 var type = typeof(T);
                 if (type == typeof(IQueryable))

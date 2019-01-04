@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
@@ -92,12 +93,30 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
+        /// Gets or sets the parsed <see cref="ODataQueryOptions"/> of the request.
+        /// </summary>
+        public ODataQueryOptions QueryOptions
+        {
+            get { return this.innerFeature.QueryOptions; }
+            set { this.innerFeature.QueryOptions = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the total count for the OData response.
         /// </summary>
         /// <value><c>null</c> if no count should be sent back to the client.</value>
         public long? TotalCount
         {
             get { return this.innerFeature.TotalCount; }
+        }
+
+        /// <summary>
+        /// Page size to be used by skiptoken implementation for the top-level resource for the request. 
+        /// </summary>
+        public int PageSize
+        {
+            get { return this.innerFeature.PageSize; }
+            set { this.innerFeature.PageSize = value; }
         }
 
         /// <summary>

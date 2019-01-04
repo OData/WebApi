@@ -123,6 +123,11 @@ namespace Microsoft.AspNet.OData.Query
         public SkipQueryOption Skip { get; private set; }
 
         /// <summary>
+        /// Gets the <see cref="SkipTokenQueryOption"/>.
+        /// </summary>
+        public SkipTokenQueryOption SkipToken { get; private set; }
+
+        /// <summary>
         /// Gets the <see cref="TopQueryOption"/>.
         /// </summary>
         public TopQueryOption Top { get; private set; }
@@ -382,6 +387,16 @@ namespace Microsoft.AspNet.OData.Query
                 result = orderBy.ApplyTo(result, querySettings);
             }
 
+            if (IsAvailableODataQueryOption(SkipToken, AllowedQueryOptions.SkipToken))
+            {
+                IList<OrderByNode> orderByNodes = null;
+                if (orderBy != null)
+                {
+                    orderByNodes = orderBy.OrderByNodes;
+                }
+                result = SkipToken.ApplyTo(result, querySettings, orderByNodes);
+            }
+
             AddAutoSelectExpandProperties();
 
             if (SelectExpand != null)
@@ -426,11 +441,19 @@ namespace Microsoft.AspNet.OData.Query
                 if (resultsLimited && InternalRequest.RequestUri != null && InternalRequest.RequestUri.IsAbsoluteUri &&
                     InternalRequest.Context.NextLink == null)
                 {
-                    Uri nextPageLink = InternalRequest.GetNextPageLink(pageSize);
-                    InternalRequest.Context.NextLink = nextPageLink;
+                    DefaultQuerySettings settings = Context.DefaultQuerySettings;
+                    if (settings.EnableSkipToken)
+                    {
+                        InternalRequest.Context.PageSize = pageSize;
+                    }
+                    else
+                    {
+                        InternalRequest.Context.NextLink = InternalRequest.GetNextPageLink(pageSize);
+                    }
                 }
             }
 
+            InternalRequest.Context.QueryOptions = this;
             return result;
         }
 
@@ -908,6 +931,7 @@ namespace Microsoft.AspNet.OData.Query
                         break;
                     case "$skiptoken":
                         RawValues.SkipToken = kvp.Value;
+                        SkipToken = new SkipTokenQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$deltatoken":
                         RawValues.DeltaToken = kvp.Value;

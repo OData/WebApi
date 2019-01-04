@@ -756,6 +756,12 @@ namespace Microsoft.AspNet.OData.Formatter
                     primitiveTypeKind == EdmPrimitiveTypeKind.TimeOfDay);
         }
 
+        public static IEdmTypeReference GetTypeReferenceOfProperty(IEdmModel model, Type clrType, string propertyName)
+        {
+            PropertyInfo propertyInfo = clrType.GetProperty(propertyName);
+            return propertyInfo == null ? null : GetEdmTypeReference(model, propertyInfo.PropertyType);
+        }
+
         public static IEdmPrimitiveType GetEdmPrimitiveTypeOrNull(Type clrType)
         {
             IEdmPrimitiveType primitiveType;

@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData;
@@ -33,9 +34,11 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string RoutingConventionsStoreKey = "Microsoft.AspNet.OData.RoutingConventionsStore";
         private const string RoutingConventionsKey = "Microsoft.AspNet.OData.RoutingConventions";
         private const string SelectExpandClauseKey = "Microsoft.AspNet.OData.SelectExpandClause";
+        private const string QueryOptionsKey = "Microsoft.AspNet.OData.QueryOptions";
         private const string ApplyClauseKey = "Microsoft.AspNet.OData.ApplyClause";
         private const string TotalCountKey = "Microsoft.AspNet.OData.TotalCount";
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
+        private const string PageSizeKey = "Microsoft.AspNet.OData.PageSize";
 
         private HttpRequestMessage _request;
 
@@ -60,6 +63,26 @@ namespace Microsoft.AspNet.OData.Extensions
             set
             {
                 _request.Properties[TotalCountFuncKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Page size to be used by skiptoken implementation for the top-level resource for the request. 
+        /// </summary>
+        public int PageSize
+        {
+            get
+            {
+                object pageSize;
+                if (_request.Properties.TryGetValue(PageSizeKey, out pageSize))
+                {
+                    return (int)pageSize;
+                }
+                return -1;
+            }
+            set
+            {
+                _request.Properties[PageSizeKey] = value;
             }
         }
 
@@ -175,6 +198,28 @@ namespace Microsoft.AspNet.OData.Extensions
                 }
 
                 _request.Properties[SelectExpandClauseKey] = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the parsed OData <see cref="ODataQueryOptions"/> of the request. The
+        /// <see cref="ODataResourceSet "/> will use this information (if any) while writing the response for
+        /// this request.
+        /// </summary>
+        public ODataQueryOptions QueryOptions
+        {
+            get
+            {
+                return GetValueOrNull<ODataQueryOptions>(QueryOptionsKey);
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.ArgumentNull("value");
+                }
+
+                _request.Properties[QueryOptionsKey] = value;
             }
         }
 

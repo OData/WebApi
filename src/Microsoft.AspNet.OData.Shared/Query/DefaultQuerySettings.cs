@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.OData.Query
         private bool _enableExpand;
         private bool _enableCount;
         private bool _enableSelect;
+        private bool _enableSkipToken;
         private int? _maxTop = 0;
 
         /// <summary>
@@ -112,6 +113,21 @@ namespace Microsoft.AspNet.OData.Query
                 }
 
                 _maxTop = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the service will use skiptoken or not.
+        /// </summary>
+        public bool EnableSkipToken
+        {
+            get
+            {
+                return _enableSkipToken;
+            }
+            set
+            {
+                _enableSkipToken = value;
             }
         }
     }

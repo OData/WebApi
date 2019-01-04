@@ -141,12 +141,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
 
                 // save this for later to support JSON odata.streaming.
-                Uri nextPageLink = deltaFeed.NextPageLink;
+                Func<Object, Uri> nextLinkGenerator = GetNextLinkGenerator(deltaFeed, enumerable, feedType.AsCollection(), writeContext);
                 deltaFeed.NextPageLink = null;
 
                 //Start writing of the Delta Feed
                 writer.WriteStart(deltaFeed);
 
+                Object lastObject = null;
                 //Iterate over all the entries present and select the appropriate write method.
                 //Write method creates ODataDeltaDeletedEntry / ODataDeltaDeletedLink / ODataDeltaLink or ODataEntry.
                 foreach (object entry in enumerable)
@@ -156,6 +157,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         throw new SerializationException(SRResources.NullElementInCollection);
                     }
 
+                    lastObject = entry;
                     IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
                     if (edmChangedObject == null)
                     {
@@ -194,14 +196,35 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
                 // object before calling WriteEnd(), the next page link will be written at the end, as required for
                 // odata.streaming=true support.
-                if (nextPageLink != null)
-                {
-                    deltaFeed.NextPageLink = nextPageLink;
-                }
+
+                deltaFeed.NextPageLink = nextLinkGenerator(lastObject);
             }
 
             //End Writing of the Delta Feed
             writer.WriteEnd();
+        }
+
+        /// <summary>
+        /// Creates a function that takes in an object and generates nextlink uri.
+        /// </summary>
+        /// <param name="deltaFeed">The resource set describing a collection of structured objects.</param>
+        /// <param name="enumerable">The instance representing the resourceSet being written.</param>
+        /// <param name="edmCollectionTypeReference">The EDM type of the resourceSet being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The function that generates the NextLink from an object.</returns>
+        /// <returns></returns>
+        internal virtual Func<object, Uri> GetNextLinkGenerator(ODataDeltaResourceSet deltaFeed, IEnumerable enumerable, IEdmCollectionTypeReference edmCollectionTypeReference, ODataSerializerContext writeContext)
+        {
+            if (writeContext.InternalRequest != null && writeContext.InternalRequest.Context.QueryOptions != null)
+            {
+                SkipTokenHandler nextLinkGenerator = SkipTokenQueryOption.GetSkipTokenHandler(writeContext.InternalRequest.Context.QueryOptions.Context);
+                if (nextLinkGenerator != null && nextLinkGenerator.IsDeltaFeedSupported)
+                {
+                    return (obj) => nextLinkGenerator.GenerateNextPageLink(writeContext.InternalRequest.RequestUri, writeContext.InternalRequest.Context.PageSize, obj, writeContext);
+                }
+            }
+            Uri defaultUri = deltaFeed.NextPageLink;
+            return (obj) => { return defaultUri; };
         }
 
         /// <summary>

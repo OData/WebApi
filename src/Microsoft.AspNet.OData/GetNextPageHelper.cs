@@ -13,12 +13,12 @@ namespace Microsoft.AspNet.OData
     internal static partial class GetNextPageHelper
     {
         /// <remarks>This signature uses types that are AspNet-specific.</remarks>
-        internal static Uri GetNextPageLink(Uri requestUri, int pageSize)
+        internal static Uri GetNextPageLink(Uri requestUri, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(requestUri.IsAbsoluteUri);
 
-            return GetNextPageLink(requestUri, new FormDataCollection(requestUri), pageSize);
+            return GetNextPageLink(requestUri, new FormDataCollection(requestUri), pageSize, instance, objectToSkipTokenValue);
         }
     }
 }

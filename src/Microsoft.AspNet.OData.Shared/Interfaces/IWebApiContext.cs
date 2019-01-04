@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
@@ -36,6 +37,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         Uri DeltaLink { get; set; }
 
         /// <summary>
+        /// Page size to be used by skiptoken implementation for the top-level resource for the request. 
+        /// </summary>
+        int PageSize { get; set; }
+
+        /// <summary>
         /// Gets the OData path.
         /// </summary>
         ODataPath Path { get; }
@@ -55,6 +61,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the parsed OData <see cref="SelectExpandClause"/> of the request.
         /// </summary>
         SelectExpandClause SelectExpandClause { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ODataQueryOptions"/> of the request.
+        /// </summary>
+        ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the total count for the OData response.

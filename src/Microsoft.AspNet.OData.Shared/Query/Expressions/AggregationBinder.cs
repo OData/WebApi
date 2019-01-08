@@ -148,7 +148,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Contract.Assert(query != null);
 
-            this._linqToObjectMode = query.Provider.GetType().Namespace == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace;
+            var providerNS = query.Provider.GetType().Namespace;
+            this._linqToObjectMode = (providerNS == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace || providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEFCore2);
             this.BaseQuery = query;
             EnsureFlattenedPropertyContainer(this._lambdaParameter);
 

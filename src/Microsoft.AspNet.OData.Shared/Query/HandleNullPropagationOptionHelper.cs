@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Query
 
         private const string ObjectContextQueryProviderNamespaceEF5 = "System.Data.Objects.ELinq";
         private const string ObjectContextQueryProviderNamespaceEF6 = "System.Data.Entity.Core.Objects.ELinq";
-        private const string ObjectContextQueryProviderNamespaceEFCore2 = "Microsoft.EntityFrameworkCore.Query.Internal";
+        internal const string ObjectContextQueryProviderNamespaceEFCore2 = "Microsoft.EntityFrameworkCore.Query.Internal";
 
         private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
         internal const string Linq2ObjectsQueryProviderNamespace = "System.Linq";

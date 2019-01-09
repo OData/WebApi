@@ -171,7 +171,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             var providerNS = query.Provider.GetType().Namespace;
             return (providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEF6 
                 || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
-
         }
 
         private IQueryable BindSelect(IQueryable grouping)
@@ -360,7 +359,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 asQuerableExpression = Expression.Convert(accum, queryableType);
             }
 
-
             // $count is a virtual property, so there's not a propertyLambda to create.
             if (expression.Method == AggregationMethod.VirtualPropertyCount)
             {
@@ -403,7 +401,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         // For Dynamic properties cast to decimal
                         Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
                         propertyLambda = Expression.Lambda(propertyExpression, lambdaParameter);
-
 
                         if (
                             !(_classicEF 

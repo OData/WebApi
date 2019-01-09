@@ -70,7 +70,6 @@ namespace Microsoft.AspNet.OData
 
         private static MethodInfo _queryableDistinctMethod = GenericMethodOf(_ => Queryable.Distinct<int>(default(IQueryable<int>)));
         
-
         private static MethodInfo _createQueryGenericMethod = GetCreateQueryGenericMethod();
 
         //Unlike the Sum method, the return types are not unique and do not match the input type of the expression.

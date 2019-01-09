@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Type _groupByClrType;
 
-        private bool _linqToObjectMode = false;
+        private bool _classicEF = false;
 
         internal AggregationBinder(ODataQuerySettings settings, IWebApiAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(query != null);
 
             var providerNS = query.Provider.GetType().Namespace;
-            this._linqToObjectMode = (providerNS == HandleNullPropagationOptionHelper.Linq2ObjectsQueryProviderNamespace || providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEFCore2);
+            this._classicEF = (providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEF6 || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
             this.BaseQuery = query;
             EnsureFlattenedPropertyContainer(this._lambdaParameter);
 
@@ -158,6 +158,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             IQueryable grouping = BindGroupBy(query);
 
             IQueryable result = BindSelect(grouping);
+
+            //foreach (var r in result)
+            //{
+
+            //}
 
             return result;
         }
@@ -334,13 +339,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private Expression CreatePropertyAggregateExpression(ParameterExpression accum, AggregateExpression expression, Type baseType)
         {
             // I substitute the element type for all generic arguments.
-            var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
-            Expression asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
+            Expression asQuerableExpression = null;
+            if (_classicEF)
+            {
+                var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
+                asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
+            }
+            else
+            {
+                var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
+                asQuerableExpression = Expression.Convert(accum, queryableType);
+            }
+
 
             // $count is a virtual property, so there's not a propertyLambda to create.
             if (expression.Method == AggregationMethod.VirtualPropertyCount)
             {
-                var countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(baseType);
+                var countMethod = (_classicEF 
+                    ? ExpressionHelperMethods.QueryableCountGeneric
+                    : ExpressionHelperMethods.EnumerableCountGeneric).MakeGenericMethod(baseType);
                 return WrapConvert(Expression.Call(null, countMethod, asQuerableExpression));
             }
 
@@ -355,14 +372,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 case AggregationMethod.Min:
                     {
-                        var minMethod = ExpressionHelperMethods.QueryableMin.MakeGenericMethod(baseType,
+                        var minMethod = (_classicEF
+                            ? ExpressionHelperMethods.QueryableMin
+                            : ExpressionHelperMethods.EnumerableMin).MakeGenericMethod(baseType,
                             propertyLambda.Body.Type);
                         aggregationExpression = Expression.Call(null, minMethod, asQuerableExpression, propertyLambda);
                     }
                     break;
                 case AggregationMethod.Max:
                     {
-                        var maxMethod = ExpressionHelperMethods.QueryableMax.MakeGenericMethod(baseType,
+                        var maxMethod = (_classicEF
+                            ? ExpressionHelperMethods.QueryableMax
+                            : ExpressionHelperMethods.EnumerableMax).MakeGenericMethod(baseType,
                             propertyLambda.Body.Type);
                         aggregationExpression = Expression.Call(null, maxMethod, asQuerableExpression, propertyLambda);
                     }
@@ -374,8 +395,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
                         propertyLambda = Expression.Lambda(propertyExpression, lambdaParameter);
 
+
                         if (
-                            !ExpressionHelperMethods.QueryableSumGenerics.TryGetValue(propertyExpression.Type,
+                            !(_classicEF 
+                                ? ExpressionHelperMethods.QueryableSumGenerics
+                                : ExpressionHelperMethods.EnumerableSumGenerics).TryGetValue(propertyExpression.Type,
                                 out sumGenericMethod))
                         {
                             throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType,
@@ -400,7 +424,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         propertyLambda = Expression.Lambda(propertyExpression, lambdaParameter);
 
                         if (
-                            !ExpressionHelperMethods.QueryableAverageGenerics.TryGetValue(propertyExpression.Type,
+                            !(_classicEF
+                                ? ExpressionHelperMethods.QueryableAverageGenerics
+                                : ExpressionHelperMethods.EnumerableAverageGenerics).TryGetValue(propertyExpression.Type,
                                 out averageGenericMethod))
                         {
                             throw new ODataException(Error.Format(SRResources.AggregationNotSupportedForType,
@@ -421,19 +447,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         // I select the specific field
                         var selectMethod =
-                            ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType,
+                            (_classicEF
+                                ? ExpressionHelperMethods.QueryableSelectGeneric
+                                : ExpressionHelperMethods.EnumerableSelectGeneric).MakeGenericMethod(this._elementType,
                                 propertyLambda.Body.Type);
                         Expression queryableSelectExpression = Expression.Call(null, selectMethod, asQuerableExpression,
                             propertyLambda);
 
                         // I run distinct over the set of items
                         var distinctMethod =
-                            ExpressionHelperMethods.QueryableDistinct.MakeGenericMethod(propertyLambda.Body.Type);
+                            (_classicEF 
+                                ? ExpressionHelperMethods.QueryableDistinct
+                                : ExpressionHelperMethods.EnumerableDistinct).MakeGenericMethod(propertyLambda.Body.Type);
                         Expression distinctExpression = Expression.Call(null, distinctMethod, queryableSelectExpression);
 
                         // I count the distinct items as the aggregation expression
                         var countMethod =
-                            ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(propertyLambda.Body.Type);
+                            (_classicEF
+                                ? ExpressionHelperMethods.QueryableCountGeneric
+                                : ExpressionHelperMethods.EnumerableCountGeneric).MakeGenericMethod(propertyLambda.Body.Type);
                         aggregationExpression = Expression.Call(null, countMethod, distinctExpression);
                     }
                     break;
@@ -441,7 +473,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         MethodInfo customMethod = GetCustomMethod(expression);
                         var selectMethod =
-                            ExpressionHelperMethods.QueryableSelectGeneric.MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
+                            (_classicEF
+                                ? ExpressionHelperMethods.QueryableSelectGeneric
+                                : ExpressionHelperMethods.EnumerableSelectGeneric).MakeGenericMethod(this._elementType, propertyLambda.Body.Type);
                         var selectExpression = Expression.Call(null, selectMethod, asQuerableExpression, propertyLambda);
                         aggregationExpression = Expression.Call(null, customMethod, selectExpression);
                     }
@@ -455,9 +489,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression WrapConvert(Expression expression)
         {
-            return this._linqToObjectMode
-                ? Expression.Convert(expression, typeof(object))
-                : expression;
+            return this._classicEF
+                ? expression
+                : Expression.Convert(expression, typeof(object));
         }
 
         private Expression BindAccessor(QueryNode node, Expression baseElement = null)

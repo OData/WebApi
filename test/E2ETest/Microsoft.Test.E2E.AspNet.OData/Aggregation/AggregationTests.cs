@@ -55,18 +55,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 
 #if NETCORE
-    public class AggregationTestsEFCore : AggregationTests
+    public class AggregationTestsEFCoreInMemory : AggregationTests
     {
         protected override string AggregationTestBaseUrl => "{0}/aggregation/Customers";
 
-        public AggregationTestsEFCore(WebHostTestFixture fixture)
+        public AggregationTestsEFCoreInMemory(WebHostTestFixture fixture)
             : base(fixture)
         {
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(CoreCustomersController));
+            configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreInMemory>));
+            base.UpdateConfiguration(configuration);
+        }
+    }
+
+    public class AggregationTestsEFCoreSql : AggregationTests
+    {
+        protected override string AggregationTestBaseUrl => "{0}/aggregation/Customers";
+
+        public AggregationTestsEFCoreSql(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreSql>));
             base.UpdateConfiguration(configuration);
         }
     }

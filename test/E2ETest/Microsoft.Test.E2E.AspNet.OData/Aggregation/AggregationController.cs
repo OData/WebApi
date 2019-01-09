@@ -94,14 +94,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 
 #if NETCORE
-    public class CoreCustomersController : BaseCustomersController
+    public class CoreCustomersController<T> : BaseCustomersController where T: AggregationContextCoreBase, new()
     {
         [EnableQuery]
         [ODataRoute("Customers")]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
-            var db = new AggregationContextCore();
+            var db = new T();
             return db.Customers;
         }
 
@@ -109,21 +109,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public TestSingleResult<Customer> Get(int key)
         {
             ResetDataSource();
-            var db = new AggregationContextCore();
+            var db = new T();
             return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
         }
 
 
         protected override void SaveGenerated()
         {
-            var db = new AggregationContextCore();
+            var db = new T();
             db.Customers.AddRange(_customers);
             db.SaveChanges();
         }
 
         protected override void ResetDataSource()
         {
-            var db = new AggregationContextCore();
+            var db = new T();
+            db.Database.EnsureCreated();
             if (!db.Customers.Any())
             {
                 Generate();

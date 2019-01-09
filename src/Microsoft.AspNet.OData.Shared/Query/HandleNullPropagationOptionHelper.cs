@@ -9,10 +9,10 @@ namespace Microsoft.AspNet.OData.Query
 {
     internal static class HandleNullPropagationOptionHelper
     {
-        private const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
+        internal const string EntityFrameworkQueryProviderNamespace = "System.Data.Entity.Internal.Linq";
 
-        private const string ObjectContextQueryProviderNamespaceEF5 = "System.Data.Objects.ELinq";
-        private const string ObjectContextQueryProviderNamespaceEF6 = "System.Data.Entity.Core.Objects.ELinq";
+        internal const string ObjectContextQueryProviderNamespaceEF5 = "System.Data.Objects.ELinq";
+        internal const string ObjectContextQueryProviderNamespaceEF6 = "System.Data.Entity.Core.Objects.ELinq";
         internal const string ObjectContextQueryProviderNamespaceEFCore2 = "Microsoft.EntityFrameworkCore.Query.Internal";
 
         private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";

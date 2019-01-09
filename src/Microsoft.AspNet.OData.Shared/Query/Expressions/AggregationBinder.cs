@@ -148,8 +148,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             Contract.Assert(query != null);
 
-            var providerNS = query.Provider.GetType().Namespace;
-            this._classicEF = (providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEF6 || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
+            this._classicEF = IsClassicEF(query);
             this.BaseQuery = query;
             EnsureFlattenedPropertyContainer(this._lambdaParameter);
 
@@ -159,12 +158,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             IQueryable result = BindSelect(grouping);
 
-            //foreach (var r in result)
-            //{
-
-            //}
-
             return result;
+        }
+
+        /// <summary>
+        /// Checks IQueryable provider for need of EF6 oprimization
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns>True if EF6 optimization are needed.</returns>
+        internal virtual bool IsClassicEF(IQueryable query)
+        {
+            var providerNS = query.Provider.GetType().Namespace;
+            return (providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEF6 
+                || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
+
         }
 
         private IQueryable BindSelect(IQueryable grouping)
@@ -338,7 +345,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression CreatePropertyAggregateExpression(ParameterExpression accum, AggregateExpression expression, Type baseType)
         {
-            // I substitute the element type for all generic arguments.
+            // accum type is IGrouping<,baseType> that implements IEnumerable<baseType> 
+            // we need cast it to IEnumerable<baseType> during expression building (IEnumerable)$it
+            // however for EF6 we need to use $it.AsQueryable() due to limitations in types of casts that will properly translated
             Expression asQuerableExpression = null;
             if (_classicEF)
             {
@@ -489,6 +498,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression WrapConvert(Expression expression)
         {
+            // Expression that we are generating looks like Value = $it.PropertyName where Value is defined as object, but PropertyName can be any type 
+            // Proper .NET expression must look like as Value = (object) $it.PropertyName or AccessViolationExceptino will be thrown
+            // Cast to object isn't translatable by EF6 as a result skipping (object) in that case
             return this._classicEF
                 ? expression
                 : Expression.Convert(expression, typeof(object));

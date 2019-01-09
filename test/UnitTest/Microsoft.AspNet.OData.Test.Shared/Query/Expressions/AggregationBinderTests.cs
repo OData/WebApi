@@ -150,12 +150,22 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, Container = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Sum($it => $it.SupplierID)), }, })");
         }
 
-        private Expression VerifyQueryDeserialization(string filter, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null)
+        [Fact]
+        public void ClassicEFQueryShape()
         {
-            return VerifyQueryDeserialization<Product>(filter, expectedResult, settingsCustomizer);
+            var filters = VerifyQueryDeserialization(
+                "aggregate(SupplierID with sum as SupplierID)",
+                ".GroupBy($it => new NoGroupByWrapper())"
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = $it.AsQueryable().Sum($it => $it.SupplierID), }, })",
+                classicEF: true);
         }
 
-        private Expression VerifyQueryDeserialization<T>(string clauseString, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null) where T : class
+        private Expression VerifyQueryDeserialization(string filter, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false)
+        {
+            return VerifyQueryDeserialization<Product>(filter, expectedResult, settingsCustomizer, classicEF);
+        }
+
+        private Expression VerifyQueryDeserialization<T>(string clauseString, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false) where T : class
         {
             IEdmModel model = GetModel<T>();
             ApplyClause clause = CreateApplyNode(clauseString, model, typeof(T));
@@ -171,12 +181,19 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 return settings;
             };
 
-            var binder = new AggregationBinder(
-                customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }),
-                assembliesResolver,
-                typeof(T),
-                model,
-                clause.Transformations.First());
+            var binder = classicEF
+                ? new AggregationBinderEFFake(
+                    customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }),
+                    assembliesResolver,
+                    typeof(T),
+                    model,
+                    clause.Transformations.First())
+                : new AggregationBinder(
+                    customizeSettings(new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False }),
+                    assembliesResolver,
+                    typeof(T),
+                    model,
+                    clause.Transformations.First());
 
             var query = Enumerable.Empty<T>().AsQueryable();
 
@@ -232,6 +249,19 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 value = _modelCache[key] = model.GetEdmModel();
             }
             return value;
+        }
+
+        private class AggregationBinderEFFake : AggregationBinder
+        {
+            internal AggregationBinderEFFake(ODataQuerySettings settings, IWebApiAssembliesResolver assembliesResolver, Type elementType, IEdmModel model, TransformationNode transformation) 
+                : base(settings, assembliesResolver, elementType, model, transformation)
+            {
+            }
+
+            internal override bool IsClassicEF(IQueryable query)
+            {
+                return true;
+            }
         }
     }
 }

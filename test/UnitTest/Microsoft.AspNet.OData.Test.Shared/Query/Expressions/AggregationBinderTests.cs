@@ -75,7 +75,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with sum as SupplierID)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Sum($it => $it.SupplierID)), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Sum($it => $it.SupplierID)), }, })");
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization<DynamicProduct>(
                 "aggregate(ProductProperty with sum as ProductProperty)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = ProductProperty, Value = Convert(Convert($it.AsQueryable().Sum($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null).SafeConvertToDecimal()))), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = ProductProperty, Value = Convert(Convert(Convert($it).Sum($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null).SafeConvertToDecimal()))), }, })");
         }
 
         [Fact]
@@ -93,7 +93,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with min as SupplierID)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Min($it => $it.SupplierID)), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Min($it => $it.SupplierID)), }, })");
         }
 
         [Fact]
@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization<DynamicProduct>(
                 "aggregate(ProductProperty with min as MinProductProperty)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = MinProductProperty, Value = Convert($it.AsQueryable().Min($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null))), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = MinProductProperty, Value = Convert(Convert($it).Min($it => IIF($it.ProductProperties.ContainsKey(ProductProperty), $it.ProductPropertiesProductProperty, null))), }, })");
         }
 
         [Fact]
@@ -111,7 +111,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with max as SupplierID)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Max($it => $it.SupplierID)), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Max($it => $it.SupplierID)), }, })");
         }
 
         [Fact]
@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(UnitPrice with average as AvgUnitPrice)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = AvgUnitPrice, Value = Convert($it.AsQueryable().Average($it => $it.UnitPrice)), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = AvgUnitPrice, Value = Convert(Convert($it).Average($it => $it.UnitPrice)), }, })");
         }
 
         [Fact]
@@ -129,7 +129,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with countdistinct as Count)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = Count, Value = Convert($it.AsQueryable().Select($it => $it.SupplierID).Distinct().LongCount()), }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new LastInChain() {Name = Count, Value = Convert(Convert($it).Select($it => $it.SupplierID).Distinct().LongCount()), }, })");
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "aggregate(SupplierID with sum as SupplierID, CategoryID with sum as CategoryID)",
                 ".GroupBy($it => new NoGroupByWrapper())"
-                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new AggregationPropertyContainer() {Name = CategoryID, Value = Convert($it.AsQueryable().Sum($it => $it.CategoryID)), Next = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Sum($it => $it.SupplierID)), }, }, })");
+                + ".Select($it => new NoGroupByAggregationWrapper() {Container = new AggregationPropertyContainer() {Name = CategoryID, Value = Convert(Convert($it).Sum($it => $it.CategoryID)), Next = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Sum($it => $it.SupplierID)), }, }, })");
         }
 
         [Fact]
@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization(
                 "groupby((ProductName), aggregate(SupplierID with sum as SupplierID))",
                 ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = Convert($it.ProductName), }, })"
-                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, Container = new LastInChain() {Name = SupplierID, Value = Convert($it.AsQueryable().Sum($it => $it.SupplierID)), }, })");
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, Container = new LastInChain() {Name = SupplierID, Value = Convert(Convert($it).Sum($it => $it.SupplierID)), }, })");
         }
 
         private Expression VerifyQueryDeserialization(string filter, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null)

@@ -243,6 +243,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 return source;
             }
+            else if (IsDateAndTimeRelated(conversionType) && IsDateAndTimeRelated(source.Type))
+            {
+                return source;
+            }
             else if (source == NullConstant)
             {
                 return source;
@@ -966,6 +970,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal static bool IsDoubleOrDecimal(Type type)
         {
             return IsType<double>(type) || IsType<decimal>(type);
+        }
+
+        internal static bool IsDateAndTimeRelated(Type type)
+        {
+            return IsType<Date>(type) ||
+                IsType<DateTime>(type) ||
+                IsType<DateTimeOffset>(type) ||
+                IsType<TimeOfDay>(type) ||
+                IsType<TimeSpan>(type);
         }
 
         internal static bool IsDateRelated(Type type)

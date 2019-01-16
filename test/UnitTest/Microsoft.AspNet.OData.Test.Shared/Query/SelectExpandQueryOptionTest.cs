@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public void Ctor_ThrowsArgument_IfContextIsNotForAnEntityType()
+        public void Ctor_ThrowsArgument_IfContextIsNotForStructuredType()
         {
             // Arrange
             ODataQueryContext context = new ODataQueryContext(_model.Model, typeof(int));
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             ExceptionAssert.ThrowsArgument(
                 () => new SelectExpandQueryOption(select: "Name", expand: "Name", context: context),
                 "context",
-                "The type 'Edm.Int32' is not an entity type. Only entity types support $select and $expand.");
+                "The type 'Edm.Int32' is not a structured type. Only structured types support $select and $expand.");
         }
 
         [Fact]

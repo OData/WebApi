@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             ParameterExpression source = Expression.Parameter(elementType);
 
             // expression looks like -> new Wrapper { Instance = source , Properties = "...", Container = new PropertyContainer { ... } }
-            Expression projectionExpression = ProjectElement(source, _selectExpandQuery.SelectExpandClause, _context.ElementType as IEdmEntityType, navigationSource);
+            Expression projectionExpression = ProjectElement(source, _selectExpandQuery.SelectExpandClause, _context.ElementType as IEdmStructuredType, navigationSource);
 
             // expression looks like -> source => new Wrapper { Instance = source .... }
             LambdaExpression projectionLambdaExpression = Expression.Lambda(projectionExpression, source);
@@ -117,14 +117,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        internal Expression CreatePropertyNameExpression(IEdmEntityType elementType, IEdmProperty property, Expression source)
+        internal Expression CreatePropertyNameExpression(IEdmStructuredType elementType, IEdmProperty property, Expression source)
         {
             Contract.Assert(elementType != null);
             Contract.Assert(property != null);
             Contract.Assert(source != null);
 
-            IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
-            Contract.Assert(declaringType != null, "only entity types are projected.");
+            IEdmStructuredType declaringType = property.DeclaringType as IEdmStructuredType;
+
+            Contract.Assert(declaringType != null, "Unstructured types cannot be projected.");
 
             // derived navigation property using cast
             if (elementType != declaringType)
@@ -133,7 +134,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
                 if (castType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, declaringType.FullName()));
+                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, declaringType.FullTypeName()));
                 }
 
                 if (!castType.IsAssignableFrom(originalType))
@@ -152,33 +153,89 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return Expression.Constant(property.Name);
         }
 
-        internal Expression CreatePropertyValueExpression(IEdmEntityType elementType, IEdmProperty property, Expression source)
+        internal Expression CreatePropertyValueExpression(IEdmStructuredType elementType, IEdmProperty property, Expression source)
         {
             Contract.Assert(elementType != null);
             Contract.Assert(property != null);
             Contract.Assert(source != null);
 
-            return CreatePropertyValueExpressionWithFilter(elementType, property, source, filterClause: null);
+            return CreatePropertyValueExpressionWithFilter(elementType, property, source, null);
         }
 
-        internal Expression CreatePropertyValueExpressionWithFilter(IEdmEntityType elementType, IEdmProperty property,
-            Expression source, FilterClause filterClause)
+        internal Expression CreatePropertyValueExpressionWithFilter(IEdmStructuredType elementType, IEdmProperty property,
+    Expression source, ExpandedReferenceSelectItem expandItem)
         {
             Contract.Assert(elementType != null);
             Contract.Assert(property != null);
             Contract.Assert(source != null);
 
-            IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
-            Contract.Assert(declaringType != null, "only entity types are projected.");
+            FilterClause filterClause = expandItem != null ? expandItem.FilterOption : null;
+
+            IEdmStructuredType declaringType;
+            IEdmStructuredType currentType = elementType;
+            if (expandItem != null)
+            {
+                foreach (ODataPathSegment segment in expandItem.PathToNavigationProperty)
+                {
+                    string currentProperty = String.Empty;
+                    PropertySegment propertyAccessPathSegment =
+                         segment as PropertySegment;
+                    if (propertyAccessPathSegment != null)
+                    {
+                        IEdmProperty propertyInPath = propertyAccessPathSegment.Property;
+                        currentProperty = EdmLibHelpers.GetClrPropertyName(propertyInPath, _model);
+                        declaringType = propertyInPath.DeclaringType;
+                        Contract.Assert(!String.IsNullOrEmpty(currentProperty), "Property name could not be found on the model.");
+                        if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                        {
+                            // create expression similar to: 'source == null ? null : propertyValue'
+                            if (declaringType != currentType)
+                            {
+                                Type castType = EdmLibHelpers.GetClrType(property.DeclaringType, _model);
+                                if (castType == null)
+                                {
+                                    throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType,
+                                        property.DeclaringType.FullTypeName()));
+                                }
+
+                                source = Expression.TypeAs(source, castType);
+                            }
+                            Expression propertyExpression = Expression.Property(source, currentProperty);
+                            Type nullablePropType = TypeHelper.ToNullable(propertyExpression.Type);
+
+                            source = Expression.Condition(
+                                test: Expression.Equal(propertyExpression, Expression.Constant(value: null)),
+                                ifTrue: Expression.Constant(value: null, type: nullablePropType),
+                                ifFalse: propertyExpression);
+                        }
+                        else
+                        {
+                            source = Expression.Property(source, currentProperty);
+                        }
+
+                        currentType = propertyInPath.Type.ToStructuredType();
+                    }
+                    else
+                    {
+                        TypeSegment typeSegment = segment as TypeSegment;
+                        if (typeSegment != null)
+                        {
+                            Type castType = EdmLibHelpers.GetClrType(typeSegment.EdmType, _model);
+                            source = Expression.TypeAs(source, castType);
+                            currentType = typeSegment.EdmType as IEdmStructuredType;
+                        }
+                    }
+                }
+            }
 
             // derived property using cast
-            if (elementType != declaringType)
+            if (currentType != property.DeclaringType)
             {
-                Type castType = EdmLibHelpers.GetClrType(declaringType, _model);
+                Type castType = EdmLibHelpers.GetClrType(property.DeclaringType, _model);
                 if (castType == null)
                 {
                     throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType,
-                        declaringType.FullName()));
+                        property.DeclaringType.FullTypeName()));
                 }
 
                 source = Expression.TypeAs(source, castType);
@@ -295,7 +352,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         // Generates the expression
         //      source => new Wrapper { Instance = source, Container = new PropertyContainer { ..expanded properties.. } }
-        private Expression ProjectElement(Expression source, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource)
+        private Expression ProjectElement(Expression source, SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmNavigationSource navigationSource)
         {
             Contract.Assert(source != null);
 
@@ -330,7 +387,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else
             {
                 // Initialize property 'TypeName' on the wrapper class as we don't have the instance.
-                Expression typeName = CreateTypeNameExpression(source, entityType, _model);
+                Expression typeName = CreateTypeNameExpression(source, structuredType, _model);
                 if (typeName != null)
                 {
                     isTypeNamePropertySet = true;
@@ -346,13 +403,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
 
-                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
-                bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
+                ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, structuredType, navigationSource, _model, out autoSelectedProperties);
+                bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, structuredType);
 
                 if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0 || isSelectingOpenTypeSegments)
                 {
                     Expression propertyContainerCreation =
-                        BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
+                        BuildPropertyContainer(structuredType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
 
                     if (propertyContainerCreation != null)
                     {
@@ -370,9 +427,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
         }
 
-        private static bool GetSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmEntityType entityType)
+        private static bool GetSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType)
         {
-            if (!entityType.IsOpen)
+            if (structuredType == null || !structuredType.IsOpen)
             {
                 return false;
             }
@@ -427,7 +484,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
-        private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
+        private Expression BuildPropertyContainer(IEdmStructuredType elementType, Expression source,
             Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand,
             ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
         {
@@ -446,7 +503,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 Expression propertyName = CreatePropertyNameExpression(elementType, propertyToExpand, source);
                 Expression propertyValue = CreatePropertyValueExpressionWithFilter(elementType, propertyToExpand, source,
-                    expandItem.FilterOption);
+                    expandItem);
                 Expression nullCheck = GetNullCheckExpression(propertyToExpand, propertyValue, projection);
 
                 Expression countExpression = CreateTotalCountExpression(propertyValue, expandItem);
@@ -698,9 +755,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         //      source is GrandChild ? "GrandChild" : ( source is Child ? "Child" : "Root" )
         // Notice that the order is important here. The most derived type must be the first to check.
         // If entity framework had a way to figure out the type name without selecting the whole object, we don't have to do this magic.
-        internal static Expression CreateTypeNameExpression(Expression source, IEdmEntityType elementType, IEdmModel model)
+        internal static Expression CreateTypeNameExpression(Expression source, IEdmStructuredType elementType, IEdmModel model)
         {
-            IReadOnlyList<IEdmEntityType> derivedTypes = GetAllDerivedTypes(elementType, model);
+            IReadOnlyList<IEdmStructuredType> derivedTypes = GetAllDerivedTypes(elementType, model);
             if (derivedTypes.Count == 0)
             {
                 // no inheritance.
@@ -708,18 +765,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else
             {
-                Expression expression = Expression.Constant(elementType.FullName());
+                Expression expression = Expression.Constant(elementType.FullTypeName());
                 for (int i = 0; i < derivedTypes.Count; i++)
                 {
                     Type clrType = EdmLibHelpers.GetClrType(derivedTypes[i], model);
                     if (clrType == null)
                     {
-                        throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, derivedTypes[0].FullName()));
+                        throw new ODataException(Error.Format(SRResources.MappingDoesNotContainResourceType, derivedTypes[0].FullTypeName()));
                     }
 
                     expression = Expression.Condition(
                                     test: Expression.TypeIs(source, clrType),
-                                    ifTrue: Expression.Constant(derivedTypes[i].FullName()),
+                                    ifTrue: Expression.Constant(derivedTypes[i].FullTypeName()),
                                     ifFalse: expression);
                 }
 
@@ -729,17 +786,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         // returns all the derived types (direct and indirect) of baseType ordered according to their depth. The direct children
         // are the first in the list.
-        private static IReadOnlyList<IEdmEntityType> GetAllDerivedTypes(IEdmEntityType baseType, IEdmModel model)
+        private static IReadOnlyList<IEdmStructuredType> GetAllDerivedTypes(IEdmStructuredType baseType, IEdmModel model)
         {
-            IEnumerable<IEdmEntityType> allEntityTypes = model.SchemaElements.OfType<IEdmEntityType>();
+            IEnumerable<IEdmStructuredType> allStructuredTypes = model.SchemaElements.OfType<IEdmStructuredType>();
 
-            List<Tuple<int, IEdmEntityType>> derivedTypes = new List<Tuple<int, IEdmEntityType>>();
-            foreach (IEdmEntityType entityType in allEntityTypes)
+            List<Tuple<int, IEdmStructuredType>> derivedTypes = new List<Tuple<int, IEdmStructuredType>>();
+            foreach (IEdmStructuredType structuredType in allStructuredTypes)
             {
-                int distance = IsDerivedTypeOf(entityType, baseType);
+                int distance = IsDerivedTypeOf(structuredType, baseType);
                 if (distance > 0)
                 {
-                    derivedTypes.Add(Tuple.Create(distance, entityType));
+                    derivedTypes.Add(Tuple.Create(distance, structuredType));
                 }
             }
 
@@ -748,7 +805,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         // returns -1 if type does not derive from baseType and a positive number representing the distance
         // between them if it does.
-        private static int IsDerivedTypeOf(IEdmEntityType type, IEdmEntityType baseType)
+        private static int IsDerivedTypeOf(IEdmStructuredType type, IEdmStructuredType baseType)
         {
             int distance = 0;
             while (type != null)
@@ -758,7 +815,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     return distance;
                 }
 
-                type = type.BaseEntityType();
+                type = type.BaseType();
                 distance++;
             }
 
@@ -779,7 +836,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 ExpandedReferenceSelectItem expandItem = selectItem as ExpandedReferenceSelectItem;
                 if (expandItem != null)
                 {
-                    SelectExpandNode.ValidatePathIsSupported(expandItem.PathToNavigationProperty);
+                    SelectExpandNode.ValidatePathIsSupportedForExpand(expandItem.PathToNavigationProperty);
                     NavigationPropertySegment navigationSegment = expandItem.PathToNavigationProperty.LastSegment as NavigationPropertySegment;
                     if (navigationSegment == null)
                     {
@@ -794,8 +851,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         private static ISet<IEdmStructuralProperty> GetPropertiesToIncludeInQuery(
-            SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
+            SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmNavigationSource navigationSource, IEdmModel model, out ISet<IEdmStructuralProperty> autoSelectedProperties)
         {
+            IEdmEntityType entityType = structuredType as IEdmEntityType;
+
             autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
             HashSet<IEdmStructuralProperty> propertiesToInclude = new HashSet<IEdmStructuralProperty>();
 
@@ -805,7 +864,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // only select requested properties and keys.
                 foreach (PathSelectItem pathSelectItem in selectedItems.OfType<PathSelectItem>())
                 {
-                    SelectExpandNode.ValidatePathIsSupported(pathSelectItem.SelectedPath);
+                    SelectExpandNode.ValidatePathIsSupportedForSelect(pathSelectItem.SelectedPath);
                     PropertySegment structuralPropertySegment = pathSelectItem.SelectedPath.LastSegment as PropertySegment;
                     if (structuralPropertySegment != null)
                     {
@@ -813,12 +872,29 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     }
                 }
 
-                // add keys
-                foreach (IEdmStructuralProperty keyProperty in entityType.Key())
+                foreach (ExpandedNavigationSelectItem expandedNavigationSelectItem in selectedItems.OfType<ExpandedNavigationSelectItem>())
                 {
-                    if (!propertiesToInclude.Contains(keyProperty))
+                    foreach (var segment in expandedNavigationSelectItem.PathToNavigationProperty)
                     {
-                        autoSelectedProperties.Add(keyProperty);
+                        PropertySegment propertySegment = segment as PropertySegment;
+                        if (propertySegment != null &&
+                            structuredType.Properties().Contains(propertySegment.Property))
+                        {
+                            propertiesToInclude.Add(propertySegment.Property);
+                            break;
+                        }
+                    }
+                }
+
+                if (entityType != null)
+                {
+                    // add keys
+                    foreach (IEdmStructuralProperty keyProperty in entityType.Key())
+                    {
+                        if (!propertiesToInclude.Contains(keyProperty))
+                        {
+                            autoSelectedProperties.Add(keyProperty);
+                        }
                     }
                 }
 

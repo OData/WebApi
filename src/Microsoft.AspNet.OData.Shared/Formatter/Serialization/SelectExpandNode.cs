@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
@@ -13,13 +14,13 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>
-    /// Describes the set of structural properties and navigation properties and actions to select and navigation properties to expand while 
+    /// Describes the set of structural properties and navigation properties and actions to select and navigation properties to expand while
     /// writing an <see cref="ODataResource"/> in the response.
     /// </summary>
     public class SelectExpandNode
     {
         /// <summary>
-        /// Exists to support backward compatibility as we introduced ExpandedProperties. 
+        /// Exists to support backward compatibility as we introduced ExpandedProperties.
         /// </summary>
         private Dictionary<IEdmNavigationProperty, SelectExpandClause> cachedExpandedClauses;
 
@@ -32,6 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>();
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
+            ExpandedNavigationPropertiesOnComplexTypes = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>();
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
             ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             SelectedActions = new HashSet<IEdmAction>();
@@ -46,6 +48,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="selectExpandNodeToCopy">The instance from which the state for the new instance will be copied.</param>
         public SelectExpandNode(SelectExpandNode selectExpandNodeToCopy)
         {
+            ExpandedNavigationPropertiesOnComplexTypes = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedNavigationPropertiesOnComplexTypes);
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedProperties);
             ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>(selectExpandNodeToCopy.ReferencedNavigationProperties);
 
@@ -66,8 +69,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
         /// <remarks>The default constructor is for unit testing only.</remarks>
         public SelectExpandNode(IEdmStructuredType structuredType, ODataSerializerContext writeContext)
-            : this(writeContext.SelectExpandClause, structuredType, writeContext.Model, writeContext.ExpandReference)
+            : this()
         {
+            Property = writeContext.EdmProperty;
+            PropertiesInPath = writeContext.PropertiesInPath;
+            Initialize(writeContext.SelectExpandClause, structuredType, writeContext.Model, writeContext.ExpandReference);
         }
 
         /// <summary>
@@ -92,6 +98,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="expandedReference">a boolean value indicating whether it's expanded reference.</param>
         internal SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model, bool expandedReference)
             : this()
+        {
+            Initialize(selectExpandClause, structuredType, model, false);
+        }
+
+        private void Initialize(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model, bool expandedReference)
         {
             if (structuredType == null)
             {
@@ -126,12 +137,21 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 HashSet<IEdmNavigationProperty> allNavigationProperties;
                 HashSet<IEdmAction> allActions;
                 HashSet<IEdmFunction> allFunctions;
+                IEnumerable<SelectItem> selectItems = new List<SelectItem>();
 
                 if (entityType != null)
                 {
                     allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
                     allActions = new HashSet<IEdmAction>(model.GetAvailableActions(entityType));
                     allFunctions = new HashSet<IEdmFunction>(model.GetAvailableFunctions(entityType));
+                }
+                else if (structuredType != null)
+                {
+                    allNavigationProperties = new HashSet<IEdmNavigationProperty>(structuredType.NavigationProperties());
+                    
+                    // Currently, the library does not support for bounded operations on complex type. 
+                    allActions = new HashSet<IEdmAction>();
+                    allFunctions = new HashSet<IEdmFunction>();
                 }
                 else
                 {
@@ -168,14 +188,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
                     }
 
-                    BuildExpansions(selectExpandClause, allNavigationProperties);
-
-                    // remove expanded navigation properties from the selected navigation properties.
-                    SelectedNavigationProperties.ExceptWith(ExpandedProperties.Keys);
-
-                    // remove expanded navigation properties from the selected navigation properties.
-                    SelectedNavigationProperties.ExceptWith(ReferencedNavigationProperties);
+                    selectItems = selectExpandClause.SelectedItems;
                 }
+
+                BuildExpansions(selectItems, allNavigationProperties);
+
+                // remove expanded navigation properties from the selected navigation properties.
+                SelectedNavigationProperties.ExceptWith(ExpandedProperties.Keys);
+
+                // remove referenced navigation properties from the selected navigation properties.
+                SelectedNavigationProperties.ExceptWith(ReferencedNavigationProperties);
             }
         }
 
@@ -218,6 +240,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public ISet<IEdmNavigationProperty> ReferencedNavigationProperties { get; private set; }
 
         /// <summary>
+        /// Gets the list of EDM navigation properties to be expanded on ComplexTypes in the response.
+        /// </summary>
+        public IDictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem> ExpandedNavigationPropertiesOnComplexTypes { get; private set; }
+
+        /// <summary>
         /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
         /// </summary>
         public ISet<IEdmStructuralProperty> SelectedComplexProperties { get; private set; }
@@ -242,30 +269,119 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         public ISet<IEdmFunction> SelectedFunctions { get; private set; }
 
-        private void BuildExpansions(SelectExpandClause selectExpandClause, HashSet<IEdmNavigationProperty> allNavigationProperties)
+        /// <summary>
+        /// Gets the path to property corresponding to the SelectExpandNode. Null for a top-level select expand.
+        /// </summary>
+        public Queue<IEdmProperty> PropertiesInPath { get; private set; }
+
+        /// <summary>
+        /// Gets the property corresponding to the SelectExpandNode. Null for a top-level select expand.
+        /// </summary>
+        public IEdmProperty Property { get; private set; }
+
+        private void BuildExpansions(IEnumerable<SelectItem> selectedItems, HashSet<IEdmNavigationProperty> allNavigationProperties)
         {
-            foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
+            foreach (SelectItem selectItem in selectedItems)
             {
                 ExpandedReferenceSelectItem expandReferenceItem = selectItem as ExpandedReferenceSelectItem;
                 if (expandReferenceItem != null)
                 {
-                    ValidatePathIsSupported(expandReferenceItem.PathToNavigationProperty);
+                    ValidatePathIsSupportedForExpand(expandReferenceItem.PathToNavigationProperty);
                     NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandReferenceItem.PathToNavigationProperty.LastSegment;
                     IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
                     if (allNavigationProperties.Contains(navigationProperty))
                     {
                         ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+
                         if (expandItem != null)
                         {
-                            ExpandedProperties.Add(navigationProperty, expandItem);
+                            if (!ExpandedProperties.ContainsKey(navigationProperty))
+                            {
+                                ExpandedProperties.Add(navigationProperty, expandItem);
+                            }
+                            else
+                            {
+                                ExpandedProperties[navigationProperty] = expandItem;
+                            }
                         }
                         else
                         {
                             ReferencedNavigationProperties.Add(navigationProperty);
                         }
                     }
+                    else
+                    {
+                        //This is the case where the navigation property is not on the current type. We need to propagate the expand item to deeper SelectExpandNode.
+                        IEdmStructuralProperty complexProperty = FindNextPropertySegment(expandReferenceItem.PathToNavigationProperty);
+
+                        if (complexProperty != null)
+                        {
+                            SelectExpandClause newClause;
+                            if (ExpandedNavigationPropertiesOnComplexTypes.ContainsKey(complexProperty))
+                            {
+                                SelectExpandClause oldClause = ExpandedNavigationPropertiesOnComplexTypes[complexProperty].SelectAndExpand;
+                                newClause = new SelectExpandClause(
+                                    oldClause.SelectedItems.Concat(new SelectItem[] { expandReferenceItem }), false);
+                            }
+                            else
+                            {
+                                newClause = new SelectExpandClause(new SelectItem[] { expandReferenceItem }, false);
+                            }
+                           
+                            ExpandedNavigationSelectItem newItem = new ExpandedNavigationSelectItem(expandReferenceItem.PathToNavigationProperty, navigationSegment.NavigationSource, newClause);
+                            ExpandedNavigationPropertiesOnComplexTypes.Add(complexProperty, newItem);
+                        }
+                    }
                 }
             }
+        }
+
+        /// <summary>
+        /// Finds the appropriate property segment which should be responsible for propagating the expand item.
+        /// For instance, if we are creating the SelectExpandNode for property p2 for the query ~/EnitySet/Key/p1/p2/p3?$expand=NP, we want to return property p3 here.
+        /// </summary>
+        private IEdmStructuralProperty FindNextPropertySegment(ODataPath path)
+        {
+            IEdmStructuralProperty complexProperty = null;
+            // If the current SelectExpandNode is not top-level and has a property associated with it then return the next property segment from the path.
+            if (Property != null)
+            {
+                Debug.Assert(PropertiesInPath != null, "PropertiesInPath should not be null if Property is not null");
+                Queue<IEdmProperty> propertyQueue = new Queue<IEdmProperty>(PropertiesInPath);
+
+                foreach (ODataPathSegment segment in path)
+                {
+                    PropertySegment propertySegment = segment as PropertySegment;
+                    if (propertySegment != null)
+                    {
+                        complexProperty = propertySegment.Property;
+                        if (propertyQueue.Count == 0)
+                        {
+                            break;
+                        }
+
+                        if (propertyQueue.Peek().Name == complexProperty.Name)
+                        {
+                            propertyQueue.Dequeue();
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Return the first property if top-level resource
+                PropertySegment segment = path.OfType<PropertySegment>().FirstOrDefault();
+                if (segment != null)
+                {
+                    complexProperty = segment.Property;
+                }
+            }
+
+            return complexProperty;
         }
 
         private void BuildSelections(
@@ -286,7 +402,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 PathSelectItem pathSelectItem = selectItem as PathSelectItem;
                 if (pathSelectItem != null)
                 {
-                    ValidatePathIsSupported(pathSelectItem.SelectedPath);
+                    ValidatePathIsSupportedForSelect(pathSelectItem.SelectedPath);
                     ODataPathSegment segment = pathSelectItem.SelectedPath.LastSegment;
 
                     NavigationPropertySegment navigationPropertySegment = segment as NavigationPropertySegment;
@@ -370,9 +486,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
             }
         }
-
         // we only support paths of type 'cast/structuralOrNavPropertyOrAction' and 'structuralOrNavPropertyOrAction'.
-        internal static void ValidatePathIsSupported(ODataPath path)
+        internal static void ValidatePathIsSupportedForSelect(ODataPath path)
         {
             int segmentCount = path.Count();
 
@@ -394,6 +509,27 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 || lastSegment is PropertySegment
                 || lastSegment is OperationSegment
                 || lastSegment is DynamicPathSegment))
+            {
+                throw new ODataException(SRResources.UnsupportedSelectExpandPath);
+            }
+        }
+
+        // we support paths of type 'cast/structuralOrNavPropertyOrAction', 'ComplexObject/cast/StructuralOrNavPropertyOnAction', 'ComplexObject/structuralOrNavPropertyOnAction' and 'structuralOrNavPropertyOrAction'.
+        internal static void ValidatePathIsSupportedForExpand(ODataPath path)
+        {
+            ODataPathSegment lastSegment = path.LastSegment;
+            foreach (ODataPathSegment segment in path)
+            {
+                if (!(segment is TypeSegment || segment is PropertySegment || (segment == lastSegment)))
+                {
+                    throw new ODataException(SRResources.UnsupportedSelectExpandPath);
+                }
+            }
+
+            if (!(lastSegment is NavigationPropertySegment
+                  || lastSegment is PropertySegment
+                  || lastSegment is OperationSegment
+                  || lastSegment is DynamicPathSegment))
             {
                 throw new ODataException(SRResources.UnsupportedSelectExpandPath);
             }

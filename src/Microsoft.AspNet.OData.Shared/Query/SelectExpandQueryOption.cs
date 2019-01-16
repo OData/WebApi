@@ -592,7 +592,16 @@ namespace Microsoft.AspNet.OData.Query
                 item = new ExpandedNavigationSelectItem(
                     expandItem.PathToNavigationProperty,
                     expandItem.NavigationSource,
-                    currentSelectExpandClause);
+                    currentSelectExpandClause,
+                    expandItem.FilterOption,
+                    expandItem.OrderByOption,
+                    expandItem.TopOption,
+                    expandItem.SkipOption,
+                    expandItem.CountOption,
+                    expandItem.SearchOption,
+                    null,
+                    expandItem.ComputeOption,
+                    expandItem.ApplyOption);
 
                 level--;
 

@@ -254,6 +254,42 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "The query option is not bound to any CLR type. 'ApplyTo' is only supported with a query option bound to a CLR type.");
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProcessLevelsCorrectly_PreserveOtherOptions(bool autoSelect)
+        {
+            // Arrange
+            var model = ODataLevelsTest.GetEdmModel();
+            var entityType = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.LevelsEntity");
+            var context = new ODataQueryContext(
+                model,
+                entityType);
+
+            if (autoSelect)
+            {
+                var modelBound = model.GetAnnotationValue<ModelBoundQuerySettings>(entityType) ?? new ModelBoundQuerySettings();
+                modelBound.DefaultSelectType = SelectExpandType.Automatic;
+                model.SetAnnotationValue(entityType, modelBound);
+            }
+
+            context.RequestContainer = new MockContainer();
+            var selectExpand = new SelectExpandQueryOption(
+                select: null,
+                expand: "Parent($filter=Cnt gt 1;$apply=aggregate($count as Cnt))",
+                context: context);
+            selectExpand.LevelsMaxLiteralExpansionDepth = 1;
+
+            // Act
+            SelectExpandClause clause = selectExpand.ProcessLevels();
+
+            // Assert
+            var item = Assert.IsType<ExpandedNavigationSelectItem>(clause.SelectedItems.Single());
+            Assert.NotNull(item.FilterOption);
+            Assert.NotNull(item.ApplyOption);
+        }
+
+
         [Fact]
         public void ProcessLevelsCorrectly_AllSelected()
         {

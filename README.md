@@ -98,7 +98,9 @@ Please refer to the [CONTRIBUTION.md](https://github.com/OData/WebApi/blob/maste
 Please visit the [OData Web API pages](http://odata.github.io/WebApi).
 
 ### Samples
-Please refer to the [ODataSamples WebApi](https://github.com/OData/ODataSamples/tree/master/WebApi).
+Please refer to the [ODataSamples Repro](https://github.com/OData/ODataSamples).
+* ASP.NET Core OData samples at [here](https://github.com/OData/ODataSamples/tree/master/WebApiCore)
+* ASP.NET Classic OData samples at [here](https://github.com/OData/ODataSamples/tree/master/WebApiClassic)
 
 ### Debug
 Please refer to the [How to debug](http://odata.github.io/WebApi/10-01-debug-webapi-source).

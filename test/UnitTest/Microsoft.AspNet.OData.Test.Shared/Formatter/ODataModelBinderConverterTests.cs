@@ -11,7 +11,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
     {
 
         /// <summary>
-        /// The 
+        /// The set of potential values to test against 
+        /// <see cref="ODataModelBinderConverter.Convert(object, IEdmTypeReference, Type, string, OData.Formatter.Deserialization.ODataDeserializerContext, IServiceProvider)"/>.
         /// </summary>
         public static TheoryDataSet<object, EdmPrimitiveTypeKind, Type, object> ODataModelBinderConverter_Works_TestData
         {

@@ -165,6 +165,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\CollectionDeserializationHelpersTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataActionPayloadDeserializerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializationTestsCommon.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataModelBinderConverterTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataEntityReferenceLinksSerializerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataEnumTypeSerializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataRawValueSerializerTests.cs" />

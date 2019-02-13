@@ -610,13 +610,10 @@ namespace Microsoft.AspNet.OData.Query
                     ? entityType.Key()
                     : entityType
                         .StructuralProperties()
-                        .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream());
+                        .Where(property => property.Type.IsPrimitive() && !property.Type.IsStream())
+                        .OrderBy(p => p.Name);
 
-            return properties.OrderBy(o =>
-            {
-                var value = o.DeclaringType as PrimitivePropertyConfiguration;
-                return value == null ? 0 : value.Order;
-            }).ThenBy(o => o.Name).ToList();
+            return properties.ToList();
         }
 
         // Generates the OrderByQueryOption to use by default for $skip or $top

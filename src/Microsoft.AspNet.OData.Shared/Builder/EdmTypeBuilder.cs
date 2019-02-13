@@ -370,11 +370,11 @@ namespace Microsoft.AspNet.OData.Builder
             Contract.Assert(config != null);
 
             CreateStructuralTypeBody(type, config);
-            IEnumerable<IEdmStructuralProperty> keys = config.Keys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
-            type.AddKeys(keys);
-
-            // Add the Enum keys
-            keys = config.EnumKeys.Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
+            var keys = ((IEnumerable<PropertyConfiguration>)config.Keys)
+                                     .Concat(config.EnumKeys)
+                                     .OrderBy(p => p.Order)
+                                     .ThenBy(p => p.Name)
+                                     .Select(p => type.DeclaredProperties.OfType<IEdmStructuralProperty>().First(dp => dp.Name == p.Name));
             type.AddKeys(keys);
         }
 

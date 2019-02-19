@@ -1,5 +1,10 @@
+---
+layout: post
+title: "12.4 Navigation Properties on Complex Types"
+description: "Changes required to support navigation properties on complex types in WebAPI"
+category: "12. Design"
+---
 # NAVIGATION PROPERTIES ON COMPLEX TYPES
-
 ## 1	OVERVIEW
 ### 1.1	INTRODUCTION
 In WebAPI, navigation properties were only allowed on entity types. This design will now enable support for navigation properties on complex types as well. 

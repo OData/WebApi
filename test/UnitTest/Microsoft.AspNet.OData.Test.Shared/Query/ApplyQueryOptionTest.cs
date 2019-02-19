@@ -769,6 +769,13 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
                         }
                     },
+                    {
+                        "$apply=compute(0 as ComputeProperty)/groupby((ComputeProperty))&$orderby=ComputeProperty desc",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "ComputeProperty", 0}},
+                        }
+                    },
                 };
             }
         }
@@ -1152,6 +1159,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var address0 = results[0]["Address"] as JObject;
             Assert.Equal("redmond", address0["City"].ToString());
         }
+
 
         private object GetValue(DynamicTypeWrapper wrapper, string path)
         {

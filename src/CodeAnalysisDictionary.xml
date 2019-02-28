@@ -55,6 +55,9 @@
             <Word>ModelName</Word>
             <Word>BSON</Word>
             <Word>Untyped</Word>
+            <Word>Insertable</Word>
+            <Word>Updatable</Word>
+            <Word>Deletable</Word>
         </Recognized>
         <Compound>
             <Term CompoundAlternate="WebPage">WebPage</Term>

@@ -495,10 +495,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private Expression WrapConvert(Expression expression)
         {
-            // Expression that we are generating looks like Value = $it.PropertyName where Value is defined as object, but PropertyName can be any type 
-            // Proper .NET expression must look like as Value = (object) $it.PropertyName or AccessViolationExceptino will be thrown
+            // Expression that we are generating looks like Value = $it.PropertyName where Value is defined as object and PropertyName can be value 
+            // Proper .NET expression must look like as Value = (object) $it.PropertyName for proper boxing or AccessViolationException will be thrown
             // Cast to object isn't translatable by EF6 as a result skipping (object) in that case
-            return this._classicEF
+            return (this._classicEF || !expression.Type.IsValueType)
                 ? expression
                 : Expression.Convert(expression, typeof(object));
         }

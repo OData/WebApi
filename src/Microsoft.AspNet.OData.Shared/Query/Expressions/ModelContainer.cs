@@ -14,19 +14,24 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// </summary>
     internal static class ModelContainer
     {
-        private static ConcurrentDictionary<IEdmModel, string> _map = new ConcurrentDictionary<IEdmModel, string>();
-        private static ConcurrentDictionary<string, IEdmModel> _reverseMap = new ConcurrentDictionary<string, IEdmModel>();
+        private static ConcurrentDictionary<string, IEdmModel> _map = new ConcurrentDictionary<string, IEdmModel>();
 
         public static string GetModelID(IEdmModel model)
         {
-            string index = _map.GetOrAdd(model, m => Guid.NewGuid().ToString());
-            _reverseMap.TryAdd(index, model);
+            string index = Guid.NewGuid().ToString();
+            _map.TryAdd(index, model);
             return index;
         }
 
         public static IEdmModel GetModel(string id)
         {
-            return _reverseMap[id];
+            return _map[id];
+        }
+
+        public static void RemoveModelId(string id)
+        {
+            IEdmModel model;
+            _map.TryRemove(id, out model);
         }
     }
 }

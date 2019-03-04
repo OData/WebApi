@@ -28,3 +28,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder.#.cctor()")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "type", Target = "Microsoft.AspNet.OData.Query.Expressions.PropertyContainer", Justification = "Using generated classes to simulate b-tree.")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "member", Target = "Microsoft.AspNet.OData.Query.Expressions.PropertyContainer.#.cctor()", Justification = "Using generated classes to simulate b-tree.")]
+[assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "type", Target = "Microsoft.AspNet.OData.EnableQueryAttribute")]

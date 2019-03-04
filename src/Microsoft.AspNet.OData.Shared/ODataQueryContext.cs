@@ -8,6 +8,7 @@ using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
@@ -20,6 +21,7 @@ namespace Microsoft.AspNet.OData
     public class ODataQueryContext
     {
         private DefaultQuerySettings _defaultQuerySettings;
+        private string modelId = null;
 
         /// <summary>
         /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
@@ -72,16 +74,28 @@ namespace Microsoft.AspNet.OData
             {
                 throw Error.ArgumentNull("model");
             }
+
             if (elementType == null)
             {
                 throw Error.ArgumentNull("elementType");
             }
 
-            Model = model;
             ElementType = elementType;
+            Model = model;
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
             GetPathContext();
+        }
+
+        /// <summary>
+        /// Destructor called to clean up reference in ModelContainer
+        /// </summary>
+        ~ODataQueryContext()
+        {
+            if (this.modelId != null)
+            {
+                ModelContainer.RemoveModelId(ModelId);
+            }
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)
@@ -151,6 +165,19 @@ namespace Microsoft.AspNet.OData
         internal IEdmStructuredType TargetStructuredType { get; private set; }
 
         internal string TargetName { get; private set; }
+
+        internal string ModelId
+        {
+            get
+            {
+                if (this.modelId == null)
+                {
+                    this.modelId = ModelContainer.GetModelID(this.Model);
+                }
+
+                return this.modelId;
+            }
+        }
 
         private static IEdmNavigationSource GetNavigationSource(IEdmModel model, IEdmType elementType, ODataPath odataPath)
         {

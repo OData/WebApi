@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -374,7 +375,7 @@ namespace Microsoft.AspNet.OData
         {
             if (!_querySettings.PageSize.HasValue && responseValue != null)
             {
-                GetModelBoundPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path, createErrorAction);
+                GetModelBoundPageSize(responseValue, singleResultCollection, actionDescriptor, modelFunction, request, createErrorAction);
             }
 
             // Apply the query if there are any query options, if there is a page size set, in the case of
@@ -486,22 +487,23 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Get the ODaya query context.
+        /// Get the OData query context.
         /// </summary>
         /// <param name="responseValue">The response value.</param>
         /// <param name="singleResultCollection">The content as SingleResult.Queryable.</param>
         /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
         /// <param name="modelFunction">A function to get the model.</param>
-        /// <param name="path">The OData path.</param>
+        /// <param name="request">The request message</param>
         /// <returns></returns>
         private static ODataQueryContext GetODataQueryContext(
             object responseValue,
             IQueryable singleResultCollection,
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
-            ODataPath path)
+            IWebApiRequestMessage request)
         {
             Type elementClrType = GetElementType(responseValue, singleResultCollection, actionDescriptor);
+            ODataPath path = request.Context.Path;
 
             IEdmModel model = modelFunction(elementClrType);
             if (model == null)
@@ -509,7 +511,10 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            return new ODataQueryContext(model, elementClrType, path);
+            ODataQueryContext queryContext = new ODataQueryContext(model, elementClrType, path);
+            RegisterContext(request, queryContext);
+
+            return queryContext;
         }
 
         /// <summary>
@@ -519,21 +524,21 @@ namespace Microsoft.AspNet.OData
         /// <param name="singleResultCollection">The content as SingleResult.Queryable.</param>
         /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
         /// <param name="modelFunction">A function to get the model.</param>
-        /// <param name="path">The OData path.</param>
+        /// <param name="request">The request message.</param>
         /// <param name="createErrorAction">A function used to generate error response.</param>
         private void GetModelBoundPageSize(
             object responseValue,
             IQueryable singleResultCollection,
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
-            ODataPath path,
+            IWebApiRequestMessage request,
             Action<HttpStatusCode, string, Exception> createErrorAction)
         {
             ODataQueryContext queryContext = null;
 
             try
             {
-                queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, path);
+                queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request);
             }
             catch (InvalidOperationException e)
             {
@@ -571,7 +576,8 @@ namespace Microsoft.AspNet.OData
             IWebApiRequestMessage request,
             Func<ODataQueryContext, ODataQueryOptions> createQueryOptionFunction)
         {
-            ODataQueryContext queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path);
+            ODataQueryContext queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request);
+            RegisterContext(request, queryContext);
 
             // Create and validate the query options.
             ODataQueryOptions queryOptions = createQueryOptionFunction(queryContext);

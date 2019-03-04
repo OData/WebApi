@@ -19,14 +19,6 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
-        public void GetModelID_Returns_SameIDForSameModel()
-        {
-            EdmModel model = new EdmModel();
-
-            Assert.Equal(ModelContainer.GetModelID(model), ModelContainer.GetModelID(model));
-        }
-
-        [Fact]
         public void GetModelID_AndThen_GetModel_ReturnsOriginalModel()
         {
             EdmModel model = new EdmModel();

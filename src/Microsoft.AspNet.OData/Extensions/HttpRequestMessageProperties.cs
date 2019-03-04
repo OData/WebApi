@@ -38,6 +38,7 @@ namespace Microsoft.AspNet.OData.Extensions
         private const string TotalCountFuncKey = "Microsoft.AspNet.OData.TotalCountFunc";
 
         private HttpRequestMessage _request;
+        private IList<ODataQueryContext> _queryContexts = new List<ODataQueryContext>();
 
         internal HttpRequestMessageProperties(HttpRequestMessage request)
         {
@@ -221,6 +222,14 @@ namespace Microsoft.AspNet.OData.Extensions
             private set
             {
                 _request.Properties[RoutingConventionsStoreKey] = value;
+            }
+        }
+
+        internal IList<ODataQueryContext> QueryContexts
+        {
+            get
+            {
+                return _queryContexts;
             }
         }
 

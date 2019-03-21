@@ -320,6 +320,10 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     {
                         nameInRouteData = uriTemplateExpression.LiteralText.Trim();
                     }
+                    else
+                    {
+                        nameInRouteData = node.Value as string;
+                    }
                 }
                 else
                 {

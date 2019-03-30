@@ -310,6 +310,12 @@ namespace Microsoft.AspNet.OData.Test.Common
             getSalaray.AddOptionalParameter("aveSalary", intType, "129");
             model.AddElement(getSalaray);
 
+            //function with int and string parameter
+            EdmFunction getAvailability = new EdmFunction("NS", "GetAvailability", stringType, isBound: true, entitySetPathExpression: null, isComposable: false);
+            getAvailability.AddParameter("entityset", new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(customer, false))));
+            getAvailability.AddParameter("Region", stringType);
+            getAvailability.AddParameter("Unit", intType);
+            model.AddElement(getAvailability);
             // navigation properties
             EdmNavigationProperty ordersNavProp = customer.AddUnidirectionalNavigation(
                 new EdmNavigationPropertyInfo

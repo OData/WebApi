@@ -226,6 +226,14 @@ namespace Microsoft.AspNet.OData.Test.Routing
             {
                 return "GetWholeSalary(" + min + "," + max + "," + ave + ")";
             }
+            
+            [HttpGet]
+            [ODataRoute("Customers/NS.GetAvailability(Region='{Region}',Unit={Unit})")]
+            public string GetAvailability(string Region, int Unit)
+            {
+                return "GetAvailability('" + Region + "'," + Unit + ")";
+            }
+
 
             [HttpGet]
             [ODataRoute("Customers({id})/NS.SpecialCustomer/NS.GetSalary()")]

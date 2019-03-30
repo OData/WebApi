@@ -111,6 +111,14 @@ namespace Microsoft.AspNet.OData.Test.Routing
         }
 
         [Fact]
+        public void Parse_OperationTemplate()
+        {
+            string odataPath = "Availability/Default.FindAvailability(Region='{Region}',Unit={Unit})";
+
+            _parser.Parse(_model, _serviceRoot, odataPath);
+        }
+        
+        [Fact]
         public void Parse_ForInvalidCast_ThrowsODataException()
         {
             string odataPath = "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.Product";
@@ -2286,6 +2294,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("Customers/NS.GetWholeSalary(minSalary=7)", "Customers/NS.GetWholeSalary(minSalary={min})", new string[] { "min:7" })]
         [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max})", new string[] { "min:7", "max:8" })]
         [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8,aveSalary=9)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max},aveSalary={ave})", new string[] { "min:7", "max:8", "ave:9" })]
+        [InlineData("Customers/NS.GetAvailability(Region='NZ',Unit=5)", "Customers/NS.GetAvailability(Region='{Region}',Unit={Unit})", new string[] { "Region:NZ", "Unit:5"})]
         public void ParseTemplate(string path, string template, string[] keyValues)
         {
             // Arrange

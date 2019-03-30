@@ -111,14 +111,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
         }
 
         [Fact]
-        public void Parse_OperationTemplate()
-        {
-            string odataPath = "Availability/Default.FindAvailability(Region='{Region}',Unit={Unit})";
-
-            _parser.Parse(_model, _serviceRoot, odataPath);
-        }
-        
-        [Fact]
         public void Parse_ForInvalidCast_ThrowsODataException()
         {
             string odataPath = "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.Product";

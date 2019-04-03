@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Query
         internal const string ObjectContextQueryProviderNamespaceEF6 = "System.Data.Entity.Core.Objects.ELinq";
         internal const string ObjectContextQueryProviderNamespaceEFCore2 = "Microsoft.EntityFrameworkCore.Query.Internal";
 
-        private const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
+        internal const string Linq2SqlQueryProviderNamespace = "System.Data.Linq";
         internal const string Linq2ObjectsQueryProviderNamespace = "System.Linq";
 
         public static bool IsDefined(HandleNullPropagationOption value)

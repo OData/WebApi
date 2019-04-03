@@ -18,8 +18,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
     public class AggregationTestsEFClassic: AggregationTests
     {
-        protected override string AggregationTestBaseUrl => "{0}/aggregation/Customers";
-
         public AggregationTestsEFClassic(WebHostTestFixture fixture)
             : base(fixture)
         {
@@ -57,8 +55,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 #if NETCORE
     public class AggregationTestsEFCoreInMemory : AggregationTests
     {
-        protected override string AggregationTestBaseUrl => "{0}/aggregation/Customers";
-
         public AggregationTestsEFCoreInMemory(WebHostTestFixture fixture)
             : base(fixture)
         {
@@ -73,8 +69,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
     public class AggregationTestsEFCoreSql : AggregationTests
     {
-        protected override string AggregationTestBaseUrl => "{0}/aggregation/Customers";
-
         public AggregationTestsEFCoreSql(WebHostTestFixture fixture)
             : base(fixture)
         {
@@ -88,9 +82,51 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 #endif
 
+
+    public class LinqToSqlAggregationTests : WebHostTestBase
+    {
+        protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
+
+        public LinqToSqlAggregationTests(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(LinqToSqlCustomersController));
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.MapODataServiceRoute("aggregation", "aggregation",
+                AggregationEdmModel.GetEdmModel(configuration));
+        }
+
+        [Fact]
+        public async Task ApplyThrows()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=aggregate($count as Count)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("$apply query options not supported for LINQ to SQL providers",result);
+        }
+
+    }
+
     public abstract class AggregationTests : WebHostTestBase
     {
-        protected virtual string AggregationTestBaseUrl { get; }
+        protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
 
         public AggregationTests(WebHostTestFixture fixture)
             :base(fixture)
@@ -122,7 +158,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;
@@ -208,7 +243,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
@@ -241,7 +275,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Single(results);
@@ -326,7 +359,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Assert
 
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
@@ -365,7 +397,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Single(results);
@@ -438,7 +469,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
@@ -90,6 +91,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             ResetDataSource();
             var db = new AggregationContext();
             return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
+        }
+    }
+
+    public class LinqToSqlCustomersController : BaseCustomersController
+    {
+        [EnableQuery]
+        [ODataRoute("Customers")]
+        public IQueryable<Customer> Get()
+        {
+            var db = new LinqToSqlDatabaseContext();
+            return db.Customers;
+        }
+
+        [EnableQuery]
+        public TestSingleResult<Customer> Get(int key)
+        {
+            throw new NotSupportedException();
         }
     }
 

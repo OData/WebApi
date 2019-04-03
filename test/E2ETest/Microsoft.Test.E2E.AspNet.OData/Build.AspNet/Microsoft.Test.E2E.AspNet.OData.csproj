@@ -83,6 +83,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data.Entity" />
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.WebRequest" />
@@ -1813,6 +1814,7 @@
     <Compile Include="..\Validation\DeltaOfTValidationTests.cs">
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
+    <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

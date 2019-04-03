@@ -19,6 +19,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public DbSet<Customer> Customers { get; set; }
     }
 
+    [System.Data.Linq.Mapping.Table(Name = "Customer")]
     public class Customer
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]

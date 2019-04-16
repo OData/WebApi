@@ -21,6 +21,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 return new TheoryDataSet<object, EdmPrimitiveTypeKind, Type, object>
                 {
                     { "true", EdmPrimitiveTypeKind.Boolean, typeof(bool), true },
+                    { true, EdmPrimitiveTypeKind.Boolean, typeof(bool), true },
                     { 5, EdmPrimitiveTypeKind.Int32, typeof(int),  5 },
                     { new Guid("C2AEFDF2-B533-4971-8B6A-A539373BFC32"), EdmPrimitiveTypeKind.Guid, typeof(Guid), new Guid("C2AEFDF2-B533-4971-8B6A-A539373BFC32") }
                 };

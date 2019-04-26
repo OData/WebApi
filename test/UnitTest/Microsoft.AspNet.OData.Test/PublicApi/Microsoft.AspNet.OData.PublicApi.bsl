@@ -3680,3 +3680,4 @@ public class Microsoft.AspNet.OData.Routing.Template.TypeSegmentTemplate : OData
 
 	public virtual bool TryMatch (Microsoft.OData.UriParser.ODataPathSegment pathSegment, System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] values)
 }
+

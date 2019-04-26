@@ -186,7 +186,16 @@ namespace Microsoft.AspNet.OData.Query
             return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenQueryOption.RawValue);
         }
 
-        private static IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes, ODataQueryContext context, string skipTokenRawValue)
+        /// <summary>
+        /// Core logic for applying the query option to the IQueryable. 
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        /// <param name="querySettings">Query setting used for validating the query option.</param>
+        /// <param name="orderByNodes">OrderBy information required to correctly apply the query option for default implementation.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <param name="skipTokenRawValue">The raw string value of the skiptoken query parameter.</param>
+        /// <returns></returns>
+        protected static IQueryable ApplyToCore(IQueryable query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes, ODataQueryContext context, string skipTokenRawValue)
         {
             if (context.ElementClrType == null)
             {
@@ -250,7 +259,13 @@ namespace Microsoft.AspNet.OData.Query
             return ExpressionHelpers.Where(query, whereLambda, query.ElementType);
         }
 
-        private static IDictionary<string, object> PopulatePropertyValuePairs(string value, ODataQueryContext context)
+        /// <summary>
+        /// Generates a dictionary with property name and property values specified in the skiptoken value.
+        /// </summary>
+        /// <param name="value">The skiptoken string value.</param>
+        /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information</param>
+        /// <returns>Dictionary with property name and property value in the skiptoken value.</returns>
+        protected static IDictionary<string, object> PopulatePropertyValuePairs(string value, ODataQueryContext context)
         {
             Contract.Assert(context != null);
 
@@ -282,7 +297,14 @@ namespace Microsoft.AspNet.OData.Query
             return propertyValuePairs;
         }
 
-        private static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
+        /// <summary>
+        /// Returns the list of properties that should be used for generating the skiptoken value. 
+        /// </summary>
+        /// <param name="lastMember">The last record that will be returned in the response.</param>
+        /// <param name="model">IEdmModel</param>
+        /// <param name="orderByNodes">OrderBy nodes in the original request.</param>
+        /// <returns>List of properties that should be used for generating the skiptoken value.</returns>
+        protected static IEnumerable<IEdmProperty> GetPropertiesForSkipToken(object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
         {
             IEdmType edmType = GetTypeFromObject(lastMember, model);
             IEdmEntityType entity = edmType as IEdmEntityType;
@@ -315,7 +337,12 @@ namespace Microsoft.AspNet.OData.Query
             return key.AsEnumerable();
         }
 
-        private static IDictionary<string, OrderByDirection> PopulateDirections(IList<OrderByNode> orderByNodes)
+        /// <summary>
+        /// Generates a map of node and direction.
+        /// </summary>
+        /// <param name="orderByNodes">OrderBy nodes in the original request.</param>
+        /// <returns>A map of node and direction.</returns>
+        protected static IDictionary<string, OrderByDirection> PopulateDirections(IList<OrderByNode> orderByNodes)
         {
             IDictionary<string, OrderByDirection> directions = new Dictionary<string, OrderByDirection>();
             if (orderByNodes == null)
@@ -333,7 +360,13 @@ namespace Microsoft.AspNet.OData.Query
             return directions;
         }
 
-        private static IEdmType GetTypeFromObject(object obj, IEdmModel model)
+        /// <summary>
+        /// Gets the EdmType from the Instance which may be a select expand wrapper.
+        /// </summary>
+        /// <param name="obj">Instance</param>
+        /// <param name="model">IEdmModel</param>
+        /// <returns>The EdmType of the underlying instance.</returns>
+        protected static IEdmType GetTypeFromObject(object obj, IEdmModel model)
         {
             SelectExpandWrapper selectExpand = obj as SelectExpandWrapper;
             if (selectExpand != null)

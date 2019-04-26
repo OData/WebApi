@@ -47,6 +47,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.CombinedTest
         [InlineData(ModelBoundOrderBaseUrl + "?$top=4", "top")]
         public async Task DefaultQuerySettings(string url, string error)
         {
+            // Some of these tests error out unexpectedly in the build pipeline.
             string queryUrl =
                 string.Format(
                     url,

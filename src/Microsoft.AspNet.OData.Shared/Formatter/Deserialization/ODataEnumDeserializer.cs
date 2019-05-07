@@ -60,28 +60,31 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 item = property.Value;
             }
 
-            IEdmEnumTypeReference enumTypeReference = (IEdmEnumTypeReference)edmType;
-            IEdmEnumType enumType = enumTypeReference.EnumDefinition();
+            IEdmEnumTypeReference enumTypeReference = edmType as IEdmEnumTypeReference;
+            IEdmEnumType enumType = enumTypeReference?.EnumDefinition();
             ODataEnumValue enumValue = item as ODataEnumValue;
-            if (readContext.IsUntyped)
+            if (readContext.IsUntyped && enumTypeReference != null)
             {
                 Contract.Assert(edmType.TypeKind() == EdmTypeKind.Enum);
                 return new EdmEnumObject(enumTypeReference, enumValue.Value);
             }
 
             // Enum member supports model alias case. So, try to use the Edm member name to retrieve the Enum value.
-            var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation(enumType);
-            if (memberMapAnnotation != null)
+            if (enumType != null)
             {
-                if (enumValue != null)
+                var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation(enumType);
+                if (memberMapAnnotation != null)
                 {
-                    IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == enumValue.Value);
-                    if (enumMember != null)
+                    if (enumValue != null)
                     {
-                        var clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
-                        if (clrMember != null)
+                        IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == enumValue.Value);
+                        if (enumMember != null)
                         {
-                            return clrMember;
+                            var clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
+                            if (clrMember != null)
+                            {
+                                return clrMember;
+                            }
                         }
                     }
                 }

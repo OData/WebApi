@@ -247,5 +247,79 @@ namespace Microsoft.AspNet.OData.Test
         {
             public Color? NullableColor { get; set; }
         }
+
+        [Fact]
+        public void AlternativeModelEnumValueDeserializerTest()
+        {
+            // Arrange
+            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
+            ODataResource resourceValue = new ODataResource
+            {
+                Properties = new[]
+                {
+                    new ODataProperty { Name = "AccountType", Value = new ODataEnumValue("Personal") }
+                },
+                TypeName = "Microsoft.AspNet.OData.Test.Builder.TestModels.Account"
+            };
+
+            IEdmModel model = GetAlternativeEdmModel();
+            ODataDeserializerContext readContext = new ODataDeserializerContext() { Model = model };
+            IEdmTypeReference edmTypeReference = model.GetEdmTypeReference(typeof(Microsoft.AspNet.OData.Test.Builder.TestModels.Account));
+            IEdmStructuredTypeReference enumStructuredTypeReference = edmTypeReference.AsStructured();
+
+            // Act
+            var account = deserializer.ReadResource(new ODataResourceWrapper(resourceValue), enumStructuredTypeReference, readContext) as Microsoft.AspNet.OData.Test.Builder.TestModels.Account;
+
+            // Assert
+            Assert.NotNull(account);
+            Assert.Equal(Microsoft.AspNet.OData.Test.Builder.TestModels.AccountType.Personal, account.AccountType);
+        }
+
+        private IEdmModel GetAlternativeEdmModel()
+        {
+            const string edmx = @"<edmx:Edmx Version=""4.0"" xmlns:edmx=""http://docs.oasis-open.org/odata/ns/edmx"">
+                  <edmx:DataServices>
+                    <Schema Namespace=""Microsoft.AspNet.OData.Test.Builder.TestModels"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+                      <EntityType Name=""Account"">
+                        <Key>
+                          <PropertyRef Name=""AccountId"" />
+                        </Key>
+                        <Property Name=""AccountId"" Type=""Edm.Guid"" Nullable=""false"" />
+                        <Property Name=""Name"" Type=""Edm.String"" />
+                        <Property Name=""AccountType"" Type=""Microsoft.AspNet.OData.Test.Builder.TestModels.AccountType"" Nullable=""false"" />
+                      </EntityType>
+                      <EnumType Name=""AccountType"">
+                        <Member Name=""Corporate"" Value=""0"" />
+                        <Member Name=""Personal"" Value=""1"" />
+                        <Member Name=""Unknown"" Value=""2"" />
+                      </EnumType>
+                    </Schema>
+                    <Schema Namespace=""Default"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
+                      <EntityContainer Name=""AccountService"">
+                        <EntitySet Name=""Accounts"" EntityType=""Microsoft.AspNet.OData.Test.Builder.TestModels.Account"" />
+                      </EntityContainer>
+                    </Schema>
+                  </edmx:DataServices>
+                </edmx:Edmx>";
+            System.Xml.XmlReader reader = System.Xml.XmlReader.Create(new System.IO.StringReader(edmx));
+            return Microsoft.OData.Edm.Csdl.CsdlReader.Parse(reader);
+        }
+    }
+}
+
+namespace Microsoft.AspNet.OData.Test.Builder.TestModels
+{
+    public enum AccountType
+    {
+        Corporate = 0,
+        Personal = 1,
+        Unknown = 2,
+    }
+
+    public class Account
+    {
+        public Guid AccountId { get; set; }
+        public string Name { get; set; }
+        public AccountType AccountType { get; set; }
     }
 }

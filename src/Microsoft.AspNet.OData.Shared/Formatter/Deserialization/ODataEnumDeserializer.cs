@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             IEdmEnumTypeReference enumTypeReference = edmType as IEdmEnumTypeReference;
-            IEdmEnumType enumType = enumTypeReference?.EnumDefinition();
+            IEdmEnumType enumType = enumTypeReference != null ? enumTypeReference.EnumDefinition() : null;
             ODataEnumValue enumValue = item as ODataEnumValue;
             if (readContext.IsUntyped && enumTypeReference != null)
             {

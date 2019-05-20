@@ -1803,7 +1803,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("PropertyMustBeDateTimeOffsetOrDate", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a boolean..
+        /// </summary>
+        internal static string PropertyMustBeBoolean
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyMustBeBoolean", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The value with type &apos;{0}&apos; must have type &apos;{1}&apos;..
         /// </summary>

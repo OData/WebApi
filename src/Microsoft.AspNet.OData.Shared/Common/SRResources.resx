@@ -895,4 +895,7 @@
   <data name="AggregateKindNotSupported" xml:space="preserve">
     <value>{0} type of aggregation is not supported.</value>
   </data>
+  <data name="PropertyMustBeBoolean" xml:space="preserve">
+    <value>The value must be a boolean.</value>
+  </data>
 </root>

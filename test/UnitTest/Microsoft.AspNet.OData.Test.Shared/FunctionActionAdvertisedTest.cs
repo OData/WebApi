@@ -90,12 +90,14 @@ namespace Microsoft.AspNet.OData.Test
             new Account
             {
                 Id = 1,
+                AccountType = AccountType.Corporate,
                 PayinPIs = new List<PaymentInstrument>(),
                 PayoutPI = new PaymentInstrument { Id = 11 }
             },
             new PreminumAccount
             {
                 Id = 2,
+                AccountType = AccountType.Personal,
                 PayinPIs = new List<PaymentInstrument>(),
                 PayoutPI = new PaymentInstrument { Id = 22 },
                 Name = "Sam"
@@ -106,6 +108,8 @@ namespace Microsoft.AspNet.OData.Test
     public class Account
     {
         public int Id { get; set; }
+
+        public AccountType AccountType { get; set; }
 
         public PaymentInstrument PayoutPI { get; set; }
 
@@ -120,5 +124,12 @@ namespace Microsoft.AspNet.OData.Test
     public class PaymentInstrument
     {
         public int Id { get; set; }
+    }
+
+    public enum AccountType
+    {
+        Corporate = 0,
+        Personal = 1,
+        Unknown = 2,
     }
 }

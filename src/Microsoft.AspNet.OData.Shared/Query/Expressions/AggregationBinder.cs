@@ -466,7 +466,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             var lambdaParameter = baseType == this._elementType ? this._lambdaParameter : Expression.Parameter(baseType, "$it");
             if (!this._preFlattenedMap.TryGetValue(expression.Expression, out body))
             {
-                body = BindAccessor(expression.Expression);
+                body = BindAccessor(expression.Expression, lambdaParameter);
             }
             LambdaExpression propertyLambda = Expression.Lambda(body, lambdaParameter);
 

@@ -748,13 +748,14 @@ namespace Microsoft.AspNet.OData.Query
 
             foreach (KeyValuePair<string, string> kvp in InternalRequest.QueryParameters)
             {
+                string key = kvp.Key.Trim();
                 // Check supported system query options per $-sign-prefix option.
                 if (!_enableNoDollarSignQueryOptions)
                 {
                     // This is the original case for required $-sign prefix.
-                    if (kvp.Key.StartsWith("$", StringComparison.Ordinal))
+                    if (key.StartsWith("$", StringComparison.Ordinal))
                     {
-                        result.Add(kvp.Key, kvp.Value);
+                        result.Add(key, kvp.Value);
                     }
                 }
                 else
@@ -763,15 +764,15 @@ namespace Microsoft.AspNet.OData.Query
                     {
                         // Normalized the supported system query key by adding the $-prefix if needed.
                         result.Add(
-                            !kvp.Key.StartsWith("$", StringComparison.Ordinal) ? "$" + kvp.Key : kvp.Key,
+                            !key.StartsWith("$", StringComparison.Ordinal) ? "$" + key : key,
                             kvp.Value);
                     }
                 }
 
                 // check parameter alias
-                if (kvp.Key.StartsWith("@", StringComparison.Ordinal))
+                if (key.StartsWith("@", StringComparison.Ordinal))
                 {
-                    result.Add(kvp.Key, kvp.Value);
+                    result.Add(key, kvp.Value);
                 }
             }
 

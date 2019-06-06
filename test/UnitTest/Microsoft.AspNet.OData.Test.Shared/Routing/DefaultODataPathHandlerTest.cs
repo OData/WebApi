@@ -1654,12 +1654,39 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.Equal(parameterValue, address);
         }
 
-        [Theory]
-        [InlineData("(address={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
-        public void ParseComplexTypeAsFunctionParameterInlineThrows(string parameterValue)
+        [Fact]
+        public void ParseComplexTypeAsFunctionParameterInlineSuccessed()
         {
             // Arrange & Act
-            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
+            string requestUri = "RoutingCustomers(1)/Default.CanMoveToAddress(address={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})";
+
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, requestUri);
+
+            // Assert
+            Assert.NotNull(path);
+            Assert.Equal(3, path.Segments.Count);
+
+            OperationSegment operationSegment = Assert.IsType<OperationSegment>(path.Segments.Last());
+            Assert.NotNull(operationSegment);
+
+            OperationSegmentParameter parameter = Assert.Single(operationSegment.Parameters);
+            Assert.Equal("address", parameter.Name);
+
+            ConstantNode parameterValue = Assert.IsType<ConstantNode>(parameter.Value);
+            Assert.NotNull(parameterValue);
+
+            var resourceValue = Assert.IsType<ODataResourceValue>(parameterValue.Value);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.Address", resourceValue.TypeName);
+
+            Assert.Equal(2, resourceValue.Properties.Count());
+            ODataProperty street = resourceValue.Properties.FirstOrDefault(p => p.Name == "Street");
+            Assert.NotNull(street);
+            Assert.Equal("NE 24th St.", street.Value);
+
+            ODataProperty city = resourceValue.Properties.FirstOrDefault(p => p.Name == "City");
+            Assert.NotNull(city);
+            Assert.Equal("Redmond", city.Value);
         }
 
         [Theory]

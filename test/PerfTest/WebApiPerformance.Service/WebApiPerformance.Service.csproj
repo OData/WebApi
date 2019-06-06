@@ -22,7 +22,6 @@
     <IISExpressUseClassicPipelineMode />
     <UseGlobalApplicationHostFile />
     <TestType Condition=" '$(TestType)' == '' ">Private</TestType>
-    <Use64BitIISExpress />
   </PropertyGroup>
   <Choose>
     <When Condition=" '$(TestType)'=='Private' ">

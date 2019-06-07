@@ -3070,8 +3070,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 
             Assert.Collection(
                 people.NavigationPropertyBindings,
-                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path),
-                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path));
+                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path),
+                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path));
         }
 
         [Fact]

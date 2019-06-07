@@ -330,17 +330,23 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Assert
             // Level 1.
             Assert.False(clause.AllSelected);
-            Assert.Equal(3, clause.SelectedItems.Count());
+            Assert.Equal(2, clause.SelectedItems.Count());
 
             var nameSelectItem = Assert.Single(clause.SelectedItems.OfType<PathSelectItem>().Where(
                 item => item.SelectedPath.FirstSegment is PropertySegment));
             Assert.Equal("Name", ((PropertySegment)nameSelectItem.SelectedPath.FirstSegment).Property.Name);
 
+            // Before ODL 7.6, the expand navigation property will be added as a select item (PathSelectItem).
+            // After ODL 7.6 (include 7.6), the expand navigation property will not be added.
+            // Comment the following codes for visibility later.
+            /*
             var parentSelectItem = Assert.Single(clause.SelectedItems.OfType<PathSelectItem>().Where(
                 item => item.SelectedPath.FirstSegment is NavigationPropertySegment));
             Assert.Equal(
                 "Parent",
                 ((NavigationPropertySegment)parentSelectItem.SelectedPath.FirstSegment).NavigationProperty.Name);
+            */
+            Assert.Empty(clause.SelectedItems.OfType<PathSelectItem>().Where(item => item.SelectedPath.FirstSegment is NavigationPropertySegment));
 
             var expandedItem = Assert.Single(clause.SelectedItems.OfType<ExpandedNavigationSelectItem>());
             Assert.Equal(
@@ -357,7 +363,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 item => item.SelectedPath.FirstSegment is PropertySegment));
             Assert.Equal("ID", ((PropertySegment)idSelectItem.SelectedPath.FirstSegment).Property.Name);
 
-            parentSelectItem = Assert.Single(clause.SelectedItems.OfType<PathSelectItem>().Where(
+            var parentSelectItem = Assert.Single(clause.SelectedItems.OfType<PathSelectItem>().Where(
                 item => item.SelectedPath.FirstSegment is NavigationPropertySegment));
             Assert.Equal(
                 "Parent",

@@ -115,8 +115,8 @@ namespace Microsoft.AspNet.OData.Test
     <Schema Namespace=""Default"" xmlns=""http://docs.oasis-open.org/odata/ns/edm"">
       <EntityContainer Name=""Container"">
         <EntitySet Name=""QueryLimitCustomers"" EntityType=""Microsoft.AspNet.OData.Test.QueryLimitCustomer"">
-          <NavigationPropertyBinding Path=""Orders"" Target=""QueryLimitOrders"" />
           <NavigationPropertyBinding Path=""ImportantOrders"" Target=""QueryLimitOrders"" />
+          <NavigationPropertyBinding Path=""Orders"" Target=""QueryLimitOrders"" />
           <Annotation Term=""Org.OData.Capabilities.V1.CountRestrictions"">
             <Record>
               <PropertyValue Property=""Countable"" Bool=""true"" />

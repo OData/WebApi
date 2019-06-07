@@ -1042,8 +1042,8 @@ namespace Microsoft.AspNet.OData.Test
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
                   "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCustomer\">" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
                       "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities_B\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
                   "</EntitySet>" +
                   "<EntitySet Name=\"Cities_A\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
                   "<EntitySet Name=\"Cities_B\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
@@ -1077,26 +1077,26 @@ namespace Microsoft.AspNet.OData.Test
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
                   "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCustomer\">" +
-                      "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
                   "</EntitySet>" +
                   "<EntitySet Name=\"Cities\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
               "</EntityContainer>";

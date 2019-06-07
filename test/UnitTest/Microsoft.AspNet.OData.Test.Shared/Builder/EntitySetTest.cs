@@ -3,18 +3,16 @@
 
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData.Test.Builder;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Formatter;
 using Microsoft.OData.Edm;
 using Xunit;
 
-namespace Microsoft.AspNet.OData.Test.Builderr
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class EntitySetTest
     {

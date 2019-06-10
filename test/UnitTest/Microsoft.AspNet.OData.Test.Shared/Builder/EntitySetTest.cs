@@ -421,8 +421,12 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(2, bindings.Count());
 
             Assert.Equal("City, City", String.Join(", ", bindings.Select(e => e.NavigationProperty.Name)));
-            Assert.Equal("Cities_A, Cities_B", String.Join(", ", bindings.Select(e => e.Target.Name)));
-            Assert.Equal("Location/City, Address/City", String.Join(", ", bindings.Select(e => e.Path.Path)));
+
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Target.Name == "Cities_A"));
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Target.Name == "Cities_B"));
+
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Path.Path == "Location/City"));
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Path.Path == "Address/City"));
 
             // "BindingCity" entity type
             model.AssertHasEntityType(typeof(BindingCity));

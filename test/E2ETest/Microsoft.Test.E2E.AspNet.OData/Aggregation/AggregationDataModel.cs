@@ -27,6 +27,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
         public string Name { get; set; }
 
+        public CustomerBucket? Bucket { get; set; }
+
         public Order Order { get; set; }
 
         public Address Address { get; set; }
@@ -49,5 +51,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public string Name { get; set; }
 
         public string Street { get; set; }
+    }
+
+    public enum CustomerBucket
+    {
+        Small,
+        Medium,
+        Big
     }
 }

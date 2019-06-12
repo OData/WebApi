@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </param>
         /// <param name="queryContext">The <see cref="ODataQueryContext"/> for the navigation property being expanded.</param>
         /// <param name="expandedItem">The <see cref="ExpandedReferenceSelectItem"/> for the navigation property being expanded.></param>
-        public ODataSerializerContext(ResourceContext resource, IEdmProperty edmProperty, ODataQueryContext queryContext, ExpandedReferenceSelectItem expandedItem)
+        internal ODataSerializerContext(ResourceContext resource, IEdmProperty edmProperty, ODataQueryContext queryContext, ExpandedReferenceSelectItem expandedItem)
         {
             if (resource == null)
             {
@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the <see cref="ExpandedNavigationSelectItem"/>.
         /// </summary>
-        public ExpandedReferenceSelectItem CurrentExpandedSelectItem { get; set; }
+        internal ExpandedReferenceSelectItem CurrentExpandedSelectItem { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ODataQueryOptions"/>.

@@ -3402,9 +3402,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSeri
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext {
 	public ODataSerializerContext ()
 	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmProperty edmProperty)
-	public ODataSerializerContext (ResourceContext resource, Microsoft.OData.Edm.IEdmProperty edmProperty, ODataQueryContext queryContext, Microsoft.OData.UriParser.ExpandedReferenceSelectItem expandedItem)
 
-	Microsoft.OData.UriParser.ExpandedReferenceSelectItem CurrentExpandedSelectItem  { public get; public set; }
 	Microsoft.OData.Edm.IEdmProperty EdmProperty  { public get; public set; }
 	ResourceContext ExpandedResource  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.Object],[System.Object]] Items  { public get; }

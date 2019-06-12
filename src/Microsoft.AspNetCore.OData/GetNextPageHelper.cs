@@ -19,7 +19,6 @@ namespace Microsoft.AspNet.OData
         internal static Uri GetNextPageLink(Uri requestUri, int pageSize, object instance = null, Func<object, String> objectToSkipTokenValue = null)
         {
             Contract.Assert(requestUri != null);
-            Contract.Assert(requestUri.IsAbsoluteUri);
 
             Dictionary<string, StringValues> queryValues = QueryHelpers.ParseQuery(requestUri.Query);
             IEnumerable<KeyValuePair<string, string>> queryParameters = queryValues.SelectMany(

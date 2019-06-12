@@ -448,7 +448,11 @@ namespace Microsoft.AspNet.OData.Query
             return result;
         }
 
-        internal OrderByQueryOption GenerateStableOrderByQueryOption()
+        /// <summary>
+        /// Generates the Stable OrderBy query option based on the existing OrderBy and other query options. 
+        /// </summary>
+        /// <returns>An order by query option that ensures stable ordering of the results.</returns>
+        public OrderByQueryOption GenerateStableOrderByQueryOption()
         {
             if (_stableOrderBy != null)
             {

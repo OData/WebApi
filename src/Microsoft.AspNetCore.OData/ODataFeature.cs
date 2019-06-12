@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Mvc;

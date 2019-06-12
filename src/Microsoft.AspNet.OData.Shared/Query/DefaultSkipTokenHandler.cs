@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.OData.Query
         internal static DefaultSkipTokenHandler Instance = new DefaultSkipTokenHandler();
 
         /// <summary>
-        /// Constructor for DefaultSkipTokenHandler - Sets the Property Delimiter
+        /// Constructor for DefaultSkipTokenHandler
         /// </summary>
         public DefaultSkipTokenHandler()
         {
@@ -37,8 +37,8 @@ namespace Microsoft.AspNet.OData.Query
         /// Returns the URI for NextPageLink
         /// </summary>
         /// <param name="baseUri">BaseUri for nextlink. It should be request URI for top level resource and navigation link for nested resource.</param>
-        /// <param name="instance">Instance based on which SkipToken value will be generated.</param>
         /// <param name="pageSize">Maximum number of records in the set of partial results for a resource.</param>
+        /// <param name="instance">Instance based on which SkipToken value will be generated.</param>
         /// <param name="context">Serializer context</param>
         /// <returns>Returns the URI for NextPageLink. If a null object is passed for the instance, resorts to the default paging mechanism of using $skip and $top.</returns>
         public override Uri GenerateNextPageLink(Uri baseUri, int pageSize, Object instance, ODataSerializerContext context)
@@ -97,7 +97,7 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
-        /// Returns a string that converts an object to a skiptoken value string
+        /// Generates a string to be used as the skip token value within the next link.
         /// </summary>
         /// <param name="lastMember"> Object based on which SkipToken value will be generated.</param>
         /// <param name="model">The edm model.</param>
@@ -109,6 +109,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 return String.Empty;
             }
+
             IEnumerable<IEdmProperty> propertiesForSkipToken = GetPropertiesForSkipToken(lastMember, model, orderByNodes);
             StringBuilder skipTokenBuilder = new StringBuilder(String.Empty);
             if (propertiesForSkipToken == null)
@@ -164,14 +165,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
         public override IQueryable<T> ApplyTo<T>(IQueryable<T> query, SkipTokenQueryOption skipTokenQueryOption)
         {
-            if (skipTokenQueryOption == null)
-            {
-                throw Error.ArgumentNullOrEmpty("skipTokenQueryOption");
-            }
-
-            ODataQuerySettings querySettings = skipTokenQueryOption.QuerySettings;
-            IList<OrderByNode> orderByNodes = skipTokenQueryOption.OrderByNodes;
-            return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenQueryOption.RawValue) as IOrderedQueryable<T>;
+            return ApplyTo(query, skipTokenQueryOption);
         }
 
         /// <summary>
@@ -188,7 +182,18 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             ODataQuerySettings querySettings = skipTokenQueryOption.QuerySettings;
-            IList<OrderByNode> orderByNodes = skipTokenQueryOption.OrderByNodes;
+            ODataQueryOptions queryOptions = skipTokenQueryOption.QueryOptions;
+            IList<OrderByNode> orderByNodes = null;
+
+            if (queryOptions != null)
+            {
+                OrderByQueryOption orderBy = queryOptions.GenerateStableOrderByQueryOption();
+                if (orderBy != null)
+                {
+                    orderByNodes = orderBy.OrderByNodes;
+                }
+            }
+
             return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenQueryOption.RawValue);
         }
 
@@ -252,10 +257,11 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     value = enumValue.Value;
                 }
+
                 Expression constant = parameterizeConstant ? LinqParameterContainer.Parameterize(value.GetType(), value) : Expression.Constant(value);
-                if (directionMap.ContainsKey(key))
+                if (directionMap.ContainsKey(key) && directionMap[key] == OrderByDirection.Descending)
                 {
-                    compare = directionMap[key] == OrderByDirection.Descending ? binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true) : binder.CreateBinaryExpression(BinaryOperatorKind.GreaterThan, property, constant, true);
+                    compare = binder.CreateBinaryExpression(BinaryOperatorKind.LessThan, property, constant, true);
                 }
                 else
                 {
@@ -271,7 +277,7 @@ namespace Microsoft.AspNet.OData.Query
                 else
                 {
                     Expression condition = Expression.AndAlso(lastEquality, compare);
-                    where = where == null ? condition : Expression.OrElse(where, condition);
+                    where = Expression.OrElse(where, condition);
                     lastEquality = Expression.AndAlso(lastEquality, binder.CreateBinaryExpression(BinaryOperatorKind.Equal, property, constant, true));
                 }
             }
@@ -292,20 +298,24 @@ namespace Microsoft.AspNet.OData.Query
 
             IDictionary<string, object> propertyValuePairs = new Dictionary<string, object>();
             IList<string> keyValuesPairs = ParseValue(value, CommaDelimiter);
+
+            IEdmStructuredType type = context.ElementType as IEdmStructuredType;
+            Debug.Assert(type != null);
+
             foreach (string pair in keyValuesPairs)
             {
                 string[] pieces = pair.Split(new char[] { propertyDelimiter }, 2);
                 if (pieces.Length > 1 && !String.IsNullOrWhiteSpace(pieces[0]))
                 {
                     object propValue = null;
-                    IEdmStructuredType type = context.ElementType as IEdmStructuredType;
-                    Debug.Assert(type != null);
+
                     IEdmTypeReference propertyType = null;
                     IEdmProperty property = type.FindProperty(pieces[0]);
                     if (property != null)
                     {
                         propertyType = property.Type;
                     }
+
                     propValue = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, context.Model, propertyType);
                     propertyValuePairs.Add(pieces[0], propValue);
                 }

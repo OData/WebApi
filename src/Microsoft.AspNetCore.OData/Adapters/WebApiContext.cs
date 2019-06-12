@@ -99,6 +99,7 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get
             {
+                // since we wanted to avoid a breaking change by modifying the interface, we cast to check if it is our ODataFeature class before we access the internal property. To be cleaned up with 8.x.
                 ODataFeature feature = this.innerFeature as ODataFeature;
                 if (feature != null)
                 {
@@ -133,6 +134,7 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get
             {
+                // since we wanted to avoid a breaking change by modifying the interface, we cast to check if it is our ODataFeature class before we access the internal property.  
                 ODataFeature feature = this.innerFeature as ODataFeature;
                 if (feature != null)
                 {

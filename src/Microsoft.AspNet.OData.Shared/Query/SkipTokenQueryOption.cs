@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Gets and sets the given <see cref="ODataQueryContext"/>.
         /// </summary>
-        public ODataQueryContext Context { get; set; }
+        public ODataQueryContext Context { get; private set; }
 
         /// <summary>
         /// Generates the nextlink value and consumes the skiptoken value.
@@ -72,21 +72,21 @@ namespace Microsoft.AspNet.OData.Query
         public ODataQuerySettings QuerySettings { get; private set; }
 
         /// <summary>
-        /// Gets or sets the list of OrderByNodes for the original query
+        /// Gets or sets the QueryOptions
         /// </summary>
-        public IList<OrderByNode> OrderByNodes { get; private set; }
+        public ODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Apply the $skiptoken query to the given IQueryable.
         /// </summary>
         /// <param name="query">The original <see cref="IQueryable"/>.</param>
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
-        /// <param name="orderByNodes">Information about the orderby query option.</param>
+        /// <param name="queryOptions">Information about the other query options.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
-        public virtual IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IList<OrderByNode> orderByNodes)
+        public virtual IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
         {
             QuerySettings = querySettings;
-            OrderByNodes = orderByNodes;
+            QueryOptions = queryOptions;
             return SkipTokenHandler.ApplyTo<T>(query, this) as IOrderedQueryable<T>;
         }
 
@@ -100,16 +100,7 @@ namespace Microsoft.AspNet.OData.Query
         public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
         {
             QuerySettings = querySettings;
-
-            if (queryOptions != null)
-            {
-                OrderByQueryOption orderBy = queryOptions.GenerateStableOrderByQueryOption();
-                if (orderBy != null)
-                {
-                    OrderByNodes = orderBy.OrderByNodes;
-                }
-            }
-
+            QueryOptions = queryOptions;
             return SkipTokenHandler.ApplyTo(query, this);
         }
 

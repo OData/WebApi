@@ -27,13 +27,6 @@ namespace Microsoft.AspNet.OData.Query
         internal static DefaultSkipTokenHandler Instance = new DefaultSkipTokenHandler();
 
         /// <summary>
-        /// Constructor for DefaultSkipTokenHandler
-        /// </summary>
-        public DefaultSkipTokenHandler()
-        {
-        }
-
-        /// <summary>
         /// Returns the URI for NextPageLink
         /// </summary>
         /// <param name="baseUri">BaseUri for nextlink. It should be request URI for top level resource and navigation link for nested resource.</param>
@@ -121,12 +114,12 @@ namespace Microsoft.AspNet.OData.Query
             string uriLiteral;
             object value;
             int lastIndex = propertiesForSkipToken.Count() - 1;
+            IEdmStructuredObject obj = lastMember as IEdmStructuredObject;
 
             foreach (IEdmProperty property in propertiesForSkipToken)
             {
                 bool islast = count == lastIndex;
                 string propertyName = EdmLibHelpers.GetClrPropertyName(property, model);
-                IEdmStructuredObject obj = lastMember as IEdmStructuredObject;
                 if (obj != null)
                 {
                     obj.TryGetPropertyValue(propertyName, out value);

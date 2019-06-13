@@ -878,6 +878,61 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 result.ToString());
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrue(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrueAndPagesizeIsSet(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            _settings.PageSize = 100;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
+        }
+
         private class SpecialCustomer : Customer
         {
             public int SpecialCustomerProperty { get; set; }

@@ -406,6 +406,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : System.Web.Http.Filte
 	string AllowedOrderByProperties  { public get; public set; }
 	AllowedQueryOptions AllowedQueryOptions  { public get; public set; }
 	bool EnableConstantParameterization  { public get; public set; }
+	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
@@ -2388,6 +2389,7 @@ public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 	public ODataQuerySettings ()
 
 	bool EnableConstantParameterization  { public get; public set; }
+	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }

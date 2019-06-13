@@ -628,23 +628,32 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         _settings.EnableConstantParameterization);
                 }
 
-                if (_settings.PageSize.HasValue)
+                // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
+                if (expandedItem == null || !_settings.EnableCorrelatedSubqueryBuffering)
                 {
-                    source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
-                }
-                else if (_settings.ModelBoundPageSize.HasValue)
-                {
-                    source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
+                    if (_settings.PageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
+                    else if (_settings.ModelBoundPageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
                 }
             }
 
             // expression
             //      source.Select((ElementType element) => new Wrapper { })
             var selectMethod = GetSelectMethod(elementType, projection.Type);
-            var methodCallExpression = Expression.Call(selectMethod, source, selector);
-            Expression selectedExpresion = Expression.Call(ExpressionHelperMethods.QueryableToList.MakeGenericMethod(projection.Type), methodCallExpression);
+            Expression selectedExpresion = Expression.Call(selectMethod, source, selector);
+
+            // Append ToList() to collection as a hint to LINQ provider to buffer correlated subqueries in memory and avoid executing N+1 queries
+            if (_settings.EnableCorrelatedSubqueryBuffering)
+            {
+                selectedExpresion = Expression.Call(ExpressionHelperMethods.QueryableToList.MakeGenericMethod(projection.Type), selectedExpresion);
+            }
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {

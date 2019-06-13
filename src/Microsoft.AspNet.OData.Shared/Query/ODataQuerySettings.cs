@@ -22,6 +22,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             EnsureStableOrdering = true;
             EnableConstantParameterization = true;
+ //           EnableCorrelatedSubqueryBuffering = true;
         }
 
         /// <summary>
@@ -86,6 +87,15 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <value>The default value is <c>true</c>.</value>
         public bool EnableConstantParameterization { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether queries with expanded navigations should be formulated
+        /// to encourage correlated subquery results to be buffered.
+        /// Buffering correlated subquery results can reduce the number of queries from N + 1 to 2
+        /// by buffering results from the subquery.
+        /// </summary>
+        /// <value>The default value is <c>false</c>.</value>
+        public bool EnableCorrelatedSubqueryBuffering { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum number of query results to return.

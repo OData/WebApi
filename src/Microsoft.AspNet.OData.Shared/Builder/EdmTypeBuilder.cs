@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
     internal class EdmTypeBuilder
     {
         private readonly List<IEdmTypeConfiguration> _configurations;
@@ -385,43 +386,71 @@ namespace Microsoft.AspNet.OData.Builder
 
             foreach (NavigationPropertyConfiguration navProp in config.NavigationProperties)
             {
-                EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo
+                Func<NavigationPropertyConfiguration, EdmNavigationPropertyInfo> getInfo = nav =>
                 {
-                    Name = navProp.Name,
-                    TargetMultiplicity = navProp.Multiplicity,
-                    Target = GetEdmType(navProp.RelatedClrType) as IEdmEntityType,
-                    ContainsTarget = navProp.ContainsTarget,
-                    OnDelete = navProp.OnDeleteAction
-                };
-
-                // Principal properties
-                if (navProp.PrincipalProperties.Any())
-                {
-                    info.PrincipalProperties = GetDeclaringPropertyInfo(navProp.PrincipalProperties);
-                }
-
-                // Dependent properties
-                if (navProp.DependentProperties.Any())
-                {
-                    info.DependentProperties = GetDeclaringPropertyInfo(navProp.DependentProperties);
-                }
-
-                IEdmProperty edmProperty = type.AddUnidirectionalNavigation(info);
-                if (navProp.PropertyInfo != null && edmProperty != null)
-                {
-                    _properties[navProp.PropertyInfo] = edmProperty;
-                }
-
-                if (edmProperty != null)
-                {
-                    if (navProp.IsRestricted)
+                    EdmNavigationPropertyInfo info = new EdmNavigationPropertyInfo
                     {
-                        _propertiesRestrictions[edmProperty] = new QueryableRestrictions(navProp);
+                        Name = nav.Name,
+                        TargetMultiplicity = nav.Multiplicity,
+                        Target = GetEdmType(nav.RelatedClrType) as IEdmEntityType,
+                        ContainsTarget = nav.ContainsTarget,
+                        OnDelete = nav.OnDeleteAction
+                    };
+
+                    // Principal properties
+                    if (nav.PrincipalProperties.Any())
+                    {
+                        info.PrincipalProperties = GetDeclaringPropertyInfo(nav.PrincipalProperties);
                     }
 
-                    if (navProp.QueryConfiguration.ModelBoundQuerySettings != null)
+                    // Dependent properties
+                    if (nav.DependentProperties.Any())
                     {
-                        _propertiesQuerySettings.Add(edmProperty, navProp.QueryConfiguration.ModelBoundQuerySettings);
+                        info.DependentProperties = GetDeclaringPropertyInfo(nav.DependentProperties);
+                    }
+
+                    return info;
+                };
+
+                var navInfo = getInfo(navProp);
+                var props = new Dictionary<IEdmProperty, NavigationPropertyConfiguration>();
+                EdmEntityType entityType = type as EdmEntityType;
+                if (entityType != null && navProp.Partner != null)
+                {
+                    var edmProperty = entityType.AddBidirectionalNavigation(navInfo, getInfo(navProp.Partner));
+                    var partnerEdmProperty = (navInfo.Target as EdmEntityType).Properties().Single(p => p.Name == navProp.Partner.Name);
+                    props.Add(edmProperty, navProp);
+                    props.Add(partnerEdmProperty, navProp.Partner);
+                }
+                else
+                {
+                    // Do not add this if we have have a partner relationship configured, as this
+                    // property will be added automatically through the AddBidirectionalNavigation
+                    var targetConfig = config.ModelBuilder.GetTypeConfigurationOrNull(navProp.RelatedClrType) as StructuralTypeConfiguration;
+                    if (!targetConfig.NavigationProperties.Any(p => p.Partner != null && p.Partner.Name == navInfo.Name))
+                    {
+                        var edmProperty = type.AddUnidirectionalNavigation(navInfo);
+                        props.Add(edmProperty, navProp);
+                    }
+                }
+
+                foreach (var item in props)
+                {
+                    var edmProperty = item.Key;
+                    var prop = item.Value;
+                    if (prop.PropertyInfo != null)
+                    {
+                        _properties[prop.PropertyInfo] = edmProperty;
+                    }
+
+                    if (prop.IsRestricted)
+                    {
+                        _propertiesRestrictions[edmProperty] = new QueryableRestrictions(prop);
+                    }
+
+                    if (prop.QueryConfiguration.ModelBoundQuerySettings != null)
+                    {
+                        _propertiesQuerySettings.Add(edmProperty, prop.QueryConfiguration.ModelBoundQuerySettings);
                     }
                 }
             }

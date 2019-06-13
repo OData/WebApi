@@ -659,6 +659,17 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("EntityTypeDoesntHaveKeyDefined", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The entity type &apos;{0}&apos; of navigation property &apos;{1}&apos; on structural type &apos;{2}&apos; does not have a key defined..
+        /// </summary>
+        internal static string CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined
+        {
+            get
+            {
+                return ResourceManager.GetString("CollectionNavigationPropertyEntityTypeDoesntHaveKeyDefined", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to The entity type &apos;{0}&apos; does not match the expected entity type &apos;{1}&apos; as set on the query context..
@@ -1378,6 +1389,17 @@ namespace Microsoft.AspNet.OData.Common
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The entity set &apos;{0}&apos; is based on type &apos;{1}&apos; that has no keys defined..
+        /// </summary>
+        internal static string EntitySetTypeHasNoKeys
+        {
+            get
+            {
+                return ResourceManager.GetString("EntitySetTypeHasNoKeys", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; is a nested collection type. Nested collection types are not allowed..
         /// </summary>
         internal static string NestedCollectionsNotSupported {
@@ -1781,7 +1803,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("PropertyMustBeDateTimeOffsetOrDate", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a boolean..
+        /// </summary>
+        internal static string PropertyMustBeBoolean
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyMustBeBoolean", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The value with type &apos;{0}&apos; must have type &apos;{1}&apos;..
         /// </summary>

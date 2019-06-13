@@ -54,6 +54,11 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// The partner relationship of this navigation property.
+        /// </summary>
+        public NavigationPropertyConfiguration Partner { get; internal set; }
+
+        /// <summary>
         /// Gets the <see cref="EdmMultiplicity"/> of this navigation property.
         /// </summary>
         public EdmMultiplicity Multiplicity { get; private set; }

@@ -1941,7 +1941,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
-        public void ModelBuilder_DeclareNavigationSourceOnAbstractEntityTypeWithKeyThrows()
+        public void ModelBuilder_DeclareEntitySetOnAbstractEntityTypeWithoutKeyThrows()
         {
             // Arrange
             var builder = ODataConventionModelBuilderFactory.Create();
@@ -1950,7 +1950,22 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-            "The entity set or singleton 'entitySet' is based on type 'Microsoft.AspNet.OData.Test.Builder.Conventions.AbstractEntityType' that has no keys defined.");
+            "The entity set 'entitySet' is based on type 'Microsoft.AspNet.OData.Test.Builder.Conventions.AbstractEntityType' that has no keys defined.");
+        }
+
+        [Fact]
+        public void ModelBuilder_DeclareSingletonOnAbstractEntityTypeWithoutKeyWorks()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.Singleton<AbstractEntityType>("Me");
+
+            // Act
+            IEdmModel modle = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(modle);
+            Assert.NotNull(modle.FindDeclaredSingleton("Me"));
         }
 
         [Fact]
@@ -3055,8 +3070,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 
             Assert.Collection(
                 people.NavigationPropertyBindings,
-                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path),
-                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path));
+                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path),
+                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path));
         }
 
         [Fact]

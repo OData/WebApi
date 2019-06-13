@@ -104,9 +104,9 @@ namespace Microsoft.AspNet.OData.Extensions
                 object totalCount;
                 if (_request.Properties.TryGetValue(TotalCountKey, out totalCount))
                 {
-                    // Fairly big problem if following cast fails. Indicates something else is writing properties with
-                    // names we've chosen. Do not silently return null because that will hide the problem.
-                    return (long)totalCount;
+                    // TotalCount is defined as null-able long, allowed to be set as null, so it should be
+                    // safe to cast to null-able type of long as result.
+                    return (long?)totalCount;
                 }
 
                 if (this.TotalCountFunc != null)
@@ -120,11 +120,6 @@ namespace Microsoft.AspNet.OData.Extensions
             }
             set
             {
-                if (!value.HasValue)
-                {
-                    throw Error.ArgumentNull("value");
-                }
-
                 _request.Properties[TotalCountKey] = value;
             }
         }

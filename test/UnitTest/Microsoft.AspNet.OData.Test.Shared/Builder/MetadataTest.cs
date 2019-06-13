@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
@@ -17,6 +18,23 @@ namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class MetadataTest
     {
+        [Fact]
+        [Trait("Description", "Partner relationhips are emitted correctly")]
+        public void CanEmitPartnerRelationship()
+        {
+            var builder = new ODataModelBuilder()
+                .Add_Company_EntityType()
+                .Add_Employee_EntityType()
+                .Add_CompanyEmployees_Relationship();
+            var model = builder.GetServiceModel();
+            var company = model.SchemaElements.Single(e => e.Name == nameof(Company)) as EdmEntityType;
+            var ceo = company.Properties().Single(p => p.Name == nameof(Company.CEO)) as EdmNavigationProperty;
+            var employee = model.SchemaElements.Single(e => e.Name == nameof(Employee)) as EdmEntityType;
+            var isCeoOf = employee.Properties().Single(p => p.Name == nameof(Employee.IsCeoOf)) as EdmNavigationProperty;
+            Assert.Equal(ceo.Partner, isCeoOf);
+            var csdl = GetCSDL(model);
+        }
+
         [Fact]
         [Trait("Description", "Edmlib can emit a model with a single EntityType only")]
         public void CanEmitModelWithSingleEntity()

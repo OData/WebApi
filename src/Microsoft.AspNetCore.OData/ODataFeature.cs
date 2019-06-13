@@ -101,13 +101,8 @@ namespace Microsoft.AspNet.OData
 
             set
             {
-                if (!value.HasValue)
-                {
-                    throw Error.ArgumentNull("value");
-                }
-
                 this.totalCount = value;
-                this.totalCountSet = true;
+                this.totalCountSet = value.HasValue;
             }
         }
 

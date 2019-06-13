@@ -68,7 +68,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$count", rawValue } });
+                new Dictionary<string, string> { { "$count", rawValue } },
+                context.RequestContainer);
         }
 
         /// <summary>

@@ -54,8 +54,6 @@ namespace Microsoft.AspNet.OData.Formatter
                 return null;
             }
 
-            ODataDeserializerProvider deserializerProvider =
-                requestContainer.GetRequiredService<ODataDeserializerProvider>();
             // collection of primitive, enum
             ODataCollectionValue collectionValue = graph as ODataCollectionValue;
             if (collectionValue != null)
@@ -71,6 +69,9 @@ namespace Microsoft.AspNet.OData.Formatter
                 IEdmEnumTypeReference edmEnumType = edmTypeReference.AsEnum();
                 Contract.Assert(edmEnumType != null);
 
+                ODataDeserializerProvider deserializerProvider =
+                    requestContainer.GetRequiredService<ODataDeserializerProvider>();
+
                 ODataEnumDeserializer deserializer =
                     (ODataEnumDeserializer)deserializerProvider.GetEdmTypeDeserializer(edmEnumType);
 
@@ -80,7 +81,8 @@ namespace Microsoft.AspNet.OData.Formatter
             // primitive value
             if (edmTypeReference.IsPrimitive())
             {
-                return EdmPrimitiveHelpers.ConvertPrimitiveValue(graph, clrType);
+                ConstantNode node = graph as ConstantNode;
+                return EdmPrimitiveHelpers.ConvertPrimitiveValue(node != null ? node.Value : graph, clrType);
             }
 
             // Resource, ResourceSet, Entity Reference or collection of entity reference

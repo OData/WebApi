@@ -240,6 +240,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void CanExtractQueryOptionsCorrectly()
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             var message = RequestFactory.Create(
@@ -247,7 +248,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken"
             );
 
+            // Act
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+
+            // Assert
             Assert.Equal("Filter", queryOptions.RawValues.Filter);
             Assert.NotNull(queryOptions.Filter);
             Assert.Equal("OrderBy", queryOptions.RawValues.OrderBy);
@@ -264,13 +268,15 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal("DeltaToken", queryOptions.RawValues.DeltaToken);
         }
 
-
         [Theory]
         [InlineData(" $filter=Filter& $select=Select& $orderby=OrderBy& $expand=Expand& $top=10& $skip=20& $count=true& $skiptoken=SkipToken& $deltatoken=DeltaToken")]
         [InlineData("%20$filter=Filter&%20$select=Select&%20$orderby=OrderBy&%20$expand=Expand&%20$top=10&%20$skip=20&%20$count=true&%20$skiptoken=SkipToken&%20$deltatoken=DeltaToken")]
         [InlineData("$filter =Filter&$select =Select&$orderby =OrderBy&$expand =Expand&$top =10&$skip =20&$count =true&$skiptoken =SkipToken&$deltatoken =DeltaToken")]
-        public void CanExtractQueryOptionsWitLeadingSpacesCorrectly(string clause)
+        [InlineData("$filter%20=Filter&$select%20=Select&$orderby%20=OrderBy&$expand%20=Expand&$top%20=10&$skip%20=20&$count%20=true&$skiptoken%20=SkipToken&$deltatoken%20=DeltaToken")]
+        [InlineData(" $filter =Filter& $select =Select& $orderby =OrderBy& $expand =Expand& $top =10& $skip =20& $count =true& $skiptoken =SkipToken& $deltatoken =DeltaToken")]
+        public void CanExtractQueryOptionsWithExtraSpacesCorrectly(string clause)
         {
+            // Arrange
             var model = new ODataModelBuilder().Add_Customer_EntityType().Add_Customers_EntitySet().GetEdmModel();
 
             var message = RequestFactory.Create(
@@ -278,7 +284,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers/?"+ clause
             );
 
+            // Act
             var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+
+            // Assert
             Assert.Equal("Filter", queryOptions.RawValues.Filter);
             Assert.NotNull(queryOptions.Filter);
             Assert.Equal("OrderBy", queryOptions.RawValues.OrderBy);

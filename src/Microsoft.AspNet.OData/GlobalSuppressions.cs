@@ -34,4 +34,3 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Globalization", "CA1307:SpecifyStringComparison", MessageId = "System.String.StartsWith(System.String)", Scope = "member", Target = "Microsoft.AspNet.OData.Query.DefaultSkipTokenHandler.#PopulatePropertyValuePairs(System.String,Microsoft.AspNet.OData.ODataQueryContext)")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "Skiptoken", Scope = "resource", Target = "Microsoft.AspNet.OData.Properties.SRResources.resources")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "skiptoken", Scope = "resource", Target = "Microsoft.AspNet.OData.Properties.SRResources.resources")]
-

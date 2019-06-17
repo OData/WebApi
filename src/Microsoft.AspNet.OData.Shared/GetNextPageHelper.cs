@@ -38,12 +38,11 @@ namespace Microsoft.AspNet.OData
                         int top;
                         if (Int32.TryParse(value, out top))
                         {
-                            // We decrease top by the pageSize because that's the number of results we're returning in the current page
+                            // We decrease top by the pageSize because that's the number of results we're returning in the current page. If the $top query option's value is less than or equal to the page size, there is no next page.
                             if (top > pageSize)
                             {
                                 value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                             }
-                            // There is no next page if the $top query option's value is less than or equal to the page size.
                             else
                             {
                                 return null;

@@ -1008,6 +1008,7 @@ namespace Microsoft.AspNet.OData.Query
                     processedClause);
 
                 InternalRequest.Context.ProcessedSelectExpandClause = processedClause;
+                InternalRequest.Context.QueryOptions = this;
 
                 var type = typeof(T);
                 if (type == typeof(IQueryable))

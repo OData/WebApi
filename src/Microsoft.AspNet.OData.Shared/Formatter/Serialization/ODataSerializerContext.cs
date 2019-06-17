@@ -22,6 +22,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private IDictionary<object, object> _items;
         private ODataQueryContext _queryContext;
         private SelectExpandClause _selectExpandClause;
+        private bool _isSelectExpandClauseSet;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
@@ -157,7 +158,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             get
             {
                 // private backing field to be removed once public setter from ODataFeature is removed. 
-                if (_selectExpandClause != null)
+                if (_selectExpandClause != null && _isSelectExpandClauseSet)
                 {
                     return _selectExpandClause;
                 }
@@ -166,7 +167,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     if (QueryOptions.SelectExpand != null)
                     {
-                        return QueryOptions.SelectExpand.SelectExpandClause;
+                        return QueryOptions.SelectExpand.ProcessedSelectExpandClause;
                     }
 
                     return null;
@@ -180,7 +181,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 return null;
             }
-            set { _selectExpandClause = value; }
+            set
+            {
+                _isSelectExpandClauseSet = true;
+                _selectExpandClause = value;
+            }
         }
 
         /// <summary>
@@ -191,7 +196,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the <see cref="ODataQueryOptions"/>.
         /// </summary>
-        public ODataQueryOptions QueryOptions { get; set; }
+        public ODataQueryOptions QueryOptions { get; internal set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

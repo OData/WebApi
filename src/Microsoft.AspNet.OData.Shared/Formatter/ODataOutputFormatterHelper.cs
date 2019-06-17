@@ -157,6 +157,20 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
             }
 
+            //Set this variable if the SelectExpandClause is different from the processed clause on the Query options
+            SelectExpandClause selectExpandDifferentFromQueryOptions = null;
+            if (internalRequest.Context.QueryOptions != null && internalRequest.Context.QueryOptions.SelectExpand != null)
+            {
+                if (internalRequest.Context.QueryOptions.SelectExpand.ProcessedSelectExpandClause != internalRequest.Context.ProcessedSelectExpandClause)
+                {
+                    selectExpandDifferentFromQueryOptions = internalRequest.Context.ProcessedSelectExpandClause;
+                }
+            }
+            else if (internalRequest.Context.ProcessedSelectExpandClause != null)
+            {
+                selectExpandDifferentFromQueryOptions = internalRequest.Context.ProcessedSelectExpandClause;
+            }
+
             writerSettings.ODataUri = new ODataUri
             {
                 ServiceRoot = baseAddress,
@@ -184,8 +198,13 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet;
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
-                writeContext.SelectExpandClause = internalRequest.Context.ProcessedSelectExpandClause;
                 writeContext.QueryOptions = internalRequest.Context.QueryOptions;
+
+                //Set the SelectExpandClause on the context if it was explicitly specified. 
+                if (selectExpandDifferentFromQueryOptions != null)
+                {
+                    writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;
+                }
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }

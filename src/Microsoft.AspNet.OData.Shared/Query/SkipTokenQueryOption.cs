@@ -17,6 +17,11 @@ namespace Microsoft.AspNet.OData.Query
     public class SkipTokenQueryOption
     {
         /// <summary>
+        /// Generates the nextlink value and consumes the skiptoken value.
+        /// </summary>
+        private SkipTokenHandler skipTokenHandler;
+
+        /// <summary>
         /// Initialize a new instance of <see cref="SkipQueryOption"/> based on the raw $skiptoken value and
         /// an EdmModel from <see cref="ODataQueryContext"/>.
         /// </summary>
@@ -42,7 +47,7 @@ namespace Microsoft.AspNet.OData.Query
 
             RawValue = rawValue;
             Validator = context.GetSkipTokenQueryValidator();
-            SkipTokenHandler = context.GetSkipTokenHandler();
+            skipTokenHandler = context.GetSkipTokenHandler();
             Context = context;
         }
 
@@ -55,11 +60,6 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets and sets the given <see cref="ODataQueryContext"/>.
         /// </summary>
         public ODataQueryContext Context { get; private set; }
-
-        /// <summary>
-        /// Generates the nextlink value and consumes the skiptoken value.
-        /// </summary>
-        private SkipTokenHandler SkipTokenHandler { get; set; }
 
         /// <summary>
         /// Gets or sets the SkipToken Query Validator.
@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             QuerySettings = querySettings;
             QueryOptions = queryOptions;
-            return SkipTokenHandler.ApplyTo<T>(query, this) as IOrderedQueryable<T>;
+            return skipTokenHandler.ApplyTo<T>(query, this) as IOrderedQueryable<T>;
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             QuerySettings = querySettings;
             QueryOptions = queryOptions;
-            return SkipTokenHandler.ApplyTo(query, this);
+            return skipTokenHandler.ApplyTo(query, this);
         }
 
         /// <summary>

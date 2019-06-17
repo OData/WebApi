@@ -38,13 +38,12 @@ namespace Microsoft.AspNet.OData
                         int top;
                         if (Int32.TryParse(value, out top))
                         {
-                            // There is no next page if the $top query option's value is less than or equal to the page size. You should not call this API if top <= pagesize.
-                            Contract.Assert(top > pageSize);
                             // We decrease top by the pageSize because that's the number of results we're returning in the current page
                             if (top > pageSize)
                             {
                                 value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                             }
+                            // There is no next page if the $top query option's value is less than or equal to the page size.
                             else
                             {
                                 return null;

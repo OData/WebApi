@@ -96,7 +96,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="model">The edm model.</param>
         /// <param name="orderByNodes">List of orderByNodes used to generate the skiptoken value.</param>
         /// <returns>Value for the skiptoken to be used in the next link.</returns>
-        protected virtual string GenerateSkipTokenValue(Object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
+        private static string GenerateSkipTokenValue(Object lastMember, IEdmModel model, IList<OrderByNode> orderByNodes)
         {
             if (lastMember == null)
             {
@@ -311,6 +311,10 @@ namespace Microsoft.AspNet.OData.Query
 
                     propValue = ODataUriUtils.ConvertFromUriLiteral(pieces[1], ODataVersion.V401, context.Model, propertyType);
                     propertyValuePairs.Add(pieces[0], propValue);
+                }
+                else
+                {
+                    throw Error.InvalidOperation(SRResources.SkipTokenParseError);
                 }
             }
 

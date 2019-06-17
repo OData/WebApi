@@ -32,3 +32,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Scope = "member", Target = "Microsoft.AspNet.OData.GetNextPageHelper.#GetNextPageLink(System.Uri,System.Collections.Generic.IEnumerable`1<System.Collections.Generic.KeyValuePair`2<System.String,System.String>>,System.Int32,System.Object,System.Func`2<System.Object,System.String>)")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "type", Target = "Microsoft.AspNet.OData.Query.ODataQueryOptions")]
 [assembly: SuppressMessage("Microsoft.Globalization", "CA1307:SpecifyStringComparison", MessageId = "System.String.StartsWith(System.String)", Scope = "member", Target = "Microsoft.AspNet.OData.Query.DefaultSkipTokenHandler.#PopulatePropertyValuePairs(System.String,Microsoft.AspNet.OData.ODataQueryContext)")]
+[assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "Skiptoken", Scope = "resource", Target = "Microsoft.AspNet.OData.Properties.SRResources.resources")]
+[assembly: SuppressMessage("Microsoft.Naming", "CA1703:ResourceStringsShouldBeSpelledCorrectly", MessageId = "skiptoken", Scope = "resource", Target = "Microsoft.AspNet.OData.Properties.SRResources.resources")]
+

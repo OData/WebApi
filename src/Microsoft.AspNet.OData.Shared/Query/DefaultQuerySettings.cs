@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Query
         private bool _enableExpand;
         private bool _enableCount;
         private bool _enableSelect;
-        private int? _maxTop = 0;
+        private int? _maxTop;
 
         /// <summary>
         /// Gets or sets a value indicating whether navigation property can be expanded.

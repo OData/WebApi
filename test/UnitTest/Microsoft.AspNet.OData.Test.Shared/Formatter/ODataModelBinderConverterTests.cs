@@ -1,15 +1,17 @@
-﻿using Microsoft.AspNet.OData.Formatter;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using System;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataModelBinderConverterTests
     {
-
         /// <summary>
         /// The set of potential values to test against 
         /// <see cref="ODataModelBinderConverter.Convert(object, IEdmTypeReference, Type, string, OData.Formatter.Deserialization.ODataDeserializerContext, IServiceProvider)"/>.
@@ -21,6 +23,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 return new TheoryDataSet<object, EdmPrimitiveTypeKind, Type, object>
                 {
                     { "true", EdmPrimitiveTypeKind.Boolean, typeof(bool), true },
+                    { true, EdmPrimitiveTypeKind.Boolean, typeof(bool), true },
                     { 5, EdmPrimitiveTypeKind.Int32, typeof(int),  5 },
                     { new Guid("C2AEFDF2-B533-4971-8B6A-A539373BFC32"), EdmPrimitiveTypeKind.Guid, typeof(Guid), new Guid("C2AEFDF2-B533-4971-8B6A-A539373BFC32") }
                 };
@@ -47,7 +50,5 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.IsType(clrType, result);
             Assert.Equal(expectedResult, result);
         }
-
     }
-
 }

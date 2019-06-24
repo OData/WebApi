@@ -74,7 +74,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Gets or sets the QueryOptions
         /// </summary>
-        public ODataQueryOptions QueryOptions { get; set; }
+        public ODataQueryOptions QueryOptions { get; private set; }
 
         /// <summary>
         /// Apply the $skiptoken query to the given IQueryable.

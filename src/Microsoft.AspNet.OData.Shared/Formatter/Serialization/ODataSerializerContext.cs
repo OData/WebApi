@@ -158,7 +158,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             get
             {
                 // private backing field to be removed once public setter from ODataFeature is removed. 
-                if (_selectExpandClause != null && _isSelectExpandClauseSet)
+                if (_isSelectExpandClauseSet)
                 {
                     return _selectExpandClause;
                 }

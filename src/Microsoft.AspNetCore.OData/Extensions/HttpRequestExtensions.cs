@@ -258,6 +258,16 @@ namespace Microsoft.AspNet.OData.Extensions
                 }
                 : null;
         }
+        /// <summary>
+        /// Creates a link for the next page of results; To be used as the value of @odata.nextLink.
+        /// </summary>
+        /// <param name="request">The request on which to base the next page link.</param>
+        /// <param name="pageSize">The number of results allowed per page.</param>
+        /// <returns>A next page link.</returns>
+        public static Uri GetNextPageLink(this HttpRequest request, int pageSize)
+        {
+            return GetNextPageLink(request, pageSize, null, null);
+        }
 
         /// <summary>
         /// Creates a link for the next page of results; To be used as the value of @odata.nextLink.
@@ -267,7 +277,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="instance">Object which can be used to generate the skiptoken value.</param>
         /// <param name="objectToSkipTokenValue">Function that takes in the last object and returns the skiptoken value string.</param>
         /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(this HttpRequest request, int pageSize, object instance = null, Func<object,string> objectToSkipTokenValue = null)
+        public static Uri GetNextPageLink(this HttpRequest request, int pageSize, object instance, Func<object,string> objectToSkipTokenValue)
         {
             if (request == null)
             {

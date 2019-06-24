@@ -1851,7 +1851,12 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, params object instance, params System.Func`2[[System.Object],[System.String]] objectToSkipTokenValue)
+	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, object instance, System.Func`2[[System.Object],[System.String]] objectToSkipTokenValue)
 
 	[
 	ExtensionAttribute(),
@@ -2543,7 +2548,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
-	public OrderByQueryOption GenerateStableOrderByQueryOption ()
+	public virtual OrderByQueryOption GenerateStableOrder ()
 	internal virtual ETag GetETag (System.Net.Http.Headers.EntityTagHeaderValue etagHeaderValue)
 	public bool IsSupportedQueryOption (string queryOptionName)
 	public static bool IsSystemQueryOption (string queryOptionName)
@@ -2717,7 +2722,7 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 	public SkipTokenQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
-	ODataQueryOptions QueryOptions  { public get; public set; }
+	ODataQueryOptions QueryOptions  { public get; }
 	ODataQuerySettings QuerySettings  { public get; }
 	string RawValue  { public get; }
 	SkipTokenQueryValidator Validator  { public get; }

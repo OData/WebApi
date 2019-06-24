@@ -375,7 +375,7 @@ namespace Microsoft.AspNet.OData.Query
                 // Instead of failing early here if we cannot generate the OrderBy,
                 // let the IQueryable backend fail (if it has to).
 
-                orderBy = GenerateStableOrderByQueryOption();
+                orderBy = GenerateStableOrder();
             }
 
             if (IsAvailableODataQueryOption(orderBy, AllowedQueryOptions.OrderBy))
@@ -452,7 +452,7 @@ namespace Microsoft.AspNet.OData.Query
         /// Generates the Stable OrderBy query option based on the existing OrderBy and other query options. 
         /// </summary>
         /// <returns>An order by query option that ensures stable ordering of the results.</returns>
-        public OrderByQueryOption GenerateStableOrderByQueryOption()
+        public virtual OrderByQueryOption GenerateStableOrder()
         {
             if (_stableOrderBy != null)
             {

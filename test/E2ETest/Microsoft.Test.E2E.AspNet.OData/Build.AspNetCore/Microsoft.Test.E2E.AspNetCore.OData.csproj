@@ -72,6 +72,7 @@
     <Compile Include="..\Routing\AttributeRoutingTests.cs">
       <Link>Routing\AttributeRoutingTests.cs</Link>
     </Compile>
+    <Compile Include="DependencyInjection\CustomizeSkipTokenImplementationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="App.config" />
     <None Include="packages.config">
@@ -1236,6 +1237,15 @@
       <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeEdmModel.cs</Link>
     </Compile>
     <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenController.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeController.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenEdmModel.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenTest.cs">
       <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
     </Compile>
     <Compile Include="..\ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs">

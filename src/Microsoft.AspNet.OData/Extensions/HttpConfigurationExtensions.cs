@@ -205,6 +205,27 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Sets the EnableSkipToken of <see cref="DefaultQuerySettings"/> in the configuration,
+        /// depends on <see cref="QueryOptionSetting"/>.
+        /// </summary>
+        public static HttpConfiguration SkipToken(this HttpConfiguration configuration, QueryOptionSetting setting)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSkipToken = setting == QueryOptionSetting.Allowed;
+            return configuration;
+        }
+
+        /// <summary>
+        /// Sets the EnableSkipToken to true of <see cref="DefaultQuerySettings"/> in the configuration.
+        /// </summary>
+        public static HttpConfiguration SkipToken(this HttpConfiguration configuration)
+        {
+            DefaultQuerySettings defaultQuerySettings = configuration.GetDefaultQuerySettings();
+            defaultQuerySettings.EnableSkipToken = true;
+            return configuration;
+        }
+
+        /// <summary>
         /// Sets the EnableCount of <see cref="DefaultQuerySettings"/> in the configuration,
         /// depends on <see cref="QueryOptionSetting"/>.
         /// </summary>

@@ -340,7 +340,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     WriteComplexProperties(selectExpandNode.SelectedComplexProperties, resourceContext, writer);
                     WriteDynamicComplexProperties(resourceContext, writer);
                     WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
-                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties,
+                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedProperties,
                         resourceContext, writer);
                     writer.WriteEnd();
                 }
@@ -739,7 +739,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteExpandedNavigationProperties(
-            IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
+            IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> navigationPropertiesToExpand,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
@@ -747,7 +747,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navPropertyToExpand in navigationPropertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> navPropertyToExpand in navigationPropertiesToExpand)
             {
                 IEdmNavigationProperty navigationProperty = navPropertyToExpand.Key;
 
@@ -761,7 +761,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
+        private void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, ExpandedNavigationSelectItem expandedNavigationSelectItem,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
@@ -795,7 +795,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             else
             {
                 // create the serializer context for the complex and expanded item.
-                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, edmProperty, resourceContext.SerializerContext.QueryContext, expandedNavigationSelectItem);
 
                 // write object.
                 ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(edmProperty.Type);

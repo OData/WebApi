@@ -47,13 +47,14 @@ namespace Microsoft.AspNet.OData
                 {
                     return true;
                 }
-                //maxpagesize gets supersedes odata.maxpagesize
+                //maxpagesize supersedes odata.maxpagesize
                 pageSize = GetMaxPageSize(preferences, ODataMaxPageSize);
                 if (pageSize >= 0)
                 {
                     return true;
                 }
             }
+
             return false;
         }
 

@@ -302,6 +302,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         {
             // While this seems ideal for a Theory test case, the IEnumerable<Product> would need to be serialize-able in
             // order to generate an Xunit 2.0 test case.
+            // Some of these test cases may fail rarely because of the random data - the seed for randomization changes every hour though. 
             var testCases = SpecialCharacterData
                 .Union(OperatorData)
                 .Union(StringFunctionData)

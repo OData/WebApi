@@ -140,13 +140,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, DeltaFeed));
                 }
 
-                // save this for later to support JSON odata.streaming.
-                Uri nextPageLink = deltaFeed.NextPageLink;
+                // save the next page link for later to support JSON odata.streaming.
+                Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(deltaFeed, enumerable, writeContext);
                 deltaFeed.NextPageLink = null;
 
                 //Start writing of the Delta Feed
                 writer.WriteStart(deltaFeed);
 
+                object lastResource = null;
                 //Iterate over all the entries present and select the appropriate write method.
                 //Write method creates ODataDeltaDeletedEntry / ODataDeltaDeletedLink / ODataDeltaLink or ODataEntry.
                 foreach (object entry in enumerable)
@@ -156,6 +157,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         throw new SerializationException(SRResources.NullElementInCollection);
                     }
 
+                    lastResource = entry;
                     IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
                     if (edmChangedObject == null)
                     {
@@ -194,14 +196,25 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 // the next page link is not set when calling WriteStart(feed) but is instead set later on that feed
                 // object before calling WriteEnd(), the next page link will be written at the end, as required for
                 // odata.streaming=true support.
-                if (nextPageLink != null)
-                {
-                    deltaFeed.NextPageLink = nextPageLink;
-                }
+
+                deltaFeed.NextPageLink = nextLinkGenerator(lastResource);
             }
 
             //End Writing of the Delta Feed
             writer.WriteEnd();
+        }
+
+        /// <summary>
+        /// Creates a function that takes in an object and generates nextlink uri.
+        /// </summary>
+        /// <param name="deltaFeed">The resource set describing a collection of structured objects.</param>
+        /// <param name="enumerable">>The instance representing the resourceSet being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The function that generates the NextLink from an object.</returns>
+        /// <returns></returns>
+        internal static Func<object, Uri> GetNextLinkGenerator(ODataDeltaResourceSet deltaFeed, IEnumerable enumerable, ODataSerializerContext writeContext)
+        {
+            return ODataResourceSetSerializer.GetNextLinkGenerator(deltaFeed, enumerable, writeContext);
         }
 
         /// <summary>
@@ -235,15 +248,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     {
                         feed.Count = countValue.Value;
                     }
-                }
-            }
-            else
-            {
-                // nested feed
-                ITruncatedCollection truncatedCollection = feedInstance as ITruncatedCollection;
-                if (truncatedCollection != null && truncatedCollection.IsTruncated)
-                {
-                    feed.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
                 }
             }
             return feed;
@@ -348,23 +352,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, feedType.FullName());
             throw new SerializationException(message);
-        }
-
-        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
-        {
-            Contract.Assert(writeContext.ExpandedResource != null);
-
-            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
-            NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
-            Uri navigationLink =
-                linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
-            if (navigationLink != null)
-            {
-                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
-            }
-
-            return null;
         }
 
         /// <summary>

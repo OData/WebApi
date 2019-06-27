@@ -74,7 +74,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// A value that corresponds to the default query options supported.
         /// </summary>
-        Supported = Filter | OrderBy | Top | Skip | Count | Select | Expand | Format | Apply,
+        Supported = Filter | OrderBy | Top | Skip | SkipToken | Count | Select | Expand | Format | Apply,
 
         /// <summary>
         /// A value that corresponds to allowing all query options.

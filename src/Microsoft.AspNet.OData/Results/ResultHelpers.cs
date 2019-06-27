@@ -72,10 +72,18 @@ namespace Microsoft.AspNet.OData.Results
             }
         }
 
-        internal static string GetVersionString(HttpRequestMessage request)
+        internal static ODataVersion GetODataResponseVersion(HttpRequestMessage request)
         {
-            ODataVersion? serviceVersion = request.ODataProperties().ODataServiceVersion;
-            return ODataUtils.ODataVersionToString(serviceVersion ?? ODataVersionConstraint.DefaultODataVersion);
+            if (request == null)
+            {
+                return ODataVersionConstraint.DefaultODataVersion;
+            }
+
+            HttpRequestMessageProperties properties = request.ODataProperties();
+            return properties.ODataMaxServiceVersion ??
+                properties.ODataMinServiceVersion ??
+                properties.ODataServiceVersion ??
+                ODataVersionConstraint.DefaultODataVersion;
         }
     }
 }

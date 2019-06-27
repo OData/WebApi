@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Routing
         // The header names used for versioning in the versions 4.0+ of the OData protocol.
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";
+        internal const string ODataMinServiceVersionHeader = "OData-MinVersion";
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
         // The header names used for versioning in the versions 1.0 to 3.0 of the OData protocol.

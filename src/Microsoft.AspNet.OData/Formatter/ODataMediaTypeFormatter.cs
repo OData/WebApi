@@ -22,6 +22,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -34,11 +35,7 @@ namespace Microsoft.AspNet.OData.Formatter
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
     public class ODataMediaTypeFormatter : MediaTypeFormatter
     {
-        private readonly ODataVersion _version;
-
         private readonly IEnumerable<ODataPayloadKind> _payloadKinds;
-
-        private HttpRequestMessage _request;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
@@ -52,18 +49,15 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             _payloadKinds = payloadKinds;
-
-            _version = ODataVersionConstraint.DefaultODataVersion;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataMediaTypeFormatter"/> class.
         /// </summary>
         /// <param name="formatter">The <see cref="ODataMediaTypeFormatter"/> to copy settings from.</param>
-        /// <param name="version">The OData version that this formatter supports.</param>
         /// <param name="request">The <see cref="HttpRequestMessage"/> for the per-request formatter instance.</param>
         /// <remarks>This is a copy constructor to be used in <see cref="GetPerRequestFormatterInstance"/>.</remarks>
-        internal ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, ODataVersion version, HttpRequestMessage request)
+        internal ODataMediaTypeFormatter(ODataMediaTypeFormatter formatter, HttpRequestMessage request)
             : base(formatter)
         {
             if (request == null)
@@ -78,10 +72,7 @@ namespace Microsoft.AspNet.OData.Formatter
             // everything on the other instance.
             _payloadKinds = formatter._payloadKinds;
 
-            // Parameter 2: version
-            _version = version;
-
-            // Parameter 3: request
+            // Parameter 2: request
             Request = request;
 
             // BaseAddressFactory
@@ -97,14 +88,7 @@ namespace Microsoft.AspNet.OData.Formatter
         /// <summary>
         /// The request message associated with the per-request formatter instance.
         /// </summary>
-        public HttpRequestMessage Request
-        {
-            get { return _request; }
-            set
-            {
-                _request = value;
-            }
-        }
+        public HttpRequestMessage Request { get; set; }
 
         /// <inheritdoc/>
         public override MediaTypeFormatter GetPerRequestFormatterInstance(Type type, HttpRequestMessage request, MediaTypeHeaderValue mediaType)
@@ -119,8 +103,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
             else
             {
-                ODataVersion version = GetODataResponseVersion(request);
-                return new ODataMediaTypeFormatter(this, version, request);
+                return new ODataMediaTypeFormatter(this, request);
             }
         }
 
@@ -151,7 +134,7 @@ namespace Microsoft.AspNet.OData.Formatter
             // Add version header.
             headers.TryAddWithoutValidation(
                 ODataVersionConstraint.ODataServiceVersionHeader,
-                ODataUtils.ODataVersionToString(_version));
+                ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(Request)));
         }
 
         /// <inheritdoc/>
@@ -333,7 +316,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     type,
                     value,
                     Request.GetModel(),
-                    _version,
+                    ResultHelpers.GetODataResponseVersion(Request),
                     GetBaseAddressInternal(Request),
                     contentHeaders == null ? null : contentHeaders.ContentType,
                     new WebApiUrlHelper(urlHelper),
@@ -387,21 +370,6 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
-        }
-
-        internal static ODataVersion GetODataResponseVersion(HttpRequestMessage request)
-        {
-            // OData protocol requires that you send the minimum version that the client needs to know to
-            // understand the response. There is no easy way we can figure out the minimum version that the client
-            // needs to understand our response. We send response headers much ahead generating the response. So if
-            // the requestMessage has a OData-MaxVersion, tell the client that our response is of the same
-            // version; else use the DataServiceVersionHeader. Our response might require a higher version of the
-            // client and it might fail. If the client doesn't send these headers respond with the default version
-            // (V4).
-            HttpRequestMessageProperties properties = request.ODataProperties();
-            return properties.ODataMaxServiceVersion ??
-                properties.ODataServiceVersion ??
-                ODataVersionConstraint.DefaultODataVersion;
         }
     }
 }

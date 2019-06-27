@@ -166,6 +166,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 
             // Act
             SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entityType, _model.Model);
+#pragma warning disable CS0618 // Type or member is obsolete
             var result = selectExpandNode.ExpandedNavigationProperties.Keys;
 
             // Assert

@@ -24,16 +24,16 @@ namespace Microsoft.AspNet.OData.Test.Query
         [InlineData(AllowedQueryOptions.Select)]
         [InlineData(AllowedQueryOptions.Expand)]
         [InlineData(AllowedQueryOptions.Format)]
+        [InlineData(AllowedQueryOptions.SkipToken)]
         public void Supported_Contains_SupportedQueryOptions(AllowedQueryOptions queryOption)
         {
             Assert.Equal(queryOption, AllowedQueryOptions.Supported & queryOption);
         }
 
-        [Theory]
-        [InlineData(AllowedQueryOptions.SkipToken)]
-        public void Supported_DoesNotContain_UnsupportedQueryOptions(AllowedQueryOptions queryOption)
+        [Fact]
+        public void Supported_DoesNotContain_UnsupportedQueryOptions()
         {
-            Assert.Equal(AllowedQueryOptions.None, AllowedQueryOptions.Supported & queryOption);
+            Assert.Equal(AllowedQueryOptions.None, AllowedQueryOptions.Supported & (AllowedQueryOptions.DeltaToken));
         }
 
         [Fact]

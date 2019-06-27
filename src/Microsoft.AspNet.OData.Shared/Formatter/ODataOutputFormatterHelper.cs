@@ -157,12 +157,26 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw new SerializationException(SRResources.UnableToDetermineMetadataUrl);
             }
 
+            //Set this variable if the SelectExpandClause is different from the processed clause on the Query options
+            SelectExpandClause selectExpandDifferentFromQueryOptions = null;
+            if (internalRequest.Context.QueryOptions != null && internalRequest.Context.QueryOptions.SelectExpand != null)
+            {
+                if (internalRequest.Context.QueryOptions.SelectExpand.ProcessedSelectExpandClause != internalRequest.Context.ProcessedSelectExpandClause)
+                {
+                    selectExpandDifferentFromQueryOptions = internalRequest.Context.ProcessedSelectExpandClause;
+                }
+            }
+            else if (internalRequest.Context.ProcessedSelectExpandClause != null)
+            {
+                selectExpandDifferentFromQueryOptions = internalRequest.Context.ProcessedSelectExpandClause;
+            }
+
             writerSettings.ODataUri = new ODataUri
             {
                 ServiceRoot = baseAddress,
 
                 // TODO: 1604 Convert webapi.odata's ODataPath to ODL's ODataPath, or use ODL's ODataPath.
-                SelectAndExpand = internalRequest.Context.SelectExpandClause,
+                SelectAndExpand = internalRequest.Context.ProcessedSelectExpandClause,
                 Apply = internalRequest.Context.ApplyClause,
                 Path = (path == null || IsOperationPath(path)) ? null : path.Path,
             };
@@ -184,7 +198,13 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.SkipExpensiveAvailabilityChecks = serializer.ODataPayloadKind == ODataPayloadKind.ResourceSet;
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
-                writeContext.SelectExpandClause = internalRequest.Context.SelectExpandClause;
+                writeContext.QueryOptions = internalRequest.Context.QueryOptions;
+
+                //Set the SelectExpandClause on the context if it was explicitly specified. 
+                if (selectExpandDifferentFromQueryOptions != null)
+                {
+                    writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;
+                }
 
                 serializer.WriteObject(value, type, messageWriter, writeContext);
             }

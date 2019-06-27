@@ -135,18 +135,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [Theory]
         [InlineData(CustomerBaseUrl, "?$expand=Orders", true)]
-        //[InlineData(CustomerBaseUrl, "(1)/Orders",true)]
-        //[InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders",true)]
-        //[InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders",true)]
-        //[InlineData(CustomerBaseUrl, "?$expand=Orders", false)]
-        //[InlineData(CustomerBaseUrl, "(1)/Orders", false)]
-        //[InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", false)]
-        //[InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders", false)]
+        [InlineData(CustomerBaseUrl, "(1)/Orders", true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders", true)]
+        [InlineData(CustomerBaseUrl, "?$expand=Orders", false)]
+        [InlineData(CustomerBaseUrl, "(1)/Orders", false)]
+        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", false)]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders", false)]
         public async Task PageSizeOnProperty(string url, string expand, bool usePreferPageSize)
         {
             string queryUrl = string.Format(url + expand, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
- //           request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             if (usePreferPageSize)
             {
                 request.Headers.Add("prefer", "maxpagesize=1");

@@ -22,7 +22,6 @@ namespace Microsoft.AspNet.OData.Query
         {
             EnsureStableOrdering = true;
             EnableConstantParameterization = true;
- //           EnableCorrelatedSubqueryBuffering = true;
         }
 
         /// <summary>

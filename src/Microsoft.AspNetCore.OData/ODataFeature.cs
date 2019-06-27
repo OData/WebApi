@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -126,6 +126,16 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <value>Initially an empty <c>IDictionary&lt;string, object&gt;</c>.</value>
         public IDictionary<string, object> RoutingConventionsStore { get; set; } = new Dictionary<string, object>();
+
+        /// <summary>
+        /// Gets or sets the parsed <see cref="ODataQueryOptions"/> of the request.
+        /// </summary>
+        internal ODataQueryOptions QueryOptions { get; set; }
+
+        /// <summary>
+        /// Page size to be used by skiptoken implementation for the top-level resource for the request. 
+        /// </summary>
+        internal int PageSize { get; set; }
 
         /// <inheritdoc/>
         public void Dispose()

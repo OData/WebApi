@@ -898,6 +898,9 @@
   <data name="PropertyMustBeBoolean" xml:space="preserve">
     <value>The value must be a boolean.</value>
   </data>
+  <data name="SkipTokenParseError" xml:space="preserve">
+    <value>Unable to parse the skiptoken value. Skiptoken value should always be server generated.</value>
+  </data>
   <data name="ApplyQueryOptionNotSupportedForLinq2SQL" xml:space="preserve">
     <value>$apply query options not supported for LINQ to SQL providers</value>
   </data>

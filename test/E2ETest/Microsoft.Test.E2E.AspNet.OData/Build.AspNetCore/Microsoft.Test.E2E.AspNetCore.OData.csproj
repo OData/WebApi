@@ -73,6 +73,7 @@
       <Link>Routing\AttributeRoutingTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
+    <Compile Include="DependencyInjection\CustomizeSkipTokenImplementationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <None Include="App.config" />
     <None Include="packages.config">
@@ -1242,6 +1243,15 @@
     <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs">
       <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
     </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenController.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeController.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenEdmModel.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ModelBoundQuerySettings\PageAttributeTest\SkipTokenTest.cs">
+      <Link>ModelBoundQuerySettings\PageAttributeTest\PageAttributeTest.cs</Link>
+    </Compile>
     <Compile Include="..\ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs">
       <Link>ModelBoundQuerySettings\SelectAttributeTest\SelectAttributeController.cs</Link>
     </Compile>
@@ -1761,17 +1771,17 @@
     <Reference Include="Microsoft.Net.Http.Headers, Version=2.0.3.0, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Net.Http.Headers.2.0.3\lib\netstandard2.0\Microsoft.Net.Http.Headers.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Client, Version=7.5.0.20627, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.5.0\lib\netstandard1.1\Microsoft.OData.Client.dll</HintPath>
+    <Reference Include="Microsoft.OData.Client, Version=7.6.0.30605, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.6.0\lib\netstandard1.1\Microsoft.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Core, Version=7.5.0.20627, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.5.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
+    <Reference Include="Microsoft.OData.Core, Version=7.6.0.30605, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.6.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=7.5.0.20627, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.5.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
+    <Reference Include="Microsoft.OData.Edm, Version=7.6.0.30605, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.6.0\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=7.5.0.20627, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.5.0\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
+    <Reference Include="Microsoft.Spatial, Version=7.6.0.30605, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.6.0\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Newtonsoft.Json.10.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>

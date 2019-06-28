@@ -9,6 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -96,6 +97,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             IEdmStructuredTypeReference elementType = GetResourceType(resourceSetType);
             ODataResourceSet resourceSet = CreateResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
+
+            Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(resourceSet, enumerable, writeContext);
+
             if (resourceSet == null)
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
@@ -120,14 +124,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName()));
             }
 
-            // save this for later to support JSON odata.streaming.
-            Uri nextPageLink = resourceSet.NextPageLink;
+            // set the nextpagelink to null to support JSON odata.streaming.
             resourceSet.NextPageLink = null;
-
             writer.WriteStart(resourceSet);
-
+            object lastResource = null;
             foreach (object item in enumerable)
             {
+                lastResource = item;
                 if (item == null || item is NullEdmComplexObject)
                 {
                     if (elementType.IsEntity())
@@ -151,10 +154,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
             // odata.streaming=true support.
 
-            if (nextPageLink != null)
-            {
-                resourceSet.NextPageLink = nextPageLink;
-            }
+            resourceSet.NextPageLink = nextLinkGenerator(lastResource);
 
             writer.WriteEnd();
         }
@@ -218,13 +218,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else
             {
-                // nested resourceSet
-                ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
-                if (truncatedCollection != null && truncatedCollection.IsTruncated)
-                {
-                    resourceSet.NextPageLink = GetNestedNextPageLink(writeContext, truncatedCollection.PageSize);
-                }
-
                 ICountOptionCollection countOptionCollection = resourceSetInstance as ICountOptionCollection;
                 if (countOptionCollection != null && countOptionCollection.TotalCount != null)
                 {
@@ -233,6 +226,42 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             return resourceSet;
+        }
+
+        /// <summary>
+        /// Creates a function that takes in an object and generates nextlink uri.
+        /// </summary>
+        /// <param name="resourceSet">The resource set describing a collection of structured objects.</param>
+        /// <param name="resourceSetInstance">The instance representing the resourceSet being written.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        /// <returns>The function that generates the NextLink from an object.</returns>
+        internal static Func<Object, Uri> GetNextLinkGenerator(ODataResourceSetBase resourceSet, IEnumerable resourceSetInstance, ODataSerializerContext writeContext)
+        {
+            if (resourceSet != null && resourceSet.NextPageLink != null)
+            {
+               Uri defaultUri = resourceSet.NextPageLink;
+               return (obj) => { return defaultUri; };
+            }
+
+            if (writeContext.ExpandedResource == null)
+            {
+                if (writeContext.InternalRequest != null && writeContext.QueryContext != null)
+                {
+                    SkipTokenHandler handler = writeContext.QueryContext.GetSkipTokenHandler();
+                    return (obj) => { return handler.GenerateNextPageLink(writeContext.InternalRequest.RequestUri, writeContext.InternalRequest.Context.PageSize, obj, writeContext); };
+                }
+            }
+            else
+            {
+                // nested resourceSet
+                ITruncatedCollection truncatedCollection = resourceSetInstance as ITruncatedCollection;
+                if (truncatedCollection != null && truncatedCollection.IsTruncated)
+                {
+                    return (obj) => { return GetNestedNextPageLink(writeContext, truncatedCollection.PageSize, obj); };
+                }
+            }
+
+            return (obj) => { return null; };
         }
 
         /// <summary>
@@ -325,21 +354,72 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize)
+        private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize, object obj)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
-
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
-            if (navigationLink != null)
+            Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
+            SkipTokenHandler nextLinkGenerator = null;
+            if (writeContext.QueryContext != null)
             {
-                return GetNextPageHelper.GetNextPageLink(navigationLink, pageSize);
+                nextLinkGenerator = writeContext.QueryContext.GetSkipTokenHandler();
+            }
+
+            if (nestedNextLink != null)
+            {
+                if (nextLinkGenerator != null)
+                {
+                    return nextLinkGenerator.GenerateNextPageLink(nestedNextLink, pageSize, obj, writeContext);
+                }
+
+                return GetNextPageHelper.GetNextPageLink(nestedNextLink, pageSize);
             }
 
             return null;
+        }
+
+        private static Uri GenerateQueryFromExpandedItem(ODataSerializerContext writeContext, Uri navigationLink)
+        {
+            IWebApiUrlHelper urlHelper = writeContext.InternalUrlHelper;
+            if (urlHelper == null)
+            {
+                return navigationLink;
+            }
+            string serviceRoot = urlHelper.CreateODataLink(
+                writeContext.InternalRequest.Context.RouteName,
+                writeContext.InternalRequest.PathHandler,
+                new List<ODataPathSegment>());
+            Uri serviceRootUri = new Uri(serviceRoot);
+            ODataUriParser parser = new ODataUriParser(writeContext.Model, serviceRootUri, navigationLink);
+            ODataUri newUri = parser.ParseUri();
+            newUri.SelectAndExpand = writeContext.SelectExpandClause;
+            if (writeContext.CurrentExpandedSelectItem != null)
+            {
+                newUri.OrderBy = writeContext.CurrentExpandedSelectItem.OrderByOption;
+                newUri.Filter = writeContext.CurrentExpandedSelectItem.FilterOption;
+                newUri.Skip = writeContext.CurrentExpandedSelectItem.SkipOption;
+                newUri.Top = writeContext.CurrentExpandedSelectItem.TopOption;
+
+                if (writeContext.CurrentExpandedSelectItem.CountOption != null)
+                {
+                    if (writeContext.CurrentExpandedSelectItem.CountOption.HasValue)
+                    {
+                        newUri.QueryCount = writeContext.CurrentExpandedSelectItem.CountOption.Value;
+                    }
+                }
+
+                ExpandedNavigationSelectItem expandedNavigationItem = writeContext.CurrentExpandedSelectItem as ExpandedNavigationSelectItem;
+                if (expandedNavigationItem != null)
+                {
+                    newUri.SelectAndExpand = expandedNavigationItem.SelectAndExpand;
+                }
+            }
+
+            ODataUrlKeyDelimiter keyDelimiter = writeContext.InternalRequest.Options.UrlKeyDelimiter == ODataUrlKeyDelimiter.Slash ? ODataUrlKeyDelimiter.Slash : ODataUrlKeyDelimiter.Parentheses;
+            return newUri.BuildUri(keyDelimiter);
         }
 
         private static IEdmStructuredTypeReference GetResourceType(IEdmTypeReference resourceSetType)

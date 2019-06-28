@@ -2167,7 +2167,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("SkipTopLimitExceeded", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to parse the skiptoken value. Skiptoken value should always be server generated..
+        /// </summary>
+        internal static string SkipTokenParseError
+        {
+            get
+            {
+                return ResourceManager.GetString("SkipTokenParseError", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Could not find the target entity type for the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>

@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Checks IQueryable provider for need of EF6 oprimization
+        /// Checks IQueryable provider for need of EF6 optimization
         /// </summary>
         /// <param name="query"></param>
         /// <returns>True if EF6 optimization are needed.</returns>

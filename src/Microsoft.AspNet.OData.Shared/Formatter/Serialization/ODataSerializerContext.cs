@@ -73,6 +73,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SkipExpensiveAvailabilityChecks = context.SkipExpensiveAvailabilityChecks;
             MetadataLevel = context.MetadataLevel;
             Items = context.Items;
+            ExpandReference = context.ExpandReference;
 
             QueryContext = queryContext;
             ExpandedResource = resource; // parent resource
@@ -202,6 +203,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the resource that is being expanded.
         /// </summary>
         public ResourceContext ExpandedResource { get; set; }
+
+        /// <summary>
+        /// Gets or sets the boolean value indicating whether it's $ref expanded.
+        /// </summary>
+        public bool ExpandReference { get; set; }
 
         /// <summary>
         /// Gets or sets the complex property being nested or navigation property being expanded.

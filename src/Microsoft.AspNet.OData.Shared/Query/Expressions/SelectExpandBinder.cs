@@ -100,7 +100,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause,
-            IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem = null,
+            IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedReferenceSelectItem expandedItem = null,
             int? modelBoundPageSize = null)
         {
             Type elementType;
@@ -344,7 +344,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // source => new Wrapper { Container =  new PropertyContainer { .... } }
             if (selectExpandClause != null)
             {
-                Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
+                Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
 
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
@@ -386,7 +386,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is DynamicPathSegment);
         }
 
-        private Expression CreateTotalCountExpression(Expression source, ExpandedNavigationSelectItem expandItem)
+        private Expression CreateTotalCountExpression(Expression source, ExpandedReferenceSelectItem expandItem)
         {
             Expression countExpression = Expression.Constant(null, typeof(long?));
             if (expandItem.CountOption == null || !expandItem.CountOption.Value)
@@ -429,16 +429,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
-            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
+            Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand,
             ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
-            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> kvp in propertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedReferenceSelectItem> kvp in propertiesToExpand)
             {
                 IEdmNavigationProperty propertyToExpand = kvp.Key;
-                ExpandedNavigationSelectItem expandItem = kvp.Value;
-                SelectExpandClause projection = expandItem.SelectAndExpand;
+                ExpandedReferenceSelectItem expandItem = kvp.Value;
+
+                SelectExpandClause projection = GetOrCreateSelectExpandClause(kvp);
 
                 ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(propertyToExpand,
                     propertyToExpand.ToEntityType(),
@@ -527,6 +528,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return PropertyContainer.CreatePropertyContainer(includedProperties);
         }
 
+        private static SelectExpandClause GetOrCreateSelectExpandClause(KeyValuePair<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertyToExpand)
+        {
+            // for normal $expand=....
+            ExpandedNavigationSelectItem expandNavigationSelectItem = propertyToExpand.Value as ExpandedNavigationSelectItem;
+            if (expandNavigationSelectItem != null)
+            {
+                return expandNavigationSelectItem.SelectAndExpand;
+            }
+
+            // for $expand=..../$ref, just includes the keys properties.
+            IList<SelectItem> selectItems = new List<SelectItem>();
+            foreach (IEdmStructuralProperty keyProperty in propertyToExpand.Key.ToEntityType().Key())
+            {
+                selectItems.Add(new PathSelectItem(new ODataSelectPath(new PropertySegment(keyProperty))));
+            }
+
+            return new SelectExpandClause(selectItems, false);
+        }
+
         private Expression AddOrderByQueryForSource(Expression source, OrderByClause orderbyClause, Type elementType)
         {
             if (orderbyClause != null)
@@ -575,7 +595,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
-        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem, int? modelBoundPageSize)
+        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedReferenceSelectItem expandedItem, int? modelBoundPageSize)
         {
             ParameterExpression element = Expression.Parameter(elementType);
 
@@ -740,13 +760,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return ExpressionHelperMethods.EnumerableSelectGeneric.MakeGenericMethod(elementType, resultType);
         }
 
-        private static Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
+        private static Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
         {
-            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> properties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
+            Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> properties = new Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem>();
 
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                ExpandedReferenceSelectItem expandItem = selectItem as ExpandedReferenceSelectItem;
                 if (expandItem != null)
                 {
                     SelectExpandNode.ValidatePathIsSupported(expandItem.PathToNavigationProperty);

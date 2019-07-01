@@ -19,12 +19,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public DbSet<Customer> Customers { get; set; }
     }
 
+    [System.Data.Linq.Mapping.Table(Name = "Customer")]
     public class Customer
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public CustomerBucket? Bucket { get; set; }
 
         public Order Order { get; set; }
 
@@ -48,5 +51,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public string Name { get; set; }
 
         public string Street { get; set; }
+    }
+
+    public enum CustomerBucket
+    {
+        Small,
+        Medium,
+        Big
     }
 }

@@ -64,7 +64,21 @@ namespace AspNetCoreODataSample.Web.Controllers
                     Title = "Conan",
                     ReleaseDate = new DateTimeOffset(new DateTime(2018, 3, 3)),
                     Genre = Genre.Comedy,
-                    Price = 1.99m
+                    Price = 1.99m,
+                    Stars = new List<MovieStar>{
+                        new MovieStar
+                        {
+                            FirstName = "Arnold",
+                            LastName = "Schwarzenegger",
+                            MovieId = 1
+                        },
+                        new MovieStar
+                        {
+                            FirstName = "Jackie",
+                            LastName = "Chan",
+                            MovieId = 1
+                        }
+                    }
                 },
                 new Movie
                 {
@@ -72,7 +86,15 @@ namespace AspNetCoreODataSample.Web.Controllers
                     Title = "James",
                     ReleaseDate = new DateTimeOffset(new DateTime(2017, 3, 3)),
                     Genre = Genre.Adult,
-                    Price = 91.99m
+                    Price = 91.99m,
+                    Stars = new List<MovieStar>{
+                        new MovieStar
+                        {
+                            FirstName = "Bruce",
+                            LastName = "Willis",
+                            MovieId = 2
+                        }
+                    }
                 }
             };
         }

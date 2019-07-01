@@ -563,7 +563,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 
             // Act
             HttpResponseMessage response = await client.SendAsync(request);
-                                                                                                                                                                                                                                                                                                                                                    
+
             // Assert
             Assert.NotNull(response);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -578,6 +578,65 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.Equal(8, orders[0]["Id"]);
             JArray orderdetails = orders[0]["OrderDetails"] as JArray;
             Assert.Equal(0, orderdetails[0]["Id"]);
+        }
+
+        [Fact]
+        public async Task DollarRefAfterDollarExpandWorks()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?$expand=SelectOrders/$ref", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(result);
+
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+            JArray orders = customers[9]["SelectOrders"] as JArray;
+
+            Assert.Equal(9, orders.Count);
+            for (int i = 0; i < 9; i++)
+            {
+                Assert.Contains("SelectOrder(" + i + ")", (string)(orders[i]["@odata.id"]));
+            }
+        }
+
+        [Fact]
+        public async Task DollarRefAfterDollarExpandWithNestedQueryOptionsWorks()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer?$expand=SelectOrders/$ref($filter=Id eq 6)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.NotNull(result);
+
+            JsonAssert.ArrayLength(10, "value", result);
+            JArray customers = (JArray)result["value"];
+
+            JArray orders = customers[9]["SelectOrders"] as JArray;
+            JToken order = Assert.Single(orders); // only one
+            Assert.Contains("SelectOrder(6)", (string)order["@odata.id"]);
         }
     }
 

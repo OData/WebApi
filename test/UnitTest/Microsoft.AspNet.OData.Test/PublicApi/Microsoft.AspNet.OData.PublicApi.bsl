@@ -3278,6 +3278,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 
 	Microsoft.OData.Edm.IEdmProperty EdmProperty  { public get; public set; }
 	ResourceContext ExpandedResource  { public get; public set; }
+	bool ExpandReference  { public get; public set; }
 	System.Collections.Generic.IDictionary`2[[System.Object],[System.Object]] Items  { public get; }
 	ODataMetadataLevel MetadataLevel  { public get; public set; }
 	Microsoft.OData.Edm.IEdmModel Model  { public get; public set; }
@@ -3304,6 +3305,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode (SelectExpandNode selectExpandNodeToCopy)
 	public SelectExpandNode (Microsoft.OData.Edm.IEdmStructuredType structuredType, ODataSerializerContext writeContext)
 	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model)
+	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model, bool expandedReference)
 
 	[
 	ObsoleteAttribute(),
@@ -3311,6 +3313,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
 
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedNavigationSelectItem]] ExpandedProperties  { public get; }
+	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] ReferencedNavigationProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmAction]] SelectedActions  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedComplexProperties  { public get; }

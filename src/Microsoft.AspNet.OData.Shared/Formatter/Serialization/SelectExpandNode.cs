@@ -33,6 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
+            ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             SelectedActions = new HashSet<IEdmAction>();
             SelectedFunctions = new HashSet<IEdmFunction>();
             SelectedDynamicProperties = new HashSet<string>();
@@ -46,6 +47,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public SelectExpandNode(SelectExpandNode selectExpandNodeToCopy)
         {
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedProperties);
+            ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>(selectExpandNodeToCopy.ReferencedNavigationProperties);
+
             SelectedActions = new HashSet<IEdmAction>(selectExpandNodeToCopy.SelectedActions);
             SelectAllDynamicProperties = selectExpandNodeToCopy.SelectAllDynamicProperties;
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>(selectExpandNodeToCopy.SelectedComplexProperties);
@@ -63,7 +66,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
         /// <remarks>The default constructor is for unit testing only.</remarks>
         public SelectExpandNode(IEdmStructuredType structuredType, ODataSerializerContext writeContext)
-            : this(writeContext.SelectExpandClause, structuredType, writeContext.Model)
+            : this(writeContext.SelectExpandClause, structuredType, writeContext.Model, writeContext.ExpandReference)
         {
         }
 
@@ -75,6 +78,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="structuredType">The structural type of the resource that would be written.</param>
         /// <param name="model">The <see cref="IEdmModel"/> that contains the given structural type.</param>
         public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model)
+            : this(selectExpandClause, structuredType, model, false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new instance of the <see cref="SelectExpandNode"/> class describing the set of structural properties,
+        /// nested properties, navigation properties, and actions to select and expand for the given <paramref name="selectExpandClause"/>.
+        /// </summary>
+        /// <param name="selectExpandClause">The parsed $select and $expand query options.</param>
+        /// <param name="structuredType">The structural type of the resource that would be written.</param>
+        /// <param name="model">The <see cref="IEdmModel"/> that contains the given structural type.</param>
+        /// <param name="expandedReference">a boolean value indicating whether it's expanded reference.</param>
+        public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model, bool expandedReference)
             : this()
         {
             if (structuredType == null)
@@ -90,41 +106,41 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // So far, it includes all properties of primitive, enum and collection of them
             HashSet<IEdmStructuralProperty> allStructuralProperties = new HashSet<IEdmStructuralProperty>();
 
-            // So far, it includes all properties of complex and collection of complex
-            HashSet<IEdmStructuralProperty> allComplexStructuralProperties = new HashSet<IEdmStructuralProperty>();
-            GetStructuralProperties(structuredType, allStructuralProperties, allComplexStructuralProperties);
-
-            // So far, it includes all navigation properties
-            HashSet<IEdmNavigationProperty> allNavigationProperties;
-            HashSet<IEdmAction> allActions;
-            HashSet<IEdmFunction> allFunctions;
-
             IEdmEntityType entityType = structuredType as IEdmEntityType;
-            if (entityType != null)
+            if (expandedReference)
             {
-                allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
-                allActions = new HashSet<IEdmAction>(model.GetAvailableActions(entityType));
-                allFunctions = new HashSet<IEdmFunction>(model.GetAvailableFunctions(entityType));
+                SelectAllDynamicProperties = false;
+                if (entityType != null)
+                {
+                    // only need to include the key properties.
+                    SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>(entityType.Key());
+                }
             }
             else
             {
-                allNavigationProperties = new HashSet<IEdmNavigationProperty>();
-                allActions = new HashSet<IEdmAction>();
-                allFunctions = new HashSet<IEdmFunction>();
-            }
+                // So far, it includes all properties of complex and collection of complex
+                HashSet<IEdmStructuralProperty> allComplexStructuralProperties = new HashSet<IEdmStructuralProperty>();
+                GetStructuralProperties(structuredType, allStructuralProperties, allComplexStructuralProperties);
 
-            if (selectExpandClause == null)
-            {
-                SelectedStructuralProperties = allStructuralProperties;
-                SelectedComplexProperties = allComplexStructuralProperties;
-                SelectedNavigationProperties = allNavigationProperties;
-                SelectedActions = allActions;
-                SelectedFunctions = allFunctions;
-                SelectAllDynamicProperties = true;
-            }
-            else
-            {
-                if (selectExpandClause.AllSelected)
+                // So far, it includes all navigation properties
+                HashSet<IEdmNavigationProperty> allNavigationProperties;
+                HashSet<IEdmAction> allActions;
+                HashSet<IEdmFunction> allFunctions;
+
+                if (entityType != null)
+                {
+                    allNavigationProperties = new HashSet<IEdmNavigationProperty>(entityType.NavigationProperties());
+                    allActions = new HashSet<IEdmAction>(model.GetAvailableActions(entityType));
+                    allFunctions = new HashSet<IEdmFunction>(model.GetAvailableFunctions(entityType));
+                }
+                else
+                {
+                    allNavigationProperties = new HashSet<IEdmNavigationProperty>();
+                    allActions = new HashSet<IEdmAction>();
+                    allFunctions = new HashSet<IEdmFunction>();
+                }
+
+                if (selectExpandClause == null)
                 {
                     SelectedStructuralProperties = allStructuralProperties;
                     SelectedComplexProperties = allComplexStructuralProperties;
@@ -135,16 +151,31 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
                 else
                 {
-                    // Explicitly set SelectAllDynamicProperties as false, while the BuildSelections method will set it as true
-                    // if it meets the select all condition.
-                    SelectAllDynamicProperties = false;
-                    BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
+                    if (selectExpandClause.AllSelected)
+                    {
+                        SelectedStructuralProperties = allStructuralProperties;
+                        SelectedComplexProperties = allComplexStructuralProperties;
+                        SelectedNavigationProperties = allNavigationProperties;
+                        SelectedActions = allActions;
+                        SelectedFunctions = allFunctions;
+                        SelectAllDynamicProperties = true;
+                    }
+                    else
+                    {
+                        // Explicitly set SelectAllDynamicProperties as false, while the BuildSelections method will set it as true
+                        // if it meets the select all condition.
+                        SelectAllDynamicProperties = false;
+                        BuildSelections(selectExpandClause, allStructuralProperties, allComplexStructuralProperties, allNavigationProperties, allActions, allFunctions);
+                    }
+
+                    BuildExpansions(selectExpandClause, allNavigationProperties);
+
+                    // remove expanded navigation properties from the selected navigation properties.
+                    SelectedNavigationProperties.ExceptWith(ExpandedProperties.Keys);
+
+                    // remove expanded navigation properties from the selected navigation properties.
+                    SelectedNavigationProperties.ExceptWith(ReferencedNavigationProperties);
                 }
-
-                BuildExpansions(selectExpandClause, allNavigationProperties);
-
-                // remove expanded navigation properties from the selected navigation properties.
-                SelectedNavigationProperties.ExceptWith(ExpandedProperties.Keys);
             }
         }
 
@@ -182,6 +213,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> ExpandedProperties { get; private set; }
 
         /// <summary>
+        /// Gets the list of EDM navigation properties to be expand referenced in the response.
+        /// </summary>
+        public ISet<IEdmNavigationProperty> ReferencedNavigationProperties { get; private set; }
+
+        /// <summary>
         /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
         /// </summary>
         public ISet<IEdmStructuralProperty> SelectedComplexProperties { get; private set; }
@@ -210,15 +246,23 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
-                if (expandItem != null)
+                ExpandedReferenceSelectItem expandReferenceItem = selectItem as ExpandedReferenceSelectItem;
+                if (expandReferenceItem != null)
                 {
-                    ValidatePathIsSupported(expandItem.PathToNavigationProperty);
-                    NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandItem.PathToNavigationProperty.LastSegment;
+                    ValidatePathIsSupported(expandReferenceItem.PathToNavigationProperty);
+                    NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandReferenceItem.PathToNavigationProperty.LastSegment;
                     IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
                     if (allNavigationProperties.Contains(navigationProperty))
                     {
-                        ExpandedProperties.Add(navigationProperty, expandItem);
+                        ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                        if (expandItem != null)
+                        {
+                            ExpandedProperties.Add(navigationProperty, expandItem);
+                        }
+                        else
+                        {
+                            ReferencedNavigationProperties.Add(navigationProperty);
+                        }
                     }
                 }
             }

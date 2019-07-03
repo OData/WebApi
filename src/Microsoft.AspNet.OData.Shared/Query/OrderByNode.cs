@@ -60,6 +60,12 @@ namespace Microsoft.AspNet.OData.Query
             List<OrderByNode> result = new List<OrderByNode>();
             for (OrderByClause clause = orderByClause; clause != null; clause = clause.ThenBy)
             {
+                if (clause.Expression is CountNode)
+                {
+                    result.Add(new OrderByCountNode(clause));
+                    continue;
+                }
+
                 if (clause.Expression is NonResourceRangeVariableReferenceNode ||
                     clause.Expression is ResourceRangeVariableReferenceNode)
                 {

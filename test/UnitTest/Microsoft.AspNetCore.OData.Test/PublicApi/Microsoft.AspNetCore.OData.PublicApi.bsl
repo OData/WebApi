@@ -2613,6 +2613,12 @@ public class Microsoft.AspNet.OData.Query.ODataValidationSettings {
 	System.Nullable`1[[System.Int32]] MaxTop  { public get; public set; }
 }
 
+public class Microsoft.AspNet.OData.Query.OrderByCountNode : OrderByNode {
+	public OrderByCountNode (Microsoft.OData.UriParser.OrderByClause orderByClause)
+
+	Microsoft.OData.UriParser.OrderByClause OrderByClause  { public get; }
+}
+
 public class Microsoft.AspNet.OData.Query.OrderByItNode : OrderByNode {
 	public OrderByItNode (Microsoft.OData.UriParser.OrderByDirection direction)
 }
@@ -2664,6 +2670,7 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CollectionResourceFunctionCallNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.ConstantNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.ConvertNode nodeIn)
+	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.CountNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.InNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.NamedFunctionParameterNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.NonResourceRangeVariableReferenceNode nodeIn)

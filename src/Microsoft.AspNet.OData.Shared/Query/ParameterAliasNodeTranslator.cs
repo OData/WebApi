@@ -390,5 +390,15 @@ namespace Microsoft.AspNet.OData.Query
         {
             return new UnaryOperatorNode(nodeIn.OperatorKind, (SingleValueNode)nodeIn.Operand.Accept(this));
         }
+
+        /// <summary> 
+        /// Translate a CountNode. 
+        /// </summary> 
+        /// <param name="nodeIn">The node to be translated.</param> 
+        /// <returns>The translated node.</returns> 
+        public override QueryNode Visit(CountNode nodeIn)
+        {
+            return new CountNode((CollectionNode)nodeIn.Source.Accept(this));
+        }
     }
 }

@@ -22,14 +22,37 @@ namespace AspNetCoreODataSample.Web.Controllers
 
             if (_context.Movies.Count() == 0)
             {
-                Movie m = new Movie
+                Movie conanMovie = new Movie
                 {
                     Title = "Conan",
                     ReleaseDate = new DateTimeOffset(new DateTime(2017, 3, 3)),
                     Genre = Genre.Comedy,
                     Price = 1.99m
                 };
-                _context.Movies.Add(m);
+                Movie dieHardMovie = new Movie
+                {
+                    Title = "Die Hard",
+                    ReleaseDate = new DateTimeOffset(new DateTime(2014, 1, 3)),
+                    Genre = Genre.Comedy,
+                    Price = 1.89m
+                };
+                _context.Movies.Add(conanMovie);
+                _context.Movies.Add(dieHardMovie);
+                _context.SaveChanges();
+                MovieStar s = new MovieStar
+                {
+                    FirstName = "Arnold",
+                    LastName = "Schwarzenegger",
+                    MovieId = conanMovie.ID
+                };
+                _context.MovieStars.Add(s);
+                MovieStar b = new MovieStar
+                {
+                    FirstName = "Bruce",
+                    LastName = "Willis",
+                    MovieId = dieHardMovie.ID
+                };
+                _context.MovieStars.Add(b);
                 _context.SaveChanges();
             }
 
@@ -41,7 +64,21 @@ namespace AspNetCoreODataSample.Web.Controllers
                     Title = "Conan",
                     ReleaseDate = new DateTimeOffset(new DateTime(2018, 3, 3)),
                     Genre = Genre.Comedy,
-                    Price = 1.99m
+                    Price = 1.99m,
+                    Stars = new List<MovieStar>{
+                        new MovieStar
+                        {
+                            FirstName = "Arnold",
+                            LastName = "Schwarzenegger",
+                            MovieId = 1
+                        },
+                        new MovieStar
+                        {
+                            FirstName = "Jackie",
+                            LastName = "Chan",
+                            MovieId = 1
+                        }
+                    }
                 },
                 new Movie
                 {
@@ -49,7 +86,15 @@ namespace AspNetCoreODataSample.Web.Controllers
                     Title = "James",
                     ReleaseDate = new DateTimeOffset(new DateTime(2017, 3, 3)),
                     Genre = Genre.Adult,
-                    Price = 91.99m
+                    Price = 91.99m,
+                    Stars = new List<MovieStar>{
+                        new MovieStar
+                        {
+                            FirstName = "Bruce",
+                            LastName = "Willis",
+                            MovieId = 2
+                        }
+                    }
                 }
             };
         }

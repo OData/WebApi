@@ -68,6 +68,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\OrderByCountNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\SkipTokenHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">
       <AutoGen>True</AutoGen>
@@ -75,6 +78,8 @@
       <DependentUpon>PropertyContainer.generated.tt</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\SkipTokenQueryOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\SkipTokenQueryValidator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)RequestMethod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionDescriptor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IWebApiActionMap.cs" />

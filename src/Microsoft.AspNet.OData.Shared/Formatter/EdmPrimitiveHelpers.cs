@@ -118,6 +118,16 @@ namespace Microsoft.AspNet.OData.Formatter
 
                     throw new ValidationException(Error.Format(SRResources.PropertyMustBeTimeOfDay));
                 }
+                else if (type == typeof(bool))
+                {
+                    bool result;
+                    if (str != null && Boolean.TryParse(str, out result))
+                    {
+                        return result;
+                    }
+
+                    throw new ValidationException(Error.Format(SRResources.PropertyMustBeBoolean));
+                }
                 else
                 {
                     Contract.Assert(type == typeof(uint) || type == typeof(ushort) || type == typeof(ulong));

@@ -589,37 +589,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         }
 
         [Fact]
-        public void CreateResourceSet_SetsNextPageLink_WhenWritingTruncatedCollection_ForExpandedProperties()
-        {
-            // Arrange
-            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            IEdmCollectionTypeReference customersType = new EdmCollectionTypeReference(new EdmCollectionType(model.Customer.AsReference()));
-            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(_serializerProvider);
-            SelectExpandClause selectExpandClause = new SelectExpandClause(new SelectItem[0], allSelected: true);
-            IEdmNavigationProperty ordersProperty = model.Customer.NavigationProperties().First();
-            ResourceContext entity = new ResourceContext
-            {
-                SerializerContext = new ODataSerializerContext { NavigationSource = model.Customers, Model = model.Model }
-            };
-            ODataSerializerContext nestedContext = new ODataSerializerContext(entity, selectExpandClause, ordersProperty);
-            TruncatedCollection<Order> orders = new TruncatedCollection<Order>(new[] { new Order(), new Order() }, pageSize: 1);
-
-            NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation();
-            linkBuilder.AddNavigationPropertyLinkBuilder(ordersProperty,
-                new NavigationLinkBuilder((entityContext, navigationProperty) => new Uri("http://navigation-link/"),
-                    false));
-
-            model.Model.SetNavigationSourceLinkBuilder(model.Customers, linkBuilder);
-            model.Model.SetNavigationSourceLinkBuilder(model.Orders, new NavigationSourceLinkBuilderAnnotation());
-
-            // Act
-            ODataResourceSet resourceSet = serializer.CreateResourceSet(orders, _customersType, nestedContext);
-
-            // Assert
-            Assert.Equal("http://navigation-link/?$skip=1", resourceSet.NextPageLink.AbsoluteUri);
-        }
-
-        [Fact]
         public void CreateResourceSet_SetsODataOperations()
         {
             // Arrange
@@ -645,6 +614,23 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             // Assert
             Assert.Single(resourceSet.Actions);
             Assert.Equal(3, resourceSet.Functions.Count());
+        }
+
+        [Fact]
+        public void SetODataFeatureTotalCountValueNull()
+        {
+            // Arrange
+            ODataResourceSetSerializer serializer = new ODataResourceSetSerializer(_serializerProvider);
+            var request = RequestFactory.Create();
+            request.ODataContext().TotalCount = null;
+
+            var result = new object[0];
+
+            // Act
+            ODataResourceSet resourceSet = serializer.CreateResourceSet(result, _customersType, new ODataSerializerContext { Request = request });
+
+            // Assert
+            Assert.Null(resourceSet.Count);
         }
 
         [Theory]

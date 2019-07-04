@@ -78,7 +78,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$orderby", rawValue }, { "$apply", applyRaw } });
+                new Dictionary<string, string> { { "$orderby", rawValue }, { "$apply", applyRaw } },
+                context.RequestContainer);
             _queryOptionParser.ParseApply();
         }
 
@@ -102,7 +103,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$orderby", rawValue } });
+                new Dictionary<string, string> { { "$orderby", rawValue } },
+                context.RequestContainer);
         }
 
         internal OrderByQueryOption(OrderByQueryOption orderBy)
@@ -241,6 +243,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 OrderByPropertyNode propertyNode = node as OrderByPropertyNode;
                 OrderByOpenPropertyNode openPropertyNode = node as OrderByOpenPropertyNode;
+                OrderByCountNode countNode = node as OrderByCountNode;
 
                 if (propertyNode != null)
                 {
@@ -278,6 +281,12 @@ namespace Microsoft.AspNet.OData.Query
                     openPropertiesSoFar.Add(openPropertyNode.PropertyName);
                     Contract.Assert(openPropertyNode.OrderByClause != null);
                     querySoFar = AddOrderByQueryForProperty(query, querySettings, openPropertyNode.OrderByClause, querySoFar, openPropertyNode.Direction, alreadyOrdered);
+                    alreadyOrdered = true;
+                }
+                else if (countNode != null)
+                {
+                    Contract.Assert(countNode.OrderByClause != null);
+                    querySoFar = AddOrderByQueryForProperty(query, querySettings, countNode.OrderByClause, querySoFar, countNode.Direction, alreadyOrdered);
                     alreadyOrdered = true;
                 }
                 else

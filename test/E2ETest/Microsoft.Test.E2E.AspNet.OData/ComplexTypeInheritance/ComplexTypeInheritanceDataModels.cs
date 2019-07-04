@@ -10,12 +10,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         public Window()
         {
             OptionalShapes = new List<Shape>();
+            PolygonalShapes = new List<Polygon>();
         }
         public int Id { get; set; }
         public string Name { get; set; }
         public Window Parent { get; set; }
         public Shape CurrentShape { get; set; }
         public IList<Shape> OptionalShapes { get; set; }
+        public IList<Polygon> PolygonalShapes { get; set; }
     }
 
     public abstract class Shape

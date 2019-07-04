@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmTypeReference edmType = readContext.GetEdmType(type);
             Contract.Assert(edmType != null);
 
-            ODataProperty property = messageReader.ReadProperty();
+            ODataProperty property = messageReader.ReadProperty(edmType);
             return ReadInline(property, edmType, readContext);
         }
 
@@ -60,14 +60,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 item = property.Value;
             }
 
-            IEdmEnumTypeReference enumTypeReference = (IEdmEnumTypeReference)edmType;
-            IEdmEnumType enumType = enumTypeReference.EnumDefinition();
+            IEdmEnumTypeReference enumTypeReference = edmType.AsEnum();
             ODataEnumValue enumValue = item as ODataEnumValue;
             if (readContext.IsUntyped)
             {
                 Contract.Assert(edmType.TypeKind() == EdmTypeKind.Enum);
                 return new EdmEnumObject(enumTypeReference, enumValue.Value);
             }
+
+            IEdmEnumType enumType = enumTypeReference.EnumDefinition();
 
             // Enum member supports model alias case. So, try to use the Edm member name to retrieve the Enum value.
             var memberMapAnnotation = readContext.Model.GetClrEnumMemberAnnotation(enumType);

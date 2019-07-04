@@ -13,5 +13,16 @@ namespace AspNetCoreODataSample.Web.Models
         }
 
         public DbSet<Movie> Movies { get; set; }
+        public DbSet<MovieStar> MovieStars { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<MovieStar>().HasKey(_ => new
+            {
+                _.FirstName,
+                _.LastName
+            });
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

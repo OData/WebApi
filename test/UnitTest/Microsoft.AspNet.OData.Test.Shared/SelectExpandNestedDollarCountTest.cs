@@ -131,7 +131,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Contains("\"Categories@odata.count\":9", payload); // Categories
         }
 
-        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader, bool handleNullPropagation = true)
+        private Task<HttpResponseMessage> GetResponse(string uri, string acceptHeader)
         {
             var controllers = new[] {
                 typeof(MsCustomersController),

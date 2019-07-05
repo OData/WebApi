@@ -14,4 +14,12 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public DateTimeOffset OrderDate { get; set; }
         public DateTimeOffset? DeliveryDate { get; set; }
     }
+
+    public static class OrderExtensions
+    {
+        public static Customer CustomerExt(this Order order)
+        {
+            return order.Customer;
+        }
+    }
 }

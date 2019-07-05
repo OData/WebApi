@@ -60,6 +60,19 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public Address[] NotFilterableAlternateAddresses { get; set; }
     }
 
+    public static class ProductExtensions
+    {
+        public static Category CategoryExt(this Product product)
+        {
+            return product.Category;
+        }
+
+        public static Category AlternateCategory(this Product product)
+        {
+            return null;
+        }
+    }
+
     public class Category
     {
         public int CategoryID { get; set; }
@@ -71,6 +84,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         public IEnumerable<Product> EnumerableProducts { get; set; }
         public IQueryable<Product> QueryableProducts { get; set; }
+    }
+
+    public static class CategoryExtensions
+    {
+        public static IEnumerable<Product> EnumerableProductsExt(this Category category)
+        {
+            return category.EnumerableProducts;
+        }
     }
 
     public class Address

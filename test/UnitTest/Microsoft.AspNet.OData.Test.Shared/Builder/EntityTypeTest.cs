@@ -56,6 +56,34 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         [Fact]
+        public void CreateEntityTypeWithExtensionRelationship()
+        {
+            var builder = new ODataModelBuilder().Add_Customer_EntityType().Add_Order_EntityType().Add_OrderCustomer_Relationship_Extension();
+
+            var model = builder.GetServiceModel();
+            var orderType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(t => t.Name == "Order");
+            Assert.NotNull(orderType);
+            Assert.Equal("Order", orderType.Name);
+            Assert.Equal(typeof(Order).Namespace, orderType.Namespace);
+            Assert.Equal("OrderId", orderType.DeclaredKey.Single().Name);
+            Assert.Equal(5, orderType.DeclaredProperties.Count());
+            Assert.Single(orderType.NavigationProperties());
+            var deliveryDateProperty = orderType.DeclaredProperties.Single(dp => dp.Name == "DeliveryDate");
+            Assert.NotNull(deliveryDateProperty);
+            Assert.True(deliveryDateProperty.Type.IsNullable);
+
+            Assert.Equal("CustomerExt", orderType.NavigationProperties().First().Name);
+            Assert.Equal("Customer", orderType.NavigationProperties().First().ToEntityType().Name);
+
+            var customerType = model.SchemaElements.OfType<IEdmEntityType>().SingleOrDefault(t => t.Name == "Customer");
+            Assert.NotNull(customerType);
+            Assert.Equal("Customer", customerType.Name);
+            Assert.Equal(typeof(Customer).Namespace, customerType.Namespace);
+            Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
+            Assert.Equal(5, customerType.DeclaredProperties.Count());
+        }
+
+        [Fact]
         public void CanCreateEntityWithCompoundKey()
         {
             var builder = new ODataModelBuilder();

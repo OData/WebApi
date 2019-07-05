@@ -19,9 +19,8 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="property">The name of the property.</param>
         /// <param name="declaringType">The declaring EDM type of the property.</param>
         public PrimitivePropertyConfiguration(PropertyInfo property, StructuralTypeConfiguration declaringType)
-            :base(property, declaringType)
+            : base(property, declaringType)
         {
-
         }
 
         /// <summary>

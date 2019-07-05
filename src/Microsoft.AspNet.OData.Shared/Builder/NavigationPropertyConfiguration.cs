@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (memberDescriptor == null)
             {
-                throw Error.ArgumentNull("memberDescripor");
+                throw Error.ArgumentNull("memberDescriptor");
             }
 
             Multiplicity = multiplicity;
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Builder
                 Type elementType;
                 if (!TypeHelper.IsCollection(_relatedType, out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, memberDescriptor.Name, TypeHelper.GetReflectedType(memberDescriptor).Name);
+                    throw Error.Argument("memberDescriptor", SRResources.ManyToManyNavigationPropertyMustReturnCollection, memberDescriptor.Name, TypeHelper.GetReflectedType(memberDescriptor).Name);
                 }
 
                 _relatedType = elementType;
@@ -67,10 +67,8 @@ namespace Microsoft.AspNet.OData.Builder
 
         private static MemberDescriptor CreatePropertyDescriptor(PropertyInfo property)
         {
-            if(property == null)
-            {
-                throw Error.ArgumentNull("property");
-            }
+            if (property == null)
+                return null;
             return new MemberDescriptor(property);
         }
 

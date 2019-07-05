@@ -129,7 +129,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Cast MemberDescriptor to MemberInfo.
         /// </summary>
-        /// <param name="memberDescriptor">The object to compare with the current object.</param>
+        /// <param name="memberDescriptor">The object to cast.</param>
         public static implicit operator MemberInfo(MemberDescriptor memberDescriptor)
         {
             return memberDescriptor.MemberInfo;

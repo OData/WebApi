@@ -19,4 +19,12 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public List<Customer> Customers { get; set; }
         public List<Address> Subsidiaries { get; set; }
     }
+
+    public static class CompanyExtensions
+    {
+        public static IList<Employee> CompanyEmployeesExt(this Company company)
+        {
+            return company.ComplanyEmployees;
+        }
+    }
 }

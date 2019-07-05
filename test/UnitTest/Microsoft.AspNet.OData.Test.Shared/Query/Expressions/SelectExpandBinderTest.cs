@@ -829,6 +829,51 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void CreatePropertyValueExpressionWithFilter_Collection_Works_NavigationExtension()
+        {
+            // Arrange
+            var ordersProperty =  _model.Customer.AddUnidirectionalNavigation(
+                new EdmNavigationPropertyInfo
+                {
+                    Name = "OrdersExt",
+                    Target = _model.Order,
+                    TargetMultiplicity = EdmMultiplicity.Many
+                });
+            _model.Model.SetAnnotationValue(_model.Order, new ClrTypeAnnotation(typeof(Order)));
+            var extensionMethod = typeof(CustomerExtensions).GetMethod("OrdersExt", BindingFlags.Static|BindingFlags.Public);
+            var memberDescriptor = new MemberDescriptor(extensionMethod);
+            _model.Model.SetAnnotationValue(ordersProperty, new ClrPropertyInfoAnnotation(memberDescriptor));
+            _settings.HandleNullPropagation = HandleNullPropagationOption.True;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Order,
+                _model.Orders,
+                new Dictionary<string, string> { { "$filter", "ID eq 1" } });
+            var filterCaluse = parser.ParseFilter();
+
+            // Act
+            var filterInExpand = _binder.CreatePropertyValueExpressionWithFilter(
+                _model.Customer,
+                ordersProperty,
+                customer,
+                filterCaluse);
+
+            // Assert
+            Assert.Equal(
+                string.Format(
+                    "IIF((value({0}) == null), null, IIF((value({0}).OrdersExt() == null), null, " +
+                    "value({0}).OrdersExt().AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
+                    customer.Type,
+                    "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
+                filterInExpand.ToString());
+            var orders = Expression.Lambda(filterInExpand).Compile().DynamicInvoke() as IEnumerable<Order>;
+            Assert.Single(orders);
+            Assert.Equal(1, orders.ToList()[0].ID);
+        }
+
+        [Fact]
         public void CreatePropertyValueExpressionWithFilter_Collection_Works_HandleNullPropagationOptionIsFalse()
         {
             // Arrange

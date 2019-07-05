@@ -225,7 +225,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (isCollection)
                 {
                     Expression filterSource =
-                        typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
+                        typeof(IEnumerable).IsAssignableFrom(propertyValue.Type)
                             ? Expression.Call(
                                 ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
                                 nullablePropertyValue)

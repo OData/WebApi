@@ -52,11 +52,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Fact]
         public void NavigationMultipleGroupBy()
-        {
+        {  
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName, SupplierAddress/State))",
                 ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = SupplierAddress, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = State, Value = $it.SupplierAddress.State, }, }, Next = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+        
+        [Fact]
+        public void NavigationExtensionGroupBy()
+        {
+            Action<ODataModelBuilder> modelCustomizer = builder =>
+            {
+                var entityType = builder.EntityType<Product>();
+                entityType.HasRequired(p => p.CategoryExt());
+            };
+
+            var filters = VerifyQueryDeserialization(
+                "groupby((CategoryExt/CategoryName))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = CategoryExt, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.CategoryExt().CategoryName, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })",
+                modelCustomizer: modelCustomizer);
+        }
+
+        [Fact]
+        public void NavigationExtensionMultipleGroupBy()
+        {
+            Action<ODataModelBuilder> modelCustomizer = builder =>
+            {
+                var entityType = builder.EntityType<Product>();
+                entityType.HasRequired(p => p.CategoryExt());
+                entityType.HasRequired(p => p.AlternateCategory());
+            };
+              
+            var filters = VerifyQueryDeserialization(
+                "groupby((CategoryExt/CategoryName, AlternateCategory/CategoryName))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = AlternateCategory, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.AlternateCategory().CategoryName, }, }, Next = new NestedPropertyLastInChain() {Name = CategoryExt, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.CategoryExt().CategoryName, }, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })",
+                modelCustomizer: modelCustomizer);
         }
 
         [Fact]
@@ -160,14 +193,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 classicEF: true);
         }
 
-        private Expression VerifyQueryDeserialization(string filter, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false)
+        private Expression VerifyQueryDeserialization(string filter, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false, Action<ODataModelBuilder> modelCustomizer = null)
         {
-            return VerifyQueryDeserialization<Product>(filter, expectedResult, settingsCustomizer, classicEF);
+            return VerifyQueryDeserialization<Product>(filter, expectedResult, settingsCustomizer, classicEF, modelCustomizer);
         }
 
-        private Expression VerifyQueryDeserialization<T>(string clauseString, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false) where T : class
+        private Expression VerifyQueryDeserialization<T>(string clauseString, string expectedResult = null, Action<ODataQuerySettings> settingsCustomizer = null, bool classicEF = false, Action<ODataModelBuilder> modelCustomizer = null) where T : class
         {
-            IEdmModel model = GetModel<T>();
+            IEdmModel model = GetModel<T>(modelCustomizer);
             ApplyClause clause = CreateApplyNode(clauseString, model, typeof(T));
             IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolverFactory.Create();
 
@@ -231,7 +264,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             return parser.ParseApply();
         }
 
-        private IEdmModel GetModel<T>() where T : class
+        private IEdmModel GetModel<T>(Action<ODataModelBuilder> modelCustomizer) where T : class
         {
             Type key = typeof(T);
             IEdmModel value;
@@ -244,6 +277,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 {
                     model.EntityType<DerivedProduct>().DerivesFrom<Product>();
                     model.EntityType<DerivedCategory>().DerivesFrom<Category>();
+                }
+
+                if (modelCustomizer != null)
+                {
+                    modelCustomizer(model);
                 }
 
                 value = _modelCache[key] = model.GetEdmModel();

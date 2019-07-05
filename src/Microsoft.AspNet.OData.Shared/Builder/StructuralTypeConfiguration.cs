@@ -578,8 +578,8 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Returns the <see cref="NavigationPropertyConfiguration"/> of the added property.</returns>
         public virtual NavigationPropertyConfiguration AddContainedNavigationProperty(PropertyInfo navigationProperty, EdmMultiplicity multiplicity)
         {
-            MemberDescriptor propertyDescriptor = new MemberDescriptor(navigationProperty);
-            return AddNavigationProperty(propertyDescriptor, multiplicity, containsTarget: true);
+            MemberDescriptor memberDescriptor = new MemberDescriptor(navigationProperty);
+            return AddNavigationProperty(memberDescriptor, multiplicity, containsTarget: true);
         }
 
         /// <summary>

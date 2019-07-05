@@ -1580,10 +1580,13 @@ public class Microsoft.AspNet.OData.Builder.MemberDescriptor {
 	System.Type ReflectedType  { public get; }
 
 	public virtual bool Equals (object obj)
-	public T GetCustomAttribute (params bool inherit)
-	public IEnumerable`1 GetCustomAttributes (params bool inherit)
+	public T GetCustomAttribute ()
+	public T GetCustomAttribute (bool inherit)
+	public IEnumerable`1 GetCustomAttributes ()
+	public IEnumerable`1 GetCustomAttributes (bool inherit)
 	public object[] GetCustomAttributes (System.Type type, bool inherit)
 	public virtual int GetHashCode ()
+	public System.Reflection.MemberInfo ToMemberInfo ()
 }
 
 public class Microsoft.AspNet.OData.Builder.NavigationLinkBuilder {
@@ -1604,7 +1607,7 @@ public class Microsoft.AspNet.OData.Builder.NavigationPropertyBindingConfigurati
 }
 
 public class Microsoft.AspNet.OData.Builder.NavigationPropertyConfiguration : PropertyConfiguration {
-	public NavigationPropertyConfiguration (MemberDescriptor propertyDecriptor, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
+	public NavigationPropertyConfiguration (MemberDescriptor memberDescriptor, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 	public NavigationPropertyConfiguration (System.Reflection.PropertyInfo property, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 
 	bool ContainsTarget  { public get; }

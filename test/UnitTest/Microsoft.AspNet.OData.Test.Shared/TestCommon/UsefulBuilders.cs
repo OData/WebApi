@@ -229,10 +229,22 @@ namespace Microsoft.AspNet.OData.Test.Common
             return builder;
         }
 
+        public static ODataModelBuilder Add_EmployeeComplany_Relationship_Extension(this ODataModelBuilder builder)
+        {
+            builder.EntityType<Employee>().HasRequired(o => o.WorkCompanyExt());
+            return builder;
+        }
+
         // EntitySet -> EntitySet
         public static ODataModelBuilder Add_CompaniesEmployees_Binding(this ODataModelBuilder builder)
         {
             builder.EntitySet<Company>("Companies").HasManyBinding(c => c.ComplanyEmployees, "Employees");
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_CompaniesEmployees_Binding_Extension(this ODataModelBuilder builder)
+        {
+            builder.EntitySet<Company>("Companies").HasManyBinding(c => c.CompanyEmployeesExt(), "Employees");
             return builder;
         }
 
@@ -266,6 +278,12 @@ namespace Microsoft.AspNet.OData.Test.Common
         public static ODataModelBuilder Add_OrderCustomer_Relationship(this ODataModelBuilder builder)
         {
             builder.EntityType<Order>().HasRequired(o => o.Customer);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_OrderCustomer_Relationship_Extension(this ODataModelBuilder builder)
+        {
+            builder.EntityType<Order>().HasRequired(o => o.CustomerExt());
             return builder;
         }
 

@@ -800,6 +800,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 case ClrCanonicalFunctions.NowFunctionName:
                     return BindNow(node);
 
+                case ClrCanonicalFunctions.ReplaceFunctionName:
+                    return BindReplace(node);
+
                 default:
                     // Get Expression of custom binded method.
                     Expression expression = BindCustomMethodExpressionOrNull(node);
@@ -810,6 +813,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                     throw new NotImplementedException(Error.Format(SRResources.ODataFunctionNotSupported, node.Name));
             }
+        }
+
+        private Expression BindReplace(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert("replace" == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+            ValidateAllStringArguments(node.Name, arguments);
+
+            Contract.Assert(arguments.Length == 3 && arguments[0].Type == typeof(string));
+
+            return MakeFunctionCall(ClrCanonicalFunctions.Replace, arguments);
         }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)

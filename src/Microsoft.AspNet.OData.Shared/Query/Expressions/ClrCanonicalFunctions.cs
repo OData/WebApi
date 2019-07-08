@@ -43,6 +43,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal const string DateFunctionName = "date";
         internal const string TimeFunctionName = "time";
         internal const string NowFunctionName = "now";
+        internal const string ReplaceFunctionName = "replace";
 
         // string functions
         public static readonly MethodInfo StartsWith = MethodOf(_ => _defaultString.StartsWith(default(string)));
@@ -56,6 +57,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public static readonly MethodInfo ToLower = MethodOf(_ => _defaultString.ToLower());
         public static readonly MethodInfo ToUpper = MethodOf(_ => _defaultString.ToUpper());
         public static readonly MethodInfo Trim = MethodOf(_ => _defaultString.Trim());
+        public static readonly MethodInfo Replace = MethodOf(_ => _defaultString.Replace(default(string), default(string)));
         public static readonly MethodInfo Concat = MethodOf(_ => String.Concat(default(string), default(string)));
 
         // math functions

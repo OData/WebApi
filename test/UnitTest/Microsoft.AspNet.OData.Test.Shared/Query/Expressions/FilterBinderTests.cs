@@ -964,6 +964,22 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Theory]
         [InlineData(null, false, typeof(NullReferenceException))]
+        [InlineData("this is test", true, true)]
+        [InlineData("1234Abc", false, false)]
+        public void StringReplace(string productName, bool withNullPropagation, object withoutNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+                "replace(ProductName, ' ', '') eq 'thisistest'",
+                "$it => ($it.ProductName.Replace(\" \", \"\") == \"thisistest\")",
+                NotTesting);
+
+            RunFilters(filters,
+                new Product { ProductName = productName },
+                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withoutNullPropagation });
+        }
+
+        [Theory]
+        [InlineData(null, false, typeof(NullReferenceException))]
         [InlineData("Tasty Treats", true, true)]
         [InlineData("Tasty Treatss", false, false)]
         public void StringToLower(string productName, bool withNullPropagation, object withoutNullPropagation)

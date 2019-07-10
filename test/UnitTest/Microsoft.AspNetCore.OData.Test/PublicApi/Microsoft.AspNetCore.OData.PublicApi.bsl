@@ -1486,6 +1486,7 @@ public class Microsoft.AspNet.OData.Builder.EnumMemberConfiguration {
 public class Microsoft.AspNet.OData.Builder.EnumPropertyConfiguration : StructuralPropertyConfiguration {
 	public EnumPropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
+	string DefaultValueString  { public get; public set; }
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 
@@ -1699,6 +1700,7 @@ public class Microsoft.AspNet.OData.Builder.PrecisionPropertyConfiguration : Pri
 public class Microsoft.AspNet.OData.Builder.PrimitivePropertyConfiguration : StructuralPropertyConfiguration {
 	public PrimitivePropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
 
+	string DefaultValueString  { public get; public set; }
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 	System.Nullable`1[[Microsoft.OData.Edm.EdmPrimitiveTypeKind]] TargetEdmTypeKind  { public get; }

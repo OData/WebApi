@@ -37,13 +37,13 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
             DefaultValueAttribute defaultValueAttribute = attribute as DefaultValueAttribute;
             if (!edmProperty.AddedExplicitly && defaultValueAttribute != null && defaultValueAttribute.Value != null)
             {
-                if(edmProperty.Kind == PropertyKind.Primitive)
+                if (edmProperty.Kind == PropertyKind.Primitive)
                 {
                     PrimitivePropertyConfiguration primitiveProperty = edmProperty as PrimitivePropertyConfiguration;
                     primitiveProperty.DefaultValueString = defaultValueAttribute.Value.ToString();
                 }
 
-                if(edmProperty.Kind == PropertyKind.Enum)
+                if (edmProperty.Kind == PropertyKind.Enum)
                 {
                     EnumPropertyConfiguration enumProperty = edmProperty as EnumPropertyConfiguration;
                     enumProperty.DefaultValueString = defaultValueAttribute.Value.ToString();

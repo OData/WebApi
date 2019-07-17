@@ -190,8 +190,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 && _aggregateExpressions.OfType<AggregateExpression>().Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
                 && _groupingProperties != null
                 && _groupingProperties.Any()
-                && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any())
-                )
+                && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any()))
             {
                 var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this._elementType);
                 var sourceProperty = wrapperType.GetProperty("Source");
@@ -252,7 +251,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         private Dictionary<SingleValueNode, Expression> _preFlattenedMap = new Dictionary<SingleValueNode, Expression>();
-
 
         /// <summary>
         /// Checks IQueryable provider for need of EF6 oprimization

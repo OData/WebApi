@@ -526,9 +526,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void NavigationPropertyExtension()
         {
-            Action<ODataModelBuilder> modelCustomizer = builder => builder.EntityType<Product>().HasRequired(p => p.CategoryExt());
-
-            var filters = VerifyQueryDeserialization("Category/CategoryName eq 'Electronic'", modelCustomizer: modelCustomizer);
+            var filters = VerifyQueryDeserialization("Category/CategoryName eq 'Electronic'");
 
             RunFilters(filters,
                 new Product { },
@@ -2949,14 +2947,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             return filter.Compile().Invoke(instance);
         }
 
-        private dynamic VerifyQueryDeserialization(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null, Action<ODataModelBuilder> modelCustomizer = null)
+        private dynamic VerifyQueryDeserialization(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null)
         {
-            return VerifyQueryDeserialization<Product>(filter, expectedResult, expectedResultWithNullPropagation, settingsCustomizer, modelCustomizer);
+            return VerifyQueryDeserialization<Product>(filter, expectedResult, expectedResultWithNullPropagation, settingsCustomizer);
         }
 
-        private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null, Action<ODataModelBuilder> modelCustomizer = null) where T : class
+        private dynamic VerifyQueryDeserialization<T>(string filter, string expectedResult = null, string expectedResultWithNullPropagation = null, Action<ODataQuerySettings> settingsCustomizer = null) where T : class
         {
-            IEdmModel model = GetModel<T>(modelCustomizer);
+            IEdmModel model = GetModel<T>();
             FilterClause filterNode = CreateFilterNode(filter, model, typeof(T));
             IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolverFactory.Create();
 
@@ -3010,7 +3008,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 String.Format("Expected expression '{0}' but the deserializer produced '{1}'", expectedExpression, resultExpression));
         }
 
-        private IEdmModel GetModel<T>(Action<ODataModelBuilder> modelCustomizer = null) where T : class
+        private IEdmModel GetModel<T>() where T : class
         {
             Type key = typeof(T);
             IEdmModel value;
@@ -3023,11 +3021,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 {
                     model.EntityType<DerivedProduct>().DerivesFrom<Product>();
                     model.EntityType<DerivedCategory>().DerivesFrom<Category>();
-                }
-
-                if (modelCustomizer != null)
-                {
-                    modelCustomizer(model);
+                    model.EntityType<Product>().HasRequired(p=>p.CategoryExt());
                 }
 
                 value = _modelCache[key] = model.GetEdmModel();

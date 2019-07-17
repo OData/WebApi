@@ -557,12 +557,12 @@ namespace Microsoft.AspNet.OData.Builder
             Type propertyType = null;
             PropertyInfo propertyInfo = info as PropertyInfo;
             MethodInfo methodInfo = info as MethodInfo;
-            if(propertyInfo!=null)
+            if (propertyInfo != null)
             {
                 declaringType = info.DeclaringType;
                 propertyType = propertyInfo.PropertyType;
             }
-            else if(methodInfo!=null && methodInfo.GetCustomAttribute<ExtensionAttribute>()!=null)
+            else if (methodInfo != null && methodInfo.GetCustomAttribute<ExtensionAttribute>() != null)
             {
                 declaringType = methodInfo.GetParameters().First().ParameterType;
                 propertyType = methodInfo.ReturnType;

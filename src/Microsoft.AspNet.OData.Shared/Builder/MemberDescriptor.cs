@@ -36,10 +36,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="methodInfo">Extension method information</param>
         public MemberDescriptor(MethodInfo methodInfo)
         {
-            if(methodInfo == null)
+            if (methodInfo == null)
             {
                 throw Error.ArgumentNull("methodInfo");
             }
+
             this._memberInfo = methodInfo;
         }
 
@@ -95,7 +96,10 @@ namespace Microsoft.AspNet.OData.Builder
             get
             {
                 if (PropertyInfo != null)
+                {
                     return PropertyInfo.PropertyType;
+                }
+
                 return MethodInfo.ReturnType;
             }
         }
@@ -108,7 +112,10 @@ namespace Microsoft.AspNet.OData.Builder
             get
             {
                 if (PropertyInfo != null)
+                {
                     return PropertyInfo.DeclaringType;
+                }
+
                 return MethodInfo.GetParameters()[0].ParameterType;
             }
         }
@@ -121,7 +128,10 @@ namespace Microsoft.AspNet.OData.Builder
             get
             {
                 if (PropertyInfo != null)
+                {
                     return TypeHelper.GetReflectedType(PropertyInfo);
+                }
+
                 return MethodInfo.GetParameters()[0].ParameterType;
             }
         }
@@ -161,7 +171,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <typeparam name="T">The type of attribute to search for.</typeparam>
         /// <returns>A collection of the custom attributes that are applied to element and that match T, or an empty collection if no such attributes exist. </returns>
         public IEnumerable<T> GetCustomAttributes<T>()
-            where T : Attribute
+            where T: Attribute
         {
             return GetCustomAttributes<T>(false);
         }
@@ -173,7 +183,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
         /// <returns>A collection of the custom attributes that are applied to element and that match T, or an empty collection if no such attributes exist. </returns>
         public IEnumerable<T> GetCustomAttributes<T>(bool inherit)
-            where T:Attribute
+            where T: Attribute
         {
             return MemberInfo.GetCustomAttributes<T>(inherit);
         }
@@ -184,7 +194,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <typeparam name="T">The type of attribute to search for.</typeparam>
         /// <returns>A custom attribute that matches T, or null if no such attribute is found.</returns>
         public T GetCustomAttribute<T>()
-            where T : Attribute
+            where T: Attribute
         {
             return GetCustomAttribute<T>(false);
         }
@@ -196,7 +206,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="inherit">true to inspect the ancestors of element; otherwise, false.</param>
         /// <returns>A custom attribute that matches T, or null if no such attribute is found.</returns>
         public T GetCustomAttribute<T>(bool inherit)
-            where T : Attribute
+            where T: Attribute
         {
             return MemberInfo.GetCustomAttribute<T>(inherit);
         }
@@ -219,12 +229,18 @@ namespace Microsoft.AspNet.OData.Builder
         {
             MemberDescriptor propDescr = obj as MemberDescriptor;
             if (propDescr == null)
+            {
                 return false;
+            }
 
             if (PropertyInfo != null)
+            {
                 return PropertyInfo.Equals(propDescr.PropertyInfo);
+            }
             else
+            {
                 return MethodInfo.Equals(propDescr.MethodInfo);
+            }
         }
     }
 }

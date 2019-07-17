@@ -3,6 +3,7 @@
 
 using System.Linq;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData
@@ -25,6 +26,26 @@ namespace Microsoft.AspNet.OData
             }
 
             return updatedSettings;
+        }
+
+        public static SkipTokenHandler GetSkipTokenHandler(this ODataQueryContext context)
+        {
+            if (context == null || context.RequestContainer == null)
+            {
+                return DefaultSkipTokenHandler.Instance;
+            }
+
+            return context.RequestContainer.GetRequiredService<SkipTokenHandler>();
+        }
+
+        public static SkipTokenQueryValidator GetSkipTokenQueryValidator(this ODataQueryContext context)
+        {
+            if (context == null || context.RequestContainer == null)
+            {
+                return new SkipTokenQueryValidator();
+            }
+
+            return context.RequestContainer.GetRequiredService<SkipTokenQueryValidator>();
         }
     }
 }

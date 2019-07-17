@@ -23,6 +23,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 {
                     Id = i,
                     Name = "Customer" + i % 2,
+                    Bucket = i % 2 == 0? (CustomerBucket?)CustomerBucket.Small : null,
                     Order = new Order
                     {
                         Id = i,
@@ -43,6 +44,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             {
                 Id = 10,
                 Name = null,
+                Bucket = CustomerBucket.Big,
                 Address = new Address
                 {
                     Name = "City1",

@@ -232,6 +232,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         [Fact]
+        public async Task GroupByEnumPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Bucket))&$orderby=Bucket",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(3, results.Count);
+            Assert.Equal(JValue.CreateNull(), results[0]["Bucket"]);
+            Assert.Equal("Small", results[1]["Bucket"].ToString());
+            Assert.Equal("Big", results[2]["Bucket"].ToString());
+        }
+
+        [Fact]
         public async Task GroupByComplexPropertyWorks()
         {
             // Arrange

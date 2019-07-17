@@ -32,6 +32,7 @@ namespace Microsoft.AspNet.OData.Test
                     {"?$count=true", "Count"},
                     {"?$select=Id", "Select"},
                     {"?$expand=Orders", "Expand"},
+                    {"?$skiptoken=Id-5", "SkipToken"},
                 };
             }
         }
@@ -43,7 +44,7 @@ namespace Microsoft.AspNet.OData.Test
             {
                 return new TheoryDataSet<string, string>
                 {
-                    {"?$skiptoken=5", "SkipToken"},
+                    {"?$deltatoken=5", "DeltaToken"},
                 };
             }
         }
@@ -671,7 +672,7 @@ namespace Microsoft.AspNet.OData.Test
             return TestServerFactory.Create(controllers, (config) =>
             {
                 config.MapODataServiceRoute("odata", "odata", model);
-                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select().SkipToken();
             });
 
         }

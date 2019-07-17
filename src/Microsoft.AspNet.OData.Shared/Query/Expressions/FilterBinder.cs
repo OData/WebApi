@@ -203,6 +203,43 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
+        private Expression BindCountNode(CountNode node)
+        {
+            Expression source = Bind(node.Source);
+            Expression countExpression = Expression.Constant(null, typeof(long?));
+            Type elementType;
+            if (!TypeHelper.IsCollection(source.Type, out elementType))
+            {
+                return countExpression;
+            }
+
+            MethodInfo countMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
+            }
+
+            // call Count() method. 
+            countExpression = Expression.Call(null, countMethod, new[] { source });
+
+            if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)
+            {
+                // source == null ? null : countExpression 
+                return Expression.Condition(
+                       test: Expression.Equal(source, Expression.Constant(null)),
+                       ifTrue: Expression.Constant(null, typeof(long?)),
+                       ifFalse: ExpressionHelpers.ToNullable(countExpression));
+            }
+            else
+            {
+                return countExpression;
+            }
+        }
+
         /// <summary>
         /// Binds a <see cref="SingleValueOpenPropertyAccessNode"/> to create a LINQ <see cref="Expression"/> that
         /// represents the semantics of the <see cref="SingleValueOpenPropertyAccessNode"/>.
@@ -1475,6 +1512,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 case QueryNodeKind.In:
                     return BindInNode(node as InNode);
+
+                case QueryNodeKind.Count:
+                    return BindCountNode(node as CountNode);
 
                 case QueryNodeKind.NamedFunctionParameter:
                 case QueryNodeKind.ParameterAlias:

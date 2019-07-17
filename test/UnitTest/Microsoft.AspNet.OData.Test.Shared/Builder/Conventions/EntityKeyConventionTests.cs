@@ -24,11 +24,12 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         {
             // Arrange
             Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
-            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName), mockEntityType.Object);
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName));
+            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyDescriptor, mockEntityType.Object);
 
             mockEntityType.Setup(e => e.Name).Returns("SampleEntity");
             mockEntityType.Setup(entityType => entityType.HasKey(typeof(EntityKeyConventionTests_EntityType).GetProperty(propertyName))).Returns(mockEntityType.Object).Verifiable();
-            mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
+            mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), property.Object);
 
             // Act
             new EntityKeyConvention().Apply(mockEntityType.Object, null);
@@ -42,8 +43,9 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         {
             // Arrange
             Mock<EntityTypeConfiguration> mockEntityType = new Mock<EntityTypeConfiguration>();
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId"));
             Mock<PropertyConfiguration> property =
-                new Mock<PropertyConfiguration>(typeof(EntityKeyConventionTests_EntityType).GetProperty("ColorId"),
+                new Mock<PropertyConfiguration>(propertyDescriptor,
                     mockEntityType.Object);
             property.Setup(c => c.Kind).Returns(PropertyKind.Enum);
 
@@ -53,7 +55,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
                 .Returns(mockEntityType.Object)
                 .Verifiable();
 
-            mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo(), property.Object);
+            mockEntityType.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), property.Object);
 
             // Act
             new EntityKeyConvention().Apply(mockEntityType.Object, null);

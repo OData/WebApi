@@ -174,6 +174,23 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var csdl = GetCSDL(model);
         }
 
+        [Fact]
+        public void CanEmitModelWithExtensionMethodBinding()
+        {
+            //Arrange
+            var builder = new ODataModelBuilder()
+                .Add_Company_EntityType()
+                .Add_Employee_EntityType()
+                .Add_CompaniesEmployees_Binding_Extension()
+                .Add_EmployeeComplany_Relationship_Extension();
+
+            // Act
+            var model = builder.GetServiceModel();
+
+            //Assert
+            var csdl = GetCSDL(model);
+        }
+
         public static string GetCSDL(IEdmModel model)
         {
             StringWriter writer = new StringWriter();

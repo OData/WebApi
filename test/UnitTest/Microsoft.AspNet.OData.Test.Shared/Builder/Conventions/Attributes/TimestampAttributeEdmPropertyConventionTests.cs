@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             PropertyInfo property = CreateMockPropertyInfo("TestProperty");
             EntityTypeConfiguration entityType = new EntityTypeConfiguration();
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, entityType);
-            entityType.ExplicitProperties.Add(property, primitiveProperty);
+            entityType.ExplicitProperties.Add(primitiveProperty.PropertyInfo, primitiveProperty);
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             PropertyInfo property = CreateMockPropertyInfo("TestProperty");
             ComplexTypeConfiguration complexType = new ComplexTypeConfiguration();
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, complexType);
-            complexType.ExplicitProperties.Add(property, primitiveProperty);
+            complexType.ExplicitProperties.Add(primitiveProperty.PropertyInfo, primitiveProperty);
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
@@ -56,8 +56,9 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             PropertyInfo otherProperty = CreateMockPropertyInfo("OtherTestProperty");
             EntityTypeConfiguration entityType = new EntityTypeConfiguration();
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, entityType);
-            entityType.ExplicitProperties.Add(property, primitiveProperty);
-            entityType.ExplicitProperties.Add(otherProperty, new PrimitivePropertyConfiguration(otherProperty, entityType));
+            PrimitivePropertyConfiguration otherPrimitiveProperty = new PrimitivePropertyConfiguration(otherProperty, entityType);
+            entityType.ExplicitProperties.Add(primitiveProperty.PropertyInfo, primitiveProperty);
+            entityType.ExplicitProperties.Add(otherPrimitiveProperty.PropertyInfo, otherPrimitiveProperty);
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act
@@ -80,8 +81,9 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             entityType.BaseType = baseEntityType;
 
             PrimitivePropertyConfiguration primitiveProperty = new PrimitivePropertyConfiguration(property, entityType);
-            entityType.ExplicitProperties.Add(property, primitiveProperty);
-            baseEntityType.ExplicitProperties.Add(otherProperty, new PrimitivePropertyConfiguration(otherProperty, baseEntityType));
+            PrimitivePropertyConfiguration otherPrimitiveProperty = new PrimitivePropertyConfiguration(otherProperty, baseEntityType);
+            entityType.ExplicitProperties.Add(primitiveProperty.PropertyInfo, primitiveProperty);
+            baseEntityType.ExplicitProperties.Add(otherPrimitiveProperty.PropertyInfo, otherPrimitiveProperty);
             TimestampAttributeEdmPropertyConvention convention = new TimestampAttributeEdmPropertyConvention();
 
             // Act

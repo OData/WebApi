@@ -29,28 +29,47 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
         /// <param name="declaringType">The declaring structural type.</param>
         public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
-            : base(property, declaringType)
+            :this(CreatePropertyDescriptor(property), multiplicity, declaringType)
         {
-            if (property == null)
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavigationPropertyConfiguration"/> class.
+        /// </summary>
+        /// <param name="memberDescriptor">The backing CLR property.</param>
+        /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
+        /// <param name="declaringType">The declaring structural type.</param>
+        public NavigationPropertyConfiguration(MemberDescriptor memberDescriptor, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
+            : base(memberDescriptor, declaringType)
+        {
+            if (memberDescriptor == null)
             {
-                throw Error.ArgumentNull("property");
+                throw Error.ArgumentNull("memberDescriptor");
             }
 
             Multiplicity = multiplicity;
 
-            _relatedType = property.PropertyType;
+            _relatedType = memberDescriptor.PropertyType;
             if (multiplicity == EdmMultiplicity.Many)
             {
                 Type elementType;
                 if (!TypeHelper.IsCollection(_relatedType, out elementType))
                 {
-                    throw Error.Argument("property", SRResources.ManyToManyNavigationPropertyMustReturnCollection, property.Name, TypeHelper.GetReflectedType(property).Name);
+                    throw Error.Argument("memberDescriptor", SRResources.ManyToManyNavigationPropertyMustReturnCollection, memberDescriptor.Name, TypeHelper.GetReflectedType(memberDescriptor).Name);
                 }
 
                 _relatedType = elementType;
             }
 
             OnDeleteAction = EdmOnDeleteAction.None;
+        }
+
+        private static MemberDescriptor CreatePropertyDescriptor(PropertyInfo property)
+        {
+            if (property == null)
+                return null;
+            return new MemberDescriptor(property);
         }
 
         /// <summary>
@@ -195,6 +214,18 @@ namespace Microsoft.AspNet.OData.Builder
         {
             return HasConstraint(new KeyValuePair<PropertyInfo, PropertyInfo>(dependentPropertyInfo,
                 principalPropertyInfo));
+        }
+
+        /// <summary>
+        /// Configures the referential constraint with the specified <parameref name="dependentPropertyInfo"/>
+        /// and <parameref name="principalPropertyInfo" />.
+        /// </summary>
+        /// <param name="dependentPropertyInfo">The dependent property info for the referential constraint.</param>
+        /// <param name="principalPropertyInfo">The principal property info for the referential constraint.</param>
+        public NavigationPropertyConfiguration HasConstraint(MemberDescriptor dependentPropertyInfo,
+            MemberDescriptor principalPropertyInfo)
+        {
+            return HasConstraint(dependentPropertyInfo.PropertyInfo, principalPropertyInfo.PropertyInfo);
         }
 
         /// <summary>

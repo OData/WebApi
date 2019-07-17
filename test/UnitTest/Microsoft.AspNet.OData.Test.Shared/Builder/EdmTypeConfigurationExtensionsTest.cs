@@ -19,17 +19,17 @@ namespace Microsoft.AspNet.OData.Test.Builder
         {
             // Arrange
             Mock<EntityTypeConfiguration> entityA = new Mock<EntityTypeConfiguration>();
-            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A1", entityA.Object));
-            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A2", entityA.Object));
+            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("A1", entityA.Object));
+            entityA.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("A2", entityA.Object));
 
             Mock<EntityTypeConfiguration> entityB = new Mock<EntityTypeConfiguration>();
-            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B1", entityB.Object));
-            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B2", entityB.Object));
+            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("B1", entityB.Object));
+            entityB.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("B2", entityB.Object));
             entityB.Setup(e => e.BaseType).Returns(entityA.Object);
 
             Mock<EntityTypeConfiguration> entityC = new Mock<EntityTypeConfiguration>();
-            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C1", entityC.Object));
-            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C2", entityC.Object));
+            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("C1", entityC.Object));
+            entityC.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("C2", entityC.Object));
             entityC.Setup(e => e.BaseType).Returns(entityB.Object);
 
             // Act & Assert
@@ -43,17 +43,17 @@ namespace Microsoft.AspNet.OData.Test.Builder
         {
             // Arrange
             Mock<ComplexTypeConfiguration> complexA = new Mock<ComplexTypeConfiguration>();
-            complexA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A1", complexA.Object));
-            complexA.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("A2", complexA.Object));
+            complexA.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("A1", complexA.Object));
+            complexA.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("A2", complexA.Object));
 
             Mock<ComplexTypeConfiguration> complexB = new Mock<ComplexTypeConfiguration>();
-            complexB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B1", complexB.Object));
-            complexB.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("B2", complexB.Object));
+            complexB.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("B1", complexB.Object));
+            complexB.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("B2", complexB.Object));
             complexB.Setup(e => e.BaseType).Returns(complexA.Object);
 
             Mock<ComplexTypeConfiguration> complexC = new Mock<ComplexTypeConfiguration>();
-            complexC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C1", complexC.Object));
-            complexC.Object.ExplicitProperties.Add(new MockPropertyInfo(), MockProperty("C2", complexC.Object));
+            complexC.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("C1", complexC.Object));
+            complexC.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), MockProperty("C2", complexC.Object));
             complexC.Setup(e => e.BaseType).Returns(complexB.Object);
 
             // Act & Assert
@@ -437,7 +437,9 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Mock<PropertyInfo> propertyInfo = new Mock<PropertyInfo>();
             propertyInfo.Setup(p => p.Name).Returns(name);
 
-            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyInfo.Object, declaringType);
+            Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(propertyInfo.Object);
+
+            Mock<PropertyConfiguration> property = new Mock<PropertyConfiguration>(propertyDescriptor.Object, declaringType);
             return property.Object;
         }
     }

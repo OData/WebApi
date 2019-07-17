@@ -523,6 +523,20 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
+        [Fact]
+        public void NavigationPropertyExtension()
+        {
+            var filters = VerifyQueryDeserialization("Category/CategoryName eq 'Electronic'");
+
+            RunFilters(filters,
+                new Product { },
+               new { WithNullPropagation = false, WithoutNullPropagation = typeof(NullReferenceException) });
+
+            RunFilters(filters,
+               new Product { Category = new Category { CategoryName = "Electronic" } },
+               new { WithNullPropagation = true, WithoutNullPropagation = true });
+        }
+
 #region Any/All
 
         [Fact]
@@ -3007,6 +3021,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 {
                     model.EntityType<DerivedProduct>().DerivesFrom<Product>();
                     model.EntityType<DerivedCategory>().DerivesFrom<Category>();
+                    model.EntityType<Product>().HasRequired(p=>p.CategoryExt());
                 }
 
                 value = _modelCache[key] = model.GetEdmModel();

@@ -123,7 +123,7 @@ namespace Microsoft.AspNet.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Explicit Expression generic type is more clear")]
         public EntityTypeConfiguration<TEntityType> HasKey<TKey>(Expression<Func<TEntityType, TKey>> keyDefinitionExpression)
         {
-            ICollection<PropertyInfo> properties = PropertySelectorVisitor.GetSelectedProperties(keyDefinitionExpression);
+            ICollection<MemberInfo> properties = PropertySelectorVisitor.GetSelectedProperties(keyDefinitionExpression, false);
             foreach (PropertyInfo property in properties)
             {
                 _configuration.HasKey(property);

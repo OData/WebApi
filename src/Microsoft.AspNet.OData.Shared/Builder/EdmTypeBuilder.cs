@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Builder
     {
         private readonly List<IEdmTypeConfiguration> _configurations;
         private readonly Dictionary<Type, IEdmType> _types = new Dictionary<Type, IEdmType>();
-        private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
+        private readonly Dictionary<MemberDescriptor, IEdmProperty> _properties = new Dictionary<MemberDescriptor, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
         private readonly Dictionary<IEdmProperty, ModelBoundQuerySettings> _propertiesQuerySettings = new Dictionary<IEdmProperty, ModelBoundQuerySettings>();
         private readonly Dictionary<IEdmStructuredType, ModelBoundQuerySettings> _structuredTypeQuerySettings = new Dictionary<IEdmStructuredType, ModelBoundQuerySettings>();
@@ -462,7 +462,8 @@ namespace Microsoft.AspNet.OData.Builder
             foreach (PropertyInfo propInfo in propertyInfos)
             {
                 IEdmProperty edmProperty;
-                if (_properties.TryGetValue(propInfo, out edmProperty))
+                MemberDescriptor propDescr = new MemberDescriptor(propInfo);
+                if (_properties.TryGetValue(propDescr, out edmProperty))
                 {
                     edmProperties.Add(edmProperty);
                 }
@@ -473,7 +474,8 @@ namespace Microsoft.AspNet.OData.Builder
                     while (baseType != null)
                     {
                         PropertyInfo basePropInfo = baseType.GetProperty(propInfo.Name);
-                        if (_properties.TryGetValue(basePropInfo, out edmProperty))
+                        MemberDescriptor basePropDescr = new MemberDescriptor(basePropInfo);
+                        if (_properties.TryGetValue(basePropDescr, out edmProperty))
                         {
                             edmProperties.Add(edmProperty);
                             break;

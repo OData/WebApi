@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PrecisionPropertyConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\MemberDescriptor.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClrEnumMemberAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\CollectionExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\ListWrapperCollection.cs" />

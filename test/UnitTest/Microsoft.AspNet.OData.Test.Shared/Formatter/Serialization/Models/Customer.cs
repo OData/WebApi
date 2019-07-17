@@ -24,6 +24,14 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization.Models
         public Address HomeAddress { get; set; }
     }
 
+    public static class CustomerExtensions
+    {
+        public static IList<Order> OrdersExt(this Customer customer)
+        {
+            return customer.Orders;
+        }
+    }
+
     public class SpecialCustomer : Customer
     {
         public int Level { get; set; }

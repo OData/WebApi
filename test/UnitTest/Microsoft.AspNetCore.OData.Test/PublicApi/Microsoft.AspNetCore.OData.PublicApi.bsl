@@ -211,9 +211,10 @@ public class Microsoft.AspNet.OData.ClrEnumMemberAnnotation {
 }
 
 public class Microsoft.AspNet.OData.ClrPropertyInfoAnnotation {
+	public ClrPropertyInfoAnnotation (MemberDescriptor propertyDescriptor)
 	public ClrPropertyInfoAnnotation (System.Reflection.PropertyInfo clrPropertyInfo)
 
-	System.Reflection.PropertyInfo ClrPropertyInfo  { public get; }
+	MemberDescriptor ClrPropertyInfo  { public get; }
 }
 
 public class Microsoft.AspNet.OData.ClrTypeAnnotation {
@@ -1070,7 +1071,7 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
-	protected PropertyConfiguration (System.Reflection.PropertyInfo property, StructuralTypeConfiguration declaringType)
+	protected PropertyConfiguration (MemberDescriptor property, StructuralTypeConfiguration declaringType)
 
 	bool AddedExplicitly  { public get; public set; }
 	bool AutoExpand  { public get; public set; }
@@ -1086,7 +1087,7 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	bool NotNavigable  { public get; public set; }
 	bool NotSortable  { public get; public set; }
 	int Order  { public get; public set; }
-	System.Reflection.PropertyInfo PropertyInfo  { public get; }
+	MemberDescriptor PropertyInfo  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Type RelatedClrType  { public abstract get; }
 	bool Unsortable  { public get; public set; }
@@ -1145,7 +1146,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	StructuralTypeConfiguration BaseTypeInternal  { protected virtual get; }
 	System.Type ClrType  { public virtual get; }
 	System.Reflection.PropertyInfo DynamicPropertyDictionary  { public get; }
-	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
+	System.Collections.Generic.IDictionary`2[[Microsoft.AspNet.OData.Builder.MemberDescriptor],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Reflection.PropertyInfo]] IgnoredProperties  { public get; }
 	System.Nullable`1[[System.Boolean]] IsAbstract  { public virtual get; public virtual set; }
@@ -1162,13 +1163,16 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	internal virtual void AbstractImpl ()
 	public virtual CollectionPropertyConfiguration AddCollectionProperty (System.Reflection.PropertyInfo propertyInfo)
 	public virtual ComplexPropertyConfiguration AddComplexProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (MemberDescriptor navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual NavigationPropertyConfiguration AddNavigationProperty (MemberDescriptor navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
 	internal virtual void DerivesFromNothingImpl ()
+	public virtual void RemoveProperty (MemberDescriptor propertyDescriptor)
 	public virtual void RemoveProperty (System.Reflection.PropertyInfo propertyInfo)
 }
 
@@ -1563,6 +1567,28 @@ public class Microsoft.AspNet.OData.Builder.LowerCamelCaser {
 	public virtual string ToLowerCamelCase (string name)
 }
 
+public class Microsoft.AspNet.OData.Builder.MemberDescriptor {
+	public MemberDescriptor (System.Reflection.MethodInfo methodInfo)
+	public MemberDescriptor (System.Reflection.PropertyInfo propertyInfo)
+
+	System.Type DeclaringType  { public get; }
+	System.Reflection.MemberInfo MemberInfo  { public get; }
+	System.Reflection.MethodInfo MethodInfo  { public get; }
+	string Name  { public get; }
+	System.Reflection.PropertyInfo PropertyInfo  { public get; }
+	System.Type PropertyType  { public get; }
+	System.Type ReflectedType  { public get; }
+
+	public virtual bool Equals (object obj)
+	public T GetCustomAttribute ()
+	public T GetCustomAttribute (bool inherit)
+	public IEnumerable`1 GetCustomAttributes ()
+	public IEnumerable`1 GetCustomAttributes (bool inherit)
+	public object[] GetCustomAttributes (System.Type type, bool inherit)
+	public virtual int GetHashCode ()
+	public System.Reflection.MemberInfo ToMemberInfo ()
+}
+
 public class Microsoft.AspNet.OData.Builder.NavigationLinkBuilder {
 	public NavigationLinkBuilder (System.Func`3[[Microsoft.AspNet.OData.ResourceContext],[Microsoft.OData.Edm.IEdmNavigationProperty],[System.Uri]] navigationLinkFactory, bool followsConventions)
 
@@ -1581,6 +1607,7 @@ public class Microsoft.AspNet.OData.Builder.NavigationPropertyBindingConfigurati
 }
 
 public class Microsoft.AspNet.OData.Builder.NavigationPropertyConfiguration : PropertyConfiguration {
+	public NavigationPropertyConfiguration (MemberDescriptor memberDescriptor, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 	public NavigationPropertyConfiguration (System.Reflection.PropertyInfo property, Microsoft.OData.Edm.EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
 
 	bool ContainsTarget  { public get; }
@@ -1597,6 +1624,7 @@ public class Microsoft.AspNet.OData.Builder.NavigationPropertyConfiguration : Pr
 	public NavigationPropertyConfiguration CascadeOnDelete (bool cascade)
 	public NavigationPropertyConfiguration Contained ()
 	public NavigationPropertyConfiguration HasConstraint (System.Collections.Generic.KeyValuePair`2[[System.Reflection.PropertyInfo],[System.Reflection.PropertyInfo]] constraint)
+	public NavigationPropertyConfiguration HasConstraint (MemberDescriptor dependentPropertyInfo, MemberDescriptor principalPropertyInfo)
 	public NavigationPropertyConfiguration HasConstraint (System.Reflection.PropertyInfo dependentPropertyInfo, System.Reflection.PropertyInfo principalPropertyInfo)
 	public NavigationPropertyConfiguration NonContained ()
 	public NavigationPropertyConfiguration Optional ()

@@ -694,14 +694,35 @@ namespace Microsoft.AspNet.OData.Formatter
             ClrPropertyInfoAnnotation annotation = edmModel.GetAnnotationValue<ClrPropertyInfoAnnotation>(edmProperty);
             if (annotation != null)
             {
-                PropertyInfo propertyInfo = annotation.ClrPropertyInfo;
-                if (propertyInfo != null)
+                MemberDescriptor propDescr = annotation.ClrPropertyInfo;
+                if (propDescr != null)
                 {
-                    propertyName = propertyInfo.Name;
+                    propertyName = propDescr.Name;
                 }
             }
 
             return propertyName;
+        }
+
+        public static MemberDescriptor GetClrMemberDescriptor(IEdmProperty edmProperty, IEdmModel edmModel)
+        {
+            if (edmProperty == null)
+            {
+                throw Error.ArgumentNull("edmProperty");
+            }
+
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            ClrPropertyInfoAnnotation annotation = edmModel.GetAnnotationValue<ClrPropertyInfoAnnotation>(edmProperty);
+            if (annotation != null)
+            {
+                return annotation.ClrPropertyInfo;
+            }
+
+            return null;
         }
 
         public static ClrEnumMemberAnnotation GetClrEnumMemberAnnotation(this IEdmModel edmModel, IEdmEnumType enumType)

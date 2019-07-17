@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                 EntityTypeConfiguration entity = structuralTypeConfiguration as EntityTypeConfiguration;
                 if (entity != null)
                 {
-                    entity.HasKey(edmProperty.PropertyInfo);
+                    entity.HasKey(edmProperty.PropertyInfo.PropertyInfo);
                 }
             }
         }

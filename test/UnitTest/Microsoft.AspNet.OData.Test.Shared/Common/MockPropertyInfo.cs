@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using Moq;
 
 namespace Microsoft.AspNet.OData.Test.Common
@@ -43,6 +44,11 @@ namespace Microsoft.AspNet.OData.Test.Common
                 .Returns(_mockGetMethod.Object.Attributes | MethodAttributes.Abstract);
 
             return this;
+        }
+
+        public MemberDescriptor AsPropertyDescriptor()
+        {
+            return new MemberDescriptor(this);
         }
     }
 }

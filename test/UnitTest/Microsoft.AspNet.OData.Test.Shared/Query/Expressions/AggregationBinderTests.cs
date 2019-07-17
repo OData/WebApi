@@ -52,10 +52,29 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Fact]
         public void NavigationMultipleGroupBy()
-        {
+        {  
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName, SupplierAddress/State))",
                 ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = SupplierAddress, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = State, Value = $it.SupplierAddress.State, }, }, Next = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+        
+        [Fact]
+        public void NavigationExtensionGroupBy()
+        {
+            var filters = VerifyQueryDeserialization(
+                "groupby((CategoryExt/CategoryName))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = CategoryExt, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.CategoryExt().CategoryName, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+
+        [Fact]
+        public void NavigationExtensionMultipleGroupBy()
+        {
+            
+            var filters = VerifyQueryDeserialization(
+                "groupby((CategoryExt/CategoryName, AlternateCategory/CategoryName))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = AlternateCategory, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.AlternateCategory().CategoryName, }, }, Next = new NestedPropertyLastInChain() {Name = CategoryExt, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.CategoryExt().CategoryName, }, }, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 
@@ -244,6 +263,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 {
                     model.EntityType<DerivedProduct>().DerivesFrom<Product>();
                     model.EntityType<DerivedCategory>().DerivesFrom<Category>();
+                    model.EntityType<Product>().HasRequired(p => p.CategoryExt());
+                    model.EntityType<Product>().HasRequired(p => p.AlternateCategory());
                 }
 
                 value = _modelCache[key] = model.GetEdmModel();

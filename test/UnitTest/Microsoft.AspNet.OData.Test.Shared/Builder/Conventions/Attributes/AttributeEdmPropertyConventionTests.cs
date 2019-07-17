@@ -58,7 +58,12 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { attribute });
 
             Mock<TProperty> propertyConfiguration;
-            if (typeof(TProperty) == typeof(NavigationPropertyConfiguration))
+            if(typeof(TProperty) == typeof(PropertyConfiguration))
+            {
+                Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(property.Object);
+                propertyConfiguration = new Mock<TProperty>(propertyDescriptor.Object, structuralType.Object);
+            }
+            else if (typeof(TProperty) == typeof(NavigationPropertyConfiguration))
             {
                 propertyConfiguration = new Mock<TProperty>(property.Object, EdmMultiplicity.ZeroOrOne, structuralType.Object);
             }

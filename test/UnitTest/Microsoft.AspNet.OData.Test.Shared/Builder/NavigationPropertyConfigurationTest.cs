@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             ExceptionAssert.Throws<ArgumentException>(
                 () => new NavigationPropertyConfiguration(mockEntity.GetProperty("ID"), EdmMultiplicity.Many, new EntityTypeConfiguration()),
-                "The property 'ID' on the type 'T' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.\r\nParameter name: property");
+                "The property 'ID' on the type 'T' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.\r\nParameter name: memberDescriptor");
         }
 
         [Fact]

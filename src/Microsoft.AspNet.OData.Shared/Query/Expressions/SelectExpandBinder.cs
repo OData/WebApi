@@ -184,8 +184,22 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 source = Expression.TypeAs(source, castType);
             }
 
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
-            Expression propertyValue = Expression.Property(source, propertyName);
+            var memberDescriptor = EdmLibHelpers.GetClrMemberDescriptor(property, _model);
+            string propertyName = null;
+            Expression propertyValue;
+            if (memberDescriptor != null)
+            {
+                propertyName = memberDescriptor.Name;
+                if (memberDescriptor.PropertyInfo != null)
+                    propertyValue = Expression.Property(source, memberDescriptor.PropertyInfo);
+                else
+                    propertyValue = Expression.Call(memberDescriptor.MethodInfo, source);
+            }
+            else
+            {
+                propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
+                propertyValue = Expression.Property(source, propertyName);
+            }
             Type nullablePropertyType = TypeHelper.ToNullable(propertyValue.Type);
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 
@@ -211,7 +225,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (isCollection)
                 {
                     Expression filterSource =
-                        typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
+                        typeof(IEnumerable).IsAssignableFrom(propertyValue.Type)
                             ? Expression.Call(
                                 ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
                                 nullablePropertyValue)

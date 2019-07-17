@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
@@ -525,8 +526,8 @@ namespace Microsoft.AspNet.OData.Builder
             Contract.Assert(navigationConfiguration != null);
             Contract.Assert(bindingPath != null);
 
-            PropertyInfo navigation = bindingPath.Last() as PropertyInfo;
-            if (navigation == null || navigation != navigationConfiguration.PropertyInfo)
+            MemberInfo navigation = bindingPath.Last() as MemberInfo;
+            if (navigation == null || navigation != navigationConfiguration.PropertyInfo.MemberInfo)
             {
                 throw Error.Argument("navigationConfiguration", SRResources.NavigationPropertyBindingPathIsNotValid,
                     bindingPath.ConvertBindingPath(), navigationConfiguration.Name);
@@ -552,13 +553,25 @@ namespace Microsoft.AspNet.OData.Builder
                 return derivedType.BaseType;
             }
 
+            Type declaringType = null;
+            Type propertyType = null;
             PropertyInfo propertyInfo = info as PropertyInfo;
-            if (propertyInfo == null)
+            MethodInfo methodInfo = info as MethodInfo;
+            if (propertyInfo != null)
+            {
+                declaringType = info.DeclaringType;
+                propertyType = propertyInfo.PropertyType;
+            }
+            else if (methodInfo != null && methodInfo.GetCustomAttribute<ExtensionAttribute>() != null)
+            {
+                declaringType = methodInfo.GetParameters().First().ParameterType;
+                propertyType = methodInfo.ReturnType;
+            }
+            else
             {
                 throw Error.NotSupported(SRResources.NavigationPropertyBindingPathNotSupported, info.Name, info.MemberType);
             }
 
-            Type declaringType = propertyInfo.DeclaringType;
             if (declaringType == null ||
                 !(declaringType.IsAssignableFrom(current) || current.IsAssignableFrom(declaringType)))
             {
@@ -567,12 +580,12 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             Type elementType;
-            if (TypeHelper.IsCollection(propertyInfo.PropertyType, out elementType))
+            if (TypeHelper.IsCollection(propertyType, out elementType))
             {
                 return elementType;
             }
 
-            return propertyInfo.PropertyType;
+            return propertyType;
         }
     }
 }

@@ -35,11 +35,11 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             type.Setup(t => t.ClrType).Returns(clrType.Object);
 
             var mockPropertyWithoutAttributes = CreateMockProperty();
-            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), CreateMockProperty(new DataMemberAttribute()));
-            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), CreateMockProperty(new DataMemberAttribute()));
-            type.Object.ExplicitProperties.Add(new MockPropertyInfo(), mockPropertyWithoutAttributes);
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), CreateMockProperty(new DataMemberAttribute()));
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), CreateMockProperty(new DataMemberAttribute()));
+            type.Object.ExplicitProperties.Add(new MockPropertyInfo().AsPropertyDescriptor(), mockPropertyWithoutAttributes);
 
-            type.Setup(t => t.RemoveProperty(mockPropertyWithoutAttributes.PropertyInfo)).Verifiable();
+            type.Setup(t => t.RemoveProperty(mockPropertyWithoutAttributes.PropertyInfo.PropertyInfo)).Verifiable();
 
             // Act
             _convention.Apply(type.Object, builder);
@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             _convention.Apply(entity, builder);
 
             // Assert
-            Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
+            Assert.Contains(new MemberDescriptor(propertyInfo), entity.ExplicitProperties.Keys);
             Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
         }
 

@@ -881,14 +881,24 @@ namespace Microsoft.AspNet.OData.Builder
 
         internal NavigationPropertyConfiguration GetOrCreateNavigationProperty(Expression navigationPropertyExpression, EdmMultiplicity multiplicity)
         {
-            PropertyInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression);
-            return _configuration.AddNavigationProperty(navigationProperty, multiplicity);
+            MemberInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression, true);
+            PropertyInfo pinfo = navigationProperty as PropertyInfo;
+            MethodInfo minfo = navigationProperty as MethodInfo;
+
+            MemberDescriptor propDescr = pinfo!=null ? new MemberDescriptor(pinfo)
+                                                       : new MemberDescriptor(minfo);
+            return _configuration.AddNavigationProperty(propDescr, multiplicity);
         }
 
         internal NavigationPropertyConfiguration GetOrCreateContainedNavigationProperty(Expression navigationPropertyExpression, EdmMultiplicity multiplicity)
         {
-            PropertyInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression);
-            return _configuration.AddContainedNavigationProperty(navigationProperty, multiplicity);
+            MemberInfo navigationProperty = PropertySelectorVisitor.GetSelectedProperty(navigationPropertyExpression, true);
+            PropertyInfo pinfo = navigationProperty as PropertyInfo;
+            MethodInfo minfo = navigationProperty as MethodInfo;
+
+            MemberDescriptor propDescr = pinfo != null ? new MemberDescriptor(pinfo)
+                                                       : new MemberDescriptor(minfo);
+            return _configuration.AddContainedNavigationProperty(propDescr, multiplicity);
         }
 
         private PrimitivePropertyConfiguration GetPrimitivePropertyConfiguration(Expression propertyExpression, bool optional)

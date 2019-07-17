@@ -39,4 +39,12 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public Decimal Bonus { get; set; }
         public IList<Customer> Customers { get; set; }
     }
+
+    public static class EmployeeExtensions
+    {
+        public static Company WorkCompanyExt(this Employee employee)
+        {
+            return employee.WorkCompany;
+        }
+    }
 }

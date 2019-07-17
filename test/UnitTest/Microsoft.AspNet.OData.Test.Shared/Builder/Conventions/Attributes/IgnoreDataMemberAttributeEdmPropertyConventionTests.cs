@@ -31,12 +31,14 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             property.Setup(p => p.PropertyType).Returns(typeof(int));
             property.Setup(p => p.GetCustomAttributes(It.IsAny<bool>())).Returns(new[] { new IgnoreDataMemberAttribute() });
 
+            Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(property.Object);
+
             Mock<Type> type = new Mock<Type>();
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             structuralType.Setup(e => e.RemoveProperty(property.Object)).Verifiable();
             structuralType.Setup(s => s.ClrType).Returns(type.Object);
 
-            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
+            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(propertyDescriptor.Object, structuralType.Object);
             primitiveProperty.Object.AddedExplicitly = false;
 
             // Act
@@ -65,13 +67,15 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
                 new DataContractAttribute() 
             });
 
+            Mock<MemberDescriptor> propertyDescriptor = new Mock<MemberDescriptor>(property.Object);
+
             Mock<Type> type = new Mock<Type>();
             type.Setup(t => t.GetCustomAttributes(It.IsAny<Type>(), It.IsAny<bool>())).Returns(new[] { new DataContractAttribute() });
             
             Mock<StructuralTypeConfiguration> structuralType = new Mock<StructuralTypeConfiguration>(MockBehavior.Strict);
             structuralType.Setup(s => s.ClrType).Returns(type.Object);
 
-            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(property.Object, structuralType.Object);
+            Mock<PropertyConfiguration> primitiveProperty = new Mock<PropertyConfiguration>(propertyDescriptor.Object, structuralType.Object);
 
             // Act
             new IgnoreDataMemberAttributeEdmPropertyConvention().Apply(primitiveProperty.Object, structuralType.Object, builder);
@@ -86,6 +90,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             // Arrange
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             PropertyInfo propertyInfo = typeof(TestEntity).GetProperty("ExplicitlyAddedProperty");
+            MemberDescriptor propertyDescriptor = new MemberDescriptor(propertyInfo);
             EntityTypeConfiguration entity = builder.AddEntityType(typeof(TestEntity));
             PropertyConfiguration property = entity.AddProperty(propertyInfo);
 
@@ -93,7 +98,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions.Attributes
             new IgnoreDataMemberAttributeEdmPropertyConvention().Apply(property, entity, builder);
 
             // Assert
-            Assert.Contains(propertyInfo, entity.ExplicitProperties.Keys);
+            Assert.Contains(propertyDescriptor, entity.ExplicitProperties.Keys);
             Assert.DoesNotContain(propertyInfo, entity.RemovedProperties);
 
         }

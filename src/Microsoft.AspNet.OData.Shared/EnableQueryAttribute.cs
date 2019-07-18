@@ -99,6 +99,25 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Gets or sets a value indicating whether queries with expanded navigations should be formulated
+        /// to encourage correlated subquery results to be buffered.
+        /// Buffering correlated subquery results can reduce the number of queries from N + 1 to 2
+        /// by buffering results from the subquery.
+        /// </summary>
+        /// <value>The default value is <c>false</c>.</value>
+        public bool EnableCorrelatedSubqueryBuffering
+        {
+            get
+            {
+                return _querySettings.EnableCorrelatedSubqueryBuffering;
+            }
+            set
+            {
+                _querySettings.EnableCorrelatedSubqueryBuffering = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum depth of the Any or All elements nested inside the query. This limit helps prevent
         /// Denial of Service attacks.
         /// </summary>

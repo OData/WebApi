@@ -134,10 +134,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData(CustomerBaseUrl, "?$expand=Orders",true)]
-        [InlineData(CustomerBaseUrl, "(1)/Orders",true)]
-        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders",true)]
-        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders",true)]
+        [InlineData(CustomerBaseUrl, "?$expand=Orders", true)]
+        [InlineData(CustomerBaseUrl, "(1)/Orders", true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", true)]
+        [InlineData(ModelBoundCustomerBaseUrl, "(1)/Orders", true)]
         [InlineData(CustomerBaseUrl, "?$expand=Orders", false)]
         [InlineData(CustomerBaseUrl, "(1)/Orders", false)]
         [InlineData(ModelBoundCustomerBaseUrl, "?$expand=Orders", false)]

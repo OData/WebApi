@@ -819,7 +819,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Equal(
                 string.Format(
                     "IIF((value({0}) == null), null, IIF((value({0}).Orders == null), null, " +
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
+                    "value({0}).Orders.Where($it => ($it.ID == value({1}).TypedProperty))))",
                     customer.Type,
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
                 filterInExpand.ToString());
@@ -854,7 +854,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Assert
             Assert.Equal(
                 string.Format(
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value(" +
+                    "value({0}).Orders.Where($it => ($it.ID == value(" +
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
                     customer.Type),
                 filterInExpand.ToString());
@@ -1056,6 +1056,61 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Equal(
                 @"IIF((42 Is AAA), ""NS.AAA"", IIF((42 Is AA), ""NS.AA"", IIF((42 Is B), ""NS.B"", IIF((42 Is A), ""NS.A"", ""NS.BaseType""))))",
                 result.ToString());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrue(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrueAndPagesizeIsSet(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            _settings.PageSize = 100;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
         }
 
         private class SpecialCustomer : Customer

@@ -150,6 +150,15 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
+        public void EnableCorrelatedSubqueryBuffering_Property_RoundTrips()
+        {
+            ReflectionAssert.BooleanProperty(
+                new EnableQueryAttribute(),
+                o => o.EnableCorrelatedSubqueryBuffering,
+                expectedDefaultValue: false);
+        }
+
+        [Fact]
         public void AllowedQueryOptions_Property_RoundTrips()
         {
             ReflectionAssert.EnumProperty<EnableQueryAttribute, AllowedQueryOptions>(

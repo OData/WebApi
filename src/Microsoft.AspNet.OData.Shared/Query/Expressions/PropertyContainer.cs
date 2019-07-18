@@ -118,7 +118,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 if (property.CountOption != null && property.CountOption.Value)
                 {
-                    memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("TotalCount"), property.TotalCount));
+                    memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("TotalCount"), ExpressionHelpers.ToNullable(property.TotalCount)));
                 }
             }
             else

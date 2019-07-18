@@ -332,6 +332,16 @@ namespace Microsoft.AspNet.OData.Extensions
             return GetODataVersionFromHeader(request.Headers, ODataVersionConstraint.ODataMaxServiceVersionHeader);
         }
 
+        internal static ODataVersion? ODataMinServiceVersion(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            return GetODataVersionFromHeader(request.Headers, ODataVersionConstraint.ODataMinServiceVersionHeader);
+        }
+
         private static ODataVersion? GetODataVersionFromHeader(IHeaderDictionary headers, string headerName)
         {
             StringValues values;

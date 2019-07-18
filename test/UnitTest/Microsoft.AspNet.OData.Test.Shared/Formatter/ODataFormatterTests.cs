@@ -63,6 +63,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
     public class ODataFormatterTests
     {
         private const string baseAddress = "http://localhost:8081/";
+        private const string versionHeader = "OData-Version";
 
         [Theory]
         [InlineData("application/json;odata.metadata=none", "PersonEntryInJsonLightNoMetadata.json")]
@@ -332,6 +333,46 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                     json["error"]["innererror"]["type"].Value);
             }
             //}
+        }
+
+        [Theory]
+        [InlineData("4.0", null, null, null)]
+        [InlineData("4.0", "4.0", null, null)]
+        [InlineData("4.0", null, "4.0", null)]
+        [InlineData("4.0", null, null, "4.0")]
+        [InlineData("4.0", "4.0", null, "4.01")]
+        [InlineData("4.01", "4.01", null, null)]
+        [InlineData("4.01", null, "4.01", null)]
+        [InlineData("4.01", null, null, "4.01")]
+        [InlineData("4.01", null, "4.01", "4.0")]
+        [InlineData("4.01", "4.01", null, "4.0")]
+        [InlineData("4.01", "4.01", "4.0", "4.0")]
+        [InlineData("4.01", "4.01", "4.0", null)]
+        public async Task ValidateResponseVersion(string expectedVersion, string maxVersionHeader, string minVersionHeader, string requestVersionHeader)
+        {
+            // Arrange
+            using (HttpClient client = CreateClient())
+            using (HttpRequestMessage request = CreateRequest("People",
+                    ODataTestUtil.ApplicationJsonMediaTypeWithQuality, maxVersionHeader, minVersionHeader, requestVersionHeader))
+            // Act
+            using (HttpResponseMessage response = await client.SendAsync(request))
+            {
+                // Assert
+                Assert.NotNull(response);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+#if NETCORE
+                Assert.True(response.Headers.Contains(versionHeader));
+                Assert.Equal(response.Headers.GetValues(versionHeader).FirstOrDefault(), expectedVersion);
+#else
+                Assert.True(response.Content.Headers.Contains(versionHeader));
+                Assert.Equal(response.Content.Headers.GetValues(versionHeader).FirstOrDefault(), expectedVersion);
+#endif
+                string result = await response.Content.ReadAsStringAsync();
+                dynamic json = JToken.Parse(result);
+
+                string context = expectedVersion == "4.0" ? "@odata.context" : "@context";
+                Assert.NotNull(json[context]);
+            }
         }
 
         [Fact]
@@ -1143,6 +1184,29 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, CreateAbsoluteUri(pathAndQuery));
             request.Headers.Accept.Add(accept);
+
+            return request;
+        }
+
+        private static HttpRequestMessage CreateRequest(string pathAndQuery, MediaTypeWithQualityHeaderValue accept, string maxVersion, string minVersion, string requestVersion)
+        {
+            HttpRequestMessage request = CreateRequest(pathAndQuery, accept);
+            
+            if (!string.IsNullOrEmpty(maxVersion))
+            {
+                request.Headers.Add("OData-MaxVersion", maxVersion);
+            }
+
+            if (!string.IsNullOrEmpty(minVersion))
+            {
+                request.Headers.Add("OData-MinVersion", minVersion);
+            }
+
+            if (!string.IsNullOrEmpty(requestVersion))
+            {
+                request.Headers.Add("OData-Version", requestVersion);
+            }
+
             return request;
         }
 

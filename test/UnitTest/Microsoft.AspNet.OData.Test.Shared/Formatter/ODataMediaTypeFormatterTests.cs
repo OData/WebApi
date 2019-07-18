@@ -377,7 +377,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(new ODataPayloadKind[0]);
             ExceptionAssert.ThrowsArgumentNull(
-                () => new ODataMediaTypeFormatter(formatter, version: ODataVersion.V4, request: null),
+                () => new ODataMediaTypeFormatter(formatter, request: null),
                 "request");
         }
 
@@ -385,7 +385,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         public void CopyCtor_ThrowsArgumentNull_Formatter()
         {
             ExceptionAssert.ThrowsArgumentNull(
-                () => new ODataMediaTypeFormatter(formatter: null, version: ODataVersion.V4, request: new HttpRequestMessage()),
+                () => new ODataMediaTypeFormatter(formatter: null, request: new HttpRequestMessage()),
                 "formatter");
         }
 

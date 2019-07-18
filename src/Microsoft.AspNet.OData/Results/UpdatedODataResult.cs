@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData.Adapters;
+using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Results
 {
@@ -101,7 +102,7 @@ namespace Microsoft.AspNet.OData.Results
         {
             IHttpActionResult result = GetInnerActionResult();
             var response = await result.ExecuteAsync(cancellationToken);
-            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(Request));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(Request)));
             return response;
         }
 

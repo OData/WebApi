@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -12,6 +13,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
@@ -29,8 +31,6 @@ namespace Microsoft.AspNet.OData.Formatter
     /// </summary>
     public class ODataOutputFormatter : TextOutputFormatter, IMediaTypeMappingCollection
     {
-        private readonly ODataVersion _version;
-
         /// <summary>
         /// The set of payload kinds this formatter will accept in CanWriteType.
         /// </summary>
@@ -48,7 +48,6 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             _payloadKinds = payloadKinds;
-            _version = ODataVersionConstraint.DefaultODataVersion;
         }
 
         /// <summary>
@@ -182,7 +181,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             // Add version header.
-            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(_version);
+            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request));
         }
 
         /// <inheritdoc/>
@@ -222,7 +221,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     type,
                     context.Object,
                     request.GetModel(),
-                    _version,
+                    ResultHelpers.GetODataResponseVersion(request),
                     baseAddress,
                     contentType,
                     new WebApiUrlHelper(request.GetUrlHelper()),

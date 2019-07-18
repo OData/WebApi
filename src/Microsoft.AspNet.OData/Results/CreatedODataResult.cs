@@ -13,6 +13,7 @@ using System.Web.Http;
 using System.Web.Http.Results;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Results
 {
@@ -127,7 +128,7 @@ namespace Microsoft.AspNet.OData.Results
             HttpResponseMessage response = await result.ExecuteAsync(cancellationToken);
             response.Headers.Location = LocationHeader;
             ResultHelpers.AddEntityId(response, () => GenerateEntityId(Request));
-            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(Request));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(Request)));
             return response;
         }
 

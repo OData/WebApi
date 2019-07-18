@@ -7,6 +7,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Results
 {
@@ -40,7 +41,7 @@ namespace Microsoft.AspNet.OData.Results
             HttpRequest request = context.HttpContext.Request;
             IActionResult result = GetInnerActionResult(request);
             await result.ExecuteResultAsync(context);
-            ResultHelpers.AddServiceVersion(response, () => ResultHelpers.GetVersionString(request));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request)));
         }
 
         internal IActionResult GetInnerActionResult(HttpRequest request)

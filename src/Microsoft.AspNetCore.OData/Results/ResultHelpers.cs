@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics.Contracts;
 using System.Net;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -70,9 +71,13 @@ namespace Microsoft.AspNet.OData.Results
             }
         }
 
-        internal static string GetVersionString(HttpRequest request)
+        internal static ODataVersion GetODataResponseVersion(HttpRequest request)
         {
-            return ODataUtils.ODataVersionToString(request.ODataServiceVersion() ?? ODataVersionConstraint.DefaultODataVersion);
+            Contract.Assert(request != null, "GetODataResponseVersion called with a null request");
+            return request.ODataMaxServiceVersion() ??
+                request.ODataMinServiceVersion() ??
+                request.ODataServiceVersion() ??
+                ODataVersionConstraint.DefaultODataVersion;
         }
     }
 }

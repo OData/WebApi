@@ -17,6 +17,7 @@ namespace Microsoft.AspNet.OData.Routing
         // The header names used for versioning in the versions 4.0+ of the OData protocol.
         internal const string ODataServiceVersionHeader = "OData-Version";
         internal const string ODataMaxServiceVersionHeader = "OData-MaxVersion";
+        internal const string ODataMinServiceVersionHeader = "OData-MinVersion";
         internal const ODataVersion DefaultODataVersion = ODataVersion.V4;
 
         // The header names used for versioning in the versions 1.0 to 3.0 of the OData protocol.
@@ -30,12 +31,12 @@ namespace Microsoft.AspNet.OData.Routing
         /// </summary>
         public ODataVersionConstraint()
         {
-            Version = ODataVersion.V4;
+            Version = DefaultODataVersion;
             IsRelaxedMatch = true;
         }
 
         /// <summary>
-        /// The version of the OData protocol that an OData-Version or OData-MaxVersion request header must have
+        /// The (minimum) version of the OData protocol that an OData-Version or OData-MaxVersion request header must have
         /// in order to be processed by the OData service with this route constraint.
         /// </summary>
         public ODataVersion Version { get; private set; }
@@ -65,7 +66,7 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             ODataVersion? requestVersion = GetVersion(headers, serviceVersion, maxServiceVersion);
-            return requestVersion.HasValue && requestVersion.Value == Version;
+            return requestVersion.HasValue && requestVersion.Value >= Version;
         }
 
         private bool ValidateVersionHeaders(IDictionary<string, IEnumerable<string>> headers)
@@ -90,7 +91,7 @@ namespace Microsoft.AspNet.OData.Routing
         private ODataVersion? GetVersion(IDictionary<string, IEnumerable<string>> headers, ODataVersion? serviceVersion, ODataVersion? maxServiceVersion)
         {
             // The logic is as follows. We check OData-Version first and if not present we check OData-MaxVersion.
-            // If both OData-Version and OData-MaxVersion are not present, we assume the version is V4
+            // If both OData-Version and OData-MaxVersion are not present, we assume the version is the service version
 
             int versionHeaderCount = GetHeaderCount(ODataServiceVersionHeader, headers);
             int maxVersionHeaderCount = GetHeaderCount(ODataMaxServiceVersionHeader, headers);
@@ -105,7 +106,7 @@ namespace Microsoft.AspNet.OData.Routing
             }
             else if (versionHeaderCount == 0 && maxVersionHeaderCount == 0)
             {
-                return Version;
+                return this.Version;
             }
             else
             {

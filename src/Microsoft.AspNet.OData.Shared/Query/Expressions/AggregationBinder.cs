@@ -580,12 +580,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (memberDescriptor != null)
             {
                 if (memberDescriptor.MethodInfo != null)
+                {
                     return Expression.Call(null, memberDescriptor.MethodInfo, source);
+                }
                 else
+                {
                     return Expression.Property(source, memberDescriptor.PropertyInfo);
+                }
             }
             else
+            {
                 return Expression.Property(source, propertyName);
+            }
         }
 
         private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)

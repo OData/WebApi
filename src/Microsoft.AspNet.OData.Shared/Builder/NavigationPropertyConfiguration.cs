@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="multiplicity">The <see cref="EdmMultiplicity"/>.</param>
         /// <param name="declaringType">The declaring structural type.</param>
         public NavigationPropertyConfiguration(PropertyInfo property, EdmMultiplicity multiplicity, StructuralTypeConfiguration declaringType)
-            :this(CreatePropertyDescriptor(property), multiplicity, declaringType)
+            : this(CreatePropertyDescriptor(property), multiplicity, declaringType)
         {
 
         }
@@ -68,7 +68,10 @@ namespace Microsoft.AspNet.OData.Builder
         private static MemberDescriptor CreatePropertyDescriptor(PropertyInfo property)
         {
             if (property == null)
+            {
                 return null;
+            }
+
             return new MemberDescriptor(property);
         }
 

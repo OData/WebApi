@@ -191,9 +191,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 propertyName = memberDescriptor.Name;
                 if (memberDescriptor.PropertyInfo != null)
+                {
                     propertyValue = Expression.Property(source, memberDescriptor.PropertyInfo);
+                }
                 else
+                {
                     propertyValue = Expression.Call(memberDescriptor.MethodInfo, source);
+                }
             }
             else
             {

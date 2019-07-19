@@ -157,6 +157,109 @@ namespace Microsoft.AspNet.OData.Test.Query
                         }
                     },
                     {
+                        "filter(Company/CEO/EmployeeName eq 'john')/groupby((Company/CEO/EmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"} }
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/EmployeeName))/filter(Company/CEO/EmployeeName eq 'john')",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"} }
+                        }
+                    },
+                    {
+                        "groupby((Name, Company/CEO/EmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Company/CEO/EmployeeName", "john" } },
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Company/CEO/EmployeeName", "tom" } },
+                            new Dictionary<string, object> { { "Name", "Middle"}, { "Company/CEO/EmployeeName", "john" } },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Company/CEO/EmployeeName", "alex" } },
+                            new Dictionary<string, object> { { "Name", "Lowest"}, { "Company/CEO/EmployeeName", null } }
+                        }
+                    },
+                    {
+                        "groupby((Address/City, Company/CEO/EmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Address/City", "redmond"}, { "Company/CEO/EmployeeName", "john" } },
+                            new Dictionary<string, object> { { "Address/City", "seattle"}, { "Company/CEO/EmployeeName", "tom" } },
+                            new Dictionary<string, object> { { "Address/City", "hobart"}, { "Company/CEO/EmployeeName", "john" } },
+                            new Dictionary<string, object> { { "Address/City", null}, { "Company/CEO/EmployeeName", "alex" } },
+                            new Dictionary<string, object> { { "Address/City", "redmond"}, { "Company/CEO/EmployeeName", null } }
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/HomeAddress/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "redmond"} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "seattle"} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "hobart"} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", null} },
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "redmond"}, { "Company/CEO/HomeAddress/State", "WA"} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "seattle"}, { "Company/CEO/HomeAddress/State", "WA"} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", "hobart"}, { "Company/CEO/HomeAddress/State", null} },
+                            new Dictionary<string, object> { { "Company/CEO/HomeAddress/City", null}, { "Company/CEO/HomeAddress/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))/groupby((Company/CEO/HomeAddress/State), aggregate(Company/CEO/HomeAddress/City with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Company/CEO/HomeAddress/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Company/CEO/HomeAddress/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/EmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null} }
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"}, { "Company/CEO/BaseSalary", 0M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null}, { "Company/CEO/BaseSalary", null} }
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))/groupby((Company/CEO/BaseSalary), aggregate(Company/CEO/EmployeeName with max as MaxEmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "MaxEmployeeName", "tom"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "MaxEmployeeName", "alex"}, { "Company/CEO/BaseSalary", 0M} },
+                            new Dictionary<string, object> {{ "MaxEmployeeName", null}, { "Company/CEO/BaseSalary", null} }
+                        }
+                    },
+                    {
+                        "groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))/groupby((Company/CEO/EmployeeName), aggregate(Company/CEO/BaseSalary with average as AverageBaseSalary))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "AverageBaseSalary", 20M }, { "Company/CEO/EmployeeName", "john"} },
+                            new Dictionary<string, object> {{ "AverageBaseSalary", 20M }, { "Company/CEO/EmployeeName", "tom"} },
+                            new Dictionary<string, object> {{ "AverageBaseSalary", 0M }, { "Company/CEO/EmployeeName", "alex"} },
+                            new Dictionary<string, object> {{ "AverageBaseSalary", null }, { "Company/CEO/EmployeeName", null} }
+                        }
+                    },
+                    {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {
@@ -344,6 +447,90 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> {{"Address/City", "redmond"}},
                         }
                     },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City))&$orderby=Company/CEO/HomeAddress/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", null}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "hobart"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "seattle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City))&$filter=Company/CEO/HomeAddress/City eq 'redmond'&$orderby=Company/CEO/HomeAddress/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))&$filter=Company/CEO/HomeAddress/State eq 'WA'&$orderby=Company/CEO/HomeAddress/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "seattle"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))&$orderby=Company/CEO/HomeAddress/State desc, Company/CEO/HomeAddress/City",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "seattle"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", null}, {"Company/CEO/HomeAddress/State", null}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "hobart"}, {"Company/CEO/HomeAddress/State", null}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City))&$filter=Company/CEO/HomeAddress/City eq 'redmond'",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName))&$orderby=Company/CEO/EmployeeName",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName))&$filter=Company/CEO/EmployeeName eq 'alex'&$orderby=Company/CEO/EmployeeName",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/EmployeeName", "alex"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))&$filter= Company/CEO/BaseSalary eq 20&$orderby=Company/CEO/EmployeeName",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"}, { "Company/CEO/BaseSalary", 20M} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))&$orderby=Company/CEO/BaseSalary desc, Company/CEO/EmployeeName desc",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"}, { "Company/CEO/BaseSalary", 0M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null}, { "Company/CEO/BaseSalary", null} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName))&$filter=Company/CEO/EmployeeName eq 'john'",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/EmployeeName", "john"}},
+                        }
+                    },
                     //{
                     //    "$apply=groupby((Name))&$top=1",
                     //    new List<Dictionary<string, object>>
@@ -485,6 +672,62 @@ namespace Microsoft.AspNet.OData.Test.Query
                         }
                     },
                     {
+                        "$apply=groupby((Company/CEO/HomeAddress/City))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", null}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "hobart"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "seattle"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", null}, {"Company/CEO/HomeAddress/State", null}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "hobart"}, {"Company/CEO/HomeAddress/State", null}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/HomeAddress/City, Company/CEO/HomeAddress/State))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "redmond"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                            new Dictionary<string, object> {{"Company/CEO/HomeAddress/City", "seattle"}, {"Company/CEO/HomeAddress/State", "WA"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", null}, { "Company/CEO/BaseSalary", null} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "alex"}, { "Company/CEO/BaseSalary", 0M} }
+                        }
+                    },
+                    {
+                        "$apply=groupby((Company/CEO/EmployeeName, Company/CEO/BaseSalary))&$skip=2",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "john"}, { "Company/CEO/BaseSalary", 20M} },
+                            new Dictionary<string, object> {{ "Company/CEO/EmployeeName", "tom"}, { "Company/CEO/BaseSalary", 20M} }
+                        }
+                    },
+                    {
                         "$apply=groupby((Name))&$orderby=Name",
                         new List<Dictionary<string, object>>
                         {
@@ -574,6 +817,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                     // Complex properties
                     { "Address/City eq 'redmond'", new int[] { 1, 5 } },
                     { "contains(Address/City, 'e')", new int[] { 1, 2, 5 } },
+                    { "Company/CEO/HomeAddress/City eq 'redmond'", new int[] { 1, 4 } },
+                    { "contains(Company/CEO/HomeAddress/City, 'e')", new int[] { 1, 2, 4 } },
 
                     // Primitive property collections
                     { "Aliases/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
@@ -582,6 +827,15 @@ namespace Microsoft.AspNet.OData.Test.Query
 
                     // Navigational properties
                     { "Orders/any(order: order/OrderId eq 12)", new int[] { 1 } },
+                    { "startswith(Company/CompanyName, 'company')", new int[] { 1, 2, 3, 4 } },
+                    { "Company/CompanyName eq 'company1'", new int[] { 1, 2 } },
+                    { "Company/CompanyName eq 'company2'", new int[] { 3 } },
+                    { "Company/CompanyName eq 'company3'", new int[] { 4 } },
+                    { "Company/CEO/EmployeeName eq 'john'", new int[] { 1, 3 } },
+                    { "Company/CEO/EmployeeName eq 'tom'", new int[] { 2 } },
+                    { "Company/CEO/EmployeeName eq 'alex'", new int[] { 4 } },
+                    { "Company/CEO/BaseSalary eq 0", new int[] { 4 } },
+                    { "Company/CEO/BaseSalary eq 20", new int[] { 1, 2, 3 } },
                 };
             }
         }
@@ -601,6 +855,16 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Address = new Address { City = "redmond", State = "WA" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } }
                 };
+                c.Company = new Company()
+                {
+                    CompanyName = "company1",
+                    CEO = new Employee()
+                    {
+                        EmployeeName = "john",
+                        BaseSalary = 20,
+                        HomeAddress = new Address { City = "redmond", State = "WA" }
+                    }
+                };
                 c.Orders = new List<Order>
                 {
                     new Order { OrderId = 11, Customer = c },
@@ -617,6 +881,16 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Aliases = new List<string> { "alias2", "alias2" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } }
                 };
+                c.Company = new Company()
+                {
+                    CompanyName = "company1",
+                    CEO = new Employee()
+                    {
+                        EmployeeName = "tom",
+                        BaseSalary = 20,
+                        HomeAddress = new Address { City = "seattle", State = "WA" }
+                    }
+                };
                 customerList.Add(c);
 
                 c = new Customer
@@ -627,6 +901,16 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Aliases = new List<string> { "alias2", "alias34", "alias31" },
                     DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } }
                 };
+                c.Company = new Company()
+                {
+                    CompanyName = "company2",
+                    CEO = new Employee()
+                    {
+                        EmployeeName = "john",
+                        BaseSalary = 20,
+                        HomeAddress = new Address { City = "hobart" }
+                    }
+                };
                 customerList.Add(c);
 
                 c = new Customer
@@ -634,6 +918,15 @@ namespace Microsoft.AspNet.OData.Test.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" },
+                };
+                c.Company = new Company()
+                {
+                    CompanyName = "company3",
+                    CEO = new Employee()
+                    {
+                        EmployeeName = "alex",
+                        HomeAddress = new Address { City = "redmond", State = "WA" }
+                    }
                 };
                 customerList.Add(c);
 
@@ -660,6 +953,14 @@ namespace Microsoft.AspNet.OData.Test.Query
                     "$apply=groupby((Name))/filter(CustomerId eq 1)",
                     "$apply=groupby((Name))/filter(Address/City eq 1)",
                     "$apply=groupby((Name))/groupby((CustomerId))",
+                    "$apply=groupby((Company/CEO/EmployeeName))&$filter=CustomerId eq 1",
+                    "$apply=groupby((Company/CEO/EmployeeName))/filter(CustomerId eq 1)",
+                    "$apply=groupby((Company/CEO/EmployeeName))/filter(Address/City eq 1)",
+                    "$apply=groupby((Company/CEO/EmployeeName))/groupby((CustomerId))",
+                    "$apply=groupby((Company/CEO/EmployeeName))/groupby((Company/CEO/BaseSalary))",
+                    "$apply=groupby((Company/CEO/EmployeeName))/filter(Company/CEO/BaseSalary eq 20)",
+                    "$apply=groupby((Company/CEO/EmployeeName))&$filter=Company/CEO/BaseSalary eq 20",
+                    "$apply=groupby((Company/CEO/EmployeeName))/groupby((Company/CEO/BaseSalary))"
                 };
             }
         }
@@ -674,6 +975,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                             .Add_Customer_EntityType_With_Address()
                             .Add_CustomerOrders_Relationship()
                             .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Company_EntityType()
+                            .Add_CustomerCompany_Relationship()
+                            .Add_Employee_EntityType_With_HomeAddress()
+                            .Add_CompanyEmployees_Relationship()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };
@@ -718,6 +1023,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                             .Add_Customer_EntityType_With_Address()
                             .Add_CustomerOrders_Relationship()
                             .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Company_EntityType()
+                            .Add_CustomerCompany_Relationship()
+                            .Add_Employee_EntityType_With_HomeAddress()
+                            .Add_CompanyEmployees_Relationship()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
@@ -790,6 +1099,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                             .Add_Customer_EntityType_With_Address()
                             .Add_CustomerOrders_Relationship()
                             .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Company_EntityType()
+                            .Add_CustomerCompany_Relationship()
+                            .Add_Employee_EntityType_With_HomeAddress()
+                            .Add_CompanyEmployees_Relationship()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer));
@@ -834,6 +1147,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                             .Add_Customer_EntityType_With_Address()
                             .Add_CustomerOrders_Relationship()
                             .Add_Customer_EntityType_With_CollectionProperties()
+                            .Add_Company_EntityType()
+                            .Add_CustomerCompany_Relationship()
+                            .Add_Employee_EntityType_With_HomeAddress()
+                            .Add_CompanyEmployees_Relationship()
                             .Add_Customers_EntitySet()
                             .GetEdmModel();
             var context = new ODataQueryContext(model, typeof(Customer)) { RequestContainer = new MockContainer() };

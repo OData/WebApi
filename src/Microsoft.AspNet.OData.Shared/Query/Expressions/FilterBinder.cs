@@ -446,6 +446,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         public virtual Expression BindNavigationPropertyNode(QueryNode sourceNode, IEdmNavigationProperty navigationProperty)
         {
+            return BindNavigationPropertyNode(sourceNode, navigationProperty, null);
+        }
+
+        /// <summary>
+        /// Binds a <see cref="IEdmNavigationProperty"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="IEdmNavigationProperty"/>.
+        /// </summary>
+        /// <param name="sourceNode">The node that represents the navigation source.</param>
+        /// <param name="navigationProperty">The navigation property to bind.</param>
+        /// <param name="propertyPath"></param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        public virtual Expression BindNavigationPropertyNode(QueryNode sourceNode, IEdmNavigationProperty navigationProperty, string propertyPath)
+        {
             Expression source;
 
             // TODO: bug in uri parser is causing this property to be null for the root property.
@@ -458,7 +471,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 source = Bind(sourceNode);
             }
 
-            return CreatePropertyAccessExpression(source, navigationProperty);
+            return CreatePropertyAccessExpression(source, navigationProperty, propertyPath);
         }
 
         /// <summary>
@@ -1496,7 +1509,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 case QueryNodeKind.SingleNavigationNode:
                     SingleNavigationNode navigationNode = node as SingleNavigationNode;
-                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty);
+                    return BindNavigationPropertyNode(navigationNode.Source, navigationNode.NavigationProperty, GetFullPropertyPath(navigationNode));
 
                 case QueryNodeKind.Any:
                     return BindAnyNode(node as AnyNode);

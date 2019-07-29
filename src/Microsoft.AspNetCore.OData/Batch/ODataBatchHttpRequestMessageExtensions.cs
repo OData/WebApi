@@ -247,7 +247,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 response.StatusCode = (int)HttpStatusCode.BadRequest;
                 await response.WriteAsync(Error.Format(SRResources.BatchRequestInvalidMediaType,
-                    $"{BatchMediaTypeMime} or {BatchMediaTypeJson}"));
+                    BatchMediaTypeMime, BatchMediaTypeJson));
                 return false;
             }
 

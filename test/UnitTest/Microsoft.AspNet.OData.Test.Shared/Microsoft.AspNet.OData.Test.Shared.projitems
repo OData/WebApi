@@ -34,6 +34,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ComplexTypeConfigurationTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ComplexTypeTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ContainmentPathBuilderTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConventionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\RecursiveComplexTypesTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\RecursiveComplexTypesModels.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DynamicPropertyDictionaryAnnotationTest.cs" />

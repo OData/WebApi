@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PrecisionPropertyConfiguration.cs" />

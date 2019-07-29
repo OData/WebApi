@@ -16,7 +16,8 @@ namespace Microsoft.AspNet.OData.Batch
         private ODataMessageQuotas _messageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue };
 
         // Preference odata.continue-on-error.
-        internal const string PreferenceContinueOnError = "odata.continue-on-error";
+        internal const string PreferenceContinueOnError = "continue-on-error";
+        internal const string PreferenceContinueOnErrorFalse = "continue-on-error=false";
 
         /// <summary>
         /// Gets the <see cref="ODataMessageQuotas"/> used for reading/writing the batch request/response.
@@ -44,7 +45,8 @@ namespace Microsoft.AspNet.OData.Batch
         internal void SetContinueOnError(IWebApiHeaders header, bool enableContinueOnErrorHeader)
         {
             string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(header);
-            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError)) || (!enableContinueOnErrorHeader))
+            if ((preferHeader != null && preferHeader.Contains(PreferenceContinueOnError) && !preferHeader.Contains(PreferenceContinueOnErrorFalse)) 
+                || (!enableContinueOnErrorHeader))
             {
                 ContinueOnError = true;
             }

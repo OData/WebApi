@@ -120,9 +120,21 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task ProcessBatchAsync_ContinueOnError(bool enableContinueOnError)
+        [InlineData(true, "", 2)]
+        [InlineData(true, "odata.continue-on-error", 3)]
+        [InlineData(true, "odata.continue-on-error=true", 3)]
+        [InlineData(true, "odata.continue-on-error=false", 2)]
+        [InlineData(true, "continue-on-error", 3)]
+        [InlineData(true, "continue-on-error=true", 3)]
+        [InlineData(true, "continue-on-error=false", 2)]
+        [InlineData(false, "", 3)]
+        [InlineData(false, "odata.continue-on-error", 3)]
+        [InlineData(false, "odata.continue-on-error=true", 3)]
+        [InlineData(false, "odata.continue-on-error=false", 3)]
+        [InlineData(false, "continue-on-error", 3)]
+        [InlineData(false, "continue-on-error=true", 3)]
+        [InlineData(false, "continue-on-error=false", 3)]
+        public async Task ProcessBatchAsync_ContinueOnError(bool enableContinueOnError, string preferenceHeader, int expectedResponses)
         {
             // Arrange
             MockHttpServer server = new MockHttpServer(async request =>
@@ -166,44 +178,19 @@ namespace Microsoft.AspNet.OData.Test.Batch
             var enableContinueOnErrorconfig = new HttpConfiguration();
             enableContinueOnErrorconfig.EnableODataDependencyInjectionSupport();
             enableContinueOnErrorconfig.EnableContinueOnErrorHeader();
-            batchRequest.SetConfiguration(enableContinueOnErrorconfig);
+            if(enableContinueOnError)
+                batchRequest.SetConfiguration(enableContinueOnErrorconfig);
+            if (!string.IsNullOrEmpty(preferenceHeader))
+                batchRequest.Headers.Add("prefer", preferenceHeader);
             batchRequest.EnableHttpDependencyInjectionSupport();
-            HttpRequestMessage batchRequestWithPrefContinueOnError = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
-            {
-                Content = new MultipartContent("mixed")
-                {
-                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
-                    new MultipartContent("mixed") // ChangeSet
-                    {
-                        ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
-                        {
-                            Content = new StringContent("foo")
-                        })
-                    },
-                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
-                    {
-                        Content = new StringContent("bar")
-                    }),
-                }
-            };
-            batchRequestWithPrefContinueOnError.EnableHttpDependencyInjectionSupport();
-            if (enableContinueOnError)
-            {
-                batchRequestWithPrefContinueOnError.SetConfiguration(enableContinueOnErrorconfig);
-                batchRequestWithPrefContinueOnError.Headers.Add("prefer", "odata.continue-on-error");
-            }
 
             // Act
             var response = await batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None);
             var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
             var batchResponses = batchContent.Responses.ToArray();
-            var responseWithPrefContinueOnError = await batchHandler.ProcessBatchAsync(batchRequestWithPrefContinueOnError, CancellationToken.None);
-            var batchContentWithPrefContinueOnError = Assert.IsType<ODataBatchContent>(responseWithPrefContinueOnError.Content);
-            var batchResponsesWithPrefContinueOnError = batchContentWithPrefContinueOnError.Responses.ToArray();
 
             // Assert
-            Assert.Equal(2, batchResponses.Length);
-            Assert.Equal(3, batchResponsesWithPrefContinueOnError.Length);
+            Assert.Equal(expectedResponses, batchResponses.Length);
         }
 
         [Fact]

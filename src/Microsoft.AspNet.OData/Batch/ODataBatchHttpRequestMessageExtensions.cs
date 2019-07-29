@@ -17,6 +17,7 @@ using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -181,20 +182,35 @@ namespace Microsoft.AspNet.OData.Batch
             request.Properties[ContentIdMappingKey] = contentIdMapping;
         }
 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Caller is responsible for disposing the object.")]
         internal static Task<HttpResponseMessage> CreateODataBatchResponseAsync(this HttpRequestMessage request, IEnumerable<ODataBatchResponseItem> responses, ODataMessageQuotas messageQuotas)
         {
             Contract.Assert(request != null);
 
-            ODataVersion odataVersion = ODataMediaTypeFormatter.GetODataResponseVersion(request);
+            ODataVersion odataVersion = ResultHelpers.GetODataResponseVersion(request);
             IServiceProvider requestContainer = request.GetRequestContainer();
             ODataMessageWriterSettings writerSettings =
                 requestContainer.GetRequiredService<ODataMessageWriterSettings>();
             writerSettings.Version = odataVersion;
             writerSettings.MessageQuotas = messageQuotas;
 
+            MediaTypeHeaderValue responseContentType = null;
+            if (request.Headers.Accept.Any(
+                t => t.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
+            {
+                responseContentType = MediaTypeHeaderValue.Parse(
+                    String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}",
+                        Guid.NewGuid()));
+            }
+            else if (request.Headers.Accept.Any(
+                t => t.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase)))
+            {
+                responseContentType = MediaTypeHeaderValue.Parse(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson);
+            }
+
             HttpResponseMessage response = request.CreateResponse(HttpStatusCode.OK);
-            response.Content = new ODataBatchContent(responses, requestContainer);
+            response.Content = new ODataBatchContent(responses, requestContainer, responseContentType);
             return Task.FromResult(response);
         }
 

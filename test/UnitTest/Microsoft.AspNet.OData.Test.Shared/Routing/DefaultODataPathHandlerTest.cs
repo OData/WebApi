@@ -1654,12 +1654,39 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.Equal(parameterValue, address);
         }
 
-        [Theory]
-        [InlineData("(address={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})")]
-        public void ParseComplexTypeAsFunctionParameterInlineThrows(string parameterValue)
+        [Fact]
+        public void ParseComplexTypeAsFunctionParameterInlineSuccessed()
         {
             // Arrange & Act
-            ExceptionAssert.Throws<ODataException>(() => _parser.Parse(_model, _serviceRoot, "RoutingCustomers(1)/Default.CanMoveToAddress" + parameterValue));
+            string requestUri = "RoutingCustomers(1)/Default.CanMoveToAddress(address={\"@odata.type\":\"Microsoft.AspNet.OData.Test.Routing.Address\",\"Street\":\"NE 24th St.\",\"City\":\"Redmond\"})";
+
+            // Act
+            ODataPath path = _parser.Parse(_model, _serviceRoot, requestUri);
+
+            // Assert
+            Assert.NotNull(path);
+            Assert.Equal(3, path.Segments.Count);
+
+            OperationSegment operationSegment = Assert.IsType<OperationSegment>(path.Segments.Last());
+            Assert.NotNull(operationSegment);
+
+            OperationSegmentParameter parameter = Assert.Single(operationSegment.Parameters);
+            Assert.Equal("address", parameter.Name);
+
+            ConstantNode parameterValue = Assert.IsType<ConstantNode>(parameter.Value);
+            Assert.NotNull(parameterValue);
+
+            var resourceValue = Assert.IsType<ODataResourceValue>(parameterValue.Value);
+            Assert.Equal("Microsoft.AspNet.OData.Test.Routing.Address", resourceValue.TypeName);
+
+            Assert.Equal(2, resourceValue.Properties.Count());
+            ODataProperty street = resourceValue.Properties.FirstOrDefault(p => p.Name == "Street");
+            Assert.NotNull(street);
+            Assert.Equal("NE 24th St.", street.Value);
+
+            ODataProperty city = resourceValue.Properties.FirstOrDefault(p => p.Name == "City");
+            Assert.NotNull(city);
+            Assert.Equal("Redmond", city.Value);
         }
 
         [Theory]
@@ -2283,6 +2310,9 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("Orders(24)/DynamicPropertyName", "Orders({ID})/{propertyname:dynamicproperty}", new string[] { "ID:24", "propertyname:DynamicPropertyName" })]
         [InlineData("RootOrder/DynamicPropertyName", "RootOrder/{propertyname:dynamicproperty}", new string[] { "propertyname:DynamicPropertyName" })]
         [InlineData("Customers(42)/Orders(24)/DynamicPropertyName", "Customers({ID})/Orders({key})/{propertyname:dynamicproperty}", new string[] { "ID:42", "key:24", "propertyname:DynamicPropertyName" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7)", "Customers/NS.GetWholeSalary(minSalary={min})", new string[] { "min:7" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max})", new string[] { "min:7", "max:8" })]
+        [InlineData("Customers/NS.GetWholeSalary(minSalary=7,maxSalary=8,aveSalary=9)", "Customers/NS.GetWholeSalary(minSalary={min},maxSalary={max},aveSalary={ave})", new string[] { "min:7", "max:8", "ave:9" })]
         public void ParseTemplate(string path, string template, string[] keyValues)
         {
             // Arrange

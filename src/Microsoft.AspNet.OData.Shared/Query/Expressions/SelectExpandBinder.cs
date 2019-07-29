@@ -100,7 +100,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         internal Expression ProjectAsWrapper(Expression source, SelectExpandClause selectExpandClause,
-            IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem = null,
+            IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedReferenceSelectItem expandedItem = null,
             int? modelBoundPageSize = null)
         {
             Type elementType;
@@ -210,17 +210,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 if (isCollection)
                 {
-                    Expression filterSource =
-                        typeof(IEnumerable).IsAssignableFrom(source.Type.GetProperty(propertyName).PropertyType)
-                            ? Expression.Call(
-                                ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(clrElementType),
-                                nullablePropertyValue)
-                            : nullablePropertyValue;
+                    Expression filterSource = nullablePropertyValue;
 
                     // TODO: Implement proper support for $select/$expand after $apply
                     Expression filterPredicate = FilterBinder.Bind(null, filterClause, clrElementType, _context, querySettings);
                     filterResult = Expression.Call(
-                        ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(clrElementType),
+                        ExpressionHelperMethods.EnumerableWhereGeneric.MakeGenericMethod(clrElementType),
                         filterSource,
                         filterPredicate);
 
@@ -309,6 +304,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
 
             PropertyInfo wrapperProperty;
+            Expression wrapperPropertyValueExpression;
             bool isInstancePropertySet = false;
             bool isTypeNamePropertySet = false;
             bool isContainerPropertySet = false;
@@ -316,7 +312,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // Initialize property 'ModelID' on the wrapper class.
             // source = new Wrapper { ModelID = 'some-guid-id' }
             wrapperProperty = wrapperType.GetProperty("ModelID");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(_modelID)));
+            wrapperPropertyValueExpression = _settings.EnableConstantParameterization ?
+                LinqParameterContainer.Parameterize(typeof(string), _modelID) :
+                Expression.Constant(_modelID);
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, wrapperPropertyValueExpression));
 
             if (IsSelectAll(selectExpandClause))
             {
@@ -344,22 +343,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // source => new Wrapper { Container =  new PropertyContainer { .... } }
             if (selectExpandClause != null)
             {
-                Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
+                Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand = GetPropertiesToExpandInQuery(selectExpandClause);
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
 
                 ISet<IEdmStructuralProperty> propertiesToInclude = GetPropertiesToIncludeInQuery(selectExpandClause, entityType, navigationSource, _model, out autoSelectedProperties);
                 bool isSelectingOpenTypeSegments = GetSelectsOpenTypeSegments(selectExpandClause, entityType);
 
-                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0)
+                if (propertiesToExpand.Count > 0 || propertiesToInclude.Count > 0 || autoSelectedProperties.Count > 0 || isSelectingOpenTypeSegments)
                 {
-                    wrapperProperty = wrapperType.GetProperty("Container");
-                    Contract.Assert(wrapperProperty != null);
-
                     Expression propertyContainerCreation =
                         BuildPropertyContainer(entityType, source, propertiesToExpand, propertiesToInclude, autoSelectedProperties, isSelectingOpenTypeSegments);
 
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
-                    isContainerPropertySet = true;
+                    if (propertyContainerCreation != null)
+                    {
+                        wrapperProperty = wrapperType.GetProperty("Container");
+                        Contract.Assert(wrapperProperty != null);
+
+                        wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, propertyContainerCreation));
+                        isContainerPropertySet = true;
+                    }
                 }
             }
 
@@ -375,7 +377,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return false;
             }
 
-            if (selectExpandClause.AllSelected)
+            if (IsSelectAll(selectExpandClause))
             {
                 return true;
             }
@@ -383,7 +385,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is DynamicPathSegment);
         }
 
-        private Expression CreateTotalCountExpression(Expression source, ExpandedNavigationSelectItem expandItem)
+        private Expression CreateTotalCountExpression(Expression source, ExpandedReferenceSelectItem expandItem)
         {
             Expression countExpression = Expression.Constant(null, typeof(long?));
             if (expandItem.CountOption == null || !expandItem.CountOption.Value)
@@ -426,16 +428,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
         private Expression BuildPropertyContainer(IEdmEntityType elementType, Expression source,
-            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> propertiesToExpand,
+            Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand,
             ISet<IEdmStructuralProperty> propertiesToInclude, ISet<IEdmStructuralProperty> autoSelectedProperties, bool isSelectingOpenTypeSegments)
         {
             IList<NamedPropertyExpression> includedProperties = new List<NamedPropertyExpression>();
 
-            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> kvp in propertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedReferenceSelectItem> kvp in propertiesToExpand)
             {
                 IEdmNavigationProperty propertyToExpand = kvp.Key;
-                ExpandedNavigationSelectItem expandItem = kvp.Value;
-                SelectExpandClause projection = expandItem.SelectAndExpand;
+                ExpandedReferenceSelectItem expandItem = kvp.Value;
+
+                SelectExpandClause projection = GetOrCreateSelectExpandClause(kvp);
 
                 ModelBoundQuerySettings querySettings = EdmLibHelpers.GetModelBoundQuerySettings(propertyToExpand,
                     propertyToExpand.ToEntityType(),
@@ -498,28 +501,49 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (isSelectingOpenTypeSegments)
             {
                 var dynamicPropertyDictionary = EdmLibHelpers.GetDynamicPropertyDictionary(elementType, _model);
-
-                Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
-                Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
-                Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
-                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                if (dynamicPropertyDictionary != null)
                 {
-                    // source == null ? null : propertyValue
-                    propertyValue = Expression.Condition(
-                        test: Expression.Equal(source, Expression.Constant(value: null)),
-                        ifTrue: Expression.Constant(value: null, type: TypeHelper.ToNullable(propertyValue.Type)),
-                        ifFalse: nullablePropertyValue);
-                }
-                else
-                {
-                    propertyValue = nullablePropertyValue;
-                }
+                    Expression propertyName = Expression.Constant(dynamicPropertyDictionary.Name);
+                    Expression propertyValue = Expression.Property(source, dynamicPropertyDictionary.Name);
+                    Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
+                    if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                    {
+                        // source == null ? null : propertyValue
+                        propertyValue = Expression.Condition(
+                            test: Expression.Equal(source, Expression.Constant(value: null)),
+                            ifTrue: Expression.Constant(value: null, type: TypeHelper.ToNullable(propertyValue.Type)),
+                            ifFalse: nullablePropertyValue);
+                    }
+                    else
+                    {
+                        propertyValue = nullablePropertyValue;
+                    }
 
-                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                    includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                }
             }
 
             // create a property container that holds all these property names and values.
             return PropertyContainer.CreatePropertyContainer(includedProperties);
+        }
+
+        private static SelectExpandClause GetOrCreateSelectExpandClause(KeyValuePair<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertyToExpand)
+        {
+            // for normal $expand=....
+            ExpandedNavigationSelectItem expandNavigationSelectItem = propertyToExpand.Value as ExpandedNavigationSelectItem;
+            if (expandNavigationSelectItem != null)
+            {
+                return expandNavigationSelectItem.SelectAndExpand;
+            }
+
+            // for $expand=..../$ref, just includes the keys properties.
+            IList<SelectItem> selectItems = new List<SelectItem>();
+            foreach (IEdmStructuralProperty keyProperty in propertyToExpand.Key.ToEntityType().Key())
+            {
+                selectItems.Add(new PathSelectItem(new ODataSelectPath(new PropertySegment(keyProperty))));
+            }
+
+            return new SelectExpandClause(selectItems, false);
         }
 
         private Expression AddOrderByQueryForSource(Expression source, OrderByClause orderbyClause, Type elementType)
@@ -548,7 +572,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return null;
             }
 
-            if (projection.AllSelected || !propertyToExpand.ToEntityType().Key().Any())
+            if (IsSelectAll(projection) || !propertyToExpand.ToEntityType().Key().Any())
             {
                 return Expression.Equal(propertyValue, Expression.Constant(null));
             }
@@ -570,7 +594,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
-        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedNavigationSelectItem expandedItem, int? modelBoundPageSize)
+        private Expression ProjectCollection(Expression source, Type elementType, SelectExpandClause selectExpandClause, IEdmEntityType entityType, IEdmNavigationSource navigationSource, ExpandedReferenceSelectItem expandedItem, int? modelBoundPageSize)
         {
             ParameterExpression element = Expression.Parameter(elementType);
 
@@ -628,21 +652,32 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         _settings.EnableConstantParameterization);
                 }
 
-                if (_settings.PageSize.HasValue)
+                // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
+                if (expandedItem == null || !_settings.EnableCorrelatedSubqueryBuffering)
                 {
-                    source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
-                }
-                else if (_settings.ModelBoundPageSize.HasValue)
-                {
-                    source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
+                    if (_settings.PageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
+                    else if (_settings.ModelBoundPageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
                 }
             }
 
             // expression
             //      source.Select((ElementType element) => new Wrapper { })
-            Expression selectedExpresion = Expression.Call(GetSelectMethod(elementType, projection.Type), source, selector);
+            var selectMethod = GetSelectMethod(elementType, projection.Type);
+            Expression selectedExpresion = Expression.Call(selectMethod, source, selector);
+
+            // Append ToList() to collection as a hint to LINQ provider to buffer correlated subqueries in memory and avoid executing N+1 queries
+            if (_settings.EnableCorrelatedSubqueryBuffering)
+            {
+                selectedExpresion = Expression.Call(ExpressionHelperMethods.QueryableToList.MakeGenericMethod(projection.Type), selectedExpresion);
+            }
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
@@ -735,13 +770,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return ExpressionHelperMethods.EnumerableSelectGeneric.MakeGenericMethod(elementType, resultType);
         }
 
-        private static Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
+        private static Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> GetPropertiesToExpandInQuery(SelectExpandClause selectExpandClause)
         {
-            Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> properties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
+            Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> properties = new Dictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem>();
 
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
-                ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
+                ExpandedReferenceSelectItem expandItem = selectItem as ExpandedReferenceSelectItem;
                 if (expandItem != null)
                 {
                     SelectExpandNode.ValidatePathIsSupported(expandItem.PathToNavigationProperty);

@@ -20,6 +20,8 @@ namespace Microsoft.AspNet.OData.Query
     {
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
+        private SelectExpandClause _processedSelectExpandClause;
+
         // Give _levelsMaxLiteralExpansionDepth a negative value meaning it is uninitialized, and it will be set to:
         // 1. LevelsMaxLiteralExpansionDepth or
         // 2. ODataValidationSettings.MaxExpansionDepth
@@ -100,7 +102,8 @@ namespace Microsoft.AspNet.OData.Query
                 context.Model,
                 context.ElementType,
                 context.NavigationSource,
-                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } });
+                new Dictionary<string, string> { { "$select", select }, { "$expand", expand } },
+                context.RequestContainer);
         }
 
         /// <summary>
@@ -136,6 +139,20 @@ namespace Microsoft.AspNet.OData.Query
                 }
 
                 return _selectExpandClause;
+            }
+        }
+
+        internal SelectExpandClause ProcessedSelectExpandClause
+        {
+            get
+            {
+                if (_processedSelectExpandClause != null)
+                {
+                    return _processedSelectExpandClause;
+                }
+
+                _processedSelectExpandClause = this.ProcessLevels();
+                return _processedSelectExpandClause;
             }
         }
 

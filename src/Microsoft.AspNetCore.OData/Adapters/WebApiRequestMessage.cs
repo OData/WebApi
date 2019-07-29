@@ -42,6 +42,7 @@ namespace Microsoft.AspNet.OData.Adapters
             }
 
             this.innerRequest = request;
+            this.Headers = new WebApiRequestHeaders(request.Headers);
 
             IODataFeature feature = request.ODataFeature();
             if (feature != null)
@@ -61,6 +62,11 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Gets the contents of the HTTP message. 
         /// </summary>
         public IWebApiContext Context { get; private set; }
+
+        /// <summary>
+        /// WebAPI headers associated with the request
+        /// </summary>
+        public IWebApiHeaders Headers { get; private set;}
 
         /// <summary>
         /// Gets a value indicating if this is a count request.
@@ -129,10 +135,12 @@ namespace Microsoft.AspNet.OData.Adapters
         /// Get the next page link for a given page size.
         /// </summary>
         /// <param name="pageSize">The page size.</param>
+        /// <param name="instance">Object which will be used to generate the skiptoken value.</param>
+        /// <param name="objToSkipTokenValue">Function that takes in an instance and returns the skiptoken value string.</param>
         /// <returns></returns>
-        public Uri GetNextPageLink(int pageSize)
+        public Uri GetNextPageLink(int pageSize, object instance = null, Func<object, string> objToSkipTokenValue = null)
         {
-            return this.innerRequest.GetNextPageLink(pageSize);
+            return this.innerRequest.GetNextPageLink(pageSize, instance, objToSkipTokenValue);
         }
 
         /// <summary>

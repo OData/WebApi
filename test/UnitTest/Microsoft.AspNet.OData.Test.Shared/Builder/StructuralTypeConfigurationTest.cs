@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
 using Xunit;
@@ -53,6 +54,125 @@ namespace Microsoft.AspNet.OData.Test.Builder
             ExceptionAssert.ThrowsArgument(() => configuration.AddDynamicPropertyDictionary(property),
                 "propertyInfo",
                 string.Format("The argument must be of type '{0}'.", "IDictionary<string, object>"));
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_AssignedNamespace()
+        {
+            // Arrange & Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
+            {
+                Namespace = expectedNamespace
+            };
+
+            modelBuilder.EntitySet<Client>("clients");
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_SettingNamespaceToNullOrEmptyRevertsItToDefault()
+        {
+            // Arrange & Act.
+            ODataConventionModelBuilder modelBuilderWithNullNamespace = new ODataConventionModelBuilder()
+            {
+                Namespace = null
+            };
+
+            // Assert
+            Assert.Equal("Default", modelBuilderWithNullNamespace.Namespace);
+
+
+            ODataConventionModelBuilder modelBuilderWithEmptyNamespace = new ODataConventionModelBuilder()
+            {
+                Namespace = string.Empty
+            };
+
+            // Assert
+            Assert.Equal("Default", modelBuilderWithEmptyNamespace.Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration
+        /// but individual types can have namespaces assigned to them as well.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_AssignedNamespaceAndClassNamespace()
+        {
+            // Arrange & Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder()
+            {
+                Namespace = expectedNamespace
+            };
+
+            modelBuilder.EntitySet<Client>("clients");
+            modelBuilder.EntitySet<MyOrder>("orders").EntityType.Namespace = "DifferentNamespace";
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal("DifferentNamespace", modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to ensure that default CLR namespace is used if user does not assign one.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_DefaultNamespace()
+        {
+            // Arrange & Act.
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            modelBuilder.EntitySet<Client>("clients");
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            Assert.Equal(typeof(Client).Namespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal(typeof(MyOrder).Namespace, modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(typeof(OrderLine).Namespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(typeof(OrderHeader).Namespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(typeof(ZipCode).Namespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the namespace assignment logic to check the order in which namespace is assigned matters.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_AutoAssignsNamespaceToStructuralType_NamespaceAssignedAfterAddingEntities()
+        {
+            // Arrange & Act.
+            string expectedNamespace = "TestingNamespace";
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            modelBuilder.EntitySet<Client>("clients");
+
+            modelBuilder.Namespace = expectedNamespace;
+            modelBuilder.ComplexType<ZipCode>();
+
+            // Assert
+            // Client was registered explicitly so picks up the namespace. Auto discovery is done at model generation hence uses the assigned namespace
+            Assert.Equal(typeof(Client).Namespace, modelBuilder.EntityType<Client>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<MyOrder>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
+            Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
         }
     }
 }

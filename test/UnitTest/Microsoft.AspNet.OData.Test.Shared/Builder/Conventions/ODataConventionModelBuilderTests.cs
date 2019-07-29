@@ -405,6 +405,47 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.Equal("Name", path);
         }
 
+        public class BaseTypeWithConcurrencyCheckAttribute
+        {
+            public int ID { get; set; }
+
+            [ConcurrencyCheck]
+            public string Name { get; set; }
+        }
+
+        public class SubTypeWithoutConcurrencyCheckAttribute : BaseTypeWithConcurrencyCheckAttribute
+        {
+            public string SubName { get; set; }
+        }
+
+        [Fact]
+        public void ModelBuilder_BaseTypeWithConcurrencyCheckAttribute_HasVocabuaryAnnotationOnDerivedEntitySet()
+        {
+            // Arrange
+            var modelBuilder = ODataConventionModelBuilderFactory.Create();
+            modelBuilder.EntitySet<SubTypeWithoutConcurrencyCheckAttribute>("SubEntities");
+
+            // Act
+            var model = modelBuilder.GetEdmModel();
+
+            // Assert
+            var entitySet = model.FindDeclaredEntitySet("SubEntities");
+            Assert.NotNull(entitySet);
+
+            var annotations = model.FindVocabularyAnnotations<IEdmVocabularyAnnotation>(entitySet, CoreVocabularyModel.ConcurrencyTerm);
+            IEdmVocabularyAnnotation concurrencyAnnotation = Assert.Single(annotations);
+
+            IEdmCollectionExpression properties = concurrencyAnnotation.Value as IEdmCollectionExpression;
+            Assert.NotNull(properties);
+
+            Assert.Single(properties.Elements);
+            var element = properties.Elements.First() as IEdmPathExpression;
+            Assert.NotNull(element);
+
+            string path = Assert.Single(element.PathSegments);
+            Assert.Equal("Name", path);
+        }
+
         [Fact]
         public void ModelBuilder_ProductWithTimestampAttribute()
         {
@@ -1900,7 +1941,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
-        public void ModelBuilder_DeclareNavigationSourceOnAbstractEntityTypeWithKeyThrows()
+        public void ModelBuilder_DeclareEntitySetOnAbstractEntityTypeWithoutKeyThrows()
         {
             // Arrange
             var builder = ODataConventionModelBuilderFactory.Create();
@@ -1909,7 +1950,22 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             // Act & Assert
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => builder.GetEdmModel(),
-            "The entity set or singleton 'entitySet' is based on type 'Microsoft.AspNet.OData.Test.Builder.Conventions.AbstractEntityType' that has no keys defined.");
+            "The entity set 'entitySet' is based on type 'Microsoft.AspNet.OData.Test.Builder.Conventions.AbstractEntityType' that has no keys defined.");
+        }
+
+        [Fact]
+        public void ModelBuilder_DeclareSingletonOnAbstractEntityTypeWithoutKeyWorks()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            builder.Singleton<AbstractEntityType>("Me");
+
+            // Act
+            IEdmModel modle = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(modle);
+            Assert.NotNull(modle.FindDeclaredSingleton("Me"));
         }
 
         [Fact]
@@ -3014,8 +3070,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 
             Assert.Collection(
                 people.NavigationPropertyBindings,
-                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path),
-                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path));
+                nav => Assert.Equal("ResponsibleGuardian/Microsoft.AspNet.OData.Test.Builder.TestModels.Child/Car", nav.Path.Path),
+                nav => Assert.Equal("ResponsibleGuardian/OnlyChild/Car", nav.Path.Path));
         }
 
         [Fact]

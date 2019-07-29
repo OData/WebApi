@@ -46,6 +46,18 @@ namespace Microsoft.AspNet.OData.Test.Query
 
                     // Navigational properties
                     { "Orders/any(order: order/OrderId eq 12)", new int[] { 1 } },
+
+                    // Collection count 
+                    { "Orders/$count eq 2", new int[] { 1 } },
+                    { "Addresses/$count ge 1", new int[] { 1 } },
+                    { "Aliases/$count gt 2", new int[] { 3 } },
+
+                    // case insensitive forms
+                    { "NaME eq 'Highest'", new int[] { 2 } },
+                    { "AdDrEsS/CiTy eq 'redmond'", new int[] { 1 } },
+                    { "AlIaSeS/any(alias: alias eq 'alias34')", new int[] { 3, 4 } },
+                    { "OrDeRs/any(order: order/OrDeRId eq 12)", new int[] { 1 } },
+
                 };
             }
         }
@@ -67,6 +79,10 @@ namespace Microsoft.AspNet.OData.Test.Query
                 {
                     new Order { OrderId = 11, Customer = c },
                     new Order { OrderId = 12, Customer = c },
+                };
+                c.Addresses = new List<Address>
+                {
+                    new Address {City = "Shanghai"}
                 };
                 customerList.Add(c);
 

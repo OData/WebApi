@@ -56,15 +56,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
         }
 
         [Theory]
-        [InlineData("$expand=Manager($levels=3)", 
-            "$expand=Manager($expand=Manager($expand=Manager))")]
-        [InlineData("$expand=Manager($levels=0)", 
-            "")]
+        [InlineData("$expand=Manager($levels=3)", "$expand=Manager($expand=Manager($expand=Manager))")]
+        [InlineData("$expand=Manager($levels=0)", "")]
         [InlineData("$expand=Manager($levels=2;$expand=DirectReports($levels=2))",
             "$expand=Manager($expand=Manager($expand=DirectReports($expand=DirectReports)),DirectReports($expand=DirectReports))")]
         [InlineData("$expand=Manager($select=ID;$expand=DirectReports($levels=2;$select=Name))",
-            "$expand=Manager($select=ID;$expand=DirectReports($expand=DirectReports($select=Name);$select=Name))")]
-        public async Task LevelsWithValidNumber(string originalQuery, string expandedQuery) 
+            "$expand=Manager($select=ID;$expand=DirectReports($expand=DirectReports($select=Name);$select=Name,DirectReports))")]
+        public async Task LevelsWithValidNumber(string originalQuery, string expandedQuery)
         {
             string requestUri = this.BaseAddress + "/odata/DLManagers(5)?" + originalQuery;
 

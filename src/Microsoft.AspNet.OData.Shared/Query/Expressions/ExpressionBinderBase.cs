@@ -30,6 +30,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public abstract class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+        internal static readonly MethodInfo GuidCompareMethodInfo = typeof(ExpressionBinderBase).GetMethod("GuidCompare", new[] { typeof(Guid), typeof(Guid) });
         internal static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         internal static readonly Expression NullConstant = Expression.Constant(null);
@@ -159,6 +160,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 right = ToNullable(right);
             }
 
+            if ((left.Type == typeof(Guid) || right.Type == typeof(Guid)))
+            {
+                left = ConvertNull(left, typeof(Guid));
+                right = ConvertNull(right, typeof(Guid));
+
+                switch (binaryOperator)
+                {
+                    case BinaryOperatorKind.GreaterThan:
+                    case BinaryOperatorKind.GreaterThanOrEqual:
+                    case BinaryOperatorKind.LessThan:
+                    case BinaryOperatorKind.LessThanOrEqual:
+                        left = Expression.Call(GuidCompareMethodInfo, left, right);
+                        right = ZeroConstant;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
             if (left.Type == typeof(string) || right.Type == typeof(string))
             {
                 // convert nulls of type object to nulls of type string to make the String.Compare call work
@@ -240,6 +260,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             else if (conversionType == typeof(TimeOfDay?) &&
                 (source.Type == typeof(DateTimeOffset?) || source.Type == typeof(DateTime?) || source.Type == typeof(TimeSpan?)))
+            {
+                return source;
+            }
+            else if (IsDateAndTimeRelated(conversionType) && IsDateAndTimeRelated(source.Type))
             {
                 return source;
             }
@@ -968,6 +992,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return IsType<double>(type) || IsType<decimal>(type);
         }
 
+        internal static bool IsDateAndTimeRelated(Type type)
+        {
+            return IsType<Date>(type) ||
+                IsType<DateTime>(type) ||
+                IsType<DateTimeOffset>(type) ||
+                IsType<TimeOfDay>(type) ||
+                IsType<TimeSpan>(type);
+        }
+
         internal static bool IsDateRelated(Type type)
         {
             return IsType<Date>(type) || IsType<DateTime>(type) || IsType<DateTimeOffset>(type);
@@ -1024,6 +1057,27 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 return expression;
             }
+        }
+
+        /// <summary>
+        /// Compares two guids
+        /// </summary>
+        /// <param name="firstValue"></param>
+        /// <param name="secondValue"></param>
+        /// <returns>An integer value based on the Guid's CompareTo method</returns>
+        public static int GuidCompare(Guid firstValue, Guid secondValue)
+        {
+            if (firstValue != null)
+            {
+                return firstValue.CompareTo(secondValue);
+            }
+
+            if (secondValue != null)
+            {
+                return (-1) * secondValue.CompareTo(firstValue);
+            }
+
+            return 0;
         }
     }
 }

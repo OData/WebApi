@@ -560,12 +560,12 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Action Name=\"NullableAction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
                 "</Action>" +
                 "<Action Name=\"NonNullableAction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Action>" +
                 "<EntityContainer Name=\"Container\" /></Schema>" +
@@ -602,12 +602,12 @@ namespace Microsoft.AspNet.OData.Test
             "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
                 "<Function Name=\"NullableFunction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
                 "</Function>" +
                 "<Function Name=\"NonNullableFunction\" IsBound=\"true\">" +
                     "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
-                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" Unicode=\"false\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" Nullable=\"false\" />" +
                     "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" Nullable=\"false\" />" +
                 "</Function>" +
                 "<EntityContainer Name=\"Container\" />" +
@@ -633,6 +633,100 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.True(response.IsSuccessStatusCode);
             Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            Assert.Contains(expectMetadata.Replace("'", "\""), await response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
+        public async Task DollarMetadata_Works_WithActionOptionalParameter()
+        {
+            // Arrange
+            const string expectMetadata =
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Action Name=\"ActionWithOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
+                        "<Record>" +
+                          "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
+                        "</Record>" +
+                      "</Annotation>" +
+                    "</Parameter>" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
+                    "</Parameter>" +
+                "</Action>" +
+                "<EntityContainer Name=\"Container\" /></Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            ActionConfiguration action = person.Action("ActionWithOptional");
+            action.Parameter<string>("param1").HasDefaultValue("A default value");
+            action.Parameter<string>("param2").Optional();
+            IEdmModel model = builder.GetEdmModel();
+            HttpClient client = GetClient(model);
+
+            // Act
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Contains(expectMetadata.Replace("'", "\""), result);
+        }
+
+        [Fact]
+        public async Task DollarMetadata_Works_WithFunctionOptionalParameter()
+        {
+            // Arrange
+            const string expectMetadata =
+            "<Schema Namespace=\"Default\" xmlns=\"http://docs.oasis-open.org/odata/ns/edm\">" +
+                "<Function Name=\"FunctionWithoutOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param\" Type=\"Edm.String\" />" +
+                    "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
+                "</Function>" +
+                "<Function Name=\"FunctionWithOptional\" IsBound=\"true\">" +
+                    "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterPerson\" />" +
+                    "<Parameter Name=\"param1\" Type=\"Edm.String\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\">" +
+                        "<Record>" +
+                          "<PropertyValue Property=\"DefaultValue\" String=\"A default value\" />" +
+                        "</Record>" +
+                      "</Annotation>" +
+                    "</Parameter>" +
+                    "<Parameter Name=\"param2\" Type=\"Edm.String\">" +
+                      "<Annotation Term=\"Org.OData.Core.V1.OptionalParameter\" />" +
+                    "</Parameter>" +
+                    "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Formatter.FormatterAddress\" />" +
+                "</Function>" +
+                "<EntityContainer Name=\"Container\" />" +
+            "</Schema>" +
+            "</edmx:DataServices>" +
+            "</edmx:Edmx>";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            EntityTypeConfiguration<FormatterPerson> person = builder.EntityType<FormatterPerson>();
+
+            FunctionConfiguration function = person.Function("FunctionWithoutOptional").Returns<FormatterAddress>();
+            function.Parameter<string>("param");
+
+            function = person.Function("FunctionWithOptional").Returns<FormatterAddress>();
+            function.Parameter<string>("param1").HasDefaultValue("A default value");
+            function.Parameter<string>("param2").Optional();
+            IEdmModel model = builder.GetEdmModel();
+            HttpClient client = GetClient(model);
+
+            // Act
+            var response = await client.GetAsync("http://localhost/odata/$metadata");
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            Assert.Equal("application/xml", response.Content.Headers.ContentType.MediaType);
+            string a = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectMetadata.Replace("'", "\""), await response.Content.ReadAsStringAsync());
         }
 
@@ -948,8 +1042,8 @@ namespace Microsoft.AspNet.OData.Test
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
                   "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCustomer\">" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
                       "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities_B\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities_A\" />" +
                   "</EntitySet>" +
                   "<EntitySet Name=\"Cities_A\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
                   "<EntitySet Name=\"Cities_B\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
@@ -983,26 +1077,26 @@ namespace Microsoft.AspNet.OData.Test
             const string expectMetadata =
               "<EntityContainer Name=\"Container\">" +
                   "<EntitySet Name=\"Customers\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCustomer\">" +
-                      "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Address/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
-                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Addresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Location/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/City\" Target=\"Cities\" />" +
                       "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipAddresses/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Cities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/City\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCities\" Target=\"Cities\" />" +
+                      "<NavigationPropertyBinding Path=\"Microsoft.AspNet.OData.Test.Formatter.BindingVipCustomer/VipLocation/Microsoft.AspNet.OData.Test.Formatter.BindingUsAddress/UsCity\" Target=\"Cities\" />" +
                   "</EntitySet>" +
                   "<EntitySet Name=\"Cities\" EntityType=\"Microsoft.AspNet.OData.Test.Formatter.BindingCity\" />" +
               "</EntityContainer>";

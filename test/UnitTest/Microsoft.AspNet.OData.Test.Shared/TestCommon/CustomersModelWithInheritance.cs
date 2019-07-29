@@ -47,6 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             customer.AddStructuralProperty("SimpleEnum", simpleEnum.ToEdmTypeReference(isNullable: false));
             customer.AddStructuralProperty("Address", new EdmComplexTypeReference(address, isNullable: true));
             customer.AddStructuralProperty("Account", new EdmComplexTypeReference(account, isNullable: true));
+            customer.AddStructuralProperty("OtherAccounts", new EdmCollectionTypeReference(new EdmCollectionType(new EdmComplexTypeReference(account, true))));
             IEdmTypeReference primitiveTypeReference = EdmCoreModel.Instance.GetPrimitive(
                 EdmPrimitiveTypeKind.String,
                 isNullable: true);
@@ -136,6 +137,10 @@ namespace Microsoft.AspNet.OData.Test.Common
             // no-containment
             IEdmNavigationSource nonContainedOrderLines = myOrders.FindNavigationTarget(nonContainedOrderLinesNavProp);
 
+            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
+            IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
+            IEdmTypeReference intType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
+
             // actions
             EdmAction upgrade = new EdmAction("NS", "upgrade", returnType: null, isBound: true, entitySetPathExpression: null);
             upgrade.AddParameter("entity", new EdmEntityTypeReference(customer, false));
@@ -157,11 +162,14 @@ namespace Microsoft.AspNet.OData.Test.Common
                 new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(specialCustomer, false))));
             model.AddElement(upgradeSpecialAll);
 
-            // functions
-            IEdmTypeReference returnType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Boolean, isNullable: false);
-            IEdmTypeReference stringType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
-            IEdmTypeReference intType = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Int32, isNullable: false);
+            // action with optional parameters
+            EdmAction updateSalaray = new EdmAction("NS", "UpdateSalaray", returnType: null, isBound: true, entitySetPathExpression: null);
+            updateSalaray.AddParameter("entity", new EdmEntityTypeReference(customer, false));
+            updateSalaray.AddParameter("minSalaray", intType);
+            updateSalaray.AddOptionalParameter("maxSalaray", intType);
+            updateSalaray.AddOptionalParameter("aveSalaray", intType, "129");
 
+            // functions
             EdmFunction IsUpgraded = new EdmFunction(
                 "NS",
                 "IsUpgraded",
@@ -293,6 +301,14 @@ namespace Microsoft.AspNet.OData.Test.Common
                 new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(specialCustomer, false))));
             isSpecialAllUpgraded.AddParameter("param", intType);
             model.AddElement(isSpecialAllUpgraded);
+
+            // function with optional parameters
+            EdmFunction getSalaray = new EdmFunction("NS", "GetWholeSalary", intType, isBound: true, entitySetPathExpression: null, isComposable: false);
+            getSalaray.AddParameter("entityset", new EdmCollectionTypeReference(new EdmCollectionType(new EdmEntityTypeReference(customer, false))));
+            getSalaray.AddParameter("minSalary", intType);
+            getSalaray.AddOptionalParameter("maxSalary", intType);
+            getSalaray.AddOptionalParameter("aveSalary", intType, "129");
+            model.AddElement(getSalaray);
 
             // navigation properties
             EdmNavigationProperty ordersNavProp = customer.AddUnidirectionalNavigation(

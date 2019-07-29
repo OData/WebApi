@@ -220,6 +220,7 @@ Content-Type: application/json;odata.metadata=minimal
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("multipart/mixed", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
@@ -253,6 +254,19 @@ Content-Type: application/json;odata.metadata=minimal
             HttpContent content = new StringContent(@"
 {
     ""requests"": [{
+            ""id"": ""0"",
+            ""atomicityGroup"": ""f7de7314-2f3d-4422-b840-ada6d6de0f18"",
+            ""method"": ""PATCH"",
+            ""url"": """ + absoluteUri + "(6)" + @""",
+            ""headers"": {
+                ""OData-Version"": ""4.0"",
+                ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                ""Accept"": ""application/json;odata.metadata=minimal""
+            },
+            ""body"": {
+                ""Name"":""PatchedByJsonBatch_0""
+            }
+        }, {
             ""id"": ""1"",
             ""atomicityGroup"": ""f7de7314-2f3d-4422-b840-ada6d6de0f18"",
             ""method"": ""POST"",
@@ -304,11 +318,13 @@ Content-Type: application/json;odata.metadata=minimal
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
             {
                 var batchReader = messageReader.CreateODataBatchReader();
+
                 while (batchReader.Read())
                 {
                     switch (batchReader.State)
@@ -316,12 +332,22 @@ Content-Type: application/json;odata.metadata=minimal
                         case ODataBatchReaderState.Operation:
                             var operationMessage = batchReader.CreateOperationResponseMessage();
                             subResponseCount++;
-                            Assert.Equal(201, operationMessage.StatusCode);
+
+                            if (operationMessage.ContentId.Equals("0"))
+                            {
+                                // No-Content response for PATCH
+                                Assert.Equal(204, operationMessage.StatusCode);
+                            }
+                            else
+                            {
+                                Assert.Equal(201, operationMessage.StatusCode);
+                            }
+
                             break;
                     }
                 }
             }
-            Assert.Equal(3, subResponseCount);
+            Assert.Equal(4, subResponseCount);
         }
     }
 

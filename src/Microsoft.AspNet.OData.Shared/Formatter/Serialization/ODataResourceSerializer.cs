@@ -336,13 +336,23 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 ODataResource resource = CreateResource(selectExpandNode, resourceContext);
                 if (resource != null)
                 {
-                    writer.WriteStart(resource);
-                    WriteComplexProperties(selectExpandNode.SelectedComplexProperties, resourceContext, writer);
-                    WriteDynamicComplexProperties(resourceContext, writer);
-                    WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
-                    WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties,
-                        resourceContext, writer);
-                    writer.WriteEnd();
+                    if (resourceContext.SerializerContext.ExpandReference)
+                    {
+                        writer.WriteEntityReferenceLink(new ODataEntityReferenceLink
+                        {
+                            Url = resource.Id
+                        });
+                    }
+                    else
+                    {
+                        writer.WriteStart(resource);
+                        WriteComplexProperties(selectExpandNode.SelectedComplexProperties, resourceContext, writer);
+                        WriteDynamicComplexProperties(resourceContext, writer);
+                        WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
+                        WriteExpandedNavigationProperties(selectExpandNode.ExpandedProperties, resourceContext, writer);
+                        WriteReferencedNavigationProperties(selectExpandNode.ReferencedNavigationProperties, resourceContext, writer);
+                        writer.WriteEnd();
+                    }
                 }
             }
         }
@@ -394,8 +404,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw Error.ArgumentNull("resourceContext");
             }
 
-            string typeName = resourceContext.StructuredType.FullTypeName();
+            if (resourceContext.SerializerContext.ExpandReference)
+            {
+                return new ODataResource
+                {
+                    Id = resourceContext.GenerateSelfLink(false)
+                };
+            }
 
+            string typeName = resourceContext.StructuredType.FullTypeName();
             ODataResource resource = new ODataResource
             {
                 TypeName = typeName,
@@ -739,7 +756,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteExpandedNavigationProperties(
-            IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
+            IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> navigationPropertiesToExpand,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
@@ -747,7 +764,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            foreach (KeyValuePair<IEdmNavigationProperty, SelectExpandClause> navPropertyToExpand in navigationPropertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> navPropertyToExpand in navigationPropertiesToExpand)
             {
                 IEdmNavigationProperty navigationProperty = navPropertyToExpand.Key;
 
@@ -761,9 +778,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
+        private void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, ExpandedNavigationSelectItem expandedNavigationSelectItem,
             ResourceContext resourceContext,
-            ODataWriter writer)
+            ODataWriter writer, bool expandReference = false)
         {
             Contract.Assert(edmProperty != null);
             Contract.Assert(resourceContext != null);
@@ -795,7 +812,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             else
             {
                 // create the serializer context for the complex and expanded item.
-                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
+
+                ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, edmProperty, resourceContext.SerializerContext.QueryContext, expandedNavigationSelectItem);
+                nestedWriteContext.ExpandReference = expandReference;
 
                 // write object.
                 ODataEdmTypeSerializer serializer = SerializerProvider.GetEdmTypeSerializer(edmProperty.Type);
@@ -806,6 +825,25 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
 
                 serializer.WriteObjectInline(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+            }
+        }
+
+        private void WriteReferencedNavigationProperties(ISet<IEdmNavigationProperty> referencedPropertiesToExpand,
+            ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(referencedPropertiesToExpand != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            foreach (IEdmNavigationProperty navigationProperty in referencedPropertiesToExpand)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = CreateNavigationLink(navigationProperty, resourceContext);
+                if (nestedResourceInfo != null)
+                {
+                    writer.WriteStart(nestedResourceInfo);
+                    WriteComplexAndExpandedNavigationProperty(navigationProperty, null, resourceContext, writer, true);
+                    writer.WriteEnd();
+                }
             }
         }
 

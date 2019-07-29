@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
+    [Page(PageSize =2)]
     public class Customer
     {
         public int Id { get; set; }

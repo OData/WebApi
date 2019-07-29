@@ -22,6 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             windowType.Property(a => a.Name).IsRequired();
             windowType.ComplexProperty(w => w.CurrentShape).IsOptional();
             windowType.CollectionProperty(w => w.OptionalShapes);
+            windowType.CollectionProperty(w => w.PolygonalShapes);
             windowType.HasOptional<Window>(w => w.Parent);
 
             ComplexTypeConfiguration<Shape> shapeType = builder.ComplexType<Shape>();

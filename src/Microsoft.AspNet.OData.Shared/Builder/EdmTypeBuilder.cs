@@ -253,7 +253,7 @@ namespace Microsoft.AspNet.OData.Builder
                         edmProperty = type.AddStructuralProperty(
                             primitiveProperty.Name,
                             primitiveTypeReference,
-                            defaultValue: null);
+                            defaultValue: primitiveProperty.DefaultValueString);
                         break;
 
                     case PropertyKind.Complex:
@@ -353,7 +353,7 @@ namespace Microsoft.AspNet.OData.Builder
             return type.AddStructuralProperty(
                 enumProperty.Name,
                 enumTypeReference,
-                defaultValue: null);
+                defaultValue: enumProperty.DefaultValueString);
         }
 
         private void CreateComplexTypeBody(EdmComplexType type, ComplexTypeConfiguration config)

@@ -436,7 +436,7 @@ namespace Microsoft.AspNet.OData.Query
             if (pageSize > 0)
             {
                 bool resultsLimited;
-                result = LimitResults(result, pageSize, out resultsLimited);
+                result = LimitResults(result, pageSize, querySettings.EnableConstantParameterization, out resultsLimited);
                 if (resultsLimited && InternalRequest.RequestUri != null &&
                     InternalRequest.Context.NextLink == null)
                 {

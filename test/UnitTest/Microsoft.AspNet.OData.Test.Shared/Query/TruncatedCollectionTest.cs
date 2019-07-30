@@ -10,9 +10,15 @@ namespace Microsoft.AspNet.OData.Test.Query
     public class TruncatedCollectionTest
     {
         [Fact]
-        public void Ctor_ThrowsArgumentNull_Collection()
+        public void Ctor_ThrowsArgumentNull_Collection_Enumerable_Source()
         {
             ExceptionAssert.ThrowsArgumentNull(() => new TruncatedCollection<int>(source: null, pageSize: 10), "source");
+        }
+
+        [Fact]
+        public void Ctor_ThrowsArgumentNull_Collection_Queryable_Source()
+        {
+            ExceptionAssert.ThrowsArgumentNull(() => new TruncatedCollection<int>(source: null, pageSize: 10, parameterize: false), "source");
         }
 
         [Fact]

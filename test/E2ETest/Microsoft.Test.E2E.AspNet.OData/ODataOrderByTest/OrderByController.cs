@@ -1,39 +1,73 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
-using System.Web.Http;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 {
-    public class ItemsController : ODataController
+    public class ItemsController : TestODataController
     {
         private static readonly OrderByEdmModel.OrderByContext Db = new OrderByEdmModel.OrderByContext();
-
+        private static readonly IQueryable<ItemWithoutColumn> _itemWithoutColumns;
         static ItemsController()
         {
-            if (Db.Items.Any() && Db.Items2.Any())
+            _itemWithoutColumns = new List<ItemWithoutColumn>()
+            {
+                // The key is A, B, C
+                new ItemWithoutColumn() { A = 2, B = 1, C = 1, ExpectedOrder = 4 },
+                new ItemWithoutColumn() { A = 1, B = 2, C = 1, ExpectedOrder = 3 },
+                new ItemWithoutColumn() { A = 1, B = 1, C = 2, ExpectedOrder = 2 },
+                new ItemWithoutColumn() { A = 1, B = 1, C = 1, ExpectedOrder = 1 }
+            }.AsQueryable();
+
+            if (Db.Items.Any() && Db.Items2.Any() && Db.ItemsWithEnum.Any())
             {
                 return;
             }
 
-            Db.Items.Add(new Item() { A = 1, C = 1, B = 99, Name = "#1 - A1 C1 B99" });
-            Db.Items.Add(new Item() { A = 1, C = 2, B = 98, Name = "#2 - A1 C2 B98" });
-            Db.Items.Add(new Item() { A = 1, C = 3, B = 97, Name = "#3 - A1 C3 B97" });
-            Db.Items.Add(new Item() { A = 1, C = 4, B = 96, Name = "#4 - A1 C4 B96" });
+            AddInSet(
+                Db.Items,
+                // The key is C, A, B
+                new Item() { A = 1, B = 99, C = 2, ExpectedOrder = 4 },
+                new Item() { A = 2, B = 2, C = 1, ExpectedOrder = 3 },
+                new Item() { A = 2, B = 1, C = 1, ExpectedOrder = 2 },
+                new Item() { A = 1, B = 96, C = 1, ExpectedOrder = 1 }
+                );
+            AddInSet(
+                Db.Items2,
+                // The key is C, B, A
+                new Item2() { A = "AA", C = "BB", B = 99, ExpectedOrder = 2 },
+                new Item2() { A = "BB", C = "AA", B = 98, ExpectedOrder = 1 },
+                new Item2() { A = "01", C = "XX", B = 1, ExpectedOrder = 3 },
+                new Item2() { A = "00", C = "ZZ", B = 96, ExpectedOrder = 4 }
+                );
 
-
-            Db.Items2.Add(new Item2() { A = "AA", C = "BB", B = 99, Name = "#2" });
-            Db.Items2.Add(new Item2() { A = "BB", C = "AA", B = 98, Name = "#1" });
-            Db.Items2.Add(new Item2() { A = "01", C = "XX", B = 1, Name = "#3" });
-            Db.Items2.Add(new Item2() { A = "00", C = "ZZ", B = 96, Name = "#4" });
+            AddInSet(
+                Db.ItemsWithEnum,
+                // The key is C, B, A
+                new ItemWithEnum() { A = SmallNumber.One, B = "A", C = SmallNumber.One, ExpectedOrder = 1 },
+                new ItemWithEnum() { A = SmallNumber.One, B = "B", C = SmallNumber.One, ExpectedOrder = 3 },
+                new ItemWithEnum() { A = SmallNumber.One, B = "B", C = SmallNumber.Two, ExpectedOrder = 4 },
+                new ItemWithEnum() { A = SmallNumber.Two, B = "A", C = SmallNumber.One, ExpectedOrder = 2 }
+            );
             Db.SaveChanges();
         }
 
+        private static void AddInSet<T>(IDbSet<T> set, params T[] items) where T : class
+        {            
+            foreach (var item in items)
+            {
+                set.Add(item);
+            }
+        }
+
         [EnableQuery]
-        public IHttpActionResult GetItems()
+        public ITestActionResult GetItems()
         {
             return Ok(Db.Items);
         }
@@ -41,10 +75,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
         [EnableQuery]
         [HttpGet]
         [ODataRoute("Items2")]
-        public IHttpActionResult GetItems2()
+        public ITestActionResult GetItems2()
         {
             return Ok(Db.Items2);
         }
 
+        [EnableQuery]
+        [HttpGet]
+        [ODataRoute("ItemsWithEnum")]
+        public ITestActionResult GetItemsWithEnum()
+        {
+            return Ok(Db.ItemsWithEnum);
+        }
+
+        [EnableQuery]
+        [HttpGet]
+        [ODataRoute("ItemsWithoutColumn")]
+        public ITestActionResult GetItemsWithoutColumn()
+        {
+            return Ok(_itemWithoutColumns);
+        }
     }
 }

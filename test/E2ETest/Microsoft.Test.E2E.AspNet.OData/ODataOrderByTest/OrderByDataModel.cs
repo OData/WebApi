@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 {
-    public class Item
+    public class Item:OrderedItem
     {
         [Key]
         [Column(Order = 2)]
@@ -19,13 +19,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
         [Key]
         [Column(Order = 3)]
         public int B { get; set; }
-
-        [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
     }
 
-    public class Item2
+    public class Item2 : OrderedItem
     {
         [Key]
         [Column(Order = 3)]
@@ -33,15 +29,51 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 
         [Key]
         [Column(Order = 1)]
-        public string C { get; set; }  
+        public string C { get; set; }
 
         [Key]
         [Column(Order = 2)]
         public int B { get; set; }
+    }
 
-        [Required]
-        [StringLength(50)]
-        public string Name { get; set; }
+    public class ItemWithEnum : OrderedItem
+    {
+        [Key]
+        [Column(Order = 3)]
+        public SmallNumber A { get; set; }
+
+        [Key]
+        [Column(Order = 2)]
+        public string B { get; set; }
+
+        [Key]
+        [Column(Order = 1)]
+        public SmallNumber C { get; set; }
+    }
+
+    public class ItemWithoutColumn : OrderedItem
+    {
+        [Key]
+        public int C { get; set; }
+
+        [Key]
+        public int B { get; set; }
+
+        [Key]
+        public int A { get; set; }
+    }
+
+    public enum SmallNumber
+    {
+        One,
+        Two,
+        Three,
+        Four
+    }
+
+    public abstract class OrderedItem
+    {
+        public int ExpectedOrder { get; set; }
     }
 }
 

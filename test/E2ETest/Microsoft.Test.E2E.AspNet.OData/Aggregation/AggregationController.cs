@@ -74,12 +74,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             {
                 Generate();
             }
+            CleanCommands();
+        }
+
+
+        public virtual string LastCommand()
+        {
+            return null;
+        }
+
+        public virtual bool CleanCommands()
+        {
+            return true;
         }
     }
 
     public class CustomersController : BaseCustomersController
     {
-        [EnableQuery]
+          [EnableQuery]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
@@ -93,6 +105,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             ResetDataSource();
             var db = new AggregationContext();
             return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
+        }
+
+
+        [HttpGet]
+        [EnableQuery]
+        [ODataRoute("GetLastCommand()")]
+        public override string LastCommand()
+        {
+            return AggregationContext.LastCommand;
+        }
+
+        [HttpGet]
+        [ODataRoute("CleanCommands()")]
+        public override bool CleanCommands()
+        {
+            AggregationContext.CleanCommands();
+            return true;
         }
     }
 
@@ -149,6 +178,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             {
                 Generate();
             }
+        }
+
+        [HttpGet]
+        [EnableQuery]
+        [ODataRoute("GetLastCommand()")]
+        public override string LastCommand()
+        {
+            return TraceLoggerProvider.CurrentSQL;
+        }
+
+        [HttpGet]
+        [ODataRoute("CleanCommands()")]
+        public override bool CleanCommands()
+        {
+            TraceLoggerProvider.CleanCommands();
+            return true;
         }
     }
 #endif

@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="structuredType">The structural type of the resource that would be written.</param>
         /// <param name="model">The <see cref="IEdmModel"/> that contains the given structural type.</param>
         /// <param name="expandedReference">a boolean value indicating whether it's expanded reference.</param>
-        public SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model, bool expandedReference)
+        internal SelectExpandNode(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmModel model, bool expandedReference)
             : this()
         {
             if (structuredType == null)

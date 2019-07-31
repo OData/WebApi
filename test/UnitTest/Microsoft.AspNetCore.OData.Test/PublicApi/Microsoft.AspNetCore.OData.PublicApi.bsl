@@ -3443,7 +3443,6 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode (SelectExpandNode selectExpandNodeToCopy)
 	public SelectExpandNode (Microsoft.OData.Edm.IEdmStructuredType structuredType, ODataSerializerContext writeContext)
 	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model)
-	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model, bool expandedReference)
 
 	[
 	ObsoleteAttribute(),

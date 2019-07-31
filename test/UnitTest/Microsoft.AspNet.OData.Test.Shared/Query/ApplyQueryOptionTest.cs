@@ -157,6 +157,38 @@ namespace Microsoft.AspNet.OData.Test.Query
                         }
                     },
                     {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, CustomerId mul CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "CustomerId", 30}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "CustomerId", 25 }, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(CustomerId mul CustomerId with sum as CustomerId))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 30}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "CustomerId", 25}, { "Address/State", null} },
+                        }
+                    },
+                    {
                         "aggregate(CustomerId mul CustomerId with sum as CustomerId)",
                         new List<Dictionary<string, object>>
                         {

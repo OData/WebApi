@@ -20,6 +20,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 {
     internal class AggregationBinder : ExpressionBinderBase
     {
+        private const string GroupByContainerProperty = "GroupByContainer";
         private Type _elementType;
         private TransformationNode _transformation;
 
@@ -152,6 +153,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             this.BaseQuery = query;
             EnsureFlattenedPropertyContainer(this._lambdaParameter);
 
+            query = FlattenReferencedProperties(query);
+
             // Answer is query.GroupBy($it => new DynamicType1() {...}).Select($it => new DynamicType2() {...})
             // We are doing Grouping even if only aggregate was specified to have a IQuaryable after aggregation
             IQueryable grouping = BindGroupBy(query);
@@ -162,7 +165,95 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Checks IQueryable provider for need of EF6 optimization
+        /// Pre flattens properties referenced in aggregate clause to avoid generation of nested queries by EF.
+        /// For query like groupby((A), aggregate(B/C with max as Alias1, B/D with max as Alias2)) we need to generate 
+        /// .Select(
+        ///     $it => new FlattenninWrapper () {
+        ///         Source = $it, // Will used in groupby stage
+        ///         Container = new {
+        ///             Value = $it.B.C
+        ///             Next = new {
+        ///                 Value = $it.B.D
+        ///             }
+        ///         }
+        ///     }
+        /// )
+        /// Also we need to populate expressions to access B/C and B/D in aggregate stage. It will look like:
+        /// B/C : $it.Container.Value
+        /// B/D : $it.Container.Next.Value
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns>Query with Select that flattens properties</returns>
+        private IQueryable FlattenReferencedProperties(IQueryable query)
+        {
+            if (_aggregateExpressions != null
+                && _aggregateExpressions.OfType<AggregateExpression>().Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
+                && _groupingProperties != null
+                && _groupingProperties.Any()
+                && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any()))
+            {
+                var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this._elementType);
+                var sourceProperty = wrapperType.GetProperty("Source");
+                List<MemberAssignment> wta = new List<MemberAssignment>();
+                wta.Add(Expression.Bind(sourceProperty, this._lambdaParameter));
+
+                var aggrregatedPropertiesToFlatten = _aggregateExpressions.OfType<AggregateExpression>().Where(e => e.Method != AggregationMethod.VirtualPropertyCount).ToList();
+                // Generated Select will be stack like, meaning that first property in the list will be deepest one
+                // For example if we add $it.B.C, $it.B.D, select will look like
+                // new {
+                //      Value = $it.B.C
+                //      Next = new {
+                //          Value = $it.B.D
+                //      }
+                // }
+                // We are generated references (in currentContainerExpression) from  the begining of the  Select ($it.Value, then $it.Next.Value etc.)
+                // We have proper match we need insert properties in reverse order
+                // After this 
+                // properties = { $it.B.D, $it.B.C}
+                // _preFlattendMAp = { {$it.B.C, $it.Value}, {$it.B.D, $it.Next.Value} }
+                var properties = new NamedPropertyExpression[aggrregatedPropertiesToFlatten.Count];
+                var aliasIdx = aggrregatedPropertiesToFlatten.Count - 1;
+                var aggParam = Expression.Parameter(wrapperType, "$it");
+                var currentContainerExpression = Expression.Property(aggParam, GroupByContainerProperty);
+                foreach (var aggExpression in aggrregatedPropertiesToFlatten)
+                {
+                    var alias = "Property" + aliasIdx; // We just need unique alias, we aren't going to use it
+
+                    // Add Value = $it.B.C
+                    var propAccessExpression = BindAccessor(aggExpression.Expression);
+                    var type = propAccessExpression.Type;
+                    propAccessExpression = WrapConvert(propAccessExpression);
+                    properties[aliasIdx] = new NamedPropertyExpression(Expression.Constant(alias), propAccessExpression);
+
+                    // Save $it.Container.Next.Value for future use
+                    UnaryExpression flatAccessExpression = Expression.Convert(
+                        Expression.Property(currentContainerExpression, "Value"),
+                        type);
+                    currentContainerExpression = Expression.Property(currentContainerExpression, "Next");
+                    _preFlattenedMap.Add(aggExpression.Expression, flatAccessExpression);
+                    aliasIdx--;
+                }
+
+                var wrapperProperty = ResultClrType.GetProperty(GroupByContainerProperty);
+
+                wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
+
+                var flatLambda = Expression.Lambda(Expression.MemberInit(Expression.New(wrapperType), wta), _lambdaParameter);
+
+                query = ExpressionHelpers.Select(query, flatLambda, this._elementType);
+
+                // We applied flattening let .GroupBy know about it.
+                this._lambdaParameter = aggParam;
+                this._elementType = wrapperType;
+            }
+
+            return query;
+        }
+
+        private Dictionary<SingleValueNode, Expression> _preFlattenedMap = new Dictionary<SingleValueNode, Expression>();
+
+        /// <summary>
+        /// Checks IQueryable provider for need of EF6 oprimization
         /// </summary>
         /// <param name="query"></param>
         /// <returns>True if EF6 optimization are needed.</returns>
@@ -196,9 +287,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // Setting GroupByContainer property when previous step was grouping
             if (this._groupingProperties != null && this._groupingProperties.Any())
             {
-                var wrapperProperty = this.ResultClrType.GetProperty("GroupByContainer");
+                var wrapperProperty = this.ResultClrType.GetProperty(GroupByContainerProperty);
 
-                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), "GroupByContainer")));
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Property(Expression.Property(accum, "Key"), GroupByContainerProperty)));
             }
 
             // Setting Container property when we have aggregation clauses
@@ -368,10 +459,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return WrapConvert(Expression.Call(null, countMethod, asQuerableExpression));
             }
 
+            Expression body;
+
             var lambdaParameter = baseType == this._elementType ? this._lambdaParameter : Expression.Parameter(baseType, "$it");
-            Expression propertyAccessor = BindAccessor(expression.Expression, lambdaParameter);
-            LambdaExpression propertyLambda = Expression.Lambda(propertyAccessor,
-                lambdaParameter);
+            if (!this._preFlattenedMap.TryGetValue(expression.Expression, out body))
+            {
+                body = BindAccessor(expression.Expression, lambdaParameter);
+            }
+            LambdaExpression propertyLambda = Expression.Lambda(body, lambdaParameter);
 
             Expression aggregationExpression;
 
@@ -399,7 +494,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         MethodInfo sumGenericMethod;
                         // For Dynamic properties cast to decimal
-                        Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
+                        Expression propertyExpression = WrapDynamicCastIfNeeded(body);
                         propertyLambda = Expression.Lambda(propertyExpression, lambdaParameter);
 
                         if (
@@ -416,7 +511,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         aggregationExpression = Expression.Call(null, sumMethod, asQuerableExpression, propertyLambda);
 
                         // For Dynamic properties cast back to object
-                        if (propertyAccessor.Type == typeof(object))
+                        if (propertyLambda.Type == typeof(object))
                         {
                             aggregationExpression = Expression.Convert(aggregationExpression, typeof(object));
                         }
@@ -426,7 +521,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         MethodInfo averageGenericMethod;
                         // For Dynamic properties cast to decimal
-                        Expression propertyExpression = WrapDynamicCastIfNeeded(propertyAccessor);
+                        Expression propertyExpression = WrapDynamicCastIfNeeded(body);
                         propertyLambda = Expression.Lambda(propertyExpression, lambdaParameter);
 
                         if (
@@ -443,7 +538,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         aggregationExpression = Expression.Call(null, averageMethod, asQuerableExpression, propertyLambda);
 
                         // For Dynamic properties cast back to object
-                        if (propertyAccessor.Type == typeof(object))
+                        if (propertyLambda.Type == typeof(object))
                         {
                             aggregationExpression = Expression.Convert(aggregationExpression, typeof(object));
                         }
@@ -508,7 +603,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.ResourceRangeVariableReference:
-                    return baseElement ?? this._lambdaParameter;
+                    return this._lambdaParameter.Type.IsGenericType && this._lambdaParameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
+                            ? (Expression)Expression.Property(this._lambdaParameter, "Source")
+                            : this._lambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source, baseElement), propAccessNode.Property, GetFullPropertyPath(propAccessNode));
@@ -610,6 +707,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private IQueryable BindGroupBy(IQueryable query)
         {
             LambdaExpression groupLambda = null;
+            Type elementType = query.ElementType;
             if (_groupingProperties != null && _groupingProperties.Any())
             {
                 // Generates expression
@@ -630,7 +728,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 //                                      })
                 List<NamedPropertyExpression> properties = CreateGroupByMemberAssignments(_groupingProperties);
 
-                var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                var wrapperProperty = typeof(GroupByWrapper).GetProperty(GroupByContainerProperty);
                 List<MemberAssignment> wta = new List<MemberAssignment>();
                 wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(properties)));
                 groupLambda = Expression.Lambda(Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta), _lambdaParameter);
@@ -642,7 +740,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this._lambdaParameter);
             }
 
-            return ExpressionHelpers.GroupBy(query, groupLambda, this._elementType, this._groupByClrType);
+            return ExpressionHelpers.GroupBy(query, groupLambda, elementType, this._groupByClrType);
         }
 
         private List<NamedPropertyExpression> CreateGroupByMemberAssignments(IEnumerable<GroupByPropertyNode> nodes)
@@ -657,7 +755,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
                 else
                 {
-                    var wrapperProperty = typeof(GroupByWrapper).GetProperty("GroupByContainer");
+                    var wrapperProperty = typeof(GroupByWrapper).GetProperty(GroupByContainerProperty);
                     List<MemberAssignment> wta = new List<MemberAssignment>();
                     wta.Add(Expression.Bind(wrapperProperty, AggregationPropertyContainer.CreateNextNamedPropertyContainer(CreateGroupByMemberAssignments(grpProp.ChildTransformations))));
                     properties.Add(new NamedPropertyExpression(Expression.Constant(propertyName), Expression.MemberInit(Expression.New(typeof(GroupByWrapper)), wta)));

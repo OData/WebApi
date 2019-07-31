@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -141,10 +142,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
+        #region "SQL logging"
+        public static async Task CleanUpSQlCommandsLog(string BaseAddress)
+        {
+            string queryUrl = $"{BaseAddress}/aggregation/CleanCommands()";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.SendAsync(request);
+        }
+
+        public static async Task<string> GetLastSQLCommand(string BaseAddress)
+        {
+            string queryUrl = $"{BaseAddress}/aggregation/GetLastCommand()";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.SendAsync(request);
+            var lastCommandResponse = await response.Content.ReadAsStringAsync();
+            return  (string)JObject.Parse(lastCommandResponse)["value"];
+        }
+        #endregion
+
         [Fact]
         public async Task AggregateNavigationPropertyWorks()
         {
             // Arrange
+            await CleanUpSQlCommandsLog(BaseAddress);
+
             string queryUrl =
                 string.Format(
                     AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
@@ -168,6 +193,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
+
+
+            string lastCommand = await GetLastSQLCommand(BaseAddress);
+            if (lastCommand != "")
+            {
+                // Only one join with Customers table
+                Assert.Single(Regex.Matches(lastCommand, @"\[Customers]"));
+            }
         }
 
         [Fact]

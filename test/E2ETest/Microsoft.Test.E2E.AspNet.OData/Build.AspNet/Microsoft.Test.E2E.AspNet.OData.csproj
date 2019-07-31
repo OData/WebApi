@@ -1462,6 +1462,18 @@
     <Compile Include="..\ODataCountTest\CountTest.cs">
       <Link>ODataCountTest\CountTest.cs</Link>
     </Compile>
+    <Compile Include="..\ODataOrderByTest\OrderByController.cs">
+      <Link>ODataOrderByTest\OrderByController.cs</Link>
+    </Compile>
+    <Compile Include="..\ODataOrderByTest\OrderByDataModel.cs">
+      <Link>ODataOrderByTest\OrderByDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ODataOrderByTest\OrderByEdmModel.cs">
+      <Link>ODataOrderByTest\OrderByEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ODataOrderByTest\OrderByTest.cs">
+      <Link>ODataOrderByTest\OrderByTest.cs</Link>
+    </Compile>
     <Compile Include="..\ODataPathHandler\LinkGenerationTests.cs">
       <Link>ODataPathHandler\LinkGenerationTests.cs</Link>
     </Compile>

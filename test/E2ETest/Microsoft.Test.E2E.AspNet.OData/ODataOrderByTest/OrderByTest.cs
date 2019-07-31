@@ -2,11 +2,13 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Http.Dispatcher;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json.Linq;
 using Xunit;
@@ -20,11 +22,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected override void UpdateConfiguration(HttpConfiguration configuration)
         {
             var controllers = new[] { typeof(ItemsController) };
-            configuration.AddControllers(controllers);
-            configuration.IncludeErrorDetail = true;
+            TestAssemblyResolver resolver = new TestAssemblyResolver(new TypesInjectionAssembly(controllers));
+            configuration.Services.Replace(typeof(IAssembliesResolver), resolver);
+
+            configuration.IncludeErrorDetailPolicy = IncludeErrorDetailPolicy.Always;
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -32,64 +36,54 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
             configuration.MapODataServiceRoute(
                 routeName: "odata",
                 routePrefix: "odata",
-                model: OrderByEdmModel.GetModel(configuration));
+                model: OrderByEdmModel.GetModel());
 
             configuration.EnsureInitialized();
         }
 
         [Fact]
-        public async Task TestStableOrder_WithCompositeKeyOrderedByColumnAttribute_UseColumnAttributeToDetermineTheKeyOrder()
+        public async Task TestOrderByResultItem()
         {   // Arrange
-            await TestOrderedQuery<Item>("Items");
-        }
-
-        [Fact]
-        public async Task TestStableOrder_WithCompositeKeyOrderedByColumnAttribute_UseColumnAttributeToDetermineTheKeyOrder2()
-        {
-            await TestOrderedQuery<Item2>("Items2");
-        }
-
-        [Fact]
-        public async Task TestStableOrder_WithCompositeKeyOrderedByColumnAttribute_AndContainingEnums_UseColumnAttributeToDetermineTheKeyOrder()
-        {
-            await TestOrderedQuery<ItemWithEnum>("ItemsWithEnum");
-        }
-
-        [Fact]
-        public async Task TestStableOrder_WithCompositeKeyNotOrdered_OrderTheKeyByPropertyName()
-        {
-            await TestOrderedQuery<ItemWithoutColumn>("ItemsWithoutColumn");
-        }
-
-        private async Task TestOrderedQuery<T>(string entitySet) where T : OrderedItem, new()
-        {
-            // Arrange
-            var requestUri = $"{BaseAddress}/odata/{entitySet}?$top=10";
+            var requestUri = string.Format("{0}/odata/Items", BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            // Act
+
             var response = await Client.SendAsync(request);
+
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var rawResult = await response.Content.ReadAsStringAsync();
             var jsonResult = JObject.Parse(rawResult);
             var jsonValue = jsonResult.SelectToken("value");
             Assert.NotNull(jsonValue);
-            var concreteResult = jsonValue.ToObject<List<T>>();
+            var concreteResult = jsonValue.ToObject<List<Item>>();
             Assert.NotEmpty(concreteResult);
-            var expected = Enumerable.Range(1, 4).Select(i => new T() { ExpectedOrder = i }).ToList();
-            Assert.Equal(expected, concreteResult, new OrderedItemComparer<T>());
+            for (var i = 0; i < concreteResult.Count - 1; i++)
+            {
+                var value = string.Format("#{0}", i + 1);
+                Assert.True(concreteResult[i].Name.StartsWith(value), "Incorrect order.");
+            }
         }
 
-        private sealed class OrderedItemComparer<T> : IEqualityComparer<T> where T : OrderedItem
-        {
-            public bool Equals(T x, T y)
-            {
-                return x.ExpectedOrder == y.ExpectedOrder;
-            }
+        [Fact]
+        public async Task TestOrderByResultItem2()
+        {   // Arrange
+            var requestUri = string.Format("{0}/odata/Items2", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
-            public int GetHashCode(T obj)
+            var response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var rawResult = await response.Content.ReadAsStringAsync();
+            var jsonResult = JObject.Parse(rawResult);
+            var jsonValue = jsonResult.SelectToken("value");
+            Assert.NotNull(jsonValue);
+            var concreteResult = jsonValue.ToObject<List<Item2>>();
+            Assert.NotEmpty(concreteResult);
+            for (var i = 0; i < concreteResult.Count - 1; i++)
             {
-                return obj.ExpectedOrder.GetHashCode();
+                var value = string.Format("#{0}", i + 1);
+                Assert.True(concreteResult[i].Name.StartsWith(value), "Incorrect order.");
             }
         }
     }

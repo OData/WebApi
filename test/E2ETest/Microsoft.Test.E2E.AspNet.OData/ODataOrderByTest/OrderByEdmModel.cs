@@ -4,7 +4,6 @@
 using System.Data.Entity;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 {
@@ -22,17 +21,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 
             public IDbSet<Item> Items { get; set; }
             public IDbSet<Item2> Items2 { get; set; }
-            public IDbSet<ItemWithEnum> ItemsWithEnum { get; set; }
         }
 
-        public static IEdmModel GetModel(WebRouteConfiguration config)
+        public static IEdmModel GetModel()
         {
-            ODataConventionModelBuilder builder = config.CreateConventionModelBuilder();
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             builder.EntitySet<Item>("Items");
             builder.EntitySet<Item2>("Items2");
-            builder.EntitySet<ItemWithEnum>("ItemsWithEnum");
-            builder.EntitySet<ItemWithoutColumn>("ItemsWithoutColumn");
-            builder.EnumType<SmallNumber>();
             return builder.GetEdmModel();
         }
     }

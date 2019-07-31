@@ -37,17 +37,16 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
                 return;
             }
 
-            // Respect order in the column attribute
-            var columnAttribute = attribute as ColumnAttribute;
-            if (columnAttribute != null && columnAttribute.Order > 0)
-            {
-                edmProperty.Order = columnAttribute.Order;
-            }
-
             var primitiveProperty = edmProperty as PrimitivePropertyConfiguration;
             if (primitiveProperty == null)
             {
                 return; // ignore non-primitive property
+            }
+
+            var columnAttribute = attribute as ColumnAttribute;
+            if (columnAttribute != null && columnAttribute.Order > 0)
+            {
+                primitiveProperty.Order = columnAttribute.Order;
             }
 
             if (columnAttribute == null || columnAttribute.TypeName == null)

@@ -109,7 +109,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDeltaResource(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        public virtual void WriteDeltaResource(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
             Contract.Assert(writeContext != null);
 
@@ -142,7 +142,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDeltaComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
+        public virtual void WriteDeltaComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
             ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(complexProperties != null);
@@ -170,7 +170,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
+        public virtual void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
             ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(edmProperty != null);
@@ -227,7 +227,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private static IEnumerable<ODataProperty> CreateODataPropertiesFromDynamicType(EdmEntityType entityType, object graph,
+        public virtual static IEnumerable<ODataProperty> CreateODataPropertiesFromDynamicType(EdmEntityType entityType, object graph,
             Dictionary<IEdmProperty, object> dynamicTypeProperties)
         {
             Contract.Assert(dynamicTypeProperties != null);
@@ -272,7 +272,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return properties;
         }
 
-        private void WriteDynamicTypeResource(object graph, ODataWriter writer, IEdmTypeReference expectedType,
+        public virtual void WriteDynamicTypeResource(object graph, ODataWriter writer, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
             var dynamicTypeProperties = new Dictionary<IEdmProperty, object>();
@@ -316,7 +316,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             writer.WriteEnd();
         }
 
-        private void WriteResource(object graph, ODataWriter writer, ODataSerializerContext writeContext,
+        public virtual void WriteResource(object graph, ODataWriter writer, ODataSerializerContext writeContext,
             IEdmTypeReference expectedType)
         {
             Contract.Assert(writeContext != null);
@@ -636,7 +636,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return null;
         }
 
-        private void WriteNavigationLinks(
+        public virtual void WriteNavigationLinks(
             IEnumerable<IEdmNavigationProperty> navigationProperties, ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(resourceContext != null);
@@ -649,7 +649,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
+        public virtual void WriteComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
             ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(complexProperties != null);
@@ -677,7 +677,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDynamicComplexProperties(ResourceContext resourceContext, ODataWriter writer)
+        public virtual void WriteDynamicComplexProperties(ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(resourceContext != null);
             Contract.Assert(resourceContext.EdmModel != null);
@@ -716,7 +716,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteDynamicComplexProperty(object propertyValue, IEdmTypeReference edmType, ResourceContext resourceContext, ODataWriter writer)
+        public virtual void WriteDynamicComplexProperty(object propertyValue, IEdmTypeReference edmType, ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
@@ -738,7 +738,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             serializer.WriteObjectInline(propertyValue, edmType, writer, nestedWriteContext);
         }
 
-        private void WriteExpandedNavigationProperties(
+        public virtual void WriteExpandedNavigationProperties(
             IDictionary<IEdmNavigationProperty, SelectExpandClause> navigationPropertiesToExpand,
             ResourceContext resourceContext,
             ODataWriter writer)
@@ -761,7 +761,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
+        public virtual void WriteComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
@@ -809,7 +809,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private IEnumerable<ODataNestedResourceInfo> CreateNavigationLinks(
+        public virtual IEnumerable<ODataNestedResourceInfo> CreateNavigationLinks(
             IEnumerable<IEdmNavigationProperty> navigationProperties, ResourceContext resourceContext)
         {
             Contract.Assert(navigationProperties != null);
@@ -867,7 +867,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return navigationLink;
         }
 
-        private IEnumerable<ODataProperty> CreateStructuralPropertyBag(
+        public virtual IEnumerable<ODataProperty> CreateStructuralPropertyBag(
             IEnumerable<IEdmStructuralProperty> structuralProperties, ResourceContext resourceContext)
         {
             Contract.Assert(structuralProperties != null);
@@ -938,7 +938,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return serializer.CreateProperty(propertyValue, propertyType, structuralProperty.Name, writeContext);
         }
 
-        private IEnumerable<ODataAction> CreateODataActions(
+        public virtual IEnumerable<ODataAction> CreateODataActions(
             IEnumerable<IEdmAction> actions, ResourceContext resourceContext)
         {
             Contract.Assert(actions != null);
@@ -954,7 +954,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private IEnumerable<ODataFunction> CreateODataFunctions(
+        public virtual IEnumerable<ODataFunction> CreateODataFunctions(
             IEnumerable<IEdmFunction> functions, ResourceContext resourceContext)
         {
             Contract.Assert(functions != null);
@@ -1032,7 +1032,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return CreateODataOperation(function, builder, resourceContext) as ODataFunction;
         }
 
-        private static ODataOperation CreateODataOperation(IEdmOperation operation, OperationLinkBuilder builder, ResourceContext resourceContext)
+        public virtual static ODataOperation CreateODataOperation(IEdmOperation operation, OperationLinkBuilder builder, ResourceContext resourceContext)
         {
             Contract.Assert(operation != null);
             Contract.Assert(builder != null);
@@ -1104,7 +1104,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return fragment;
         }
 
-        private static IEdmStructuredType GetODataPathType(ODataSerializerContext serializerContext)
+        public virtual static IEdmStructuredType GetODataPathType(ODataSerializerContext serializerContext)
         {
             Contract.Assert(serializerContext != null);
             if (serializerContext.EdmProperty != null)
@@ -1280,7 +1280,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private IEdmStructuredTypeReference GetResourceType(object graph, ODataSerializerContext writeContext)
+        public virtual IEdmStructuredTypeReference GetResourceType(object graph, ODataSerializerContext writeContext)
         {
             Contract.Assert(graph != null);
 

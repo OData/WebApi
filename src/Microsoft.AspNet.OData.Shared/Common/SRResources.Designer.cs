@@ -153,7 +153,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("AggregationNotSupportedForType", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   $apply query options not supported for LINQ to SQL providers
+        /// </summary>
+        internal static string ApplyQueryOptionNotSupportedForLinq2SQL
+        {
+            get
+            {
+                return ResourceManager.GetString("ApplyQueryOptionNotSupportedForLinq2SQL", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The query option is not bound to any CLR type. &apos;{0}&apos; is only supported with a query option bound to a CLR type..
         /// </summary>
@@ -1803,7 +1814,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("PropertyMustBeDateTimeOffsetOrDate", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a boolean..
+        /// </summary>
+        internal static string PropertyMustBeBoolean
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyMustBeBoolean", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to The value with type &apos;{0}&apos; must have type &apos;{1}&apos;..
         /// </summary>
@@ -2145,7 +2167,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("SkipTopLimitExceeded", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to parse the skiptoken value. Skiptoken value should always be server generated..
+        /// </summary>
+        internal static string SkipTokenParseError
+        {
+            get
+            {
+                return ResourceManager.GetString("SkipTokenParseError", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Could not find the target entity type for the navigation property &apos;{0}&apos; on entity type &apos;{1}&apos;..
         /// </summary>

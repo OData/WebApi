@@ -17,6 +17,7 @@ using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -187,7 +188,7 @@ namespace Microsoft.AspNet.OData.Batch
         {
             Contract.Assert(request != null);
 
-            ODataVersion odataVersion = ODataMediaTypeFormatter.GetODataResponseVersion(request);
+            ODataVersion odataVersion = ResultHelpers.GetODataResponseVersion(request);
             IServiceProvider requestContainer = request.GetRequestContainer();
             ODataMessageWriterSettings writerSettings =
                 requestContainer.GetRequiredService<ODataMessageWriterSettings>();

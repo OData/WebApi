@@ -3,18 +3,16 @@
 
 using System;
 using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData.Test.Builder;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Formatter;
 using Microsoft.OData.Edm;
 using Xunit;
 
-namespace Microsoft.AspNet.OData.Test.Builderr
+namespace Microsoft.AspNet.OData.Test.Builder
 {
     public class EntitySetTest
     {
@@ -423,8 +421,12 @@ namespace Microsoft.AspNet.OData.Test.Builderr
             Assert.Equal(2, bindings.Count());
 
             Assert.Equal("City, City", String.Join(", ", bindings.Select(e => e.NavigationProperty.Name)));
-            Assert.Equal("Cities_A, Cities_B", String.Join(", ", bindings.Select(e => e.Target.Name)));
-            Assert.Equal("Location/City, Address/City", String.Join(", ", bindings.Select(e => e.Path.Path)));
+
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Target.Name == "Cities_A"));
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Target.Name == "Cities_B"));
+
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Path.Path == "Location/City"));
+            Assert.NotNull(bindings.SingleOrDefault(c => c.Path.Path == "Address/City"));
 
             // "BindingCity" entity type
             model.AssertHasEntityType(typeof(BindingCity));

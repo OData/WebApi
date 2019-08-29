@@ -1,8 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
@@ -10,6 +13,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     public class BaseCustomersController : TestODataController
     {
         protected readonly AggregationContext _db = new AggregationContext();
+        protected readonly List<Customer> _customers = new List<Customer>();
 
         public void Generate()
         {
@@ -19,6 +23,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 {
                     Id = i,
                     Name = "Customer" + i % 2,
+                    Bucket = i % 2 == 0? (CustomerBucket?)CustomerBucket.Small : null,
                     Order = new Order
                     {
                         Id = i,
@@ -32,13 +37,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                     }
                 };
 
-                _db.Customers.Add(customer);
+                _customers.Add(customer);
             }
 
-            _db.Customers.Add(new Customer()
+            _customers.Add(new Customer()
             {
                 Id = 10,
                 Name = null,
+                Bucket = CustomerBucket.Big,
                 Address = new Address
                 {
                     Name = "City1",
@@ -52,21 +58,40 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 },
             });
 
+            SaveGenerated();
+        }
+
+
+        protected virtual void SaveGenerated()
+        {
+            _db.Customers.AddRange(_customers);
             _db.SaveChanges();
         }
 
-        protected void ResetDataSource()
+        protected virtual void ResetDataSource()
         {
             if (!_db.Customers.Any())
             {
                 Generate();
             }
+            CleanCommands();
+        }
+
+
+        public virtual string LastCommand()
+        {
+            return null;
+        }
+
+        public virtual bool CleanCommands()
+        {
+            return true;
         }
     }
 
     public class CustomersController : BaseCustomersController
     {
-        [EnableQuery]
+          [EnableQuery]
         public IQueryable<Customer> Get()
         {
             ResetDataSource();
@@ -81,5 +106,95 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             var db = new AggregationContext();
             return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
         }
+
+
+        [HttpGet]
+        [EnableQuery]
+        [ODataRoute("GetLastCommand()")]
+        public override string LastCommand()
+        {
+            return AggregationContext.LastCommand;
+        }
+
+        [HttpGet]
+        [ODataRoute("CleanCommands()")]
+        public override bool CleanCommands()
+        {
+            AggregationContext.CleanCommands();
+            return true;
+        }
     }
+
+    public class LinqToSqlCustomersController : BaseCustomersController
+    {
+        [EnableQuery]
+        [ODataRoute("Customers")]
+        public IQueryable<Customer> Get()
+        {
+            var db = new LinqToSqlDatabaseContext();
+            return db.Customers;
+        }
+
+        [EnableQuery]
+        public TestSingleResult<Customer> Get(int key)
+        {
+            throw new NotSupportedException();
+        }
+    }
+
+#if NETCORE
+    public class CoreCustomersController<T> : BaseCustomersController where T: AggregationContextCoreBase, new()
+    {
+        [EnableQuery]
+        [ODataRoute("Customers")]
+        public IQueryable<Customer> Get()
+        {
+            ResetDataSource();
+            var db = new T();
+            return db.Customers;
+        }
+
+        [EnableQuery]
+        public TestSingleResult<Customer> Get(int key)
+        {
+            ResetDataSource();
+            var db = new T();
+            return TestSingleResult.Create(db.Customers.Where(c => c.Id == key));
+        }
+
+
+        protected override void SaveGenerated()
+        {
+            var db = new T();
+            db.Customers.AddRange(_customers);
+            db.SaveChanges();
+        }
+
+        protected override void ResetDataSource()
+        {
+            var db = new T();
+            db.Database.EnsureCreated();
+            if (!db.Customers.Any())
+            {
+                Generate();
+            }
+        }
+
+        [HttpGet]
+        [EnableQuery]
+        [ODataRoute("GetLastCommand()")]
+        public override string LastCommand()
+        {
+            return TraceLoggerProvider.CurrentSQL;
+        }
+
+        [HttpGet]
+        [ODataRoute("CleanCommands()")]
+        public override bool CleanCommands()
+        {
+            TraceLoggerProvider.CleanCommands();
+            return true;
+        }
+    }
+#endif
 }

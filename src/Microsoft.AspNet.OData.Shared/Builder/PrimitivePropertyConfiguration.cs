@@ -24,6 +24,11 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Gets or sets a value string representation of default value.
+        /// </summary>
+        public string DefaultValueString { get; set; }
+
+        /// <summary>
         /// Gets the type of this property.
         /// </summary>
         public override PropertyKind Kind

@@ -11,20 +11,39 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public static string ConnectionString =
             @"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Persist Security Info=True;Database=AggregationTest1";
 
+        public static string LastCommand { get; private set; } = "";
+
         public AggregationContext()
             : base(ConnectionString)
         {
+            this.Database.Log = (sql) =>
+            {
+                if (sql.Contains("SELECT") 
+                    && !sql.Contains("_Migration")
+                    && !sql.Contains("INFORMATION_SCHEMA"))
+                {
+                    LastCommand += sql;
+                }
+            };
         }
 
         public DbSet<Customer> Customers { get; set; }
+
+        public static void CleanCommands()
+        {
+            LastCommand = "";
+        }
     }
 
+    [System.Data.Linq.Mapping.Table(Name = "Customer")]
     public class Customer
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
 
         public string Name { get; set; }
+
+        public CustomerBucket? Bucket { get; set; }
 
         public Order Order { get; set; }
 
@@ -48,5 +67,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public string Name { get; set; }
 
         public string Street { get; set; }
+    }
+
+    public enum CustomerBucket
+    {
+        Small,
+        Medium,
+        Big
     }
 }

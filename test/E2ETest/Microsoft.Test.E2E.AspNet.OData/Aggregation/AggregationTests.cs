@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -16,9 +17,117 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class AggregationTests : WebHostTestBase
+    public class AggregationTestsEFClassic: AggregationTests
     {
-        private const string AggregationTestBaseUrl = "{0}/aggregation/Customers";
+        public AggregationTestsEFClassic(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(CustomersController));
+            base.UpdateConfiguration(configuration);
+        }
+
+        [Theory]
+        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.StdDev as PriceStdDev))")]
+        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
+        public async Task CustomAggregateStdDevWorks(string query)
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + query,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+    }
+
+#if NETCORE
+    public class AggregationTestsEFCoreInMemory : AggregationTests
+    {
+        public AggregationTestsEFCoreInMemory(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreInMemory>));
+            base.UpdateConfiguration(configuration);
+        }
+    }
+
+    public class AggregationTestsEFCoreSql : AggregationTests
+    {
+        public AggregationTestsEFCoreSql(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreSql>));
+            base.UpdateConfiguration(configuration);
+        }
+    }
+#endif
+
+
+    public class LinqToSqlAggregationTests : WebHostTestBase
+    {
+        protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
+
+        public LinqToSqlAggregationTests(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            configuration.AddControllers(typeof(LinqToSqlCustomersController));
+            configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
+            configuration.MapODataServiceRoute("aggregation", "aggregation",
+                AggregationEdmModel.GetEdmModel(configuration));
+        }
+
+        [Fact]
+        public async Task ApplyThrows()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=aggregate($count as Count)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsStringAsync();
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Contains("$apply query options not supported for LINQ to SQL providers",result);
+        }
+
+    }
+
+    public abstract class AggregationTests : WebHostTestBase
+    {
+        protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
 
         public AggregationTests(WebHostTestFixture fixture)
             :base(fixture)
@@ -27,20 +136,43 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof (CustomersController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("aggregation", "aggregation",
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
+        #region "SQL logging"
+        public static async Task CleanUpSQlCommandsLog(string BaseAddress)
+        {
+            string queryUrl = $"{BaseAddress}/aggregation/CleanCommands()";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.SendAsync(request);
+        }
+
+        public static async Task<string> GetLastSQLCommand(string BaseAddress)
+        {
+            string queryUrl = $"{BaseAddress}/aggregation/GetLastCommand()";
+
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+            HttpResponseMessage response = await client.SendAsync(request);
+            var lastCommandResponse = await response.Content.ReadAsStringAsync();
+            return  (string)JObject.Parse(lastCommandResponse)["value"];
+        }
+        #endregion
+
         [Fact]
         public async Task AggregateNavigationPropertyWorks()
         {
             // Arrange
+            await CleanUpSQlCommandsLog(BaseAddress);
+
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))",
+                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -51,7 +183,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;
@@ -62,6 +193,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal("Customer0", results[1]["Name"].ToString());
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
+
+
+            string lastCommand = await GetLastSQLCommand(BaseAddress);
+            if (lastCommand != "")
+            {
+                // Only one join with Customers table
+                Assert.Single(Regex.Matches(lastCommand, @"\[Customers]"));
+            }
         }
 
         [Fact]
@@ -70,7 +209,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))",
+                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))&$orderby=TotalId desc",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -93,12 +232,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         [Fact]
+        public async Task GroupByEnumPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Bucket))&$orderby=Bucket",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(3, results.Count);
+            Assert.Equal(JValue.CreateNull(), results[0]["Bucket"]);
+            Assert.Equal("Small", results[1]["Bucket"].ToString());
+            Assert.Equal("Big", results[2]["Bucket"].ToString());
+        }
+
+        [Fact]
         public async Task GroupByComplexPropertyWorks()
         {
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Address/Name), aggregate(Id with sum as TotalId))",
+                    AggregationTestBaseUrl + "?$apply=groupby((Address/Name), aggregate(Id with sum as TotalId))&$orderby=TotalId",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -126,7 +290,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name, Address/Street), aggregate(Id with sum as TotalId))",
+                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name, Address/Street), aggregate(Id with sum as TotalId))&$orderby=TotalId",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -137,7 +301,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
@@ -170,7 +333,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Single(results);
@@ -243,7 +405,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             string queryUrl =
                 string.Format(
                     AggregationTestBaseUrl +
-                    "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))/groupby((Name),aggregate(TotalPrice with sum as TotalAmount))",
+                    "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))/groupby((Name),aggregate(TotalPrice with sum as TotalAmount))&$orderby=TotalAmount",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -255,7 +417,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Assert
 
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Equal(3, results.Count);
@@ -294,32 +455,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var results = result["value"] as JArray;
             Assert.Single(results);
-        }
-
-        [Theory]
-        [InlineData("?$apply=groupby((Name), aggregate(Order/Price with Custom.StdDev as PriceStdDev))")]
-        [InlineData("?$apply=groupby((Address/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
-        [InlineData("?$apply=groupby((Order/Name), aggregate(Id with Custom.StdDev as IdStdDev))")]
-        public async Task CustomAggregateStdDevWorks(string query)
-        {
-            // Arrange
-            string queryUrl =
-                string.Format(
-                    AggregationTestBaseUrl + query,
-                    BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         }
 
         [Theory]
@@ -389,7 +527,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
-            System.Console.WriteLine(result);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;

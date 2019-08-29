@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.OData.Test
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("http://localhost/odata/$metadata#MyOrders/$entity", (string)result["@odata.context"]);
+            Assert.Equal("http://localhost/odata/$metadata#MyOrders(OrderLines())/$entity", (string)result["@odata.context"]);
         }
 
         [Fact]
@@ -235,7 +235,7 @@ namespace Microsoft.AspNet.OData.Test
 
             // Assert
             Assert.True(response.IsSuccessStatusCode);
-            Assert.Equal("http://localhost/odata/$metadata#MyOrders/$entity", (string)result["@odata.context"]);
+            Assert.Equal("http://localhost/odata/$metadata#MyOrders(OrderLines())/$entity", (string)result["@odata.context"]);
             var myOrder = result;
             Assert.Equal("http://localhost/odata/MyOrders(1)", myOrder["@odata.id"]);
             Assert.Equal("http://localhost/odata/MyOrders(1)", myOrder["@odata.editLink"]);

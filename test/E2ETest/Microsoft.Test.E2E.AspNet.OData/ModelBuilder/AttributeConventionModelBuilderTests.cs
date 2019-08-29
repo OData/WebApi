@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -27,6 +28,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
         [DataMember(IsRequired = true)]
         public string RequiredProperty2 { get; set; }
+
+        [DataMember(IsRequired = true)]
+        [DefaultValue("default")]
+        public string RequiredPropertyWithDefaultValue { get; set; }
 
         public string NotDataMember { get; set; }
 
@@ -81,13 +86,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var model = builder.GetEdmModel();
 
             var simpleDataContractModel = model.SchemaElements.OfType<IEdmEntityType>().First(t => t.Name == typeof(SimpleDataContractModel).Name);
-            Assert.Equal(5, simpleDataContractModel.Properties().Count());
+            Assert.Equal(6, simpleDataContractModel.Properties().Count());
 
             Assert.Equal("KeyProperty", simpleDataContractModel.Key().Single().Name);
 
             var requiredProperty2 = simpleDataContractModel.Properties().Single(p => p.Name == "RequiredProperty2") as EdmProperty;
 
             Assert.False(requiredProperty2.Type.IsNullable);
+
+            var requiredPropertyWithDefaultValue = simpleDataContractModel.Properties().Single(p => p.Name == "RequiredPropertyWithDefaultValue") as EdmStructuralProperty;
+
+            Assert.Equal("default", requiredPropertyWithDefaultValue.DefaultValueString);
 
             var navigationProperty1 = simpleDataContractModel.Properties().Single(p => p.Name == "NavigationProperty1") as EdmNavigationProperty;
             Assert.Equal(EdmMultiplicity.One, navigationProperty1.TargetMultiplicity());

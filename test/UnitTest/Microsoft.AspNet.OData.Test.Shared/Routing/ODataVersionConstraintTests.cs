@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Test
     public class ODataVersionConstraintTests
     {
         [Fact]
-        public void Ctor_PamaterlessDefaultsToV4()
+        public void Ctor_ParameterlessDefaultsToV4()
         {
             // Act
             ODataVersionConstraint constraint = new ODataVersionConstraint();
@@ -27,6 +27,50 @@ namespace Microsoft.AspNet.OData.Test.Routing.Test
             // Arrange
             ODataVersionConstraint constraint = new ODataVersionConstraint();
             TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+
+            // Act
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("OData-Version", "4.0")]
+        [InlineData("OData-Version", "4.01")]
+        [InlineData("OData-MinVersion", "4.0")]
+        [InlineData("OData-MinVersion", "4.01")]
+        [InlineData("OData-MaxVersion", "4.0")]
+        [InlineData("OData-MaxVersion", "4.01")]
+        public void Matches_Version(string header, string versionString)
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint();
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add(header, versionString);
+
+            // Act
+            bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Theory]
+        [InlineData("4.0", "4.0","4.0")]
+        [InlineData("4.0", "4.0", "4.01")]
+        [InlineData("4.0", "4.01", "4.01")]
+        [InlineData("4.01", "4.0", "4.0")]
+        [InlineData("4.01", "4.0", "4.01")]
+        [InlineData("4.01", "4.01", "4.01")]
+        public void Matches_MinMaxVersion(string odataVersion, string minVersion, string maxVersion)
+        {
+            // Arrange
+            ODataVersionConstraint constraint = new ODataVersionConstraint();
+            TestVersionRequest request = new TestVersionRequest(HttpMethod.Get, "http://localhost:12345/itdoesnotmatter");
+            request.Headers.Add("OData-Version", odataVersion);
+            request.Headers.Add("OData-MinVersion", minVersion);
+            request.Headers.Add("OData-MaxVersion", maxVersion);
 
             // Act
             bool result = ConstraintMatch(constraint, request, RouteDirection.UriResolution);

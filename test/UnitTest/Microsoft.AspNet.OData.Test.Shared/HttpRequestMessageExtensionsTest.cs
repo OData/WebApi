@@ -296,14 +296,6 @@ namespace Microsoft.AspNet.OData.Test
             ExceptionAssert.Throws<ArgumentNullException>(() => { Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(requestWithNullUri, 10); });
         }
 
-        [Fact]
-        public void GetNextPageLink_WithRelativeUri_Throws()
-        {
-            Uri relativeUri = new Uri("/test", UriKind.Relative);
-            HttpRequestMessage requestWithRelativeUri = new HttpRequestMessage() { RequestUri = relativeUri };
-            ExceptionAssert.Throws<ArgumentException>(() => { Microsoft.AspNet.OData.Extensions.HttpRequestMessageExtensions.GetNextPageLink(requestWithRelativeUri, 10); });
-        }
-
         [Theory]
         [InlineData(0, true)]
         [InlineData(0.0, true)]

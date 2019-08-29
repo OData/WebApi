@@ -304,6 +304,186 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Same(_model.Model, ModelContainer.GetModel(customerWrapper.ModelID));
         }
 
+        [Fact]
+        public void ProjectAsWrapper_Element_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpand()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialOrder, new ClrTypeAnnotation(typeof(SpecialOrder)));
+            IPropertyMapper propertyMapper = new IdentityPropertyMapper();
+
+            Customer customer = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 42 },
+                    new SpecialOrder { ID = 38 }
+                }
+            };
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders/$ref" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
+            Expression source = Expression.Constant(customer);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
+
+            // Assert
+            Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
+            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+            SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
+
+            var orders = customerWrapper.Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            Assert.Equal(2, orders.Count());
+            Assert.Equal(42, orders.ElementAt(0).Container.ToDictionary(propertyMapper)["ID"]);
+            Assert.Equal(38, orders.ElementAt(1).Container.ToDictionary(propertyMapper)["ID"]);
+        }
+
+        [Fact]
+        public void ProjectAsWrapper_Element_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpand_AndNestedFilterClause()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue(_model.Order, new ClrTypeAnnotation(typeof(Order)));
+            _model.Model.SetAnnotationValue(_model.SpecialOrder, new ClrTypeAnnotation(typeof(SpecialOrder)));
+            IPropertyMapper propertyMapper = new IdentityPropertyMapper();
+
+            Customer customer = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 42, City = "xyz" },
+                    new SpecialOrder { ID = 38, City = "abc" }
+                }
+            };
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders/$ref($filter=City eq 'abc')" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
+            Expression source = Expression.Constant(customer);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
+
+            // Assert
+            Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
+            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+            SelectExpandWrapper<Customer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<Customer>;
+
+            var orders = customerWrapper.Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            var order = Assert.Single(orders); // only one
+            Assert.Equal(38, order.Container.ToDictionary(propertyMapper)["ID"]);
+        }
+
+        [Fact]
+        public void ProjectAsWrapper_Collection_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpand()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialOrder, new ClrTypeAnnotation(typeof(SpecialOrder)));
+            IPropertyMapper propertyMapper = new IdentityPropertyMapper();
+
+            Customer customer1 = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 8 },
+                    new SpecialOrder { ID = 9 }
+                }
+            };
+            Customer customer2 = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 18 },
+                    new SpecialOrder { ID = 19 }
+                }
+            };
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders/$ref" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
+            Expression source = Expression.Constant(new[] { customer1, customer2 });
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
+
+            // Assert
+            Assert.Equal(ExpressionType.Call, projection.NodeType);
+            var customerWrappers = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Customer>>;
+            Assert.Equal(2, customerWrappers.Count());
+
+            var orders = customerWrappers.ElementAt(0).Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            Assert.Equal(2, orders.Count());
+            Assert.Equal(8, orders.ElementAt(0).Container.ToDictionary(propertyMapper)["ID"]);
+            Assert.Equal(9, orders.ElementAt(1).Container.ToDictionary(propertyMapper)["ID"]);
+
+            orders = customerWrappers.ElementAt(1).Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            Assert.Equal(2, orders.Count());
+            Assert.Equal(18, orders.ElementAt(0).Container.ToDictionary(propertyMapper)["ID"]);
+            Assert.Equal(19, orders.ElementAt(1).Container.ToDictionary(propertyMapper)["ID"]);
+        }
+
+        [Fact]
+        public void ProjectAsWrapper_Collection_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpand_AndNestedTopAndSkip()
+        {
+            // Arrange
+            _model.Model.SetAnnotationValue<ClrTypeAnnotation>(_model.SpecialOrder, new ClrTypeAnnotation(typeof(SpecialOrder)));
+            IPropertyMapper propertyMapper = new IdentityPropertyMapper();
+
+            Customer customer1 = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 8 },
+                    new SpecialOrder { ID = 9 }
+                }
+            };
+            Customer customer2 = new Customer
+            {
+                Orders = new[]
+                {
+                    new Order { ID = 18 },
+                    new SpecialOrder { ID = 19 }
+                }
+            };
+
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders/$ref($top=1;$skip=1)" } });
+            SelectExpandClause selectExpand = parser.ParseSelectAndExpand();
+            Expression source = Expression.Constant(new[] { customer1, customer2 });
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand, _model.Customer, _model.Customers);
+
+            // Assert
+            Assert.Equal(ExpressionType.Call, projection.NodeType);
+            var customerWrappers = Expression.Lambda(projection).Compile().DynamicInvoke() as IEnumerable<SelectExpandWrapper<Customer>>;
+            Assert.Equal(2, customerWrappers.Count());
+
+            var orders = customerWrappers.ElementAt(0).Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            var order = Assert.Single(orders); // only one
+            Assert.Equal(9, order.Container.ToDictionary(propertyMapper)["ID"]);
+
+            orders = customerWrappers.ElementAt(1).Container.ToDictionary(propertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<Order>>;
+            Assert.NotNull(orders);
+            order = Assert.Single(orders);
+            Assert.Equal(19, order.Container.ToDictionary(propertyMapper)["ID"]);
+        }
+
         [Theory]
         [InlineData("*")]
         [InlineData("ID,*")]
@@ -639,7 +819,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Equal(
                 string.Format(
                     "IIF((value({0}) == null), null, IIF((value({0}).Orders == null), null, " +
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value({1}).TypedProperty))))",
+                    "value({0}).Orders.Where($it => ($it.ID == value({1}).TypedProperty))))",
                     customer.Type,
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]"),
                 filterInExpand.ToString());
@@ -674,7 +854,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Assert
             Assert.Equal(
                 string.Format(
-                    "value({0}).Orders.AsQueryable().Where($it => ($it.ID == value(" +
+                    "value({0}).Orders.Where($it => ($it.ID == value(" +
                     "Microsoft.AspNet.OData.Query.Expressions.LinqParameterContainer+TypedLinqParameterContainer`1[System.Int32]).TypedProperty))",
                     customer.Type),
                 filterInExpand.ToString());
@@ -876,6 +1056,61 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Equal(
                 @"IIF((42 Is AAA), ""NS.AAA"", IIF((42 Is AA), ""NS.AA"", IIF((42 Is B), ""NS.B"", IIF((42 Is A), ""NS.A"", ""NS.BaseType""))))",
                 result.ToString());
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrue(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void CorrelatedSubqueryIncludesToListIfBufferingOptimizationIsTrueAndPagesizeIsSet(bool enableOptimization)
+        {
+            // Arrange
+            _settings.EnableCorrelatedSubqueryBuffering = enableOptimization;
+            _settings.PageSize = 100;
+            var customer =
+                Expression.Constant(new Customer { Orders = new[] { new Order { ID = 1 }, new Order { ID = 2 } } });
+            var parser = new ODataQueryOptionParser(
+                _model.Model,
+                _model.Customer,
+                _model.Customers,
+                new Dictionary<string, string> { { "$expand", "Orders" } });
+            var expandClause = parser.ParseSelectAndExpand();
+
+            // Act
+            var expand = _binder.ProjectAsWrapper(
+                customer,
+                expandClause,
+                _model.Customer,
+                _model.Customers);
+
+            // Assert
+            Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
         }
 
         private class SpecialCustomer : Customer

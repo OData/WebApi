@@ -21,7 +21,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         {
             var builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<Customer>("Customers");
+            builder.EntityType<Customer>().EnumProperty(c => c.Bucket);
             builder.EntitySet<Order>("Orders");
+
+            var func = builder.Function("GetLastCommand");
+            func.Returns<string>();
+
+            var clean = builder.Function("CleanCommands").Returns<bool>();
             IEdmModel model = builder.GetEdmModel();
 
             var stdDevMethods = GetCustomMethods(typeof(DbFunctions), StdDevMethodLabel);

@@ -114,6 +114,12 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.NotSupported(SRResources.ApplyToOnUntypedQueryOption, "ApplyTo");
             }
 
+            // Linq to SQL not supported for $apply
+            if (query.Provider.GetType().Namespace == HandleNullPropagationOptionHelper.Linq2SqlQueryProviderNamespace)
+            {
+                throw Error.NotSupported(SRResources.ApplyQueryOptionNotSupportedForLinq2SQL);
+            }
+
             ApplyClause applyClause = ApplyClause;
             Contract.Assert(applyClause != null);
 

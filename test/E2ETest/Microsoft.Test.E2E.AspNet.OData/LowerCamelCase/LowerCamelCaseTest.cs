@@ -32,7 +32,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select().SkipToken();
             configuration.MapODataServiceRoute("OData", "odata", LowerCamelCaseEdmModel.GetConventionModel(configuration));
             configuration.EnsureInitialized();
         }
@@ -350,7 +350,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
                  format
              );
 
-            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);          
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             JObject content = await response.Content.ReadAsObject<JObject>();
@@ -466,6 +466,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             Assert.Equal(8, secondEmployee["id"].Value<int>());
         }
 
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        public async Task QueryEntitiesWithSkipToken(string format)
+        {
+            string requestUri = string.Format("{0}/odata/Employees/Microsoft.Test.E2E.AspNet.OData.LowerCamelCase.GetPaged()?format={1}", this.BaseAddress, format);
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var result = await response.Content.ReadAsObject<JObject>();
+            var value = result["@odata.nextLink"].Value<string>();
+            Assert.Contains("$skiptoken=id", value);
+        }
 
         [Fact]
         public async Task AddEntity()

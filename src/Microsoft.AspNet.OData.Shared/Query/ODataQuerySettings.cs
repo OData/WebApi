@@ -134,6 +134,7 @@ namespace Microsoft.AspNet.OData.Query
             PageSize = settings.PageSize;
             ModelBoundPageSize = settings.ModelBoundPageSize;
             HandleReferenceNavigationPropertyExpandFilter = settings.HandleReferenceNavigationPropertyExpandFilter;
+            EnableCorrelatedSubqueryBuffering = settings.EnableCorrelatedSubqueryBuffering;
         }
     }
 }

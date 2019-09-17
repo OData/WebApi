@@ -17,6 +17,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             employee.EnumProperty<Gender>(e => e.Sex).Name = "Gender";
 
             employee.Collection.Function("GetEarliestTwoEmployees").ReturnsCollectionFromEntitySet<Employee>("Employees");
+            employee.Collection.Function("GetPaged").ReturnsCollectionFromEntitySet<Employee>("Employees");
 
             var functionConfiguration = builder.Function("GetAddress");
             functionConfiguration.Parameter<int>("id");

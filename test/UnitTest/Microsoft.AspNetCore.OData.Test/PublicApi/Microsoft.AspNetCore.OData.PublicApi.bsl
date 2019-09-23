@@ -3431,7 +3431,6 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 	ODataPath Path  { public get; public set; }
-	System.Collections.Generic.Queue`1[[Microsoft.OData.Edm.IEdmProperty]] PropertiesInPath  { public get; }
 	ODataQueryOptions QueryOptions  { public get; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; public set; }
 	string RootElementName  { public get; public set; }
@@ -3457,10 +3456,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	]
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
 
-	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmStructuralProperty],[Microsoft.OData.UriParser.ExpandedNavigationSelectItem]] ExpandedNavigationPropertiesOnComplexTypes  { public get; }
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedNavigationSelectItem]] ExpandedProperties  { public get; }
-	System.Collections.Generic.Queue`1[[Microsoft.OData.Edm.IEdmProperty]] PropertiesInPath  { public get; }
-	Microsoft.OData.Edm.IEdmProperty Property  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] ReferencedNavigationProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmAction]] SelectedActions  { public get; }

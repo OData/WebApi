@@ -212,7 +212,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets or sets the relative path to the resouce being serialized
         /// </summary>
-        public Queue<IEdmProperty> PropertiesInPath { get; private set; }
+        internal Queue<IEdmProperty> PropertiesInPath { get; private set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

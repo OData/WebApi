@@ -168,7 +168,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         }
 
         [Theory]
-        //[InlineData("?$expand=Order/Zip/ZipCode", "\"Order\":{\"Zip\":{\"ZipCode\":{\"Zip\":98052,\"City\":\"Redmond\",\"State\":\"Washington\"}}}}")]
+        [InlineData("?$expand=Order/Zip/ZipCode", "\"Order\":{\"Zip\":{\"ZipCode\":{\"Zip\":98052,\"City\":\"Redmond\",\"State\":\"Washington\"}}}}")]
         [InlineData("?$expand=Order/Order/Zip/ZipCode", "\"Order\":{\"Order\":{\"Zip\":{\"ZipCode\":{\"Zip\":98030,\"City\":\"Kent\",\"State\":\"Washington\"}}}}}")]
         public async Task RecursiveExpandOnOrders(string queryOption, string expected)
         {

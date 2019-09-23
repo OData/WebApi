@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SelectedStructuralProperties = new HashSet<IEdmStructuralProperty>();
             SelectedComplexProperties = new HashSet<IEdmStructuralProperty>();
             SelectedNavigationProperties = new HashSet<IEdmNavigationProperty>();
-            ExpandedNavigationPropertiesOnComplexTypes = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>();
+            ExpandedPropertiesOnSubChildren = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>();
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>();
             ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>();
             SelectedActions = new HashSet<IEdmAction>();
@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="selectExpandNodeToCopy">The instance from which the state for the new instance will be copied.</param>
         public SelectExpandNode(SelectExpandNode selectExpandNodeToCopy)
         {
-            ExpandedNavigationPropertiesOnComplexTypes = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedNavigationPropertiesOnComplexTypes);
+            ExpandedPropertiesOnSubChildren = new Dictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedPropertiesOnSubChildren);
             ExpandedProperties = new Dictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem>(selectExpandNodeToCopy.ExpandedProperties);
             ReferencedNavigationProperties = new HashSet<IEdmNavigationProperty>(selectExpandNodeToCopy.ReferencedNavigationProperties);
 
@@ -242,7 +242,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets the list of EDM navigation properties to be expanded on ComplexTypes in the response.
         /// </summary>
-        public IDictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem> ExpandedNavigationPropertiesOnComplexTypes { get; private set; }
+        internal IDictionary<IEdmStructuralProperty, ExpandedNavigationSelectItem> ExpandedPropertiesOnSubChildren { get; private set; }
 
         /// <summary>
         /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
@@ -272,12 +272,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <summary>
         /// Gets the path to property corresponding to the SelectExpandNode. Null for a top-level select expand.
         /// </summary>
-        public Queue<IEdmProperty> PropertiesInPath { get; private set; }
+        internal Queue<IEdmProperty> PropertiesInPath { get; private set; }
 
         /// <summary>
         /// Gets the property corresponding to the SelectExpandNode. Null for a top-level select expand.
         /// </summary>
-        public IEdmProperty Property { get; private set; }
+        internal IEdmProperty Property { get; private set; }
 
         private void BuildExpansions(IEnumerable<SelectItem> selectedItems, HashSet<IEdmNavigationProperty> allNavigationProperties)
         {
@@ -289,10 +289,18 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     ValidatePathIsSupportedForExpand(expandReferenceItem.PathToNavigationProperty);
                     NavigationPropertySegment navigationSegment = (NavigationPropertySegment)expandReferenceItem.PathToNavigationProperty.LastSegment;
                     IEdmNavigationProperty navigationProperty = navigationSegment.NavigationProperty;
-                    if (allNavigationProperties.Contains(navigationProperty))
-                    {
-                        ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
 
+                    int propertyCountInPath =
+                        expandReferenceItem.PathToNavigationProperty.OfType<PropertySegment>().Count();
+
+                    bool numberOfPropertiesInPathMatch =
+                        (propertyCountInPath > 0 && PropertiesInPath != null &&
+                         PropertiesInPath.Count == propertyCountInPath) || propertyCountInPath < 1;
+
+                    if (numberOfPropertiesInPathMatch && allNavigationProperties.Contains(navigationProperty))
+                    {
+
+                        ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
                         if (expandItem != null)
                         {
                             if (!ExpandedProperties.ContainsKey(navigationProperty))
@@ -317,9 +325,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         if (complexProperty != null)
                         {
                             SelectExpandClause newClause;
-                            if (ExpandedNavigationPropertiesOnComplexTypes.ContainsKey(complexProperty))
+                            if (ExpandedPropertiesOnSubChildren.ContainsKey(complexProperty))
                             {
-                                SelectExpandClause oldClause = ExpandedNavigationPropertiesOnComplexTypes[complexProperty].SelectAndExpand;
+                                SelectExpandClause oldClause = ExpandedPropertiesOnSubChildren[complexProperty].SelectAndExpand;
                                 newClause = new SelectExpandClause(
                                     oldClause.SelectedItems.Concat(new SelectItem[] { expandReferenceItem }), false);
                             }
@@ -329,7 +337,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                             }
                            
                             ExpandedNavigationSelectItem newItem = new ExpandedNavigationSelectItem(expandReferenceItem.PathToNavigationProperty, navigationSegment.NavigationSource, newClause);
-                            ExpandedNavigationPropertiesOnComplexTypes.Add(complexProperty, newItem);
+                            ExpandedPropertiesOnSubChildren.Add(complexProperty, newItem);
                         }
                     }
                 }

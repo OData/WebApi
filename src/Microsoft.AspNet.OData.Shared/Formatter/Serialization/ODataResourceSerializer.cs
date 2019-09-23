@@ -687,7 +687,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
-                if (selectExpandNode.ExpandedNavigationPropertiesOnComplexTypes.ContainsKey(complexProperty))
+                if (selectExpandNode.ExpandedPropertiesOnSubChildren.ContainsKey(complexProperty))
                 {
                     // We will write the property when the property is expanded.
                     continue;
@@ -704,10 +704,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 writer.WriteEnd();
             }
 
-            foreach (var item in selectExpandNode.ExpandedNavigationPropertiesOnComplexTypes)
+            foreach (var item in selectExpandNode.ExpandedPropertiesOnSubChildren)
             {
                 IEdmStructuralProperty complexProperty = item.Key;
-                ExpandedNavigationSelectItem expandedNavigationSelectItem = selectExpandNode.ExpandedNavigationPropertiesOnComplexTypes[complexProperty];
+                ExpandedNavigationSelectItem expandedNavigationSelectItem = selectExpandNode.ExpandedPropertiesOnSubChildren[complexProperty];
 
                 ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
                 {

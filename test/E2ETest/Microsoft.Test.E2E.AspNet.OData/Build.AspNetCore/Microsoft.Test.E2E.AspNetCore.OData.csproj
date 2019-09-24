@@ -77,7 +77,8 @@
     </Compile>
     <Compile Include="..\ODataOrderByTest\OrderByTest.cs">
       <Link>ODataOrderByTest\OrderByTest.cs</Link>
-    <Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs">
+    </Compile>
+	<Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs">
       <Link>NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs</Link>
     </Compile>
     <Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeTests.cs">
@@ -1889,7 +1890,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

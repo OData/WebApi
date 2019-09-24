@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
@@ -28,6 +29,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
     {
         public Address Zip { get; set; }
         public Orders Order { get; set; }
+        public IDictionary<string, object> propertybag { get; set; }
     }
 
     public class Address

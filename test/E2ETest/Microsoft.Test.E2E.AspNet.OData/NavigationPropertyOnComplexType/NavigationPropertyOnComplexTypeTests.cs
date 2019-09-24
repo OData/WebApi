@@ -187,6 +187,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(expected, result);
         }
+
+        [Theory]
+        [InlineData("?$select=key", "key\":{\"@odata.type\":\"#Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.ZipCode\",\"Zip\":98030,\"City\":\"Kent\",\"State\":\"Washington\"")]
+        public async Task SelectOnOpenType(string queryOption, string expected)
+        {
+            string resourcePath = PeopleBaseUrl + "(5)/Order";
+            string queryUrl =
+                string.Format(
+                    resourcePath + queryOption,
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
+        }
     }
 }
 

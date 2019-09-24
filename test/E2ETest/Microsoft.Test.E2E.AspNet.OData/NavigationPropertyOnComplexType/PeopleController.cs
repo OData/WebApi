@@ -66,6 +66,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             return Ok(person.Location as GeoLocation);
         }
 
+        [EnableQuery]
+        [ODataRoute("people({id})/Order")]
+        public ITestActionResult GetOrdeFromPerson([FromODataUri]int id)
+        {
+            return Ok(_repo.people.FirstOrDefault(p => p.Id == id).Order);
+        }
+
         [ODataRoute("people({id})/Location/ZipCode")]
         public ITestActionResult GetZipCode([FromODataUri]int id)
         {

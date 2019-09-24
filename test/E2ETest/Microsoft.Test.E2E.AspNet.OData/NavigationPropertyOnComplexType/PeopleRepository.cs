@@ -10,6 +10,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
     {
         public List<Person> people { get; set; }
         public List<ZipCode> zipCodes;
+        public IDictionary<string, object> propertyBag = new Dictionary<string, object>();
 
         public PeopleRepository()
         {
@@ -20,11 +21,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                 new ZipCode {Zip = 98004, City = "Bellevue", State = "Washington"}
             };
 
+            propertyBag.Add("key", zipCodes[1]);
+
             people = new List<Person> { 
                 new Person { Id=1, FirstName = "Kate", LastName = "Jones", Age = 5, Location = new Address{ ZipCode = zipCodes[1], Street = "110th" }, Home = new Address{ ZipCode = zipCodes[0], Street = "110th" }, Order = new Orders{ Zip = new Address{ ZipCode = zipCodes[0], Street = "110th" }}},
                 new Person { Id =2, FirstName = "Lewis", LastName = "James", Age = 6 , Location = new GeoLocation{ ZipCode = zipCodes[1], Street = "110th", Latitude = "12.211", Longitude ="231.131" }, Home = new Address{ ZipCode = zipCodes[0], Street = "110th" }, Order = new Orders{ Zip = new Address{ ZipCode = zipCodes[0], Street = "110th" }}},
                 new Person { Id = 3, FirstName = "Carlos", LastName = "Park", Age = 7, Location = new Address{ ZipCode = zipCodes[2], Street = "110th" }, Home = new Address{ ZipCode = zipCodes[0], Street = "110th" }, Order = new Orders{ Zip = new Address{ ZipCode = zipCodes[0], Street = "110th" }}, PreciseLocation = new GeoLocation{Area = zipCodes[2], Latitude = "12", Longitude = "22", Street = "50th", ZipCode = zipCodes[1]}},
                 new Person { Id = 4, FirstName = "Carlos", LastName = "Park", Age = 7, Location = new Address{ ZipCode = zipCodes[2], Street = "110th" }, Home = new Address{ ZipCode = zipCodes[0], Street = "110th" }, Order = new Orders{ Zip = new Address{ ZipCode = zipCodes[0], Street = "110th" }, Order = new Orders{ Zip = new Address{ ZipCode = zipCodes[1], Street = "110th" }}}, PreciseLocation = new GeoLocation{Area = zipCodes[2], Latitude = "12", Longitude = "22", Street = "50th", ZipCode = zipCodes[1]}},
+                new Person { Id = 5, FirstName = "Carlos", LastName = "Park", Age = 7, Order = new Orders() {propertybag = propertyBag} }
             };
         }
 

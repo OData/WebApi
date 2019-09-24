@@ -329,14 +329,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                                 SelectExpandClause oldClause = ExpandedPropertiesOnSubChildren[complexProperty].SelectAndExpand;
                                 newClause = new SelectExpandClause(
                                     oldClause.SelectedItems.Concat(new SelectItem[] { expandReferenceItem }), false);
+                                ExpandedNavigationSelectItem newItem = new ExpandedNavigationSelectItem(expandReferenceItem.PathToNavigationProperty, navigationSegment.NavigationSource, newClause);
+                                ExpandedPropertiesOnSubChildren[complexProperty] = newItem;
                             }
                             else
                             {
                                 newClause = new SelectExpandClause(new SelectItem[] { expandReferenceItem }, false);
+                                ExpandedNavigationSelectItem newItem = new ExpandedNavigationSelectItem(expandReferenceItem.PathToNavigationProperty, navigationSegment.NavigationSource, newClause);
+                                ExpandedPropertiesOnSubChildren.Add(complexProperty, newItem);
                             }
-                           
-                            ExpandedNavigationSelectItem newItem = new ExpandedNavigationSelectItem(expandReferenceItem.PathToNavigationProperty, navigationSegment.NavigationSource, newClause);
-                            ExpandedPropertiesOnSubChildren.Add(complexProperty, newItem);
                         }
                     }
                 }

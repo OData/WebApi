@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="writeContext">The serializer context to be used while creating the collection.</param>
         /// <remarks>The default constructor is for unit testing only.</remarks>
         public SelectExpandNode(IEdmStructuredType structuredType, ODataSerializerContext writeContext)
-            : this()
+            : this(writeContext.SelectExpandClause, structuredType, writeContext.Model, writeContext.ExpandReference)
         {
             Property = writeContext.EdmProperty;
             PropertiesInPath = writeContext.PropertiesInPath;
@@ -299,7 +299,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                     if (numberOfPropertiesInPathMatch && allNavigationProperties.Contains(navigationProperty))
                     {
-
                         ExpandedNavigationSelectItem expandItem = selectItem as ExpandedNavigationSelectItem;
                         if (expandItem != null)
                         {

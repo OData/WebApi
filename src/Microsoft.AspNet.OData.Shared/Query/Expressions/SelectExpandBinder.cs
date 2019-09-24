@@ -185,7 +185,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
-            Expression propertyValue = Expression.Property(source, propertyName);
+            PropertyInfo propertyInfo = source.Type.GetProperty(propertyName);
+            Expression propertyValue = Expression.Property(source, propertyInfo);
             Type nullablePropertyType = TypeHelper.ToNullable(propertyValue.Type);
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 

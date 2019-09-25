@@ -528,7 +528,20 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            return new ODataQueryContext(model, elementClrType, path);
+            IEdmType elementType = null;
+            IEdmModelClrTypeMappingHandler typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
+            if (typeMappingHandler != null)
+            {
+                elementType = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
+                elementType = EdmLibHelpers.UnwrapCollectionType(elementType);
+            }
+
+            if (elementType == null)
+            {
+                elementType = model.GetEdmType(elementClrType);
+            }
+
+            return new ODataQueryContext(model, elementType, elementClrType, path);
         }
 
         /// <summary>
@@ -751,8 +764,21 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            IEdmEntityType baseEntityType = model.GetEdmType(elementClrType) as IEdmEntityType;
-            IEdmStructuredType structuredType = model.GetEdmType(elementClrType) as IEdmStructuredType;
+            IEdmType type = null;
+            IEdmModelClrTypeMappingHandler typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
+            if (typeMappingHandler != null)
+            {
+                type = typeMappingHandler.MapClrInstanceToEdmType(model, responseValue);
+                type = EdmLibHelpers.UnwrapCollectionType(type);
+            }
+
+            if (type == null)
+            {
+                type = model.GetEdmType(elementClrType);
+            }
+
+            IEdmEntityType baseEntityType = type as IEdmEntityType;
+            IEdmStructuredType structuredType = type as IEdmStructuredType;
             IEdmProperty property = null;
             if (path != null)
             {

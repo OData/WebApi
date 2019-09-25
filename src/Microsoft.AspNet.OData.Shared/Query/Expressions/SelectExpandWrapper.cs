@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             Type elementType = GetElementType();
-            return model.GetEdmTypeReference(elementType);
+            return model.GetEdmTypeReference(UntypedInstance, elementType);
         }
 
         /// <inheritdoc />

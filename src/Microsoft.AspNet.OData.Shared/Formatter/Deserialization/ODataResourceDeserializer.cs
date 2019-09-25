@@ -410,6 +410,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
         {
+            var typeMappingHandler = readContext.Model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(readContext.Model);
+            if (typeMappingHandler != null)
+            {
+                typeMappingHandler.InitializeClrInstanceForDeserialization(readContext.Model, structuredType, resource);
+            }
+
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
         }

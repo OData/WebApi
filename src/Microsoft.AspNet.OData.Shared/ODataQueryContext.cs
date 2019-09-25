@@ -45,13 +45,60 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("elementClrType");
             }
 
-            ElementType = model.GetEdmType(elementClrType);
+            var typeMappingHandler = model.GetAnnotationValue<IEdmModelClrTypeMappingHandler>(model);
+            if (typeMappingHandler != null)
+            {
+                ElementType = typeMappingHandler.MapClrTypeToEdmType(model, elementClrType);
+            }
+
+            if (ElementType == null)
+            {
+                ElementType = model.GetEdmType(elementClrType);
+            }
 
             if (ElementType == null)
             {
                 throw Error.Argument("elementClrType", SRResources.ClrTypeNotInModel, elementClrType.FullName);
             }
 
+            ElementClrType = elementClrType;
+            Model = model;
+            Path = path;
+            NavigationSource = GetNavigationSource(Model, ElementType, path);
+            GetPathContext();
+        }
+
+        /// <summary>
+        /// Constructs an instance of <see cref="ODataQueryContext"/> with <see cref="IEdmModel" />, element CLR type,
+        /// and <see cref="ODataPath" />.
+        /// </summary>
+        /// <param name="model">The EdmModel that includes the <see cref="IEdmType"/> corresponding to
+        /// the given <paramref name="elementClrType"/>.</param>
+        /// <param name="elementType">The EDM type of the element of the collection being queried.</param>
+        /// <param name="elementClrType">The CLR type of the element of the collection being queried.</param>
+        /// <param name="path">The parsed <see cref="ODataPath"/>.</param>
+        /// <remarks>
+        /// This is a public constructor used for stand-alone scenario; in this case, the services
+        /// container may not be present.
+        /// </remarks>
+        public ODataQueryContext(IEdmModel model, IEdmType elementType, Type elementClrType, ODataPath path)
+        {
+            if (model == null)
+            {
+                throw Error.ArgumentNull("model");
+            }
+
+            if (elementType == null)
+            {
+                throw Error.ArgumentNull("elementType");
+            }
+
+            if (elementClrType == null)
+            {
+                throw Error.ArgumentNull("elementClrType");
+            }
+
+            ElementType = elementType;
             ElementClrType = elementClrType;
             Model = model;
             Path = path;
@@ -82,6 +129,11 @@ namespace Microsoft.AspNet.OData
             Path = path;
             NavigationSource = GetNavigationSource(Model, ElementType, path);
             GetPathContext();
+        }
+
+        internal ODataQueryContext(IEdmModel model, IEdmType edmType, Type elementClrType)
+            : this(model, edmType, elementClrType, path: null)
+        {
         }
 
         internal ODataQueryContext(IEdmModel model, Type elementClrType)

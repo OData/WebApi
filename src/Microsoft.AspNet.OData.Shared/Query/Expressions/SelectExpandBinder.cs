@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
         Justification = "Class coupling acceptable.")]
-    internal class SelectExpandBinder
+    public class SelectExpandBinder
     {
         private SelectExpandQueryOption _selectExpandQuery;
         private ODataQueryContext _context;
@@ -31,7 +31,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private ODataQuerySettings _settings;
         private string _modelID;
 
-        public SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectExpandBinder"/> class.
+        /// </summary>
+        /// <param name="settings">The <see cref="ODataQuerySettings"/> to use during binding.</param>
+        /// <param name="selectExpandQuery">The <see cref="SelectExpandQueryOption"/> that contains the OData $select and $expand query options.</param>
+        protected internal SelectExpandBinder(ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
         {
             Contract.Assert(settings != null);
             Contract.Assert(selectExpandQuery != null);
@@ -45,26 +50,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
         }
-
-        public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings,
-            SelectExpandQueryOption selectExpandQuery)
-        {
-            Contract.Assert(queryable != null);
-
-            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
-            return binder.Bind(queryable);
-        }
-
-        public static object Bind(object entity, ODataQuerySettings settings,
-            SelectExpandQueryOption selectExpandQuery)
-        {
-            Contract.Assert(entity != null);
-
-            SelectExpandBinder binder = new SelectExpandBinder(settings, selectExpandQuery);
-            return binder.Bind(entity);
-        }
-
-        private object Bind(object entity)
+        
+        /// <summary>
+        /// Applies the $select and $expand query options to the given entity.
+        /// </summary>
+        /// <param name="entity">The original entity.</param>
+        protected internal virtual object Bind(object entity)
         {
             Contract.Assert(entity != null);
 
@@ -74,7 +65,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return projectionLambda.Compile().DynamicInvoke(entity);
         }
 
-        private IQueryable Bind(IQueryable queryable)
+        /// <summary>
+        /// Applies the $select and $expand query options to the given <see cref="IQueryable"/>.
+        /// </summary>
+        /// <param name="queryable">The original <see cref="IQueryable"/>.</param>
+        protected internal virtual IQueryable Bind(IQueryable queryable)
         {
             Type elementType = _selectExpandQuery.Context.ElementClrType;
 
@@ -117,13 +112,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        internal Expression CreatePropertyNameExpression(IEdmEntityType elementType, IEdmProperty property, Expression source)
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents the name of <paramref name="edmProperty"/>.
+        /// </summary>
+        /// <param name="elementType">The EDM entity type of the provided <paramref name="source"/>.</param>
+        /// <param name="edmProperty">The EDM property which name expression to return.</param>
+        /// <param name="source">The source that contains the <paramref name="edmProperty"/>.</param>
+        /// <returns>The property name <see cref="Expression"/>.</returns>
+        protected internal virtual Expression CreatePropertyNameExpression(IEdmEntityType elementType, IEdmProperty edmProperty, Expression source)
         {
             Contract.Assert(elementType != null);
-            Contract.Assert(property != null);
+            Contract.Assert(edmProperty != null);
             Contract.Assert(source != null);
 
-            IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
+            IEdmEntityType declaringType = edmProperty.DeclaringType as IEdmEntityType;
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
             // derived navigation property using cast
@@ -142,14 +144,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     //          source is navigationPropertyDeclaringType ? propertyName : null
                     return Expression.Condition(
                         test: Expression.TypeIs(source, castType),
-                        ifTrue: Expression.Constant(property.Name),
+                        ifTrue: Expression.Constant(edmProperty.Name),
                         ifFalse: Expression.Constant(null, typeof(string)));
                 }
             }
 
             // Expression
             //          "propertyName"
-            return Expression.Constant(property.Name);
+            return Expression.Constant(edmProperty.Name);
         }
 
         internal Expression CreatePropertyValueExpression(IEdmEntityType elementType, IEdmProperty property, Expression source)
@@ -161,14 +163,22 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return CreatePropertyValueExpressionWithFilter(elementType, property, source, filterClause: null);
         }
 
-        internal Expression CreatePropertyValueExpressionWithFilter(IEdmEntityType elementType, IEdmProperty property,
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents the value of <paramref name="edmProperty"/>.
+        /// </summary>
+        /// <param name="elementType">The EDM entity type of the provided <paramref name="source"/>.</param>
+        /// <param name="edmProperty">The EDM property which value expression to return.</param>
+        /// <param name="source">The source that contains the <paramref name="edmProperty"/>.</param>
+        /// <param name="filterClause">The <see cref="FilterClause"/> that filters the <paramref name="edmProperty"/> value.</param>
+        /// <returns>The property value <see cref="Expression"/>.</returns>
+        protected internal virtual Expression CreatePropertyValueExpressionWithFilter(IEdmEntityType elementType, IEdmProperty edmProperty,
             Expression source, FilterClause filterClause)
         {
             Contract.Assert(elementType != null);
-            Contract.Assert(property != null);
+            Contract.Assert(edmProperty != null);
             Contract.Assert(source != null);
 
-            IEdmEntityType declaringType = property.DeclaringType as IEdmEntityType;
+            IEdmEntityType declaringType = edmProperty.DeclaringType as IEdmEntityType;
             Contract.Assert(declaringType != null, "only entity types are projected.");
 
             // derived property using cast
@@ -184,17 +194,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 source = Expression.TypeAs(source, castType);
             }
 
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, _model);
-            PropertyInfo propertyInfo = source.Type.GetProperty(propertyName);
-            Expression propertyValue = Expression.Property(source, propertyInfo);
+            Expression propertyValue = CreatePropertyAccessExpression(source, edmProperty);
             Type nullablePropertyType = TypeHelper.ToNullable(propertyValue.Type);
             Expression nullablePropertyValue = ExpressionHelpers.ToNullable(propertyValue);
 
             if (filterClause != null)
             {
-                bool isCollection = property.Type.IsCollection();
+                bool isCollection = edmProperty.Type.IsCollection();
 
-                IEdmTypeReference edmElementType = (isCollection ? property.Type.AsCollection().ElementType() : property.Type);
+                IEdmTypeReference edmElementType = (isCollection ? edmProperty.Type.AsCollection().ElementType() : edmProperty.Type);
                 Type clrElementType = EdmLibHelpers.GetClrType(edmElementType, _model);
                 if (clrElementType == null)
                 {
@@ -228,7 +236,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     if (filterLambdaExpression == null)
                     {
                         throw new ODataException(Error.Format(SRResources.ExpandFilterExpressionNotLambdaExpression,
-                            property.Name, "LambdaExpression"));
+                            edmProperty.Name, "LambdaExpression"));
                     }
 
                     ParameterExpression filterParameter = filterLambdaExpression.Parameters.First();
@@ -270,6 +278,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return propertyValue;
+        }
+
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents access to <paramref name="edmProperty"/>.
+        /// </summary>
+        /// <param name="edmProperty">The EDM property which access expression to return.</param>
+        /// <param name="source">The source that contains the <paramref name="edmProperty"/>.</param>
+        /// <returns>The property access <see cref="Expression"/>.</returns>
+        protected virtual Expression CreatePropertyAccessExpression(Expression source, IEdmProperty edmProperty)
+        {
+            var propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, _model);
+            PropertyInfo propertyInfo = source.Type.GetProperty(propertyName);
+            return Expression.Property(source, propertyInfo);
         }
 
         private class ReferenceNavigationPropertyExpandFilterVisitor : ExpressionVisitor
@@ -386,7 +407,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return selectExpandClause.SelectedItems.OfType<PathSelectItem>().Any(x => x.SelectedPath.LastSegment is DynamicPathSegment);
         }
 
-        private Expression CreateTotalCountExpression(Expression source, ExpandedReferenceSelectItem expandItem)
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents the count of items in <paramref name="source"/> if it is applicable.
+        /// </summary>
+        /// <param name="source">The source which items should be count.</param>
+        /// <param name="expandItem">The <see cref="ExpandedReferenceSelectItem"/>.</param>
+        /// <returns>The count <see cref="Expression"/>.</returns>
+        protected virtual Expression CreateTotalCountExpression(Expression source, ExpandedReferenceSelectItem expandItem)
         {
             Expression countExpression = Expression.Constant(null, typeof(long?));
             if (expandItem.CountOption == null || !expandItem.CountOption.Value)

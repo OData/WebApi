@@ -3,14 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -18,7 +21,12 @@ using Microsoft.OData.UriParser.Aggregation;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
-    internal class AggregationBinder : ExpressionBinderBase
+    /// <summary>
+    /// Translates an OData aggregate or groupby transformations of $apply parse tree represented by <see cref="TransformationNode"/> to
+    /// an <see cref="Expression"/> and applies it to an <see cref="IQueryable"/>.
+    /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
+    public class AggregationBinder : ExpressionBinderBase
     {
         private const string GroupByContainerProperty = "GroupByContainer";
         private Type _elementType;
@@ -32,6 +40,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private Type _groupByClrType;
 
         private bool _classicEF = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AggregationBinder"/> class.
+        /// </summary>
+        /// <param name="settings">The <see cref="ODataQuerySettings"/> to use during binding.</param>
+        /// <param name="requestContainer">The request container.</param>
+        /// <param name="elementType">ClrType for result of transformations.</param>
+        /// <param name="model">The EDM model.</param>
+        /// <param name="transformation">The transformation node.</param>
+        protected internal AggregationBinder(ODataQuerySettings settings, IServiceProvider requestContainer, Type elementType,
+            IEdmModel model, TransformationNode transformation)
+            : this(settings, requestContainer?.GetService<IWebApiAssembliesResolver>() ?? WebApiAssembliesResolver.Default,
+                elementType, model, transformation)
+        {
+            // Notes for: ?? WebApiAssembliesResolver.Default
+            // The IWebApiAssembliesResolver service is internal and can only be injected by WebApi.
+            // This code path may be used in cases when the service container is not available
+            // and the service container is available but may not contain an instance of IWebApiAssembliesResolver.
+        }
 
         internal AggregationBinder(ODataQuerySettings settings, IWebApiAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model, TransformationNode transformation)
@@ -140,12 +167,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             get; private set;
         }
 
-        public IEdmTypeReference ResultType
+        internal IEdmTypeReference ResultType
         {
             get; private set;
         }
 
-        public IQueryable Bind(IQueryable query)
+        /// <summary>
+        /// Applies aggregate or groupby transformations of $apply query option to the given <see cref="IQueryable"/>.
+        /// </summary>
+        /// <param name="query">The original <see cref="IQueryable"/>.</param>
+        public virtual IQueryable Bind(IQueryable query)
         {
             Contract.Assert(query != null);
 
@@ -353,8 +384,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        private Expression CreateEntitySetAggregateExpression(
-            ParameterExpression accum, EntitySetAggregateExpression expression, Type baseType)
+        /// <summary>
+        /// Binds a <see cref="EntitySetAggregateExpression"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="EntitySetAggregateExpression"/>.
+        /// </summary>
+        /// <param name="accumulativeParameter"></param>
+        /// <param name="expression">The node to bind.</param>
+        /// <param name="baseType"></param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        protected virtual Expression CreateEntitySetAggregateExpression(
+            ParameterExpression accumulativeParameter, EntitySetAggregateExpression expression, Type baseType)
         {
             // Should return following expression
             //  $it => $it.AsQueryable()
@@ -371,7 +410,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             List<MemberAssignment> wrapperTypeMemberAssignments = new List<MemberAssignment>();
             var asQueryableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
-            Expression asQueryableExpression = Expression.Call(null, asQueryableMethod, accum);
+            Expression asQueryableExpression = Expression.Call(null, asQueryableMethod, accumulativeParameter);
 
             // Create lambda to access the entity set from expression
             var source = BindAccessor(expression.Expression.Source);
@@ -433,7 +472,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return Expression.Call(null, selectMethod, groupedEntitySet, selectLambda);
         }
 
-        private Expression CreatePropertyAggregateExpression(ParameterExpression accum, AggregateExpression expression, Type baseType)
+        /// <summary>
+        /// Binds a <see cref="AggregateExpression"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="AggregateExpression"/>.
+        /// </summary>
+        /// <param name="accumulativeParameter"></param>
+        /// <param name="expression">The node to bind.</param>
+        /// <param name="baseType"></param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        protected virtual Expression CreatePropertyAggregateExpression(ParameterExpression accumulativeParameter, AggregateExpression expression, Type baseType)
         {
             // accum type is IGrouping<,baseType> that implements IEnumerable<baseType> 
             // we need cast it to IEnumerable<baseType> during expression building (IEnumerable)$it
@@ -442,12 +489,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (_classicEF)
             {
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
-                asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
+                asQuerableExpression = Expression.Call(null, asQuerableMethod, accumulativeParameter);
             }
             else
             {
                 var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
-                asQuerableExpression = Expression.Convert(accum, queryableType);
+                asQuerableExpression = Expression.Convert(accumulativeParameter, queryableType);
             }
 
             // $count is a virtual property, so there's not a propertyLambda to create.
@@ -639,9 +686,27 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        private Expression CreatePropertyAccessExpression(Expression source, IEdmProperty property, string propertyPath = null)
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents access to <paramref name="edmProperty"/>.
+        /// </summary>
+        /// <param name="edmProperty">The EDM property which access expression to return.</param>
+        /// <param name="source">The source that contains the <paramref name="edmProperty"/>.</param>
+        /// <returns>The property access <see cref="Expression"/>.</returns>
+        protected virtual Expression CreatePropertyAccessExpression(Expression source, IEdmProperty edmProperty)
         {
-            string propertyName = EdmLibHelpers.GetClrPropertyName(property, Model);
+            return CreatePropertyAccessExpression(source, edmProperty, null);
+        }
+
+        /// <summary>
+        /// Returns an <see cref="Expression"/> that represents access to <paramref name="edmProperty"/>.
+        /// </summary>
+        /// <param name="edmProperty">The EDM property which access expression to return.</param>
+        /// <param name="source">The source that contains the <paramref name="edmProperty"/>.</param>
+        /// <param name="propertyPath"></param>
+        /// <returns>The property access <see cref="Expression"/>.</returns>
+        protected virtual Expression CreatePropertyAccessExpression(Expression source, IEdmProperty edmProperty, string propertyPath)
+        {
+            string propertyName = EdmLibHelpers.GetClrPropertyName(edmProperty, Model);
             propertyPath = propertyPath ?? propertyName;
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && IsNullable(source.Type) &&
                 source != this._lambdaParameter)
@@ -666,7 +731,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
         }
 
-        private Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)
+        /// <summary>
+        /// Binds a <see cref="SingleValueOpenPropertyAccessNode"/> to create a LINQ <see cref="Expression"/> that
+        /// represents the semantics of the <see cref="SingleValueOpenPropertyAccessNode"/>.
+        /// </summary>
+        /// <param name="openNode">The node to bind.</param>
+        /// <returns>The LINQ <see cref="Expression"/> created.</returns>
+        protected virtual Expression CreateOpenPropertyAccessExpression(SingleValueOpenPropertyAccessNode openNode)
         {
             Expression sourceAccessor = BindAccessor(openNode.Source);
 

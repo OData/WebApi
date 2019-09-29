@@ -23,6 +23,7 @@ namespace Microsoft.AspNet.OData.Query
     {
         private ApplyClause _applyClause;
         private ODataQueryOptionParser _queryOptionParser;
+        private ODataBinderProvider _binderProvider;
 
         /// <summary>
         /// Initialize a new instance of <see cref="ApplyQueryOption"/> based on the raw $apply value and
@@ -54,6 +55,8 @@ namespace Microsoft.AspNet.OData.Query
             //Validator = new FilterQueryValidator();
             _queryOptionParser = queryOptionParser;
             ResultClrType = Context.ElementClrType;
+            _binderProvider = context.RequestContainer?.GetRequiredService<ODataBinderProvider>() ??
+                              new DefaultODataBinderProvider();
         }
 
         /// <summary>
@@ -124,25 +127,12 @@ namespace Microsoft.AspNet.OData.Query
             Contract.Assert(applyClause != null);
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(querySettings, query);
-
-            // The IWebApiAssembliesResolver service is internal and can only be injected by WebApi.
-            // This code path may be used in cases when the service container is not available
-            // and the service container is available but may not contain an instance of IWebApiAssembliesResolver.
-            IWebApiAssembliesResolver assembliesResolver = WebApiAssembliesResolver.Default;
-            if (Context.RequestContainer != null)
-            { 
-                IWebApiAssembliesResolver injectedResolver = Context.RequestContainer.GetService<IWebApiAssembliesResolver>();
-                if (injectedResolver != null)
-                {
-                    assembliesResolver = injectedResolver;
-                }
-            }
-
+            
             foreach (var transformation in applyClause.Transformations)
             {
                 if (transformation.Kind == TransformationNodeKind.Aggregate || transformation.Kind == TransformationNodeKind.GroupBy)
                 {
-                    var binder = new AggregationBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, transformation);
+                    var binder = _binderProvider.GetAggregationBinder(updatedSettings, Context.RequestContainer, ResultClrType, Context.Model, transformation);
                     query = binder.Bind(query);
                     this.ResultClrType = binder.ResultClrType;
                 }

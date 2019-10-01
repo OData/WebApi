@@ -78,6 +78,18 @@
     <Compile Include="..\ODataOrderByTest\OrderByTest.cs">
       <Link>ODataOrderByTest\OrderByTest.cs</Link>
     </Compile>
+	<Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs">
+      <Link>NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeTests.cs">
+      <Link>NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeTests.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\PeopleController.cs">
+      <Link>NavigationPropertyOnComplexType\PeopleController.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\PeopleRepository.cs">
+      <Link>NavigationPropertyOnComplexType\PeopleRepository.cs</Link>
+    </Compile>
     <Compile Include="..\QueryComposition\EFWideCustomer.cs">
       <Link>QueryComposition\EFWideCustomer.cs</Link>
     </Compile>

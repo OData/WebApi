@@ -200,7 +200,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.MetadataLevel = metadataLevel;
                 writeContext.QueryOptions = internalRequest.Context.QueryOptions;
 
-                //Set the SelectExpandClause on the context if it was explicitly specified. 
+                //Set the SelectExpandClause on the context if it was explicitly specified.
                 if (selectExpandDifferentFromQueryOptions != null)
                 {
                     writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;

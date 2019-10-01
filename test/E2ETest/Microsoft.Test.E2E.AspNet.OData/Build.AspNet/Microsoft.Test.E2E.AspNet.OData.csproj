@@ -1450,6 +1450,18 @@
     <Compile Include="..\ModelBuilder\UnicodeLinkGenerationTests.cs">
       <Link>ModelBuilder\UnicodeLinkGenerationTests.cs</Link>
     </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs">
+      <Link>NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeModel.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeTests.cs">
+      <Link>NavigationPropertyOnComplexType\NavigationPropertyOnComplexTypeTests.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\PeopleController.cs">
+      <Link>NavigationPropertyOnComplexType\PeopleController.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\PeopleRepository.cs">
+      <Link>NavigationPropertyOnComplexType\PeopleRepository.cs</Link>
+    </Compile>
     <Compile Include="..\ODataCountTest\CountController.cs">
       <Link>ODataCountTest\CountController.cs</Link>
     </Compile>

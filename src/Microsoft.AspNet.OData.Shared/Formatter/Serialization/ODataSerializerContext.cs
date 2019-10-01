@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
@@ -84,15 +85,24 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 SelectExpandClause = expandedNavigationSelectItem.SelectAndExpand;
             }
-
             EdmProperty = edmProperty; // should be nested property
+
+            Queue<IEdmProperty> parentPropertiesInPath =
+                context.PropertiesInPath != null ? context.PropertiesInPath : new Queue<IEdmProperty>();
+
+            parentPropertiesInPath.Enqueue(edmProperty);
+            PropertiesInPath = parentPropertiesInPath;
 
             if (context.NavigationSource != null)
             {
                 IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
                 if (navigationProperty != null)
                 {
-                    NavigationSource = context.NavigationSource.FindNavigationTarget(NavigationProperty);
+                    NavigationSource = context.NavigationSource.FindNavigationTarget(navigationProperty);
+                }
+                else
+                {
+                    NavigationSource = context.NavigationSource;
                 }
             }
         }
@@ -105,7 +115,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         internal IWebApiUrlHelper InternalUrlHelper { get; private set; }
 
         /// <summary>
-        /// ODataQueryContext object, retrieved from query options for top-level context and passed down to nested serializer context as is. 
+        /// ODataQueryContext object, retrieved from query options for top-level context and passed down to nested serializer context as is.
         /// </summary>
         internal ODataQueryContext QueryContext
         {
@@ -158,7 +168,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             get
             {
-                // private backing field to be removed once public setter from ODataFeature is removed. 
+                // private backing field to be removed once public setter from ODataFeature is removed.
                 if (_isSelectExpandClauseSet)
                 {
                     return _selectExpandClause;
@@ -198,6 +208,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the <see cref="ODataQueryOptions"/>.
         /// </summary>
         public ODataQueryOptions QueryOptions { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the relative path to the resouce being serialized
+        /// </summary>
+        internal Queue<IEdmProperty> PropertiesInPath { get; private set; }
 
         /// <summary>
         /// Gets or sets the resource that is being expanded.

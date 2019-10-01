@@ -346,10 +346,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     else
                     {
                         writer.WriteStart(resource);
-                        WriteComplexProperties(selectExpandNode.SelectedComplexProperties, resourceContext, writer);
+                        WriteComplexProperties(selectExpandNode, resourceContext, writer);
                         WriteDynamicComplexProperties(resourceContext, writer);
                         WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
-                        WriteExpandedNavigationProperties(selectExpandNode.ExpandedProperties, resourceContext, writer);
+                        WriteExpandedNavigationProperties(selectExpandNode, resourceContext, writer);
                         WriteReferencedNavigationProperties(selectExpandNode.ReferencedNavigationProperties, resourceContext, writer);
                         writer.WriteEnd();
                     }
@@ -375,6 +375,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmStructuredType structuredType = resourceContext.StructuredType;
 
             object selectExpandNode;
+
             Tuple<SelectExpandClause, IEdmStructuredType> key = Tuple.Create(writeContext.SelectExpandClause, structuredType);
             if (!writeContext.Items.TryGetValue(key, out selectExpandNode))
             {
@@ -666,12 +667,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private void WriteComplexProperties(IEnumerable<IEdmStructuralProperty> complexProperties,
+        private void WriteComplexProperties(SelectExpandNode selectExpandNode,
             ResourceContext resourceContext, ODataWriter writer)
         {
-            Contract.Assert(complexProperties != null);
+            Contract.Assert(selectExpandNode != null);
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
+
+            IEnumerable<IEdmStructuralProperty> complexProperties = selectExpandNode.SelectedComplexProperties;
+
+            Contract.Assert(complexProperties != null);
 
             if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
             {
@@ -682,6 +687,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
+                if (selectExpandNode.ExpandedPropertiesOnSubChildren.ContainsKey(complexProperty))
+                {
+                    // We will write the property when the property is expanded.
+                    continue;
+                }
+
                 ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
                 {
                     IsCollection = complexProperty.Type.IsCollection(),
@@ -690,6 +701,22 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 writer.WriteStart(nestedResourceInfo);
                 WriteComplexAndExpandedNavigationProperty(complexProperty, null, resourceContext, writer);
+                writer.WriteEnd();
+            }
+
+            foreach (var item in selectExpandNode.ExpandedPropertiesOnSubChildren)
+            {
+                IEdmStructuralProperty complexProperty = item.Key;
+                ExpandedNavigationSelectItem expandedNavigationSelectItem = selectExpandNode.ExpandedPropertiesOnSubChildren[complexProperty];
+
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = complexProperty.Type.IsCollection(),
+                    Name = complexProperty.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteComplexAndExpandedNavigationProperty(complexProperty, expandedNavigationSelectItem, resourceContext, writer);
                 writer.WriteEnd();
             }
         }
@@ -756,13 +783,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteExpandedNavigationProperties(
-            IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> navigationPropertiesToExpand,
+           SelectExpandNode selectExpandNode,
             ResourceContext resourceContext,
             ODataWriter writer)
         {
-            Contract.Assert(navigationPropertiesToExpand != null);
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
+
+            IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> navigationPropertiesToExpand = selectExpandNode.ExpandedProperties;
+
+            Contract.Assert(navigationPropertiesToExpand != null);
 
             foreach (KeyValuePair<IEdmNavigationProperty, ExpandedNavigationSelectItem> navPropertyToExpand in navigationPropertiesToExpand)
             {

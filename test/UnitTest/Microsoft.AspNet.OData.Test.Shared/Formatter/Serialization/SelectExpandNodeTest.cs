@@ -38,13 +38,29 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         }
 
         [Theory]
+        [InlineData("ID,ID", "ID")]
+        [InlineData("NS.upgrade,NS.upgrade", "NS.upgrade")]
+        public void DuplicatedSelectPathInOneDollarSelectThrows(string select, string error)
+        {
+            // Arrange
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
+                new Dictionary<string, string> { { "$select", select } });
+
+            // Act
+            Action test = () => parser.ParseSelectAndExpand();
+
+            // Assert
+            ExceptionAssert.Throws<ODataException>(test,
+                String.Format("Found mutliple select terms with same select path '{0}' at one $select, please combine them together.", error));
+        }
+
+        [Theory]
         [InlineData(null, null, false, "City,ID,Name,SimpleEnum", "Account,Address,OtherAccounts")] // no select and expand -> select all
         [InlineData(null, null, true, "City,ID,Name,SimpleEnum,SpecialCustomerProperty", "Account,Address,OtherAccounts,SpecialAddress")] // no select and expand on derived type -> select all
         [InlineData("ID", null, false, "ID", "")] // simple select -> select requested
         [InlineData("ID", null, true, "ID", "")] // simple select on derived type -> select requested
         [InlineData("*", null, false, "City,ID,Name,SimpleEnum", "Account,Address,OtherAccounts")] // simple select with wild card -> select all, no duplication
         [InlineData("*", null, true, "City,ID,Name,SimpleEnum,SpecialCustomerProperty", "Account,Address,OtherAccounts,SpecialAddress")] // simple select with wild card on derived type -> select all, no duplication
-        [InlineData("ID,ID", null, false, "ID", "")] // simple select with duplicates -> select requested no duplicates
         [InlineData("ID,*", null, false, "City,ID,Name,SimpleEnum", "Account,Address,OtherAccounts")] // simple select with wild card and duplicate -> select all, no duplicates
         [InlineData("ID,*", null, true, "City,ID,Name,SimpleEnum,SpecialCustomerProperty", "Account,Address,OtherAccounts,SpecialAddress")] // simple select with wild card and duplicate -> select all, no duplicates
         [InlineData("ID,Name", null, false, "ID,Name", "")] // multiple select -> select requested
@@ -182,7 +198,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         [InlineData("NS.upgrade", null, true, "upgrade")] // select single actions -> select requested action
         [InlineData("NS.SpecialCustomer/NS.specialUpgrade", null, false, "")] // select single derived action on base type -> select nothing
         [InlineData("NS.SpecialCustomer/NS.specialUpgrade", null, true, "specialUpgrade")] // select single derived action on derived type  -> select requested action
-        [InlineData("NS.upgrade,NS.upgrade", null, false, "upgrade")] // select duplicate actions -> de-duplicate
         [InlineData("NS.*", null, false, "upgrade")] // select wild card actions -> select all
         [InlineData("NS.*", null, true, "specialUpgrade,upgrade")] // select wild card actions -> select all
         public void GetActionsToBeSelected_Selects_ExpectedActions(

@@ -384,7 +384,7 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Contains("The query specified in the URI is not valid. " +
-                "A path within the select or expand query option is not supported.",
+                String.Format("Can not resolve the segment identifier '{0}' in query option.", nonNamespaceQualifiedName),
                 responseString);
         }
 

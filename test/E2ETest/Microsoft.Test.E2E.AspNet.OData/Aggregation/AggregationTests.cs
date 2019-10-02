@@ -194,12 +194,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal("2500", results[2]["TotalPrice"].ToString());
             Assert.Equal("Customer1", results[2]["Name"].ToString());
 
-
             string lastCommand = await GetLastSQLCommand(BaseAddress);
             if (lastCommand != "")
             {
                 // Only one join with Customers table
-                Assert.Single(Regex.Matches(lastCommand, @"\[Customers]"));
+                var num = Regex.Matches(lastCommand, @"\[Customers]").Count;
+                Assert.True(num == 1, $"More than one Customers table reference in the output {lastCommand}");
             }
         }
 

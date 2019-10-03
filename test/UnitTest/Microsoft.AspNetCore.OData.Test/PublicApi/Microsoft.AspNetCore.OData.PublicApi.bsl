@@ -3493,12 +3493,28 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 public abstract class Microsoft.AspNet.OData.Query.Expressions.ODataBinderProvider {
 	protected ODataBinderProvider ()
 
+	public abstract AggregationBinder GetAggregationBinder (ODataQuerySettings settings, System.IServiceProvider requestContainer, System.Type elementType, Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.UriParser.Aggregation.TransformationNode transformation)
 	public abstract SelectExpandBinder GetSelectExpandBinder (ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+}
+
+public class Microsoft.AspNet.OData.Query.Expressions.AggregationBinder : ExpressionBinderBase {
+	protected AggregationBinder (ODataQuerySettings settings, System.IServiceProvider requestContainer, System.Type elementType, Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.UriParser.Aggregation.TransformationNode transformation)
+
+	System.Type ResultClrType  { public get; }
+
+	public virtual System.Linq.IQueryable Bind (System.Linq.IQueryable query)
+	protected virtual System.Linq.Expressions.Expression CreateEntitySetAggregateExpression (System.Linq.Expressions.ParameterExpression accumulativeParameter, Microsoft.OData.UriParser.Aggregation.EntitySetAggregateExpression expression, System.Type baseType)
+	protected virtual System.Linq.Expressions.Expression CreateOpenPropertyAccessExpression (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyAccessExpression (System.Linq.Expressions.Expression source, Microsoft.OData.Edm.IEdmProperty edmProperty)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyAccessExpression (System.Linq.Expressions.Expression source, Microsoft.OData.Edm.IEdmProperty edmProperty, string propertyPath)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyAggregateExpression (System.Linq.Expressions.ParameterExpression accumulativeParameter, Microsoft.OData.UriParser.Aggregation.AggregateExpression expression, System.Type baseType)
+	internal virtual bool IsClassicEF (System.Linq.IQueryable query)
 }
 
 public class Microsoft.AspNet.OData.Query.Expressions.DefaultODataBinderProvider : ODataBinderProvider {
 	public DefaultODataBinderProvider ()
 
+	public virtual AggregationBinder GetAggregationBinder (ODataQuerySettings settings, System.IServiceProvider requestContainer, System.Type elementType, Microsoft.OData.Edm.IEdmModel model, Microsoft.OData.UriParser.Aggregation.TransformationNode transformation)
 	public virtual SelectExpandBinder GetSelectExpandBinder (ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
 }
 

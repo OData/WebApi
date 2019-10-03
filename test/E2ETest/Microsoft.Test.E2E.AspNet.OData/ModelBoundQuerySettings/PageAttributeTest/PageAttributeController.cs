@@ -89,6 +89,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             return _orders;
         }
 
+        [HttpPost]
         [ODataRoute("Orders/Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SpecialOrder")]
         public PageResult<Order> GetOrdersPageResult(ODataQueryOptions options)
         {

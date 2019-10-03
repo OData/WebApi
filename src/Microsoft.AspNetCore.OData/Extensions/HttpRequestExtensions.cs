@@ -293,8 +293,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 uriBuilder.Port = request.Host.Port.Value;
             }
 
-            ODataOptions odataOptions = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
-            ODataCompatibilityOptions compatibilityOptions = odataOptions.CompatibilityOptions;
+            ODataCompatibilityOptions compatibilityOptions = request.GetODataCompatibilityOptions();
 
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
             return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue, compatibilityOptions);
@@ -313,6 +312,33 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the set of flags for <see cref="ODataCompatibilityOptions"/> from ODataOptions. 
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>Set of flags for <see cref="ODataCompatibilityOptions"/> from ODataOptions.</returns>
+        internal static ODataCompatibilityOptions GetODataCompatibilityOptions(this HttpRequest request)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            if (request.HttpContext == null)
+            {
+                return ODataCompatibilityOptions.None;
+            }
+
+            ODataOptions options = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
+
+            if (options == null)
+            {
+                return ODataCompatibilityOptions.None;
+            }
+
+            return options.CompatibilityOptions;
         }
 
         internal static ODataVersion? ODataServiceVersion(this HttpRequest request)

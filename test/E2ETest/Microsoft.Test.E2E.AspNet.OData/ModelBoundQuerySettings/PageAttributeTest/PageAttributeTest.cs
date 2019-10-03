@@ -187,7 +187,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         public async Task CompatibilityFlagRespectedForNextLink()
         {
             string queryUrl = string.Format(ModelBoundOrderBaseUrl + "/Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SpecialOrder" + "?$top=5", BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpClient client = new HttpClient();
 

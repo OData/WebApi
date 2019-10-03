@@ -1,17 +1,17 @@
+[
+FlagsAttribute(),
+]
+public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
+	AllowNextLinkWithNonPositiveTopValue = 1
+	None = 0
+}
+
 public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	DeletedEntry = 1
 	DeletedLinkEntry = 2
 	Entry = 0
 	LinkEntry = 3
 	Unknown = 4
-}
-
-[
-FlagsAttribute(),
-]
-public enum Microsoft.AspNet.OData.ODataCompatibilityOptions : int {
-	AllowNextLinkWithNonPositiveTopValue = 1
-	None = 0
 }
 
 public interface Microsoft.AspNet.OData.IDelta {
@@ -1889,17 +1889,17 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpConfigurationExtension
 	[
 	ExtensionAttribute(),
 	]
+	public static void SetCompatibilityOptions (System.Web.Http.HttpConfiguration configuration, CompatibilityOptions options)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static void SetDefaultQuerySettings (System.Web.Http.HttpConfiguration configuration, DefaultQuerySettings defaultQuerySettings)
 
 	[
 	ExtensionAttribute(),
 	]
 	public static void SetETagHandler (System.Web.Http.HttpConfiguration configuration, IETagHandler handler)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static void SetODataCompatibilityOptions (System.Web.Http.HttpConfiguration configuration, ODataCompatibilityOptions options)
 
 	[
 	ExtensionAttribute(),

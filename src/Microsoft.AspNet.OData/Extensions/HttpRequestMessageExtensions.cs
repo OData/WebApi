@@ -228,7 +228,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            ODataCompatibilityOptions options = request.GetODataCompatibilityOptions();
+            CompatibilityOptions options = request.GetCompatibilityOptions();
 
             return GetNextPageHelper.GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize, instance, objToSkipTokenValue, options);
         }
@@ -412,20 +412,20 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Gets the set of flags for <see cref="ODataCompatibilityOptions"/> from the http configuration. 
+        /// Gets the set of flags for <see cref="CompatibilityOptions"/> from the http configuration. 
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <returns>Set of flags for <see cref="ODataCompatibilityOptions"/> from the http configuration.</returns>
-        internal static ODataCompatibilityOptions GetODataCompatibilityOptions(this HttpRequestMessage request)
+        /// <returns>Set of flags for <see cref="CompatibilityOptions"/> from the http configuration.</returns>
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpRequestMessage request)
         {
             HttpConfiguration configuration = request.GetConfiguration();
 
             if (configuration == null)
             {
-                return ODataCompatibilityOptions.None;
+                return CompatibilityOptions.None;
             }
 
-            return configuration.GetODataCompatibilityOptions();
+            return configuration.GetCompatibilityOptions();
         }
 
         private static IServiceScope CreateRequestScope(this HttpRequestMessage request, string routeName)

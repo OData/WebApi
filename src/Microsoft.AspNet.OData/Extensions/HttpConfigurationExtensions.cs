@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
         private const string NonODataRootContainerKey = "Microsoft.AspNet.OData.NonODataRootContainerKey";
 
-        private const string ODataCompatibilityOptionsKey = "Microsoft.AspNet.OData.ODataCompatibilityOptionsKey";
+        private const string CompatibilityOptionsKey = "Microsoft.AspNet.OData.CompatibilityOptionsKey";
 
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
@@ -437,15 +437,15 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Set the ODataCompatibilityOption.
         /// </summary>
         /// <param name="configuration">The server configuration.</param>
-        /// <param name="options">The <see cref="ODataCompatibilityOptions"/></param>
-        public static void SetODataCompatibilityOptions(this HttpConfiguration configuration, ODataCompatibilityOptions options)
+        /// <param name="options">The <see cref="CompatibilityOptions"/></param>
+        public static void SetCompatibilityOptions(this HttpConfiguration configuration, CompatibilityOptions options)
         {
             if (configuration == null)
             {
                 throw Error.ArgumentNull("configuration");
             }
 
-            configuration.Properties[ODataCompatibilityOptionsKey] = options;
+            configuration.Properties[CompatibilityOptionsKey] = options;
         }
 
         /// <summary>
@@ -485,7 +485,7 @@ namespace Microsoft.AspNet.OData.Extensions
             return null;
         }
 
-        internal static ODataCompatibilityOptions GetODataCompatibilityOptions(this HttpConfiguration configuration)
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpConfiguration configuration)
         {
             if (configuration == null)
             {
@@ -493,13 +493,13 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             object value;
-            if (configuration.Properties.TryGetValue(ODataCompatibilityOptionsKey, out value))
+            if (configuration.Properties.TryGetValue(CompatibilityOptionsKey, out value))
             {
-                return (ODataCompatibilityOptions)value;
+                return (CompatibilityOptions)value;
             }
 
-            configuration.Properties[ODataCompatibilityOptionsKey] = ODataCompatibilityOptions.None;
-            return ODataCompatibilityOptions.None;
+            configuration.Properties[CompatibilityOptionsKey] = CompatibilityOptions.None;
+            return CompatibilityOptions.None;
         }
 
         /// <summary>

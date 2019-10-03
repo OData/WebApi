@@ -293,7 +293,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 uriBuilder.Port = request.Host.Port.Value;
             }
 
-            ODataCompatibilityOptions compatibilityOptions = request.GetODataCompatibilityOptions();
+            CompatibilityOptions compatibilityOptions = request.GetCompatibilityOptions();
 
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
             return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue, compatibilityOptions);
@@ -315,11 +315,11 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Gets the set of flags for <see cref="ODataCompatibilityOptions"/> from ODataOptions. 
+        /// Gets the set of flags for <see cref="CompatibilityOptions"/> from ODataOptions. 
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <returns>Set of flags for <see cref="ODataCompatibilityOptions"/> from ODataOptions.</returns>
-        internal static ODataCompatibilityOptions GetODataCompatibilityOptions(this HttpRequest request)
+        /// <returns>Set of flags for <see cref="CompatibilityOptions"/> from ODataOptions.</returns>
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpRequest request)
         {
             if (request == null)
             {
@@ -328,14 +328,14 @@ namespace Microsoft.AspNet.OData.Extensions
 
             if (request.HttpContext == null)
             {
-                return ODataCompatibilityOptions.None;
+                return CompatibilityOptions.None;
             }
 
             ODataOptions options = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
 
             if (options == null)
             {
-                return ODataCompatibilityOptions.None;
+                return CompatibilityOptions.None;
             }
 
             return options.CompatibilityOptions;

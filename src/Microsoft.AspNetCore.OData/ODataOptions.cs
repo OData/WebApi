@@ -30,6 +30,6 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or Sets the set of flags that have options for backward compatibility
         /// </summary>
-        public ODataCompatibilityOptions CompatibilityOptions { get; set; }
+        public CompatibilityOptions CompatibilityOptions { get; set; }
     }
 }

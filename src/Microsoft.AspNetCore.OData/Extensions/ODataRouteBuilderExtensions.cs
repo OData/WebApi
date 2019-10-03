@@ -473,11 +473,11 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Set the ODataCompatibilityOptions.
+        /// Set the CompatibilityOptions.
         /// </summary>
         /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
-        /// <param name="options">The <see cref="ODataCompatibilityOptions"/></param>
-        public static IRouteBuilder SetODataCompatibilityOptions(this IRouteBuilder builder, ODataCompatibilityOptions options)
+        /// <param name="options">The <see cref="CompatibilityOptions"/></param>
+        public static IRouteBuilder SetCompatibilityOptions(this IRouteBuilder builder, CompatibilityOptions options)
         {
             if (builder == null)
             {

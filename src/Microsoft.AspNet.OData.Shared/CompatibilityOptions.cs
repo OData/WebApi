@@ -8,7 +8,7 @@ namespace Microsoft.AspNet.OData
     /// Contains bitmasks for features that need backward compatibilty.
     /// </summary>
     [Flags]
-    public enum ODataCompatibilityOptions
+    public enum CompatibilityOptions
     {
         /// <summary>
         /// No compatibility options are selected. 

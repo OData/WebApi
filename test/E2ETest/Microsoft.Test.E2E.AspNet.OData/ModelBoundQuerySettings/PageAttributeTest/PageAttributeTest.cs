@@ -30,7 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MaxTop(2).Expand();
-            configuration.SetODataCompatibilityOptions(ODataCompatibilityOptions.AllowNextLinkWithNonPositiveTopValue);
+            configuration.SetCompatibilityOptions(CompatibilityOptions.AllowNextLinkWithNonPositiveTopValue);
             configuration.MapODataServiceRoute("enablequery", "enablequery",
                 PageAttributeEdmModel.GetEdmModel(configuration));
             configuration.MapODataServiceRoute("modelboundapi", "modelboundapi",

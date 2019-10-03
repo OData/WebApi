@@ -2886,6 +2886,8 @@ public sealed class Microsoft.AspNet.OData.Query.UnsortableAttribute : System.At
 public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IActionResult {
 	public CreatedODataResult`1 (T entity)
 
+	T Entity  { public virtual get; }
+
 	[
 	AsyncStateMachineAttribute(),
 	]
@@ -2894,6 +2896,8 @@ public class Microsoft.AspNet.OData.Results.CreatedODataResult`1 : IActionResult
 
 public class Microsoft.AspNet.OData.Results.UpdatedODataResult`1 : IActionResult {
 	public UpdatedODataResult`1 (T entity)
+
+	T Entity  { public virtual get; }
 
 	[
 	AsyncStateMachineAttribute(),

@@ -621,7 +621,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 case QueryNodeKind.None:
                 case QueryNodeKind.SingleNavigationNode:
                     var navNode = (SingleNavigationNode)node;
-                    return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty);
+                    return CreatePropertyAccessExpression(BindAccessor(navNode.Source), navNode.NavigationProperty, GetFullPropertyPath(navNode));
                 case QueryNodeKind.BinaryOperator:
                     var binaryNode = (BinaryOperatorNode)node;
                     var leftExpression = BindAccessor(binaryNode.Left, baseElement);

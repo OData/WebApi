@@ -51,11 +51,29 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void NestedNavigationGroupBy()
+        {
+            var filters = VerifyQueryDeserialization(
+                "groupby((Category/Product/ProductName))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Product, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = ProductName, Value = $it.Category.Product.ProductName, }, }, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+
+        [Fact]
         public void NavigationMultipleGroupBy()
         {
             var filters = VerifyQueryDeserialization(
                 "groupby((Category/CategoryName, SupplierAddress/State))",
                 ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedProperty() {Name = SupplierAddress, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = State, Value = $it.SupplierAddress.State, }, }, Next = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new LastInChain() {Name = CategoryName, Value = $it.Category.CategoryName, }, }, }, }, })"
+                + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
+        }
+
+        [Fact]
+        public void NestedNavigationMultipleGroupBy()
+        {
+            var filters = VerifyQueryDeserialization(
+                "groupby((Category/Product/ProductName, Category/Product/UnitPrice))",
+                ".GroupBy($it => new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Category, NestedValue = new GroupByWrapper() {GroupByContainer = new NestedPropertyLastInChain() {Name = Product, NestedValue = new GroupByWrapper() {GroupByContainer = new AggregationPropertyContainer() {Name = UnitPrice, Value = Convert($it.Category.Product.UnitPrice), Next = new LastInChain() {Name = ProductName, Value = $it.Category.Product.ProductName, }, }, }, }, }, }, })"
                 + ".Select($it => new AggregationWrapper() {GroupByContainer = $it.Key.GroupByContainer, })");
         }
 

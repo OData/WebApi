@@ -60,6 +60,18 @@ namespace Microsoft.AspNet.OData.Test.Results
             ExceptionAssert.ThrowsArgumentNull(
                 () => new CreatedODataResult<TestEntity>(entity: null), "entity");
         }
+
+        [Fact]
+        public void GetEntity_ReturnsCorrect()
+        {
+            // Arrange
+            Mock<CreatedODataResultTest> mock = new Mock<CreatedODataResultTest>();
+            CreatedODataResult<CreatedODataResultTest> result =
+                new CreatedODataResult<CreatedODataResultTest>(mock.Object);
+
+            // Act & Assert
+            Assert.Same(mock.Object, result.Entity);
+        }
 #else
         [Fact]
         public void Ctor_ControllerDependency_ThrowsArgumentNull_Entity()

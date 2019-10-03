@@ -15,7 +15,7 @@
     <AspNetCorePackageDependency>[2.0.0, 3.0.0)</AspNetCorePackageDependency>
     <DependencyInjection1PackageDependency>1.0.0</DependencyInjection1PackageDependency>
     <DependencyInjection2PackageDependency>2.0.0</DependencyInjection2PackageDependency>
-    <ODataLibPackageDependency>[7.6.0, 8.0.0)</ODataLibPackageDependency>
+    <ODataLibPackageDependency>[7.6.1, 8.0.0)</ODataLibPackageDependency>
   </PropertyGroup>
 
   <!--
@@ -61,7 +61,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild).$(VersionRevision)</AssemblyVersion>
+    <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild)</AssemblyVersion>
     <AssemblyFileVersion>$(VersionMajor).$(VersionMinor).$(VersionBuild).$(VersionRevision)</AssemblyFileVersion>
     <AssemblyInfoVersion>$(AssemblyFileVersion)</AssemblyInfoVersion>
     <AssemblyVersionFile>$(IntermediateOutputPath)$(MSBuildProjectName).version.cs</AssemblyVersionFile>

@@ -537,8 +537,8 @@
   <data name="SelectionTypeNotSupported" xml:space="preserve">
     <value>$select does not support selections of type '{0}'.</value>
   </data>
-  <data name="SelectNonEntity" xml:space="preserve">
-    <value>The type '{0}' is not an entity type. Only entity types support $select and $expand.</value>
+  <data name="SelectNonStructured" xml:space="preserve">
+    <value>The type '{0}' is not a structured type. Only structured types support $select and $expand.</value>
   </data>
   <data name="PropertyNotFound" xml:space="preserve">
     <value>The EDM instance of type '{0}' is missing the property '{1}'.</value>

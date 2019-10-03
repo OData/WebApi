@@ -217,7 +217,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 var currentContainerExpression = Expression.Property(aggParam, GroupByContainerProperty);
                 foreach (var aggExpression in aggrregatedPropertiesToFlatten)
                 {
-                    var alias = "Property" + aliasIdx; // We just need unique alias, we aren't going to use it
+                    var alias = "Property" + aliasIdx.ToString(CultureInfo.CurrentCulture); // We just need unique alias, we aren't going to use it
 
                     // Add Value = $it.B.C
                     var propAccessExpression = BindAccessor(aggExpression.Expression);

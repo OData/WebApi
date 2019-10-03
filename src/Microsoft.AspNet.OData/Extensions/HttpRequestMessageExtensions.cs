@@ -228,7 +228,9 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            return GetNextPageHelper.GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize, instance, objToSkipTokenValue);
+            CompatibilityOptions options = request.GetCompatibilityOptions();
+
+            return GetNextPageHelper.GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize, instance, objToSkipTokenValue, options);
         }
 
         /// <summary>
@@ -407,6 +409,23 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
+        }
+
+        /// <summary>
+        /// Gets the set of flags for <see cref="CompatibilityOptions"/> from the http configuration. 
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <returns>Set of flags for <see cref="CompatibilityOptions"/> from the http configuration.</returns>
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpRequestMessage request)
+        {
+            HttpConfiguration configuration = request.GetConfiguration();
+
+            if (configuration == null)
+            {
+                return CompatibilityOptions.None;
+            }
+
+            return configuration.GetCompatibilityOptions();
         }
 
         private static IServiceScope CreateRequestScope(this HttpRequestMessage request, string routeName)

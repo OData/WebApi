@@ -1,3 +1,11 @@
+[
+FlagsAttribute(),
+]
+public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
+	AllowNextLinkWithNonPositiveTopValue = 1
+	None = 0
+}
+
 public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	DeletedEntry = 1
 	DeletedLinkEntry = 2
@@ -1877,6 +1885,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpConfigurationExtension
 	ExtensionAttribute(),
 	]
 	public static System.Web.Http.HttpConfiguration Select (System.Web.Http.HttpConfiguration configuration, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetCompatibilityOptions (System.Web.Http.HttpConfiguration configuration, CompatibilityOptions options)
 
 	[
 	ExtensionAttribute(),

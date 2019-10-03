@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
+using Moq;
 using Xunit;
 #else
 using System.Collections.Generic;
@@ -42,6 +43,18 @@ namespace Microsoft.AspNet.OData.Test.Results
         {
             ExceptionAssert.ThrowsArgumentNull(
                 () => new UpdatedODataResult<TestEntity>(entity: null), "entity");
+        }
+
+        [Fact]
+        public void GetEntity_ReturnsCorrect()
+        {
+            // Arrange
+            Mock<UpdatedODataResultTest> mock = new Mock<UpdatedODataResultTest>();
+            UpdatedODataResult<UpdatedODataResultTest> updatedODataResult =
+                new UpdatedODataResult<UpdatedODataResultTest>(mock.Object);
+
+            // Act & Assert
+            Assert.Same(mock.Object, updatedODataResult.Entity);
         }
 #else
         [Fact]

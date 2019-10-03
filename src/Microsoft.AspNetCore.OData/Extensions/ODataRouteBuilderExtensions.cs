@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
@@ -469,6 +470,23 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return TimeZoneInfoHelper.TimeZone;
+        }
+
+        /// <summary>
+        /// Set the ODataCompatibilityOptions.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="options">The <see cref="ODataCompatibilityOptions"/></param>
+        public static IRouteBuilder SetODataCompatibilityOptions(this IRouteBuilder builder, ODataCompatibilityOptions options)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            defaultOptions.CompatibilityOptions = options;
+            return builder;
         }
 
         /// <summary>

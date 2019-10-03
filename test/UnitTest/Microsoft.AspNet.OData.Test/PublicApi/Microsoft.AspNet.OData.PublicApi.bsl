@@ -6,6 +6,14 @@ public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	Unknown = 4
 }
 
+[
+FlagsAttribute(),
+]
+public enum Microsoft.AspNet.OData.ODataCompatibilityOptions : int {
+	AllowNextLinkWithNonPositiveTopValue = 1
+	None = 0
+}
+
 public interface Microsoft.AspNet.OData.IDelta {
 	void Clear ()
 	System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
@@ -1887,6 +1895,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpConfigurationExtension
 	ExtensionAttribute(),
 	]
 	public static void SetETagHandler (System.Web.Http.HttpConfiguration configuration, IETagHandler handler)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void SetODataCompatibilityOptions (System.Web.Http.HttpConfiguration configuration, ODataCompatibilityOptions options)
 
 	[
 	ExtensionAttribute(),

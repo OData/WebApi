@@ -293,8 +293,11 @@ namespace Microsoft.AspNet.OData.Extensions
                 uriBuilder.Port = request.Host.Port.Value;
             }
 
+            ODataOptions odataOptions = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
+            ODataCompatibilityOptions compatibilityOptions = odataOptions.CompatibilityOptions;
+
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
-            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue);
+            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue, compatibilityOptions);
         }
 
         /// <summary>

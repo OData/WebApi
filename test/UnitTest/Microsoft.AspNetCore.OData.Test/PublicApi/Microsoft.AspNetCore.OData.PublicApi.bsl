@@ -6,6 +6,14 @@ public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	Unknown = 4
 }
 
+[
+FlagsAttribute(),
+]
+public enum Microsoft.AspNet.OData.ODataCompatibilityOptions : int {
+	AllowNextLinkWithNonPositiveTopValue = 1
+	None = 0
+}
+
 public interface Microsoft.AspNet.OData.IDelta {
 	void Clear ()
 	System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
@@ -522,6 +530,7 @@ public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : IFilterMetada
 public class Microsoft.AspNet.OData.ODataOptions {
 	public ODataOptions ()
 
+	ODataCompatibilityOptions CompatibilityOptions  { public get; public set; }
 	bool EnableContinueOnErrorHeader  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
@@ -2068,6 +2077,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtension
 	ExtensionAttribute(),
 	]
 	public static Microsoft.AspNetCore.Routing.IRouteBuilder SetDefaultQuerySettings (Microsoft.AspNetCore.Routing.IRouteBuilder builder, DefaultQuerySettings defaultQuerySettings)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IRouteBuilder SetODataCompatibilityOptions (Microsoft.AspNetCore.Routing.IRouteBuilder builder, ODataCompatibilityOptions options)
 
 	[
 	ExtensionAttribute(),

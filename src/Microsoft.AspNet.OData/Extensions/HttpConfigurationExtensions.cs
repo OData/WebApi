@@ -51,6 +51,8 @@ namespace Microsoft.AspNet.OData.Extensions
 
         private const string NonODataRootContainerKey = "Microsoft.AspNet.OData.NonODataRootContainerKey";
 
+        private const string ODataCompatibilityOptionsKey = "Microsoft.AspNet.OData.ODataCompatibilityOptionsKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -432,6 +434,21 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Set the ODataCompatibilityOption.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="options">The <see cref="ODataCompatibilityOptions"/></param>
+        public static void SetODataCompatibilityOptions(this HttpConfiguration configuration, ODataCompatibilityOptions options)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[ODataCompatibilityOptionsKey] = options;
+        }
+
+        /// <summary>
         /// Check the null dynamic property is enable or not.
         /// </summary>
         /// <returns></returns>
@@ -466,6 +483,23 @@ namespace Microsoft.AspNet.OData.Extensions
 
             configuration.Properties[UrlKeyDelimiterKey] = null;
             return null;
+        }
+
+        internal static ODataCompatibilityOptions GetODataCompatibilityOptions(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(ODataCompatibilityOptionsKey, out value))
+            {
+                return (ODataCompatibilityOptions)value;
+            }
+
+            configuration.Properties[ODataCompatibilityOptionsKey] = ODataCompatibilityOptions.None;
+            return ODataCompatibilityOptions.None;
         }
 
         /// <summary>

@@ -228,7 +228,9 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("request");
             }
 
-            return GetNextPageHelper.GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize, instance, objToSkipTokenValue);
+            ODataCompatibilityOptions options = request.GetConfiguration().GetODataCompatibilityOptions();
+
+            return GetNextPageHelper.GetNextPageLink(request.RequestUri, request.GetQueryNameValuePairs(), pageSize, instance, objToSkipTokenValue, options);
         }
 
         /// <summary>

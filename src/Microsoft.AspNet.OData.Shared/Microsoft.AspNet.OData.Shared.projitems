@@ -66,6 +66,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandler.cs" />

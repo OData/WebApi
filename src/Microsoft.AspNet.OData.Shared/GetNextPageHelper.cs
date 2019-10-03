@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null, CompatibilityOptions options = CompatibilityOptions.None)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData
                         if (Int32.TryParse(value, out top))
                         {
                             // We decrease top by the pageSize because that's the number of results we're returning in the current page. If the $top query option's value is less than or equal to the page size, there is no next page.
-                            if (top > pageSize)
+                            if ((options & CompatibilityOptions.AllowNextLinkWithNonPositiveTopValue) != 0 || top > pageSize)
                             {
                                 value = (top - pageSize).ToString(CultureInfo.InvariantCulture);
                             }

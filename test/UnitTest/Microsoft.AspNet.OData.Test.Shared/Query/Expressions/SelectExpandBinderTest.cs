@@ -50,9 +50,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             // Arrange
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(select: "ID", expand: null, context: _context);
+            SelectExpandBinder binder = new SelectExpandBinder(_settings, selectExpand);
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
+            IQueryable queryable = binder.Bind(_queryable);
 
             // Assert
             Assert.NotNull(queryable);
@@ -69,9 +70,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
             IPropertyMapper mapper = new IdentityPropertyMapper();
             _model.Model.SetAnnotationValue(_model.Order, new DynamicPropertyDictionaryAnnotation(typeof(Order).GetProperty("OrderProperties")));
+            SelectExpandBinder binder = new SelectExpandBinder(_settings, selectExpand);
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
+            IQueryable queryable = binder.Bind(_queryable);
 
             // Assert
             IEnumerator enumerator = queryable.GetEnumerator();

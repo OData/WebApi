@@ -3355,6 +3355,18 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	public static int GuidCompare (System.Guid firstValue, System.Guid secondValue)
 }
 
+public abstract class Microsoft.AspNet.OData.Query.Expressions.ODataBinderProvider {
+	protected ODataBinderProvider ()
+
+	public abstract SelectExpandBinder GetSelectExpandBinder (ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+}
+
+public class Microsoft.AspNet.OData.Query.Expressions.DefaultODataBinderProvider : ODataBinderProvider {
+	public DefaultODataBinderProvider ()
+
+	public virtual SelectExpandBinder GetSelectExpandBinder (ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+}
+
 public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
 	public FilterBinder (System.IServiceProvider requestContainer)
 
@@ -3378,6 +3390,18 @@ public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionB
 	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
+}
+
+public class Microsoft.AspNet.OData.Query.Expressions.SelectExpandBinder {
+	protected SelectExpandBinder (ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
+
+	protected virtual System.Linq.IQueryable Bind (System.Linq.IQueryable queryable)
+	protected virtual object Bind (object entity)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyAccessExpression (System.Linq.Expressions.Expression source, Microsoft.OData.Edm.IEdmProperty edmProperty)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyAccessExpression (System.Linq.Expressions.Expression source, string propertyName)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyNameExpression (Microsoft.OData.Edm.IEdmStructuredType elementType, Microsoft.OData.Edm.IEdmProperty edmProperty, System.Linq.Expressions.Expression source)
+	protected virtual System.Linq.Expressions.Expression CreatePropertyValueExpressionWithFilter (Microsoft.OData.Edm.IEdmStructuredType elementType, Microsoft.OData.Edm.IEdmProperty edmProperty, System.Linq.Expressions.Expression source, Microsoft.OData.UriParser.ExpandedReferenceSelectItem expandItem)
+	protected virtual System.Linq.Expressions.Expression CreateTotalCountExpression (System.Linq.Expressions.Expression source, Microsoft.OData.UriParser.ExpandedReferenceSelectItem expandItem)
 }
 
 public class Microsoft.AspNet.OData.Query.Validators.CountQueryValidator {

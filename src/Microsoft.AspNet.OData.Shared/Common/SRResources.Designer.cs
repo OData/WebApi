@@ -2126,9 +2126,10 @@ namespace Microsoft.AspNet.OData.Common
         /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; is not an entity type. Only entity types support $select and $expand..
         /// </summary>
-        internal static string SelectNonEntity {
+        internal static string SelectNonStructured
+        {
             get {
-                return ResourceManager.GetString("SelectNonEntity", resourceCulture);
+                return ResourceManager.GetString("SelectNonStructured", resourceCulture);
             }
         }
         

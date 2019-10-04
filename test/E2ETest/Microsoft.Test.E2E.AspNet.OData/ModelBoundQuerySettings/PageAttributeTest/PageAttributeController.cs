@@ -3,6 +3,9 @@
 
 using System.Collections.Generic;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest
@@ -78,12 +81,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
     {
         private List<Order> _orders;
         private List<SpecialOrder> _specialOrders;
-        
+
         [EnableQuery]
         public List<Order> Get()
         {
             Generate();
             return _orders;
+        }
+
+        [HttpPost]
+        [ODataRoute("Orders/Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SpecialOrder")]
+        public PageResult<Order> GetOrdersPageResult(ODataQueryOptions options)
+        {
+            Generate();
+            var page = new PageResult<Order>(_orders, options.Request.GetNextPageLink(5), 10);
+            return page;
         }
 
         [EnableQuery]

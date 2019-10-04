@@ -512,7 +512,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.SingleComplexNode:
-                    path = ((SingleComplexNode)node).Property.Name;
+                    var complexNode = (SingleComplexNode)node;
+                    path = complexNode.Property.Name;
+                    parent = complexNode.Source;
                     break;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propertyNode = ((SingleValuePropertyAccessNode)node);

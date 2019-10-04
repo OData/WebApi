@@ -235,7 +235,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="segment">the segment to handle</param>
         public override void Handle(PropertySegment segment)
         {
-            _navigationSource = null;
+            // Not setting navigation source to null as the relevant navigation source for the path will be the previous navigation source.
 
             _pathTemplate.Add(ODataSegmentKinds.Property); // property
 

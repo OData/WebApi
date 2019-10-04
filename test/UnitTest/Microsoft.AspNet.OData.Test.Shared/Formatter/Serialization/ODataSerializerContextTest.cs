@@ -126,9 +126,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
 
             // Assert
             Assert.Same(resource, nestedContext.ExpandedResource);
-            Assert.Null(nestedContext.NavigationProperty);
             Assert.Same(selectExpand, nestedContext.SelectExpandClause);
-            Assert.Null(nestedContext.NavigationSource);
             Assert.Same(complexProperty, nestedContext.EdmProperty);
         }
 

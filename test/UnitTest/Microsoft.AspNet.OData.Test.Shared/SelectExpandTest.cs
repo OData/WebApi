@@ -353,6 +353,22 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal(5, result["value"].Count());
         }
 
+        [Fact]
+        public async Task SelectExpand_Works_ForSelectCaseSensitivityProperties()
+        {
+            // Arrange
+            const string URI = "/odata2/Players?$select=Title,TITLE";
+
+            // Act
+            HttpResponseMessage response = await GetResponse(URI, AcceptJsonFullMetadata);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(responseString);
+            Assert.Equal(5, result["value"].Count());
+        }
+
         [Theory]
         [InlineData("Default.Container.*")]
         [InlineData("Container.*")]
@@ -368,7 +384,7 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.False(response.IsSuccessStatusCode);
             Assert.Contains("The query specified in the URI is not valid. " +
-                "A path within the select or expand query option is not supported.",
+                String.Format("Can not resolve the segment identifier '{0}' in query option.", nonNamespaceQualifiedName),
                 responseString);
         }
 
@@ -407,7 +423,7 @@ namespace Microsoft.AspNet.OData.Test
                 config.Routes.MapHttpRoute("api", "api/{controller}", new { controller = "NonODataSelectExpandTestCustomers" });
 #endif
                 config.EnableDependencyInjection();
-                });
+            });
 
             HttpClient client = TestServerFactory.CreateClient(server);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost" + uri);
@@ -778,7 +794,9 @@ namespace Microsoft.AspNet.OData.Test
                         Id = i,
                         Name = "PayerName " + i,
                         Category = "Category " + i,
-                        Address = "Address " + i
+                        Address = "Address " + i,
+                        Title = "Title" + i,
+                        TITLE = "TITLE" + i
                     }).ToList();
 
         [EnableQuery]
@@ -794,5 +812,7 @@ namespace Microsoft.AspNet.OData.Test
         public string Name { get; set; }
         public string Category { get; set; }
         public string Address { get; set; }
+        public string Title { get; set; }
+        public string TITLE { get; set; }
     }
 }

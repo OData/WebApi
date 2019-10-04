@@ -37,6 +37,17 @@ namespace Microsoft.AspNet.OData.Results
             this._innerResult = entity;
         }
 
+        /// <summary>
+        /// Gets the entity that was created.
+        /// </summary>
+        public virtual T Entity
+        {
+            get
+            {
+                return _innerResult;
+            }
+        }
+
         /// <inheritdoc/>
         public async virtual Task ExecuteResultAsync(ActionContext context)
         {

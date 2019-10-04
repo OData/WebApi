@@ -56,7 +56,9 @@ namespace Microsoft.AspNet.OData.Query
             _queryOptionParser = queryOptionParser;
             ResultClrType = Context.ElementClrType;
             if (context.RequestContainer != null)
+            {
                 _binderProvider = context.RequestContainer.GetRequiredService<ODataBinderProvider>();
+            }
             _binderProvider = _binderProvider ?? new DefaultODataBinderProvider();
         }
 

@@ -66,7 +66,9 @@ namespace Microsoft.AspNet.OData.Query
             _queryOptionParser = queryOptionParser;
 
             if (context.RequestContainer != null)
+            {
                 _binderProvider = context.RequestContainer.GetRequiredService<ODataBinderProvider>();
+            }
             _binderProvider = _binderProvider ?? new DefaultODataBinderProvider();
         }
 
@@ -110,7 +112,9 @@ namespace Microsoft.AspNet.OData.Query
                 context.RequestContainer);
 
             if (context.RequestContainer != null)
+            {
                 _binderProvider = context.RequestContainer.GetRequiredService<ODataBinderProvider>();
+            }
             _binderProvider = _binderProvider ?? new DefaultODataBinderProvider();
         }
 

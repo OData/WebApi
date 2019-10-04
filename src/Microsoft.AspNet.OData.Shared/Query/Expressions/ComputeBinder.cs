@@ -15,8 +15,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 {
     internal class ComputeBinder : TransformationBinderBase
     {
-        private const string GroupByContainerProperty = "GroupByContainer";
-
         private ComputeTransformationNode _transformation;
         private string _modelID;
 

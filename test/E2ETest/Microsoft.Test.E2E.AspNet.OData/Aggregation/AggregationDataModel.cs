@@ -27,6 +27,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             };
         }
 
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            IDatabaseInitializer<AggregationContext> addBucket = new DropCreateDatabaseIfModelChanges<AggregationContext>();
+            Database.SetInitializer<AggregationContext>(addBucket);
+            base.OnModelCreating(modelBuilder);
+        }
+
         public DbSet<Customer> Customers { get; set; }
 
         public static void CleanCommands()

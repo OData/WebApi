@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -399,7 +400,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // so using a foreach loop and doing an implicit cast from object to the CLR type of ItemType.
             foreach (ConstantNode item in node.Collection)
             {
-                castedList.Add(item.Value);
+                object member = constantType.IsEnum ? (EnumDeserializationHelpers.ConvertEnumValue(item.Value, constantType)) : item.Value;
+                castedList.Add(member);
             }
 
             return Expression.Constant(castedList);
@@ -740,7 +742,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {

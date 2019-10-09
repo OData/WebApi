@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Query.Validators;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
@@ -21,6 +22,7 @@ namespace Microsoft.AspNet.OData.Query
         private SelectExpandClause _selectExpandClause;
         private ODataQueryOptionParser _queryOptionParser;
         private SelectExpandClause _processedSelectExpandClause;
+        private ODataBinderProvider _binderProvider;
 
         // Give _levelsMaxLiteralExpansionDepth a negative value meaning it is uninitialized, and it will be set to:
         // 1. LevelsMaxLiteralExpansionDepth or
@@ -62,6 +64,12 @@ namespace Microsoft.AspNet.OData.Query
             RawExpand = expand;
             Validator = SelectExpandQueryValidator.GetSelectExpandQueryValidator(context);
             _queryOptionParser = queryOptionParser;
+
+            if (context.RequestContainer != null)
+            {
+                _binderProvider = context.RequestContainer.GetRequiredService<ODataBinderProvider>();
+            }
+            _binderProvider = _binderProvider ?? new DefaultODataBinderProvider();
         }
 
         internal SelectExpandQueryOption(
@@ -102,6 +110,12 @@ namespace Microsoft.AspNet.OData.Query
                 context.NavigationSource,
                 new Dictionary<string, string> { { "$select", select }, { "$expand", expand } },
                 context.RequestContainer);
+
+            if (context.RequestContainer != null)
+            {
+                _binderProvider = context.RequestContainer.GetRequiredService<ODataBinderProvider>();
+            }
+            _binderProvider = _binderProvider ?? new DefaultODataBinderProvider();
         }
 
         /// <summary>
@@ -204,7 +218,8 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, queryable);
 
-            return SelectExpandBinder.Bind(queryable, updatedSettings, this);
+            var binder = _binderProvider.GetSelectExpandBinder(updatedSettings, this);
+            return binder.Bind(queryable);
         }
 
         /// <summary>
@@ -230,7 +245,8 @@ namespace Microsoft.AspNet.OData.Query
 
             ODataQuerySettings updatedSettings = Context.UpdateQuerySettings(settings, query: null);
 
-            return SelectExpandBinder.Bind(entity, updatedSettings, this);
+            var binder = _binderProvider.GetSelectExpandBinder(updatedSettings, this);
+            return binder.Bind(entity);
         }
 
         /// <summary>

@@ -80,6 +80,9 @@ namespace Microsoft.AspNet.OData.Extensions
             builder.AddService<ODataMetadataSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataRawValueSerializer>(ServiceLifetime.Singleton);
 
+            // BinderProvider.
+            builder.AddService<ODataBinderProvider, DefaultODataBinderProvider>(ServiceLifetime.Singleton);
+
             // Binders.
             builder.AddService<ODataQuerySettings>(ServiceLifetime.Scoped);
             builder.AddService<FilterBinder>(ServiceLifetime.Transient);

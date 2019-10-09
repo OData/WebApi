@@ -143,7 +143,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         #region "SQL logging"
-        public static async Task CleanUpSQlCommandsLog(string BaseAddress)
+        public async Task CleanUpSQlCommandsLog(string BaseAddress)
         {
             string queryUrl = $"{BaseAddress}/aggregation/CleanCommands()";
 
@@ -152,7 +152,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             HttpResponseMessage response = await client.SendAsync(request);
         }
 
-        public static async Task<string> GetLastSQLCommand(string BaseAddress)
+        public async Task<string> GetLastSQLCommand(string BaseAddress)
         {
             string queryUrl = $"{BaseAddress}/aggregation/GetLastCommand()";
 
@@ -168,38 +168,45 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public async Task AggregateNavigationPropertyWorks()
         {
             // Arrange
-            await CleanUpSQlCommandsLog(BaseAddress);
-
-            string queryUrl =
-                string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
-                    BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            var result = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            var results = result["value"] as JArray;
-            Assert.Equal(3, results.Count);
-            Assert.Equal("0", results[0]["TotalPrice"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
-            Assert.Equal("2000", results[1]["TotalPrice"].ToString());
-            Assert.Equal("Customer0", results[1]["Name"].ToString());
-            Assert.Equal("2500", results[2]["TotalPrice"].ToString());
-            Assert.Equal("Customer1", results[2]["Name"].ToString());
-
-            string lastCommand = await GetLastSQLCommand(BaseAddress);
-            if (lastCommand != "")
+            try
             {
-                // Only one join with Customers table
-                var num = Regex.Matches(lastCommand, @"\[Customers]").Count;
-                Assert.True(num == 1, $"More than one Customers table reference in the output {lastCommand}");
+                await CleanUpSQlCommandsLog(BaseAddress);
+
+                string queryUrl =
+                    string.Format(
+                        AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
+                        BaseAddress);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+                HttpClient client = new HttpClient();
+
+                // Act
+                HttpResponseMessage response = await client.SendAsync(request);
+
+                // Assert
+                var result = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                var results = result["value"] as JArray;
+                Assert.Equal(3, results.Count);
+                Assert.Equal("0", results[0]["TotalPrice"].ToString());
+                Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
+                Assert.Equal("2000", results[1]["TotalPrice"].ToString());
+                Assert.Equal("Customer0", results[1]["Name"].ToString());
+                Assert.Equal("2500", results[2]["TotalPrice"].ToString());
+                Assert.Equal("Customer1", results[2]["Name"].ToString());
+
+                string lastCommand = await GetLastSQLCommand(BaseAddress);
+                if (lastCommand != "")
+                {
+                    // Only one join with Customers table
+                    var num = Regex.Matches(lastCommand, @"\[Customers]").Count;
+                    Assert.True(num == 1, $"More than one Customers table reference in the output {lastCommand}");
+                }
+            }
+            finally
+            {
+                await CleanUpSQlCommandsLog(BaseAddress);
             }
         }
 

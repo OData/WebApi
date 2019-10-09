@@ -17,6 +17,7 @@ using System.Xml.Linq;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -1339,7 +1340,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // so using a foreach loop and doing an implicit cast from object to the CLR type of ItemType.
             foreach (ConstantNode item in node.Collection)
             {
-                castedList.Add(item.Value);
+                object member = constantType.IsEnum ? (EnumDeserializationHelpers.ConvertEnumValue(item.Value, constantType)) : item.Value;
+                castedList.Add(member);
             }
 
             return Expression.Constant(castedList);

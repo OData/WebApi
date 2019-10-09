@@ -17,6 +17,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -1632,6 +1633,20 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "LongProp lt -987654321L and LongProp gt -123456789l",
                 "$it => (($it.LongProp < -987654321) AndAlso ($it.LongProp > -123456789))");
         }
+        
+        [Fact]
+        public void EnumInExpression()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "SimpleEnumProp in ('First', 'Second')",
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)");
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+
+            // expression tree is guaranteed by expression string above
+            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
+        }
+        
 
         [Fact]
         public void RealLiteralSuffixes()

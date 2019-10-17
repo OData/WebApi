@@ -393,14 +393,30 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             Type constantType = RetrieveClrTypeForConstant(node.ItemType, ref value);
-            Type listType = typeof(List<>).MakeGenericType(constantType);
+            Type nullableConstantType = node.ItemType.IsNullable
+                ? typeof(Nullable<>).MakeGenericType(constantType)
+                : constantType;
+            Type listType = typeof(List<>).MakeGenericType(nullableConstantType);
             IList castedList = Activator.CreateInstance(listType) as IList;
 
             // Getting a LINQ expression to dynamically cast each item in the Collection during runtime is tricky,
             // so using a foreach loop and doing an implicit cast from object to the CLR type of ItemType.
             foreach (ConstantNode item in node.Collection)
             {
-                object member = constantType.IsEnum ? (EnumDeserializationHelpers.ConvertEnumValue(item.Value, constantType)) : item.Value;
+                object member;
+                if (item.Value == null)
+                {
+                    member = null;
+                }
+                else if (constantType.IsEnum)
+                {
+                    member = EnumDeserializationHelpers.ConvertEnumValue(item.Value, constantType);
+                }
+                else
+                {
+                    member = item.Value;
+                }
+
                 castedList.Add(member);
             }
 

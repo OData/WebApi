@@ -393,7 +393,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             Type constantType = RetrieveClrTypeForConstant(node.ItemType, ref value);
-            Type nullableConstantType = node.ItemType.IsNullable
+            Type nullableConstantType = node.ItemType.IsNullable && constantType.IsValueType
                 ? typeof(Nullable<>).MakeGenericType(constantType)
                 : constantType;
             Type listType = typeof(List<>).MakeGenericType(nullableConstantType);

@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTime).GetProperty("Second")),
             new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(DateTime).GetProperty("Millisecond")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
+        
         // DateTimeOffset properties
         public static readonly Dictionary<string, PropertyInfo> DateTimeOffsetProperties = new[]
         {

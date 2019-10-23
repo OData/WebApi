@@ -727,7 +727,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         /// <param name="node">The node to bind.</param>
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "These are simple binding functions and cannot be split up.")]
         public virtual Expression BindSingleValueFunctionCallNode(SingleValueFunctionCallNode node)
         {
@@ -762,6 +762,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
                 case ClrCanonicalFunctions.ConcatFunctionName:
                     return BindConcat(node);
+
+                case ClrCanonicalFunctions.ReplaceFunctionName:
+                    return BindReplace(node);
 
                 case ClrCanonicalFunctions.YearFunctionName:
                 case ClrCanonicalFunctions.MonthFunctionName:
@@ -1335,6 +1338,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Contract.Assert(arguments.Length == 2 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string));
 
             return MakeFunctionCall(ClrCanonicalFunctions.EndsWith, arguments);
+        }
+
+        private Expression BindReplace(SingleValueFunctionCallNode node)
+        {
+            Contract.Assert("replace" == node.Name);
+
+            Expression[] arguments = BindArguments(node.Parameters);
+            ValidateAllStringArguments(node.Name, arguments);
+
+            Contract.Assert(arguments.Length == 3 && arguments[0].Type == typeof(string) && arguments[1].Type == typeof(string) && arguments[2].Type == typeof(string));
+
+            return MakeFunctionCall(ClrCanonicalFunctions.Replace, arguments);
         }
 
         private Expression[] BindArguments(IEnumerable<QueryNode> nodes)

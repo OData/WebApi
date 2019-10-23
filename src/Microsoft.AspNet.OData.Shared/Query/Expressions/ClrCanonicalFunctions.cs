@@ -26,6 +26,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal const string TolowerFunctionName = "tolower";
         internal const string ToupperFunctionName = "toupper";
         internal const string TrimFunctionName = "trim";
+        internal const string ReplaceFunctionName = "replace";
         internal const string ConcatFunctionName = "concat";
         internal const string YearFunctionName = "year";
         internal const string MonthFunctionName = "month";
@@ -56,6 +57,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         public static readonly MethodInfo ToLower = MethodOf(_ => _defaultString.ToLower());
         public static readonly MethodInfo ToUpper = MethodOf(_ => _defaultString.ToUpper());
         public static readonly MethodInfo Trim = MethodOf(_ => _defaultString.Trim());
+        public static readonly MethodInfo Replace = MethodOf(_ => _defaultString.Replace(default(string), default(string)));
         public static readonly MethodInfo Concat = MethodOf(_ => String.Concat(default(string), default(string)));
 
         // math functions
@@ -89,7 +91,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             new KeyValuePair<string, PropertyInfo>(SecondFunctionName, typeof(DateTime).GetProperty("Second")),
             new KeyValuePair<string, PropertyInfo>(MillisecondFunctionName, typeof(DateTime).GetProperty("Millisecond")),
         }.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-        
+
         // DateTimeOffset properties
         public static readonly Dictionary<string, PropertyInfo> DateTimeOffsetProperties = new[]
         {

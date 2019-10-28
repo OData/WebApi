@@ -19,7 +19,7 @@
     "AspNetCoreODataSample.Web": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "efcore/Movies",
+      "launchUrl": "odata/$metadata",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

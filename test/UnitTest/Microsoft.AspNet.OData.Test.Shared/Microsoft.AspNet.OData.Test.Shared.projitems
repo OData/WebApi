@@ -236,6 +236,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ModelContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandBinderTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandIncludePropertyTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />

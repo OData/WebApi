@@ -1462,6 +1462,9 @@
     <Compile Include="..\NavigationPropertyOnComplexType\PeopleRepository.cs">
       <Link>NavigationPropertyOnComplexType\PeopleRepository.cs</Link>
     </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs">
+      <Link>NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs</Link>
+    </Compile>
     <Compile Include="..\ODataCountTest\CountController.cs">
       <Link>ODataCountTest\CountController.cs</Link>
     </Compile>

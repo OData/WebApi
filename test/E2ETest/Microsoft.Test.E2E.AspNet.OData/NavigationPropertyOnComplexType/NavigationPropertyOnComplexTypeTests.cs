@@ -38,10 +38,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             // Arrange : GET ~/People(1)/HomeLocation/ZipCode
             string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(1)/HomeLocation/ZipCode";
 
-            string expects = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#ZipCodes/$entity\"," +
+            string equals = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#ZipCodes/$entity\"," +
                 "\"Zip\":98052,\"City\":\"Redmond\",\"State\":\"Washington\"}";
-
-            string equals = expects.Replace("BASE_ADDRESS", BaseAddress);
 
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: null, equals: equals);
@@ -53,11 +51,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             // Arrange
             string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(1)/HomeLocation?$select=Street&$expand=ZipCode";
 
-            string expects = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(1)/HomeLocation(Street,ZipCode())\"," +
+            string equals = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(1)/HomeLocation(Street,ZipCode())\"," +
                 "\"Street\":\"110th\"," +
                 "\"ZipCode\":{\"Zip\":98052,\"City\":\"Redmond\",\"State\":\"Washington\"}}";
-
-            string equals = expects.Replace("BASE_ADDRESS", BaseAddress);
 
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: null, equals: equals);
@@ -74,8 +70,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
 
             // Assert
             JObject jObj = JObject.Parse(result);
-            Assert.Equal("BASE_ADDRESS/odata/$metadata#People(1)/RepoLocations(Street,ZipCode())".Replace("BASE_ADDRESS", BaseAddress),
-                jObj["@odata.context"]);
+            Assert.Equal("BASE_ADDRESS/odata/$metadata#People(1)/RepoLocations(Street,ZipCode())", jObj["@odata.context"]);
 
             var array = jObj["value"] as JArray;
             Assert.Equal(3, array.Count);
@@ -135,10 +130,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             // Arrange
             string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(1)?$expand=HomeLocation/ZipCode&$select=HomeLocation/Street";
 
-            string expects = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(HomeLocation/Street,HomeLocation/ZipCode())/$entity\"," +
+            string equals = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(HomeLocation/Street,HomeLocation/ZipCode())/$entity\"," +
                 "\"HomeLocation\":{\"Street\":\"110th\",\"ZipCode\":{\"Zip\":98052,\"City\":\"Redmond\",\"State\":\"Washington\"}}}";
-
-            string equals = expects.Replace("BASE_ADDRESS", BaseAddress);
 
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: null, equals: equals);
@@ -175,8 +168,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                       "\"ZipCode\":{\"Zip\":35816,\"City\":\"Huntsville\",\"State\":\"Alabama\"}}}";
             }
 
-            equals = equals.Replace("BASE_ADDRESS", BaseAddress);
-
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, null, equals);
         }
@@ -211,22 +202,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         public void QueryEntityWithReferenceOnNavigationPropertiesOfComplexProperty()
         {
             // Arrange
-            string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(2)?$expand=HomeLocation/ZipCode/$ref&$select=HomeLocation/Street";
+            string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(1)?$expand=HomeLocation/ZipCode/$ref&$select=HomeLocation/Street";
 
-            string contains = "odata/$metadata#People(OrderInfo,OrderInfo/BillLocation/ZipCode())/$entity\"," +
-              "\"OrderInfo\":{" +
-                "\"BillLocation\":{" +
+            string contains = "odata/$metadata#People(HomeLocation/Street,HomeLocation/ZipCode,HomeLocation/ZipCode/$ref())/$entity\"," +
+              "\"HomeLocation\":{" +
                   "\"Street\":\"110th\"," +
-                  "\"TaxNo\":0," +
-                  "\"Emails\":[]," +
-                  "\"RelatedInfo\":null,\"AdditionInfos\":[]," +
                   "\"ZipCode\":{" +
-                    "\"Zip\":98052," +
-                    "\"City\":\"Redmond\"," +
-                    "\"State\":\"Washington\"" +
+                    "\"@odata.id\":\"ZipCodes(98052)\"" +
                   "}" +
-                "}," +
-                "\"SubInfo\":null" +
+                "}" +
               "}";
 
             // Act & Assert
@@ -237,22 +221,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         public void QueryEntityWithReferenceOnCollectionNavigationPropertiesOfComplexProperty()
         {
             // Arrange
-            string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(2)?$expand=HomeLocation/DetailCodes/$ref&$select=HomeLocation/Street";
+            string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(1)?$expand=HomeLocation/DetailCodes/$ref&$select=HomeLocation/Street";
 
-            string contains = "odata/$metadata#People(OrderInfo,OrderInfo/BillLocation/ZipCode())/$entity\"," +
-              "\"OrderInfo\":{" +
-                "\"BillLocation\":{" +
+            string contains = "odata/$metadata#People(HomeLocation/Street,HomeLocation/DetailCodes,HomeLocation/DetailCodes/$ref())/$entity\"," +
+              "\"HomeLocation\":{" +
                   "\"Street\":\"110th\"," +
-                  "\"TaxNo\":0," +
-                  "\"Emails\":[]," +
-                  "\"RelatedInfo\":null,\"AdditionInfos\":[]," +
-                  "\"ZipCode\":{" +
-                    "\"Zip\":98052," +
-                    "\"City\":\"Redmond\"," +
-                    "\"State\":\"Washington\"" +
-                  "}" +
-                "}," +
-                "\"SubInfo\":null" +
+                  "\"DetailCodes\":[" +
+                    "{" +
+                       "\"@odata.id\":\"ZipCodes(98052)\"" +
+                    "}," +
+                    "{" +
+                       "\"@odata.id\":\"ZipCodes(35816)\"" +
+                    "}," +
+                    "{" +
+                       "\"@odata.id\":\"ZipCodes(10048)\"" +
+                    "}" +
+                  "]" +
+                "}" +
               "}";
 
             // Act & Assert
@@ -265,21 +250,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             // Arrange
             string requestUri = string.Format(PeopleBaseUrl, BaseAddress) + "(2)?$expand=OrderInfo/BillLocation/ZipCode/$ref&$select=OrderInfo/BillLocation/Street";
 
-            string contains = "odata/$metadata#People(OrderInfo,OrderInfo/BillLocation/ZipCode())/$entity\"," +
+            string contains = "odata/$metadata#People(OrderInfo/BillLocation/Street,OrderInfo/BillLocation/ZipCode,OrderInfo/BillLocation/ZipCode/$ref())/$entity\"," +
               "\"OrderInfo\":{" +
                 "\"BillLocation\":{" +
                   "\"Street\":\"110th\"," +
-                  "\"TaxNo\":0," +
-                  "\"Emails\":[]," +
-                  "\"RelatedInfo\":null,\"AdditionInfos\":[]," +
                   "\"ZipCode\":{" +
-                    "\"Zip\":98052," +
-                    "\"City\":\"Redmond\"," +
-                    "\"State\":\"Washington\"" +
+                    "\"@odata.id\":\"ZipCodes(98052)\"" +
                   "}" +
-                "}," +
-                "\"SubInfo\":null" +
-              "}";
+                "}" +
+              "}" +
+            "}";
 
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains);
@@ -319,8 +299,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             string contains = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(4)/HomeLocation(Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation/Area())\"," +
                 "\"Street\":\"120th\",\"TaxNo\":17,\"Emails\":[\"E7\",\"E4\",\"E5\"],\"Latitude\":\"12.8\",\"Longitude\":\"22.9\",\"Rela";
 
-            contains = contains.Replace("BASE_ADDRESS", BaseAddress);
-
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: contains, equals: null);
         }
@@ -334,8 +312,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             string contains = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(4)/HomeLocation/Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation(Area())\"," +
                 "\"Street\":\"120th\",\"TaxNo\":17,\"Emails\":[\"E7\",\"E4\",\"E5\"],\"Latitude\":\"12.8\",\"Longitude\":\"22.9\",\"Rela";
 
-            contains = contains.Replace("BASE_ADDRESS", BaseAddress);
-
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: contains, equals: null);
         }
@@ -348,8 +324,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
 
             string contains = "{\"@odata.context\":\"BASE_ADDRESS/odata/$metadata#People(HomeLocation/Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType.GeoLocation/Area())/$entity\"," +
                 "\"Id\":4,\"Name\":\"Jones\",\"Age\":9,";
-
-            contains = contains.Replace("BASE_ADDRESS", BaseAddress);
 
             // Act & Assert
             var result = ExecuteAndVerifyQueryRequest(requestUri, contains: contains, equals: null);
@@ -370,8 +344,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                         "\"Street\":\"110th\"," +
                         "\"ZipCode\":{\"Zip\":35816,\"City\":\"Huntsville\",\"State\":\"Alabama\"}}}}}";
 
-            equals = equals.Replace("BASE_ADDRESS", BaseAddress);
-
             // Act & Assert
             ExecuteAndVerifyQueryRequest(requestUri, contains: null, equals: equals);
         }
@@ -390,6 +362,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             string result = response.Content.ReadAsStringAsync().Result;
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            // replace the real address using "BASE_ADDRESS"
+            string odataContext = "\"@odata.context\":\"";
+            int start = result.IndexOf(odataContext) + odataContext.Length;
+            int end = result.IndexOf("/odata/$metadata");
+            string uri = result.Substring(start, end - start);
+            result = result.Replace(uri, "BASE_ADDRESS");
 
             if (contains != null)
             {

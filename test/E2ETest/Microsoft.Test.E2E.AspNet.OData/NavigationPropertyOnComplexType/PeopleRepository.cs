@@ -157,7 +157,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                     Id = 6,
                     Name = "Sam",
                     Age = 40,
-                    HomeLocation = new Address
+                    HomeLocation = new GeometryLocation
                     {
                         Street = "130th",
                         TaxNo = 18,
@@ -169,7 +169,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                             CountyName = "King" + e
                         }).ToList(),
                         ZipCode = zipCodes[2],
-                        DetailCodes = zipCodes
+                        DetailCodes = zipCodes,
+                        Latitude = "101.1",
+                        Longitude = "202.2"
                     },
                     Bonus = 99
                 }

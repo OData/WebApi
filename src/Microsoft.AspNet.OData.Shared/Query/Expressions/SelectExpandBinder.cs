@@ -315,7 +315,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 ISet<IEdmStructuralProperty> autoSelectedProperties;
 
                 bool isContainDynamicPropertySelection = GetSelectExpandProperties(_model, structuredType, navigationSource, selectExpandClause,
-                    out propertiesToInclude, 
+                    out propertiesToInclude,
                     out propertiesToExpand,
                     out autoSelectedProperties);
 

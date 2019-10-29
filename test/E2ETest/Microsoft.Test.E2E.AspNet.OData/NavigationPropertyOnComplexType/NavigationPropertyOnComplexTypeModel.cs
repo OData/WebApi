@@ -84,6 +84,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         public ZipCode Area { get; set; }
     }
 
+    // with the same propert name in different derived type.
+    public class GeometryLocation : Address
+    {
+        public string Latitude { get; set; }
+
+        public string Longitude { get; set; }
+    }
+
     public class ModelGenerator
     {
         // Builds the EDM model for the OData service.

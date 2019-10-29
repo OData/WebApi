@@ -152,19 +152,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 return;
             }
-            var complexProperties = selectExpandNode.SelectedComplexes;
+            IEnumerable<IEdmStructuralProperty> complexProperties = selectExpandNode.SelectedComplexes.Keys;
 
             if (null != resourceContext.EdmObject && resourceContext.EdmObject.IsDeltaResource())
             {
                 IDelta deltaObject = resourceContext.EdmObject as IDelta;
                 IEnumerable<string> changedProperties = deltaObject.GetChangedPropertyNames();
 
-                complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Key.Name)).ToDictionary(a => a.Key, a => a.Value);
+                complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Name));
             }
 
             foreach (var selectedComplex in complexProperties)
             {
-                IEdmStructuralProperty complexProperty = selectedComplex.Key;
+                IEdmStructuralProperty complexProperty = selectedComplex;
 
                 ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
                 {

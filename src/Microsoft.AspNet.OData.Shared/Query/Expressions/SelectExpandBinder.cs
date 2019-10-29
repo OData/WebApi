@@ -422,15 +422,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     IEnumerable<IEdmStructuralProperty> concurrencyProperties = model.GetConcurrencyProperties(navigationSource);
                     foreach (IEdmStructuralProperty concurrencyProperty in concurrencyProperties)
                     {
-                        if (concurrencyProperty.DeclaringType == structuredType &&
-                            !currentLevelPropertiesInclude.Keys.Contains(concurrencyProperty))
+                        if (structuredType.Properties().Any(p => p == concurrencyProperty))
                         {
-                            if (autoSelectedProperties == null)
+                            if (!currentLevelPropertiesInclude.Keys.Contains(concurrencyProperty))
                             {
-                                autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
-                            }
+                                if (autoSelectedProperties == null)
+                                {
+                                    autoSelectedProperties = new HashSet<IEdmStructuralProperty>();
+                                }
 
-                            autoSelectedProperties.Add(concurrencyProperty);
+                                autoSelectedProperties.Add(concurrencyProperty);
+                            }
                         }
                     }
                 }
@@ -1024,18 +1026,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     _settings.EnableConstantParameterization);
             }
 
-            // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
-            if (!_settings.EnableCorrelatedSubqueryBuffering)
+            if (_settings.PageSize.HasValue || modelBoundPageSize.HasValue || hasTopValue || hasSkipvalue)
             {
-                if (_settings.PageSize.HasValue)
+                // don't page nested collections if EnableCorrelatedSubqueryBuffering is enabled
+                if (!_settings.EnableCorrelatedSubqueryBuffering)
                 {
-                    source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
-                }
-                else if (_settings.ModelBoundPageSize.HasValue)
-                {
-                    source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
-                        _settings.EnableConstantParameterization);
+                    if (_settings.PageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, _settings.PageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
+                    else if (_settings.ModelBoundPageSize.HasValue)
+                    {
+                        source = ExpressionHelpers.Take(source, modelBoundPageSize.Value + 1, elementType,
+                            _settings.EnableConstantParameterization);
+                    }
                 }
             }
 

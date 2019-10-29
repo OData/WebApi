@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             EdmProperty = edmProperty; // should be nested property
 
-            if (currentSelectItem == null)
+            if (currentSelectItem == null || (NavigationSource as IEdmUnknownEntitySet) != null)
             {
                 IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
                 if (navigationProperty != null && context.NavigationSource != null)

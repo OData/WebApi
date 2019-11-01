@@ -66,17 +66,17 @@ namespace Microsoft.AspNet.OData.Routing
                 }
 
                 object value;
+                var prefixedKey = ODataParameterValue.ParameterValuePrefix + key;
                 if (values.TryGetValue(key, out value))
                 {
-                    string stringValue;
-                    if (value is ODataParameterValue parameterValue)
-                    {
-                        stringValue = parameterValue.Value as string ?? Convert.ToString(parameterValue.Value, this.culture) ?? string.Empty;
-                    }
-                    else
-                    {
-                        stringValue = value as string ?? Convert.ToString(value, this.culture) ?? string.Empty;
-                    }
+                    string stringValue = value as string ?? Convert.ToString(value, this.culture) ?? string.Empty;
+                    return new ValueProviderResult(stringValue, this.culture);
+                }
+                else if (values.TryGetValue(prefixedKey, out value))
+                {
+                    var odataParameterValue = (ODataParameterValue)value;
+
+                    string stringValue = odataParameterValue.Value as string ?? Convert.ToString(odataParameterValue.Value, this.culture) ?? string.Empty;
                     return new ValueProviderResult(stringValue, this.culture);
                 }
                 else

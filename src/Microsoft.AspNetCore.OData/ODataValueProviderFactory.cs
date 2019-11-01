@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -75,6 +76,10 @@ namespace Microsoft.AspNet.OData.Routing
                 else if (values.TryGetValue(prefixedKey, out value))
                 {
                     var odataParameterValue = (ODataParameterValue)value;
+                    if (odataParameterValue.Value is ODataEnumValue odataEnumValue)
+                    {
+                        return new ValueProviderResult(Convert.ToString(odataEnumValue.Value, this.culture) ?? string.Empty, this.culture);
+                    }
 
                     string stringValue = odataParameterValue.Value as string ?? Convert.ToString(odataParameterValue.Value, this.culture) ?? string.Empty;
                     return new ValueProviderResult(stringValue, this.culture);

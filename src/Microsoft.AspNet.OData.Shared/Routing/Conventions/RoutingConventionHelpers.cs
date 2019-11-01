@@ -279,6 +279,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             string prefixName = ODataParameterValue.ParameterValuePrefix + name;
             values[prefixName] = parameterValue;
+            values[name] = parameterValue;
 
             // using the following codes to support [FromUriAttribute]
             if (!routeData.ContainsKey(name))

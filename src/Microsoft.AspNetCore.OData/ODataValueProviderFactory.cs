@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -26,16 +28,22 @@ namespace Microsoft.AspNet.OData.Routing
 
             return Task.CompletedTask;
         }
-
         private class ODataValueProvider : BindingSourceValueProvider
         {
             private IDictionary<string, object> values;
             private PrefixContainer _prefixContainer;
+            private CultureInfo culture { get; }
 
-            public ODataValueProvider(IDictionary<string, object> values)
+            public ODataValueProvider(IDictionary<string, object> values, CultureInfo culture)
                 : base(BindingSource.Path)
             {
                 this.values = values;
+                this.culture = culture;
+            }
+
+            public ODataValueProvider(IDictionary<string, object> values)
+                : this(values, CultureInfo.InvariantCulture)
+            {
             }
 
             /// <inheritdoc />
@@ -60,8 +68,16 @@ namespace Microsoft.AspNet.OData.Routing
                 object value;
                 if (values.TryGetValue(key, out value))
                 {
-                    var stringValue = value as string ?? value?.ToString() ?? string.Empty;
-                    return new ValueProviderResult(stringValue);
+                    string stringValue;
+                    if (value is ODataParameterValue parameterValue)
+                    {
+                        stringValue = parameterValue.Value as string ?? Convert.ToString(parameterValue.Value, this.culture) ?? string.Empty;
+                    }
+                    else
+                    {
+                        stringValue = value as string ?? Convert.ToString(value, this.culture) ?? string.Empty;
+                    }
+                    return new ValueProviderResult(stringValue, this.culture);
                 }
                 else
                 {

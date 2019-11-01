@@ -319,9 +319,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataVersionConstraintTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CustomersModelWithInheritance.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CaseInsensitiveResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\TestControllerBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\UnqualifiedCaseInsensitiveResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\ODataModelBuilderMocks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenCustomer.cs" />

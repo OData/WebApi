@@ -209,6 +209,10 @@ namespace Microsoft.AspNet.OData.Test
             {
                 IEdmTypeReference nonnullableDouble = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: false);
                 IEdmTypeReference nullableDouble = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Double, isNullable: true);
+                IEdmTypeReference nonnullableString = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false);
+                IEdmTypeReference nullableString = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: true);
+                IEdmTypeReference nonnullableBinary = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Binary, isNullable: false);
+                IEdmTypeReference nullableBinary = EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Binary, isNullable: true);
                 IEdmTypeReference nullableEntity = new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true);
                 IEdmTypeReference nullableComplex = new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true);
                 EdmCollectionTypeReference entityCollection = new EdmCollectionTypeReference(new EdmCollectionType(nullableEntity));
@@ -223,10 +227,20 @@ namespace Microsoft.AspNet.OData.Test
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Date, isNullable: false), default(Date) },
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.TimeOfDay, isNullable: true), null },
                     { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.TimeOfDay, isNullable: false), default(TimeOfDay) },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Duration, isNullable: true), null },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Duration, isNullable: false), default(TimeSpan) },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: true), null },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.String, isNullable: false), String.Empty },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Binary, isNullable: true), null },
+                    { EdmCoreModel.Instance.GetPrimitive(EdmPrimitiveTypeKind.Binary, isNullable: false), new byte[0] },
                     { new EdmComplexTypeReference(new EdmComplexType("NS", "Complex"), isNullable: true), null },
                     { new EdmEntityTypeReference(new EdmEntityType("NS", "Entity"), isNullable: true), null },
                     { new EdmCollectionTypeReference(new EdmCollectionType(nullableDouble)), new List<double?>() },
                     { new EdmCollectionTypeReference(new EdmCollectionType(nonnullableDouble)), new List<double>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableString)), new List<string>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nonnullableString)), new List<string>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nullableBinary)), new List<byte[]>() },
+                    { new EdmCollectionTypeReference(new EdmCollectionType(nonnullableBinary)), new List<byte[]>() },
                     { new EdmCollectionTypeReference(new EdmCollectionType(nullableEntity)), new EdmEntityObjectCollection(entityCollection) },
                 };
             }

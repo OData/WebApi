@@ -138,6 +138,11 @@ namespace Microsoft.AspNet.OData.Query
                     ODataEnumValue enumValue = new ODataEnumValue(value.ToString(), value.GetType().FullName);
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(enumValue, ODataVersion.V401, model);
                 }
+                else if(edmProperty.Type.IsDateTimeOffset() && value is DateTime d)
+                {
+                    var dateTimeOffsetValue = TimeZoneInfoHelper.ConvertToDateTimeOffset(d);
+                    uriLiteral = ODataUriUtils.ConvertToUriLiteral(dateTimeOffsetValue, ODataVersion.V401, model);
+                }
                 else
                 {
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);

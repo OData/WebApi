@@ -9,12 +9,15 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+#if NETCOREAPP3_0
+#else
+using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Mvc.Internal;
+#endif
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -74,12 +77,18 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 
             // Create a route build with a default path handler.
             IRouteBuilder routeBuilder = new RouteBuilder(appBuilder);
+
+#if NETCOREAPP3_0
+            routeBuilder.DefaultHandler = null;
+#else
+
             routeBuilder.DefaultHandler = new MvcRouteHandler(
                 mockInvokerFactory.Object,
                 mockActionSelector.Object,
                 diagnosticSource,
                 mockLoggerFactory.Object,
                 new ActionContextAccessor());
+#endif
 
             return routeBuilder;
         }

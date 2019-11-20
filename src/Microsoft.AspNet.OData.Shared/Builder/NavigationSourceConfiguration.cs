@@ -77,11 +77,13 @@ namespace Microsoft.AspNet.OData.Builder
             Name = name;
             EntityType = entityType;
             ClrType = entityType.ClrType;
+            DerivedTypeConstraints = new DerivedTypeConstraintSet(entityType.ClrType);
             _url = Name;
 
             _editLinkBuilder = null;
             _readLinkBuilder = null;
             _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder>();
+
         }
 
         /// <summary>
@@ -101,6 +103,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets the backing <see cref="Type"/> for the entity type contained in this navigation source.
         /// </summary>
         public Type ClrType { get; private set; }
+
+        /// <summary>
+        /// Collection that determines the derived type constraints
+        /// </summary>
+        internal DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the name of this navigation source.
@@ -455,6 +462,14 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             return Enumerable.Empty<NavigationPropertyBindingConfiguration>();
+        }
+
+        /// <summary>
+        /// Adds types to the list of derived type constraints.
+        /// </summary>
+        internal void AddDerivedTypeConstraintImpl(params Type[] subtypes)
+        {
+            DerivedTypeConstraints.ValidateAndAddConstraints(subtypes);
         }
 
         /// <summary>

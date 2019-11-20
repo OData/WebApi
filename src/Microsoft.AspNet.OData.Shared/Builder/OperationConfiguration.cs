@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             Name = name;
             ModelBuilder = builder;
+            DerivedTypeConstraint = new DerivedTypeConstraintSet();
         }
 
         /// <summary>
@@ -147,6 +148,11 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Type constraints for the return type of the operation.
+        /// </summary>
+        internal DerivedTypeConstraintSet DerivedTypeConstraint { get; private set; }
+
+        /// <summary>
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
@@ -238,6 +244,16 @@ namespace Microsoft.AspNet.OData.Builder
         internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType)
         {
             _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType);
+        }
+
+        internal void AddDerivedTypeConstraintToReturnTypeImpl(params Type[] constraints)
+        {
+            if (ReturnType == null)
+            {
+                Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
+            }
+
+            DerivedTypeConstraint.ValidateAndAddConstraints(ReturnType.ClrType, constraints);
         }
 
         /// <summary>

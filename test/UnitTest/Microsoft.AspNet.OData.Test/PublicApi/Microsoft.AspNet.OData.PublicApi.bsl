@@ -1025,6 +1025,7 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	bool Nullable  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
 
+	public ParameterConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public ParameterConfiguration HasDefaultValue (string defaultValue)
 	public ParameterConfiguration Optional ()
 	public ParameterConfiguration Required ()
@@ -1270,6 +1271,7 @@ public class Microsoft.AspNet.OData.Builder.ActionConfiguration : OperationConfi
 	bool IsSideEffecting  { public virtual get; }
 	OperationKind Kind  { public virtual get; }
 
+	public ActionConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetActionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedActionLink ()
 	public ActionConfiguration HasActionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
@@ -1324,6 +1326,7 @@ public class Microsoft.AspNet.OData.Builder.CollectionPropertyConfiguration : St
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 
+	public CollectionPropertyConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public CollectionPropertyConfiguration IsOptional ()
 	public CollectionPropertyConfiguration IsRequired ()
 }
@@ -1346,6 +1349,7 @@ public class Microsoft.AspNet.OData.Builder.ComplexPropertyConfiguration : Struc
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 
+	public ComplexPropertyConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public ComplexPropertyConfiguration IsOptional ()
 	public ComplexPropertyConfiguration IsRequired ()
 }
@@ -1392,11 +1396,13 @@ public class Microsoft.AspNet.OData.Builder.EntitySetConfiguration : NavigationS
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 
+	public EntitySetConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public virtual System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedSelfLink ()
 	public virtual NavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
 
 public class Microsoft.AspNet.OData.Builder.EntitySetConfiguration`1 : NavigationSourceConfiguration`1 {
+	public EntitySetConfiguration`1 AddDerivedTypeConstraint (System.Type[] subtypes)
 	public virtual void HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.String]] feedSelfLinkFactory)
 	public virtual void HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
@@ -1495,6 +1501,7 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 	bool SupportedInFilter  { public get; public set; }
 	bool SupportedInOrderBy  { public get; public set; }
 
+	public FunctionConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedFunctionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetFunctionLink ()
 	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] functionLinkFactory, bool followsConventions)
@@ -1554,6 +1561,7 @@ public class Microsoft.AspNet.OData.Builder.NavigationPropertyConfiguration : Pr
 	System.Collections.Generic.IEnumerable`1[[System.Reflection.PropertyInfo]] PrincipalProperties  { public get; }
 	System.Type RelatedClrType  { public virtual get; }
 
+	public NavigationPropertyConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 	public NavigationPropertyConfiguration AutomaticallyExpand (bool disableWhenSelectIsPresent)
 	public NavigationPropertyConfiguration CascadeOnDelete ()
 	public NavigationPropertyConfiguration CascadeOnDelete (bool cascade)
@@ -1707,9 +1715,12 @@ public class Microsoft.AspNet.OData.Builder.SingletonConfiguration : NavigationS
 	public SingletonConfiguration ()
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
+
+	public SingletonConfiguration AddDerivedTypeConstraint (System.Type[] subtypes)
 }
 
 public class Microsoft.AspNet.OData.Builder.SingletonConfiguration`1 : NavigationSourceConfiguration`1 {
+	public SingletonConfiguration`1 AddDerivedTypeConstraint (System.Type[] subtypes)
 }
 
 [
@@ -1735,6 +1746,16 @@ AttributeUsageAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.Builder.ContainedAttribute : System.Attribute, _Attribute {
 	public ContainedAttribute ()
+}
+
+[
+AttributeUsageAttribute(),
+]
+public sealed class Microsoft.AspNet.OData.Builder.DerivedTypeConstraintAttribute : System.Attribute, _Attribute {
+	public DerivedTypeConstraintAttribute ()
+	public DerivedTypeConstraintAttribute (System.Type[] types)
+
+	System.Collections.Generic.ISet`1[[System.Type]] DerivedTypeConstraints  { public get; }
 }
 
 [

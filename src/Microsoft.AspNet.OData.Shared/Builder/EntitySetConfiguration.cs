@@ -66,5 +66,20 @@ namespace Microsoft.AspNet.OData.Builder
         {
             return _feedSelfLinkFactory;
         }
+
+        /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public EntitySetConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        {
+            foreach (Type subType in subtypes)
+            {
+                AddDerivedTypeConstraintImpl(subType);
+            }
+
+            return this;
+        }
     }
 }

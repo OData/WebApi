@@ -118,6 +118,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
     public class Park
     {
         public int Id { get; set; }
+
+        [DerivedTypeConstraint]
         public Animal Animal { get; set; }
         public Human Human { get; set; }
     }
@@ -127,10 +129,17 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public int HorseId { get; set; }
     }
 
+    public class Zebra : Animal
+    {
+        public int ZebraId { get; set; }
+    }
+
     public class ZooHorse
     {
         public int Id { get; set; }
         public Horse Horse { get; set; }
+
+        [DerivedTypeConstraint(typeof(Horse), typeof(Zebra))]
         public Animal Animal { get; set; }
     }
 

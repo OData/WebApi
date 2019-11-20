@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.OData.Edm.Vocabularies.V1;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -45,8 +46,8 @@ namespace Microsoft.AspNet.OData.Builder
             // Build the navigation source map
             IDictionary<string, EdmNavigationSource> navigationSourceMap = model.GetNavigationSourceMap(edmMap, navigationSources);
 
-            // Add the core vocabulary annotations
-            model.AddCoreVocabularyAnnotations(navigationSources, edmMap);
+            // Add the core and validation vocabulary annotations
+            model.AddCoreAndValidationVocabularyAnnotations(navigationSources, edmMap);
 
             // TODO: support etags on contained nav props
             // Support for this in 5.x adds annotations to navigation properties. Ideally would add annotations to entity set/singleton for
@@ -191,28 +192,31 @@ namespace Microsoft.AspNet.OData.Builder
             return String.Join("/", bindings);
         }
 
-        private static void AddOperationParameters(EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
+        private static void AddOperationParameters(this EdmModel model, EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
         {
             foreach (ParameterConfiguration parameter in operationConfiguration.Parameters)
             {
+                IEdmOperationParameter operationParameter;
                 bool isParameterNullable = parameter.Nullable;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterNullable);
                 if (parameter.IsOptional)
                 {
                     if (parameter.DefaultValue != null)
                     {
-                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference, parameter.DefaultValue);
+                        operationParameter = operation.AddOptionalParameter(parameter.Name, parameterTypeReference, parameter.DefaultValue);
                     }
                     else
                     {
-                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference);
+                        operationParameter = operation.AddOptionalParameter(parameter.Name, parameterTypeReference);
                     }
                 }
                 else
                 {
-                    IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
+                    operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
                     operation.AddParameter(operationParameter);
                 }
+
+                 model.AddDerivedTypeConstraintAnnotation(operationParameter, edmTypeMap, parameter.DerivedTypeConstraints);
             }
         }
 
@@ -271,7 +275,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
             Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
         private static void AddOperations(this EdmModel model, IEnumerable<OperationConfiguration> configurations, EdmEntityContainer container,
             Dictionary<Type, IEdmType> edmTypeMap, IDictionary<string, EdmNavigationSource> edmNavigationSourceMap)
@@ -321,7 +325,12 @@ namespace Microsoft.AspNet.OData.Builder
                     model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                AddOperationParameters(operation, operationConfiguration, edmTypeMap);
+                if (operationConfiguration.DerivedTypeConstraint != null)
+                {
+                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.DerivedTypeConstraint);
+                }
+
+                model.AddOperationParameters(operation, operationConfiguration, edmTypeMap);
 
                 if (operationConfiguration.IsBindable)
                 {
@@ -444,7 +453,8 @@ namespace Microsoft.AspNet.OData.Builder
             model.AddPropertyRestrictionsAnnotations(edmTypeMap.EdmPropertiesRestrictions);
             model.AddPropertiesQuerySettings(edmTypeMap.EdmPropertiesQuerySettings);
             model.AddStructuredTypeQuerySettings(edmTypeMap.EdmStructuredTypeQuerySettings);
-         
+            model.AddDerivedTypeConstraintAnnotationForProperties(edmTypeMap);
+
             // add dynamic dictionary property annotation for open types
             model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
 
@@ -577,7 +587,7 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        private static void AddCoreVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
+        private static void AddCoreAndValidationVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
         {
             Contract.Assert(model != null);
             Contract.Assert(edmTypeMap != null);
@@ -602,6 +612,7 @@ namespace Microsoft.AspNet.OData.Builder
                 }
 
                 model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig, edmTypeMap);
+                model.AddDerivedTypeConstraintAnnotationForNavigationSource(navigationSource, navigationSourceConfig, edmTypeMap);
             }
         }
 
@@ -638,11 +649,62 @@ namespace Microsoft.AspNet.OData.Builder
             if (edmProperties.Any())
             {
                 IEdmCollectionExpression collectionExpression = new EdmCollectionExpression(edmProperties.Select(p => new EdmPropertyPathExpression(p.Name)).ToArray());
-                IEdmTerm term = Microsoft.OData.Edm.Vocabularies.V1.CoreVocabularyModel.ConcurrencyTerm;
+                IEdmTerm term = CoreVocabularyModel.ConcurrencyTerm;
                 EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
                 annotation.SetSerializationLocation(model, EdmVocabularyAnnotationSerializationLocation.Inline);
                 model.SetVocabularyAnnotation(annotation);
             }
+        }
+
+        private static void AddDerivedTypeConstraintAnnotationForProperties(this EdmModel model, EdmTypeMap edmTypeMap)
+        {
+            Dictionary<IEdmProperty, PropertyConfiguration>
+                propertyConfiguration = edmTypeMap.EdmPropertyConfigurations;
+
+            foreach (var pair in propertyConfiguration)
+            {
+                if (pair.Value.DerivedTypeConstraints != null)
+                {
+                    model.AddDerivedTypeConstraintAnnotation(pair.Key, edmTypeMap.EdmTypes, pair.Value.DerivedTypeConstraints);
+                }
+            }         
+        }
+
+        private static void AddDerivedTypeConstraintAnnotationForNavigationSource(this EdmModel model, IEdmVocabularyAnnotatable target,
+            NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
+        {
+            if (navigationSourceConfiguration != null)
+            {
+                model.AddDerivedTypeConstraintAnnotation(target,
+                    edmTypeMap.EdmTypes, navigationSourceConfiguration.DerivedTypeConstraints);
+            }
+        }
+
+        internal static void AddDerivedTypeConstraintAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target, 
+            Dictionary<Type, IEdmType> edmTypeMap, IEnumerable<Type> types)
+        {
+            if (!types.Any())
+            {
+                return;
+            }
+
+            IEdmTerm term = ValidationVocabularyModel.DerivedTypeConstraintTerm;
+            List<EdmStringConstant> collectionConstants = new List<EdmStringConstant>();
+            foreach (var type in types)
+            {
+                if (edmTypeMap.ContainsKey(type))
+                {
+                    collectionConstants.Add(new EdmStringConstant(edmTypeMap[type].FullTypeName()));
+                }
+                else
+                {
+                    throw Error.InvalidOperation(SRResources.CantFindEdmType, type);
+                }
+            }
+
+            var collectionExpression = new EdmCollectionExpression(collectionConstants);
+            EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
+            model.SetVocabularyAnnotation(annotation);
         }
 
         private static void AddCapabilitiesVocabularyAnnotations(this EdmModel model, IEnumerable<NavigationSourceAndAnnotations> navigationSources, EdmTypeMap edmTypeMap)
@@ -793,7 +855,7 @@ namespace Microsoft.AspNet.OData.Builder
             EntitySetConfiguration entitySetConfiguration, EdmTypeMap edmTypeMap)
         {
             EntityTypeConfiguration entityTypeConfig = entitySetConfiguration.EntityType;
-            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);     
+            IEnumerable<PropertyConfiguration> nonExpandableProperties = entityTypeConfig.Properties.Where(property => property.NotExpandable);
             IList<IEdmNavigationProperty> properties = new List<IEdmNavigationProperty>();
             foreach (PropertyConfiguration property in nonExpandableProperties)
             {

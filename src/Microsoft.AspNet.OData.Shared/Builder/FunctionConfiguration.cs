@@ -203,6 +203,17 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public FunctionConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        {
+            AddDerivedTypeConstraintToReturnTypeImpl(subtypes);
+            return this;
+        }
+
+        /// <summary>
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
@@ -213,7 +224,8 @@ namespace Microsoft.AspNet.OData.Builder
             if (String.IsNullOrEmpty(entitySetPath))
             {
                 throw Error.ArgumentNull("entitySetPath");
-                }
+            }
+
             ReturnsEntityViaEntitySetPathImplementation<TEntityType>(entitySetPath.Split('/'));
             return this;
         }

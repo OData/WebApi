@@ -52,5 +52,16 @@ namespace Microsoft.AspNet.OData.Builder
             OptionalProperty = false;
             return this;
         }
+
+        /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public ComplexPropertyConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        {
+            AddDerivedTypeConstraintImpl(subtypes);
+            return this;
+        }
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -30,6 +31,8 @@ namespace Microsoft.AspNet.OData.Builder
 
             Name = name;
             TypeConfiguration = parameterType;
+
+            DerivedTypeConstraints = new DerivedTypeConstraintSet();
 
             Type elementType;
             Nullable = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
@@ -61,6 +64,22 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets or sets a default value for optional parameter.
         /// </summary>
         public string DefaultValue { get; protected set; }
+
+        /// <summary>
+        /// List of allowed derived types that are allowed for the property. 
+        /// </summary>
+        internal DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+
+        /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public ParameterConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        {
+            DerivedTypeConstraints.ValidateAndAddConstraints(TypeConfiguration.ClrType, subtypes);
+            return this;
+        }
 
         /// <summary>
         /// Sets the optional value as true.

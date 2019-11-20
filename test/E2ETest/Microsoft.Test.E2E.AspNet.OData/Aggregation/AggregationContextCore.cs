@@ -1,10 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-
+using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
@@ -17,8 +16,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
 
         public DbSet<Customer> Customers { get; set; }
-    }
 
+        public override void Dispose()
+        {
+            ConsoleLoggerFactory.Dispose();
+            base.Dispose();
+        }
+    }
 
     public class AggregationContextCoreInMemory : AggregationContextCoreBase
     {

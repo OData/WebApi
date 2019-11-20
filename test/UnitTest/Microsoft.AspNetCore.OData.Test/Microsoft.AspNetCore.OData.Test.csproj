@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp2.0;netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
   <Import Project="..\..\..\tools\WebStack.settings.targets" />
   <PropertyGroup>
@@ -13,11 +13,19 @@
   </PropertyGroup>
   <Import Project="..\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems" Label="Shared" />
 
-  <ItemGroup>
-    <EmbeddedResource Include="PublicApi\Microsoft.AspNetCore.OData.PublicApi.bsl" />
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' ">
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.6.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.6.1" />
+    <PackageReference Include="Moq" Version="4.7.137" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0' ">
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.0" />
@@ -33,6 +41,10 @@
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <EmbeddedResource Include="PublicApi\Microsoft.AspNetCore.OData.PublicApi.bsl" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj" />
@@ -40,6 +52,7 @@
 
   <ItemGroup>
     <Folder Include="Builder\Conventions\" />
+    <Folder Include="Properties\" />
   </ItemGroup>
 
 </Project>

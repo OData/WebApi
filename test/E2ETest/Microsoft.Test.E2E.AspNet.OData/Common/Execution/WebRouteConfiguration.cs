@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     /// And abstracted version of web configuration allow callers to configure AspNet or AspNetCore.
     /// </summary>
 #if NETCORE
-    public class WebRouteConfiguration : IRouteBuilder
+    public sealed class WebRouteConfiguration : IRouteBuilder
     {
         private IRouteBuilder routeBuilder;
         private ApplicationPartManager _scopedPartManager;

@@ -10,7 +10,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class BaseCustomersController : TestODataController
+    public class BaseCustomersController : TestODataController, IDisposable
     {
         protected readonly AggregationContext _db = new AggregationContext();
         protected readonly List<Customer> _customers = new List<Customer>();
@@ -87,6 +87,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         {
             return true;
         }
+
+        public void Dispose()
+        {
+           // _db.Dispose();
+        }
     }
 
     public class CustomersController : BaseCustomersController
@@ -125,6 +130,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
     }
 
+#if !NETCOREAPP3_0
     public class LinqToSqlCustomersController : BaseCustomersController
     {
         [EnableQuery]
@@ -141,6 +147,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             throw new NotSupportedException();
         }
     }
+#endif
 
 #if NETCORE
     public class CoreCustomersController<T> : BaseCustomersController where T: AggregationContextCoreBase, new()

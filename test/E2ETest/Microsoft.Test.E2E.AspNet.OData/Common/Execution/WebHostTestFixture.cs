@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Routing;
@@ -218,15 +219,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 {
                     options.Filters.Add(typeof(WebHostLogExceptionFilter));
                     options.Filters.Add(new DelayLoadFilterFactory<ETagMessageHandler>());
+                    options.EnableEndpointRouting = false;
                 });
 
-                coreBuilder.AddJsonFormatters();
+                coreBuilder.AddNewtonsoftJson();
                 coreBuilder.AddDataAnnotations();
                 services.AddOData();
             }
 
-            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+            public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
             {
+
+#if NETCOREAPP3_0
+                // Make sure to allow SynchronousIO
+                app.Use(next => context =>
+                {
+                    var body = context.Features.Get<IHttpBodyControlFeature>();
+                    if (body != null)
+                    {
+                        body.AllowSynchronousIO = true;
+                    }
+                    return next(context);
+                });
+#endif
+
                 // Add a custom exception handler that returns exception as a raw string. Many of the
                 // tests expect to search for the string and UseDeveloperPage() will encode the string
                 // in Html format.
@@ -288,7 +304,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     }
 
                     // Apply Json options.
-                    IOptions<MvcJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcJsonOptions>>();
+                    IOptions<MvcNewtonsoftJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcNewtonsoftJsonOptions>>();
                     if (config.JsonReferenceLoopHandling.HasValue && jsonOptions != null)
                     {
                         jsonOptions.Value.SerializerSettings.ReferenceLoopHandling = config.JsonReferenceLoopHandling.Value;

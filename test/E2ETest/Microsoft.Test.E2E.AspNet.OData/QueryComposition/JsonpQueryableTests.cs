@@ -33,7 +33,7 @@ using Xunit;
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
 #if NETCORE
-    public class JsonpMediaTypeFormatter : JsonOutputFormatter
+    public class JsonpMediaTypeFormatter : NewtonsoftJsonOutputFormatter
 #else
     public class JsonpMediaTypeFormatter : JsonMediaTypeFormatter
 #endif
@@ -46,18 +46,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public static JsonpMediaTypeFormatter Create(WebRouteConfiguration configuration)
         {
 #if NETCORE
-            var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcJsonOptions>>().Value;
+            var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value;
             var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            return new JsonpMediaTypeFormatter(options.SerializerSettings, charPool);
+            return new JsonpMediaTypeFormatter(options.SerializerSettings, charPool, new MvcOptions());
 #else
             return new JsonpMediaTypeFormatter();
 #endif
         }
 
 #if NETCORE
-        private JsonpMediaTypeFormatter(JsonSerializerSettings serializerSettings, ArrayPool<char> charPool)
-        : base(serializerSettings, charPool)
+        private JsonpMediaTypeFormatter(JsonSerializerSettings serializerSettings, ArrayPool<char> charPool, MvcOptions options)
+        : base(serializerSettings, charPool, options)
         {
             SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaTypeHeaderTextJavascript));
             //MediaTypeMappings.Add(new UriPathExtensionMapping(pathExtensionJsonp, "application/javascript"));

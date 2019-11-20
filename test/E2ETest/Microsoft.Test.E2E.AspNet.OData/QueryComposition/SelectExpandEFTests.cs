@@ -195,7 +195,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class EFSelectCustomersController : TestODataController
+    public class EFSelectCustomersController : TestODataController, IDisposable
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -239,9 +239,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             db.Customers.Add(customer);
             db.SaveChanges();
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
     }
 
-    public class EFWideCustomersController : TestODataController
+    public class EFWideCustomersController : TestODataController, IDisposable
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -296,9 +301,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             _db.WideCustomers.Add(wideCustomer);
             _db.SaveChanges();
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
     }
 
-    public class EFSelectOrdersController : TestODataController
+    public class EFSelectOrdersController : TestODataController, IDisposable
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -315,6 +325,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             _db.Database.Delete();  // Start from scratch so that tests aren't broken by schema changes.
             EFSelectCustomersController.Generate(_db);
             return Ok();
+        }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
         }
     }
 

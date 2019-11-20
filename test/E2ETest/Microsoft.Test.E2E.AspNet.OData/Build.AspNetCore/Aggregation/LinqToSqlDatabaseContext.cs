@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NETCOREAPP3_0
+using System;
 using System.Collections.Generic;
 using System.Data.Linq;
 using System.Linq;
@@ -18,3 +19,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         public Table<Customer> Customers { get; set; }
     }
 }
+#endif

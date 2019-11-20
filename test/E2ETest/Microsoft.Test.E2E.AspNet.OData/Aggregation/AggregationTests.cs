@@ -95,13 +95,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
+#if !NETCOREAPP3_0
             configuration.AddControllers(typeof(LinqToSqlCustomersController));
+#endif
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("aggregation", "aggregation",
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
+#if !NETCOREAPP3_0
         [Fact]
         public async Task ApplyThrows()
         {
@@ -122,8 +125,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("$apply query options not supported for LINQ to SQL providers",result);
         }
-
+#endif
     }
+
 
     public abstract class AggregationTests : WebHostTestBase
     {
@@ -142,7 +146,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
-        #region "SQL logging"
+#region "SQL logging"
         public static async Task CleanUpSQlCommandsLog(string BaseAddress)
         {
             string queryUrl = $"{BaseAddress}/aggregation/CleanCommands()";
@@ -162,7 +166,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             var lastCommandResponse = await response.Content.ReadAsStringAsync();
             return  (string)JObject.Parse(lastCommandResponse)["value"];
         }
-        #endregion
+#endregion
 
         [Fact]
         public async Task AggregateNavigationPropertyWorks()

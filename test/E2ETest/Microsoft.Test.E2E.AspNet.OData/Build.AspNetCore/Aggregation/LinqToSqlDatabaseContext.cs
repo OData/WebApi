@@ -1,4 +1,4 @@
-﻿#if !NETCOREAPP3_0
+﻿#if !NETCORE
 using System;
 using System.Collections.Generic;
 using System.Data.Linq;

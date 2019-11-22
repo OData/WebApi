@@ -35,7 +35,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
     }
 
-#if !NETCOREAPP3_0
+#if !NETCORE
     [System.Data.Linq.Mapping.Table(Name = "Customer")]
 #endif
     public class Customer

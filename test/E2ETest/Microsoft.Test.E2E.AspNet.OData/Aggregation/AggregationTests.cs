@@ -84,6 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 #endif
 
 
+#if !NETCORE
     public class LinqToSqlAggregationTests : WebHostTestBase
     {
         protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
@@ -93,18 +94,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         {
         }
 
+
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-#if !NETCOREAPP3_0
+
             configuration.AddControllers(typeof(LinqToSqlCustomersController));
-#endif
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.MapODataServiceRoute("aggregation", "aggregation",
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
-#if !NETCOREAPP3_0
         [Fact]
         public async Task ApplyThrows()
         {
@@ -125,9 +125,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("$apply query options not supported for LINQ to SQL providers",result);
         }
-#endif
     }
-
+#endif
 
     public abstract class AggregationTests : WebHostTestBase
     {

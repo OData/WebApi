@@ -130,7 +130,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
     }
 
-#if !NETCOREAPP3_0
+#if !NETCORE
     public class LinqToSqlCustomersController : BaseCustomersController
     {
         [EnableQuery]

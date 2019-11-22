@@ -60,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     public class WebHostTestFixture : IDisposable
     {
         private static readonly string NormalBaseAddressTemplate = "http://{0}:{1}";
-
+        
         private int _port;
         private bool disposedValue = false;
         private Object thisLock = new Object();
@@ -222,27 +222,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     options.EnableEndpointRouting = false;
                 });
 
+#if NETCOREAPP2_0
+                coreBuilder.AddJsonFormatters();
+#else
                 coreBuilder.AddNewtonsoftJson();
+#endif
                 coreBuilder.AddDataAnnotations();
                 services.AddOData();
             }
 
+#if NETCOREAPP2_0
+            public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+#else
             public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-            {
-
-#if NETCOREAPP3_0
-                // Make sure to allow SynchronousIO
-                app.Use(next => context =>
-                {
-                    var body = context.Features.Get<IHttpBodyControlFeature>();
-                    if (body != null)
-                    {
-                        body.AllowSynchronousIO = true;
-                    }
-                    return next(context);
-                });
 #endif
-
+            {
                 // Add a custom exception handler that returns exception as a raw string. Many of the
                 // tests expect to search for the string and UseDeveloperPage() will encode the string
                 // in Html format.
@@ -304,7 +298,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                     }
 
                     // Apply Json options.
+#if NETCORE
+#if NETCOREAPP2_0
+                    IOptions<MvcJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcJsonOptions>>();
+#else
                     IOptions<MvcNewtonsoftJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcNewtonsoftJsonOptions>>();
+#endif
+#else
+                    IOptions<MvcJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcJsonOptions>>();
+#endif
                     if (config.JsonReferenceLoopHandling.HasValue && jsonOptions != null)
                     {
                         jsonOptions.Value.SerializerSettings.ReferenceLoopHandling = config.JsonReferenceLoopHandling.Value;
@@ -408,6 +410,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             }
         }
 #else
+
         private void DefaultKatanaConfigure(IAppBuilder app)
         {
             // Set default principal to avoid OWIN selfhost bug with VS debugger

@@ -2,6 +2,7 @@
   <PropertyGroup>
   <TargetFrameworks>netcoreapp3.0;netcoreapp2.0</TargetFrameworks>
   </PropertyGroup>
+  
   <PropertyGroup>
     <ProjectGuid>{0073FACD-2887-4D0A-8D3E-BAA17749B629}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -17,32 +18,36 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="EntityFramework" Version="6.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0"/>
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.0' ">
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="System.Data.SqlClient, Version=4.4.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\System.Data.SqlClient.4.5.1\lib\net461\System.Data.SqlClient.dll</HintPath>
-    </Reference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
+    <PackageReference Include="EntityFramework" Version="6.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.6.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.6.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.2.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.DataAnnotations" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel" Version="2.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Server.Kestrel.Core" Version="2.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.1" />
+    <PackageReference Include="System.Diagnostics.EventLog" Version="4.6.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
     <PackageReference Include="Microsoft.OData.Client" Version="7.6.1" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
-    <PackageReference Include="System.Reflection.Emit" Version="4.6.0" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.assert" Version="2.4.1" />
@@ -1660,23 +1665,5 @@
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="..\..\..\..\sln\packages\Libuv.1.10.0\runtimes\win-x86\native\libuv.dll">
-      <Link>libuv.dll</Link>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.props'))" />
-    <Error Condition="!Exists('..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets'))" />
-    <Error Condition="!Exists('..\..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props'))" />
-  </Target>
-
-  <Import Project="..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets" Condition="Exists('..\..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets')" />
 
 </Project>

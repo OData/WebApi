@@ -7,10 +7,10 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNetCore.Mvc.ActionConstraints;
 using Microsoft.AspNetCore.Mvc.Controllers;
-#if NETCOREAPP3_0
-#else
-    using Microsoft.AspNetCore.Mvc.Internal;
+#if NETSTANDARD2_0
+using Microsoft.AspNetCore.Mvc.Internal;
 #endif
 
 namespace Microsoft.AspNet.OData.Adapters
@@ -58,15 +58,11 @@ namespace Microsoft.AspNet.OData.Adapters
             this.innerDescriptor = actionDescriptor;
             this.supportedHttpMethods = new List<ODataRequestMethod>();
 
-#if NETCOREAPP3_0
-            IEnumerable<string> actionMethods = null;
-#else
             // Determine the supported methods.
             IEnumerable<string> actionMethods = actionDescriptor.ActionConstraints?
                 .OfType<HttpMethodActionConstraint>()
                 .FirstOrDefault()?
                 .HttpMethods;
-#endif
 
             if (actionMethods == null)
             {

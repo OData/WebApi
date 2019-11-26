@@ -108,9 +108,15 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             ODataSerializerContext writeContext = new ODataSerializerContext();
             ODataPrimitiveSerializer serializer = new ODataPrimitiveSerializer();
 
+#if NETCOREAPP3_0
+            ExceptionAssert.Throws<ArgumentException>(
+                () => serializer.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), writeContext),
+                "The 'RootElementName' property is required on 'ODataSerializerContext'. (Parameter 'writeContext')");
+#else
             ExceptionAssert.Throws<ArgumentException>(
                 () => serializer.WriteObject(42, typeof(int), ODataTestUtil.GetMockODataMessageWriter(), writeContext),
                 "The 'RootElementName' property is required on 'ODataSerializerContext'.\r\nParameter name: writeContext");
+#endif
         }
 
         [Fact]

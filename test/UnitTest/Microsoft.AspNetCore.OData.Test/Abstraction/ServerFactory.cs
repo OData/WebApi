@@ -40,7 +40,8 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             builder.ConfigureServices(services =>
             {
 #if NETCOREAPP3_0
-                services.AddMvc(options => options.EnableEndpointRouting = false);
+                services.AddMvc(options => options.EnableEndpointRouting = false)
+                    .AddNewtonsoftJson();
 #else
                 services.AddMvc();
 #endif

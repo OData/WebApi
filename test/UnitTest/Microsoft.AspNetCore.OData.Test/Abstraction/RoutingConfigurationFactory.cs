@@ -79,9 +79,9 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             IRouteBuilder routeBuilder = new RouteBuilder(appBuilder);
 
 #if NETCOREAPP3_0
-            routeBuilder.DefaultHandler = null;
+            //appBuilder.ApplicationServices.GetRequiredService<MvcRouteHandler>();
+            routeBuilder.DefaultHandler = new MyMvcRouteHandler();
 #else
-
             routeBuilder.DefaultHandler = new MvcRouteHandler(
                 mockInvokerFactory.Object,
                 mockActionSelector.Object,
@@ -157,6 +157,19 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             applicationPartManager.ApplicationParts.Add(part);
 
             return builder;
+        }
+    }
+
+    internal class MyMvcRouteHandler : IRouter
+    {
+        public VirtualPathData GetVirtualPath(VirtualPathContext context)
+        {
+            return null;
+        }
+
+        public Task RouteAsync(RouteContext context)
+        {
+            return Task.CompletedTask;
         }
     }
 }

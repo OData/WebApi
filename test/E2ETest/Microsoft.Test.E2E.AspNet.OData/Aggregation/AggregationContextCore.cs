@@ -38,7 +38,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Persist Security Info = True;Database = AggregationEFCoreTest");
+            optionsBuilder.UseSqlServer(@"Data Source=(LocalDb)\MSSQLLocalDB;Integrated Security=True;Persist Security Info = True;Database = AggregationEFCoreTest1");
             optionsBuilder.UseLoggerFactory(ConsoleLoggerFactory);
             base.OnConfiguring(optionsBuilder);
         }

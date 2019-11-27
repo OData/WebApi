@@ -29,7 +29,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
         /// <returns>A Json formatter.</returns>
         public static OutputFormatter CreateJson(WebRouteConfiguration configuration)
         {
-#if NETCOREAPP2_0
+#if NETCOREAPP2_1
             var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcJsonOptions>>().Value;
             var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
             return new JsonOutputFormatter(options.SerializerSettings, charPool);

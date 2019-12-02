@@ -66,22 +66,22 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         private static ODataPathSegment GetFirstNonTypeCastSegment(ODataPath path,
-            Func<ODataPathSegment, bool> middleSegmentPredict,
-            Func<ODataPathSegment, bool> lastSegmentPredict,
+            Func<ODataPathSegment, bool> middleSegmentPredicte,
+            Func<ODataPathSegment, bool> lastSegmentPredicte,
             out IList<ODataPathSegment> remainingSegments) // could be null
         {
             Contract.Assert(path != null);
 
             remainingSegments = null;
             ODataPathSegment firstNonTypeSegment = null;
-            int lastIndex = path.Count() - 1;
+            int lastIndex = path.Count - 1;
             int index = 0;
             foreach (var segment in path)
             {
                 if (index == lastIndex)
                 {
                     // Last segment
-                    if (!lastSegmentPredict(segment))
+                    if (!lastSegmentPredicte(segment))
                     {
                         throw new ODataException(Error.Format(SRResources.InvalidLastSegmentInSelectExpandPath, segment.GetType().Name));
                     }
@@ -89,7 +89,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 else
                 {
                     // middle segment
-                    if (!middleSegmentPredict(segment))
+                    if (!middleSegmentPredicte(segment))
                     {
                         throw new ODataException(Error.Format(SRResources.InvalidSegmentInSelectExpandPath, segment.GetType().Name));
                     }
@@ -103,6 +103,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     {
                         remainingSegments = new List<ODataPathSegment>();
                     }
+
+                    Contract.Assert(remainingSegments != null);
 
                     remainingSegments.Add(segment);
                     continue;

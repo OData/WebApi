@@ -9,7 +9,7 @@ using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
-    internal class SelectExpandIncludeProperty
+    internal class SelectExpandIncludedProperty
     {
         /// <summary>
         /// the corresponding property segment.
@@ -33,20 +33,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private IList<SelectItem> _subSelectItems;
 
         /// <summary>
-        /// Creates a new instance of the <see cref="SelectExpandIncludeProperty"/> class.
+        /// Creates a new instance of the <see cref="SelectExpandIncludedProperty"/> class.
         /// </summary>
         /// <param name="propertySegment">The property segment that has this select expand item.</param>
-        public SelectExpandIncludeProperty(PropertySegment propertySegment)
+        public SelectExpandIncludedProperty(PropertySegment propertySegment)
             : this(propertySegment, null)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of the <see cref="SelectExpandIncludeProperty"/> class.
+        /// Creates a new instance of the <see cref="SelectExpandIncludedProperty"/> class.
         /// </summary>
         /// <param name="propertySegment">The property segment that has this select expand item.</param>
         /// <param name="navigationSource">The targe navigation source of this property segment.</param>
-        public SelectExpandIncludeProperty(PropertySegment propertySegment, IEdmNavigationSource navigationSource)
+        public SelectExpandIncludedProperty(PropertySegment propertySegment, IEdmNavigationSource navigationSource)
         {
             if (propertySegment == null)
             {
@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         /// <summary>
-        /// Gets the merged path select item for this property, <see cref="PathSelectItem"/>.
+        /// Gets the merged <see cref="PathSelectItem"/> for this property.
         /// </summary>
         /// <returns>Null or the created <see cref="PathSelectItem"/>.</returns>
         public PathSelectItem ToPathSelectItem()
@@ -73,8 +73,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (_propertySelectItem != null && _propertySelectItem.SelectAndExpand != null)
             {
                 // Retrieve the "IsSelectAll" from the property sub selectexpand clause.
-                isSelectAll = this._propertySelectItem.SelectAndExpand.AllSelected;
-                foreach (var selectItem in this._propertySelectItem.SelectAndExpand.SelectedItems)
+                isSelectAll = _propertySelectItem.SelectAndExpand.AllSelected;
+                foreach (var selectItem in _propertySelectItem.SelectAndExpand.SelectedItems)
                 {
                     _subSelectItems.Add(selectItem);
                 }

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
-    public class SelectExpandIncludedPropertyTest
+    public class SelectExpandIncludePropertyTest
     {
         [Fact]
         public void Constructor_ThrowsPropertySegmentArgumentNull_IfMissPropertySegment()

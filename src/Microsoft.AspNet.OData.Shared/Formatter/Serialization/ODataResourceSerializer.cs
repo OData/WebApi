@@ -162,10 +162,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Name));
             }
 
-            foreach (var selectedComplex in complexProperties)
+            foreach (IEdmStructuralProperty complexProperty in complexProperties)
             {
-                IEdmStructuralProperty complexProperty = selectedComplex;
-
                 ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
                 {
                     IsCollection = complexProperty.Type.IsCollection(),
@@ -564,10 +562,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // It is used to make sure the dynamic property name is different from all declared property names.
             HashSet<string> declaredPropertyNameSet = new HashSet<string>(resource.Properties.Select(p => p.Name));
             List<ODataProperty> dynamicProperties = new List<ODataProperty>();
+
+            // To test SelectedDynamicProperties == null is enough to filter the dynamic properties.
+            // Because if SelectAllDynamicProperties == true, SelectedDynamicProperties should be null always.
+            // So `selectExpandNode.SelectedDynamicProperties == null` covers `SelectAllDynamicProperties == true` scenario.
+            // If `selectExpandNode.SelectedDynamicProperties != null`, then we should test whether the property is selected or not using "Contains(...)".
             IEnumerable<KeyValuePair<string, object>> dynamicPropertiesToSelect =
-                dynamicPropertyDictionary.Where(x =>
-                selectExpandNode.SelectedDynamicProperties == null // if SelectedDynamicProperties == null, means SelectAllDynamicProperties == true
-                || selectExpandNode.SelectedDynamicProperties.Contains(x.Key));
+                dynamicPropertyDictionary.Where(x => selectExpandNode.SelectedDynamicProperties == null || selectExpandNode.SelectedDynamicProperties.Contains(x.Key));
             foreach (KeyValuePair<string, object> dynamicProperty in dynamicPropertiesToSelect)
             {
                 if (String.IsNullOrEmpty(dynamicProperty.Key))
@@ -698,7 +699,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 return;
             }
 
-            foreach (var dynamicComplexProperty in resourceContext.DynamicComplexProperties)
+            foreach (KeyValuePair<string, object> dynamicComplexProperty in resourceContext.DynamicComplexProperties)
             {
                 // If the dynamic property is "null", it should be treated ahead by creating an ODataProperty with ODataNullValue.
                 // However, it's safety here to skip the null dynamic property.
@@ -755,7 +756,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            var complexProperties = selectExpandNode.SelectedComplexes;
+            IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = selectExpandNode.SelectedComplexes;
             if (complexProperties == null)
             {
                 return;
@@ -768,7 +769,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 complexProperties = complexProperties.Where(p => changedProperties.Contains(p.Key.Name)).ToDictionary(a => a.Key, a => a.Value);
             }
 
-            foreach (var selectedComplex in complexProperties)
+            foreach (KeyValuePair<IEdmStructuralProperty, PathSelectItem> selectedComplex in complexProperties)
             {
                 IEdmStructuralProperty complexProperty = selectedComplex.Key;
 
@@ -789,7 +790,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            var navigationPropertiesToExpand = selectExpandNode.ExpandedProperties;
+            IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> navigationPropertiesToExpand = selectExpandNode.ExpandedProperties;
             if (navigationPropertiesToExpand == null)
             {
                 return;
@@ -814,13 +815,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
 
-            var referencedPropertiesToExpand = selectExpandNode.ReferencedProperties;
+            IDictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> referencedPropertiesToExpand = selectExpandNode.ReferencedProperties;
             if (referencedPropertiesToExpand == null)
             {
                 return;
             }
 
-            foreach (var referenced in referencedPropertiesToExpand)
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedReferenceSelectItem> referenced in referencedPropertiesToExpand)
             {
                 IEdmNavigationProperty navigationProperty = referenced.Key;
 

@@ -319,7 +319,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     out propertiesToExpand,
                     out autoSelectedProperties);
 
-                bool isSelectingOpenTypeSegments = isContainDynamicPropertySelection || IsSelectsOpenTypeSegments(selectExpandClause, structuredType);
+                bool isSelectingOpenTypeSegments = isContainDynamicPropertySelection || IsSelectAllOnOpenType(selectExpandClause, structuredType);
 
                 if (propertiesToExpand != null || propertiesToInclude != null || autoSelectedProperties != null || isSelectingOpenTypeSegments)
                 {
@@ -370,7 +370,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             autoSelectedProperties = null;
 
             bool isContainDynamicPropertySelect = false;
-            var currentLevelPropertiesInclude = new Dictionary<IEdmStructuralProperty, SelectExpandIncludeProperty>();
+            var currentLevelPropertiesInclude = new Dictionary<IEdmStructuralProperty, SelectExpandIncludedProperty>();
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
                 // $expand=...
@@ -459,7 +459,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <param name="propertiesToExpand">out/ref, the property expanded.</param>
         private static void ProcessExpandedItem(ExpandedReferenceSelectItem expandedItem,
             IEdmNavigationSource navigationSource,
-            IDictionary<IEdmStructuralProperty, SelectExpandIncludeProperty> currentLevelPropertiesInclude,
+            IDictionary<IEdmStructuralProperty, SelectExpandIncludedProperty> currentLevelPropertiesInclude,
             ref IDictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand)
         {
             Contract.Assert(expandedItem != null && expandedItem.PathToNavigationProperty != null);
@@ -478,10 +478,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // for example: $expand=abc/nav, the remaining segments should never be null because at least the last navigation segment is there.
                 Contract.Assert(remainingSegments != null);
 
-                SelectExpandIncludeProperty newPropertySelectItem;
+                SelectExpandIncludedProperty newPropertySelectItem;
                 if (!currentLevelPropertiesInclude.TryGetValue(firstStructuralPropertySegment.Property, out newPropertySelectItem))
                 {
-                    newPropertySelectItem = new SelectExpandIncludeProperty(firstStructuralPropertySegment, navigationSource);
+                    newPropertySelectItem = new SelectExpandIncludedProperty(firstStructuralPropertySegment, navigationSource);
                     currentLevelPropertiesInclude[firstStructuralPropertySegment.Property] = newPropertySelectItem;
                 }
 
@@ -516,7 +516,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>true if it's dynamic property selection, false if it's not.</returns>
         private static bool ProcessSelectedItem(PathSelectItem pathSelectItem,
             IEdmNavigationSource navigationSource,
-            IDictionary<IEdmStructuralProperty, SelectExpandIncludeProperty> currentLevelPropertiesInclude)
+            IDictionary<IEdmStructuralProperty, SelectExpandIncludedProperty> currentLevelPropertiesInclude)
         {
             Contract.Assert(pathSelectItem != null && pathSelectItem.SelectedPath != null);
             Contract.Assert(currentLevelPropertiesInclude != null);
@@ -532,10 +532,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (firstSturucturalPropertySegment != null)
             {
                 // $select=abc/..../xyz
-                SelectExpandIncludeProperty newPropertySelectItem;
+                SelectExpandIncludedProperty newPropertySelectItem;
                 if (!currentLevelPropertiesInclude.TryGetValue(firstSturucturalPropertySegment.Property, out newPropertySelectItem))
                 {
-                    newPropertySelectItem = new SelectExpandIncludeProperty(firstSturucturalPropertySegment, navigationSource);
+                    newPropertySelectItem = new SelectExpandIncludedProperty(firstSturucturalPropertySegment, navigationSource);
                     currentLevelPropertiesInclude[firstSturucturalPropertySegment.Property] = newPropertySelectItem;
                 }
 
@@ -560,7 +560,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return false;
         }
 
-        private static bool IsSelectsOpenTypeSegments(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType)
+        // To test whether the currect selection is SelectAll on an open type
+        private static bool IsSelectAllOnOpenType(SelectExpandClause selectExpandClause, IEdmStructuredType structuredType)
         {
             if (structuredType == null || !structuredType.IsOpen)
             {
@@ -876,8 +877,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 selectItems.Add(new PathSelectItem(new ODataSelectPath(new PropertySegment(keyProperty))));
             }
 
-            // TODO: Sam, it seems we can only create a "SelectAll==false" and leave the "SelectItems as empty",
-            // because the keys will be included auto-selected.
             return new SelectExpandClause(selectItems, false);
         }
 

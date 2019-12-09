@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
-using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -22,7 +21,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <param name="selectPath">The input $select path.</param>
         /// <param name="remainingSegments">The remaining segments after the first non type segment.</param>
         /// <returns>First non-type cast segment.</returns>
-        public static ODataPathSegment GetFirstNonTypeCastSegment(this ODataSelectPath selectPath, out IList<ODataPathSegment> remainingSegments)
+        public static ODataPathSegment GetFirstNonTypeCastSegment(this ODataSelectPath selectPath,
+            out IList<ODataPathSegment> remainingSegments)
         {
             if (selectPath == null)
             {
@@ -104,14 +104,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         remainingSegments = new List<ODataPathSegment>();
                     }
 
-                    Contract.Assert(remainingSegments != null);
-
                     remainingSegments.Add(segment);
                     continue;
                 }
 
-                // Theorically, a path like:  "~/NS.BaseType/NS.SubType1/NS.SubType2/PropertyOnSubType2" is valid(?) but not allowed.
-                // However, the functionality of above path is same as "~/NS.SubType2/PropertyOnSubType2".
+                // Theoretically, a path like:  "~/NS.BaseType/NS.SubType1/NS.SubType2/PropertyOnSubType2" is valid(?) but not allowed.
+                // However, the functionality of the above path is same as "~/NS.SubType2/PropertyOnSubType2" (omit the middle type cast).
                 // So, Let's only care about the last segment in the leading segments.
                 // if we have the leading segments, and the last segment must be the type segment and it's verified.
                 if (segment is TypeSegment)

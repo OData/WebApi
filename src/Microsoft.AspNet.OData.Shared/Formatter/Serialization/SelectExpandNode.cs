@@ -208,7 +208,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     SelectAllDynamicProperties = true;
 
-                    // includes primitive, enum, complex or collection of them
+                    // includes navigation properties
                     SelectedNavigationProperties = structuralTypeInfo.AllNavigationProperties;
 
                     // includes all bound actions
@@ -245,7 +245,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(selectExpandClause != null);
             Contract.Assert(structuralTypeInfo != null);
 
-            var currentLevelPropertiesInclude = new Dictionary<IEdmStructuralProperty, SelectExpandIncludeProperty>();
+            var currentLevelPropertiesInclude = new Dictionary<IEdmStructuralProperty, SelectExpandIncludedProperty>();
 
             // Explicitly set SelectAllDynamicProperties as false,
             // Below will re-set it as true if it meets the select all condition.
@@ -301,7 +301,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // at least to make sure the structural properties are in the same order of the order defined in the type.
             foreach (var structuralProperty in structuralTypeInfo.AllStructuralProperties)
             {
-                SelectExpandIncludeProperty includeProperty;
+                SelectExpandIncludedProperty includeProperty;
                 if (!currentLevelPropertiesInclude.TryGetValue(structuralProperty, out includeProperty))
                 {
                     continue;
@@ -319,7 +319,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="currentLevelPropertiesInclude">The current properties to include at current level.</param>
         /// <param name="structuralTypeInfo">The structural type properties.</param>
         private void BuildExpandItem(ExpandedReferenceSelectItem expandReferenceItem,
-            IDictionary<IEdmStructuralProperty, SelectExpandIncludeProperty> currentLevelPropertiesInclude,
+            IDictionary<IEdmStructuralProperty, SelectExpandIncludedProperty> currentLevelPropertiesInclude,
             EdmStructuralTypeInfo structuralTypeInfo)
         {
             Contract.Assert(expandReferenceItem != null && expandReferenceItem.PathToNavigationProperty != null);
@@ -340,10 +340,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 if (structuralTypeInfo.IsStructuralPropertyDefined(firstPropertySegment.Property))
                 {
-                    SelectExpandIncludeProperty newPropertySelectItem;
+                    SelectExpandIncludedProperty newPropertySelectItem;
                     if (!currentLevelPropertiesInclude.TryGetValue(firstPropertySegment.Property, out newPropertySelectItem))
                     {
-                        newPropertySelectItem = new SelectExpandIncludeProperty(firstPropertySegment);
+                        newPropertySelectItem = new SelectExpandIncludedProperty(firstPropertySegment);
                         currentLevelPropertiesInclude[firstPropertySegment.Property] = newPropertySelectItem;
                     }
 
@@ -394,7 +394,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="currentLevelPropertiesInclude">The current properties to include at current level.</param>
         /// <param name="structuralTypeInfo">The structural type properties.</param>
         private void BuildSelectItem(PathSelectItem pathSelectItem,
-            IDictionary<IEdmStructuralProperty, SelectExpandIncludeProperty> currentLevelPropertiesInclude,
+            IDictionary<IEdmStructuralProperty, SelectExpandIncludedProperty> currentLevelPropertiesInclude,
             EdmStructuralTypeInfo structuralTypeInfo)
         {
             Contract.Assert(pathSelectItem != null && pathSelectItem.SelectedPath != null);
@@ -412,10 +412,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 if (structuralTypeInfo.IsStructuralPropertyDefined(firstPropertySegment.Property))
                 {
                     // $select=abc/xyz/...
-                    SelectExpandIncludeProperty newPropertySelectItem;
+                    SelectExpandIncludedProperty newPropertySelectItem;
                     if (!currentLevelPropertiesInclude.TryGetValue(firstPropertySegment.Property, out newPropertySelectItem))
                     {
-                        newPropertySelectItem = new SelectExpandIncludeProperty(firstPropertySegment);
+                        newPropertySelectItem = new SelectExpandIncludedProperty(firstPropertySegment);
                         currentLevelPropertiesInclude[firstPropertySegment.Property] = newPropertySelectItem;
                     }
 
@@ -471,7 +471,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private static void MergeAllStructuralProperties(ISet<IEdmStructuralProperty> allStructuralProperties,
-            IDictionary<IEdmStructuralProperty, SelectExpandIncludeProperty> currentLevelPropertiesInclude)
+            IDictionary<IEdmStructuralProperty, SelectExpandIncludedProperty> currentLevelPropertiesInclude)
         {
             if (allStructuralProperties == null)
             {

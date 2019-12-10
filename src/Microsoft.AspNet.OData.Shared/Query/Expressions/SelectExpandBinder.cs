@@ -369,7 +369,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             propertiesToExpand = null;
             autoSelectedProperties = null;
 
-            bool isContainDynamicPropertySelect = false;
+            bool isSelectContainsDynamicProperty = false;
             var currentLevelPropertiesInclude = new Dictionary<IEdmStructuralProperty, SelectExpandIncludedProperty>();
             foreach (SelectItem selectItem in selectExpandClause.SelectedItems)
             {
@@ -387,7 +387,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 {
                     if (ProcessSelectedItem(pathItem, navigationSource, currentLevelPropertiesInclude))
                     {
-                        isContainDynamicPropertySelect = true;
+                        isSelectContainsDynamicProperty = true;
                     }
                     continue;
                 }
@@ -447,7 +447,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
-            return isContainDynamicPropertySelect;
+            return isSelectContainsDynamicProperty;
         }
 
         /// <summary>

@@ -945,6 +945,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         // new CollectionWrapper<ElementType> { Instance = source.Select((ElementType element) => new Wrapper { }) }
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
         private Expression ProjectCollection(Expression source, Type elementType,
             SelectExpandClause selectExpandClause, IEdmStructuredType structuredType, IEdmNavigationSource navigationSource,
             OrderByClause orderByClause,

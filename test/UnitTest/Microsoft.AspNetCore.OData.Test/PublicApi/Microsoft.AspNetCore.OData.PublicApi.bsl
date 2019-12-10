@@ -3474,13 +3474,20 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedReferenceSelectItem]] ReferencedProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmAction]] SelectedActions  { public get; }
-	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmStructuralProperty],[Microsoft.OData.UriParser.PathSelectItem]] SelectedComplexes  { public get; }
+	[
+	ObsoleteAttribute(),
+	]
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedComplexProperties  { public get; }
+
+	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmStructuralProperty],[Microsoft.OData.UriParser.PathSelectItem]] SelectedComplexTypeProperties  { public get; }
 	System.Collections.Generic.ISet`1[[System.String]] SelectedDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmFunction]] SelectedFunctions  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] SelectedNavigationProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedStructuralProperties  { public get; }
 
+	[
+	ObsoleteAttribute(),
+	]
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -37,8 +38,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             SelectedStructuralProperties = selectExpandNodeToCopy.SelectedStructuralProperties == null ?
                 null : new HashSet<IEdmStructuralProperty>(selectExpandNodeToCopy.SelectedStructuralProperties);
 
-            SelectedComplexes = selectExpandNodeToCopy.SelectedComplexes == null ?
-                null : new Dictionary<IEdmStructuralProperty, PathSelectItem>(selectExpandNodeToCopy.SelectedComplexes);
+            SelectedComplexTypeProperties = selectExpandNodeToCopy.SelectedComplexTypeProperties == null ?
+                null : new Dictionary<IEdmStructuralProperty, PathSelectItem>(selectExpandNodeToCopy.SelectedComplexTypeProperties);
 
             SelectedNavigationProperties = selectExpandNodeToCopy.SelectedNavigationProperties == null ?
                 null : new HashSet<IEdmNavigationProperty>(selectExpandNodeToCopy.SelectedNavigationProperties);
@@ -108,16 +109,17 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets the list of EDM nested properties (complex or collection of complex) to be included in the response.
         /// keeping this is only for non-breaking changes, This should be replaced by "SelectedComplexes".
         /// </summary>
+        [Obsolete("This property will be removed later, please use SelectedComplexTypeProperties.")]
         public ISet<IEdmStructuralProperty> SelectedComplexProperties
         {
             get
             {
-                if (SelectedComplexes == null)
+                if (SelectedComplexTypeProperties == null)
                 {
                     return null;
                 }
 
-                return new HashSet<IEdmStructuralProperty>(SelectedComplexes.Keys);
+                return new HashSet<IEdmStructuralProperty>(SelectedComplexTypeProperties.Keys);
             }
         }
 
@@ -137,7 +139,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// The key is the Edm structural property.
         /// The value is the potential sub select item.
         /// </summary>
-        public IDictionary<IEdmStructuralProperty, PathSelectItem> SelectedComplexes { get; internal set; }
+        public IDictionary<IEdmStructuralProperty, PathSelectItem> SelectedComplexTypeProperties { get; internal set; }
 
         /// <summary>
         /// Gets the list of EDM navigation properties to be expanded in the response along with the nested query options embedded in the expand.
@@ -548,12 +550,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (isComplexOrCollectComplex)
             {
-                if (SelectedComplexes == null)
+                if (SelectedComplexTypeProperties == null)
                 {
-                    SelectedComplexes = new Dictionary<IEdmStructuralProperty, PathSelectItem>();
+                    SelectedComplexTypeProperties = new Dictionary<IEdmStructuralProperty, PathSelectItem>();
                 }
 
-                SelectedComplexes[structuralProperty] = pathSelectItem;
+                SelectedComplexTypeProperties[structuralProperty] = pathSelectItem;
             }
             else
             {
@@ -677,6 +679,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="structuredType">The structural type of the resource.</param>
         /// <param name="structuralProperties">The non-nested structural properties of the structural type.</param>
         /// <param name="nestedStructuralProperties">The nested structural properties of the structural type.</param>
+        [Obsolete("This public method is not used anymore. It will be removed later.")]
         public static void GetStructuralProperties(IEdmStructuredType structuredType, HashSet<IEdmStructuralProperty> structuralProperties,
             HashSet<IEdmStructuralProperty> nestedStructuralProperties)
         {

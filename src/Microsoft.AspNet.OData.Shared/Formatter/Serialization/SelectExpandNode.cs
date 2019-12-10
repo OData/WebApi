@@ -92,6 +92,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets the list of EDM navigation properties to be expand referenced in the response.
         /// keeping this is only for non-breaking changes, This should be replaced by "ReferencedProperties" later.
         /// </summary>
+        [Obsolete("This property will be removed later, please use ReferencedProperties.")]
         public ISet<IEdmNavigationProperty> ReferencedNavigationProperties
         {
             get

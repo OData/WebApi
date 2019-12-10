@@ -82,8 +82,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             int propertyValue = 42;
             Expression propertyNameExpression = Expression.Constant(propertyName);
             Expression propertyValueExpression = Expression.Constant(propertyValue);
+            Expression rawPropertyValueExpression = Expression.Constant(propertyValue);
             Expression nullCheckExpression = Expression.Constant(false);
-            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression) { NullCheck = nullCheckExpression } };
+            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression) { NullCheck = nullCheckExpression, RawValue = rawPropertyValueExpression } };
 
             // Act
             Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
@@ -96,13 +97,36 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void CreatePropertyContainer_WithNullCheckFalseAndNullProperty_PropertyIsNull()
+        {
+            // Arrange
+            string propertyName = "PropertyName";
+            object propertyValue = 42;
+            object rawPropertyValue = null;
+            Expression propertyNameExpression = Expression.Constant(propertyName);
+            Expression propertyValueExpression = Expression.Constant(propertyValue);
+            Expression rawPropertyValueExpression = Expression.Constant(rawPropertyValue);
+            Expression nullCheckExpression = Expression.Constant(false);
+            var properties = new[] { new NamedPropertyExpression(propertyNameExpression, propertyValueExpression) { NullCheck = nullCheckExpression, RawValue = rawPropertyValueExpression } };
+
+            // Act
+            Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
+
+            // Assert
+            PropertyContainer container = ToContainer(containerExpression);
+            var dict = container.ToDictionary(new IdentityPropertyMapper());
+            Assert.Contains(propertyName, dict.Keys);
+            Assert.Null(dict[propertyName]);
+        }
+
+        [Fact]
         public void CreatePropertyContainer_MultiplePropertiesWithNullCheck()
         {
             // Arrange
             var properties = new[] 
             { 
                 new NamedPropertyExpression(name: Expression.Constant("Prop1"), value: Expression.Constant(1)) { NullCheck = Expression.Constant(true) },
-                new NamedPropertyExpression(name: Expression.Constant("Prop2"), value: Expression.Constant(2)) { NullCheck = Expression.Constant(false) },
+                new NamedPropertyExpression(name: Expression.Constant("Prop2"), value: Expression.Constant(2)) { NullCheck = Expression.Constant(false), RawValue = Expression.Constant(2) },
             };
 
             // Act

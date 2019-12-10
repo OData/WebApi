@@ -703,6 +703,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // Sub select and expand could be null if the expanded navigation property is not further projected or expanded.
             SelectExpandClause subSelectExpandClause = GetOrCreateSelectExpandClause(navigationProperty, expandedItem);
 
+            Expression rawPropertyValue = propertyValue;
             Expression nullCheck = GetNullCheckExpression(navigationProperty, propertyValue, subSelectExpandClause);
 
             Expression countExpression = CreateTotalCountExpression(propertyValue, expandedItem.CountOption);
@@ -720,6 +721,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (!navigationProperty.Type.IsCollection())
                 {
                     propertyExpression.NullCheck = nullCheck;
+                    propertyExpression.RawValue = rawPropertyValue;
                 }
                 else if (_settings.PageSize.HasValue)
                 {
@@ -786,6 +788,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return;
             }
 
+            Expression rawPropertyValue = propertyValue;
             Expression nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
 
             Expression countExpression = CreateTotalCountExpression(propertyValue, pathSelectItem.CountOption);
@@ -810,7 +813,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 if (!structuralProperty.Type.IsCollection())
                 {
-                     propertyExpression.NullCheck = nullCheck;
+                    propertyExpression.NullCheck = nullCheck;
+                    propertyExpression.RawValue = rawPropertyValue;
                 }
                 else if (_settings.PageSize.HasValue)
                 {

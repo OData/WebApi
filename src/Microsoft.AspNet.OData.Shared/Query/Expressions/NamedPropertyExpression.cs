@@ -34,6 +34,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         // and use Value only if IsNull is false.
         public Expression NullCheck { get; set; }
 
+        public Expression RawValue { get; set; }
+
         public int? PageSize { get; set; }
 
         public bool AutoSelected { get; set; }

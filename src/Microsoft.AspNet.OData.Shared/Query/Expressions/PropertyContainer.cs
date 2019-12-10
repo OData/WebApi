@@ -137,6 +137,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
             }
 
+            if (property.RawValue != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("RawValue"), property.RawValue));
+            }
+
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
 
@@ -172,6 +177,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             public string Name { get; set; }
 
             public T Value { get; set; }
+
+            public object RawValue { get; set; }
 
             public bool AutoSelected { get; set; }
 
@@ -212,7 +219,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             public override object GetValue()
             {
-                return IsNull ? (object)null : Value;
+                return (IsNull || RawValue == null) ? (object)null : Value;
             }
         }
 

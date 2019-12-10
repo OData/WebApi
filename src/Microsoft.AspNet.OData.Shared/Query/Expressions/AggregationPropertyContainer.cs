@@ -154,6 +154,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("IsNull"), property.NullCheck));
             }
 
+            if (property.RawValue != null)
+            {
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("RawValue"), property.RawValue));
+            }
+
             return Expression.MemberInit(Expression.New(namedPropertyType), memberBindings);
         }
     }

@@ -121,7 +121,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
-        public void Bind_GeneratedExpression_CheckNullObjectWithinChainProjectionByKey()
+        public void Bind_GeneratedExpression_CheckNullObjectAndRawValueWithinChainProjectionByKey()
         {
             // Arrange
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(null, "Orders($expand=Customer($select=City))", _context);
@@ -133,9 +133,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var unaryExpression = (UnaryExpression)((MethodCallExpression)queryable.Expression).Arguments.Single(a => a is UnaryExpression);
             var expressionString = unaryExpression.Operand.ToString();
 #if NETCORE
-            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id, Nullable`1) == null)}", expressionString);
+            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id, Nullable`1) == null), RawValue = Param_1.Customer}", expressionString);
 #else
-            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id) == null)}", expressionString);
+            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id) == null), RawValue = Param_1.Customer}", expressionString);
 #endif
         }
 

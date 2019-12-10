@@ -191,8 +191,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         AddKeyValues(anotherKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
                     }
                 }
-
-                
             }
         }
 

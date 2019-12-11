@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
@@ -134,7 +135,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class EfCustomersController : TestODataController
+    public class EfCustomersController : TestODataController, IDisposable
     {
         private readonly DateAndTimeOfDayContext _db = new DateAndTimeOfDayContext();
 
@@ -183,11 +184,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
             return Ok();
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
+
     }
 
-    public class EfPeopleController : TestODataController
+    public class EfPeopleController : TestODataController, IDisposable
     {
-        private static EdmDateWithEfContext _db = new EdmDateWithEfContext();
+        private static readonly EdmDateWithEfContext _db = new EdmDateWithEfContext();
 
         static EfPeopleController()
         {
@@ -220,6 +227,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         public async Task<TestSingleResult<EfPerson>> Get(int key)
         {
             return await Task.FromResult(TestSingleResult.Create(_db.People.Where(c => c.Id == key)));
+        }
+
+        public void Dispose()
+        {
+          //  _db.Dispose();
         }
     }
 }

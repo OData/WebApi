@@ -8,10 +8,14 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Test.Formatter;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Formatters;
+#if NETCOREAPP3_0
+#else
 using Microsoft.AspNetCore.Mvc.Internal;
+#endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
@@ -72,7 +76,8 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 
             var formatterContext = new OutputFormatterWriteContext(
                 request.HttpContext,
-                request.HttpContext.RequestServices.GetRequiredService<IHttpResponseStreamWriterFactory>().CreateWriter,
+                //request.HttpContext.RequestServices.GetRequiredService<IHttpResponseStreamWriterFactory>().CreateWriter,
+                new ODataMediaTypeFormattersTests.TestHttpResponseStreamWriterFactory().CreateWriter,
                 objectType,
                 content.Value);
 

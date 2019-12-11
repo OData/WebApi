@@ -10,7 +10,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 {
-    public class ForeignKeyCustomersController : TestODataController
+    public class ForeignKeyCustomersController : TestODataController, IDisposable
     {
         ForeignKeyContext _db = new ForeignKeyContext();
 
@@ -83,9 +83,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
             _db.SaveChanges();
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
     }
 
-    public class ForeignKeyOrdersController : TestODataController
+    public class ForeignKeyOrdersController : TestODataController, IDisposable
     {
         private readonly ForeignKeyContext _db = new ForeignKeyContext();
 
@@ -99,10 +104,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
             return Ok(order);
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
+
     }
 
     // ActionOnDelete = none
-    public class ForeignKeyCustomersNoCascadeController : TestODataController
+    public class ForeignKeyCustomersNoCascadeController : TestODataController, IDisposable
     {
         ForeignKeyContextNoCascade _db = new ForeignKeyContextNoCascade();
 
@@ -182,9 +193,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 
             _db.SaveChanges();
         }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
     }
 
-    public class ForeignKeyOrdersNoCascadeController : TestODataController
+    public class ForeignKeyOrdersNoCascadeController : TestODataController, IDisposable
     {
         private readonly ForeignKeyContextNoCascade _db = new ForeignKeyContextNoCascade();
 
@@ -218,6 +234,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
             }
 
             return StatusCode(HttpStatusCode.NoContent);
+        }
+
+        public void Dispose()
+        {
+            // _db.Dispose();
         }
     }
 }

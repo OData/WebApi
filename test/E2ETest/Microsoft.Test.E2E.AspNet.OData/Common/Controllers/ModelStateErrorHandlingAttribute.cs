@@ -4,6 +4,7 @@
 #if NETCORE
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System;
 #else
 using System.Net.Http;
 using System.Web.Http;
@@ -13,6 +14,7 @@ using System.Web.Http.Filters;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 {
+    [AttributeUsage(AttributeTargets.Class)]
     public class ModelStateErrorHandlingAttribute : ActionFilterAttribute
     {
 #if NETCORE

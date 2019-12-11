@@ -20,12 +20,19 @@
           <dependency id="Microsoft.Extensions.DependencyInjection" version="$DependencyInjection2PackageDependency$" />
           <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
         </group>
+        <group targetFramework=".NETCoreApp3.0">
+          <dependency id="Newtonsoft.Json" version="$NewtonsoftJsonPackageDependency$" />
+          <dependency id="Microsoft.OData.Core" version="$ODataLibPackageDependency$" />
+        </group>
       </dependencies>
   </metadata>
   <files>
     <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.dll" target="lib\netstandard2.0" />
     <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.pdb" target="lib\netstandard2.0" />
     <file src="$ProductRoot$\netstandard2.0\Microsoft.AspNetCore.OData.xml" target="lib\netstandard2.0" />
+    <file src="$ProductRoot$\netcoreapp3.0\Microsoft.AspNetCore.OData.dll" target="lib\netcoreapp3.0" />
+    <file src="$ProductRoot$\netcoreapp3.0\Microsoft.AspNetCore.OData.pdb" target="lib\netcoreapp3.0" />
+    <file src="$ProductRoot$\netcoreapp3.0\Microsoft.AspNetCore.OData.xml" target="lib\netcoreapp3.0" />
     <file src="$SourcesRoot$\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
   </files>

@@ -28,6 +28,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     /// <summary>
     /// The WebHostTestFixture is create a web host to be used for a test.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
     public class WebHostLogExceptionFilter : ActionFilterAttribute
     {
         /// <summary>

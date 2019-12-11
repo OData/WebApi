@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29418.71
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{31D1EFDE-8A05-4489-9621-3B163D48B0F0}"
 EndProject
@@ -18,6 +18,8 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Microsoft.AspNet.OData.Test.Shared", "..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.shproj", "{D909E7AB-3281-46EA-929B-F35FE7E94B0F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.Test", "..\test\UnitTest\Microsoft.AspNetCore.OData.Test\Microsoft.AspNetCore.OData.Test.csproj", "{2B8085F7-3625-489E-A963-E29C2BD1AA76}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore3xODataSample.Web", "..\samples\AspNetCore3xODataSample.Web\AspNetCore3xODataSample.Web.csproj", "{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
@@ -48,6 +50,12 @@ Global
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.CodeAnalysis|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.CodeAnalysis|Any CPU.Build.0 = Debug|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,6 +66,7 @@ Global
 		{0D53FCCE-2173-4FDB-A552-C3BBB71DDC49} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
 		{D909E7AB-3281-46EA-929B-F35FE7E94B0F} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
 		{2B8085F7-3625-489E-A963-E29C2BD1AA76} = {2F6228EC-37EE-4FCB-A38A-B94EE472E70E}
+		{C5DD33B7-A5C9-431C-93D1-C2176C20F12B} = {3789AD84-4A87-45C1-BD5C-3B4BE39157C8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {731B144D-90AE-4567-B337-7CFE9965AACC}

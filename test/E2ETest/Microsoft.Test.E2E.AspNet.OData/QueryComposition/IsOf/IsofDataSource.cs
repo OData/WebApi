@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
 {
-    public class IsofDataSource
+    public class IsofDataSource : IDisposable
     {
         private static BillingCustomerContextTest _context = null;
         private static IEnumerable<BillingCustomer> _customers = null;
@@ -54,7 +54,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
                 return _billings;
             }
         }
-
 
         public static IEnumerable<BillingCustomer> InMemoryCustomers
         {
@@ -142,6 +141,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
                     _context.SaveChanges();
                 }
             }
+        }
+
+        public void Dispose()
+        {
+            // _context.Dispose();
         }
     }
 

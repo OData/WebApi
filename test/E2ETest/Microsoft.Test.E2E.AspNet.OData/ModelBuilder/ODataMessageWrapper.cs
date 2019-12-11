@@ -10,7 +10,7 @@ using Microsoft.OData;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage
+    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IDisposable
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
@@ -101,6 +101,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public void SetHeader(string headerName, string headerValue)
         {
             _headers.Add(headerName, headerValue);
+        }
+
+        public void Dispose()
+        {
+            _stream.Dispose();
         }
     }
 }

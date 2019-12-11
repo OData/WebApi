@@ -17,6 +17,7 @@ using Microsoft.Net.Http.Headers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Newtonsoft.Json;
 using Xunit;
+using Xunit.Abstractions;
 #else
 using System;
 using System.IO;
@@ -33,7 +34,11 @@ using Xunit;
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
 #if NETCORE
+#if NETCOREAPP2_1
     public class JsonpMediaTypeFormatter : JsonOutputFormatter
+#else
+    public class JsonpMediaTypeFormatter : NewtonsoftJsonOutputFormatter
+#endif
 #else
     public class JsonpMediaTypeFormatter : JsonMediaTypeFormatter
 #endif
@@ -46,18 +51,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public static JsonpMediaTypeFormatter Create(WebRouteConfiguration configuration)
         {
 #if NETCORE
+#if NETCOREAPP2_1
             var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcJsonOptions>>().Value;
             var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
             options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             return new JsonpMediaTypeFormatter(options.SerializerSettings, charPool);
+#else
+            var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value;
+            var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
+            options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
+            return new JsonpMediaTypeFormatter(options.SerializerSettings, charPool, new MvcOptions());
+#endif
 #else
             return new JsonpMediaTypeFormatter();
 #endif
         }
 
 #if NETCORE
+#if NETCOREAPP2_1
         private JsonpMediaTypeFormatter(JsonSerializerSettings serializerSettings, ArrayPool<char> charPool)
         : base(serializerSettings, charPool)
+#else
+        private JsonpMediaTypeFormatter(JsonSerializerSettings serializerSettings, ArrayPool<char> charPool, MvcOptions options)
+        : base(serializerSettings, charPool, options)
+#endif
         {
             SupportedMediaTypes.Add(new MediaTypeHeaderValue(mediaTypeHeaderTextJavascript));
             //MediaTypeMappings.Add(new UriPathExtensionMapping(pathExtensionJsonp, "application/javascript"));

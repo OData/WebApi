@@ -138,8 +138,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 annotationFilter = messageWrapper.PreferHeader().AnnotationFilter;
             }
 
-            ODataMessageWrapper responseMessageWrapper = getODataMessageWrapper(internalRequest.RequestContainer);
-            IODataResponseMessage responseMessage = responseMessageWrapper;
+            IODataResponseMessage responseMessage = getODataMessageWrapper(internalRequest.RequestContainer);
             if (annotationFilter != null)
             {
                 responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;

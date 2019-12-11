@@ -318,7 +318,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class DateAndTimeOfDayModelsController : TestODataController
+    public class DateAndTimeOfDayModelsController : TestODataController, IDisposable
     {
         private EfDateAndTimeOfDayModelContext db = new EfDateAndTimeOfDayModelContext();
 
@@ -370,6 +370,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
             TimeSpan timeSpan = Assert.IsType<TimeSpan>(value);
             Assert.Equal(new TimeSpan(0, 14, 13, 15, 179), timeSpan);
             return Updated(dt);
+        }
+
+        public void Dispose()
+        {
+            // db.Dispose();
         }
     }
 

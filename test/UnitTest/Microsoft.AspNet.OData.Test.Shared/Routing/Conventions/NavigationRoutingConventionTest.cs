@@ -52,8 +52,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             }
         }
 
@@ -122,8 +123,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             }
         }
 
@@ -229,6 +231,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -253,8 +256,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -283,8 +287,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]

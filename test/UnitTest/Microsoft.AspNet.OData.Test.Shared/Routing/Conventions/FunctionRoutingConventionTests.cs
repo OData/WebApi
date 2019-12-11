@@ -128,8 +128,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal("IsUpgraded", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Fact]
@@ -183,8 +184,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal("IsUpgradedWithParam", selectedAction);
-            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+            Assert.Equal(3, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal("any", SelectActionHelper.GetRouteData(request).Values["city"]);
         }
 
@@ -239,8 +241,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal("GetOrders", selectedAction);
-            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+            Assert.Equal(3, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal(5, SelectActionHelper.GetRouteData(request).Values["parameter"]);
         }
     }

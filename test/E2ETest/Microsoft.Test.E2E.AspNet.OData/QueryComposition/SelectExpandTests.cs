@@ -129,7 +129,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             Assert.True(customers.OfType<JObject>().All(x => x.Properties().Count() == 1 && x.Properties().All(p => p.Name == "Name")));
         }
 
-        [Fact(Skip = "This GitHub issue needs to be fixed before this test can pass: https://github.com/OData/WebApi/issues/196")]
+        [Fact]
         public async Task QueryComplexPropertiesOfAnEntry()
         {
             string queryUrl = string.Format("{0}/selectexpand/SelectCustomer/?$select=LocationAddresses/City", BaseAddress);
@@ -170,7 +170,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 Assert.Equal(JTokenType.Array, locationAddressesProperty.Value.Type);
 
                 var locationAddresses = (JArray)locationAddressesProperty.Value;
-                Assert.Collection(locationAddresses.OfType<JObject>(), Enumerable.Repeat(assertLocationAddress, 10).ToArray());
+                int count = locationAddresses.Count;
+                Assert.Collection(locationAddresses.OfType<JObject>(), Enumerable.Repeat(assertLocationAddress, count).ToArray());
             };
 
             foreach (JObject customer in customers.OfType<JObject>())

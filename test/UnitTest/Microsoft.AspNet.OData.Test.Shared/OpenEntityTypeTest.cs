@@ -238,6 +238,71 @@ namespace Microsoft.AspNet.OData.Test
             Assert.NotNull(resultArray[4]["Token"]);//customer 4 has a token
         }
 
+        [Theory]
+        [InlineData("$select=Address/Street,Address/City")]
+        [InlineData("$select=Address($select=Street,City)")]
+        public async Task Get_OpenEntityTypeWithMultiplePropertySelect(string select)
+        {
+            // Arrange
+            string requestUri = "http://localhost/odata/SimpleOpenCustomers?" + select;
+            var controllers = new[] { typeof(SimpleOpenCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Select();
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            var client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+          //  Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(6, resultArray.Count);
+            Assert.Equal(@"[
+  {
+    ""Address"": {
+      ""Street"": ""Street 0"",
+      ""City"": ""City 0""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 1"",
+      ""City"": ""City 1""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 2"",
+      ""City"": ""City 2""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 3"",
+      ""City"": ""City 3""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 4"",
+      ""City"": ""City 4""
+    }
+  },
+  {
+    ""@odata.type"": ""#Microsoft.AspNet.OData.Test.Common.SimpleVipCustomer"",
+    ""Address"": {
+      ""Street"": ""Vip Street "",
+      ""City"": ""Vip City ""
+    }
+  }
+]", resultArray.ToString());
+        }
+
         [Fact]
         public async Task Get_OpenEntityTypeWithSelectWildcard()
         {

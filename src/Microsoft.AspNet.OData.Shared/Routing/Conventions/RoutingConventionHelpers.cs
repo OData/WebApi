@@ -172,21 +172,25 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
                 Contract.Assert(keyProperty != null);
 
-                // if there's only one key, just use the given key name, for example: "key, relatedKey"
-                // otherwise, to append the key name after the given key name.
+                // if there's only one key, provide two paramters, one using the given key name, e.g., "key, relatedKey"
+                // and the other appending the property name to the given key name: "keyId, relatedKeyId"
+                // in other cases, just append the property names to the given key name
                 // so for multiple keys, the parameter name is "keyId1, keyId2..."
                 // for navigation property, the parameter name is "relatedKeyId1, relatedKeyId2 ..."
-                string newKeyName;
                 if (alternateKey || keyCount > 1)
                 {
-                    newKeyName = keyName + keyValuePair.Key;
+                    var newKeyName = keyName + keyValuePair.Key;
+                    AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
                 }
                 else
                 {
-                    newKeyName = keyName;
+                    AddKeyValues(keyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
+                    if (keyCount == 1)
+                    {
+                        var anotherKeyName = keyName + keyValuePair.Key;
+                        AddKeyValues(anotherKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
+                    }
                 }
-
-                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
             }
         }
 

@@ -2377,6 +2377,28 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("UnsupportedSelectExpandPath", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to A segment &apos;{0}&apos; within the select or expand query option is not supported..
+        /// </summary>
+        internal static string InvalidSegmentInSelectExpandPath
+        {
+            get
+            {
+                return ResourceManager.GetString("InvalidSegmentInSelectExpandPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The last segment &apos;{0}&apos; of the select or expand query option is not supported...
+        /// </summary>
+        internal static string InvalidLastSegmentInSelectExpandPath
+        {
+            get
+            {
+                return ResourceManager.GetString("InvalidLastSegmentInSelectExpandPath", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Unterminated string literal at {0} in segment &apos;{1}&apos;..

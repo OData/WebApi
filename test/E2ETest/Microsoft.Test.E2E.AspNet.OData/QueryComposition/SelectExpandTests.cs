@@ -24,7 +24,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     public class SelectExpandTests : WebHostTestBase
     {
         public SelectExpandTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -351,7 +351,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
             HttpClient client = new HttpClient();
             HttpResponseMessage response;
-           
+
             response = await client.SendAsync(request);
 
             Assert.NotNull(response);
@@ -639,6 +639,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             JToken order = Assert.Single(orders); // only one
             Assert.Contains("SelectOrder(6)", (string)order["@odata.id"]);
         }
+
+        [Fact]
+        public async Task SelectWithByteArrayAndCharArrayAndIntArrayAndDoubleArrayWorks()
+        {
+            // Arrange
+            string queryUrl = string.Format("{0}/selectexpand/SelectCustomer(1)?$select=ByteData,CharData,IntData,DoubleData($top=1)", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            Assert.NotNull(response);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            Assert.NotNull(response.Content);
+            JObject result = await response.Content.ReadAsObject<JObject>();
+
+            Assert.Contains("$metadata#SelectCustomer(ByteData,CharData,IntData,DoubleData)/$entity", (string)result["@odata.context"]);
+
+            Assert.Equal("AQID", result["ByteData"]);
+            Assert.Equal("abc;", result["CharData"]);
+
+            JArray intData = (JArray)result["IntData"];
+            Assert.Equal(3, intData.Count); // has 3 items
+
+            JArray doubleData = (JArray)result["DoubleData"];
+            Assert.Equal(1, doubleData.Count); // only one item
+        }
     }
 
     public class SelectCustomerController : TestODataController
@@ -651,6 +682,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             {
                 Id = i,
                 Name = string.Format("Customer{0}", i),
+                ByteData = new byte[] { 1, 2, 3 },
+                IntData = new [] { 1, 2, 3 },
+                DoubleData = new double[] { 1.1, 2.2, 3.983 },
+                CharData = new char[] { 'a', 'b', 'c', ';' },
                 SelectOrders = Enumerable.Range(0, i).Select(j => new SelectOrder
                 {
                     Id = j,
@@ -688,6 +723,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public IQueryable<SelectCustomer> Get()
         {
             return Customers.AsQueryable();
+        }
+
+        [EnableQuery]
+        public SelectCustomer Get(int key)
+        {
+            return Customers.FirstOrDefault(c => c.Id == key);
         }
 
         [EnableQuery]
@@ -731,8 +772,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     public class SelectCustomer
     {
         public int Id { get; set; }
+        
         public string Name { get; set; }
+
+        public byte[] ByteData { get; set; }
+        
+        public int[] IntData { get; set; }
+        
+        public double[] DoubleData { get; set; }
+
+        public char[] CharData { get; set; }
+
         public virtual IList<SelectOrder> SelectOrders { get; set; }
+
         public virtual IList<SelectAddress> LocationAddresses { get; set; }
     }
 

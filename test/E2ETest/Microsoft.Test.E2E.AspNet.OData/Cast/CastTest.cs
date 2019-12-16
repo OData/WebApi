@@ -49,30 +49,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                 {
                     // To Edm.String
                     combinations.Add(dataSourceType, "?$filter=cast('Name1',Edm.String) eq Name", 1);
-                    combinations.Add(dataSourceType, "?$filter=contains(cast(Name,Edm.String),'Name')", 3);
-                    combinations.Add(dataSourceType, "?$filter=cast(Microsoft.Test.E2E.AspNet.OData.Cast.Domain'Civil',Edm.String) eq '2'", 3);
-                    combinations.Add(dataSourceType, "?$filter=cast(Domain,Edm.String) eq '3'", 1);
-                    combinations.Add(dataSourceType, "?$filter=cast(ID,Edm.String) gt '1'", 2);
+                    combinations.Add(dataSourceType, "?$filter=contains(cast(Name,Edm.String),'Name')", 6);
+                    combinations.Add(dataSourceType, "?$filter=cast(Microsoft.Test.E2E.AspNet.OData.Cast.Domain'Civil',Edm.String) eq '2'", 6);
+                    combinations.Add(dataSourceType, "?$filter=cast(Domain,Edm.String) eq '3'", 2);
+                    combinations.Add(dataSourceType, "?$filter=cast(ID,Edm.String) gt '1'", 5);
                     // TODO bug 1889: Cast function reports error if it is used against a collection of primitive value.
                     // Delete $it after the bug if fixed.
                     combinations.Add(dataSourceType, "(1)/DimensionInCentimeter?$filter=cast($it,Edm.String) gt '1'", 2);
-                    combinations.Add(dataSourceType, "?$filter=cast(Weight,Edm.String) gt '1.1'", 2);
+                    combinations.Add(dataSourceType, "?$filter=cast(Weight,Edm.String) gt '1.1'", 5);
                     combinations.Add(dataSourceType, "?$filter=contains(cast(ManufacturingDate,Edm.String),'2011')", 1);
                     // TODO bug 1982: The result of casting a value of DateTimeOffset to String is not always the literal representation used in payloads
                     // combinations.Add(dataSourceType, "?$filter=contains(cast(2011-01-01T00:00:00%2B08:00,Edm.String),'2011-01-01')", 3);
 
                     // To Edm.Int32
                     combinations.Add(dataSourceType, "?$filter=cast(Weight,Edm.Int32) eq 1", 1);
-                    combinations.Add(dataSourceType, "?$filter=cast(cast(Name,Edm.Int32),Edm.Int32) eq null", 3);
+                    combinations.Add(dataSourceType, "?$filter=cast(cast(Name,Edm.Int32),Edm.Int32) eq null", 6);
 
                     // To DateTimeOffset
                     combinations.Add(dataSourceType, "?$filter=cast(ManufacturingDate,Edm.DateTimeOffset) eq 2011-01-01T00:00:00%2B08:00", 1);
-                    combinations.Add(dataSourceType, "?$filter=cast(null,Edm.DateTimeOffset) eq null", 3);
+                    combinations.Add(dataSourceType, "?$filter=cast(null,Edm.DateTimeOffset) eq null", 6);
 
                     // To Enum
-                    combinations.Add(dataSourceType, "?$filter=cast('Both',Microsoft.Test.E2E.AspNet.OData.Cast.Domain) eq Domain", 1);
-                    combinations.Add(dataSourceType, "?$filter=cast('1',Microsoft.Test.E2E.AspNet.OData.Cast.Domain) eq Domain", 1);
+                    combinations.Add(dataSourceType, "?$filter=cast('Both',Microsoft.Test.E2E.AspNet.OData.Cast.Domain) eq Domain", 2);
+                    combinations.Add(dataSourceType, "?$filter=cast('1',Microsoft.Test.E2E.AspNet.OData.Cast.Domain) eq Domain", 2);
                     combinations.Add(dataSourceType, "?$filter=cast(null,Microsoft.Test.E2E.AspNet.OData.Cast.Domain) eq Domain", 0);
+
+                    //To Derived Structured Types
+                    combinations.Add(dataSourceType, "?$filter=cast('Microsoft.Test.E2E.AspNet.OData.Cast.AirPlane')/Speed eq 100", 2);
+                    combinations.Add(dataSourceType, "?$filter=cast('Microsoft.Test.E2E.AspNet.OData.Cast.AirPlane')/Speed eq 500", 1);
+                    combinations.Add(dataSourceType, "?$filter=cast('Microsoft.Test.E2E.AspNet.OData.Cast.JetPlane')/Company eq 'Boeing'", 1);
                 }
 
                 return combinations;

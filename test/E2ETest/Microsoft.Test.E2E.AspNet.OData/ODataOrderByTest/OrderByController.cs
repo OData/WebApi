@@ -11,7 +11,10 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 {
-    public class ItemsController : TestODataController, IDisposable
+    public class ItemsController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private static readonly OrderByEdmModel.OrderByContext Db = new OrderByEdmModel.OrderByContext();
         private static readonly IQueryable<ItemWithoutColumn> _itemWithoutColumns;
@@ -97,9 +100,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
             return Ok(_itemWithoutColumns);
         }
 
+#if NETCORE
         public void Dispose()
         {
             // Db.Dispose();
         }
+#endif
     }
 }

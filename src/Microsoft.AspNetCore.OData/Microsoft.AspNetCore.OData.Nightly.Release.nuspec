@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>Microsoft.AspNetCore.OData</id>
-    <title>Microsoft ASP.NET Core 2.0 for OData v4.0</title>
+    <title>Microsoft ASP.NET Core 2.0 and 3.x for OData v4.0</title>
     <version>$VersionFullSemantic$-Nightly$NightlyBuildVersion$</version>
     <authors>Microsoft</authors>
     <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>

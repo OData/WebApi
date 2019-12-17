@@ -9,7 +9,10 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 {
-    public class CustomersController : TestODataController, IDisposable
+    public class CustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly EntitySetAggregationContext _db = new EntitySetAggregationContext();
 
@@ -74,9 +77,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
             Generate();
         }
 
+#if NETCORE
         public void Dispose()
         {
-            // _db.Dispose();
+            //_db.Dispose();
         }
+#endif
     }
 }

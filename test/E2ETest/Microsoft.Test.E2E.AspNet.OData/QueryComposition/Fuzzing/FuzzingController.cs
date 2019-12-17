@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
@@ -24,7 +25,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Fuzzing
         }
     }
 
-    public class FuzzingDbController : TestNonODataController
+    public class FuzzingDbController : TestNonODataController, IDisposable
     {
         private FuzzingContext context = new FuzzingContext();
 
@@ -39,6 +40,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.Fuzzing
         {
             context.Dispose();
             base.Dispose(disposing);
+        }
+#else
+        public void Dispose()
+        {
+            context.Dispose();
         }
 #endif
     }

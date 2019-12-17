@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <Import Project="..\..\tools\WebStack.settings.targets" />
+  
   <PropertyGroup>
     <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
     <CodeAnalysisRuleSet>..\Strict.ruleset</CodeAnalysisRuleSet>
@@ -11,16 +12,21 @@
     <!-- Let's generate our own assembly info -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+  
   <Import Project="..\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems" Label="Shared" />
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' ">
+    <!-- Define the Items for .NET CORE 3.0 -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
+    <!-- Define the Items for .NET Standard 2.0 -->
     <PackageReference Include="Desktop.Analyzers" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.0.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" />
+    <!-- PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" /> -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.6.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.6.1" />
     <PackageReference Include="System.Collections.Concurrent" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel" Version="4.3.0" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.3.0" />
@@ -32,6 +38,12 @@
     <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
     <PackageReference Include="System.Runtime" Version="4.3.0" />
     <PackageReference Include="System.Security.Cryptography.Hashing.Algorithms.Analyzers" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.OData.Core" Version="7.6.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.6.1" />
   </ItemGroup>
 
   <ItemGroup>

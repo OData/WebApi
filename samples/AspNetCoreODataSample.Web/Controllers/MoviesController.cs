@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AspNetCoreODataSample.Web.Controllers
 {
-    public class MoviesController : ODataController
+    public class MoviesController : ODataController, IDisposable
     {
         private readonly MovieContext _context;
 
@@ -131,6 +131,11 @@ namespace AspNetCoreODataSample.Web.Controllers
             }
 
             return Ok(m);
+        }
+
+        public void Dispose()
+        {
+            _context.Dispose();
         }
     }
 }

@@ -196,6 +196,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
     }
 
     public class EFSelectCustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -239,9 +242,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             db.Customers.Add(customer);
             db.SaveChanges();
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+             //_db.Dispose();
+        }
+#endif
     }
 
     public class EFWideCustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -296,9 +309,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             _db.WideCustomers.Add(wideCustomer);
             _db.SaveChanges();
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
+#endif
     }
 
     public class EFSelectOrdersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly SampleContext _db = new SampleContext();
 
@@ -316,6 +339,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             EFSelectCustomersController.Generate(_db);
             return Ok();
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+             //_db.Dispose();
+        }
+#endif
     }
 
     public class SampleContext : DbContext

@@ -221,11 +221,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator
 
             var assemblyName = new AssemblyName(uniqueName);
 
-            AssemblyBuilder assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(
-                assemblyName, AssemblyBuilderAccess.RunAndSave);
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 
             ModuleBuilder modelBuilder = assemblyBuilder.DefineDynamicModule(
-                assemblyName.Name, assemblyName.Name + ".dll");
+                assemblyName.Name);
 
             for (int i = 0; i < count; i++)
             {
@@ -348,7 +347,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator
                 enumBuilder.DefineLiteral("Literal" + i, i);
             }
 
-            var result = enumBuilder.CreateType();
+            var result = enumBuilder.CreateTypeInfo();
 
             return result;
         }

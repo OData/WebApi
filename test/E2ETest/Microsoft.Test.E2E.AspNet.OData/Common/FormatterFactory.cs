@@ -29,9 +29,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
         /// <returns>A Json formatter.</returns>
         public static OutputFormatter CreateJson(WebRouteConfiguration configuration)
         {
+#if NETCOREAPP2_1
             var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcJsonOptions>>().Value;
             var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
             return new JsonOutputFormatter(options.SerializerSettings, charPool);
+#else
+            var options = configuration.ServiceProvider.GetRequiredService<IOptions<MvcNewtonsoftJsonOptions>>().Value;
+            var charPool = configuration.ServiceProvider.GetRequiredService<ArrayPool<char>>();
+            return new NewtonsoftJsonOutputFormatter(options.SerializerSettings, charPool, new MvcOptions());
+#endif
         }
 
         /// <summary>
@@ -44,12 +50,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
             return ODataOutputFormatterFactory.Create();
         }
 #else
-        /// <summary>
-        /// Create a Json formatter.
-        /// </summary>
-        /// <param name="configuration">The configuration.</param>
-        /// <returns>A Json formatter.</returns>
-        public static MediaTypeFormatter CreateJson(WebRouteConfiguration configuration)
+            /// <summary>
+            /// Create a Json formatter.
+            /// </summary>
+            /// <param name="configuration">The configuration.</param>
+            /// <returns>A Json formatter.</returns>
+            public static MediaTypeFormatter CreateJson(WebRouteConfiguration configuration)
         {
             return new JsonMediaTypeFormatter();
         }

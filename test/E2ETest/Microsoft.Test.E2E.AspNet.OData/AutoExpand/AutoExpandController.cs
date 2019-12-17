@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
@@ -8,6 +9,9 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 {
     public class CustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandCustomerContext _db = new AutoExpandCustomerContext();
 
@@ -108,9 +112,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
                 Generate();
             }
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            //_db.Dispose();
+        }
+#endif
     }
 
     public class PeopleController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandPeopleContext _db = new AutoExpandPeopleContext();
 
@@ -160,9 +174,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
                 Generate();
             };
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            // _db.Dispose();
+        }
+#endif
     }
 
     public class NormalOrdersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandOrdersContext _db = new AutoExpandOrdersContext();
 
@@ -237,5 +261,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
                 Generate();
             };
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            //_db.Dispose();
+        }
+#endif
     }
 }

@@ -5,7 +5,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNetCore.Mvc.Internal;
+#if NETCOREAPP3_0
+#else
+    using Microsoft.AspNetCore.Mvc.Internal;
+#endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNet.OData.Routing

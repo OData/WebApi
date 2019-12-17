@@ -300,7 +300,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_4
     {
         /// <summary>
@@ -353,7 +352,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_5
     {
         /// <summary>
@@ -525,7 +523,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_11
     {
         /// <summary>
@@ -812,7 +809,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_22
     {
         /// <summary>
@@ -883,7 +879,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_26
     {
         /// <summary>
@@ -1045,7 +1040,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers.TypeLibrary
     /// <summary>
     /// Test type.
     /// </summary>
-    [Serializable]
     public class SerType_33
     {
         /// <summary>

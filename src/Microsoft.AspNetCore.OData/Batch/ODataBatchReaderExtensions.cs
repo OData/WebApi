@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             Guid changeSetId = Guid.NewGuid();
             List<HttpContext> contexts = new List<HttpContext>();
-            while (reader.Read() && reader.State != ODataBatchReaderState.ChangesetEnd)
+            while (await reader.ReadAsync() && reader.State != ODataBatchReaderState.ChangesetEnd)
             {
                 if (reader.State == ODataBatchReaderState.Operation)
                 {
@@ -118,7 +118,7 @@ namespace Microsoft.AspNet.OData.Batch
         private static async Task<HttpContext> ReadOperationInternalAsync(
             ODataBatchReader reader, HttpContext originalContext, Guid batchId, Guid? changeSetId, CancellationToken cancellationToken, bool bufferContentStream = true)
         {
-            ODataBatchOperationRequestMessage batchRequest = reader.CreateOperationRequestMessage();
+            ODataBatchOperationRequestMessage batchRequest = await reader.CreateOperationRequestMessageAsync();
 
             HttpContext context = CreateHttpContext(originalContext);
             HttpRequest request = context.Request;

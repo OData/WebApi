@@ -17,6 +17,9 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+#if NETCOREAPP3_0
+using Microsoft.AspNetCore.Http.Features;
+#endif
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -36,13 +39,31 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
             builder.ConfigureServices(services =>
             {
+#if NETCOREAPP3_0
+                services.AddMvc(options => options.EnableEndpointRouting = false)
+                    .AddNewtonsoftJson();
+#else
                 services.AddMvc();
+#endif
                 services.AddOData();
                 configureService?.Invoke(services);
             });
 
             builder.Configure(app =>
             {
+#if NETCOREAPP3_0
+                app.Use(next => context =>
+                {
+                    var body = context.Features.Get<IHttpBodyControlFeature>();
+                    if (body != null)
+                    {
+                        body.AllowSynchronousIO = true;
+                    }
+
+                    return next(context);
+                });
+#endif
+
                 app.UseMvc((routeBuilder) =>
                 {
                     configureAction(routeBuilder);

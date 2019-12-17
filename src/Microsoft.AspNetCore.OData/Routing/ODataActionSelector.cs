@@ -114,9 +114,8 @@ namespace Microsoft.AspNet.OData.Routing
             {
                 // Get the available parameter names from the route data. Ignore case of key names.
                 IList<string> availableKeys = routeData.Values.Keys.Select(k => k.ToLowerInvariant())
+                    .Where((key) => routePrefix != "{" + key + "}")
                     .ToList();
-
-                availableKeys = availableKeys.Where((key) => routePrefix != "{" + key + "}").ToList();
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
@@ -160,7 +159,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper, int totalParameterCount)
         {
-            if (parameters.Count == 0 && availableKeys.Count > 2 && totalParameterCount == 0)
+            if (totalParameterCount == 0 && availableKeys.Count > 2)
             {
                 return false;
             }

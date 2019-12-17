@@ -115,7 +115,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                             appLog.WriteEntry(errorMessage, EventLogEntryType.Error);
                         }
 
+#pragma warning disable CA2200 // Rethrow to preserve stack details.
                         throw ex;
+#pragma warning restore CA2200 // Rethrow to preserve stack details.
                     }
                 }
                 foreach (var type in types)

@@ -67,9 +67,23 @@ namespace Microsoft.AspNet.OData.Extensions
                 options.ValueProviderFactories.Add(new ODataValueProviderFactory());
             });
 
+#if NETCOREAPP3_0
+            // We need to decorate the ActionSelector.
+            var selector = services.First(s => s.ServiceType == typeof(IActionSelector) && s.ImplementationType != null);
+            services.Remove(selector);
+            services.Add(new ServiceDescriptor(selector.ImplementationType, selector.ImplementationType, ServiceLifetime.Singleton));
+
+            // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor
+            // and pass all non-OData calls to this inner selector.
+            services.AddSingleton<IActionSelector>(s =>
+            {
+                return new ODataActionSelector((IActionSelector)s.GetRequiredService(selector.ImplementationType));
+            });
+#else
             // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor
             // and pass all non-OData calls to this inner selector.
             services.AddSingleton<IActionSelector, ODataActionSelector>();
+#endif
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed
             // during the formatting process to construct a IUrlHelper.

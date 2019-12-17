@@ -319,6 +319,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
     }
 
     public class DateAndTimeOfDayModelsController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private EfDateAndTimeOfDayModelContext db = new EfDateAndTimeOfDayModelContext();
 
@@ -371,6 +374,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
             Assert.Equal(new TimeSpan(0, 14, 13, 15, 179), timeSpan);
             return Updated(dt);
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            //db.Dispose();
+        }
+#endif
     }
 
     public class EfDateAndTimeOfDayModelContext : DbContext

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
@@ -135,6 +136,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
     }
 
     public class EfCustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly DateAndTimeOfDayContext _db = new DateAndTimeOfDayContext();
 
@@ -183,11 +187,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 
             return Ok();
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+           // _db.Dispose();
+        }
+#endif
     }
 
     public class EfPeopleController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
-        private static EdmDateWithEfContext _db = new EdmDateWithEfContext();
+        private static readonly EdmDateWithEfContext _db = new EdmDateWithEfContext();
 
         static EfPeopleController()
         {
@@ -221,5 +235,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         {
             return await Task.FromResult(TestSingleResult.Create(_db.People.Where(c => c.Id == key)));
         }
+
+#if NETCORE
+        public void Dispose()
+        {
+            //_db.Dispose();
+        }
+#endif
     }
 }

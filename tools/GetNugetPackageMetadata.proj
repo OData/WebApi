@@ -13,5 +13,6 @@
     <Message Importance="high" Text="##vso[task.setvariable variable=DependencyInjection1PackageDependency]$(DependencyInjection1PackageDependency)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=DependencyInjection2PackageDependency]$(DependencyInjection2PackageDependency)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=ODataLibPackageDependency]$(ODataLibPackageDependency)" />
+    <Message Importance="high" Text="##vso[task.setvariable variable=NewtonsoftJsonPackageDependency]$(NewtonsoftJsonPackageDependency)" />
   </Target>
 </Project>

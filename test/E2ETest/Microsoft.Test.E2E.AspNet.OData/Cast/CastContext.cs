@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Cast
 {
-    public class DataSource
+    public class DataSource: IDisposable
     {
         private static ProductsContext _context = null;
         private static IQueryable<Product> _products = null;
@@ -73,6 +73,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                     _context.SaveChanges();
                 }
                 return _context.Products;
+            }
+        }
+
+        public void Dispose()
+        {
+            if(_context != null) 
+            {
+                // _context.Dispose();
             }
         }
     }

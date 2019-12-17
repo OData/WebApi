@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 #else
+using System;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Controllers;

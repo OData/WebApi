@@ -10,7 +10,10 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class BaseCustomersController : TestODataController, IDisposable
+    public class BaseCustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         protected readonly AggregationContext _db = new AggregationContext();
         protected readonly List<Customer> _customers = new List<Customer>();
@@ -88,10 +91,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             return true;
         }
 
+#if NETCORE
         public void Dispose()
         {
-           // _db.Dispose();
+            //_db.Dispose();
         }
+#endif
     }
 
     public class CustomersController : BaseCustomersController

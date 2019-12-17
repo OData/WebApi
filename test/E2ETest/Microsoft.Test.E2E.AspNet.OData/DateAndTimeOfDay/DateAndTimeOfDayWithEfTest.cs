@@ -318,7 +318,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class DateAndTimeOfDayModelsController : TestODataController, IDisposable
+    public class DateAndTimeOfDayModelsController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private EfDateAndTimeOfDayModelContext db = new EfDateAndTimeOfDayModelContext();
 
@@ -372,10 +375,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
             return Updated(dt);
         }
 
+#if NETCORE
         public void Dispose()
         {
-            // db.Dispose();
+            //db.Dispose();
         }
+#endif
     }
 
     public class EfDateAndTimeOfDayModelContext : DbContext

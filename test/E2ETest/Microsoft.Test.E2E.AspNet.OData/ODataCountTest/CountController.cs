@@ -9,7 +9,10 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 {
-    public class HeroesController : TestODataController, IDisposable
+    public class HeroesController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private static CountEdmModel.CountContext _db = new CountEdmModel.CountContext();
 
@@ -67,9 +70,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
             return Ok(names);
         }
 
+#if NETCORE
         public void Dispose()
         {
             // _db.Dispose();
         }
+#endif
     }
 }

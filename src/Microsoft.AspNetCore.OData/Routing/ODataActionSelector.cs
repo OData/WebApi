@@ -17,6 +17,10 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 #else
     using Microsoft.AspNetCore.Routing;
 #endif
+using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -95,10 +99,24 @@ namespace Microsoft.AspNet.OData.Routing
         {
             RouteData routeData = context.RouteData;
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
+
+            var routers = routeData.Routers;
+            var odataRoute = routeData.Routers.FirstOrDefault((router) =>
+            {
+                var _odataRoute = router as ODataRoute;
+                return _odataRoute == null ?
+                    false : true;
+            }) as ODataRoute;
+
+            var routePrefix = odataRoute == null ? null : odataRoute.RoutePrefix;
+            
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
                 // Get the available parameter names from the route data. Ignore case of key names.
-                IList<string> availableKeys = routeData.Values.Keys.Select(k => k.ToLowerInvariant()).AsList();
+                IList<string> availableKeys = routeData.Values.Keys.Select(k => k.ToLowerInvariant())
+                    .ToList();
+
+                availableKeys = availableKeys.Where((key) => routePrefix != "{" + key + "}").ToList();
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
@@ -107,7 +125,7 @@ namespace Microsoft.AspNet.OData.Routing
                         .Where(p =>
                         {
                             return p.ParameterType != typeof(ODataPath) &&
-                                !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
+                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
                         })));
 
                 // retrieve the optional parameters
@@ -126,7 +144,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => !c.FilteredParameters.Any() || TryMatch(c.FilteredParameters, availableKeys, optionalWrapper))
+                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys, optionalWrapper, c.TotalParameterCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount);
 
@@ -134,14 +152,19 @@ namespace Microsoft.AspNet.OData.Routing
                 // candidate if none matched.
                 return (matchedCandidates.Any())
                     ? candidates.Where(c => c.Id == matchedCandidates.FirstOrDefault().Id).FirstOrDefault()
-                    : candidates.FirstOrDefault();
+                    : null;
             }
 
             return _innerSelector.SelectBestCandidate(context, candidates);
         }
 
-        private bool TryMatch(IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper)
+        private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper, int totalParameterCount)
         {
+            if (parameters.Count == 0 && availableKeys.Count > 2 && totalParameterCount == 0)
+            {
+                return false;
+            }
+            bool matchedBody = false;
             // use the parameter name to match.
             foreach(var p in parameters)
             {
@@ -158,6 +181,15 @@ namespace Microsoft.AspNet.OData.Routing
                     {
                         continue;
                     }
+                }
+
+                // if parameter is not bound to a key in the path,
+                // assume that it's bound to the request body
+                // only one parameter should be considered bound to the body
+                if (!matchedBody && context.HttpContext.Request.Body.Length > 0)
+                {
+                    matchedBody = true;
+                    continue;
                 }
 
                 return false;

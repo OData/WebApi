@@ -2269,14 +2269,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it As DerivedCategory) == null), null, ($it As DerivedCategory).DerivedCategoryName) == null)")]
         public void CastToQuotedEntityType_DerivedProductName(string filter, string expectedExpression, string expectedExpressionWithNullCheck)
         {
-            // Arrange 
-            var model = new DerivedProduct
-            {
-                SupplierAddress = new Address { City = "Redmond", },
-                Category = new DerivedCategory { DerivedCategoryName = "DerivedCategory" }
-            };
-
-            // Act & Assert
+            // Arrange, Act & Assert
             VerifyQueryDeserialization<Product>(
                 filter,
                 expectedResult: expectedExpression,

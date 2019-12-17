@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -43,6 +45,12 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 descriptor.ActionName = methodInfo.Name;
                 descriptor.DisplayName = methodInfo.Name;
                 descriptor.MethodInfo = methodInfo;
+                descriptor.Parameters = methodInfo.GetParameters().Select(
+                    p => new ParameterDescriptor
+                    {
+                        Name = p.Name,
+                        ParameterType = p.ParameterType
+                    }).ToList();
                 descriptors.Add(descriptor);
 
                 // For attribute routing tests, stash the root service provider on the descriptor.

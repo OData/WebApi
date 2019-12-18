@@ -28,9 +28,15 @@ namespace Microsoft.AspNet.OData.Test.Builder
         {
             MockType mockEntity = new MockType().Property<int>("ID");
 
+#if NETCOREAPP3_0
+            ExceptionAssert.Throws<ArgumentException>(
+                () => new NavigationPropertyConfiguration(mockEntity.GetProperty("ID"), EdmMultiplicity.Many, new EntityTypeConfiguration()),
+                "The property 'ID' on the type 'T' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections. (Parameter 'property')");
+#else
             ExceptionAssert.Throws<ArgumentException>(
                 () => new NavigationPropertyConfiguration(mockEntity.GetProperty("ID"), EdmMultiplicity.Many, new EntityTypeConfiguration()),
                 "The property 'ID' on the type 'T' is being configured as a Many-to-Many navigation property. Many to Many navigation properties must be collections.\r\nParameter name: property");
+#endif
         }
 
         [Fact]

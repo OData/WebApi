@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter
@@ -12,7 +13,7 @@ namespace Microsoft.AspNet.OData.Formatter
     /// <summary>
     /// Wrapper for IODataRequestMessage and IODataResponseMessage.
     /// </summary>
-    internal class ODataMessageWrapper : IODataRequestMessage, IODataResponseMessage, IODataPayloadUriConverter, IContainerProvider, IDisposable
+    internal class ODataMessageWrapper : IODataRequestMessageAsync, IODataResponseMessageAsync, IODataPayloadUriConverter, IContainerProvider, IDisposable
     {
         private Stream _stream;
         private Dictionary<string, string> _headers;
@@ -108,6 +109,13 @@ namespace Microsoft.AspNet.OData.Formatter
         public Stream GetStream()
         {
             return _stream;
+        }
+
+        public Task<Stream> GetStreamAsync()
+        {
+            TaskCompletionSource<Stream> taskCompletionSource = new TaskCompletionSource<Stream>();
+            taskCompletionSource.SetResult(_stream);
+            return taskCompletionSource.Task;
         }
 
         public void SetHeader(string headerName, string headerValue)

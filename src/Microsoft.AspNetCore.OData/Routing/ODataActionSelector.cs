@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Internal;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -100,15 +99,8 @@ namespace Microsoft.AspNet.OData.Routing
             RouteData routeData = context.RouteData;
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
 
-            var routers = routeData.Routers;
-            var odataRoute = routeData.Routers.FirstOrDefault((router) =>
-            {
-                var _odataRoute = router as ODataRoute;
-                return _odataRoute == null ?
-                    false : true;
-            }) as ODataRoute;
-
-            var routePrefix = odataRoute == null ? null : odataRoute.RoutePrefix;
+            var odataRoute = routeData.Routers.OfType<ODataRoute>().FirstOrDefault();
+            var routePrefix = odataRoute?.RoutePrefix;
             
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {

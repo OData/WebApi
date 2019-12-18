@@ -30,8 +30,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
             builder.EntitySet<DateTimeOffsetKeyCustomer>("DateTimeOffsetKeyCustomers");
             builder.EntitySet<Destination>("Destinations");
             builder.EntitySet<Incident>("Incidents");
-            builder.EntitySet<NotFoundCustomer>("OnlyGetRoutingCustomers");
-            builder.EntitySet<NotFoundWithIdCustomer>("OnlyGetByIdRoutingCustomers");
+            builder.EntitySet<NotFoundCustomer>("NotFoundCustomers");
+            builder.EntitySet<NotFoundWithIdCustomer>("NotFoundWithIdCustomers");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
             builder.EntityType<SpecialProduct>();

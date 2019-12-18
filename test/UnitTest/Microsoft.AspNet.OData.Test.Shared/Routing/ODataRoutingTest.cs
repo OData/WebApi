@@ -495,11 +495,11 @@ namespace Microsoft.AspNet.OData.Test.Routing
         }
 
         [Theory]
-        [InlineData("OnlyGetByIdRoutingCustomers", "GET")]
-        [InlineData("OnlyGetRoutingCustomers(10)", "GET")]
-        [InlineData("OnlyGetRoutingCustomers(10)", "DELETE")]
-        [InlineData("OnlyGetRoutingCustomers(10)", "PUT")]
-        [InlineData("OnlyGetRoutingCustomers(10)", "PATCH")]
+        [InlineData("NotFoundWithIdCustomers", "GET")]
+        [InlineData("NotFoundCustomers(10)", "GET")]
+        [InlineData("NotFoundCustomers(10)", "DELETE")]
+        [InlineData("NotFoundCustomers(10)", "PUT")]
+        [InlineData("NotFoundCustomers(10)", "PATCH")]
         public async Task ActionsDontMatch_ReturnsNotFound(string uri, string httpMethod)
         {
             // Arrange & Act
@@ -916,7 +916,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
     {
         public string Get(int key)
         {
-            return String.Format(CultureInfo.InvariantCulture, "Get({0})", key);
+            return $"Get({key})";
         }
     }
 

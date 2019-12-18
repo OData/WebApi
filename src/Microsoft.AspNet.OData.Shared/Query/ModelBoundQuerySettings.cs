@@ -65,7 +65,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 if (value.HasValue && value <= 0)
                 {
-                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 0);
+                    throw Error.ArgumentMustBeGreaterThanOrEqualTo("value", value, 1);
                 }
 
                 _maxTop = value;

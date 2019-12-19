@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -87,7 +89,11 @@ namespace Microsoft.AspNet.OData.Routing
                 if (actionName != null)
                 {
                     routeData.Values[ODataRouteConstants.Action] = actionName;
-                    return _innerSelector.SelectAction(controllerContext);
+                    var action = _innerSelector.SelectAction(controllerContext);
+                    if (ActionParametersMatchRequest(action, controllerContext))
+                    {
+                        return action;
+                    }
                 }
             }
 
@@ -105,6 +111,69 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             return request.CreateErrorResponse(statusCode, error);
+        }
+
+        private static bool ActionParametersMatchRequest(HttpActionDescriptor action, HttpControllerContext context)
+        {
+            var parameters = action.GetParameters();
+            var routeData = context.RouteData;
+            var matchedBody = false;
+            var route = routeData.Route as ODataRoute;
+            var routePrefix = route?.RoutePrefix;
+            var availableKeys = routeData.Values.Keys
+                .Where(k => routePrefix != "{" + k + "}")
+                .Select(k => k.ToUpperInvariant())
+                .ToList();
+
+            if (parameters.Count == 0 && availableKeys.Count > 3)
+            {
+                return false;
+            }
+
+            foreach (var p in parameters)
+            {
+                string parameterName = p.ParameterName.ToUpperInvariant();
+                if (availableKeys.Contains(parameterName))
+                {
+                    continue;
+                }
+                if (!matchedBody && RequestHasBody(context))
+                {
+                    matchedBody = true;
+                    continue;
+                }
+                if (p.ParameterType == typeof(ODataPath))
+                {
+                    continue;
+                }
+                if (IsODataQueryOptions(p.ParameterType))
+                {
+                    continue;
+                }
+                if (p.IsOptional)
+                {
+                    continue;
+                }
+                return false;
+            }
+            return true;
+        }
+
+        private static bool RequestHasBody(HttpControllerContext context)
+        {
+            var content = context.Request.Content;
+            return content?.Headers.ContentLength > 0;
+        }
+
+        private static bool IsODataQueryOptions(Type parameterType)
+        {
+            if (parameterType == null)
+            {
+                return false;
+            }
+            return ((parameterType == typeof(ODataQueryOptions)) ||
+                    (parameterType.IsGenericType &&
+                     parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>)));
         }
     }
 }

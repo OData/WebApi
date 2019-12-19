@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
   </PropertyGroup>
+
+  <Import Project="..\..\..\..\tools\WebStack.settings.targets" />
   
   <PropertyGroup>
     <ProjectGuid>{D91C1202-316D-4E6E-818F-49729D9C06C5}</ProjectGuid>
@@ -17,6 +19,8 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  
+  
   <ItemGroup>
     <PackageReference Include="EntityFramework" Version="6.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="3.0.0" />

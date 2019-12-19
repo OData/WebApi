@@ -3,54 +3,57 @@
 
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNetCore.Routing;
-using Xunit;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
 using System.Collections.Generic;
-using System.Text;
+using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataActionSelectorTest
     {
 
-        public static TheoryDataSet<Dictionary<string, object>, System.Type, string, System.Type[]> Scenarios
+        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]> Scenarios
         {
             get
             {
-                return new TheoryDataSet<Dictionary<string, object>, System.Type, string, System.Type[]>
+                return new TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]>
                 {
                     // Actions with single key parameter
                     {
                         new Dictionary<string, object> { { "key", 1 } },
+                        null,
                         typeof(SingleKeyController), "Get",
                         new [] { typeof(int) }
                     },
                     {
                         new Dictionary<string, object>(),
+                        null,
                         typeof(SingleKeyController), "Get",
                         new System.Type[0]
                     },
                     // Actions with multiple parameters
                     {
                         new Dictionary<string, object>(),
+                        null,
                         typeof(PathAndQueryController), "Get",
                         new [] { typeof(ODataPath), typeof(ODataQueryOptions)}
                     },
                     {
                         new Dictionary<string, object>() { { "key", 1 } },
+                        null,
                         typeof(KeyAndQueryController), "Get",
                         new [] { typeof(int), typeof(ODataQueryOptions)}
                     },
                     {
                         new Dictionary<string, object>() { { "key", 1 }, { "relatedKey", 2 } },
+                        null,
                         typeof(KeyAndRelatedKeyController), "Get",
                         new [] { typeof(int), typeof(int) }
                     },
                     {
                         new Dictionary<string, object>() { { "key", 1 }, {  "relatedKey", 2 } },
+                        null,
                         typeof(KeyAndRelatedKeyAndPathController), "Get",
                         new [] { typeof(int), typeof(int), typeof(ODataPath) }
                     },
@@ -59,26 +62,47 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         {
                             { "key", 1 }, { "relatedKey", 2 }, { "navigationProperty", 3 }
                         },
+                        null,
                         typeof(KeyAndRelatedKeyAndPathController), "Get",
                         new [] { typeof(int), typeof(int), typeof(int) }
                     },
                     {
                         new Dictionary<string, object>() { { "key", 1 } },
+                        null,
                         typeof(KeyAndRelatedKeyAndPathController), "Get",
                         new [] { typeof(int), typeof(ODataPath) }
+                    },
+                    // actions that expect request body
+                    {
+                        new Dictionary<string, object>(),
+                        "{}",
+                        typeof(BodyOnlyController), "Post",
+                        new [] { typeof(int) }
+                    },
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        "{}",
+                        typeof(KeyBodyController), "Put",
+                        new [] { typeof(int), typeof(Delta<object>) }
+                    },
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        null,
+                        typeof(KeyBodyController), "Put",
+                        new [] { typeof(int) }
                     }
-                };
+            };
             }
         }
 
 
         [Theory]
         [MemberData(nameof(Scenarios))]
-        public void SelectBestCandidate_SelectsCorrectly(Dictionary<string, object> routeDataValues, System.Type controllerType, string actionName, System.Type[] expectedActionSignature)
+        public void SelectBestCandidate_SelectsCorrectly(Dictionary<string, object> routeDataValues, string bodyContent, System.Type controllerType, string actionName, System.Type[] expectedActionSignature)
         {
             // Arrange
             ODataActionSelectorTestHelper.SetupActionSelector(controllerType, out var routeBuilder, out var actionSelector, out var actionDescriptors);
-            var routeContext = ODataActionSelectorTestHelper.SetupRouteContext(routeBuilder, actionName, routeDataValues);
+            var routeContext = ODataActionSelectorTestHelper.SetupRouteContext(routeBuilder, actionName, routeDataValues, bodyContent);
 
             // Act
             var action = actionSelector.SelectBestCandidate(routeContext, actionDescriptors);
@@ -93,47 +117,51 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
     public class SingleKeyController : TestODataController
     {
-        public string Get(int key) => $"Get({key})";
-        public string Get() => "Get()";
+        public void Get(int key) {}
+        public void Get() {}
     }
 
     public class PathAndQueryController : TestODataController
     {
-        public string Get(ODataPath path, ODataQueryOptions queryOptions) => "Get(path, queryOptions)";
+        public void Get(ODataPath path, ODataQueryOptions queryOptions) { }
 
-        public string Get(ODataPath path) => "Get(path)";
+        public void Get(ODataPath path) { }
     }
 
     public class KeyAndQueryController : TestODataController
     {
-        public string Get(int key, ODataQueryOptions queryOptions) => "Get(key, queryOptions)";
+        public void Get(int key, ODataQueryOptions queryOptions) { }
 
-        public string Get(int key) => "Get(key)";
+        public void Get(int key) { }
     }
 
     public class KeyAndRelatedKeyController : TestODataController
     {
-        public string Get(int key, int relatedKey) => "Get(key, relatedKey)";
+        public void Get(int key, int relatedKey) { }
 
-        public string Get(int key) => "Get(key)";
+        public void Get(int key) { }
     }
 
     public class KeyAndRelatedKeyAndPathController : TestODataController
     {
-        public string Get(int key, int relatedKey, ODataPath path) => "Get(key, relatedKey, path)";
+        public void Get(int key, int relatedKey, ODataPath path) { }
 
-        public string Get(int key, int relatedKey) => "Get(key, relatedKey)";
+        public void Get(int key, int relatedKey) { }
 
-        public string Get(int key, int relatedKey, int navigationProperty)
-            => "Get(key, relatedKey, navigationProperty)";
+        public void Get(int key, int relatedKey, int navigationProperty) { }
 
-        public string Get(int key, ODataPath path) => "Get(key, path)";
+        public void Get(int key, ODataPath path) { }
     }
 
-    public class BodyController : TestODataController
+    public class KeyBodyController : TestODataController
     {
-        public string Put(int key, Delta<object> dt) => "Put(key, dt)";
-        public string Put(int key) => "Put(key)";
-        public string Post(int body) => "Post(body)";
+        public void Put(int key, Delta<object> dt) { }
+        public void Put(int key) { }
+    }
+
+    public class BodyOnlyController : TestODataController
+    {
+        public void Post(int body) { }
+        public void Post() { }
     }
 }

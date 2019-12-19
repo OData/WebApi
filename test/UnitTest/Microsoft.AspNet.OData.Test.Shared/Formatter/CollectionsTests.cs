@@ -74,6 +74,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             string message = "{ \"ID\" : 42, \"" + propertyName + "\": [ 1, 2, 3 ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = await _client.SendAsync(request);
@@ -91,6 +92,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             string message = "{ \"ID\" : 42, \"NullableColors\" : [ \"Red\", null, \"Green\" ]}";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
@@ -108,6 +110,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             string message = "{ \"ID\" : 42, \"ComplexCollection\" : [  { \"A\": 1 }, { \"A\": 2 }, { \"A\": 3 } ] }";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = await _client.SendAsync(request);
@@ -131,6 +134,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = await _client.SendAsync(request);
@@ -148,6 +152,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/CollectionsTests/");
             request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             try

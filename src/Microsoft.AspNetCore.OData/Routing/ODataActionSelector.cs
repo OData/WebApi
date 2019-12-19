@@ -175,7 +175,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // if parameter is not bound to a key in the path,
                 // assume that it's bound to the request body
                 // only one parameter should be considered bound to the body
-                if (!matchedBody && context.HttpContext.Request.Body.Length > 0)
+                if (!matchedBody && RequestHasBody(context))
                 {
                     matchedBody = true;
                     continue;
@@ -185,6 +185,13 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             return true;
+        }
+
+        private bool RequestHasBody(RouteContext context)
+        {
+            var request = context.HttpContext.Request;
+            var method = request.Method;
+            return request.ContentLength > 0;
         }
 
         private class ActionIdAndParameters

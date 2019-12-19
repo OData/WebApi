@@ -191,9 +191,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool RequestHasBody(RouteContext context)
         {
-            var request = context.HttpContext.Request;
-            var method = request.Method;
-            return request.ContentLength > 0;
+            return context.HttpContext.Request.ContentLength > 0;
         }
 
         private class ActionIdAndParameters

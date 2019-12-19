@@ -301,17 +301,20 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 SelectAllDynamicProperties = true;
             }
 
-            // at least to make sure the structural properties are in the same order of the order defined in the type.
-            foreach (var structuralProperty in structuralTypeInfo.AllStructuralProperties)
+            // to make sure the structural properties are in the same order defined in the type.
+            if (structuralTypeInfo.AllStructuralProperties != null)
             {
-                SelectExpandIncludedProperty includeProperty;
-                if (!currentLevelPropertiesInclude.TryGetValue(structuralProperty, out includeProperty))
+                foreach (var structuralProperty in structuralTypeInfo.AllStructuralProperties)
                 {
-                    continue;
-                }
+                    SelectExpandIncludedProperty includeProperty;
+                    if (!currentLevelPropertiesInclude.TryGetValue(structuralProperty, out includeProperty))
+                    {
+                        continue;
+                    }
 
-                PathSelectItem pathSelectItem = includeProperty == null ? null : includeProperty.ToPathSelectItem();
-                AddStructuralProperty(structuralProperty, pathSelectItem);
+                    PathSelectItem pathSelectItem = includeProperty == null ? null : includeProperty.ToPathSelectItem();
+                    AddStructuralProperty(structuralProperty, pathSelectItem);
+                }
             }
         }
 

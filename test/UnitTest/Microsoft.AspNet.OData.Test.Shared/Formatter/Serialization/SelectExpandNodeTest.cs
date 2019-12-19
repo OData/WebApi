@@ -559,6 +559,41 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
                 "$select does not support selections of type 'SelectItemProxy'.");
         }
 
+        [Fact]
+        public void BuildSelectExpandNode_Works_IfOnlyNavigationPropertyDefinedOnType()
+        {
+            // Assert
+            EdmModel model = new EdmModel();
+            EdmEntityType entity = new EdmEntityType("NS", "Entity");
+            entity.AddUnidirectionalNavigation(new EdmNavigationPropertyInfo
+            {
+                Name = "Nav",
+                Target = entity,
+                TargetMultiplicity = EdmMultiplicity.One
+            });
+            model.AddElement(entity);
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            EdmSingleton singleton = container.AddSingleton("Single", entity);
+            container.AddElement(singleton);
+            model.AddElement(container);
+
+            // Act
+            SelectExpandClause selectExpandClause = new ODataQueryOptionParser(model, entity, singleton,
+                new Dictionary<string, string>
+                {
+                    { "$select", "Nav" }
+                }).ParseSelectAndExpand();
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(selectExpandClause, entity, model);
+
+            // Assert
+            Assert.Null(selectExpandNode.SelectedStructuralProperties);
+            Assert.Null(selectExpandNode.SelectedComplexTypeProperties);
+
+            Assert.NotNull(selectExpandNode.SelectedNavigationProperties);
+            Assert.Single(selectExpandNode.SelectedNavigationProperties);
+        }
+
         #region Test IsComplexOrCollectionComplex
         [Fact]
         public void IsComplexOrCollectionComplex_TestNullInputCorrect()
@@ -693,6 +728,27 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.True(structuralTypeInfo.IsNavigationPropertyDefined(property));
             Assert.False(structuralTypeInfo.IsNavigationPropertyDefined(orderProperty));
         }
+
+        [Fact]
+        public void EdmStructuralTypeInfo_ReturnsNullForEmptyStructuredType()
+        {
+            // Assert
+            EdmModel model = new EdmModel();
+            EdmEntityType entity = new EdmEntityType("NS", "Entity");
+            model.AddElement(entity);
+
+            // Act
+            var structuralTypeInfo = new SelectExpandNode.EdmStructuralTypeInfo(model, entity);
+
+            // Assert
+            Assert.Null(structuralTypeInfo.AllStructuralProperties);
+            Assert.Null(structuralTypeInfo.AllNavigationProperties);
+
+            Assert.Null(structuralTypeInfo.AllActions);
+            Assert.Null(structuralTypeInfo.AllFunctions);
+        }
+
+
         #endregion
 
         public SelectExpandClause ParseSelectExpand(string select, string expand)

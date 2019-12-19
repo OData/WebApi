@@ -62,6 +62,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }";
 
             request.Content = new StringContent(payload);
+            request.Content.Headers.ContentLength = payload.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
@@ -89,6 +90,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             request.Headers.Add("accept", "application/json");
 
             request.Content = new StringContent(EntityPayload);
+            request.Content.Headers.ContentLength = EntityPayload.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act
@@ -116,6 +118,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpClient client = TestServerFactory.CreateClient(server);
 
             request.Content = new StringContent(EntityPayload);
+            request.Content.Headers.ContentLength = EntityPayload.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act

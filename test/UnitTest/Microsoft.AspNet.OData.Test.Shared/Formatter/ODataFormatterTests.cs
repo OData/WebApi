@@ -488,9 +488,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             using (HttpClient client = TestServerFactory.CreateClient(server))
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
             {
-                request.Content = new StringContent(
-                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                var message = string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}");
+                request.Content = new StringContent(message);
+                request.Content.Headers.ContentLength = message.Length;
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                 request.Headers.Accept.ParseAdd("application/json");
 
@@ -556,9 +557,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpClient client = TestServerFactory.CreateClient(server);
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
-            request.Content = new StringContent(
-                string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+            var message = string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}");
+            request.Content = new StringContent(message);
+            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
 
@@ -582,10 +584,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             using (HttpClient client = TestServerFactory.CreateClient(server))
             using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers"))
             {
-                request.Content = new StringContent(
-                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                var message = string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}");
+                request.Content = new StringContent(message);
                 request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Content.Headers.ContentLength = message.Length;
                 request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
 
                 // Act

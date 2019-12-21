@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void Constructor_ThrowsException_IfNullRawValueArgument()
         {
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentException>(() => new CountQueryOption(null, _context, null),
                 "The argument 'rawValue' is null or empty. (Parameter 'rawValue')");
 #else
@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void Constructor_ThrowsException_IfEmptyRawValue()
         {
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentException>(() => new CountQueryOption(string.Empty, _context, null),
                 "The argument 'rawValue' is null or empty. (Parameter 'rawValue')");
 #else

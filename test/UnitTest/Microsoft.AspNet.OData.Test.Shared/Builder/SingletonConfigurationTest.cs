@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void CtorThatTakesClrType_Throws_ArgumentNull_For_Name()
         {
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentException>(
                 () => new SingletonConfiguration(modelBuilder: new ODataModelBuilder(), entityClrType: typeof(SingletonConfigurationTest), name: null),
                 "The argument 'name' is null or empty. (Parameter 'name')");
@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void CtorThatTakesEntityTypeConfiguration_Throws_ArgumentNull_For_Name()
         {
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentException>(
                 () => new SingletonConfiguration(
                     modelBuilder: new ODataModelBuilder(),

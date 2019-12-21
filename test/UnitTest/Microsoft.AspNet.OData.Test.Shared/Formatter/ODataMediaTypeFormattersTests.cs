@@ -14,9 +14,9 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
 #else
-using Microsoft.AspNetCore.Mvc.Internal;
+    using Microsoft.AspNetCore.Mvc.Internal;
 #endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
@@ -770,7 +770,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return null;
         }
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
         public class TestHttpResponseStreamWriterFactory
 #else
         public class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory

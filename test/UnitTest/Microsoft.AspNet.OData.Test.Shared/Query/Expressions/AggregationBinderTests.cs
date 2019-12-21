@@ -240,7 +240,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // strip off the beginning part of the expression to get to the first
             // actual query operator
             string resultExpression = ExpressionStringBuilder.ToString(clause);
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             var replace = "System.Linq.EmptyPartition`1[" + typeof(T).FullName + "]";
 #else
             var replace = typeof(T).FullName + "[]";

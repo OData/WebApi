@@ -13,10 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-#if NETCOREAPP3_0
-#else
-using Microsoft.AspNetCore.Builder.Internal;
-using Microsoft.AspNetCore.Mvc.Internal;
+#if NETCOREAPP2_0
+    using Microsoft.AspNetCore.Builder.Internal;
+    using Microsoft.AspNetCore.Mvc.Internal;
 #endif
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,16 +77,16 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             // Create a route build with a default path handler.
             IRouteBuilder routeBuilder = new RouteBuilder(appBuilder);
 
-#if NETCOREAPP3_0
-            //appBuilder.ApplicationServices.GetRequiredService<MvcRouteHandler>();
-            routeBuilder.DefaultHandler = new MyMvcRouteHandler();
-#else
+#if NETCOREAPP2_0
             routeBuilder.DefaultHandler = new MvcRouteHandler(
                 mockInvokerFactory.Object,
                 mockActionSelector.Object,
                 diagnosticSource,
                 mockLoggerFactory.Object,
                 new ActionContextAccessor());
+#else
+            //appBuilder.ApplicationServices.GetRequiredService<MvcRouteHandler>();
+            routeBuilder.DefaultHandler = new MyMvcRouteHandler();
 #endif
 
             return routeBuilder;

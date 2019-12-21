@@ -202,7 +202,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentOutOfRangeException>(
                 () => validator.Validate(
                     selectExpandQueryOption,

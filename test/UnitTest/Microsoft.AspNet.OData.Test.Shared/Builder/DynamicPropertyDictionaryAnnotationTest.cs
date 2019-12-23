@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             propertyInfo.Setup(p => p.PropertyType).Returns(typeof(int));
 
             // Act & Assert
-#if NETCOREAPP3_0
+#if NETCOREAPP3_1
             ExceptionAssert.Throws<ArgumentException>(() => new DynamicPropertyDictionaryAnnotation(
                 propertyInfo: propertyInfo.Object),
                 "Type 'Int32' is not supported as dynamic property annotation. " +

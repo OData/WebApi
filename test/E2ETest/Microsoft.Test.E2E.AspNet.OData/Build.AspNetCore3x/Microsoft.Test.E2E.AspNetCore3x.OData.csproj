@@ -1,8 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <Import Project="..\..\..\..\tools\WebStack.settings.targets" />
   
   <PropertyGroup>
     <ProjectGuid>{D91C1202-316D-4E6E-818F-49729D9C06C5}</ProjectGuid>

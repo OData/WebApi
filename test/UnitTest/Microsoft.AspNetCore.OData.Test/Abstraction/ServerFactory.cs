@@ -11,15 +11,15 @@ using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+#if !NETCOREAPP2_0
+    using Microsoft.AspNetCore.Http.Features;
+#endif
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
-#if NETCOREAPP3_0
-using Microsoft.AspNetCore.Http.Features;
-#endif
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -39,11 +39,11 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
             builder.ConfigureServices(services =>
             {
-#if NETCOREAPP3_0
+#if NETCOREAPP2_0
+                services.AddMvc();
+#else
                 services.AddMvc(options => options.EnableEndpointRouting = false)
                     .AddNewtonsoftJson();
-#else
-                services.AddMvc();
 #endif
                 services.AddOData();
                 configureService?.Invoke(services);
@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 
             builder.Configure(app =>
             {
-#if NETCOREAPP3_0
+#if !NETCOREAPP2_0
                 app.Use(next => context =>
                 {
                     var body = context.Features.Get<IHttpBodyControlFeature>();

@@ -67,7 +67,11 @@ namespace Microsoft.AspNet.OData.Extensions
                 options.ValueProviderFactories.Add(new ODataValueProviderFactory());
             });
 
-#if NETCOREAPP3_0
+#if NETSTANDARD2_0
+            // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor
+            // and pass all non-OData calls to this inner selector.
+            services.AddSingleton<IActionSelector, ODataActionSelector>();
+#else
             // We need to decorate the ActionSelector.
             var selector = services.First(s => s.ServiceType == typeof(IActionSelector) && s.ImplementationType != null);
             services.Remove(selector);
@@ -79,10 +83,6 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 return new ODataActionSelector((IActionSelector)s.GetRequiredService(selector.ImplementationType));
             });
-#else
-            // Add our action selector. The ODataActionSelector creates an ActionSelector in it's constructor
-            // and pass all non-OData calls to this inner selector.
-            services.AddSingleton<IActionSelector, ODataActionSelector>();
 #endif
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed

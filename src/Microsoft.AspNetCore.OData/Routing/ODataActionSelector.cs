@@ -96,15 +96,18 @@ namespace Microsoft.AspNet.OData.Routing
         {
             RouteData routeData = context.RouteData;
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
-
-            var odataRoute = routeData.Routers.OfType<ODataRoute>().FirstOrDefault();
-            var routePrefix = odataRoute?.RoutePrefix;
             
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
+                var odataRoute = routeData.Routers.OfType<ODataRoute>().FirstOrDefault();
+                var routePrefix = odataRoute?.RoutePrefix;
                 // Get the available parameter names from the route data. Ignore case of key names.
-                IList<string> availableKeys = routeData.Values.Keys.Select(k => k.ToLowerInvariant())
-                    .Where((key) => routePrefix != "{" + key + "}")
+                // Remove route prefix and other non-parameter values from availableKeys
+                IList<string> availableKeys = routeData.Values.Keys
+                    .Where((key) => routePrefix != "{" + key + "}"
+                        && key != ODataRouteConstants.Action
+                        && key != ODataRouteConstants.ODataPath)
+                    .Select(k => k.ToLowerInvariant())
                     .ToList();
 
                 // Filter out types we know how to bind out of the parameter lists. These values
@@ -122,7 +125,8 @@ namespace Microsoft.AspNet.OData.Routing
                 ODataOptionalParameter optionalWrapper = wrapper as ODataOptionalParameter;
 
                 // Find the action with the all matched parameters from available keys including
-                // matches with no parameters. Ordered first by the total number of matched
+                // matches with no parameters and matches with parameters bound to the body.
+                // Ordered first by the total number of matched
                 // parameters followed by the total number of parameters.  Ignore case of
                 // parameter names. The first one is the best match.
                 //
@@ -135,10 +139,9 @@ namespace Microsoft.AspNet.OData.Routing
                 var matchedCandidates = considerCandidates
                     .Where(c => TryMatch(context, c.FilteredParameters, availableKeys, optionalWrapper, c.TotalParameterCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
-                    .ThenByDescending(c => c.TotalParameterCount);
+                    .ThenByDescending(c => c.TotalParameterCount)
+                    .ToList();
 
-                // Return either the best matched candidate or the first
-                // candidate if none matched.
                 return (matchedCandidates.Any())
                     ? candidates.Where(c => c.Id == matchedCandidates.FirstOrDefault().Id).FirstOrDefault()
                     : null;
@@ -149,16 +152,22 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper, int totalParameterCount)
         {
-            if (totalParameterCount == 0 && availableKeys.Count > 2)
+            if (totalParameterCount == 0 && availableKeys.Count > 0)
             {
                 return false;
             }
             bool matchedBody = false;
+            var conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
             // use the parameter name to match.
             foreach(var p in parameters)
             {
                 string parameterName = p.Name.ToLowerInvariant();
                 if (availableKeys.Contains(parameterName))
+                {
+                    continue;
+                }
+
+                if (conventionsStore != null && conventionsStore.ContainsKey(p.Name))
                 {
                     continue;
                 }

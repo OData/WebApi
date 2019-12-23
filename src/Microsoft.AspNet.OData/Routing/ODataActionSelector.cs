@@ -117,15 +117,19 @@ namespace Microsoft.AspNet.OData.Routing
         {
             var parameters = action.GetParameters();
             var routeData = context.RouteData;
+            var conventionsStore = context.Request.ODataProperties().RoutingConventionsStore;
             var matchedBody = false;
             var route = routeData.Route as ODataRoute;
             var routePrefix = route?.RoutePrefix;
             var availableKeys = routeData.Values.Keys
-                .Where(k => routePrefix != "{" + k + "}")
+                .Where(k => routePrefix != "{" + k + "}" 
+                    && k != ODataRouteConstants.Action
+                    && k != ODataRouteConstants.Controller
+                    && k != ODataRouteConstants.ODataPath)
                 .Select(k => k.ToUpperInvariant())
                 .ToList();
 
-            if (parameters.Count == 0 && availableKeys.Count > 3)
+            if (parameters.Count == 0 && availableKeys.Count > 0)
             {
                 return false;
             }
@@ -134,6 +138,10 @@ namespace Microsoft.AspNet.OData.Routing
             {
                 string parameterName = p.ParameterName.ToUpperInvariant();
                 if (availableKeys.Contains(parameterName))
+                {
+                    continue;
+                }
+                if (conventionsStore.ContainsKey(p.ParameterName))
                 {
                     continue;
                 }

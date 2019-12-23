@@ -7,13 +7,14 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
 using System.Collections.Generic;
 using Xunit;
+using System;
 
 namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataActionSelectorTest
     {
 
-        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]> Scenarios
+        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]> ScenariosWithCorrectAction
         {
             get
             {
@@ -90,14 +91,36 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         null,
                         typeof(KeyBodyController), "Put",
                         new [] { typeof(int) }
+                    },
+                };
+            }
+        }
+
+        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string> ScenariosWithNoCorrectAction
+        {
+            get
+            {
+                return new TheoryDataSet<Dictionary<string, object>, string, System.Type, string>
+                {
+                    // Action has no param but route data has values
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        null,
+                        typeof(NoParamController), "Get"
+                    },
+                    // Action has parameters not in route values
+                    {
+                        new Dictionary<string, object>() { { "someValue", 1 } },
+                        null,
+                        typeof(NoParamController), "Put"
                     }
-            };
+                };
             }
         }
 
 
         [Theory]
-        [MemberData(nameof(Scenarios))]
+        [MemberData(nameof(ScenariosWithCorrectAction))]
         public void SelectBestCandidate_SelectsCorrectly(Dictionary<string, object> routeDataValues, string bodyContent, System.Type controllerType, string actionName, System.Type[] expectedActionSignature)
         {
             // Arrange
@@ -113,12 +136,30 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.True(ODataActionSelectorTestHelper.ActionMatchesMethod(action, method));
         }
 
+        [Theory]
+        [MemberData(nameof(ScenariosWithNoCorrectAction))]
+        public void SelectBestCandidate_WhenNoActionWithMatchingParameters_ReturnsNull(
+            Dictionary<string, object> routeDataValues,
+            string bodyContent,
+            Type controllerType,
+            string actionName)
+        {
+            // Arrange
+            ODataActionSelectorTestHelper.SetupActionSelector(controllerType, out var routeBuilder, out var actionSelector, out var actionDescriptors);
+            var routeContext = ODataActionSelectorTestHelper.SetupRouteContext(routeBuilder, actionName, routeDataValues, bodyContent);
+
+            // Act
+            var action = actionSelector.SelectBestCandidate(routeContext, actionDescriptors);
+
+            // Assert
+            Assert.True(action == null);
+        }
     }
 
     public class SingleKeyController : TestODataController
     {
-        public void Get(int key) {}
-        public void Get() {}
+        public void Get(int key) { }
+        public void Get() { }
     }
 
     public class PathAndQueryController : TestODataController
@@ -163,5 +204,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
     {
         public void Post(int body) { }
         public void Post() { }
+    }
+
+    public class NoParamController : TestODataController
+    {
+        public void Get() { }
     }
 }

@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
-using System.Collections.Generic;
 using Xunit;
-using System;
 
 namespace Microsoft.AspNet.OData.Test.Routing
 {
     public class ODataActionSelectorTest
     {
 
-        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]> ScenariosWithCorrectAction
+        public static TheoryDataSet<Dictionary<string, object>, string, Type, string, Type[]> ScenariosWithCorrectAction
         {
             get
             {
-                return new TheoryDataSet<Dictionary<string, object>, string, System.Type, string, System.Type[]>
+                return new TheoryDataSet<Dictionary<string, object>, string, Type, string, Type[]>
                 {
                     // Actions with single key parameter
                     {
@@ -31,7 +31,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         new Dictionary<string, object>(),
                         null,
                         typeof(SingleKeyController), "Get",
-                        new System.Type[0]
+                        new Type[0]
                     },
                     // Actions with multiple parameters
                     {
@@ -96,11 +96,11 @@ namespace Microsoft.AspNet.OData.Test.Routing
             }
         }
 
-        public static TheoryDataSet<Dictionary<string, object>, string, System.Type, string> ScenariosWithNoCorrectAction
+        public static TheoryDataSet<Dictionary<string, object>, string, Type, string> ScenariosWithNoCorrectAction
         {
             get
             {
-                return new TheoryDataSet<Dictionary<string, object>, string, System.Type, string>
+                return new TheoryDataSet<Dictionary<string, object>, string, Type, string>
                 {
                     // Action has no param but route data has values
                     {
@@ -121,7 +121,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
         [Theory]
         [MemberData(nameof(ScenariosWithCorrectAction))]
-        public void SelectBestCandidate_SelectsCorrectly(Dictionary<string, object> routeDataValues, string bodyContent, System.Type controllerType, string actionName, System.Type[] expectedActionSignature)
+        public void SelectBestCandidate_SelectsCorrectly(Dictionary<string, object> routeDataValues, string bodyContent, Type controllerType, string actionName, Type[] expectedActionSignature)
         {
             // Arrange
             ODataActionSelectorTestHelper.SetupActionSelector(controllerType, out var routeBuilder, out var actionSelector, out var actionDescriptors);

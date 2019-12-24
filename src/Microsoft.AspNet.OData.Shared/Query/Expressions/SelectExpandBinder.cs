@@ -779,6 +779,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // $compute=...
 
             propertyValue = CreatePropertyValueExpression(structuredType, structuralProperty, source, pathSelectItem.FilterOption);
+            Type propertyValueType = propertyValue.Type;
+            if (propertyValueType == typeof(char[]) || propertyValueType == typeof(byte[]))
+            {
+                includedProperties.Add(new NamedPropertyExpression(propertyName, propertyValue));
+                return;
+            }
 
             Expression nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
 

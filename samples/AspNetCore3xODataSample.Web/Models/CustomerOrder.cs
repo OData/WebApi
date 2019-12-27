@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +16,8 @@ namespace AspNetCore3xODataSample.Web.Models
         public Address HomeAddress { get; set; }
 
         public Order Order { get; set; }
+
+        public IList<Order> Orders { get; set; }
     }
 
     public class Order

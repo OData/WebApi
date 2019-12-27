@@ -49,6 +49,7 @@ namespace AspNetCore3xODataSample.Web.Controllers
                 {
                     _context.Customers.Add(customer);
                     _context.Orders.Add(customer.Order);
+                    _context.Orders.AddRange(customer.Orders);
                 }
 
                 _context.SaveChanges();

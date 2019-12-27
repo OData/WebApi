@@ -25,7 +25,7 @@ namespace AspNetCore3xODataSample.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CustomerOrderContext>(opt => opt.UseInMemoryDatabase("CustomerOrderList"));
+            services.AddDbContext<CustomerOrderContext>(opt => opt.UseLazyLoadingProxies().UseInMemoryDatabase("CustomerOrderList"));
             services.AddOData();
             services.AddMvc(options => options.EnableEndpointRouting = false);
         }

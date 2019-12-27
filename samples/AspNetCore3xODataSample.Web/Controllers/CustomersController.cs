@@ -26,19 +26,22 @@ namespace AspNetCore3xODataSample.Web.Controllers
                     {
                         Name = "Jonier",
                         HomeAddress = new Address { City = "Redmond", Street = "156 AVE NE"},
-                        Order = new Order { Title = "104m" }
+                        Order = new Order { Title = "104m" },
+                        Orders = Enumerable.Range(0, 2).Select(e => new Order { Title = "abc" + e }).ToList()
                     },
                     new Customer
                     {
                         Name = "Sam",
                         HomeAddress = new Address { City = "Bellevue", Street = "Main St NE"},
-                        Order = new Order { Title = "Zhang" }
+                        Order = new Order { Title = "Zhang" },
+                        Orders = Enumerable.Range(0, 2).Select(e => new Order { Title = "xyz" + e }).ToList()
                     },
                     new Customer
                     {
                         Name = "Peter",
                         HomeAddress = new Address {  City = "Hollewye", Street = "Main St NE"},
-                        Order = new Order { Title = "Jichan" }
+                        Order = new Order { Title = "Jichan" },
+                        Orders = Enumerable.Range(0, 2).Select(e => new Order { Title = "ijk" + e }).ToList()
                     },
                 };
 

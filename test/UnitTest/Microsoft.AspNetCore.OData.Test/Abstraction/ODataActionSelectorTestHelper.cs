@@ -4,22 +4,20 @@
 using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Extensions;
-#if NETCOREAPP3_0
-    using Microsoft.AspNetCore.Routing;
-    using Microsoft.AspNetCore.Mvc.Controllers;
-    using Microsoft.AspNetCore.Mvc.Abstractions;
-    using Moq;
-#else
+using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+#if NETSTANDARD2_0
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.OData;
     using Microsoft.AspNetCore.Mvc.Internal;
-    using Microsoft.AspNetCore.Routing;
-    using Microsoft.AspNetCore.Mvc.Controllers;
-    using Microsoft.AspNetCore.Mvc.Abstractions;
+#else
+    using Moq;
 #endif
-using Microsoft.OData;
+
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -47,20 +45,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             return true;
         }
 
-#if NETCOREAPP3_0
-        public static void SetupActionSelector(System.Type controllerType,
-            out IRouteBuilder routeBuilder,
-            out ODataActionSelector actionSelector,
-            out IReadOnlyList<ControllerActionDescriptor> actionDescriptors)
-        {
-            var innerActionSelectorMock = new Mock<IActionSelector>();
-            actionSelector = new ODataActionSelector(innerActionSelectorMock.Object);
-            routeBuilder = RoutingConfigurationFactory.Create();
-            actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
-                as IReadOnlyList<ControllerActionDescriptor>;
-        }
-            
-#else
+#if NETSTANDARD2_0
         public static void SetupActionSelector(System.Type controllerType,
             out IRouteBuilder routeBuilder,
             out ODataActionSelector actionSelector,
@@ -77,6 +62,18 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 actionsProvider,
                 actionConstraintsProvider,
                 loggerFactory);
+        }
+#else
+        public static void SetupActionSelector(System.Type controllerType,
+            out IRouteBuilder routeBuilder,
+            out ODataActionSelector actionSelector,
+            out IReadOnlyList<ControllerActionDescriptor> actionDescriptors)
+        {
+            var innerActionSelectorMock = new Mock<IActionSelector>();
+            actionSelector = new ODataActionSelector(innerActionSelectorMock.Object);
+            routeBuilder = RoutingConfigurationFactory.Create();
+            actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
+                as IReadOnlyList<ControllerActionDescriptor>;
         }
 #endif
 

@@ -9,7 +9,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Abstractions;
-#if NETSTANDARD2_0
+#if NETCOREAPP2_0
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.OData;
@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             return true;
         }
 
-#if NETSTANDARD2_0
+#if NETCOREAPP2_0
         public static void SetupActionSelector(System.Type controllerType,
             out IRouteBuilder routeBuilder,
             out ODataActionSelector actionSelector,

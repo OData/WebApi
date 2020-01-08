@@ -169,7 +169,19 @@ namespace Microsoft.AspNet.OData.Routing
                     continue;
                 }
 
-                if (conventionsStore != null && conventionsStore.ContainsKey(p.Name))
+                if (conventionsStore != null)
+                {
+                    if (conventionsStore.ContainsKey(p.Name))
+                    {
+                        continue;
+                    }
+                    if (conventionsStore.Keys.FirstOrDefault(k => k.Contains(p.Name)) != null)
+                    {
+                        continue;
+                    }
+                }
+
+                if (context.HttpContext.Request.Query.ContainsKey(p.Name))
                 {
                     continue;
                 }
@@ -200,7 +212,8 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool RequestHasBody(RouteContext context)
         {
-            return context.HttpContext.Request.ContentLength > 0;
+            return context.HttpContext.Request.ContentLength > 0 ||
+                !string.IsNullOrEmpty(context.HttpContext.Request.ContentType);
         }
 
         private class ActionIdAndParameters

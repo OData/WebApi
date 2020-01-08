@@ -122,7 +122,7 @@ namespace Microsoft.AspNet.OData.Routing
             var route = routeData.Route as ODataRoute;
             var routePrefix = route?.RoutePrefix;
             var availableKeys = routeData.Values.Keys
-                .Where(k => routePrefix != "{" + k + "}" 
+                .Where(k => routePrefix != "{" + k + "}"
                     && k != ODataRouteConstants.Action
                     && k != ODataRouteConstants.Controller
                     && k != ODataRouteConstants.ODataPath)
@@ -145,6 +145,11 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     continue;
                 }
+                if (conventionsStore.Keys.FirstOrDefault(key =>
+                    key.Split(new char[] { '.' })[0] == p.ParameterName) != null)
+                {
+                    continue;
+                }
                 if (!matchedBody && RequestHasBody(context))
                 {
                     matchedBody = true;
@@ -162,6 +167,10 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     continue;
                 }
+                if (context.Request.RequestUri.Query.Contains(p.ParameterName))
+                {
+                    continue;
+                }
                 return false;
             }
             return true;
@@ -170,7 +179,7 @@ namespace Microsoft.AspNet.OData.Routing
         private static bool RequestHasBody(HttpControllerContext context)
         {
             var content = context.Request.Content;
-            return content?.Headers.ContentLength > 0;
+            return content?.Headers.ContentLength > 0 || content?.Headers.ContentType != null;
         }
 
         private static bool IsODataQueryOptions(Type parameterType)

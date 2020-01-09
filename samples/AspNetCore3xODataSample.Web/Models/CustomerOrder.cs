@@ -15,6 +15,8 @@ namespace AspNetCore3xODataSample.Web.Models
 
         public virtual Address HomeAddress { get; set; }
 
+        public virtual IList<Address> FavoriteAddresses { get; set; }
+
         public virtual Order Order { get; set; }
 
         public virtual IList<Order> Orders { get; set; }

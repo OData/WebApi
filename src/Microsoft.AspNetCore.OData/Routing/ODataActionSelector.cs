@@ -171,11 +171,9 @@ namespace Microsoft.AspNet.OData.Routing
 
                 if (conventionsStore != null)
                 {
-                    if (conventionsStore.ContainsKey(p.Name))
-                    {
-                        continue;
-                    }
-                    if (conventionsStore.Keys.FirstOrDefault(k => k.Contains(p.Name)) != null)
+                    // the convention store can contain the parameter as key
+                    // with a nested property (e.g. customer.Name) 
+                    if (conventionsStore.Keys.Any(k => k.Contains(p.Name)))
                     {
                         continue;
                     }

@@ -98,7 +98,7 @@ namespace Microsoft.AspNet.OData.Routing
         {
             RouteData routeData = context.RouteData;
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
-            
+
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
                 var odataRoute = routeData.Routers.OfType<ODataRoute>().FirstOrDefault();
@@ -161,7 +161,7 @@ namespace Microsoft.AspNet.OData.Routing
             bool matchedBody = false;
             var conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
             // use the parameter name to match.
-            foreach(var p in parameters)
+            foreach (var p in parameters)
             {
                 string parameterName = p.Name.ToLowerInvariant();
                 if (availableKeys.Contains(parameterName))

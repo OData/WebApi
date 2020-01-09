@@ -141,12 +141,11 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     continue;
                 }
-                if (conventionsStore.ContainsKey(p.ParameterName))
+                if (conventionsStore.Keys.Any(key => key.Contains(p.ParameterName)))
                 {
                     continue;
                 }
-                if (conventionsStore.Keys.FirstOrDefault(key =>
-                    key.Split(new char[] { '.' })[0] == p.ParameterName) != null)
+                if (context.Request.GetQueryNameValuePairs().Any(kvp => kvp.Key == p.ParameterName))
                 {
                     continue;
                 }
@@ -164,10 +163,6 @@ namespace Microsoft.AspNet.OData.Routing
                     continue;
                 }
                 if (p.IsOptional)
-                {
-                    continue;
-                }
-                if (context.Request.RequestUri.Query.Contains(p.ParameterName))
                 {
                     continue;
                 }

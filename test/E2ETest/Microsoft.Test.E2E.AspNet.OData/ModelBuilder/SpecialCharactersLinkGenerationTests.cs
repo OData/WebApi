@@ -70,7 +70,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var todoes = new List<SpecialCharactersLinkGenerationTestsModel>();
             foreach (var c in "$&+,/:;=?@ <>#%{}|\\^~[]` ")
             {
-                // Skip: it blocked by IIS settings
+                // Skip: it's blocked by IIS settings
+                // The whitespace (' ') is skipped because it was not supported but the test had bug which
+                // erroneously reported a successful response
+                // if a single whitespace should be allowed as a key parameter, then support for it should
+                // be implemented and it should be omitted from this string of skipped chars
                 if (" <>*%:+/\\&:?#=".Contains(c))//TODO: '=' is added when migration from odata v3 to v4. and the originally the test fails.
                 {
                     continue;

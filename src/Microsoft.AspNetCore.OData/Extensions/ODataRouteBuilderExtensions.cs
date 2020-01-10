@@ -19,9 +19,449 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using ServiceLifetime = Microsoft.OData.ServiceLifetime;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+
+#if NETCOREAPP3_1
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Routing.Matching;
+#endif
 
 namespace Microsoft.AspNet.OData.Extensions
 {
+#if NETCOREAPP3_1
+    internal class ODataLinkGenerator : LinkGenerator
+    {
+        private static string CombinePathSegments(string routePrefix, string odataPath)
+        {
+            if (String.IsNullOrEmpty(routePrefix))
+            {
+                return odataPath;
+            }
+            else
+            {
+                return String.IsNullOrEmpty(odataPath) ? routePrefix : routePrefix + '/' + odataPath;
+            }
+        }
+        private static readonly string _escapedHashMark = Uri.EscapeDataString("#");
+        private static readonly string _escapedQuestionMark = Uri.EscapeDataString("?");
+        private static string UriEncode(string str)
+        {
+            string escape = Uri.EscapeUriString(str);
+            escape = escape.Replace("#", _escapedHashMark);
+            escape = escape.Replace("?", _escapedQuestionMark);
+            return escape;
+        }
+
+        public override string GetPathByAddress<TAddress>(HttpContext httpContext, TAddress address, RouteValueDictionary values, RouteValueDictionary ambientValues = null, PathString? pathBase = null, FragmentString fragment = default, LinkOptions options = null)
+        {
+            object odataPathValue;
+            if (values.TryGetValue("odataPath", out odataPathValue))
+            {
+                string odataPath = odataPathValue as string;
+                if (odataPath != null)
+                {
+                    IPerRouteContainer perRouteContainer = httpContext.RequestServices.GetRequiredService<IPerRouteContainer>();
+                    string routePrex = perRouteContainer.GetRoutePrefix(httpContext.Request.ODataFeature().RouteName);
+
+                    string link = CombinePathSegments(routePrex, odataPath);
+                    link = UriEncode(link);
+                    return link;
+                }
+            }
+
+            return null;
+        }
+
+        public override string GetPathByAddress<TAddress>(TAddress address, RouteValueDictionary values, PathString pathBase = default, FragmentString fragment = default, LinkOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetUriByAddress<TAddress>(HttpContext httpContext, TAddress address, RouteValueDictionary values, RouteValueDictionary ambientValues = null, string scheme = null, HostString? host = null, PathString? pathBase = null, FragmentString fragment = default, LinkOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override string GetUriByAddress<TAddress>(TAddress address, RouteValueDictionary values, string scheme, HostString host, PathString pathBase = default, FragmentString fragment = default, LinkOptions options = null)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    internal class ODataEndpointRouteSetting
+    {
+        /// <summary>
+        /// Route variable name for the OData path.
+        /// </summary>
+        public static readonly string ODataPathPrefix = "{**odataPath_";
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    internal class ODataEndpointSelector : EndpointSelector
+    {
+        private IActionSelector _selector;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="selector"></param>
+        public ODataEndpointSelector(IActionSelector selector)
+        {
+            _selector = selector;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="candidateSet"></param>
+        /// <returns></returns>
+        public override Task SelectAsync(
+           HttpContext httpContext,
+           CandidateSet candidateSet)
+        {
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
+
+            if (candidateSet == null)
+            {
+                throw new ArgumentNullException(nameof(candidateSet));
+            }
+
+            Select(httpContext, candidateSet);
+            return Task.CompletedTask;
+        }
+
+        internal void Select(HttpContext httpContext, CandidateSet candidateSet)
+        {
+            RouteContext routeContext = new RouteContext(httpContext);
+
+            var condidates = _selector.SelectCandidates(routeContext);
+            var actionDescriptor = _selector.SelectBestCandidate(routeContext, condidates);
+            ControllerActionDescriptor controllerActionDescriptor = actionDescriptor as ControllerActionDescriptor;
+            if (controllerActionDescriptor == null)
+            {
+                return;
+            }
+
+            int count = candidateSet.Count;
+            for (int i = 0; i < count; i++)
+            {
+                CandidateState candidate = candidateSet[i];
+                ActionDescriptor action = candidate.Endpoint.Metadata.GetMetadata<ActionDescriptor>();
+                if (object.ReferenceEquals(action, controllerActionDescriptor))
+                {
+                    httpContext.SetEndpoint(candidate.Endpoint);
+                    httpContext.Request.RouteValues = candidate.Values;
+                    return;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class ODataEndpointRouteBuilderExtensions
+    {
+        /// <summary>
+        /// Gets the <see cref="DefaultQuerySettings"/> from route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        public static DefaultQuerySettings GetDefaultQuerySettings(this IEndpointRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
+            if (querySettings == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
+            }
+
+            return querySettings;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="ODataOptions"/> from route builder.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        public static ODataOptions GetDefaultODataOptions(this IEndpointRouteBuilder builder)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
+            if (options == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
+            }
+
+            return options;
+        }
+
+        /// <summary>
+        /// Maps the specified OData route and the OData route attributes.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/> to add the route to.</param>
+        /// <param name="routeName">The name of the route to map.</param>
+        /// <param name="routePrefix">The prefix to add to the OData route's path template.</param>
+        /// <param name="model">The EDM model to use for parsing OData paths.</param>
+        /// <returns>The added <see cref="ODataRoute"/>.</returns>
+        public static IEndpointRouteBuilder MapODataServiceRoute(this IEndpointRouteBuilder builder, string routeName,
+            string routePrefix, IEdmModel model)
+        {
+            return builder.MapODataServiceRoute(routeName, routePrefix, containerBuilder =>
+                containerBuilder.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model)
+                .AddService<IEnumerable<IODataRoutingConvention>>(Microsoft.OData.ServiceLifetime.Singleton, sp =>
+                ODataRoutingConventions.CreateDefaultWithAttributeRouting(routeName, builder.ServiceProvider)));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="routeBuilder"></param>
+        /// <param name="routeName"></param>
+        /// <param name="routePrefix"></param>
+        /// <param name="configureAction"></param>
+        public static IEndpointRouteBuilder MapODataServiceRoute(this IEndpointRouteBuilder routeBuilder, string routeName,
+            string routePrefix, Action<IContainerBuilder> configureAction)
+        {
+            // Build and configure the root container.
+            IServiceProvider serviceProvider = routeBuilder.ServiceProvider;
+
+            IPerRouteContainer perRouteContainer = serviceProvider.GetRequiredService<IPerRouteContainer>();
+            if (perRouteContainer == null)
+            {
+                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(IPerRouteContainer));
+            }
+
+            // Create an service provider for this route. Add the default services to the custom configuration actions.
+            Action<IContainerBuilder> builderAction = ConfigureDefaultServices(routeBuilder, configureAction);
+
+            IServiceProvider subServiceProvider = perRouteContainer.CreateODataRootContainer(routeName, builderAction);
+
+            // Make sure the MetadataController is registered with the ApplicationPartManager.
+            ApplicationPartManager applicationPartManager = serviceProvider.GetRequiredService<ApplicationPartManager>();
+            applicationPartManager.ApplicationParts.Add(new AssemblyPart(typeof(MetadataController).Assembly));
+
+            // Resolve the path handler and set URI resolver to it.
+            IODataPathHandler pathHandler = subServiceProvider.GetRequiredService<IODataPathHandler>();
+
+            // If settings is not on local, use the global configuration settings.
+            ODataOptions options = serviceProvider.GetRequiredService<ODataOptions>();
+            if (pathHandler != null && pathHandler.UrlKeyDelimiter == null)
+            {
+                pathHandler.UrlKeyDelimiter = options.UrlKeyDelimiter;
+            }
+
+            // Resolve HTTP handler, create the OData route and register it.
+            routePrefix = RemoveTrailingSlash(routePrefix);
+
+            /*
+            // If a batch handler is present, register the route with the batch path mapper. This will be used
+            // by the batching middleware to handle the batch request. Batching still requires the injection
+            // of the batching middleware via UseODataBatching().
+            ODataBatchHandler batchHandler = serviceProvider.GetService<ODataBatchHandler>();
+            if (batchHandler != null)
+            {
+                batchHandler.ODataRoute = route;
+                batchHandler.ODataRouteName = routeName;
+
+                string batchPath = String.IsNullOrEmpty(routePrefix)
+                    ? '/' + ODataRouteConstants.Batch
+                    : '/' + routePrefix + '/' + ODataRouteConstants.Batch;
+
+                ODataBatchPathMapping batchMapping = builder.ServiceProvider.GetRequiredService<ODataBatchPathMapping>();
+                batchMapping.AddRoute(routeName, batchPath);
+            }
+            */
+
+            //routeBuilder.MapDynamicControllerRoute<ODataTranslationTransformer>(routePrefix + @"/{*odatapath" + "_" + routeName + "}");
+            routeBuilder.MapDynamicControllerRoute<ODataTranslationTransformer>(CreateRoutePrefixTemplate(routeName, routePrefix));
+
+            perRouteContainer.AddRoute(routeName, routePrefix);
+
+            return routeBuilder;
+        }
+
+        
+
+        private static string CreateRoutePrefixTemplate(string routeName, string routePrefix)
+        {
+            return routePrefix + @"/{**odataPath_" + routeName + "}";
+        }
+
+        /// <summary>
+        /// Remote the trailing slash from a route prefix string.
+        /// </summary>
+        /// <param name="routePrefix">The route prefix string.</param>
+        /// <returns>The route prefix string without a trailing slash.</returns>
+        private static string RemoveTrailingSlash(string routePrefix)
+        {
+            if (!String.IsNullOrEmpty(routePrefix))
+            {
+                int prefixLastIndex = routePrefix.Length - 1;
+                if (routePrefix[prefixLastIndex] == '/')
+                {
+                    // Remove the last trailing slash if it has one.
+                    routePrefix = routePrefix.Substring(0, routePrefix.Length - 1);
+                }
+            }
+
+            return routePrefix;
+        }
+
+        /// <summary>
+        /// Configure the default services.
+        /// </summary>
+        /// <param name="routeBuilder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="configureAction">The configuring action to add the services to the root container.</param>
+        /// <returns>A configuring action to add the services to the root container.</returns>
+        internal static Action<IContainerBuilder> ConfigureDefaultServices(IEndpointRouteBuilder routeBuilder, Action<IContainerBuilder> configureAction)
+        {
+            return (builder =>
+            {
+                // Add platform-specific services here. Add Configuration first as other services may rely on it.
+                // For assembly resolution, add the and internal (IWebApiAssembliesResolver) where IWebApiAssembliesResolver
+                // is transient and instantiated from ApplicationPartManager by DI.
+                builder.AddService<IWebApiAssembliesResolver, WebApiAssembliesResolver>(ServiceLifetime.Transient);
+                builder.AddService<IODataPathTemplateHandler, DefaultODataPathHandler>(ServiceLifetime.Singleton);
+                builder.AddService<IETagHandler, DefaultODataETagHandler>(ServiceLifetime.Singleton);
+
+                // Access the default query settings and options from the global container.
+                builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultQuerySettings());
+                builder.AddService(ServiceLifetime.Singleton, sp => routeBuilder.GetDefaultODataOptions());
+
+                // Add the default webApi services.
+                builder.AddDefaultWebApiServices();
+
+                // Add custom actions.
+                configureAction?.Invoke(builder);
+            });
+        }
+    }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public class ODataTranslationTransformer : DynamicRouteValueTransformer
+        {
+        // private readonly TranslationDatabase _translationDatabase;
+        private IPerRouteContainer _perRouteContainer;
+
+        private IActionSelector _selector;
+        /// <summary>
+        /// 
+        /// </summary>
+        public ODataTranslationTransformer(IPerRouteContainer perRouteContainer,
+            IActionSelector actionSelector)
+        {
+            //_translationDatabase = translationDatabase;
+            _perRouteContainer = perRouteContainer;
+
+            _selector = actionSelector;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <param name="values"></param>
+        /// <returns></returns>
+        public override ValueTask<RouteValueDictionary> TransformAsync(HttpContext httpContext, RouteValueDictionary values)
+        {
+            ODataPath path;
+            HttpRequest request = httpContext.Request;
+
+            string routeName = request.ODataFeature().RouteName;
+
+
+            object oDataPathValue;
+
+            if (TryGetODataPathAndRouteName(values, out routeName, out oDataPathValue))
+            {
+                // We need to call Uri.GetLeftPart(), which returns an encoded Url.
+                // The ODL parser does not like raw values.
+                Uri requestUri = new Uri(request.GetEncodedUrl());
+                string requestLeftPart = requestUri.GetLeftPart(UriPartial.Path);
+                string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
+
+                path = ODataPathRouteConstraint.GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(routeName));
+
+                if (path != null)
+                {
+                    // Set all the properties we need for routing, querying, formatting
+                    IODataFeature odataFeature = httpContext.ODataFeature();
+                    odataFeature.Path = path;
+                    odataFeature.RouteName = routeName;
+
+                    RouteContext routeContext = new RouteContext(httpContext);
+
+                    var condidates = _selector.SelectCandidates(routeContext);
+                    var actionDescriptor = _selector.SelectBestCandidate(routeContext, condidates);
+                    ControllerActionDescriptor controllerActionDescriptor = actionDescriptor as ControllerActionDescriptor;
+                    if (controllerActionDescriptor != null)
+                    {
+                        foreach (var item in routeContext.RouteData.Values)
+                        {
+                            values[item.Key] = item.Value;
+                        }
+
+                        values["controller"] = controllerActionDescriptor.ControllerName;
+                        values["action"] = controllerActionDescriptor.ActionName;
+
+                        values["odataPath"] = oDataPathValue;
+                    }
+                }
+
+                // The request doesn't match this route so dispose the request container.
+                request.DeleteRequestContainer(true);
+
+            }
+
+            // throw new NotImplementedException();
+            return new ValueTask<RouteValueDictionary>(values);
+        }
+
+
+
+
+        private static bool TryGetODataPathAndRouteName(RouteValueDictionary values, out string routeName, out object odataPathValue)
+        {
+            routeName = null;
+            odataPathValue = null;
+            foreach (var item in values)
+            {
+                string keyString = item.Key;
+
+                if (keyString.StartsWith("odataPath_"))
+                {
+                    routeName = keyString.Substring(10);
+                    odataPathValue = item.Value;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+#endif
+
     /// <summary>
     /// Provides extension methods for <see cref="IRouteBuilder"/> to add OData routes.
     /// </summary>

@@ -26,6 +26,11 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <summary>
         /// Gets or sets the route name.
         /// </summary>
+        string RoutePrefix { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route name.
+        /// </summary>
         string RouteName { get; set; }
 
         /// <summary>

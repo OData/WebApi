@@ -10,6 +10,10 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Routing;
+#if NETCOREAPP3_1
+using Microsoft.AspNetCore.Routing.Matching;
+#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -31,6 +35,10 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 throw Error.ArgumentNull(nameof(services));
             }
+#if NETCOREAPP3_1
+            services.AddSingleton<ODataTranslationTransformer>();
+            services.AddSingleton<LinkGenerator, ODataLinkGenerator>();
+#endif
 
             // Setup per-route dependency injection. When routes are added, additional
             // per-route classes will be injected, such as IEdmModel and IODataRoutingConventions.
@@ -83,6 +91,8 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 return new ODataActionSelector((IActionSelector)s.GetRequiredService(selector.ImplementationType));
             });
+
+            services.AddSingleton<EndpointSelector, ODataEndpointSelector>();
 #endif
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed

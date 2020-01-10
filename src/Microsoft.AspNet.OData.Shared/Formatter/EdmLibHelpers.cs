@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
@@ -116,10 +117,18 @@ namespace Microsoft.AspNet.OData.Formatter
             return GetEdmType(edmModel, clrType, testCollections: true);
         }
 
+        private static readonly ConcurrentDictionary<Tuple<IEdmModel, Type, bool>, IEdmType> _edmTypeCache =
+            new ConcurrentDictionary<Tuple<IEdmModel, Type, bool>, IEdmType>();
+
         private static IEdmType GetEdmType(IEdmModel edmModel, Type clrType, bool testCollections)
         {
             Contract.Assert(edmModel != null);
             Contract.Assert(clrType != null);
+
+            Tuple<IEdmModel, Type, bool> key = new Tuple<IEdmModel, Type, bool>(edmModel, clrType, testCollections);
+            IEdmType edmCachedType = null;
+            if (_edmTypeCache.TryGetValue(key, out edmCachedType))
+                return edmCachedType;
 
             IEdmPrimitiveType primitiveType = GetEdmPrimitiveTypeOrNull(clrType);
             if (primitiveType != null)
@@ -145,7 +154,9 @@ namespace Microsoft.AspNet.OData.Formatter
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
                         {
-                            return new EdmCollectionType(elementType.ToEdmTypeReference(IsNullable(elementClrType)));
+                            IEdmType edmType = new EdmCollectionType(elementType.ToEdmTypeReference(IsNullable(elementClrType)));
+                            _edmTypeCache.TryAdd(key, edmType);
+                            return edmType;
                         }
                     }
                 }
@@ -174,6 +185,9 @@ namespace Microsoft.AspNet.OData.Formatter
                     // go up the inheritance tree to see if we have a mapping defined for the base type.
                     returnType = returnType ?? GetEdmType(edmModel, TypeHelper.GetBaseType(clrType), testCollections);
                 }
+            
+                _edmTypeCache.TryAdd(key, returnType);
+
                 return returnType;
             }
         }

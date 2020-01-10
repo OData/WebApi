@@ -1873,11 +1873,6 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Collections.Generic.IDictionary`2[[System.String],[System.String]] GetODataContentIdMapping (Microsoft.AspNetCore.Http.HttpRequest request)
-
-	[
-	ExtensionAttribute(),
-	]
 	public static IODataPathHandler GetPathHandler (Microsoft.AspNetCore.Http.HttpRequest request)
 
 	[

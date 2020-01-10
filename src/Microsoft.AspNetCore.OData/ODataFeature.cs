@@ -44,6 +44,11 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets or sets the route name.
         /// </summary>
+        public string RoutePrefix { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route name.
+        /// </summary>
         public string RouteName { get; set; }
 
         /// <summary>

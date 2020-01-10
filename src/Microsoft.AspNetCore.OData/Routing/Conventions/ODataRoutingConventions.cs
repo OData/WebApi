@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Routing;
@@ -34,6 +35,27 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
             IList<IODataRoutingConvention> routingConventions = CreateDefault();
             AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, builder.ServiceProvider);
+            routingConventions.Insert(0, routingConvention);
+            return routingConventions;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="routeName"></param>
+        /// <param name="serviceProvider"></param>
+        /// <returns></returns>
+        public static IList<IODataRoutingConvention> CreateDefaultWithAttributeRouting(
+            string routeName,
+            IServiceProvider serviceProvider)
+        {
+            if (routeName == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
+            IList<IODataRoutingConvention> routingConventions = CreateDefault();
+            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, serviceProvider);
             routingConventions.Insert(0, routingConvention);
             return routingConventions;
         }

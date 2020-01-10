@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -13,11 +14,32 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     public abstract class PerRouteContainerBase : IPerRouteContainer
     {
+        private IDictionary<string, string> routeMapping = new Dictionary<string, string>();
+
         /// <summary>
         /// Gets or sets a function to build an <see cref="IContainerBuilder"/>
         /// </summary>
         public Func<IContainerBuilder> BuilderFactory { get; set; }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="routeName"></param>
+        /// <param name="routePrefix"></param>
+        public virtual void AddRoute(string routeName, string routePrefix)
+        {
+            routeMapping[routeName] = routePrefix;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="routeName"></param>
+        /// <returns></returns>
+        public string GetRoutePrefix(string routeName)
+        {
+            return routeMapping[routeName];
+        }
         /// <summary>
         /// Create a root container for a given route name.
         /// </summary>

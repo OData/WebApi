@@ -9,7 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
+using ServiceLifetime = Microsoft.OData.ServiceLifetime;
 
 namespace AspNetCore3xODataSample.Web
 {
@@ -27,24 +29,30 @@ namespace AspNetCore3xODataSample.Web
         {
             services.AddDbContext<CustomerOrderContext>(opt => opt.UseLazyLoadingProxies().UseInMemoryDatabase("CustomerOrderList"));
             services.AddOData();
-            services.AddMvc(options => options.EnableEndpointRouting = false);
+            // services.AddMvc(options => options.EnableEndpointRouting = false);
+            services.AddRouting();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-
             IEdmModel model = EdmModelBuilder.GetEdmModel();
 
+            /*
             app.UseMvc(builder =>
             {
                 builder.Select().Expand().Filter().OrderBy().MaxTop(100).Count();
 
                 builder.MapODataServiceRoute("odata", "odata", model);
+            });*/
+
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapODataServiceRoute("odata", "odata", model);
+
+                endpoints.MapODataServiceRoute("odata2", "myprefix", model);
+
             });
         }
     }

@@ -12,7 +12,7 @@
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <OutputPath>$(WebStackRootPath)bin\$(Configuration)\E2ETest\AspNetCore\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)sln\</SolutionDir>
-    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETCORE;NETCORE2x;PORTABLELIB</DefineConstants>
+    <DefineConstants>$(DefineConstants);ASPNETODATA;ASPNETWEBAPI;NETCORE;NETCORE2x;NETCOREAPP2_1;PORTABLELIB</DefineConstants>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
@@ -89,6 +89,9 @@
     </Compile>
     <Compile Include="..\NavigationPropertyOnComplexType\PeopleRepository.cs">
       <Link>NavigationPropertyOnComplexType\PeopleRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs">
+      <Link>NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs</Link>
     </Compile>
     <Compile Include="..\QueryComposition\EFWideCustomer.cs">
       <Link>QueryComposition\EFWideCustomer.cs</Link>

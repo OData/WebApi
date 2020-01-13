@@ -580,6 +580,12 @@
   <data name="UnsupportedSelectExpandPath" xml:space="preserve">
     <value>A path within the select or expand query option is not supported.</value>
   </data>
+  <data name="InvalidSegmentInSelectExpandPath" xml:space="preserve">
+    <value>A segment '{0}' within the select or expand query option is not supported.</value>
+  </data>
+  <data name="InvalidLastSegmentInSelectExpandPath" xml:space="preserve">
+    <value>The last segment '{0}' of the select or expand query option is not supported.</value>
+  </data>
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
   </data>

@@ -237,6 +237,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\NamedPropertyExpression.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandBinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandPathExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandIncludedProperty.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ModelContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperConverter.cs" />

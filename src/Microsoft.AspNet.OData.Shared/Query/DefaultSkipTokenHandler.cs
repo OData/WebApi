@@ -418,7 +418,7 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             Type clrType = value.GetType();
-            return EdmLibHelpers.GetEdmType(model, clrType);
+            return model.GetTypeMappingCache().GetEdmType(clrType, model).Definition;
         }
     }
 }

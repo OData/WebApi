@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("elementClrType");
             }
 
-            ElementType = model.GetTypeMappingCache().GetEdmType(elementClrType, model).Definition;
+            ElementType = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition;
 
             if (ElementType == null)
             {

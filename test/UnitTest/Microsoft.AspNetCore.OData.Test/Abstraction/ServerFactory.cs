@@ -64,6 +64,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 });
 #endif
 
+                app.UseODataBatching();
                 app.UseMvc((routeBuilder) =>
                 {
                     configureAction(routeBuilder);

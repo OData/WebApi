@@ -1,11 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Test.Abstraction
 {
@@ -43,6 +48,32 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         public new TestUpdatedObjectResult<TEntity> Updated<TEntity>(TEntity value)
         {
             return new TestUpdatedObjectResult<TEntity>(new UpdatedODataResult<TEntity>(value));
+        }
+
+        [NonAction]
+        public new TestNoContentResult NoContent() { return new TestNoContentResult(base.NoContent()); }
+
+        // Helper method for extracting key for the entity from a Uri
+        public TKey GetKeyFromLinkUri<TKey>(HttpRequest request, Uri link)
+        {
+            if (link == null)
+                throw new ArgumentNullException("link");
+
+            var serviceRoot = request.GetUrlHelper().CreateODataLink(
+                                    request.ODataFeature().RouteName,
+                                    request.GetPathHandler(),
+                                    new List<ODataPathSegment>());
+
+            // NOTE: Fails when a routePrefix is added to OData route's path template
+            var odataPath = request.GetPathHandler().Parse(serviceRoot, link.LocalPath, request.GetRequestContainer());
+
+            var keySegment = odataPath.Segments.OfType<KeySegment>().FirstOrDefault();
+
+            if (keySegment == null || !keySegment.Keys.Any())
+                throw new InvalidOperationException("This link does not contain a key.");
+
+            // Return the key value of the first segment
+            return (TKey)keySegment.Keys.First().Value;
         }
     }
 
@@ -171,6 +202,17 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
     public class TestObjectResult : ObjectResult, ITestActionResult
     {
         public TestObjectResult(object innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+
+    /// <summary>
+    /// Wrapper for NoContentResult
+    /// </summary>
+    public class TestNoContentResult : TestActionResult
+    {
+        public TestNoContentResult(NoContentResult innerResult)
             : base(innerResult)
         {
         }

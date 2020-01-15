@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,18 +9,46 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+using System.Web.Http;
+using System.Web.Http.Routing;
+#else
+using Microsoft.AspNetCore.Mvc;
+#endif
 
 namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class DefaultODataBatchHandlerTest
     {
+        private const string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
+        private const string AcceptJson = "application/json";
+
+        private HttpClient _client;
+
+        public DefaultODataBatchHandlerTest()
+        {
+            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+                builder.EntitySet<BatchTestOrder>("BatchTestOrders");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+                config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+
+                config.EnableDependencyInjection();
+            });
+
+            _client = TestServerFactory.CreateClient(server);
+        }
+
+#if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]
         public void Parameter_Constructor()
         {
@@ -418,6 +445,149 @@ namespace Microsoft.AspNet.OData.Test.Batch
             Assert.Equal("The batch request must have a boundary specification in the \"Content-Type\" header.",
                 (await errorResponse.Response.Content.ReadAsAsync<HttpError>()).Message);
         }
+#endif
+        [Fact]
+        public async Task SendAsync_Works_ForBatchRequestWithInsertedEntityReferencedInAnotherRequest()
+        {
+            var endpoint = "http://localhost";
+
+            // Create entity request
+            var createOrderPayload = "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Batch.BatchTestOrder\",\"Id\":2,\"Amount\":50}";
+            HttpRequestMessage createOrderRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestOrders");
+            createOrderRequest.Content = new StringContent(createOrderPayload, System.Text.Encoding.UTF8, AcceptJson);
+            createOrderRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
+            createOrderRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
+            createOrderRequest.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+            createOrderRequest.Headers.TryAddWithoutValidation("OData-Version", "4.0");
+
+            var createOrderMessageContent = new HttpMessageContent(createOrderRequest);
+            createOrderMessageContent.Headers.ContentType.Parameters.Clear();
+            createOrderMessageContent.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
+            createOrderMessageContent.Headers.TryAddWithoutValidation("Content-ID", "3");
+
+            // Create reference request
+            var createRefPayload = "{\"@odata.id\":\"$3\"}";
+            HttpRequestMessage createRefRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestCustomers(2)/Orders/$ref");
+            createRefRequest.Content = new StringContent(createRefPayload, System.Text.Encoding.UTF8, AcceptJson);
+            createRefRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
+            createRefRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
+            createRefRequest.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
+            createRefRequest.Headers.TryAddWithoutValidation("OData-Version", "4.0");
+
+            var createRefMessageContent = new HttpMessageContent(createRefRequest);
+            createRefMessageContent.Headers.ContentType.Parameters.Clear();
+            createRefMessageContent.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
+            createRefMessageContent.Headers.TryAddWithoutValidation("Content-ID", "4");
+
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRref = $"changeset_{Guid.NewGuid()}";
+            // Batch request
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch")
+            {
+                Content = new MultipartContent("mixed", batchRef)
+                {
+                    new MultipartContent("mixed", changesetRref)
+                    {
+                        createOrderMessageContent,
+                        createRefMessageContent
+                    }
+                }
+            };
+
+            HttpResponseMessage response = await _client.SendAsync(batchRequest);
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+        }
+    }
+
+    public class BatchTestCustomer
+    {
+        private static Lazy<IList<BatchTestCustomer>> _customers =
+            new Lazy<IList<BatchTestCustomer>>(() => {
+                BatchTestCustomer customer01 = new BatchTestCustomer { Id = 1, Name = "Customer 01" };
+                customer01.Orders = new[] { BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(1)) };
+
+                BatchTestCustomer customer02 = new BatchTestCustomer { Id = 2, Name = "Customer 02" };
+                
+                return new List<BatchTestCustomer> { customer01, customer02 };
+            });
+
+        public static IList<BatchTestCustomer> Customers
+        {
+            get
+            {
+                return _customers.Value;
+            }
+        }
+
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public virtual ICollection<BatchTestOrder> Orders { get; set; }
+    }
+
+    public class BatchTestOrder
+    {
+        private static Lazy<IList<BatchTestOrder>> _orders = 
+            new Lazy<IList<BatchTestOrder>>(() => {
+                BatchTestOrder order01 = new BatchTestOrder { Id = 1, Amount = 100 };
+                
+                return new List<BatchTestOrder> { order01 };
+            });
+
+        public static IList<BatchTestOrder> Orders
+        {
+            get
+            {
+                return _orders.Value;
+            }
+        }
+
+        public int Id { get; set; }
+        public decimal Amount { get; set; }
+    }
+
+    public class BatchTestCustomersController : TestODataController
+    {
+        [EnableQuery]
+        public IEnumerable<BatchTestCustomer> Get()
+        {
+            return BatchTestCustomer.Customers;
+        }
+
+        public ITestActionResult CreateRef([FromODataUri]int key, [FromODataUri]string navigationProperty, [FromBody]Uri link)
+        {
+            var customer = BatchTestCustomer.Customers.SingleOrDefault(d => d.Id.Equals(key));
+            if (customer == null)
+                return NotFound();
+
+            switch (navigationProperty)
+            {
+                case "Orders":
+                    var orderId = GetKeyFromLinkUri<int>(Request, link);
+                    var order = BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(orderId));
+
+                    if (order == null)
+                        return NotFound();
+
+                    if (customer.Orders == null)
+                        customer.Orders = new List<BatchTestOrder>();
+                    if (customer.Orders.SingleOrDefault(d => d.Id.Equals(orderId)) == null)
+                        customer.Orders.Add(order);
+                    break;
+                default:
+                    return BadRequest();
+            }
+
+            return NoContent();
+        }
+    }
+
+    public class BatchTestOrdersController : TestODataController
+    {
+        public ITestActionResult Post([FromBody]BatchTestOrder order)
+        {
+            BatchTestOrder.Orders.Add(order);
+
+            return Created(order);
+        }
     }
 }
-#endif

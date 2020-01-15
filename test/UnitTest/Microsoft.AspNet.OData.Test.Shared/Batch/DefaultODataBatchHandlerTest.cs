@@ -39,7 +39,13 @@ namespace Microsoft.AspNet.OData.Test.Batch
                 builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
                 builder.EntitySet<BatchTestOrder>("BatchTestOrders");
 
-                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+#if !NETCORE
+                var batchHandler = new DefaultODataBatchHandler(new HttpServer());
+#else
+                var batchHandler = new DefaultODataBatchHandler();
+#endif
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), batchHandler);
                 config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
 
                 config.EnableDependencyInjection();

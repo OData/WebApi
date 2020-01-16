@@ -471,7 +471,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             createOrderMessageContent.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
             createOrderMessageContent.Headers.TryAddWithoutValidation("Content-ID", "3");
 
-            // Create reference request
+            // Create ref request
             var createRefPayload = "{\"@odata.id\":\"$3\"}";
             HttpRequestMessage createRefRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestCustomers(2)/Orders/$ref");
             createRefRequest.Content = new StringContent(createRefPayload, System.Text.Encoding.UTF8, AcceptJson);

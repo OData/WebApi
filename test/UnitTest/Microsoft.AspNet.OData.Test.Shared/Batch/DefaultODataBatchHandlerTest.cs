@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
+using System.IO;
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -459,7 +460,10 @@ namespace Microsoft.AspNet.OData.Test.Batch
 
             // Create entity request
             var createOrderPayload = "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Batch.BatchTestOrder\",\"Id\":2,\"Amount\":50}";
-            HttpRequestMessage createOrderRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestOrders");
+            HttpRequestMessage createOrderRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestOrders")
+            {
+                Version = HttpVersion.Version11
+            };
             createOrderRequest.Content = new StringContent(createOrderPayload, System.Text.Encoding.UTF8, AcceptJson);
             createOrderRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
             createOrderRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
@@ -473,7 +477,10 @@ namespace Microsoft.AspNet.OData.Test.Batch
 
             // Create ref request
             var createRefPayload = "{\"@odata.id\":\"$3\"}";
-            HttpRequestMessage createRefRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestCustomers(2)/Orders/$ref");
+            HttpRequestMessage createRefRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestCustomers(2)/Orders/$ref")
+            {
+                Version = HttpVersion.Version11
+            };
             createRefRequest.Content = new StringContent(createRefPayload, System.Text.Encoding.UTF8, AcceptJson);
             createRefRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
             createRefRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
@@ -497,7 +504,8 @@ namespace Microsoft.AspNet.OData.Test.Batch
                         createOrderMessageContent,
                         createRefMessageContent
                     }
-                }
+                },
+                Version = HttpVersion.Version11
             };
 
             HttpResponseMessage response = await _client.SendAsync(batchRequest);

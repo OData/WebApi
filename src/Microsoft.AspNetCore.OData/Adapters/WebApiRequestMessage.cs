@@ -184,7 +184,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public IDictionary<string, string> ODataContentIdMapping
         {
-            get { return this.innerRequest.GetODataContentIdMapping(); }
+            get { return innerRequest.GetODataContentIdMapping(); }
         }
 
         /// <summary>

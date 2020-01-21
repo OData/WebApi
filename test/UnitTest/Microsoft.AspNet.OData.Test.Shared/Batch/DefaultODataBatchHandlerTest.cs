@@ -14,7 +14,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
-using System.IO;
+using Newtonsoft.Json;
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System.Web.Http;
 using System.Web.Http.Routing;
@@ -47,8 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
 #endif
 
                 config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), batchHandler);
-                config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
-
+                config.Expand();
                 config.EnableDependencyInjection();
             });
 
@@ -458,58 +457,63 @@ namespace Microsoft.AspNet.OData.Test.Batch
         {
             var endpoint = "http://localhost";
 
-            // Create entity request
-            var createOrderPayload = "{\"@odata.type\":\"Microsoft.AspNet.OData.Test.Batch.BatchTestOrder\",\"Id\":2,\"Amount\":50}";
-            HttpRequestMessage createOrderRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestOrders")
-            {
-                Version = HttpVersion.Version11
-            };
-            createOrderRequest.Content = new StringContent(createOrderPayload, System.Text.Encoding.UTF8, AcceptJson);
-            createOrderRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
-            createOrderRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
-            createOrderRequest.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
-            createOrderRequest.Headers.TryAddWithoutValidation("OData-Version", "4.0");
-
-            var createOrderMessageContent = new HttpMessageContent(createOrderRequest);
-            createOrderMessageContent.Headers.ContentType.Parameters.Clear();
-            createOrderMessageContent.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
-            createOrderMessageContent.Headers.TryAddWithoutValidation("Content-ID", "3");
-
-            // Create ref request
-            var createRefPayload = "{\"@odata.id\":\"$3\"}";
-            HttpRequestMessage createRefRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/BatchTestCustomers(2)/Orders/$ref")
-            {
-                Version = HttpVersion.Version11
-            };
-            createRefRequest.Content = new StringContent(createRefPayload, System.Text.Encoding.UTF8, AcceptJson);
-            createRefRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJsonFullMetadata));
-            createRefRequest.Headers.TryAddWithoutValidation("Accept-Charset", "UTF-8");
-            createRefRequest.Headers.TryAddWithoutValidation("OData-MaxVersion", "4.0");
-            createRefRequest.Headers.TryAddWithoutValidation("OData-Version", "4.0");
-
-            var createRefMessageContent = new HttpMessageContent(createRefRequest);
-            createRefMessageContent.Headers.ContentType.Parameters.Clear();
-            createRefMessageContent.Headers.TryAddWithoutValidation("Content-Transfer-Encoding", "binary");
-            createRefMessageContent.Headers.TryAddWithoutValidation("Content-ID", "4");
-
             var batchRef = $"batch_{Guid.NewGuid()}";
-            var changesetRref = $"changeset_{Guid.NewGuid()}";
-            // Batch request
-            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch")
-            {
-                Content = new MultipartContent("mixed", batchRef)
-                {
-                    new MultipartContent("mixed", changesetRref)
-                    {
-                        createOrderMessageContent,
-                        createRefMessageContent
-                    }
-                },
-                Version = HttpVersion.Version11
-            };
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
 
-            HttpResponseMessage response = await _client.SendAsync(batchRequest);
+            var orderId = 2;
+            var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
+            var createRefPayload = @"{""@odata.id"":""$3""}";
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            HttpContent httpContent = new StringContent($@"
+--{batchRef}
+Content-Type: multipart/mixed; boundary={changesetRef}
+
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 3
+
+POST {endpoint}/BatchTestOrders HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Content-Type: {AcceptJsonFullMetadata}
+Accept: {AcceptJsonFullMetadata}
+Accept-Charset: UTF-8
+
+{createOrderPayload}
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 4
+
+POST {endpoint}/BatchTestCustomers(2)/Orders/$ref HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Content-Type: {AcceptJsonFullMetadata}
+Accept: {AcceptJsonFullMetadata}
+Accept-Charset: UTF-8
+
+{createRefPayload}
+--{changesetRef}--
+--{batchRef}--
+");
+
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
+            batchRequest.Content = httpContent;
+            var response = await _client.SendAsync(batchRequest);
+
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            HttpRequestMessage customerRequest = new HttpRequestMessage(HttpMethod.Get, $"{endpoint}/BatchTestCustomers(2)?$expand=Orders");
+            customerRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJson));
+
+            var customerResponse = _client.SendAsync(customerRequest).Result;
+            var objAsJsonString = await customerResponse.Content.ReadAsStringAsync();
+            var customer = JsonConvert.DeserializeObject<BatchTestCustomer>(objAsJsonString);
+
+            Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
     }
 
@@ -518,7 +522,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         private static Lazy<IList<BatchTestCustomer>> _customers =
             new Lazy<IList<BatchTestCustomer>>(() => {
                 BatchTestCustomer customer01 = new BatchTestCustomer { Id = 1, Name = "Customer 01" };
-                customer01.Orders = new[] { BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(1)) };
+                customer01.Orders = new List<BatchTestOrder> { BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(1)) };
 
                 BatchTestCustomer customer02 = new BatchTestCustomer { Id = 2, Name = "Customer 02" };
                 
@@ -535,7 +539,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
 
         public int Id { get; set; }
         public string Name { get; set; }
-        public virtual ICollection<BatchTestOrder> Orders { get; set; }
+        public virtual IList<BatchTestOrder> Orders { get; set; }
     }
 
     public class BatchTestOrder
@@ -567,9 +571,15 @@ namespace Microsoft.AspNet.OData.Test.Batch
             return BatchTestCustomer.Customers;
         }
 
+        [EnableQuery]
+        public SingleResult<BatchTestCustomer> Get([FromODataUri]int key)
+        {
+            return SingleResult.Create(BatchTestCustomer.Customers.Where(d => d.Id.Equals(key)).AsQueryable());
+        }
+
         public ITestActionResult CreateRef([FromODataUri]int key, [FromODataUri]string navigationProperty, [FromBody]Uri link)
         {
-            var customer = BatchTestCustomer.Customers.SingleOrDefault(d => d.Id.Equals(key));
+            var customer = BatchTestCustomer.Customers.FirstOrDefault(d => d.Id.Equals(key));
             if (customer == null)
                 return NotFound();
 
@@ -577,14 +587,14 @@ namespace Microsoft.AspNet.OData.Test.Batch
             {
                 case "Orders":
                     var orderId = GetKeyFromLinkUri<int>(Request, link);
-                    var order = BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(orderId));
+                    var order = BatchTestOrder.Orders.FirstOrDefault(d => d.Id.Equals(orderId));
 
                     if (order == null)
                         return NotFound();
 
                     if (customer.Orders == null)
                         customer.Orders = new List<BatchTestOrder>();
-                    if (customer.Orders.SingleOrDefault(d => d.Id.Equals(orderId)) == null)
+                    if (customer.Orders.FirstOrDefault(d => d.Id.Equals(orderId)) == null)
                         customer.Orders.Add(order);
                     break;
                 default:

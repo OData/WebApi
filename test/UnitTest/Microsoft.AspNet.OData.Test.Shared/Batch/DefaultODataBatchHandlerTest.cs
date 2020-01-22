@@ -15,7 +15,7 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
 using Newtonsoft.Json;
-#if !NETCORE // TODO #939: Enable these test on AspNetCore.
+#if !NETCORE
 using System.Web.Http;
 using System.Web.Http.Routing;
 #else
@@ -26,34 +26,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class DefaultODataBatchHandlerTest
     {
-        private const string AcceptJsonFullMetadata = "application/json;odata.metadata=full";
-        private const string AcceptJson = "application/json";
-
-        private HttpClient _client;
-
-        public DefaultODataBatchHandlerTest()
-        {
-            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
-            var server = TestServerFactory.Create(controllers, (config) =>
-            {
-                var builder = ODataConventionModelBuilderFactory.Create(config);
-                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
-                builder.EntitySet<BatchTestOrder>("BatchTestOrders");
-
-#if !NETCORE
-                var batchHandler = new DefaultODataBatchHandler(new HttpServer());
-#else
-                var batchHandler = new DefaultODataBatchHandler();
-#endif
-
-                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), batchHandler);
-                config.Expand();
-                config.EnableDependencyInjection();
-            });
-
-            _client = TestServerFactory.CreateClient(server);
-        }
-
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]
         public void Parameter_Constructor()
@@ -451,10 +423,28 @@ namespace Microsoft.AspNet.OData.Test.Batch
             Assert.Equal("The batch request must have a boundary specification in the \"Content-Type\" header.",
                 (await errorResponse.Response.Content.ReadAsAsync<HttpError>()).Message);
         }
-#endif
+#else
+ 
         [Fact]
         public async Task SendAsync_Works_ForBatchRequestWithInsertedEntityReferencedInAnotherRequest()
         {
+            const string acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
+            const string acceptJson = "application/json";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestCustomer>("BatchTestCustomers");
+                builder.EntitySet<BatchTestOrder>("BatchTestOrders");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+                config.Expand();
+                config.EnableDependencyInjection();
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
             var endpoint = "http://localhost";
 
             var batchRef = $"batch_{Guid.NewGuid()}";
@@ -463,7 +453,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             var orderId = 2;
             var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
             var createRefPayload = @"{""@odata.id"":""$3""}";
-
+            
             var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
             batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
             HttpContent httpContent = new StringContent($@"
@@ -476,10 +466,10 @@ Content-Transfer-Encoding: binary
 Content-ID: 3
 
 POST {endpoint}/BatchTestOrders HTTP/1.1
-OData-Version: 4.0
-OData-MaxVersion: 4.0
-Content-Type: {AcceptJsonFullMetadata}
-Accept: {AcceptJsonFullMetadata}
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Content-Type: {acceptJsonFullMetadata}
+Accept: {acceptJsonFullMetadata}
 Accept-Charset: UTF-8
 
 {createOrderPayload}
@@ -489,10 +479,10 @@ Content-Transfer-Encoding: binary
 Content-ID: 4
 
 POST {endpoint}/BatchTestCustomers(2)/Orders/$ref HTTP/1.1
-OData-Version: 4.0
-OData-MaxVersion: 4.0
-Content-Type: {AcceptJsonFullMetadata}
-Accept: {AcceptJsonFullMetadata}
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Content-Type: {acceptJsonFullMetadata}
+Accept: {acceptJsonFullMetadata}
 Accept-Charset: UTF-8
 
 {createRefPayload}
@@ -502,19 +492,21 @@ Accept-Charset: UTF-8
 
             httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
             batchRequest.Content = httpContent;
-            var response = await _client.SendAsync(batchRequest);
+            
+            var response = await client.SendAsync(batchRequest);
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
 
             HttpRequestMessage customerRequest = new HttpRequestMessage(HttpMethod.Get, $"{endpoint}/BatchTestCustomers(2)?$expand=Orders");
-            customerRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(AcceptJson));
+            customerRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptJson));
 
-            var customerResponse = _client.SendAsync(customerRequest).Result;
+            var customerResponse = client.SendAsync(customerRequest).Result;
             var objAsJsonString = await customerResponse.Content.ReadAsStringAsync();
             var customer = JsonConvert.DeserializeObject<BatchTestCustomer>(objAsJsonString);
 
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
+#endif
     }
 
     public class BatchTestCustomer
@@ -607,6 +599,12 @@ Accept-Charset: UTF-8
 
     public class BatchTestOrdersController : TestODataController
     {
+        [EnableQuery]
+        public IEnumerable<BatchTestOrder> Get()
+        {
+            return BatchTestOrder.Orders;
+        }
+
         public ITestActionResult Post([FromBody]BatchTestOrder order)
         {
             BatchTestOrder.Orders.Add(order);

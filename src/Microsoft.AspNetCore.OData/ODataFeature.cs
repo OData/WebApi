@@ -13,6 +13,7 @@ using Microsoft.OData.UriParser;
 using Microsoft.OData.UriParser.Aggregation;
 using IODataRoutingConvention = Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 
 namespace Microsoft.AspNet.OData
 {
@@ -40,6 +41,22 @@ namespace Microsoft.AspNet.OData
         /// Gets or sets the OData path.
         /// </summary>
         public ODataPath Path { get; set; }
+
+        /// <summary>
+        /// Gets or sets the request container.
+        /// </summary>
+        public ActionDescriptor ActionDescriptor { get; set; }
+
+        /// <summary>
+        /// Add a boolean value indicate whether it's endpoint routing or not.
+        /// Maybe it's unnecessary later.
+        /// </summary>
+        public bool IsEndpointRouting { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route name.
+        /// </summary>
+        public string RoutePrefix { get; set; }
 
         /// <summary>
         /// Gets or sets the route name.

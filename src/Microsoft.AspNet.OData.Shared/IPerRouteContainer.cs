@@ -12,6 +12,20 @@ namespace Microsoft.AspNet.OData
     public interface IPerRouteContainer
     {
         /// <summary>
+        /// Add a routing mapping
+        /// </summary>
+        /// <param name="routeName">The route name</param>
+        /// <param name="routePrefix">The route prefix</param>
+        void AddRoute(string routeName, string routePrefix);
+
+        /// <summary>
+        /// Get the route prefix
+        /// </summary>
+        /// <param name="routeName">The route name.</param>
+        /// <returns>The route prefix.</returns>
+        string GetRoutePrefix(string routeName);
+
+        /// <summary>
         /// Gets or sets a function to build an <see cref="IContainerBuilder"/>
         /// </summary>
         Func<IContainerBuilder> BuilderFactory { get; set; }

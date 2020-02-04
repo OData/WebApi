@@ -83,7 +83,7 @@ namespace Microsoft.AspNet.OData
                 return edmTypeReference.AsEntity();
             }
 
-            IEdmTypeReference reference = EdmLibHelpers.GetEdmTypeReference(model, value.GetType());
+            IEdmTypeReference reference = model.GetTypeMappingCache().GetEdmType(value.GetType(), model);
             if (reference != null && reference.Definition.IsOrInheritsFrom(edmType))
             {
                 return (IEdmEntityTypeReference)reference;

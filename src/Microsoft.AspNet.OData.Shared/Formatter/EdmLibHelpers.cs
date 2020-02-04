@@ -895,7 +895,7 @@ namespace Microsoft.AspNet.OData.Formatter
             else
             {
                 TryGetInnerTypeForDelta(ref type);
-                expectedPayloadType = model.GetEdmTypeReference(type);
+                expectedPayloadType = model.GetTypeMappingCache().GetEdmType(type, model);
             }
 
             return expectedPayloadType;

@@ -751,8 +751,9 @@ namespace Microsoft.AspNet.OData
                 throw Error.InvalidOperation(SRResources.QueryGetModelMustNotReturnNull);
             }
 
-            IEdmEntityType baseEntityType     = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition as IEdmEntityType;
-            IEdmStructuredType structuredType = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition as IEdmStructuredType;
+            IEdmType edmType = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition;
+            IEdmEntityType baseEntityType = edmType as IEdmEntityType;
+            IEdmStructuredType structuredType = edmType as IEdmStructuredType;
             IEdmProperty property = null;
             if (path != null)
             {

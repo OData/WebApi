@@ -300,21 +300,6 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Retrieves the Content-ID to Location mapping associated with the request.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>The Content-ID to Location mapping associated with this request, or <c>null</c> if there isn't one.</returns>
-        public static IDictionary<string, string> GetODataContentIdMapping(this HttpRequest request)
-        {
-            if (request == null)
-            {
-                throw Error.ArgumentNull("request");
-            }
-
-            return null;
-        }
-
-        /// <summary>
         /// Gets the set of flags for <see cref="CompatibilityOptions"/> from ODataOptions. 
         /// </summary>
         /// <param name="request">The request.</param>

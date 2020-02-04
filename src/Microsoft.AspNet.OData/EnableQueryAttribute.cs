@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="actionExecutedContext">The context related to this action, including the response message,
         /// request message and HttpConfiguration etc.</param>
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
-                Justification = "The majority of types referenced by this method result from HttpActionExecutedContext")]
+            Justification = "The majority of types referenced by this method result from HttpActionExecutedContext")]
         public override void OnActionExecuted(HttpActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext == null)

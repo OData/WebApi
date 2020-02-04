@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()
-        { 
+        {
             IEdmModel model = GetModel();
 
             if (InstanceType != null)

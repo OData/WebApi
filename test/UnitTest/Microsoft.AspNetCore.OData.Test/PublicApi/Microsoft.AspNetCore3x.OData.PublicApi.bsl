@@ -64,8 +64,10 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
 
+	void AddRoute (string routeName, string routePrefix)
 	System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	System.IServiceProvider GetODataRootContainer (string routeName)
+	string GetRoutePrefix (string routeName)
 	bool HasODataRootContainer (string routeName)
 }
 
@@ -141,11 +143,13 @@ public abstract class Microsoft.AspNet.OData.PerRouteContainerBase : IPerRouteCo
 
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public virtual get; public virtual set; }
 
+	public virtual void AddRoute (string routeName, string routePrefix)
 	protected Microsoft.OData.IContainerBuilder CreateContainerBuilderWithCoreServices ()
 	public System.IServiceProvider CreateODataRootContainer (System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	public virtual System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	protected abstract System.IServiceProvider GetContainer (string routeName)
 	public virtual System.IServiceProvider GetODataRootContainer (string routeName)
+	public virtual string GetRoutePrefix (string routeName)
 	public virtual bool HasODataRootContainer (string routeName)
 	protected abstract void SetContainer (string routeName, System.IServiceProvider rootContainer)
 }
@@ -495,14 +499,17 @@ public class Microsoft.AspNet.OData.ODataBuilder : IODataBuilder {
 public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	public ODataFeature ()
 
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public virtual get; public virtual set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
+	bool IsEndpointRouting  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
 	System.IServiceProvider RequestContainer  { public virtual get; public virtual set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public virtual get; public virtual set; }
 	string RouteName  { public virtual get; public virtual set; }
+	string RoutePrefix  { public virtual get; public virtual set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
@@ -1948,6 +1955,171 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataApplicationBuilderExt
 [
 ExtensionAttribute(),
 ]
+public sealed class Microsoft.AspNet.OData.Extensions.ODataEndpointRouteBuilderExtensions {
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Count (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Count (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder EnableContinueOnErrorHeader (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void EnableDependencyInjection (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static void EnableDependencyInjection (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Expand (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Expand (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Filter (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Filter (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static ODataOptions GetDefaultODataOptions (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static DefaultQuerySettings GetDefaultQuerySettings (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static System.TimeZoneInfo GetTimeZoneInfo (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static bool HasEnabledContinueOnErrorHeader (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static bool HasEnabledNullDynamicProperty (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MapODataRoute (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MapODataRoute (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string routeName, string routePrefix, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MapODataRoute (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, ODataBatchHandler batchHandler)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MapODataRoute (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, IODataPathHandler pathHandler, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MapODataRoute (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, string routeName, string routePrefix, Microsoft.OData.Edm.IEdmModel model, IODataPathHandler pathHandler, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] routingConventions, ODataBatchHandler batchHandler)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder MaxTop (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, System.Nullable`1[[System.Int32]] maxTopValue)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder OrderBy (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder OrderBy (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Select (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder Select (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetCompatibilityOptions (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, CompatibilityOptions options)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetDefaultODataOptions (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, ODataOptions defaultOptions)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetDefaultQuerySettings (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, DefaultQuerySettings defaultQuerySettings)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetSerializeNullDynamicProperty (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, bool serialize)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetTimeZoneInfo (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, System.TimeZoneInfo timeZoneInfo)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SetUrlKeyDelimiter (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, Microsoft.OData.ODataUrlKeyDelimiter urlKeyDelimiter)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SkipToken (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.AspNetCore.Routing.IEndpointRouteBuilder SkipToken (Microsoft.AspNetCore.Routing.IEndpointRouteBuilder builder, QueryOptionSetting setting)
+}
+
+[
+ExtensionAttribute(),
+]
 public sealed class Microsoft.AspNet.OData.Extensions.ODataRouteBuilderExtensions {
 	[
 	ExtensionAttribute(),
@@ -2174,6 +2346,12 @@ public sealed class Microsoft.AspNet.OData.Extensions.UrlHelperExtensions {
 	public static string CreateODataLink (Microsoft.AspNetCore.Mvc.IUrlHelper urlHelper, string routeName, IODataPathHandler pathHandler, System.Collections.Generic.IList`1[[Microsoft.OData.UriParser.ODataPathSegment]] segments)
 }
 
+public class Microsoft.AspNet.OData.Extensions.ODataEndpointRouteValueTransformer : Microsoft.AspNetCore.Mvc.Routing.DynamicRouteValueTransformer {
+	public ODataEndpointRouteValueTransformer (Microsoft.AspNetCore.Mvc.Infrastructure.IActionSelector actionSelector)
+
+	public virtual System.Threading.Tasks.ValueTask`1[[Microsoft.AspNetCore.Routing.RouteValueDictionary]] TransformAsync (Microsoft.AspNetCore.Http.HttpContext httpContext, Microsoft.AspNetCore.Routing.RouteValueDictionary values)
+}
+
 public enum Microsoft.AspNet.OData.Formatter.ODataMetadataLevel : int {
 	FullMetadata = 1
 	MinimalMetadata = 0
@@ -2307,14 +2485,17 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataBuilder {
 }
 
 public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public abstract get; public abstract set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
+	bool IsEndpointRouting  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }
 	System.IServiceProvider RequestContainer  { public abstract get; public abstract set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public abstract get; public abstract set; }
 	string RouteName  { public abstract get; public abstract set; }
+	string RoutePrefix  { public abstract get; public abstract set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
@@ -3628,6 +3809,7 @@ public abstract class Microsoft.AspNet.OData.Routing.Conventions.NavigationSourc
 public sealed class Microsoft.AspNet.OData.Routing.Conventions.ODataRoutingConventions {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefault ()
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, Microsoft.AspNetCore.Routing.IRouteBuilder builder)
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.IServiceProvider serviceProvider)
 }
 
 public class Microsoft.AspNet.OData.Routing.Conventions.ActionRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {

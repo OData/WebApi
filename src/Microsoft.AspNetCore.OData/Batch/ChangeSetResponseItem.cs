@@ -46,14 +46,14 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("writer");
             }
 
-            writer.WriteStartChangeset();
+            await writer.WriteStartChangesetAsync();
 
             foreach (HttpContext context in Contexts)
             {
                 await WriteMessageAsync(writer, context);
             }
 
-            writer.WriteEndChangeset();
+            await writer.WriteEndChangesetAsync();
         }
 
         /// <summary>

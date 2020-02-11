@@ -90,7 +90,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
     public class CUDBatchTests : WebHostTestBase
     {
         public CUDBatchTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -160,7 +160,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
 
             string host = address.Host;
             string relativeToServiceRootUri = "UnbufferedBatchCustomer";
-            string relativeToHostUri = address.LocalPath.TrimEnd(new char[]{'/'}) + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            string relativeToHostUri = address.LocalPath.TrimEnd(new char[] { '/' }) + "/UnbufferedBatch/UnbufferedBatchCustomer";
             string absoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
 
             // Act
@@ -240,7 +240,204 @@ Content-Type: application/json;odata.metadata=minimal
             }
             Assert.Equal(3, subResponseCount);
         }
+
+        [Fact]
+        public async Task CanHandleAbsoluteAndRelativeUrlsJSON()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            Uri address = new Uri(this.BaseAddress, UriKind.Absolute);
+
+            string relativeToServiceRootUri = "UnbufferedBatchCustomer";
+            string relativeToHostUri = address.LocalPath.TrimEnd(new char[] { '/' }) + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            string absoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+           {
+                ""requests"":[
+                    {
+                    ""id"": ""2"",
+                    ""atomicityGroup"": ""transaction"",
+                    ""method"": ""post"",
+                    ""url"": """ + relativeToServiceRootUri + @""",
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""body"": {'Id':11,'Name':'MyName11'}
+                    },
+                    {
+                    ""id"": ""3"",                                                                                               
+                    ""atomicityGroup"": ""transaction"",                                                                         
+                    ""method"": ""post"",                                                                                        
+                    ""url"": """ + relativeToHostUri + @""",                                                                                   
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""body"": {'Id':12,'Name':'MyName12'}
+                    },
+                    {
+                    ""id"": ""4"",                                                                                               
+                    ""atomicityGroup"": ""transaction"",                                                                         
+                    ""method"": ""post"",                                                                                        
+                    ""url"": """ + absoluteUri + @""",                                                                                   
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""body"": {'Id':13,'Name':'MyName13'}
+                    }
+                    ]
+                }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            Assert.Equal(201, operationMessage.StatusCode);
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(3, subResponseCount);
+        }
+
+        [Fact]
+        public async Task CanReadDataInBatch()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            Uri address = new Uri(this.BaseAddress, UriKind.Absolute);
+
+            string relativeToServiceRootUri = "UnbufferedBatchCustomer";
+            string relativeToHostUri = address.LocalPath.TrimEnd(new char[] { '/' }) + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            string absoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+            {                                                                                                        
+                ""requests"":[                                                                                             
+                    {
+                    ""id"": ""2"",                                                                                               
+                    ""method"": ""get"",                                                                                        
+                    ""url"": """ + relativeToServiceRootUri + @""",                                                                                   
+                    ""headers"": { ""Accept"": ""application/json""} 
+                    },
+                    {
+                    ""id"": ""3"",                                                                                               
+                    ""method"": ""get"",                                                                                        
+                    ""url"": """ + relativeToHostUri + @"""                                                                                   
+                    },
+                    {
+                    ""id"": ""4"",                                                                                               
+                    ""method"": ""get"",                                                                                        
+                    ""url"": """ + absoluteUri + @""",                                                                                   
+                    ""headers"": { ""Accept"": ""application/json""}
+                    }
+                ]
+            }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            var model = GetEdmModel(new ODataConventionModelBuilder());
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), model))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            Assert.Equal(200, operationMessage.StatusCode);
+                            using (var innerMessageReader = new ODataMessageReader(operationMessage, new ODataMessageReaderSettings(), model))
+                            {
+                                var innerReader = innerMessageReader.CreateODataResourceSetReader();
+                                while (innerReader.Read()) ;
+                            }
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(3, subResponseCount);
+        }
+
+        [Fact]
+        public async Task CanHandleSingleDeleteInBatch()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+            {
+                ""requests"": [
+                    {
+                        ""Id"": ""1"",
+                        ""method"": ""DELETE"",
+                        ""headers"": {
+                            ""odata-version"": ""4.01"",
+                            ""content-type"": ""application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false""
+                        },
+                        ""url"": ""DefaultBatchCustomer(5)"",
+                        ""body"": """"
+                    }
+                ]
+            }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            break;
+                    }
+                }
+            }
+            Assert.Equal(1, subResponseCount);
+        }
     }
+
 
     public class QueryBatchTests : WebHostTestBase
     {
@@ -249,17 +446,17 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
-        {
-            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
-            configuration.MapODataServiceRoute(
-                "batch",
-                "UnbufferedBatch",
-                GetEdmModel(builder),
-                new DefaultODataPathHandler(),
-                ODataRoutingConventions.CreateDefault(),
-                configuration.CreateUnbufferedODataBatchHandler());
-        }
+            protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+            {
+                ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
+                configuration.MapODataServiceRoute(
+                    "batch",
+                    "UnbufferedBatch",
+                    GetEdmModel(builder),
+                    new DefaultODataPathHandler(),
+                    ODataRoutingConventions.CreateDefault(),
+                    configuration.CreateUnbufferedODataBatchHandler());
+            }
 
 
         protected static IEdmModel GetEdmModel(ODataModelBuilder builder)

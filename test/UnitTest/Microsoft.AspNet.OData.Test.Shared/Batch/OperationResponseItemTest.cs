@@ -35,6 +35,16 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
+        public void WriteResponse_NullWriter_Throws()
+        {
+            OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage());
+
+            ExceptionAssert.ThrowsArgumentNull(
+                () => responseItem.WriteResponse(null),
+                "writer");
+        }
+
+        [Fact]
         public async Task WriteResponseAsync_NullWriter_Throws()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage());
@@ -45,7 +55,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public async Task WriteResponseAsync_WritesOperation()
+        public void WriteResponse_WritesOperation()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.Accepted));
             MemoryStream memoryStream = new MemoryStream();
@@ -54,9 +64,28 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
-            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
+            responseItem.WriteResponse(batchWriter);
 
             batchWriter.WriteEndBatch();
+            memoryStream.Position = 0;
+            string responseString = new StreamReader(memoryStream).ReadToEnd();
+
+            Assert.Contains("Accepted", responseString);
+        }
+
+        [Fact]
+        public async Task WriteResponseAsync_WritesOperation()
+        {
+            OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.Accepted));
+            MemoryStream memoryStream = new MemoryStream();
+            IODataResponseMessage responseMessage = new ODataMessageWrapper(memoryStream);
+            ODataMessageWriter writer = new ODataMessageWriter(responseMessage);
+            ODataBatchWriter batchWriter = await writer.CreateODataBatchWriterAsync();
+            await batchWriter.WriteStartBatchAsync();
+
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
+
+            await batchWriter.WriteEndBatchAsync();
             memoryStream.Position = 0;
             string responseString = new StreamReader(memoryStream).ReadToEnd();
 

@@ -255,7 +255,6 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             HttpContent content = new StringContent(@"
             {                                                                                                        
                 ""requests"":[                                                                                             
@@ -291,9 +290,9 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/json", content.Headers.ContentType.MediaType);
 
             var stream = await response.Content.ReadAsStreamAsync();
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
@@ -307,6 +306,7 @@ Content-Type: application/json;odata.metadata=minimal
                             var operationMessage = batchReader.CreateOperationResponseMessage();
                             subResponseCount++;
                             Assert.Equal(201, operationMessage.StatusCode);
+                            Assert.Contains("application/json", operationMessage.Headers.Single(h => String.Equals(h.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value);
                             break;
                     }
                 }
@@ -356,9 +356,9 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
             var stream = await response.Content.ReadAsStreamAsync();
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             var model = GetEdmModel(new ODataConventionModelBuilder());
@@ -373,6 +373,7 @@ Content-Type: application/json;odata.metadata=minimal
                             var operationMessage = batchReader.CreateOperationResponseMessage();
                             subResponseCount++;
                             Assert.Equal(200, operationMessage.StatusCode);
+                            Assert.Contains("application/json", operationMessage.Headers.Single(h => String.Equals(h.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value);
                             using (var innerMessageReader = new ODataMessageReader(operationMessage, new ODataMessageReaderSettings(), model))
                             {
                                 var innerReader = innerMessageReader.CreateODataResourceSetReader();

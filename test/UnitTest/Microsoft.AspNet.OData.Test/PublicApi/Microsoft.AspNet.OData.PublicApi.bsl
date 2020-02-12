@@ -684,12 +684,14 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem : IDis
 	public virtual void Dispose ()
 	protected abstract void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
+	public static void WriteMessage (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response)
 	[
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, System.Net.Http.HttpResponseMessage response, System.Threading.CancellationToken cancellationToken)
 
+	public abstract void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
 	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
 }
 
@@ -813,6 +815,7 @@ public class Microsoft.AspNet.OData.Batch.ChangeSetResponseItem : ODataBatchResp
 
 	protected virtual void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
+	public virtual void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
 	[
 	AsyncStateMachineAttribute(),
 	]
@@ -869,6 +872,7 @@ public class Microsoft.AspNet.OData.Batch.OperationResponseItem : ODataBatchResp
 
 	protected virtual void Dispose (bool disposing)
 	internal virtual bool IsResponseSuccessful ()
+	public virtual void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
 	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, System.Threading.CancellationToken cancellationToken)
 }
 

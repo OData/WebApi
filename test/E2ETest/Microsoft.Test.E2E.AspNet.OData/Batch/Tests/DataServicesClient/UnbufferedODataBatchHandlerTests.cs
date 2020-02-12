@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -254,7 +255,6 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             HttpContent content = new StringContent(@"
            {
                 ""requests"":[
@@ -263,23 +263,23 @@ Content-Type: application/json;odata.metadata=minimal
                     ""atomicityGroup"": ""transaction"",
                     ""method"": ""post"",
                     ""url"": """ + relativeToServiceRootUri + @""",
-                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" },
                     ""body"": {'Id':11,'Name':'MyName11'}
                     },
                     {
-                    ""id"": ""3"",                                                                                               
-                    ""atomicityGroup"": ""transaction"",                                                                         
-                    ""method"": ""post"",                                                                                        
-                    ""url"": """ + relativeToHostUri + @""",                                                                                   
-                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""id"": ""3"",
+                    ""atomicityGroup"": ""transaction"",
+                    ""method"": ""post"",
+                    ""url"": """ + relativeToHostUri + @""",
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" },
                     ""body"": {'Id':12,'Name':'MyName12'}
                     },
                     {
-                    ""id"": ""4"",                                                                                               
-                    ""atomicityGroup"": ""transaction"",                                                                         
-                    ""method"": ""post"",                                                                                        
-                    ""url"": """ + absoluteUri + @""",                                                                                   
-                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" }, 
+                    ""id"": ""4"",
+                    ""atomicityGroup"": ""transaction"",
+                    ""method"": ""post"",
+                    ""url"": """ + absoluteUri + @""",
+                    ""headers"": { ""content-type"": ""application/json"", ""Accept"": ""application/json"", ""odata-version"": ""4.0"" },
                     ""body"": {'Id':13,'Name':'MyName13'}
                     }
                     ]
@@ -290,12 +290,13 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
 
             var stream = await response.Content.ReadAsStreamAsync();
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
-            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            var model = GetEdmModel(new ODataConventionModelBuilder());
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), model))
             {
                 var batchReader = messageReader.CreateODataBatchReader();
                 while (batchReader.Read())
@@ -306,6 +307,11 @@ Content-Type: application/json;odata.metadata=minimal
                             var operationMessage = batchReader.CreateOperationResponseMessage();
                             subResponseCount++;
                             Assert.Equal(201, operationMessage.StatusCode);
+                            Assert.Contains("application/json", operationMessage.Headers.Single(h => String.Equals(h.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value);
+                            using (var innerMessageReader = new ODataMessageReader(operationMessage, new ODataMessageReaderSettings(), model))
+                            {
+                                innerMessageReader.DetectPayloadKind().FirstOrDefault();
+                            }
                             break;
                     }
                 }
@@ -328,23 +334,23 @@ Content-Type: application/json;odata.metadata=minimal
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             HttpContent content = new StringContent(@"
-            {                                                                                                        
-                ""requests"":[                                                                                             
+            {
+                ""requests"":[
                     {
-                    ""id"": ""2"",                                                                                               
-                    ""method"": ""get"",                                                                                        
-                    ""url"": """ + relativeToServiceRootUri + @""",                                                                                   
-                    ""headers"": { ""Accept"": ""application/json""} 
+                    ""id"": ""2"",
+                    ""method"": ""get"",
+                    ""url"": """ + relativeToServiceRootUri + @""",
+                    ""headers"": { ""Accept"": ""application/json""}
                     },
                     {
-                    ""id"": ""3"",                                                                                               
-                    ""method"": ""get"",                                                                                        
-                    ""url"": """ + relativeToHostUri + @"""                                                                                   
+                    ""id"": ""3"",
+                    ""method"": ""get"",
+                    ""url"": """ + relativeToHostUri + @"""
                     },
                     {
-                    ""id"": ""4"",                                                                                               
-                    ""method"": ""get"",                                                                                        
-                    ""url"": """ + absoluteUri + @""",                                                                                   
+                    ""id"": ""4"",
+                    ""method"": ""get"",
+                    ""url"": """ + absoluteUri + @""",
                     ""headers"": { ""Accept"": ""application/json""}
                     }
                 ]
@@ -355,9 +361,9 @@ Content-Type: application/json;odata.metadata=minimal
 
             // Assert
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/json", content.Headers.ContentType.MediaType);
 
             var stream = await response.Content.ReadAsStreamAsync();
-            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType.ToString());
             IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
             int subResponseCount = 0;
             var model = GetEdmModel(new ODataConventionModelBuilder());
@@ -372,6 +378,7 @@ Content-Type: application/json;odata.metadata=minimal
                             var operationMessage = batchReader.CreateOperationResponseMessage();
                             subResponseCount++;
                             Assert.Equal(200, operationMessage.StatusCode);
+                            Assert.Contains("application/json", operationMessage.Headers.Single(h => String.Equals(h.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value);
                             using (var innerMessageReader = new ODataMessageReader(operationMessage, new ODataMessageReaderSettings(), model))
                             {
                                 var innerReader = innerMessageReader.CreateODataResourceSetReader();
@@ -438,7 +445,6 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-
     public class QueryBatchTests : WebHostTestBase
     {
         public QueryBatchTests(WebHostTestFixture fixture)
@@ -446,18 +452,17 @@ Content-Type: application/json;odata.metadata=minimal
         {
         }
 
-            protected override void UpdateConfiguration(WebRouteConfiguration configuration)
-            {
-                ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
-                configuration.MapODataServiceRoute(
-                    "batch",
-                    "UnbufferedBatch",
-                    GetEdmModel(builder),
-                    new DefaultODataPathHandler(),
-                    ODataRoutingConventions.CreateDefault(),
-                    configuration.CreateUnbufferedODataBatchHandler());
-            }
-
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
+            configuration.MapODataServiceRoute(
+                "batch",
+                "UnbufferedBatch",
+                GetEdmModel(builder),
+                new DefaultODataPathHandler(),
+                ODataRoutingConventions.CreateDefault(),
+                configuration.CreateUnbufferedODataBatchHandler());
+        }
 
         protected static IEdmModel GetEdmModel(ODataModelBuilder builder)
         {

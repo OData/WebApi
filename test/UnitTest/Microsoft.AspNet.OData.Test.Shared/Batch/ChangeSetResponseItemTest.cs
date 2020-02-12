@@ -36,6 +36,16 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
+        public void WriteResponse_NullWriter_Throws()
+        {
+            ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new HttpResponseMessage[0]);
+
+            ExceptionAssert.ThrowsArgumentNull(
+                () => responseItem.WriteResponse(null),
+                "writer");
+        }
+
+        [Fact]
         public async Task WriteResponseAsync_NullWriter_Throws()
         {
             ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new HttpResponseMessage[0]);
@@ -43,6 +53,32 @@ namespace Microsoft.AspNet.OData.Test.Batch
             await ExceptionAssert.ThrowsArgumentNullAsync(
                 () => responseItem.WriteResponseAsync(null, CancellationToken.None),
                 "writer");
+        }
+
+        [Fact]
+        public void WriteResponse_WritesChangeSet()
+        {
+            HttpResponseMessage[] responses = new HttpResponseMessage[]
+                {
+                    new HttpResponseMessage(HttpStatusCode.Accepted),
+                    new HttpResponseMessage(HttpStatusCode.NoContent)
+                };
+            ChangeSetResponseItem responseItem = new ChangeSetResponseItem(responses);
+            MemoryStream memoryStream = new MemoryStream();
+            IODataResponseMessage responseMessage = new ODataMessageWrapper(memoryStream);
+            ODataMessageWriter writer = new ODataMessageWriter(responseMessage);
+            ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
+            batchWriter.WriteStartBatch();
+
+            responseItem.WriteResponse(batchWriter);
+
+            batchWriter.WriteEndBatch();
+            memoryStream.Position = 0;
+            string responseString = new StreamReader(memoryStream).ReadToEnd();
+
+            Assert.Contains("changesetresponse", responseString);
+            Assert.Contains("Accepted", responseString);
+            Assert.Contains("No Content", responseString);
         }
 
         [Fact]
@@ -57,12 +93,12 @@ namespace Microsoft.AspNet.OData.Test.Batch
             MemoryStream memoryStream = new MemoryStream();
             IODataResponseMessage responseMessage = new ODataMessageWrapper(memoryStream);
             ODataMessageWriter writer = new ODataMessageWriter(responseMessage);
-            ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
-            batchWriter.WriteStartBatch();
+            ODataBatchWriter batchWriter = await writer.CreateODataBatchWriterAsync();
+            await batchWriter.WriteStartBatchAsync();
 
             await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
 
-            batchWriter.WriteEndBatch();
+            await batchWriter.WriteEndBatchAsync();
             memoryStream.Position = 0;
             string responseString = new StreamReader(memoryStream).ReadToEnd();
 

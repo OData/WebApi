@@ -65,6 +65,18 @@ namespace Microsoft.AspNet.OData.Batch
         public HeaderDictionary Headers { get; } = new HeaderDictionary();
 
         /// <summary>
+        /// Serialize the batch content to a stream Synchronously.
+        /// </summary>
+        /// <param name="stream">The stream to serialize to.</param>
+        /// <returns>A <see cref="Task"/> that can be awaited.</returns>
+        /// <remarks>This function uses types that are AspNetCore-specific.</remarks>
+        public void SerializeToStream(Stream stream)
+        {
+            IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(stream, Headers, _requestContainer);
+            WriteToResponseMessage(responseMessage);
+        }
+
+        /// <summary>
         /// Serialize the batch content to a stream.
         /// </summary>
         /// <param name="stream">The stream to serialize to.</param>
@@ -74,6 +86,26 @@ namespace Microsoft.AspNet.OData.Batch
         {
             IODataResponseMessage responseMessage = ODataMessageWrapperHelper.Create(stream, Headers, _requestContainer);
             return WriteToResponseMessageAsync(responseMessage);
+        }
+
+        /// <summary>
+        ///  Serialize the batch responses to an <see cref="IODataResponseMessage"/> Synchronously.
+        /// </summary>
+        /// <param name="responseMessage">The response message.</param>
+        /// <returns></returns>
+        private void WriteToResponseMessage(IODataResponseMessage responseMessage)
+        {
+            ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, _writerSettings);
+            ODataBatchWriter writer = messageWriter.CreateODataBatchWriter();
+
+            writer.WriteStartBatch();
+
+            foreach (ODataBatchResponseItem response in Responses)
+            {
+                response.WriteResponse(writer);
+            }
+
+            writer.WriteEndBatch();
         }
     }
 }

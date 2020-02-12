@@ -29,14 +29,11 @@ namespace Microsoft.AspNet.OData.Batch
         }
 
         /// <summary>
-        /// Writes a single OData batch response.
+        /// Writes a single OData batch response Synchronously.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
         /// <param name="response">The response message.</param>
-        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        /// <returns>A task object representing writing the given batch response using the given writer.</returns>
-        public static async Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response,
-            CancellationToken cancellationToken)
+        public static void WriteMessage(ODataBatchWriter writer, HttpResponseMessage response)
         {
             if (writer == null)
             {
@@ -68,6 +65,51 @@ namespace Microsoft.AspNet.OData.Batch
 
                 using (Stream stream = batchResponse.GetStream())
                 {
+                    response.Content.CopyToAsync(stream).Wait();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes a single OData batch response.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        /// <param name="response">The response message.</param>
+        /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
+        /// <returns>A task object representing writing the given batch response using the given writer.</returns>
+        public static async Task WriteMessageAsync(ODataBatchWriter writer, HttpResponseMessage response,
+            CancellationToken cancellationToken)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+            if (response == null)
+            {
+                throw Error.ArgumentNull("response");
+            }
+
+            HttpRequestMessage request = response.RequestMessage;
+            string contentId = (request != null) ? request.GetODataContentId() : String.Empty;
+
+            ODataBatchOperationResponseMessage batchResponse = await writer.CreateOperationResponseMessageAsync(contentId);
+
+            batchResponse.StatusCode = (int)response.StatusCode;
+
+            foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers)
+            {
+                batchResponse.SetHeader(header.Key, String.Join(",", header.Value));
+            }
+
+            if (response.Content != null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> header in response.Content.Headers)
+                {
+                    batchResponse.SetHeader(header.Key, String.Join(",", header.Value));
+                }
+
+                using (Stream stream = batchResponse.GetStream())
+                {
                     cancellationToken.ThrowIfCancellationRequested();
                     await response.Content.CopyToAsync(stream);
                 }
@@ -80,6 +122,12 @@ namespace Microsoft.AspNet.OData.Batch
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        /// <summary>
+        /// Writes the response Synchronously.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        public abstract void WriteResponse(ODataBatchWriter writer);
 
         /// <summary>
         /// Writes the response.

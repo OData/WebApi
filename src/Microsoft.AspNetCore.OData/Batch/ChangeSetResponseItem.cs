@@ -36,6 +36,27 @@ namespace Microsoft.AspNet.OData.Batch
         public IEnumerable<HttpContext> Contexts { get; private set; }
 
         /// <summary>
+        /// Writes the responses as a ChangeSet Synchronously.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        public override void WriteResponse(ODataBatchWriter writer)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+
+            writer.WriteStartChangeset();
+
+            foreach (HttpContext context in Contexts)
+            {
+                WriteMessage(writer, context);
+            }
+
+            writer.WriteEndChangeset();
+        }
+
+        /// <summary>
         /// Writes the responses as a ChangeSet.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>

@@ -103,6 +103,15 @@ namespace Microsoft.AspNet.OData.Formatter
                 return value;
             }
 
+            // try case-insensitive
+            foreach (string key in _headers.Keys)
+            {
+                if (key.Equals(headerName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return _headers[key];
+                }
+            }
+
             return null;
         }
 

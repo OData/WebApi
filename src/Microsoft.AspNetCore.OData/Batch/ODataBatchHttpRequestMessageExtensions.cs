@@ -193,19 +193,29 @@ namespace Microsoft.AspNet.OData.Batch
             HttpResponse response = request.HttpContext.Response;
 
             StringValues acceptHeader = request.Headers["Accept"];
-            string contentType = null;
-            if (StringValues.IsNullOrEmpty(acceptHeader)
-                || acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
+            string responseContentType = null;
+            if (StringValues.IsNullOrEmpty(acceptHeader))
             {
-                contentType = String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid());
+                // In absence of accept, if request was JSON then default response to be JSON.
+                // Note that, if responseContentType is not set, then it will default to multipart/mixed
+                // when constructing the BatchContent, so we don't need to handle that case here
+                if (!String.IsNullOrEmpty(request.ContentType)
+                && request.ContentType.IndexOf(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    responseContentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
+                }
             }
-            else if (acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase)))
+            else if (acceptHeader.Any(h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
             {
-                contentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
+                responseContentType = String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid());
+            }
+            else if (acceptHeader.Any(h => h.IndexOf(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1))
+            {
+                responseContentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
             }
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer, contentType);
+            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer, responseContentType);
             foreach (var header in batchContent.Headers)
             {
                 // Copy headers from batch content, overwriting any existing headers.

@@ -36,6 +36,27 @@ namespace Microsoft.AspNet.OData.Batch
         public IEnumerable<HttpResponseMessage> Responses { get; private set; }
 
         /// <summary>
+        /// Writes the responses as a ChangeSet Synchronously.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
+        public override void WriteResponse(ODataBatchWriter writer)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+
+            writer.WriteStartChangeset();
+
+            foreach (HttpResponseMessage responseMessage in Responses)
+            {
+                WriteMessage(writer, responseMessage);
+            }
+
+            writer.WriteEndChangeset();
+        }
+
+        /// <summary>
         /// Writes the responses as a ChangeSet.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
@@ -47,14 +68,14 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("writer");
             }
 
-            writer.WriteStartChangeset();
+            await writer.WriteStartChangesetAsync();
 
             foreach (HttpResponseMessage responseMessage in Responses)
             {
                 await WriteMessageAsync(writer, responseMessage, cancellationToken);
             }
 
-            writer.WriteEndChangeset();
+            await writer.WriteEndChangesetAsync();
         }
 
         /// <summary>

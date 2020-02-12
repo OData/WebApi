@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if !NETSTANDARD2_0
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Routing;
 
 namespace Microsoft.AspNet.OData.Extensions
@@ -27,6 +28,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>The OData route endpoint pattern.</returns>
         public static string CreateODataEndpointPattern(string routeName, string routePrefix)
         {
+            if (routeName == null)
+            {
+                throw Error.ArgumentNull("routeName");
+            }
+
             return string.IsNullOrEmpty(routePrefix) ?
                 string.Format(ODataEndpointTemplate, routeName) :
                 routePrefix + "/" + string.Format(ODataEndpointTemplate, routeName);

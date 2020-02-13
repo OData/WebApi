@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -13,6 +12,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 #if NETCORE
+using System.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Net.Http.Headers;
 #endif

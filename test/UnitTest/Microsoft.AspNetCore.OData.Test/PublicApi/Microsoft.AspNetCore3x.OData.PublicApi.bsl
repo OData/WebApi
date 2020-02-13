@@ -726,14 +726,18 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem {
 	protected ODataBatchResponseItem ()
 
 	internal virtual bool IsResponseSuccessful ()
-	public static void WriteMessage (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context)
 	[
 	AsyncStateMachineAttribute(),
 	]
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context)
 
-	public abstract void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
-	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context, bool asyncWriter)
+
+	public System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 [
@@ -852,11 +856,10 @@ public class Microsoft.AspNet.OData.Batch.ChangeSetResponseItem : ODataBatchResp
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Http.HttpContext]] Contexts  { public get; }
 
 	internal virtual bool IsResponseSuccessful ()
-	public virtual void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
 	[
 	AsyncStateMachineAttribute(),
 	]
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler {
@@ -885,7 +888,6 @@ public class Microsoft.AspNet.OData.Batch.ODataBatchContent {
 	Microsoft.AspNetCore.Http.HeaderDictionary Headers  { public get; }
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] Responses  { public get; }
 
-	public void SerializeToStream (System.IO.Stream stream)
 	public System.Threading.Tasks.Task SerializeToStreamAsync (System.IO.Stream stream)
 }
 
@@ -922,8 +924,7 @@ public class Microsoft.AspNet.OData.Batch.OperationResponseItem : ODataBatchResp
 	Microsoft.AspNetCore.Http.HttpContext Context  { public get; }
 
 	internal virtual bool IsResponseSuccessful ()
-	public virtual void WriteResponse (Microsoft.OData.ODataBatchWriter writer)
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 public class Microsoft.AspNet.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHandler {

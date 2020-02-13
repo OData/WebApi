@@ -36,16 +36,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteResponse_NullWriter_Throws()
-        {
-            ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new HttpResponseMessage[0]);
-
-            ExceptionAssert.ThrowsArgumentNull(
-                () => responseItem.WriteResponse(null),
-                "writer");
-        }
-
-        [Fact]
         public async Task WriteResponseAsync_NullWriter_Throws()
         {
             ChangeSetResponseItem responseItem = new ChangeSetResponseItem(new HttpResponseMessage[0]);
@@ -56,7 +46,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteResponse_WritesChangeSet()
+        public async Task WriteResponse_SynchronouslyWritesChangeSet()
         {
             HttpResponseMessage[] responses = new HttpResponseMessage[]
                 {
@@ -70,7 +60,8 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
-            responseItem.WriteResponse(batchWriter);
+            // For backward compatibility, default is to assume a synchronous batch writer
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
 
             batchWriter.WriteEndBatch();
             memoryStream.Position = 0;
@@ -96,7 +87,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = await writer.CreateODataBatchWriterAsync();
             await batchWriter.WriteStartBatchAsync();
 
-            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None, /*asyncWriter*/ true);
 
             await batchWriter.WriteEndBatchAsync();
             memoryStream.Position = 0;

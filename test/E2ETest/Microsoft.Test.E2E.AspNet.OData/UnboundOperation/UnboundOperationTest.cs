@@ -16,14 +16,13 @@ using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
-using Newtonsoft.Json.Linq;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 {
-    public class UnboundOperationTest : WebHostTestBase
+    public class UnboundOperationTest : WebHostTestBase<UnboundOperationTest>
     {
-        public UnboundOperationTest(WebHostTestFixture fixture)
+        public UnboundOperationTest(WebHostTestFixture<UnboundOperationTest> fixture)
             :base(fixture)
         {
         }
@@ -32,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.UnboundOperation
 
         private readonly string EdmSchemaNamespace = typeof(ConventionCustomer).Namespace;
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] {
                 typeof(ConventionCustomersController),

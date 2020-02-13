@@ -64,19 +64,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class ConditionalLinkGeneration_ConventionModelBuilder_Tests : WebHostTestBase
+    public class ConditionalLinkGeneration_ConventionModelBuilder_Tests : WebHostTestBase<ConditionalLinkGeneration_ConventionModelBuilder_Tests>
     {
-        public ConditionalLinkGeneration_ConventionModelBuilder_Tests(WebHostTestFixture fixture)
+        public ConditionalLinkGeneration_ConventionModelBuilder_Tests(WebHostTestFixture<ConditionalLinkGeneration_ConventionModelBuilder_Tests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.EnableODataSupport(GetImplicitEdmModel(configuration));
         }
 
-        private static Microsoft.OData.Edm.IEdmModel GetImplicitEdmModel(WebRouteConfiguration configuration)
+        private static IEdmModel GetImplicitEdmModel(WebRouteConfiguration configuration)
         {
             ODataConventionModelBuilder modelBuilder = configuration.CreateConventionModelBuilder();
             var products = modelBuilder.EntitySet<Product>("ConditionalLinkGeneration_Products");

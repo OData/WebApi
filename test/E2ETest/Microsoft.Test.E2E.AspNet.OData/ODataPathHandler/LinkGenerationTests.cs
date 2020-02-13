@@ -68,14 +68,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         }
     }
 
-    public class LinkGenerationTests : WebHostTestBase
+    public class LinkGenerationTests : WebHostTestBase<LinkGenerationTests>
     {
-        public LinkGenerationTests(WebHostTestFixture fixture)
+        public LinkGenerationTests(WebHostTestFixture<LinkGenerationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var model1 = GetEdmModel1(configuration);
             var model2 = GetEdmModel2(configuration);

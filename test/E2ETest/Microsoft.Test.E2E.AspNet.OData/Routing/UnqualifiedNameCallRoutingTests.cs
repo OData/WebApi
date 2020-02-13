@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class UnqualifiedNameCallRoutingTests : WebHostTestBase
+    public class UnqualifiedNameCallRoutingTests : WebHostTestBase<UnqualifiedNameCallRoutingTests>
     {
-        public UnqualifiedNameCallRoutingTests(WebHostTestFixture fixture)
+        public UnqualifiedNameCallRoutingTests(WebHostTestFixture<UnqualifiedNameCallRoutingTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             var controllers = new[] { typeof(UnqualifiedCarsController) };
             config.AddControllers(controllers);

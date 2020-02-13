@@ -190,14 +190,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
         }
     }
 
-    public class SerializeEntityReferenceLinksTest : WebHostTestBase
+    public class SerializeEntityReferenceLinksTest : WebHostTestBase<SerializeEntityReferenceLinksTest>
     {
-        public SerializeEntityReferenceLinksTest(WebHostTestFixture fixture)
+        public SerializeEntityReferenceLinksTest(WebHostTestFixture<SerializeEntityReferenceLinksTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var routingConventions = ODataRoutingConventions.CreateDefault();
             routingConventions.Insert(4, new GetRefRoutingConvention());

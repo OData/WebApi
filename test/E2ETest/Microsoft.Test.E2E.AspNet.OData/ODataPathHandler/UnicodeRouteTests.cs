@@ -36,20 +36,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         }
     }
 
-    public class UnicodeRouteTests : WebHostTestBase
+    public class UnicodeRouteTests : WebHostTestBase<UnicodeRouteTests>
     {
-        private WebRouteConfiguration _configuration;
+        private static IEdmModel Model;
 
-        public UnicodeRouteTests(WebHostTestFixture fixture)
+        public UnicodeRouteTests(WebHostTestFixture<UnicodeRouteTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
-            _configuration = configuration;
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            configuration.EnableODataSupport(GetEdmModel(configuration), "odataü");
+            Model = GetEdmModel(configuration);
+            configuration.EnableODataSupport(Model, "odataü");
         }
 
         protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -108,7 +108,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ODataPathHandler
         private DataServiceContext CreateClient(Uri address)
         {
             var client = new DataServiceContext(address, ODataProtocolVersion.V4);
-            client.Format.UseJson(GetEdmModel(_configuration));
+            client.Format.UseJson(Model);
 
             return client;
         }

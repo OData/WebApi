@@ -213,9 +213,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
     #endregion
 
-    public abstract class InheritanceTests : ODataFormatterTestBase
+    public abstract class InheritanceTests<TTest> : ODataFormatterTestBase<TTest>
     {
-        public InheritanceTests(WebHostTestFixture fixture)
+        public InheritanceTests(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

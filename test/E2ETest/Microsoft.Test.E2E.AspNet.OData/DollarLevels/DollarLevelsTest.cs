@@ -12,16 +12,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
 {
-    public class DollarLevelsTest : WebHostTestBase
+    public class DollarLevelsTest : WebHostTestBase<DollarLevelsTest>
     {
         private const string NameSpace = "Microsoft.Test.E2E.AspNet.OData.DollarLevels";
 
-        public DollarLevelsTest(WebHostTestFixture fixture)
+        public DollarLevelsTest(WebHostTestFixture<DollarLevelsTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(DLManagersController), typeof(DLEmployeesController) };
             configuration.AddControllers(controllers);

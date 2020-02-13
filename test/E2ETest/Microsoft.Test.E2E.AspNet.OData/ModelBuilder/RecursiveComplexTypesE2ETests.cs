@@ -18,14 +18,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    public class RecursiveComplexTypesE2ETests : WebHostTestBase
+    public class RecursiveComplexTypesE2ETests : WebHostTestBase<RecursiveComplexTypesE2ETests>
     {
-        public RecursiveComplexTypesE2ETests(WebHostTestFixture fixture)
+        public RecursiveComplexTypesE2ETests(WebHostTestFixture<RecursiveComplexTypesE2ETests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(UsersController));
             configuration.MapODataServiceRoute("recursive", "recursive", GetEdmModel(configuration));

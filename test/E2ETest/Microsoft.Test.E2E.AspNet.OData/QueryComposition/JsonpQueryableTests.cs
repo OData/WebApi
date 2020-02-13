@@ -150,14 +150,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class JsonpQueryableTests : WebHostTestBase
+    public class JsonpQueryableTests : WebHostTestBase<JsonpQueryableTests>
     {
-        public JsonpQueryableTests(WebHostTestFixture fixture)
+        public JsonpQueryableTests(WebHostTestFixture<JsonpQueryableTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var f = JsonpMediaTypeFormatter.Create(configuration);
             configuration.RemoveNonODataFormatters();

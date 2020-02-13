@@ -21,14 +21,14 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Swagger
 {
-    public class SwaggerMetadataTest : WebHostTestBase
+    public class SwaggerMetadataTest : WebHostTestBase<SwaggerMetadataTest>
     {
-        public SwaggerMetadataTest(WebHostTestFixture fixture)
+        public SwaggerMetadataTest(WebHostTestFixture<SwaggerMetadataTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(SwaggerController), typeof(MetadataController)};
             configuration.AddControllers(controllers);

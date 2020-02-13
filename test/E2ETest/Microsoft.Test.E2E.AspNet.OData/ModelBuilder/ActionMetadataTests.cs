@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    public class ActionMetadataTests : WebHostTestBase
+    public class ActionMetadataTests : WebHostTestBase<ActionMetadataTests>
     {
-        public ActionMetadataTests(WebHostTestFixture fixture)
+        public ActionMetadataTests(WebHostTestFixture<ActionMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

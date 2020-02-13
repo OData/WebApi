@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
-using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
@@ -22,24 +21,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public List<InheritanceTests_Employee> DirectReports { get; set; }
     }
 
-    public class InheritanceTests : WebHostTestBase
+    public class InheritanceTests
     {
-        private WebRouteConfiguration _configuration;
-
-        public InheritanceTests(WebHostTestFixture fixture)
-            :base(fixture)
-        {
-        }
-
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         [Fact]
         public void IgnoredBaseTypePropertyShouldBeIgnoredInDeriveTypeAsWell()
         {
-            ODataConventionModelBuilder builder = _configuration.CreateConventionModelBuilder();
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
             var employees = builder.EntitySet<InheritanceTests_Employee>("InheritanceTests_Employee");
             employees.EntityType.Ignore(e => e.Photo);
             var model = builder.GetEdmModel();

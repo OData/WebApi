@@ -14,14 +14,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 {
-    public class DollarIdClientTest : WebHostTestBase
+    public class DollarIdClientTest : WebHostTestBase<DollarIdClientTest>
     {
-        public DollarIdClientTest(WebHostTestFixture fixture)
+        public DollarIdClientTest(WebHostTestFixture<DollarIdClientTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(SingersController), typeof(AlbumsController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

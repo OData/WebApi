@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.OrderByAttributeTest
 {
-    public class OrderByAttributeTest : WebHostTestBase
+    public class OrderByAttributeTest : WebHostTestBase<OrderByAttributeTest>
     {
         private const string CustomerBaseUrl = "{0}/enablequery/Customers";
         private const string OrderBaseUrl = "{0}/enablequery/Orders";
@@ -20,12 +20,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.OrderByAttribu
         private const string ModelBoundOrderBaseUrl = "{0}/modelboundapi/Orders";
         private const string ModelBoundCarBaseUrl = "{0}/modelboundapi/Cars";
 
-        public OrderByAttributeTest(WebHostTestFixture fixture)
+        public OrderByAttributeTest(WebHostTestFixture<OrderByAttributeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController),
                     typeof(CarsController));

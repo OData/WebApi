@@ -60,9 +60,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
         }
     }
 
-    public class JsonLightDeserializationAndSerializationTests : ODataFormatterTestBase
+    public class JsonLightDeserializationAndSerializationTests : ODataFormatterTestBase<JsonLightDeserializationAndSerializationTests>
     {
-        public JsonLightDeserializationAndSerializationTests(WebHostTestFixture fixture)
+        public JsonLightDeserializationAndSerializationTests(WebHostTestFixture<JsonLightDeserializationAndSerializationTests> fixture)
             :base(fixture)
         {
         }
@@ -138,7 +138,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

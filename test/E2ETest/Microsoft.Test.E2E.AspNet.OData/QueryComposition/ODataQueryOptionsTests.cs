@@ -102,14 +102,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class ODataQueryOptionsTests : WebHostTestBase
+    public class ODataQueryOptionsTests : WebHostTestBase<ODataQueryOptionsTests>
     {
-        public ODataQueryOptionsTests(WebHostTestFixture fixture)
+        public ODataQueryOptionsTests(WebHostTestFixture<ODataQueryOptionsTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
 {
-    public class FormattersTests : WebHostTestBase
+    public class FormattersTests : WebHostTestBase<FormattersTests>
     {
-        public FormattersTests(WebHostTestFixture fixture)
+        public FormattersTests(WebHostTestFixture<FormattersTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();

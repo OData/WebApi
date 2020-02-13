@@ -103,20 +103,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class SpecialCharactersLinkGenerationTests : WebHostTestBase
+    public class SpecialCharactersLinkGenerationTests : WebHostTestBase<SpecialCharactersLinkGenerationTests>
     {
-        private IEdmModel _model;
+        private static IEdmModel Model;
 
-        public SpecialCharactersLinkGenerationTests(WebHostTestFixture fixture)
+        public SpecialCharactersLinkGenerationTests(WebHostTestFixture<SpecialCharactersLinkGenerationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            _model = GetEdmModel(configuration);
-            configuration.EnableODataSupport(_model);
+            Model = GetEdmModel(configuration);
+            configuration.EnableODataSupport(Model);
         }
 
         public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -131,7 +131,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestSpecialCharactersInPrimaryKey()
         {
             var context = new DataServiceContext(new Uri(this.BaseAddress));
-            context.Format.UseJson(_model);
+            context.Format.UseJson(Model);
 
             var query = context.CreateQuery<SpecialCharactersLinkGenerationTestsModel>("SpecialCharactersLinkGenerationTests");
             var todoes = await query.ExecuteAsync();
@@ -158,20 +158,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class SpecialCharactersLinkGenerationWebTests : WebHostTestBase
+    public class SpecialCharactersLinkGenerationWebTests : WebHostTestBase<SpecialCharactersLinkGenerationWebTests>
     {
-        private IEdmModel _model;
+        private static IEdmModel Model;
 
-        public SpecialCharactersLinkGenerationWebTests(WebHostTestFixture fixture)
+        public SpecialCharactersLinkGenerationWebTests(WebHostTestFixture<SpecialCharactersLinkGenerationWebTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-            _model = GetEdmModel(configuration);
-            configuration.EnableODataSupport(_model);
+            Model = GetEdmModel(configuration);
+            configuration.EnableODataSupport(Model);
         }
 
         public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -185,7 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public async Task TestSpecialCharactersInPrimaryKey()
         {
             var client = new DataServiceContext(new Uri(this.BaseAddress));
-            client.Format.UseJson(_model);
+            client.Format.UseJson(Model);
 
             var query = client.CreateQuery<SpecialCharactersLinkGenerationTestsModel>("SpecialCharactersLinkGenerationWebTests");
             var todoes = await query.ExecuteAsync();

@@ -172,25 +172,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class InheritanceQueryableTests : WebHostTestBase
+    public class InheritanceQueryableTests : WebHostTestBase<InheritanceQueryableTests>
     {
-        public InheritanceQueryableTests(WebHostTestFixture fixture)
+        public InheritanceQueryableTests(WebHostTestFixture<InheritanceQueryableTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
-            var types = new[] { 
-                typeof(InheritanceQueryable_Customer), 
-                typeof(InheritanceQueryable_AbstractBase), 
-                typeof(InheritanceQueryable_DerivedType), 
-                typeof(Vehicle), 
-                typeof(Motorcycle), 
-                typeof(MiniSportBike), 
-                typeof(SportBike), 
-                typeof(NameValueCollection), 
-                typeof(ReadOnlyPropertyType), 
+            var types = new[] {
+                typeof(InheritanceQueryable_Customer),
+                typeof(InheritanceQueryable_AbstractBase),
+                typeof(InheritanceQueryable_DerivedType),
+                typeof(Vehicle),
+                typeof(Motorcycle),
+                typeof(MiniSportBike),
+                typeof(SportBike),
+                typeof(NameValueCollection),
+                typeof(ReadOnlyPropertyType),
                 typeof(InheritanceQueryableController) };
 
             configuration.AddControllers(types);

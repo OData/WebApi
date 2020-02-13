@@ -99,9 +99,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class HttpAndODataErrorAlwaysIncludeDetailsTests : WebHostTestBase
+    public class HttpAndODataErrorAlwaysIncludeDetailsTests : WebHostTestBase<HttpAndODataErrorAlwaysIncludeDetailsTests>
     {
-        public HttpAndODataErrorAlwaysIncludeDetailsTests(WebHostTestFixture fixture)
+        public HttpAndODataErrorAlwaysIncludeDetailsTests(WebHostTestFixture<HttpAndODataErrorAlwaysIncludeDetailsTests> fixture)
             :base(fixture)
         {
         }
@@ -212,7 +212,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return request;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
@@ -250,9 +250,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class HttpAndODataErrorNeverIncludeDetailsTests : WebHostTestBase
+    public class HttpAndODataErrorNeverIncludeDetailsTests : WebHostTestBase<HttpAndODataErrorNeverIncludeDetailsTests>
     {
-        public HttpAndODataErrorNeverIncludeDetailsTests(WebHostTestFixture fixture)
+        public HttpAndODataErrorNeverIncludeDetailsTests(WebHostTestFixture<HttpAndODataErrorNeverIncludeDetailsTests> fixture)
             :base(fixture)
         {
         }
@@ -297,7 +297,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.IncludeErrorDetail = false;
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

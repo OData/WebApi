@@ -13,14 +13,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataOrderByTest
 {
-    public class ODataOrderByTest : WebHostTestBase
+    public class ODataOrderByTest : WebHostTestBase<ODataOrderByTest>
     {
-        public ODataOrderByTest(WebHostTestFixture fixture)
+        public ODataOrderByTest(WebHostTestFixture<ODataOrderByTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(ItemsController) };
             configuration.AddControllers(controllers);

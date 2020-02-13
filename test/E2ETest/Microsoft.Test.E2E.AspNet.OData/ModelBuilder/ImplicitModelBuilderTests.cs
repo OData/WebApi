@@ -64,17 +64,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         public static string StaticProperty { get; set; }
     }
 
-    public class ImplicitModelBuilderTests : WebHostTestBase
+    public class ImplicitModelBuilderTests
     {
-        public ImplicitModelBuilderTests(WebHostTestFixture fixture)
-            :base(fixture)
-        {
-        }
-
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
-        {
-        }
-
         [Fact]
         public void ShouldIgnoreStaticProperty()
         {
@@ -172,14 +163,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class ImplicitModelBuilderE2ETests : WebHostTestBase
+    public class ImplicitModelBuilderE2ETests : WebHostTestBase<ImplicitModelBuilderE2ETests>
     {
-        public ImplicitModelBuilderE2ETests(WebHostTestFixture fixture)
+        public ImplicitModelBuilderE2ETests(WebHostTestFixture<ImplicitModelBuilderE2ETests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.EnableODataSupport(GetImplicitEdmModel(configuration));

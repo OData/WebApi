@@ -10,9 +10,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
-    public class JsonLightComplexTypeTests : ComplexTypeTests
+    public class JsonLightComplexTypeTests : ComplexTypeTests<JsonLightComplexTypeTests>
     {
-        public JsonLightComplexTypeTests(WebHostTestFixture fixture)
+        public JsonLightComplexTypeTests(WebHostTestFixture<JsonLightComplexTypeTests> fixture)
             :base(fixture)
         {
         }
@@ -33,7 +33,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.RemoveNonODataFormatters();

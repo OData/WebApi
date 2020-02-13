@@ -22,14 +22,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class SupportMediaTypeTests : WebHostTestBase
+    public class SupportMediaTypeTests : WebHostTestBase<SupportMediaTypeTests>
     {
-        public SupportMediaTypeTests(WebHostTestFixture fixture)
+        public SupportMediaTypeTests(WebHostTestFixture<SupportMediaTypeTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

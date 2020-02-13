@@ -17,14 +17,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ForeignKey
 {
-    public class ForeignKeyTest : WebHostTestBase
+    public class ForeignKeyTest : WebHostTestBase<ForeignKeyTest>
     {
-        public ForeignKeyTest(WebHostTestFixture fixture)
+        public ForeignKeyTest(WebHostTestFixture<ForeignKeyTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(ForeignKeyCustomersController),
                 typeof(ForeignKeyOrdersController),

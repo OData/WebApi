@@ -15,9 +15,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
-    public class JsonLightInheritanceTests : InheritanceTests
+    public class JsonLightInheritanceTests : InheritanceTests<JsonLightInheritanceTests>
     {
-        public JsonLightInheritanceTests(WebHostTestFixture fixture)
+        public JsonLightInheritanceTests(WebHostTestFixture<JsonLightInheritanceTests> fixture)
             :base(fixture)
         {
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new DeleteAllRoutingConvention());

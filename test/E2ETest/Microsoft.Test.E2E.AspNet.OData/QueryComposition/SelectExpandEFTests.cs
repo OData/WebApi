@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class SelectExpandEFTests : WebHostTestBase
+    public class SelectExpandEFTests : WebHostTestBase<SelectExpandEFTests>
     {
-        public SelectExpandEFTests(WebHostTestFixture fixture)
+        public SelectExpandEFTests(WebHostTestFixture<SelectExpandEFTests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(
                     typeof(EFSelectCustomersController),

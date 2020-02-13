@@ -14,9 +14,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class TopSkipOrderByTests : WebHostTestBase
+    public class TopSkipOrderByTests : WebHostTestBase<TopSkipOrderByTests>
     {
-        public TopSkipOrderByTests(WebHostTestFixture fixture)
+        public TopSkipOrderByTests(WebHostTestFixture<TopSkipOrderByTests> fixture)
             :base(fixture)
         {
         }
@@ -34,7 +34,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.EnableDependencyInjection();

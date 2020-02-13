@@ -18,14 +18,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class UnicodeLinkGenerationTests : WebHostTestBase
+    public class UnicodeLinkGenerationTests : WebHostTestBase<UnicodeLinkGenerationTests>
     {
-        public UnicodeLinkGenerationTests(WebHostTestFixture fixture)
+        public UnicodeLinkGenerationTests(WebHostTestFixture<UnicodeLinkGenerationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

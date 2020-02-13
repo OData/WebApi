@@ -39,9 +39,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public abstract class ComplexTypeTests : ODataFormatterTestBase
+    public abstract class ComplexTypeTests<TTest> : ODataFormatterTestBase<TTest>
     {
-        public ComplexTypeTests(WebHostTestFixture fixture)
+        public ComplexTypeTests(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

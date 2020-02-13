@@ -18,9 +18,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 {
-    public class ComplexTypeInheritanceTests : WebHostTestBase
+    public class ComplexTypeInheritanceTests : WebHostTestBase<ComplexTypeInheritanceTests>
     {
-        public ComplexTypeInheritanceTests(WebHostTestFixture fixture)
+        public ComplexTypeInheritanceTests(WebHostTestFixture<ComplexTypeInheritanceTests> fixture)
             :base(fixture)
         {
         }
@@ -93,8 +93,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             }
 
         }
-
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(WindowsController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

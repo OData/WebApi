@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 {
-    public class UntypedDeltaSerializationTests : WebHostTestBase
+    public class UntypedDeltaSerializationTests : WebHostTestBase<UntypedDeltaSerializationTests>
     {
-        public UntypedDeltaSerializationTests(WebHostTestFixture fixture)
+        public UntypedDeltaSerializationTests(WebHostTestFixture<UntypedDeltaSerializationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MapODataServiceRoute("untyped", "untyped", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

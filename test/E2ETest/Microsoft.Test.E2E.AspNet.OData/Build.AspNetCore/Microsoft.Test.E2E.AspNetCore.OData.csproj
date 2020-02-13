@@ -39,8 +39,8 @@
     <Compile Include="..\Common\Execution\WebHostLogExceptionFilter.cs">
       <Link>Common\Execution\WebHostLogExceptionFilter.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Execution\WebHostTestFixture.cs">
-      <Link>Common\Execution\WebHostTestFixture.cs</Link>
+    <Compile Include="..\Common\Execution\WebHostTestFixtureOfT.cs">
+      <Link>Common\Execution\WebHostTestFixtureOfT.cs</Link>
     </Compile>
     <Compile Include="..\Common\Extensions\HttpClientExtension.cs">
       <Link>Common\Extensions\HttpClientExtension.cs</Link>
@@ -223,8 +223,8 @@
     <Compile Include="..\Common\Execution\SecurityHelper.cs">
       <Link>Common\Execution\SecurityHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Common\Execution\WebHostTestBase.cs">
-      <Link>Common\Execution\WebHostTestBase.cs</Link>
+    <Compile Include="..\Common\Execution\WebHostTestBaseOfT.cs">
+      <Link>Common\Execution\WebHostTestBaseOfT.cs</Link>
     </Compile>
     <Compile Include="..\Common\Execution\WebRouteConfiguration.cs">
       <Link>Common\Execution\WebRouteConfiguration.cs</Link>

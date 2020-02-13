@@ -17,16 +17,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition.IsOf
 {
-    public class IsofFunctionTests : WebHostTestBase
+    public class IsofFunctionTests : WebHostTestBase<IsofFunctionTests>
     {
         private static readonly string[] DataSourceTypes = new string[] {"IM", "EF"}; // In Memory or Entity Framework
 
-        public IsofFunctionTests(WebHostTestFixture fixture)
+        public IsofFunctionTests(WebHostTestFixture<IsofFunctionTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             var controllers = new[]
                 {typeof (BillingCustomersController), typeof (BillingsController), typeof (MetadataController)};

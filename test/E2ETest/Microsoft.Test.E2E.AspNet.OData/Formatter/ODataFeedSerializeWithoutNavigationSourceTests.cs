@@ -19,14 +19,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    public class ODataFeedSerializeWithoutNavigationSourceTests : WebHostTestBase
+    public class ODataFeedSerializeWithoutNavigationSourceTests : WebHostTestBase<ODataFeedSerializeWithoutNavigationSourceTests>
     {
-        public ODataFeedSerializeWithoutNavigationSourceTests(WebHostTestFixture fixture)
+        public ODataFeedSerializeWithoutNavigationSourceTests(WebHostTestFixture<ODataFeedSerializeWithoutNavigationSourceTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             var controllers = new[] { typeof(AnyController), typeof(MetadataController) };
             config.AddControllers(controllers);

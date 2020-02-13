@@ -175,14 +175,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class GlobalQueryableFilterWithoutResultLimitTests : WebHostTestBase
+    public class GlobalQueryableFilterWithoutResultLimitTests : WebHostTestBase<GlobalQueryableFilterWithoutResultLimitTests>
     {
-        public GlobalQueryableFilterWithoutResultLimitTests(WebHostTestFixture fixture)
+        public GlobalQueryableFilterWithoutResultLimitTests(WebHostTestFixture<GlobalQueryableFilterWithoutResultLimitTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 3 });
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -244,29 +244,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class GlobalQueryableFilterWithResultLimitTests : GlobalQueryableFilterWithoutResultLimitTests
+    public class GlobalQueryableFilterWithDerivedEnableQueryAttribute : WebHostTestBase<GlobalQueryableFilterWithDerivedEnableQueryAttribute>
     {
-        public GlobalQueryableFilterWithResultLimitTests(WebHostTestFixture fixture)
+        public GlobalQueryableFilterWithDerivedEnableQueryAttribute(WebHostTestFixture<GlobalQueryableFilterWithDerivedEnableQueryAttribute> fixture)
             :base(fixture)
         {
         }
 
-        internal static void UpdateConfiguration1(WebRouteConfiguration configuration)
-        {
-            configuration.AddODataQueryFilter(new EnableQueryAttribute() { PageSize = 3 });
-            configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
-            configuration.EnableDependencyInjection();
-        }
-    }
-
-    public class GlobalQueryableFilterWithDerivedEnableQueryAttribute : WebHostTestBase
-    {
-        public GlobalQueryableFilterWithDerivedEnableQueryAttribute(WebHostTestFixture fixture)
-            :base(fixture)
-        {
-        }
-
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddODataQueryFilter(new DerivedQueryableAttribute());
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

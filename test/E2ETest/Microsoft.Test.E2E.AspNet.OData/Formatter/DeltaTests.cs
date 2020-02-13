@@ -197,9 +197,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public abstract class DeltaTests : ODataFormatterTestBase
+    public abstract class DeltaTests<TTest> : ODataFormatterTestBase<TTest>
     {
-        public DeltaTests(WebHostTestFixture fixture)
+        public DeltaTests(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }
@@ -328,14 +328,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class PutDeltaOfTTests : WebHostTestBase
+    public class PutDeltaOfTTests : WebHostTestBase<PutDeltaOfTTests>
     {
-        public PutDeltaOfTTests(WebHostTestFixture fixture)
+        public PutDeltaOfTTests(WebHostTestFixture<PutDeltaOfTTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
@@ -366,14 +366,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class PatchtDeltaOfTTests : WebHostTestBase
+    public class PatchDeltaOfTTests : WebHostTestBase<PatchDeltaOfTTests>
     {
-        public PatchtDeltaOfTTests(WebHostTestFixture fixture)
+        public PatchDeltaOfTTests(WebHostTestFixture<PatchDeltaOfTTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();

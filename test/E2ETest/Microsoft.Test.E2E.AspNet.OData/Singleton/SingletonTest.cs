@@ -37,16 +37,16 @@ using HttpClientExtensions = System.Net.Http.HttpClientExtensions;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
-    public class SingletonTest : WebHostTestBase
+    public class SingletonTest : WebHostTestBase<SingletonTest>
     {
         private const string NameSpace = "Microsoft.Test.E2E.AspNet.OData.Singleton";
 
-        public SingletonTest(WebHostTestFixture fixture)
+        public SingletonTest(WebHostTestFixture<SingletonTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(UmbrellaController), typeof(MonstersIncController), typeof(MetadataController), typeof(PartnersController) };
             configuration.AddControllers(controllers);

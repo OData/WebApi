@@ -18,14 +18,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Spatial
 {
-    public class SpatialTests : WebHostTestBase
+    public class SpatialTests : WebHostTestBase<SpatialTests>
     {
-        public SpatialTests(WebHostTestFixture fixture)
+        public SpatialTests(WebHostTestFixture<SpatialTests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(SpatialCustomersController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

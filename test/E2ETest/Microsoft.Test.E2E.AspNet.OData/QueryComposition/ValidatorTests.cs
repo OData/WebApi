@@ -190,9 +190,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class ValidatorTests : WebHostTestBase
+    public class ValidatorTests : WebHostTestBase<ValidatorTests>
     {
-        public ValidatorTests(WebHostTestFixture fixture)
+        public ValidatorTests(WebHostTestFixture<ValidatorTests> fixture)
             :base(fixture)
         {
         }
@@ -253,7 +253,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

@@ -19,14 +19,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
 {
-    public class ComplexTypeInheritanceSerializeTest : WebHostTestBase
+    public class ComplexTypeInheritanceSerializeTest : WebHostTestBase<ComplexTypeInheritanceSerializeTest>
     {
-        public ComplexTypeInheritanceSerializeTest(WebHostTestFixture fixture)
+        public ComplexTypeInheritanceSerializeTest(WebHostTestFixture<ComplexTypeInheritanceSerializeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(MetadataController), typeof(InheritanceCustomersController) };
             configuration.AddControllers(controllers);

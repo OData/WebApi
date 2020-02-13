@@ -52,14 +52,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class MultipleEntitySetOnSameClrTypeTests : WebHostTestBase
+    public class MultipleEntitySetOnSameClrTypeTests : WebHostTestBase<MultipleEntitySetOnSameClrTypeTests>
     {
-        public MultipleEntitySetOnSameClrTypeTests(WebHostTestFixture fixture)
+        public MultipleEntitySetOnSameClrTypeTests(WebHostTestFixture<MultipleEntitySetOnSameClrTypeTests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();

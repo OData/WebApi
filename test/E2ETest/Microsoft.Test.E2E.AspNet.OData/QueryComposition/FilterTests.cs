@@ -20,7 +20,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class FilterTests : WebHostTestBase
+    public class FilterTests : WebHostTestBase<FilterTests>
     {
         #region Test Data
         public static TheoryDataSet<string, IEnumerable<Product>> SpecialCharacterData
@@ -226,7 +226,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
         #endregion
 
-        public FilterTests(WebHostTestFixture fixture)
+        public FilterTests(WebHostTestFixture<FilterTests> fixture)
             :base(fixture)
         {
         }
@@ -236,7 +236,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             return name.Replace("'", "''").Replace("&", "%26").Replace("/", "%2F").Replace("?", "%3F");
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

@@ -45,9 +45,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Containment
 {
-    public class ContainmentTests : WebHostTestBase
+    public class ContainmentTests : WebHostTestBase<ContainmentTests>
     {
-        public ContainmentTests(WebHostTestFixture fixture)
+        public ContainmentTests(WebHostTestFixture<ContainmentTests> fixture)
             :base(fixture)
         {
         }
@@ -75,7 +75,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(AccountsController), typeof(AnonymousAccountController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

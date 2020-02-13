@@ -17,14 +17,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class MinimalMetadataSpecificTests : WebHostTestBase
+    public class MinimalMetadataSpecificTests : WebHostTestBase<MinimalMetadataSpecificTests>
     {
-        public MinimalMetadataSpecificTests(WebHostTestFixture fixture)
+        public MinimalMetadataSpecificTests(WebHostTestFixture<MinimalMetadataSpecificTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

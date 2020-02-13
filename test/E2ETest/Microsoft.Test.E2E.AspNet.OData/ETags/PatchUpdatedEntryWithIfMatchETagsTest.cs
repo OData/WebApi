@@ -35,14 +35,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ETags
 {
-    public class PatchUpdatedEntryWithIfMatchETagsTest : WebHostTestBase
+    public class PatchUpdatedEntryWithIfMatchETagsTest : WebHostTestBase<PatchUpdatedEntryWithIfMatchETagsTest>
     {
-        public PatchUpdatedEntryWithIfMatchETagsTest(WebHostTestFixture fixture)
+        public PatchUpdatedEntryWithIfMatchETagsTest(WebHostTestFixture<PatchUpdatedEntryWithIfMatchETagsTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             var model = GetEdmModel(configuration);

@@ -88,14 +88,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         }
     }
 
-    public class CUDBatchTests : WebHostTestBase
+    public class CUDBatchTests : WebHostTestBase<CUDBatchTests>
     {
-        public CUDBatchTests(WebHostTestFixture fixture)
-            : base(fixture)
+        public CUDBatchTests(WebHostTestFixture<CUDBatchTests> fixture)
+            :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -445,14 +445,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class QueryBatchTests : WebHostTestBase
+    public class QueryBatchTests : WebHostTestBase<QueryBatchTests>
     {
-        public QueryBatchTests(WebHostTestFixture fixture)
+        public QueryBatchTests(WebHostTestFixture<QueryBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
@@ -509,14 +509,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class ErrorsBatchTests : WebHostTestBase
+    public class ErrorsBatchTests : WebHostTestBase<ErrorsBatchTests>
     {
-        public ErrorsBatchTests(WebHostTestFixture fixture)
+        public ErrorsBatchTests(WebHostTestFixture<ErrorsBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
@@ -570,14 +570,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class LinksBatchTests : WebHostTestBase
+    public class LinksBatchTests : WebHostTestBase<LinksBatchTests>
     {
-        public LinksBatchTests(WebHostTestFixture fixture)
+        public LinksBatchTests(WebHostTestFixture<LinksBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(
@@ -616,14 +616,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class ContinueOnErrorBatchTests : WebHostTestBase
+    public class ContinueOnErrorBatchTests : WebHostTestBase<ContinueOnErrorBatchTests>
     {
-        public ContinueOnErrorBatchTests(WebHostTestFixture fixture)
+        public ContinueOnErrorBatchTests(WebHostTestFixture<ContinueOnErrorBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(

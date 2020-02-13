@@ -35,14 +35,14 @@ using Container = ModelBuilder.ActionTest.Default.Container;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    public class ODataActionTests : WebHostTestBase
+    public class ODataActionTests : WebHostTestBase<ODataActionTests>
     {
-        public ODataActionTests(WebHostTestFixture fixture)
+        public ODataActionTests(WebHostTestFixture<ODataActionTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

@@ -79,14 +79,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class MixScenarioTestsWebApi : WebHostTestBase
+    public class MixScenarioTestsWebApi : WebHostTestBase<MixScenarioTestsWebApi>
     {
-        public MixScenarioTestsWebApi(WebHostTestFixture fixture)
+        public MixScenarioTestsWebApi(WebHostTestFixture<MixScenarioTestsWebApi> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -129,9 +129,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public abstract class MixScenarioTestsOData : ODataFormatterTestBase
+    public abstract class MixScenarioTestsOData<TTest> : ODataFormatterTestBase<TTest>
     {
-        public MixScenarioTestsOData(WebHostTestFixture fixture)
+        public MixScenarioTestsOData(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

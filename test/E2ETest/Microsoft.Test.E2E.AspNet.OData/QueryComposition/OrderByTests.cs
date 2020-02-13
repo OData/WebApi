@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class OrderByTests : WebHostTestBase
+    public class OrderByTests : WebHostTestBase<OrderByTests>
     {
-        public OrderByTests(WebHostTestFixture fixture)
+        public OrderByTests(WebHostTestFixture<OrderByTests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Count().Filter().OrderBy().Expand().MaxTop(null);
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

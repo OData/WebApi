@@ -39,14 +39,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class AddRelatedObjectTests : WebHostTestBase
+    public class AddRelatedObjectTests : WebHostTestBase<AddRelatedObjectTests>
     {
-        public AddRelatedObjectTests(WebHostTestFixture fixture)
+        public AddRelatedObjectTests(WebHostTestFixture<AddRelatedObjectTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

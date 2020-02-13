@@ -15,14 +15,14 @@ using ODataV4Stack = Microsoft.AspNet.OData;
 
 namespace Microsoft.Test.E2E.AspNet.OData.SxS
 {
-    public class SxSODataV3AndV4Test : WebHostTestBase
+    public class SxSODataV3AndV4Test : WebHostTestBase<SxSODataV3AndV4Test>
     {
-        public SxSODataV3AndV4Test(WebHostTestFixture fixture)
+        public SxSODataV3AndV4Test(WebHostTestFixture<SxSODataV3AndV4Test> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[]
             {

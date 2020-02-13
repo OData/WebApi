@@ -35,14 +35,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    public class PropertyTestsUsingConventionModelBuilder : WebHostTestBase
+    public class PropertyTestsUsingConventionModelBuilder : WebHostTestBase<PropertyTestsUsingConventionModelBuilder>
     {
-        public PropertyTestsUsingConventionModelBuilder(WebHostTestFixture fixture)
+        public PropertyTestsUsingConventionModelBuilder(WebHostTestFixture<PropertyTestsUsingConventionModelBuilder> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
@@ -70,14 +70,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
         }
     }
 
-    public class PropertyTestsUsingODataModelBuilder : WebHostTestBase
+    public class PropertyTestsUsingODataModelBuilder : WebHostTestBase<PropertyTestsUsingODataModelBuilder>
     {
-        public PropertyTestsUsingODataModelBuilder(WebHostTestFixture fixture)
+        public PropertyTestsUsingODataModelBuilder(WebHostTestFixture<PropertyTestsUsingODataModelBuilder> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

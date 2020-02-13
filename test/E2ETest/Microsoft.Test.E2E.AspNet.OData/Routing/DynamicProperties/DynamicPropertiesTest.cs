@@ -13,14 +13,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing.DynamicProperties
 {
-    public class DynamicPropertiesTest : WebHostTestBase
+    public class DynamicPropertiesTest : WebHostTestBase<DynamicPropertiesTest>
     {
-        public DynamicPropertiesTest(WebHostTestFixture fixture)
+        public DynamicPropertiesTest(WebHostTestFixture<DynamicPropertiesTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { 
                 typeof(DynamicCustomersController),

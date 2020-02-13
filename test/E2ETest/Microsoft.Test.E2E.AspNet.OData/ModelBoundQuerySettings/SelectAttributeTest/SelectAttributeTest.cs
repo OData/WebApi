@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttributeTest
 {
-    public class SelectAttributeTest : WebHostTestBase
+    public class SelectAttributeTest : WebHostTestBase<SelectAttributeTest>
     {
         private const string CustomerBaseUrl = "{0}/enablequery/Customers";
         private const string OrderBaseUrl = "{0}/enablequery/Orders";
@@ -22,12 +22,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.SelectAttribut
         private const string ModelBoundCarBaseUrl = "{0}/modelboundapi/Cars";
         private const string ModelBoundAutoSelectCustomerBaseUrl = "{0}/modelboundapi/AutoSelectCustomers";
 
-        public SelectAttributeTest(WebHostTestFixture fixture)
+        public SelectAttributeTest(WebHostTestFixture<SelectAttributeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController),
                     typeof(CarsController), typeof(AutoSelectCustomersController));

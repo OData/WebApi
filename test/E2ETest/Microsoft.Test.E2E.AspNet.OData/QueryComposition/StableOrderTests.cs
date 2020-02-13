@@ -75,14 +75,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class StableOrderWithoutResultLimitTests : WebHostTestBase
+    public class StableOrderWithoutResultLimitTests : WebHostTestBase<StableOrderWithoutResultLimitTests>
     {
-        public StableOrderWithoutResultLimitTests(WebHostTestFixture fixture)
+        public StableOrderWithoutResultLimitTests(WebHostTestFixture<StableOrderWithoutResultLimitTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
             configuration.AddODataQueryFilter();

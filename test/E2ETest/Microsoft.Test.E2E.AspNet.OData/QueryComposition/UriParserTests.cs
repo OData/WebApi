@@ -15,14 +15,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public UriParser_Model1 Self { get; set; }
     }
 
-    public class UriParserTests : WebHostTestBase
+    public class UriParserTests : WebHostTestBase<UriParserTests>
     {
-        public UriParserTests(WebHostTestFixture fixture)
+        public UriParserTests(WebHostTestFixture<UriParserTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

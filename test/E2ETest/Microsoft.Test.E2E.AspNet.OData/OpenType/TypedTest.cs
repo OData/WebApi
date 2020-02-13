@@ -27,31 +27,32 @@ using TypedProxy = Microsoft.Test.E2E.AspNet.OData.OpenType.Typed.Client;
 
 namespace Microsoft.Test.E2E.AspNet.OData.OpenType
 {
-    public class TypedOpenTypeTest : WebHostTestBase
+    public class TypedOpenTypeTest : WebHostTestBase<TypedOpenTypeTest>
     {
-        WebRouteConfiguration _configuration = null;
+        private static IEdmModel Model;
         private static string[] Routings = new string[] { "convention", "AttributeRouting" };
         int expectedValueOfInt, actualValueOfInt;
         int? expectedValueOfNullableInt, actualValueOfNullableInt;
         string expectedValueOfString, actualValueOfString;
 
-        public TypedOpenTypeTest(WebHostTestFixture fixture)
+        public TypedOpenTypeTest(WebHostTestFixture<TypedOpenTypeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
-            _configuration = configuration;
             var controllers = new[] { typeof(EmployeesController), typeof(AccountsController), typeof(MetadataController) };
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+
+            Model = OpenComplexTypeEdmModel.GetTypedConventionModel(configuration);
             configuration.MapODataServiceRoute(
                 Routings[0],
                 Routings[0],
-                OpenComplexTypeEdmModel.GetTypedConventionModel(configuration),
+                Model,
                 new DefaultODataPathHandler(),
                 ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute(Routings[1], Routings[1], OpenComplexTypeEdmModel.GetTypedConventionModel(configuration));
@@ -1640,7 +1641,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
             var strArray = directory.Split(new string[] { "bin" }, StringSplitOptions.None);
             var filePath = Path.Combine(strArray[0], @"src\Microsoft.Test.E2E.AspNet.OData\OpenType\TypedMetadata.csdl.xml");
 
-            IEdmModel edmModel = OpenComplexTypeEdmModel.GetTypedConventionModel(_configuration);
+            IEdmModel edmModel = Model;
             XmlWriterSettings setting = new XmlWriterSettings();
             setting.Indent = true;
             setting.NewLineOnAttributes = false;

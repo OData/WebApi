@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.RegularExpressions;
@@ -133,47 +134,64 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
                 collection.Elements.Select(e => ((IEdmPathExpression) e).PathSegments.Single()));
         }
 
-        [Fact]
-        public async Task JsonWithDifferentMetadataLevelsHaveSameETagsTest()
+        [Theory]
+        [InlineData("application/json")] // default metadata level
+        [InlineData("application/json;odata.metadata=full")]
+        [InlineData("application/json;odata.metadata=minimal")]
+        public async Task JsonWithDifferentMetadataLevelsHaveSameETagsTest(string metadataLevel)
         {
             string requestUri = this.BaseAddress + "/odata/ETagsCustomers";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json");
+            request.Headers.Accept.ParseAdd(metadataLevel);
             HttpResponseMessage response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
             var jsonResult = await response.Content.ReadAsObject<JObject>();
-            var jsonETags = jsonResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
-            Assert.Equal(jsonETags.Count(), jsonETags.Distinct().Count());
+            var jsonValue = jsonResult.GetValue("value") as JArray;
+            Assert.Equal(10, jsonValue.Count);
 
-            requestUri = this.BaseAddress + "/odata/ETagsCustomers";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json;odata=nometadata");
-            response = await this.Client.SendAsync(request);
-            Assert.True(response.IsSuccessStatusCode);
-            var jsonWithNometadataResult = await response.Content.ReadAsObject<JObject>();
-            var jsonWithNometadataETags = jsonWithNometadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
-            Assert.Equal(jsonWithNometadataETags.Count(), jsonWithNometadataETags.Distinct().Count());
-            Assert.Equal(jsonETags, jsonWithNometadataETags);
+            var expectedEtags = new Dictionary<string, string>
+            {
+                // { "0", ",MA==,Mi4w," }, // DeleteUpdatedEntryWithIfMatchETagsTests will change #"0" customer
+                // { "1", ",MA==,NC4w," }, // PutUpdatedEntryWithIfMatchETagsTests will change #"1"customer
+                // { "2", ",MA==,Ni4w," }, // PatchUpdatedEntryWithIfMatchETagsTest will change #"2" cusotmer
+                { "3", ",MA==,OC4w," },
+                { "4", ",MA==,MTAuMA==," },
+                { "5", ",MA==,MTIuMA==," },
+                { "6", ",MA==,MTQuMA==," },
+                { "7", ",MA==,MTYuMA==," },
+                { "8", ",MA==,MTguMA==," },
+                { "9", ",MA==,MjAuMA==," },
+            };
 
-            requestUri = this.BaseAddress + "/odata/ETagsCustomers";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json;odata=fullmetadata");
-            response = await this.Client.SendAsync(request);
-            Assert.True(response.IsSuccessStatusCode);
-            var jsonWithFullmetadataResult = await response.Content.ReadAsObject<JObject>();
-            var jsonWithFullmetadataETags = jsonWithFullmetadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
-            Assert.Equal(jsonWithFullmetadataETags.Count(), jsonWithFullmetadataETags.Distinct().Count());
-            Assert.Equal(jsonETags, jsonWithFullmetadataETags);
+            var jsonETags = jsonValue.Select(e => e["@odata.etag"]);
+            foreach (var etag in jsonValue)
+            {
+                string key = etag["Id"].ToString();
+                if (expectedEtags.TryGetValue(key, out string etagValue))
+                {
+                    Assert.Contains(etagValue, etag["@odata.etag"].ToString());
+                }
+            }
+        }
 
-            requestUri = this.BaseAddress + "/odata/ETagsCustomers";
-            request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-            request.Headers.Accept.ParseAdd("application/json;odata=minimalmetadata");
-            response = await this.Client.SendAsync(request);
+        [Fact]
+        public async Task JsonWithNoneMetadataLevelsNotIncludeETags()
+        {
+            string requestUri = this.BaseAddress + "/odata/ETagsCustomers";
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            request.Headers.Accept.ParseAdd("application/json;odata.metadata=none");
+            HttpResponseMessage response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
-            var jsonWithMinimalmetadataResult = await response.Content.ReadAsObject<JObject>();
-            var jsonWithMinimalmetadataETags = jsonWithMinimalmetadataResult.GetValue("value").Select(e => e["@odata.etag"].ToString());
-            Assert.Equal(jsonWithMinimalmetadataETags.Count(), jsonWithMinimalmetadataETags.Distinct().Count());
-            Assert.Equal(jsonETags, jsonWithMinimalmetadataETags);
+            var jsonResult = await response.Content.ReadAsObject<JObject>();
+            var jsonValue = jsonResult.GetValue("value") as JArray;
+            Assert.Equal(10, jsonValue.Count());
+
+            foreach (var item in jsonValue)
+            {
+                JObject itemObject = item as JObject;
+                Assert.NotNull(itemObject);
+                Assert.DoesNotContain("@odata.etag", itemObject.Properties().Select(p => p.Name));
+            }
         }
     }
 }

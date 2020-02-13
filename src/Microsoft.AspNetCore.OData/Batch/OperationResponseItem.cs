@@ -34,31 +34,18 @@ namespace Microsoft.AspNet.OData.Batch
         public HttpContext Context { get; private set; }
 
         /// <summary>
-        /// Writes the response as an Operation Synchronously.
-        /// </summary>
-        /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public override void WriteResponse(ODataBatchWriter writer)
-        {
-            if (writer == null)
-            {
-                throw Error.ArgumentNull("writer");
-            }
-
-            WriteMessage(writer, Context);
-        }
-
-        /// <summary>
         /// Writes the response as an Operation.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public override Task WriteResponseAsync(ODataBatchWriter writer)
+        /// <param name="asyncWriter">Whether or not the writer is in async mode. </param>
+        public override Task WriteResponseAsync(ODataBatchWriter writer, bool asyncWriter)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
 
-            return WriteMessageAsync(writer, Context);
+            return WriteMessageAsync(writer, Context, asyncWriter);
         }
 
         /// <summary>

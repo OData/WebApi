@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             foreach (ODataBatchResponseItem response in Responses)
             {
-                await response.WriteResponseAsync(writer);
+                await response.WriteResponseAsync(writer, /*asyncWriter*/ true);
             }
 
             await writer.WriteEndBatchAsync();

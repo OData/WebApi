@@ -35,16 +35,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteResponse_NullWriter_Throws()
-        {
-            OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage());
-
-            ExceptionAssert.ThrowsArgumentNull(
-                () => responseItem.WriteResponse(null),
-                "writer");
-        }
-
-        [Fact]
         public async Task WriteResponseAsync_NullWriter_Throws()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage());
@@ -55,7 +45,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteResponse_WritesOperation()
+        public async Task WriteResponseAsync_SynchronouslyWritesOperation()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.Accepted));
             MemoryStream memoryStream = new MemoryStream();
@@ -64,7 +54,8 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
-            responseItem.WriteResponse(batchWriter);
+            // For backward compatibility, default is to write to use a synchronous batchWriter.
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
 
             batchWriter.WriteEndBatch();
             memoryStream.Position = 0;
@@ -74,7 +65,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public async Task WriteResponseAsync_WritesOperation()
+        public async Task WriteResponseAsync_AsynchronouslyWritesOperation()
         {
             OperationResponseItem responseItem = new OperationResponseItem(new HttpResponseMessage(HttpStatusCode.Accepted));
             MemoryStream memoryStream = new MemoryStream();
@@ -83,7 +74,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = await writer.CreateODataBatchWriterAsync();
             await batchWriter.WriteStartBatchAsync();
 
-            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None, /*writeAsync*/ true);
 
             await batchWriter.WriteEndBatchAsync();
             memoryStream.Position = 0;

@@ -27,19 +27,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteMessage_NullResponse_Throws()
-        {
-            HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
-            content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
-            IODataResponseMessage odataResponse = ODataMessageWrapperHelper.Create(new MemoryStream(), content.Headers);
-            ODataMessageWriter messageWriter = new ODataMessageWriter(odataResponse);
-
-            ExceptionAssert.ThrowsArgumentNull(
-                () => ODataBatchResponseItem.WriteMessage(messageWriter.CreateODataBatchWriter(), null),
-                "response");
-        }
-
-        [Fact]
         public async Task WriteMessageAsync_NullResponse_Throws()
         {
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
@@ -53,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public void WriteMessage_WritesResponseMessage()
+        public async Task WriteMessage_SynchronouslyWritesResponseMessage()
         {
             MemoryStream ms = new MemoryStream();
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
@@ -67,7 +54,8 @@ namespace Microsoft.AspNet.OData.Test.Batch
             response.Headers.Add("customHeader", "bar");
 
             batchWriter.WriteStartBatch();
-            ODataBatchResponseItem.WriteMessage(batchWriter, response);
+            // For backward compatibility, default is to write to a synchronous batchWriter
+            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None);
             batchWriter.WriteEndBatch();
 
             ms.Position = 0;
@@ -80,7 +68,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public async Task WriteMessageAsync_WritesResponseMessage()
+        public async Task WriteMessageAsync_AsynchronouslyWritesResponseMessage()
         {
             MemoryStream ms = new MemoryStream();
             HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
@@ -94,7 +82,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             response.Headers.Add("customHeader", "bar");
 
             await batchWriter.WriteStartBatchAsync();
-            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None);
+            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None, /*asyncWriter*/ true);
             await batchWriter.WriteEndBatchAsync();
 
             ms.Position = 0;
@@ -104,6 +92,38 @@ namespace Microsoft.AspNet.OData.Test.Batch
             Assert.Contains("text/example", result);
             Assert.Contains("customHeader", result);
             Assert.Contains("bar", result);
+        }
+
+        [Fact]
+        public async Task WriteMessageAsync_SynchronousResponseContainsContentId_IfHasContentIdInRequestChangeSet()
+        {
+            MemoryStream ms = new MemoryStream();
+            HttpContent content = new StringContent(String.Empty, Encoding.UTF8, "multipart/mixed");
+            content.Headers.ContentType.Parameters.Add(new NameValueHeaderValue("boundary", Guid.NewGuid().ToString()));
+            IODataResponseMessage odataResponse = ODataMessageWrapperHelper.Create(ms, content.Headers);
+            var batchWriter = new ODataMessageWriter(odataResponse).CreateODataBatchWriter();
+            HttpResponseMessage response = new HttpResponseMessage
+            {
+                Content = new StringContent("any", Encoding.UTF8, "text/example")
+            };
+            var request = new HttpRequestMessage();
+            var contentId = Guid.NewGuid().ToString();
+            request.SetODataContentId(contentId);
+            response.RequestMessage = request;
+
+            batchWriter.WriteStartBatch();
+            batchWriter.WriteStartChangeset();
+            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None);
+            batchWriter.WriteEndChangeset();
+            batchWriter.WriteEndBatch();
+
+            ms.Position = 0;
+            string result = new StreamReader(ms).ReadToEnd();
+
+            Assert.Contains("any", result);
+            Assert.Contains("text/example", result);
+            Assert.Contains("Content-ID", result);
+            Assert.Contains(contentId, result);
         }
 
         [Fact]
@@ -125,7 +145,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
 
             await batchWriter.WriteStartBatchAsync();
             await batchWriter.WriteStartChangesetAsync();
-            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None);
+            await ODataBatchResponseItem.WriteMessageAsync(batchWriter, response, CancellationToken.None, /*asyncWriter*/ true);
             await batchWriter.WriteEndChangesetAsync();
             await batchWriter.WriteEndBatchAsync();
 

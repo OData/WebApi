@@ -11,6 +11,13 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OData.Edm;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using System;
+using System.Runtime.InteropServices.ComTypes;
+using Microsoft.AspNetCore.Http;
+using Microsoft.OData;
+using System.Collections.Generic;
+using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace AspNetCore3xEndpointSample.Web
 {
@@ -47,7 +54,15 @@ namespace AspNetCore3xEndpointSample.Web
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapODataRoute("nullPrefix", null, model);
+                endpoints.MapODataRoute(
+                    "nullPrefix", null,
+                    b =>
+                    {
+                        b.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
+                        b.AddService<ODataDeserializerProvider>(Microsoft.OData.ServiceLifetime.Singleton, sp => new EntityReferenceODataDeserializerProvider(sp));
+                        b.AddService<IEnumerable<IODataRoutingConvention>>(Microsoft.OData.ServiceLifetime.Singleton,
+                            sp => ODataRoutingConventions.CreateDefaultWithAttributeRouting("nullPrefix", endpoints.ServiceProvider));
+                    });
 
                 endpoints.MapODataRoute("odataPrefix", "odata", model);
 
@@ -55,6 +70,25 @@ namespace AspNetCore3xEndpointSample.Web
 
                 endpoints.MapODataRoute("msPrefix", "ms", model, new DefaultODataBatchHandler());
             });
+        }
+    }
+
+    public class EntityReferenceODataDeserializerProvider : DefaultODataDeserializerProvider
+    {
+        public EntityReferenceODataDeserializerProvider(IServiceProvider rootContainer)
+            : base(rootContainer)
+        {
+
+        }
+
+        public override ODataEdmTypeDeserializer GetEdmTypeDeserializer(IEdmTypeReference edmType)
+        {
+            return base.GetEdmTypeDeserializer(edmType);
+        }
+
+        public override ODataDeserializer GetODataDeserializer(Type type, HttpRequest request)
+        {
+            return base.GetODataDeserializer(type, request);
         }
     }
 }

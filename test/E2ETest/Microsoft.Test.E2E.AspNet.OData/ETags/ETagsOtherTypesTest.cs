@@ -68,20 +68,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
                 var result = json.GetValue("value") as JArray;
                 Assert.NotNull(result);
 
-                // check the first
-                eTag = result[2]["@odata.etag"].ToString();
+                // check the first unchanged,
+                // because #0, #1, #2 will change potentially running in parallel by other tests.
+                eTag = result[3]["@odata.etag"].ToString();
                 Assert.False(String.IsNullOrEmpty(eTag));
-                Assert.Equal("W/\"Ni4w\"", eTag);
+                Assert.Equal("W/\"OC4w\"", eTag);
 
                 EntityTagHeaderValue parsedValue;
                 Assert.True(EntityTagHeaderValue.TryParse(eTag, out parsedValue));
                 IDictionary<string, object> tags = this.ParseETag(parsedValue);
                 KeyValuePair<string, object> pair = Assert.Single(tags);
                 Single value = Assert.IsType<Single>(pair.Value);
-                Assert.Equal((Single)6.0, value);
+                Assert.Equal((Single)8.0, value);
             }
 
-            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/double/ETagsCustomers(2)");
+            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/double/ETagsCustomers(3)");
             getRequestWithEtag.Headers.IfNoneMatch.ParseAdd(eTag);
             using (var response = await Client.SendAsync(getRequestWithEtag))
             {
@@ -103,20 +104,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
                 var result = json.GetValue("value") as JArray;
                 Assert.NotNull(result);
 
-                // check the second
-                eTag = result[1]["@odata.etag"].ToString();
+                // check the first unchanged,
+                // because #0, #1, #2 will change potentially running in parallel by other tests.
+                eTag = result[3]["@odata.etag"].ToString();
                 Assert.False(String.IsNullOrEmpty(eTag));
-                Assert.Equal("W/\"MzI3NjY=\"", eTag);
+                Assert.Equal("W/\"MzI3NjQ=\"", eTag);
 
                 EntityTagHeaderValue parsedValue;
                 Assert.True(EntityTagHeaderValue.TryParse(eTag, out parsedValue));
                 IDictionary<string, object> tags = this.ParseETag(parsedValue);
                 KeyValuePair<string, object> pair = Assert.Single(tags);
                 int value = Assert.IsType<int>(pair.Value);
-                Assert.Equal((short)32766, value);
+                Assert.Equal((short)32764, value);
             }
 
-            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/short/ETagsCustomers(1)");
+            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/short/ETagsCustomers(3)");
             getRequestWithEtag.Headers.IfNoneMatch.ParseAdd(eTag);
             using (var response = await Client.SendAsync(getRequestWithEtag))
             {

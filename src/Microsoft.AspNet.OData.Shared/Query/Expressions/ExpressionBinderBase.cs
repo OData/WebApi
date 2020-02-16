@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     /// </summary>
     public abstract class ExpressionBinderBase
     {
-        internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string), typeof(StringComparison) });
+        internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) });
         internal static readonly MethodInfo GuidCompareMethodInfo = typeof(ExpressionBinderBase).GetMethod("GuidCompare", new[] { typeof(Guid), typeof(Guid) });
         internal static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
@@ -37,7 +37,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal static readonly Expression FalseConstant = Expression.Constant(false);
         internal static readonly Expression TrueConstant = Expression.Constant(true);
         internal static readonly Expression ZeroConstant = Expression.Constant(0);
-        internal static readonly Expression OrdinalStringComparisonConstant = Expression.Constant(StringComparison.Ordinal);
 
         internal static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
                         .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
@@ -160,7 +159,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 right = ToNullable(right);
             }
 
-            if ((left.Type == typeof(Guid) || right.Type == typeof(Guid)))
+            if (left.Type == typeof(Guid) || right.Type == typeof(Guid))
             {
                 left = ConvertNull(left, typeof(Guid));
                 right = ConvertNull(right, typeof(Guid));
@@ -192,7 +191,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     case BinaryOperatorKind.GreaterThanOrEqual:
                     case BinaryOperatorKind.LessThan:
                     case BinaryOperatorKind.LessThanOrEqual:
-                        left = Expression.Call(StringCompareMethodInfo, left, right, OrdinalStringComparisonConstant);
+                        left = Expression.Call(StringCompareMethodInfo, left, right);
                         right = ZeroConstant;
                         break;
                     default:

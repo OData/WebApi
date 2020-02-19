@@ -110,6 +110,8 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 return new ODataEndpointLinkGenerator((LinkGenerator)s.GetRequiredService(linkGenerator.ImplementationType));
             });
+
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, ODataDynamicControllerEndpointMatcherPolicy>());
 #endif
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed

@@ -44,11 +44,6 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("defaultQuerySettings");
             }
 
-            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
-            {
-                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
-            }
-
             DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
             if (querySettings == null)
             {
@@ -91,10 +86,6 @@ namespace Microsoft.AspNet.OData.Extensions
 
             DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
             defaultQuerySettings.MaxTop = maxTopValue;
-            if (!maxTopValue.HasValue || maxTopValue > 0)
-            {
-                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = maxTopValue;
-            }
 
             return builder;
         }

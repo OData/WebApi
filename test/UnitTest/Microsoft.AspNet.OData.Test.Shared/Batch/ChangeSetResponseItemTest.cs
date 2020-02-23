@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
-        public async Task WriteResponseAsync_WritesChangeSet()
+        public async Task WriteResponse_SynchronouslyWritesChangeSet()
         {
             HttpResponseMessage[] responses = new HttpResponseMessage[]
                 {
@@ -60,9 +60,36 @@ namespace Microsoft.AspNet.OData.Test.Batch
             ODataBatchWriter batchWriter = writer.CreateODataBatchWriter();
             batchWriter.WriteStartBatch();
 
+            // For backward compatibility, default is to assume a synchronous batch writer
             await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None);
 
             batchWriter.WriteEndBatch();
+            memoryStream.Position = 0;
+            string responseString = new StreamReader(memoryStream).ReadToEnd();
+
+            Assert.Contains("changesetresponse", responseString);
+            Assert.Contains("Accepted", responseString);
+            Assert.Contains("No Content", responseString);
+        }
+
+        [Fact]
+        public async Task WriteResponseAsync_WritesChangeSet()
+        {
+            HttpResponseMessage[] responses = new HttpResponseMessage[]
+                {
+                    new HttpResponseMessage(HttpStatusCode.Accepted),
+                    new HttpResponseMessage(HttpStatusCode.NoContent)
+                };
+            ChangeSetResponseItem responseItem = new ChangeSetResponseItem(responses);
+            MemoryStream memoryStream = new MemoryStream();
+            IODataResponseMessage responseMessage = new ODataMessageWrapper(memoryStream);
+            ODataMessageWriter writer = new ODataMessageWriter(responseMessage);
+            ODataBatchWriter batchWriter = await writer.CreateODataBatchWriterAsync();
+            await batchWriter.WriteStartBatchAsync();
+
+            await responseItem.WriteResponseAsync(batchWriter, CancellationToken.None, /*asyncWriter*/ true);
+
+            await batchWriter.WriteEndBatchAsync();
             memoryStream.Position = 0;
             string responseString = new StreamReader(memoryStream).ReadToEnd();
 

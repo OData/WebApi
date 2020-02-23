@@ -39,21 +39,36 @@ namespace Microsoft.AspNet.OData.Batch
         /// Writes the responses as a ChangeSet.
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
-        public override async Task WriteResponseAsync(ODataBatchWriter writer)
+        /// <param name="asyncWriter">Whether or not the writer is in async mode. </param>
+        public override async Task WriteResponseAsync(ODataBatchWriter writer, bool asyncWriter)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
 
-            writer.WriteStartChangeset();
-
-            foreach (HttpContext context in Contexts)
+            if (asyncWriter)
             {
-                await WriteMessageAsync(writer, context);
-            }
+                await writer.WriteStartChangesetAsync();
 
-            writer.WriteEndChangeset();
+                foreach (HttpContext context in Contexts)
+                {
+                    await WriteMessageAsync(writer, context, asyncWriter);
+                }
+
+                await writer.WriteEndChangesetAsync();
+            }
+            else
+            {
+                writer.WriteStartChangeset();
+
+                foreach (HttpContext context in Contexts)
+                {
+                    await WriteMessageAsync(writer, context, asyncWriter);
+                }
+
+                writer.WriteEndChangeset();
+            }
         }
 
         /// <summary>

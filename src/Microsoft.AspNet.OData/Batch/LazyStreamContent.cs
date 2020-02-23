@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Batch
 
         protected override Task SerializeToStreamAsync(Stream stream, TransportContext context)
         {
-            return StreamContent.CopyToAsync(stream, context);
+            return StreamContent.CopyToAsync(stream, context).ContinueWith((Task)=>StreamContent.Dispose());
         }
 
         protected override bool TryComputeLength(out long length)

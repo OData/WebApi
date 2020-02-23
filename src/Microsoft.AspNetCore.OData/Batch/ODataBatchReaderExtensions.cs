@@ -232,7 +232,8 @@ namespace Microsoft.AspNet.OData.Batch
 
             // Create a response body as the default response feature does not
             // have a valid stream.
-            context.Response.Body = new MemoryStream();
+            // Use a special batch stream that remains open after the writer is disposed.
+            context.Response.Body = new ODataBatchStream();
 
             return context;
         }

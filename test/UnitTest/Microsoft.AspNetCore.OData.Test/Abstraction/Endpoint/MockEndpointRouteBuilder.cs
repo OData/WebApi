@@ -11,7 +11,6 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 {
     /// <summary>
     /// A class to Mock <see cref="IEndpointRouteBuilder"/>.
-    /// The codes are copied from ASPNETCORE.
     /// </summary>
     public class MockEndpointRouteBuilder : IEndpointRouteBuilder
     {

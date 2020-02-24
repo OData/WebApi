@@ -75,7 +75,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
         // Noted: simple workaround to bind the value for the prefix template
         // Shold replace it using the standard ASP.NET Core way later.
-        private static string BindPrefixTemplate(string prefix, RouteValueDictionary values, RouteValueDictionary ambientValues)
+        internal static string BindPrefixTemplate(string prefix, RouteValueDictionary values, RouteValueDictionary ambientValues)
         {
             IList<string> templates = new List<string>();
             int startIndex = 0;

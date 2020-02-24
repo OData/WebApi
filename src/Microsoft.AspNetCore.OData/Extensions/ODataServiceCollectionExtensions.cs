@@ -12,9 +12,6 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
-#if NETCOREAPP3_1
-using Microsoft.AspNetCore.Routing.Matching;
-#endif
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -91,15 +88,8 @@ namespace Microsoft.AspNet.OData.Extensions
 
             services.AddSingleton<ODataEndpointRouteValueTransformer>();
 
-            // EndpointSelector
-            var endpointSelector = services.First(s => s.ServiceType == typeof(EndpointSelector) && s.ImplementationType != null);
-            services.Remove(endpointSelector);
-            services.Add(new ServiceDescriptor(endpointSelector.ImplementationType, endpointSelector.ImplementationType, ServiceLifetime.Singleton));
-
-            services.AddSingleton<EndpointSelector>(s =>
-            {
-                return new ODataEndpointSelector((EndpointSelector)s.GetRequiredService(endpointSelector.ImplementationType));
-            });
+            // OData Endpoint selector policy
+            services.AddSingleton<MatcherPolicy, ODataEndpointSelectorPolicy>();
 
             // LinkGenerator
             var linkGenerator = services.First(s => s.ServiceType == typeof(LinkGenerator) && s.ImplementationType != null);
@@ -110,8 +100,6 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 return new ODataEndpointLinkGenerator((LinkGenerator)s.GetRequiredService(linkGenerator.ImplementationType));
             });
-
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<MatcherPolicy, ODataDynamicControllerEndpointMatcherPolicy>());
 #endif
 
             // Add the ActionContextAccessor; this allows access to the ActionContext which is needed

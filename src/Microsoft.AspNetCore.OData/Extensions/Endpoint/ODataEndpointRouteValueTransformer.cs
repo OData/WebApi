@@ -44,12 +44,12 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (httpContext == null)
             {
-                throw Error.ArgumentNull("httpContext");
+                throw Error.ArgumentNull(nameof(httpContext));
             }
 
             if (values == null)
             {
-                throw Error.ArgumentNull("values");
+                throw Error.ArgumentNull(nameof(values));
             }
 
             if (httpContext.ODataFeature().Path != null)

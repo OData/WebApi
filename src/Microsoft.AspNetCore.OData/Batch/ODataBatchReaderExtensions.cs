@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
@@ -140,9 +142,21 @@ namespace Microsoft.AspNet.OData.Batch
 
             foreach (var header in batchRequest.Headers)
             {
-                // Copy headers from batch, overwriting any existing headers.
                 string headerName = header.Key;
                 string headerValue = header.Value;
+
+                if (headerName.Trim().ToLowerInvariant() == "prefer")
+                {
+                    // in the case of Prefer header, we don't want to overwrite,
+                    // instead we merge preferences defined in the individual request with those inherited from the batch
+                    request.Headers.TryGetValue(headerName, out StringValues batchPreferencesList);
+                    string batchPreferences = batchPreferencesList.FirstOrDefault();
+                    // TODO: what if multiple Prefer headers are defined on the request?
+                    request.Headers[headerName] = MergeIndividualAndBatchPreferences(headerValue, batchPreferences);
+                    continue;
+                }
+
+                // Copy headers from batch, overwriting any existing headers.
                 request.Headers[headerName] = headerValue;
             }
 
@@ -234,6 +248,23 @@ namespace Microsoft.AspNet.OData.Batch
             context.Request.Cookies = originalContext.Request.Cookies;
             foreach (KeyValuePair<string, StringValues> header in originalContext.Request.Headers)
             {
+                var headerKey = header.Key.ToLowerInvariant();
+                // do not copy over headers that should not be inherited from batch to individual requests
+                if (headerKey == "content-length" ||
+                    headerKey == "content-type")
+                {
+                    continue;
+                }
+                // some preferences may be inherited, others discarded
+                if (headerKey == "prefer")
+                {
+                    var preferencesToInherit = GetPreferencesToInheritFromBatch(header.Value);
+                    if (!string.IsNullOrEmpty(preferencesToInherit))
+                    {
+                        context.Request.Headers.Add(header.Key, preferencesToInherit);
+                    }
+                    continue;
+                }
                 context.Request.Headers.Add(header);
             }
 
@@ -243,6 +274,56 @@ namespace Microsoft.AspNet.OData.Batch
             context.Response.Body = new ODataBatchStream();
 
             return context;
+        }
+
+        /// <summary>
+        /// Extract preferences that can be inherited from the overall batch request to
+        /// an individual request.
+        /// </summary>
+        /// <param name="batchPreferences">The value of the Prefer header from the batch request</param>
+        /// <returns>comma-separated preferences that can be passed down to an individual request</returns>
+        private static string GetPreferencesToInheritFromBatch(string batchPreferences)
+        {
+            // do not inherit respond-async and continue-on-error (odata.continue-on-error in OData 4.0)
+            var preferencesToIgnore = new string[] { "respond-async", "continue-on-error", "odata.continue-on-error" };
+            var preferencesToInherit = batchPreferences.Split(',')
+                .Where(value => 
+                !preferencesToIgnore.Any(
+                    prefToIgnore => value.Trim().ToLowerInvariant().StartsWith(prefToIgnore)))
+                .Select(value => value.Trim());
+            return string.Join(", ", preferencesToInherit);
+        }
+
+        /// <summary>
+        /// Merges the preferences from the batch request and an individual request inside the batch into one value.
+        /// If a given preference is defined in both the batch and individual request, the one from the individual
+        /// request is retained and the one from the batch is discarded.
+        /// </summary>
+        /// <param name="individualPreferences">The value of the Prefer header from the individual request inside the batch</param>
+        /// <param name="batchPreferences">The value of the Prefer header from the overall batch request</param>
+        /// <returns>Value containing the combined preferences</returns>
+        private static string MergeIndividualAndBatchPreferences(string individualPreferences, string batchPreferences)
+        {
+            if (string.IsNullOrEmpty(individualPreferences))
+            {
+                return batchPreferences;
+            }
+            if (string.IsNullOrEmpty(batchPreferences))
+            {
+                return individualPreferences;
+            }
+            var initialPreferences = new StringBuilder(individualPreferences);
+            // get the name of each preference to avoid adding duplicates from batch
+            var individualList = individualPreferences.Split(',').Select(pref => pref.Trim());
+            var individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
+            
+            
+            var filteredBatchList = batchPreferences.Split(',').Select(pref => pref.Trim())
+                // do not add duplicate preferences from batch
+                .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
+            var filteredBatchPreferences = string.Join(", ", filteredBatchList);
+
+            return string.Join(", ", individualPreferences, filteredBatchPreferences);
         }
     }
 }

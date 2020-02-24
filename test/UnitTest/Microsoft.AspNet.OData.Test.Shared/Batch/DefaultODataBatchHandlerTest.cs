@@ -543,8 +543,81 @@ Accept-Charset: UTF-8
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
 
-        [Fact]
-        public async Task ProcessBatchAsync_DoesNotCopyContentHeadersToGetAndDelete()
+        public static TheoryDataSet<Dictionary<string, string>, (string, string, string)> BatchHeadersTestData
+        {
+            get
+            {
+                return new TheoryDataSet<Dictionary<string, string>, (string, string, string)>()
+                {
+                    {
+                        // should not copy over content type and content length headers to individual request
+                        new Dictionary<string, string>(),
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+                        )
+                    },
+                    {
+                        // should not copy over preferences that should not be inherited
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", "respond-async, odata.continue-on-error" }
+                        },
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+                        )
+                    },
+                    {
+                        // inheritable preferences should be copied over
+                        // and combined to individual request's own preferences if any
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", "allow-entityreferences, include-annotations=\"display.*\"" }
+                        },
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                        )
+                    },
+                    {
+                        // if batch Prefer header contains both inheritable and non-inheritable preferences,
+                        // the non-inheritable ones should be removed before merging with individual request's own preferences
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error" }
+                        },
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                        )
+                    },
+                    {
+                        // if batch and individual request define the same preference, then the one from the individual request should be retained
+                        // if batch Prefer header contains both inheritable and non-inheritable preferences,
+                        // the non-inheritable ones should be removed before merging with individual request's own preferences
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200" }
+                        },
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                        )
+                    }
+                };
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(BatchHeadersTestData))]
+        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(IDictionary<string, string> batchHeaders,
+            (string getRequest, string deleteRequest, string postRequest) expectedHeaders)
         {
             var batchRef = $"batch_{Guid.NewGuid()}";
             var changesetRef = $"changeset_{Guid.NewGuid()}";
@@ -567,6 +640,10 @@ Accept-Charset: UTF-8
 
             var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
             batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            foreach (var item in batchHeaders)
+            {
+                batchRequest.Headers.Add(item.Key, item.Value);
+            }
             var batchContent = $@"
 --{batchRef}
 Content-Type: application/http
@@ -588,6 +665,7 @@ OData-Version: 4.0
 OData-MaxVersion: 4.0
 Accept: application/json;odata.metadata=minimal
 Accept-Charset: UTF-8
+Prefer: wait=100, handling=lenient
 
 
 --{batchRef}
@@ -614,9 +692,9 @@ Accept-Charset: UTF-8
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.Contains("POST,text/plain; charset=utf-8,3", responseContent);
-            Assert.Contains("GET,,", responseContent);
-            Assert.Contains("DELETE,,", responseContent);
+            Assert.Contains(expectedHeaders.postRequest, responseContent);
+            Assert.Contains(expectedHeaders.getRequest, responseContent);
+            Assert.Contains(expectedHeaders.deleteRequest, responseContent);
         }
 #endif
     }
@@ -729,17 +807,20 @@ Accept-Charset: UTF-8
     {
         public string Get()
         {
-            return $"GET,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+            return $"GET,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
+                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
         }
 
         public string Delete(int key)
         {
-            return $"DELETE,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+            return $"DELETE,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
+                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
         }
 
         public string Post()
         {
-            return $"POST,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+            return $"POST,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
+                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
         }
 
     }

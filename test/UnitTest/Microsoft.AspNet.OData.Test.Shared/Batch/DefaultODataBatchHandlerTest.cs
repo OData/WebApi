@@ -199,6 +199,42 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
 
         [Fact]
+        public async Task ProcessBatchAsync_DoesNotCopyContentHeadersToGetAndDelete()
+        {
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                string responseContent = $"{request.Method},{request.Content?.Headers.ContentLength},{request.Content?.Headers.ContentType}";
+                return new HttpResponseMessage { Content = new StringContent(responseContent) };
+            });
+            DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Delete, "http://example.com/")),
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                    {
+                        Content = new StringContent("bar")
+                    }),
+                }
+            };
+            batchRequest.EnableHttpDependencyInjectionSupport();
+
+            var response = await batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None);
+            var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
+            var subResponses = batchContent.Responses.ToArray();
+            var getResponse = (OperationResponseItem)subResponses[0];
+            var deleteResponse = (OperationResponseItem)subResponses[1];
+            var postResponse = (OperationResponseItem)subResponses[2];
+
+            Assert.Equal(3, subResponses.Length);
+            Assert.Equal("GET,0,", await getResponse.Response.Content.ReadAsStringAsync());
+            Assert.Equal("DELETE,0,", await deleteResponse.Response.Content.ReadAsStringAsync());
+            Assert.Equal("POST,3,text/plain; charset=utf-8", await postResponse.Response.Content.ReadAsStringAsync());
+        }
+
+        [Fact]
         public async Task ExecuteRequestMessagesAsync_CallsInvokerForEachRequest()
         {
             MockHttpServer server = new MockHttpServer(async request =>
@@ -424,14 +460,14 @@ namespace Microsoft.AspNet.OData.Test.Batch
                 (await errorResponse.Response.Content.ReadAsAsync<HttpError>()).Message);
         }
 #else
- 
+
         [Fact]
         public async Task SendAsync_Works_ForBatchRequestWithInsertedEntityReferencedInAnotherRequest()
         {
             const string acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
             const string acceptJson = "application/json";
 
-            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
+            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController), typeof(BatchTestOrdersController), };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 var builder = ODataConventionModelBuilderFactory.Create(config);
@@ -505,6 +541,82 @@ Accept-Charset: UTF-8
             var customer = JsonConvert.DeserializeObject<BatchTestCustomer>(objAsJsonString);
 
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
+        }
+
+        [Fact]
+        public async Task ProcessBatchAsync_DoesNotCopyContentHeadersToGetAndDelete()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+            var acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
+            var postPayload = "Bar";
+
+            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController)};
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestHeadersCustomer>("BatchTestHeadersCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+                config.Expand();
+                config.EnableDependencyInjection();
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestHeadersCustomers HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+
+
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+DELETE {endpoint}/BatchTestHeadersCustomers(1) HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+
+
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST {endpoint}/BatchTestHeadersCustomers HTTP/1.1
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Content-Type: text/plain; charset=utf-8
+Content-Length: {postPayload.Length}
+Accept: {acceptJsonFullMetadata}
+Accept-Charset: UTF-8
+
+{postPayload}
+--{batchRef}--
+";
+
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
+            httpContent.Headers.ContentLength = batchContent.Length;
+            batchRequest.Content = httpContent;
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.Contains("POST,text/plain; charset=utf-8,3", responseContent);
+            Assert.Contains("GET,,", responseContent);
+            Assert.Contains("DELETE,,", responseContent);
         }
 #endif
     }
@@ -612,4 +724,29 @@ Accept-Charset: UTF-8
             return Created(order);
         }
     }
+#if NETCORE
+    public class BatchTestHeadersCustomersController : TestODataController
+    {
+        public string Get()
+        {
+            return $"GET,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+        }
+
+        public string Delete(int key)
+        {
+            return $"DELETE,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+        }
+
+        public string Post()
+        {
+            return $"POST,{HttpContext.Request.ContentType},{HttpContext.Request.ContentLength}";
+        }
+
+    }
+
+    public class BatchTestHeadersCustomer
+    {
+        public int Id { get; set; }
+    }
+#endif
 }

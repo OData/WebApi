@@ -38,9 +38,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             var clientContext = new Client.Default.Container(new Uri(serviceRoot));
             clientContext.MergeOption = MergeOption.OverwriteChanges;
 
-            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
-            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
-
             var singer = await Task.Factory.FromAsync(clientContext.Singers.BeginExecute(null, null), (asyncResult) =>
             {
                 return clientContext.Singers.EndExecute(asyncResult).Where(s => s.ID == 0).Single();
@@ -68,10 +65,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             var clientContext = new Client.Default.Container(new Uri(serviceRoot));
             clientContext.MergeOption = MergeOption.OverwriteChanges;
 
-            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Singers/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
-            await clientContext.ExecuteAsync(new Uri(serviceRoot + "Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource"), "POST");
-
-            const int albumKey = 5;
+            const int albumKey = 0;
             var album = await Task.Factory.FromAsync(clientContext.Albums.BeginExecute(null, null), (asyncResult) =>
             {
                 return clientContext.Albums.EndExecute(asyncResult).Where(a => a.ID == albumKey).Single();

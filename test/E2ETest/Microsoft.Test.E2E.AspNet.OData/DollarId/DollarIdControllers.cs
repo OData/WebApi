@@ -7,30 +7,26 @@ using System.Net;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarId
 {
     public class SingersController : TestODataController
     {
-        public static List<Singer> Singers;
-
-        static SingersController()
-        {
-            InitData();
-        }
-
-        private static void InitData()
-        {
-            Singers = Enumerable.Range(0, 5).Select(i =>
-                   new Singer()
-                   {
-                       ID = i,
-                       Name = string.Format("Name {0}", i)
-                   }).ToList();
-            var singer = Singers.Single(s => s.ID == 0);
-            singer.Albums = new List<Album>();
-            singer.Albums.AddRange(AlbumsController.Albums.Take(3));
-        }
+        // #0  For DollarIdClientTest
+        // #1  For DollarIdTest
+        public static List<Singer> Singers = Enumerable.Range(0, 2).Select(i =>
+            new Singer()
+            {
+                ID = i,
+                Name = string.Format("Name {0}", i),
+                Albums = new List<Album>
+                {
+                    new Album { ID = 0 },
+                    new Album { ID = 1 },
+                    new Album { ID = 2 }
+                }
+            }).ToList();
 
         #region Actions
 
@@ -65,50 +61,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             return StatusCode(HttpStatusCode.NoContent);
         }
 
-        [HttpPost]
-        [ODataRoute("Singers/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource")]
-        public ITestActionResult ResetDataSourceOnCollectionOfSinger()
-        {
-            InitData();
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
         #endregion
     }
 
     public class AlbumsController : TestODataController
     {
-        public static List<Album> Albums;
-
-        static AlbumsController()
-        {
-            InitData();
-        }
-
-        private static void InitData()
-        {
-            Albums = Enumerable.Range(0, 10).Select(i =>
-                   new Album()
-                   {
-                       ID = i,
-                       Name = string.Format("Name {0}", i),
-                       Sales = new List<AreaSales>()
-                           {
-                               new AreaSales()
-                                   {
-                                       ID = 1 + i,
-                                       City = string.Format("City{0}", i),
-                                       Sales = 1000 * i
-                                   },
-                               new AreaSales()
-                                   {
-                                       ID = 2 + i,
-                                       City = string.Format("City{0}", i),
-                                       Sales = 2 * 1000 * i
-                                   }
-                           }
-                   }).ToList();
-        }
+        // #0  For DollarIdClientTest
+        // #1  For DollarIdTest
+        public static List<Album> Albums = Enumerable.Range(0, 2).Select(i =>
+            new Album()
+            {
+                ID = i,
+                Name = string.Format("Name {0}", i),
+                Sales = new List<AreaSales>()
+                {
+                    new AreaSales()
+                    {
+                        ID = 1 + i,
+                        City = string.Format("City{0}", i),
+                        Sales = 1000 * i
+                    },
+                    new AreaSales()
+                    {
+                        ID = 2 + i,
+                        City = string.Format("City{0}", i),
+                        Sales = 2 * 1000 * i
+                    }
+                }
+            }).ToList();
 
         [EnableQuery]
         public ITestActionResult Get()
@@ -126,10 +106,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         [EnableQuery]
         public ITestActionResult GetSingers(int key)
         {
-            if (Albums.SingleOrDefault(s => s.ID == key) == null)
-            {
-                return BadRequest();
-            }
+            Assert.Equal(3, key); // 3 is a magic test value from test case.
+
             IList<Singer> singers = new List<Singer>();
             singers.Add(new Singer()
             {
@@ -137,6 +115,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
                 Name = string.Format("Name101"),
                 MasterPiece="abc",
             });
+
             singers.Add(new Singer()
             {
                 ID = 102,
@@ -167,14 +146,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
             {
                 return StatusCode(HttpStatusCode.InternalServerError);
             }
-        }
-
-        [HttpPost]
-        [ODataRoute("Albums/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource")]
-        public ITestActionResult ResetDataSourceOnCollectionOfAlbum()
-        {
-            InitData();
-            return StatusCode(HttpStatusCode.NoContent);
         }
     }
 }

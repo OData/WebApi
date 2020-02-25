@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     [JsonConverter(typeof(DynamicTypeWrapperConverter))]
     internal class GroupByWrapper : DynamicTypeWrapper
     {
-        protected Dictionary<string, object> _values;
+        private Dictionary<string, object> _values;
         protected static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return (int)hash;
         }
 
-        protected virtual void EnsureValues()
+        private void EnsureValues()
         {
             if (_values == null)
             {
@@ -139,10 +139,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         public string ModelID { get; set; }
 
-        private bool _merged;
-        protected override void EnsureValues()
+        public override Dictionary<string, object> Values
         {
-            base.EnsureValues();
+            get
+            {
+                EnsureValues();
+                return base.Values;
+            }
+        }
+
+        private bool _merged;
+        private void EnsureValues()
+        {
             if (!this._merged)
             {
                 // Base properties available via Instance can be real OData properties or generated in previous transformations
@@ -151,7 +159,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 if (instanceContainer != null)
                 {
                     // Add proeprties generated in previous transformations to the collection
-                    _values.MergeWithReplace(instanceContainer.Values);
+                    base.Values.MergeWithReplace(instanceContainer.Values);
                 }
                 else
                 {
@@ -167,7 +175,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         object value;
                         if (_typedEdmEntityObject.TryGetPropertyValue(propertyName, out value))
                         {
-                            _values[propertyName] = value;
+                            base.Values[propertyName] = value;
                         }
                     }
                 }

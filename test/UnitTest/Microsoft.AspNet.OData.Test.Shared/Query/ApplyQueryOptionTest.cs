@@ -542,6 +542,14 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null}, {"MaxCityLen", 6 } },
                         }
                     },
+                    {
+                        "compute(length(Address/City) as CityLength)/groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity, CityLength with max as MaxCityLen))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"}, {"MaxCityLen", 7 } },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null}, {"MaxCityLen", 6 } },
+                        }
+                    },
                 };
             }
         }

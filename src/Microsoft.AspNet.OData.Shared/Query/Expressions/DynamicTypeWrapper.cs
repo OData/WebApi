@@ -165,15 +165,24 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 {
                     // Add real OData properties to the collection
                     // We need to use injected Model to real property names
-                    var edmType = GetEdmType() as IEdmEntityTypeReference;
-                    _typedEdmEntityObject = _typedEdmEntityObject ??
-                        new TypedEdmEntityObject(Instance, edmType, GetModel());
+                    var edmType = GetEdmType() as IEdmStructuredTypeReference;
+
+                    if (edmType is IEdmComplexTypeReference t)
+                    {
+                        _typedEdmStructuredObject = _typedEdmStructuredObject ??
+                        new TypedEdmComplexObject(Instance, t, GetModel());
+                    }
+                    else
+                    {
+                        _typedEdmStructuredObject = _typedEdmStructuredObject ??
+                        new TypedEdmEntityObject(Instance, edmType as IEdmEntityTypeReference, GetModel());
+                    }
 
                     var props = edmType.DeclaredStructuralProperties().Where(p => p.Type.IsPrimitive()).Select(p => p.Name);
                     foreach (var propertyName in props)
                     {
                         object value;
-                        if (_typedEdmEntityObject.TryGetPropertyValue(propertyName, out value))
+                        if (_typedEdmStructuredObject.TryGetPropertyValue(propertyName, out value))
                         {
                             base.Values[propertyName] = value;
                         }
@@ -182,7 +191,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 this._merged = true;
             }
         }
-        private TypedEdmEntityObject _typedEdmEntityObject;
+        private TypedEdmStructuredObject _typedEdmStructuredObject;
 
         private IEdmModel GetModel()
         {

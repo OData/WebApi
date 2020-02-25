@@ -8,7 +8,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
@@ -27,6 +26,8 @@ namespace Microsoft.AspNet.OData.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataBatchReaderExtensions
     {
+        private static readonly string[] NonInHeritableHeaders = new string[] { "content-length", "content-type" };
+
         /// <summary>
         /// Reads a ChangeSet request.
         /// </summary>
@@ -251,8 +252,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 var headerKey = header.Key.ToLowerInvariant();
                 // do not copy over headers that should not be inherited from batch to individual requests
-                if (headerKey == "content-length" ||
-                    headerKey == "content-type")
+                if (NonInHeritableHeaders.Contains(headerKey))
                 {
                     continue;
                 }

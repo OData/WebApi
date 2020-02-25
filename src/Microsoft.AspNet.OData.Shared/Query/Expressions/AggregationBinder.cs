@@ -219,7 +219,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 query = ExpressionHelpers.Select(query, flatLambda, this.ElementType);
 
                 // We applied flattening let .GroupBy know about it.
-                this.SetElementType(wrapperType, aggParam);
+                this.LambdaParameter =  aggParam;
             }
 
             return query;

@@ -20,12 +20,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             IEdmModel model) : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
-            this.SetElementType(elementType, Expression.Parameter(elementType, "$it"));
+            LambdaParameter = Expression.Parameter(elementType, "$it");
         }
 
-        protected Type ElementType { get; private set; }
-       
-        protected ParameterExpression LambdaParameter { get; private set; }
+        protected Type ElementType { get { return this.LambdaParameter.Type; } }
+
+        protected ParameterExpression LambdaParameter { get; set; }
 
         protected bool ClassicEF { get; private set; }
 
@@ -47,13 +47,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             var providerNS = query.Provider.GetType().Namespace;
             return (providerNS == HandleNullPropagationOptionHelper.ObjectContextQueryProviderNamespaceEF6
                 || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
-        }
-
-        protected void SetElementType(Type elementType, ParameterExpression lambdaParameter)
-        {
-            Contract.Assert(elementType == lambdaParameter.Type);
-            this.ElementType = elementType;
-            this.LambdaParameter = lambdaParameter;
         }
 
         protected void PreprocessQuery(IQueryable query)

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -33,26 +32,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         [Fact]
         public async Task DeleteNavigationLink()
         {
-            var requestBaseUri = this.BaseAddress + "/Singers(0)/Albums";
+            // For parallel running and no side effect, pay attention that key value is 1.
+            // And for this test cases only, we don't need to reset the data source because it's only run once.
+            var requestBaseUri = this.BaseAddress + "/Singers(1)/Albums";
 
-            await ResetDataSource("Singers");
-            await ResetDataSource("Albums");
-
-            //DELETE Singers(0)/Albums/$ref?$id=BaseAddress/Albums(0)
+            //DELETE Singers(1)/Albums/$ref?$id=BaseAddress/Albums(0)
             var response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id={0}/Albums(0)", this.BaseAddress));
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-            //GET Singers(0)/Albums
+            //GET Singers(1)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
             var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Equal<int>(2, result.Count);
 
-            //DELETE Singers(0)/Albums/$ref?$id=../../Albums(0)
+            //DELETE Singers(1)/Albums/$ref?$id=../../Albums(1)
             response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id=../../Albums(1)"));
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-            //GET Singers(0)/Albums
+            //GET Singers(1)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
             json = await response.Content.ReadAsObject<JObject>();
             result = json["value"] as JArray;
@@ -62,23 +60,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         [Fact]
         public async Task DeleteContainedNavigationLink()
         {
-            var requestBaseUri = this.BaseAddress + "/Albums(5)/Sales";
+            // For parallel running and no side effect, pay attention that key value is 1.
+            // And for this test cases only, we don't need to reset the data source because it's only run once.
+            var requestBaseUri = this.BaseAddress + "/Albums(1)/Sales";
 
-            await ResetDataSource("Singers");
-            await ResetDataSource("Albums");
-
-            var response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id={0}/Albums(5)/Sales(6)", this.BaseAddress));
+            var response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id={0}/Albums(1)/Sales(2)", this.BaseAddress));
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-            //GET Singers(0)/Albums
+            //GET Singers(1)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
             var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"] as JArray;
             Assert.Single(result);
 
-            response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id=../../Albums(5)/Sales(7)", this.BaseAddress));
+            response = await this.Client.DeleteAsync(string.Format(requestBaseUri + "/$ref?$id=../../Albums(1)/Sales(3)", this.BaseAddress));
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
+            //GET Singers(1)/Albums
             response = await this.Client.GetAsync(requestBaseUri);
             json = await response.Content.ReadAsObject<JObject>();
             result = json["value"] as JArray;
@@ -88,23 +86,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarId
         [Fact]
         public async Task GetSingersNameOfAlbum()
         {
-            var requestBaseUri = this.BaseAddress + "/Albums(5)/Microsoft.Test.E2E.AspNet.OData.DollarId.GetSingers()?$filter=MasterPiece eq 'def'&$select=Name";
+            // 3 is a magic test value and is verified at controller.
+            var requestBaseUri = this.BaseAddress + "/Albums(3)/Microsoft.Test.E2E.AspNet.OData.DollarId.GetSingers()?$filter=MasterPiece eq 'def'&$select=Name";
 
             var response = await this.Client.GetAsync(requestBaseUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            response = await this.Client.GetAsync(requestBaseUri);
             var json = await response.Content.ReadAsObject<JObject>();
             var result = json["value"];
             Assert.Equal("Name102", (string)result[0]["Name"]);
-        }
-
-        private async Task<HttpResponseMessage> ResetDataSource(string controller)
-        {
-            var uriReset = string.Format(this.BaseAddress + "/{0}/Microsoft.Test.E2E.AspNet.OData.DollarId.ResetDataSource", controller);
-            var response = await this.Client.PostAsync(uriReset, null);
-
-            return response;
         }
     }
 }

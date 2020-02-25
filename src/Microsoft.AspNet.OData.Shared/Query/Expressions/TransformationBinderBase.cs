@@ -15,18 +15,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 {
     internal class TransformationBinderBase : ExpressionBinderBase
     {
+
         internal TransformationBinderBase(ODataQuerySettings settings, IWebApiAssembliesResolver assembliesResolver, Type elementType,
             IEdmModel model) : base(model, assembliesResolver, settings)
         {
             Contract.Assert(elementType != null);
-            _elementType = elementType;
-
-            this._lambdaParameter = Expression.Parameter(this._elementType, "$it");
+            this.SetElementType(elementType, Expression.Parameter(elementType, "$it"));
         }
 
-        protected Type _elementType;
-        protected ParameterExpression _lambdaParameter;
-        protected bool _classicEF = false;
+        protected Type ElementType { get; private set; }
+       
+        protected ParameterExpression LambdaParameter { get; private set; }
+
+        protected bool ClassicEF { get; private set; }
 
         /// <summary>
         /// Gets CLR type returned from the query.
@@ -48,13 +49,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 || providerNS == HandleNullPropagationOptionHelper.EntityFrameworkQueryProviderNamespace);
         }
 
+        protected void SetElementType(Type elementType, ParameterExpression lambdaParameter)
+        {
+            Contract.Assert(elementType == lambdaParameter.Type);
+            this.ElementType = elementType;
+            this.LambdaParameter = lambdaParameter;
+        }
+
         protected void PreprocessQuery(IQueryable query)
         {
             Contract.Assert(query != null);
 
-            this._classicEF = IsClassicEF(query);
+            this.ClassicEF = IsClassicEF(query);
             this.BaseQuery = query;
-            EnsureFlattenedPropertyContainer(this._lambdaParameter);
+            EnsureFlattenedPropertyContainer(this.LambdaParameter);
         }
 
         protected Expression WrapConvert(Expression expression)
@@ -62,7 +70,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // Expression that we are generating looks like Value = $it.PropertyName where Value is defined as object and PropertyName can be value 
             // Proper .NET expression must look like as Value = (object) $it.PropertyName for proper boxing or AccessViolationException will be thrown
             // Cast to object isn't translatable by EF6 as a result skipping (object) in that case
-            return (this._classicEF || !expression.Type.IsValueType)
+            return (this.ClassicEF || !expression.Type.IsValueType)
                 ? expression
                 : Expression.Convert(expression, typeof(object));
         }
@@ -82,7 +90,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             get
             {
-                return this._lambdaParameter;
+                return this.LambdaParameter;
             }
         }
 
@@ -91,9 +99,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             switch (node.Kind)
             {
                 case QueryNodeKind.ResourceRangeVariableReference:
-                    return this._lambdaParameter.Type.IsGenericType && this._lambdaParameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
-                        ? (Expression)Expression.Property(this._lambdaParameter, "Source")
-                        : this._lambdaParameter;
+                    return this.LambdaParameter.Type.IsGenericType && this.LambdaParameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
+                        ? (Expression)Expression.Property(this.LambdaParameter, "Source")
+                        : this.LambdaParameter;
                 case QueryNodeKind.SingleValuePropertyAccess:
                     var propAccessNode = node as SingleValuePropertyAccessNode;
                     return CreatePropertyAccessExpression(BindAccessor(propAccessNode.Source, baseElement), propAccessNode.Property, GetFullPropertyPath(propAccessNode));
@@ -120,7 +128,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     var convertNode = (ConvertNode)node;
                     return CreateConvertExpression(convertNode, BindAccessor(convertNode.Source, baseElement));
                 case QueryNodeKind.CollectionNavigationNode:
-                    return baseElement ?? this._lambdaParameter;
+                    return baseElement ?? this.LambdaParameter;
                 case QueryNodeKind.SingleValueFunctionCall:
                     return BindSingleValueFunctionCallNode(node as SingleValueFunctionCallNode);
                 case QueryNodeKind.Constant:

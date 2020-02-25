@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _transformation = transformation;
             _modelID = ModelContainer.GetModelID(model);
 
-            this.ResultClrType = typeof(ComputeWrapper<>).MakeGenericType(this._elementType);
+            this.ResultClrType = typeof(ComputeWrapper<>).MakeGenericType(this.ElementType);
         }
 
         public IQueryable Bind(IQueryable query)
@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             // Set Instance property
             var wrapperProperty = this.ResultClrType.GetProperty("Instance");
-            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, this._lambdaParameter));
+            wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, this.LambdaParameter));
             var properties = new List<NamedPropertyExpression>();
             foreach (var computeExpression in this._transformation.Expressions)
             {
@@ -72,9 +72,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             var initilizedMember =
                 Expression.MemberInit(Expression.New(ResultClrType), wrapperTypeMemberAssignments);
-            var selectLambda = Expression.Lambda(initilizedMember, this._lambdaParameter);
+            var selectLambda = Expression.Lambda(initilizedMember, this.LambdaParameter);
 
-            var result = ExpressionHelpers.Select(query, selectLambda, this._elementType);
+            var result = ExpressionHelpers.Select(query, selectLambda, this.ElementType);
             return result;
         }
 

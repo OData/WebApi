@@ -467,7 +467,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             const string acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
             const string acceptJson = "application/json";
 
-            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController), typeof(BatchTestOrdersController), };
+            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 var builder = ODataConventionModelBuilderFactory.Create(config);

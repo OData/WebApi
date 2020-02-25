@@ -572,7 +572,7 @@ Accept-Charset: UTF-8
                     },
                     {
                         // inheritable preferences should be copied over
-                        // and combined to individual request's own preferences if any
+                        // and combined with the individual request's own preferences if any
                         new Dictionary<string, string>()
                         {
                             { "Prefer", "allow-entityreferences, include-annotations=\"display.*\"" }
@@ -598,16 +598,38 @@ Accept-Charset: UTF-8
                     },
                     {
                         // if batch and individual request define the same preference, then the one from the individual request should be retained
-                        // if batch Prefer header contains both inheritable and non-inheritable preferences,
-                        // the non-inheritable ones should be removed before merging with individual request's own preferences
                         new Dictionary<string, string>()
                         {
                             { "Prefer", "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200" }
                         },
                         (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
                         "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
+                        )
+                    },
+                    {
+                        // should correctly handle preferences using ; as separator
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", "allow-entityreferences; respond-async; include-annotations=\"display.*\"; continue-on-error; wait=200" }
+                        },
+                        (
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
+                        )
+                    },
+                    {
+                        // should correctly parse preferences with commas in their quoted values
+                        new Dictionary<string, string>()
+                        {
+                            { "Prefer", @"allow-entityreferences; respond-async; include-annotations=""display.*,foo""; continue-on-error; wait=""200;\""300""" }
+                        },
+                        (
+                        @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200;\\\""300\""",
+                        @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
+                        @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200;\\\""300\"""
                         )
                     }
                 };
@@ -692,9 +714,9 @@ Accept-Charset: UTF-8
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.Contains(expectedHeaders.postRequest, responseContent);
             Assert.Contains(expectedHeaders.getRequest, responseContent);
             Assert.Contains(expectedHeaders.deleteRequest, responseContent);
+            Assert.Contains(expectedHeaders.postRequest, responseContent);
         }
 #endif
     }

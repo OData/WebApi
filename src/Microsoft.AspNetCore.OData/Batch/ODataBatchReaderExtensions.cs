@@ -8,6 +8,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
@@ -150,8 +151,8 @@ namespace Microsoft.AspNet.OData.Batch
                     // in the case of Prefer header, we don't want to overwrite,
                     // instead we merge preferences defined in the individual request with those inherited from the batch
                     request.Headers.TryGetValue(headerName, out StringValues batchPreferencesList);
-                    string batchPreferences = batchPreferencesList.FirstOrDefault();
                     // TODO: what if multiple Prefer headers are defined on the request?
+                    string batchPreferences = batchPreferencesList.FirstOrDefault();
                     request.Headers[headerName] = MergeIndividualAndBatchPreferences(headerValue, batchPreferences);
                     continue;
                 }
@@ -286,7 +287,7 @@ namespace Microsoft.AspNet.OData.Batch
         {
             // do not inherit respond-async and continue-on-error (odata.continue-on-error in OData 4.0)
             var preferencesToIgnore = new string[] { "respond-async", "continue-on-error", "odata.continue-on-error" };
-            var preferencesToInherit = batchPreferences.Split(',')
+            var preferencesToInherit = batchPreferences.SplitPreferences()
                 .Where(value => 
                 !preferencesToIgnore.Any(
                     prefToIgnore => value.Trim().ToLowerInvariant().StartsWith(prefToIgnore)))
@@ -312,18 +313,66 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 return individualPreferences;
             }
-            var initialPreferences = new StringBuilder(individualPreferences);
             // get the name of each preference to avoid adding duplicates from batch
-            var individualList = individualPreferences.Split(',').Select(pref => pref.Trim());
+            var individualList = individualPreferences.SplitPreferences().Select(pref => pref.Trim());
             var individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
             
             
-            var filteredBatchList = batchPreferences.Split(',').Select(pref => pref.Trim())
+            var filteredBatchList = batchPreferences.SplitPreferences().Select(pref => pref.Trim())
                 // do not add duplicate preferences from batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
             var filteredBatchPreferences = string.Join(", ", filteredBatchList);
 
             return string.Join(", ", individualPreferences, filteredBatchPreferences);
+        }
+
+        /// <summary>
+        /// Splits the value of a Prefer header into separate preferences
+        /// e.g. a value like 'a, b=c, foo="bar,baz"' will return an IEnumerable with
+        /// - a
+        /// - b=c
+        /// - foo="bar,baz"
+        /// </summary>
+        /// <param name="preferences"></param>
+        /// <returns></returns>
+        private static IEnumerable<string> SplitPreferences(this string preferences)
+        {
+            StringBuilder currentPreference = new StringBuilder();
+            var insideQuotedValue = false;
+            char prevChar = '\0';
+            foreach (var c in preferences)
+            {
+                if (c == '"')
+                {
+                    if (!insideQuotedValue)
+                    {
+                        // we are starting a double-quoted value
+                        insideQuotedValue = true;
+                    }
+                    else
+                    {
+                        // this could be the end of a quoted value, or it could be an escaped quote
+                        insideQuotedValue = prevChar == '\\';
+                    }
+                }
+
+                if ((c == ',' || c == ';') && !insideQuotedValue)
+                {
+                    yield return currentPreference.ToString();
+                    currentPreference.Clear();
+                }
+                else
+                {
+                    currentPreference.Append(c);
+                }
+
+                prevChar = c;
+            }
+
+            if (currentPreference.Length > 0)
+            {
+                yield return currentPreference.ToString();
+            }
         }
     }
 }

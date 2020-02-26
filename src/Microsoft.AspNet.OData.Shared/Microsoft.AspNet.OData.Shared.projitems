@@ -165,6 +165,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\OperationTitleAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\AggregationBinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ComputeBinder.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\TransformationBinderBase.cs" />    
     <Compile Include="$(MSBuildThisFileDirectory)Query\ApplyQueryOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ExpressionBinderBase.cs" />

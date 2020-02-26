@@ -44,37 +44,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                             ID=3,
                             Name="Name3",
                             Domain=Domain.Both,
-                             Weight=3.3,
+                            Weight=3.3,
                             DimensionInCentimeter=new List<int>{3,4,5},
                             ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
                         },
-                         new AirPlane()
+                        new AirPlane()
                         {
                             ID=4,
                             Name="Name4",
                             Domain=Domain.Both,
-                             Weight=4.4,
+                            Weight=4.4,
                             DimensionInCentimeter=new List<int>{4,5,6},
                             ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
                             Speed=100
                         },
-                         new JetPlane()
+                        new JetPlane()
                         {
                             ID=5,
                             Name="Name5",
                             Domain=Domain.Military,
-                             Weight=5.5,
+                            Weight=5.5,
                             DimensionInCentimeter=new List<int>{6,7,8},
                             ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
                             Speed=100,
                             Company="Boeing"
                         },
-                          new JetPlane()
+                        new JetPlane()
                         {
                             ID=6,
                             Name="Name6",
                             Domain=Domain.Civil,
-                             Weight=6.6,
+                            Weight=6.6,
                             DimensionInCentimeter=new List<int>{7,8,9},
                             ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
                             Speed=500,

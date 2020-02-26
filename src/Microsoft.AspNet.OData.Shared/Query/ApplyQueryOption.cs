@@ -146,6 +146,12 @@ namespace Microsoft.AspNet.OData.Query
                     query = binder.Bind(query);
                     this.ResultClrType = binder.ResultClrType;
                 }
+                else if (transformation.Kind == TransformationNodeKind.Compute)
+                {
+                    var binder = new ComputeBinder(updatedSettings, assembliesResolver, ResultClrType, Context.Model, (ComputeTransformationNode)transformation);
+                    query = binder.Bind(query);
+                    this.ResultClrType = binder.ResultClrType;
+                }
                 else if (transformation.Kind == TransformationNodeKind.Filter)
                 {
                     var filterTransformation = transformation as FilterTransformationNode;

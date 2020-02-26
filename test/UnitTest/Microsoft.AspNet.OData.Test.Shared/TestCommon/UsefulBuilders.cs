@@ -115,6 +115,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             customer.Property(c => c.Website);
             customer.Property(c => c.SharePrice);
             customer.Property(c => c.ShareSymbol);
+            customer.Property(c => c.StartDate);
             return builder;
         }
 

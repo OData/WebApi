@@ -46,11 +46,13 @@ namespace Microsoft.AspNet.OData.Query
                 case Linq2SqlQueryProviderNamespace:
                 case ObjectContextQueryProviderNamespaceEF5:
                 case ObjectContextQueryProviderNamespaceEF6:
-                case ObjectContextQueryProviderNamespaceEFCore2:
+             
                     options = HandleNullPropagationOption.False;
                     break;
-
+                
                 case Linq2ObjectsQueryProviderNamespace:
+                // EF Core before 3.0 does a lot of client evaluations and has InMemory support which is the same as Linq2Objects
+                case ObjectContextQueryProviderNamespaceEFCore2: 
                 default:
                     options = HandleNullPropagationOption.True;
                     break;

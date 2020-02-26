@@ -11,6 +11,11 @@ using Microsoft.AspNet.OData.Routing;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 {
+    /// <summary>
+    /// Pay attention to use this class when you create test cases in parallel.
+    /// If multiple test cases rely on the same <typeparamref name="TEntity"/>, these test cases maybe conflict each other.
+    /// So, do not use the same <typeparamref name="TEntity"/> in mulitple test cases.
+    /// </summary>
     [ModelStateErrorHandling]
     public abstract class InMemoryODataController<TEntity, TKey> : TestODataController
         where TEntity : class

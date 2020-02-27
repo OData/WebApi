@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
@@ -10,6 +11,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -82,6 +84,21 @@ namespace Microsoft.AspNet.OData.Extensions
             services.AddSingleton<IActionSelector>(s =>
             {
                 return new ODataActionSelector((IActionSelector)s.GetRequiredService(selector.ImplementationType));
+            });
+
+            services.AddSingleton<ODataEndpointRouteValueTransformer>();
+
+            // OData Endpoint selector policy
+            services.AddSingleton<MatcherPolicy, ODataEndpointSelectorPolicy>();
+
+            // LinkGenerator
+            var linkGenerator = services.First(s => s.ServiceType == typeof(LinkGenerator) && s.ImplementationType != null);
+            services.Remove(linkGenerator);
+            services.Add(new ServiceDescriptor(linkGenerator.ImplementationType, linkGenerator.ImplementationType, ServiceLifetime.Singleton));
+
+            services.AddSingleton<LinkGenerator>(s =>
+            {
+                return new ODataEndpointLinkGenerator((LinkGenerator)s.GetRequiredService(linkGenerator.ImplementationType));
             });
 #endif
 

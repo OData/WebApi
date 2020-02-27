@@ -16,7 +16,6 @@ using ActionDescriptorExtensions = Microsoft.AspNet.OData.Extensions.ActionDescr
 
 namespace Microsoft.AspNet.OData.Test.Extensions
 {
-
     public class ActionDescriptorExtensionsTest
     {
         [Fact]

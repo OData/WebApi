@@ -4,9 +4,9 @@
   <!-- Set the version number: major, minor, build and release (i.e. alpha, beta or blank for RTM)-->
   <PropertyGroup>
     <VersionMajor Condition="'$(VersionMajor)' == ''">7</VersionMajor>
-    <VersionMinor Condition="'$(VersionMinor)' == ''">3</VersionMinor>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">4</VersionMinor>
     <VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
-    <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
+    <VersionRelease Condition="'$(VersionRelease)' == ''">beta</VersionRelease>
   </PropertyGroup>
 
   <!-- For NuGet Package Dependencies -->

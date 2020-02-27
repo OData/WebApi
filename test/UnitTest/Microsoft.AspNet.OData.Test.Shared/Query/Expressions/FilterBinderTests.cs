@@ -2264,38 +2264,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             ExceptionAssert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
         }
 
-        // Demonstrates a bug in FilterBinder.
         [Theory]
-        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "DerivedProductName")]
-        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
-        [InlineData("cast(Category, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
-        public void CastToQuotedEntityType_ThrowsArgumentException(string filter, string propertyName)
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "$it => (($it As DerivedProduct).DerivedProductName == null)","$it => (IIF((($it As DerivedProduct) == null), null, ($it As DerivedProduct).DerivedProductName) == null)")]
+        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it As DerivedCategory) == null), null, ($it As DerivedCategory).DerivedCategoryName) == null)")]
+        public void CastToQuotedEntityOrComplexType_DerivedProductName(string filter, string expectedExpression, string expectedExpressionWithNullCheck)
         {
-            // Arrange
-            var expectedMessage = string.Format(
-                "Instance property '{0}' is not defined for type '{1}'",
-                propertyName,
-                typeof(object).FullName);
-
-            // Act & Assert
-            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
+            // Arrange, Act & Assert
+            VerifyQueryDeserialization<Product>(
+                filter,
+                expectedResult: expectedExpression,
+                expectedResultWithNullPropagation: expectedExpressionWithNullCheck);
         }
-
-        [Theory]
-        [InlineData("cast(null,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
-        [InlineData("cast(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
-        public void CastNullToQuotedEntityType_ThrowsArgumentException(string filter)
-        {
-            // Arrange
-            var expectedMessage =
-                "Instance property 'DerivedCategoryName' is not defined for type 'System.Object'";
-
-            // Act & Assert
-            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
-        }
-
+                
 #endregion
 
 #region 'isof' in query option

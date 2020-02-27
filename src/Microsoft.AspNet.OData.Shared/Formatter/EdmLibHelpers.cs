@@ -142,6 +142,11 @@ namespace Microsoft.AspNet.OData.Formatter
                             elementClrType = entityType;
                         }
 
+                        if (IsComputeWrapper(elementClrType, out entityType))
+                        {
+                            elementClrType = entityType;
+                        }
+
                         IEdmType elementType = GetEdmType(edmModel, elementClrType, testCollections: false);
                         if (elementType != null)
                         {
@@ -1013,7 +1018,11 @@ namespace Microsoft.AspNet.OData.Formatter
             return _coreModel.GetPrimitiveType(primitiveKind);
         }
 
-        private static bool IsSelectExpandWrapper(Type type, out Type entityType)
+        private static bool IsSelectExpandWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(SelectExpandWrapper<>), type, out entityType);
+
+        internal static bool IsComputeWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(ComputeWrapper<>), type, out entityType);
+
+        private static bool IsTypeWrapper(Type wrappedType, Type type, out Type entityType)
         {
             if (type == null)
             {
@@ -1021,13 +1030,13 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == wrappedType)
             {
                 entityType = type.GetGenericArguments()[0];
                 return true;
             }
 
-            return IsSelectExpandWrapper(TypeHelper.GetBaseType(type), out entityType);
+            return IsTypeWrapper(wrappedType, TypeHelper.GetBaseType(type), out entityType);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

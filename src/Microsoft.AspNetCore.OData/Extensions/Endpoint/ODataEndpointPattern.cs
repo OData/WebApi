@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (routeName == null)
             {
-                throw Error.ArgumentNull("routeName");
+                throw Error.ArgumentNull(nameof(routeName));
             }
 
             return string.IsNullOrEmpty(routePrefix) ?
@@ -45,6 +45,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns>A tuple contains the route name and path value.</returns>
         public static (string, object) GetODataRouteInfo(this RouteValueDictionary values)
         {
+            if (values == null)
+            {
+                throw Error.ArgumentNull(nameof(values));
+            }
+
             string routeName = null;
             object odataPathValue = null;
             foreach (var item in values)

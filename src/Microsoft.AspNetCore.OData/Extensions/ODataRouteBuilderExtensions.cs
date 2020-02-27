@@ -199,8 +199,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableCount = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.Count(setting);
             return builder;
         }
 

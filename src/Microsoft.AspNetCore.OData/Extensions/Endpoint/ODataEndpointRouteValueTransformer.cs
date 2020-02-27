@@ -3,7 +3,6 @@
 
 #if !NETSTANDARD2_0
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -14,7 +13,6 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.Routing.Matching;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -125,77 +123,5 @@ namespace Microsoft.AspNet.OData.Extensions
             return new ValueTask<RouteValueDictionary>(result: null);
         }
     }
-
-    internal class ODataDynamicControllerEndpointMatcherPolicy : MatcherPolicy, IEndpointSelectorPolicy
-    {
-        private readonly EndpointMetadataComparer _comparer;
-        public ODataDynamicControllerEndpointMatcherPolicy(EndpointMetadataComparer comparer)
-        {
-            if (comparer == null)
-            {
-                throw new ArgumentNullException(nameof(comparer));
-            }
-
-            _comparer = comparer;
-        }
-
-        public override int Order => int.MinValue + 1000;
-
-        public bool AppliesToEndpoints(IReadOnlyList<Endpoint> endpoints)
-        {
-            if (endpoints == null)
-            {
-                throw new ArgumentNullException(nameof(endpoints));
-            }
-
-            if (!ContainsDynamicEndpoints(endpoints))
-            {
-                // Dynamic controller endpoints are always dynamic endpoints.
-                return false;
-            }
-
-            for (var i = 0; i < endpoints.Count; i++)
-            {
-                if (endpoints[i].Metadata.GetMetadata<IDynamicEndpointMetadata>() != null)
-                {
-                    // Found a dynamic controller endpoint
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public Task ApplyAsync(HttpContext httpContext, CandidateSet candidates)
-        {
-            if (httpContext == null)
-            {
-                throw new ArgumentNullException(nameof(httpContext));
-            }
-
-            if (candidates == null)
-            {
-                throw new ArgumentNullException(nameof(candidates));
-            }
-
-            for (var i = 0; i < candidates.Count; i++)
-            {
-                if (!candidates.IsValidCandidate(i))
-                {
-                    continue;
-                }
-            }
-
-            return Task.CompletedTask;
-        }
-    }
-
-    //public class ODataDynamicControllerEndpointSelector : IDisposable
-    //{
-    //    public DynamicControllerEndpointSelector(EndpointDataSource dataSource)
-    //        : this((EndpointDataSource)dataSource)
-    //    {
-    //    }
-    //}
 }
 #endif

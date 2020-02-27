@@ -2,9 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if !NETSTANDARD2_0
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -32,12 +32,12 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (httpContext == null)
             {
-                throw new ArgumentNullException(nameof(httpContext));
+                throw Error.ArgumentNull(nameof(httpContext));
             }
 
             if (candidates == null)
             {
-                throw new ArgumentNullException(nameof(candidates));
+                throw Error.ArgumentNull(nameof(candidates));
             }
 
             IODataFeature odataFeature = httpContext.ODataFeature();

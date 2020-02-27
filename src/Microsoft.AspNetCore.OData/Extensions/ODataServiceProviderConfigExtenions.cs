@@ -15,12 +15,12 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             if (defaultQuerySettings == null)
             {
-                throw Error.ArgumentNull("defaultQuerySettings");
+                throw Error.ArgumentNull(nameof(defaultQuerySettings));
             }
 
             if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings querySettings = serviceProvider.GetRequiredService<DefaultQuerySettings>();
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -83,7 +83,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -105,7 +105,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -116,7 +116,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -127,7 +127,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -138,7 +138,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -160,7 +160,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -171,7 +171,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -182,7 +182,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -193,7 +193,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             DefaultQuerySettings defaultQuerySettings = serviceProvider.GetDefaultQuerySettings();
@@ -204,12 +204,12 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             if (defaultOptions == null)
             {
-                throw Error.ArgumentNull("defaultOptions");
+                throw Error.ArgumentNull(nameof(defaultOptions));
             }
 
             ODataOptions options = serviceProvider.GetRequiredService<ODataOptions>();
@@ -225,7 +225,7 @@ namespace Microsoft.AspNet.OData.Extensions
         {
             if (serviceProvider == null)
             {
-                throw Error.ArgumentNull("serviceProvider");
+                throw Error.ArgumentNull(nameof(serviceProvider));
             }
 
             ODataOptions options = serviceProvider.GetRequiredService<ODataOptions>();

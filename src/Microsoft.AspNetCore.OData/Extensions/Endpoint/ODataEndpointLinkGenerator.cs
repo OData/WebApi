@@ -4,6 +4,7 @@
 #if !NETSTANDARD2_0
 using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +27,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="generator">The inner Link generator</param>
         public ODataEndpointLinkGenerator(LinkGenerator generator)
         {
+            if (generator == null)
+            {
+                throw Error.ArgumentNull(nameof(generator));
+            }
+
             _innerGenerator = generator;
         }
 
@@ -74,7 +80,7 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         // Noted: simple workaround to bind the value for the prefix template
-        // Shold replace it using the standard ASP.NET Core way later.
+        // Should replace it using the standard ASP.NET Core way later.
         internal static string BindPrefixTemplate(string prefix, RouteValueDictionary values, RouteValueDictionary ambientValues)
         {
             IList<string> templates = new List<string>();
@@ -100,11 +106,11 @@ namespace Microsoft.AspNet.OData.Extensions
 
                 if (values != null && values.TryGetValue(variable, out object valueFromValues))
                 {
-                    prefix = prefix.Replace(item, valueFromValues as string);
+                    prefix = prefix.Replace(item, valueFromValues.ToString());
                 }
                 else if (ambientValues != null && ambientValues.TryGetValue(variable, out object valueFromAmbient))
                 {
-                    prefix = prefix.Replace(item, valueFromAmbient as string);
+                    prefix = prefix.Replace(item, valueFromAmbient.ToString());
                 }
             }
 

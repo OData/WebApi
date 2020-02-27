@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.UriParser;
@@ -22,6 +23,22 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// Gets or sets the OData path.
         /// </summary>
         ODataPath Path { get; set; }
+
+        /// <summary>
+        /// Gets or sets the route name.
+        /// </summary>
+        string RoutePrefix { get; set; }
+
+        /// <summary>
+        /// Gets or sets the selected action descriptor.
+        /// </summary>
+        ActionDescriptor ActionDescriptor { get; set; }
+
+        /// <summary>
+        /// Add a boolean value indicate whether it's endpoint routing or not.
+        /// Maybe it's unnecessary later.
+        /// </summary>
+        bool IsEndpointRouting { get; set; }
 
         /// <summary>
         /// Gets or sets the route name.

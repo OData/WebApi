@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
@@ -9,14 +10,36 @@ using Microsoft.OData.UriParser;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// A base class for for managing per-route service containers.
+    /// A base class for managing per-route service containers.
     /// </summary>
     public abstract class PerRouteContainerBase : IPerRouteContainer
     {
+        private IDictionary<string, string> routeMapping = new Dictionary<string, string>();
+
         /// <summary>
         /// Gets or sets a function to build an <see cref="IContainerBuilder"/>
         /// </summary>
         public Func<IContainerBuilder> BuilderFactory { get; set; }
+
+        /// <summary>
+        /// Add a routing mapping
+        /// </summary>
+        /// <param name="routeName">The route name</param>
+        /// <param name="routePrefix">The route prefix</param>
+        public virtual void AddRoute(string routeName, string routePrefix)
+        {
+            routeMapping[routeName] = routePrefix;
+        }
+
+        /// <summary>
+        /// Get the route prefix
+        /// </summary>
+        /// <param name="routeName">The route name.</param>
+        /// <returns>The route prefix.</returns>
+        public string GetRoutePrefix(string routeName)
+        {
+            return routeMapping[routeName];
+        }
 
         /// <summary>
         /// Create a root container for a given route name.
@@ -41,10 +64,7 @@ namespace Microsoft.AspNet.OData
         {
             IContainerBuilder builder = CreateContainerBuilderWithCoreServices();
 
-            if (configureAction != null)
-            {
-                configureAction(builder);
-            }
+            configureAction?.Invoke(builder);
 
             IServiceProvider rootContainer = builder.BuildContainer();
             if (rootContainer == null)

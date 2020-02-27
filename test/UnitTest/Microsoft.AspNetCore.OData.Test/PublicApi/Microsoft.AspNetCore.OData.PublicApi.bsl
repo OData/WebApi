@@ -64,8 +64,10 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
 
+	void AddRoute (string routeName, string routePrefix)
 	System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	System.IServiceProvider GetODataRootContainer (string routeName)
+	string GetRoutePrefix (string routeName)
 	bool HasODataRootContainer (string routeName)
 }
 
@@ -141,11 +143,13 @@ public abstract class Microsoft.AspNet.OData.PerRouteContainerBase : IPerRouteCo
 
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public virtual get; public virtual set; }
 
+	public virtual void AddRoute (string routeName, string routePrefix)
 	protected Microsoft.OData.IContainerBuilder CreateContainerBuilderWithCoreServices ()
 	public System.IServiceProvider CreateODataRootContainer (System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	public virtual System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	protected abstract System.IServiceProvider GetContainer (string routeName)
 	public virtual System.IServiceProvider GetODataRootContainer (string routeName)
+	public virtual string GetRoutePrefix (string routeName)
 	public virtual bool HasODataRootContainer (string routeName)
 	protected abstract void SetContainer (string routeName, System.IServiceProvider rootContainer)
 }
@@ -495,14 +499,17 @@ public class Microsoft.AspNet.OData.ODataBuilder : IODataBuilder {
 public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	public ODataFeature ()
 
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public virtual get; public virtual set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
+	bool IsEndpointRouting  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
 	System.IServiceProvider RequestContainer  { public virtual get; public virtual set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public virtual get; public virtual set; }
 	string RouteName  { public virtual get; public virtual set; }
+	string RoutePrefix  { public virtual get; public virtual set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
@@ -2307,14 +2314,17 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataBuilder {
 }
 
 public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public abstract get; public abstract set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
+	bool IsEndpointRouting  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }
 	System.IServiceProvider RequestContainer  { public abstract get; public abstract set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public abstract get; public abstract set; }
 	string RouteName  { public abstract get; public abstract set; }
+	string RoutePrefix  { public abstract get; public abstract set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
@@ -3628,6 +3638,7 @@ public abstract class Microsoft.AspNet.OData.Routing.Conventions.NavigationSourc
 public sealed class Microsoft.AspNet.OData.Routing.Conventions.ODataRoutingConventions {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefault ()
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, Microsoft.AspNetCore.Routing.IRouteBuilder builder)
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.IServiceProvider serviceProvider)
 }
 
 public class Microsoft.AspNet.OData.Routing.Conventions.ActionRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {

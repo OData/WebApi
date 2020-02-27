@@ -334,6 +334,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // We only support to cast Entity type to the same type now.
                 return arguments[0];
             }
+            else if (arguments[0].Type.IsAssignableFrom(targetClrType))
+            {
+                // To support to cast Entity/Complex type to the sub type now.
+                Expression source = BindCastSourceNode(node.Source);
+
+                return Expression.TypeAs(source, targetClrType);
+            }
             else
             {
                 // Cast fails and return null.

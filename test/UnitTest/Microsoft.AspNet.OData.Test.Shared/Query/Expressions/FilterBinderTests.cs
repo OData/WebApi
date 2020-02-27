@@ -1646,7 +1646,40 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
             Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
+
+        [Fact]
+        public void EnumInExpression_WithNullValue_Throws()
+        {
+            ExceptionAssert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<DataTypes>("SimpleEnumProp in ('First', null)"),
+                "A null value was found with the expected type 'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum[Nullable=False]'. The expected type 'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum[Nullable=False]' does not allow null values.");
+        }
+
+        [Fact]
+        public void EnumInExpression_NullableEnum_WithNullable()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "NullableSimpleEnumProp in ('First', 'Second')",
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+
+            // expression tree is guaranteed by expression string above
+            var values = (IList<SimpleEnum?>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
+        }
         
+        [Fact]
+        public void EnumInExpression_NullableEnum_WithNullValue()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "NullableSimpleEnumProp in ('First', null)",
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+
+            // expression tree is guaranteed by expression string above
+            var values = (IList<SimpleEnum?>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
+        }
 
         [Fact]
         public void RealLiteralSuffixes()

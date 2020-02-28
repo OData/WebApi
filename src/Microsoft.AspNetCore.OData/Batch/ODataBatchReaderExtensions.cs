@@ -26,7 +26,9 @@ namespace Microsoft.AspNet.OData.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataBatchReaderExtensions
     {
-        private static readonly string[] NonInHeritableHeaders = new string[] { "content-length", "content-type" };
+        private static readonly string[] nonInheritableHeaders = new string[] { "content-length", "content-type" };
+        // do not inherit respond-async and continue-on-error (odata.continue-on-error in OData 4.0) from Prefer header
+        private static readonly string[] nonInheritablePreferences = new string[] { "respond-async", "continue-on-error", "odata.continue-on-error" };
 
         /// <summary>
         /// Reads a ChangeSet request.
@@ -252,7 +254,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 var headerKey = header.Key.ToLowerInvariant();
                 // do not copy over headers that should not be inherited from batch to individual requests
-                if (NonInHeritableHeaders.Contains(headerKey))
+                if (nonInheritableHeaders.Contains(headerKey))
                 {
                     continue;
                 }
@@ -285,11 +287,9 @@ namespace Microsoft.AspNet.OData.Batch
         /// <returns>comma-separated preferences that can be passed down to an individual request</returns>
         private static string GetPreferencesToInheritFromBatch(string batchPreferences)
         {
-            // do not inherit respond-async and continue-on-error (odata.continue-on-error in OData 4.0)
-            var preferencesToIgnore = new string[] { "respond-async", "continue-on-error", "odata.continue-on-error" };
             var preferencesToInherit = batchPreferences.SplitPreferences()
                 .Where(value => 
-                !preferencesToIgnore.Any(
+                !nonInheritablePreferences.Any(
                     prefToIgnore => value.Trim().ToLowerInvariant().StartsWith(prefToIgnore)))
                 .Select(value => value.Trim());
             return string.Join(", ", preferencesToInherit);
@@ -356,7 +356,7 @@ namespace Microsoft.AspNet.OData.Batch
                     }
                 }
 
-                if ((c == ',' || c == ';') && !insideQuotedValue)
+                if (c == ',' && !insideQuotedValue)
                 {
                     yield return currentPreference.ToString();
                     currentPreference.Clear();

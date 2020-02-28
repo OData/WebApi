@@ -608,27 +608,27 @@ Accept-Charset: UTF-8
                         )
                     },
                     {
-                        // should correctly handle preferences using ; as separator
+                        // should correctly handle preferences that contain parameters
                         new Dictionary<string, string>()
                         {
-                            { "Prefer", "allow-entityreferences; respond-async; include-annotations=\"display.*\"; continue-on-error; wait=200" }
+                            { "Prefer", "allow-entityreferences, respond-async, foo; param=paramValue, include-annotations=\"display.*\", continue-on-error, wait=200" }
                         },
                         (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
+                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200",
+                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\"",
+                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200"
                         )
                     },
                     {
                         // should correctly parse preferences with commas in their quoted values
                         new Dictionary<string, string>()
                         {
-                            { "Prefer", @"allow-entityreferences; respond-async; include-annotations=""display.*,foo""; continue-on-error; wait=""200;\""300""" }
+                            { "Prefer", @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300""" }
                         },
                         (
-                        @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200;\\\""300\""",
+                        @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\""",
                         @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
-                        @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200;\\\""300\"""
+                        @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\"""
                         )
                     }
                 };

@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Formatter;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData.Edm;
 using Xunit;
 
@@ -531,6 +532,26 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // "BindingCity" entity type
             model.AssertHasEntityType(typeof(BindingCity));
+        }
+
+        [Fact]
+        public void CanConfigureDerived()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+
+            builder.EntityType<Animal>().DerivesFrom<Creature>();
+            builder.EntityType<Human>().DerivesFrom<Creature>();
+            var creaturesConfiguration = builder.EntitySet<Creature>("Creatures");
+
+
+            creaturesConfiguration.HasDerivedTypeConstraint<Animal>().HasDerivedTypeConstraint<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            
         }
     }
 }

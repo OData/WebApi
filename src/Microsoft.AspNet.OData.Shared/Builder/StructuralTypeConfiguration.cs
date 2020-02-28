@@ -14,6 +14,76 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
+    /// 
+    /// </summary>
+    public class DerivedTypeConstraintConfiguration
+    {
+        private ISet<Type> _derivedTypes;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="baseType"></param>
+        public DerivedTypeConstraintConfiguration(Type baseType)
+        {
+            ClrBaseType = baseType;
+            _derivedTypes = new HashSet<Type>();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ISet<Type> DerivedTypes { get { return _derivedTypes; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Type ClrBaseType { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDerived"></typeparam>
+        public void Add<TDerived>()
+        {
+            Add(typeof(TDerived));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="derivedType"></param>
+        public void Add(Type derivedType)
+        {
+            if (derivedType == ClrBaseType)
+            {
+                return;
+            }
+
+            if (_derivedTypes.Contains(derivedType))
+            {
+                return;
+            }
+
+            if (!ClrBaseType.IsAssignableFrom(derivedType))
+            {
+                throw new Exception("blabla");
+            }
+
+            _derivedTypes.Add(derivedType);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBase"></typeparam>
+    public class DerivedTypeConstraintConfiguration<TBase>
+    {
+
+    }
+
+    /// <summary>
     /// Represents an <see cref="IEdmStructuredType"/> that can be built using <see cref="ODataModelBuilder"/>.
     /// </summary>
     public abstract class StructuralTypeConfiguration : IEdmTypeConfiguration

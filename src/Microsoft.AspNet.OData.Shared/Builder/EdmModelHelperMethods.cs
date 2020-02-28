@@ -13,6 +13,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Csdl;
 using Microsoft.OData.Edm.Validation;
 using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.OData.Edm.Vocabularies.V1;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -602,7 +603,50 @@ namespace Microsoft.AspNet.OData.Builder
                 }
 
                 model.AddOptimisticConcurrencyAnnotation(navigationSource, navigationSourceConfig, edmTypeMap);
+                model.AddDerivedTypeConstraintAnnotationForNavigationSource(navigationSource, navigationSourceConfig, edmTypeMap);
             }
+        }
+
+        private static void AddDerivedTypeConstraintAnnotationForNavigationSource(this EdmModel model, IEdmVocabularyAnnotatable target,
+           NavigationSourceConfiguration navigationSourceConfiguration, EdmTypeMap edmTypeMap)
+        {
+            if (navigationSourceConfiguration != null)
+            {
+                model.AddDerivedTypeConstraintAnnotation(target,
+                    edmTypeMap.EdmTypes, navigationSourceConfiguration.DerivedTypeConstraint);
+            }
+        }
+
+        internal static void AddDerivedTypeConstraintAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target,
+            Dictionary<Type, IEdmType> edmTypeMap, DerivedTypeConstraintConfiguration derivedTypeConstraint)
+        {
+            if (derivedTypeConstraint == null)
+            {
+                return;
+            }
+
+            if (!derivedTypeConstraint.DerivedTypes.Any())
+            {
+                return;
+            }
+
+            IEdmTerm term = ValidationVocabularyModel.DerivedTypeConstraintTerm;
+            List<EdmStringConstant> collectionConstants = new List<EdmStringConstant>();
+            foreach (var type in derivedTypeConstraint.DerivedTypes)
+            {
+                if (edmTypeMap.ContainsKey(type))
+                {
+                    collectionConstants.Add(new EdmStringConstant(edmTypeMap[type].FullTypeName()));
+                }
+                else
+                {
+                    throw new Exception("");
+                }
+            }
+
+            var collectionExpression = new EdmCollectionExpression(collectionConstants);
+            EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
+            model.SetVocabularyAnnotation(annotation);
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",

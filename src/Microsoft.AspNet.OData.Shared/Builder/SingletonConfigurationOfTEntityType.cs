@@ -19,5 +19,7 @@ namespace Microsoft.AspNet.OData.Builder
             : base(modelBuilder, configuration)
         {
         }
+
+        
     }
 }

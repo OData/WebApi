@@ -29,6 +29,10 @@ namespace Microsoft.AspNet.OData.Builder
 
         private readonly Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder> _navigationPropertyLinkBuilders;
 
+        private DerivedTypeConstraintConfiguration _derivedTypeConstraint;
+
+       
+
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationSourceConfiguration"/> class.
         /// The default constructor is intended for use by unit testing only.
@@ -106,6 +110,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets the name of this navigation source.
         /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DerivedTypeConstraintConfiguration DerivedTypeConstraint { get { return _derivedTypeConstraint; } }
 
         /// <summary>
         /// Configures the navigation source URL.
@@ -348,6 +357,28 @@ namespace Microsoft.AspNet.OData.Builder
                     _navigationPropertyBindings.Remove(navigationConfiguration);
                 }
             }
+        }
+
+        /// <summary>
+        /// Adds types to the list of derived type constraints.
+        /// </summary>
+        public NavigationSourceConfiguration HasDerivedTypeConstraint(Type derivedType)
+        {
+            if (_derivedTypeConstraint == null)
+            {
+                _derivedTypeConstraint = new DerivedTypeConstraintConfiguration(ClrType);
+            }
+
+            _derivedTypeConstraint.Add(derivedType);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds types to the list of derived type constraints.
+        /// </summary>
+        public NavigationSourceConfiguration HasDerivedTypeConstraint<TDerived>()
+        {
+            return HasDerivedTypeConstraint(typeof(TDerived));
         }
 
         /// <summary>

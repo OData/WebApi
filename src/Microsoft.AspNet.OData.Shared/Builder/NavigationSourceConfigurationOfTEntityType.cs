@@ -626,6 +626,28 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDerived"></typeparam>
+        /// <returns></returns>
+        public NavigationSourceConfiguration<TEntityType> HasDerivedTypeConstraint<TDerived>()
+            where TDerived : TEntityType
+        {
+            this.Configuration.HasDerivedTypeConstraint<TDerived>();
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public NavigationSourceConfiguration<TEntityType> HasDerivedTypeConstraint(Type derivedType)
+        {
+            this.Configuration.HasDerivedTypeConstraint(derivedType);
+            return this;
+        }
+
+        /// <summary>
         /// Configures the edit link for the entities from this navigation source.
         /// </summary>
         /// <param name="editLinkFactory">The factory used to generate the edit link.</param>

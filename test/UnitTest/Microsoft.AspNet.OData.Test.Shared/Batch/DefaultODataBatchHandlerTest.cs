@@ -542,15 +542,15 @@ Accept-Charset: UTF-8
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
 
-        public static TheoryDataSet<Dictionary<string, string>, (string, string, string)> BatchHeadersTestData
+        public static TheoryDataSet<Dictionary<string, IEnumerable<string>>, (string, string, string)> BatchHeadersTestData
         {
             get
             {
-                return new TheoryDataSet<Dictionary<string, string>, (string, string, string)>()
+                return new TheoryDataSet<Dictionary<string, IEnumerable<string>>, (string, string, string)>()
                 {
                     {
                         // should not copy over content type and content length headers to individual request
-                        new Dictionary<string, string>(),
+                        new Dictionary<string, IEnumerable<string>>(),
                         (
                         "GET,ContentType=,ContentLength=,Prefer=",
                         "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
@@ -559,9 +559,9 @@ Accept-Charset: UTF-8
                     },
                     {
                         // should not copy over preferences that should not be inherited
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", "respond-async, odata.continue-on-error" }
+                            { "Prefer", new string[] { "respond-async, odata.continue-on-error" } }
                         },
                         (
                         "GET,ContentType=,ContentLength=,Prefer=",
@@ -572,9 +572,9 @@ Accept-Charset: UTF-8
                     {
                         // inheritable preferences should be copied over
                         // and combined with the individual request's own preferences if any
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", "allow-entityreferences, include-annotations=\"display.*\"" }
+                            { "Prefer", new string[] { "allow-entityreferences, include-annotations=\"display.*\"" } }
                         },
                         (
                         "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
@@ -585,9 +585,9 @@ Accept-Charset: UTF-8
                     {
                         // if batch Prefer header contains both inheritable and non-inheritable preferences,
                         // the non-inheritable ones should be removed before merging with individual request's own preferences
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error" }
+                            { "Prefer", new string[] { "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error" } }
                         },
                         (
                         "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
@@ -597,9 +597,14 @@ Accept-Charset: UTF-8
                     },
                     {
                         // if batch and individual request define the same preference, then the one from the individual request should be retained
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200" }
+                            {
+                                "Prefer", new string[]
+                                {
+                                    "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200"
+                                }
+                            }
                         },
                         (
                         "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
@@ -609,9 +614,15 @@ Accept-Charset: UTF-8
                     },
                     {
                         // should correctly handle preferences that contain parameters
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", "allow-entityreferences, respond-async, foo; param=paramValue, include-annotations=\"display.*\", continue-on-error, wait=200" }
+                            {
+                                "Prefer", new string[]
+                                {
+                                    "allow-entityreferences, respond-async, foo; param=paramValue," +
+                                    "include-annotations=\"display.*\", continue-on-error, wait=200"
+                                }
+                            }
                         },
                         (
                         "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200",
@@ -621,23 +632,46 @@ Accept-Charset: UTF-8
                     },
                     {
                         // should correctly parse preferences with commas in their quoted values
-                        new Dictionary<string, string>()
+                        new Dictionary<string, IEnumerable<string>>()
                         {
-                            { "Prefer", @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300""" }
+                            {
+                                "Prefer", new string[]
+                                {
+                                    @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300"""
+                                }
+                            }
                         },
                         (
                         @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\""",
                         @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
                         @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\"""
                         )
-                    }
+                    },
+                    {
+                        // should correctly handle batch request with multiple Prefer headers and should not copy duplicate references
+                        new Dictionary<string, IEnumerable<string>>()
+                        {
+                            {
+                                "Prefer", new string[]
+                                {
+                                    @"allow-entityreferences, respond-async, wait=300",
+                                    @"continue-on-error, wait=250, include-annotations=display"
+                                }
+                            }
+                        },
+                        (
+                            @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, wait=300, include-annotations=display",
+                            @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=display",
+                            @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, wait=300, include-annotations=display"
+                        )
+                    }       
                 };
             }
         }
 
         [Theory]
         [MemberData(nameof(BatchHeadersTestData))]
-        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(IDictionary<string, string> batchHeaders,
+        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(IDictionary<string, IEnumerable<string>> batchHeaders,
             (string getRequest, string deleteRequest, string postRequest) expectedHeaders)
         {
             var batchRef = $"batch_{Guid.NewGuid()}";
@@ -826,24 +860,25 @@ Accept-Charset: UTF-8
 #if NETCORE
     public class BatchTestHeadersCustomersController : TestODataController
     {
+        private string GetResponseString(string method)
+        {
+            return $"{method},ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
+                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
+        }
         public string Get()
         {
-            return $"GET,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
-                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
+            return GetResponseString("GET");
         }
 
         public string Delete(int key)
         {
-            return $"DELETE,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
-                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
+            return GetResponseString("DELETE");
         }
 
         public string Post()
         {
-            return $"POST,ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
-                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
+            return GetResponseString("POST");
         }
-
     }
 
     public class BatchTestHeadersCustomer

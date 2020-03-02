@@ -153,10 +153,8 @@ namespace Microsoft.AspNet.OData.Batch
                 {
                     // in the case of Prefer header, we don't want to overwrite,
                     // instead we merge preferences defined in the individual request with those inherited from the batch
-                    request.Headers.TryGetValue(headerName, out StringValues batchPreferencesList);
-                    // TODO: what if multiple Prefer headers are defined on the request?
-                    string batchPreferences = batchPreferencesList.FirstOrDefault();
-                    request.Headers[headerName] = MergeIndividualAndBatchPreferences(headerValue, batchPreferences);
+                    request.Headers.TryGetValue(headerName, out StringValues batchReferences);
+                    request.Headers[headerName] = MergeIndividualAndBatchPreferences(headerValue, batchReferences);
                     continue;
                 }
 
@@ -252,7 +250,7 @@ namespace Microsoft.AspNet.OData.Batch
             context.Request.Cookies = originalContext.Request.Cookies;
             foreach (KeyValuePair<string, StringValues> header in originalContext.Request.Headers)
             {
-                var headerKey = header.Key.ToLowerInvariant();
+                string headerKey = header.Key.ToLowerInvariant();
                 // do not copy over headers that should not be inherited from batch to individual requests
                 if (nonInheritableHeaders.Contains(headerKey))
                 {
@@ -261,7 +259,7 @@ namespace Microsoft.AspNet.OData.Batch
                 // some preferences may be inherited, others discarded
                 if (headerKey == "prefer")
                 {
-                    var preferencesToInherit = GetPreferencesToInheritFromBatch(header.Value);
+                    string preferencesToInherit = GetPreferencesToInheritFromBatch(header.Value);
                     if (!string.IsNullOrEmpty(preferencesToInherit))
                     {
                         context.Request.Headers.Add(header.Key, preferencesToInherit);
@@ -287,7 +285,7 @@ namespace Microsoft.AspNet.OData.Batch
         /// <returns>comma-separated preferences that can be passed down to an individual request</returns>
         private static string GetPreferencesToInheritFromBatch(string batchPreferences)
         {
-            var preferencesToInherit = batchPreferences.SplitPreferences()
+            IEnumerable<string> preferencesToInherit = batchPreferences.SplitPreferences()
                 .Where(value => 
                 !nonInheritablePreferences.Any(
                     prefToIgnore => value.Trim().ToLowerInvariant().StartsWith(prefToIgnore)))
@@ -314,14 +312,14 @@ namespace Microsoft.AspNet.OData.Batch
                 return individualPreferences;
             }
             // get the name of each preference to avoid adding duplicates from batch
-            var individualList = individualPreferences.SplitPreferences().Select(pref => pref.Trim());
-            var individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
+            IEnumerable<string> individualList = individualPreferences.SplitPreferences().Select(pref => pref.Trim());
+            HashSet<string> individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
             
             
-            var filteredBatchList = batchPreferences.SplitPreferences().Select(pref => pref.Trim())
+            IEnumerable<string> filteredBatchList = batchPreferences.SplitPreferences().Select(pref => pref.Trim())
                 // do not add duplicate preferences from batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
-            var filteredBatchPreferences = string.Join(", ", filteredBatchList);
+            string filteredBatchPreferences = string.Join(", ", filteredBatchList);
 
             return string.Join(", ", individualPreferences, filteredBatchPreferences);
         }
@@ -338,9 +336,10 @@ namespace Microsoft.AspNet.OData.Batch
         private static IEnumerable<string> SplitPreferences(this string preferences)
         {
             StringBuilder currentPreference = new StringBuilder();
-            var insideQuotedValue = false;
+            HashSet<string> addedPreferences = new HashSet<string>();
+            bool insideQuotedValue = false;
             char prevChar = '\0';
-            foreach (var c in preferences)
+            foreach (char c in preferences)
             {
                 if (c == '"')
                 {
@@ -358,7 +357,14 @@ namespace Microsoft.AspNet.OData.Batch
 
                 if (c == ',' && !insideQuotedValue)
                 {
-                    yield return currentPreference.ToString();
+                    string result = currentPreference.ToString();
+                    string prefName = result.Split('=')[0];
+                    // do not add duplicate preference
+                    if (!addedPreferences.Contains(prefName))
+                    {
+                        yield return result;
+                        addedPreferences.Add(prefName);
+                    }
                     currentPreference.Clear();
                 }
                 else

@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 }
 
                 // Add the value provider.
-                options.ValueProviderFactories.Add(new ODataValueProviderFactory());
+                options.ValueProviderFactories.Insert(0, new ODataValueProviderFactory());
             });
 
 #if NETSTANDARD2_0

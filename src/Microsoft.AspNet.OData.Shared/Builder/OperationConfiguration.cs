@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -18,6 +19,8 @@ namespace Microsoft.AspNet.OData.Builder
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
         private string _namespace;
+        private DerivedTypeConstraintConfiguration _bindingTypeConstraint;
+        private DerivedTypeConstraintConfiguration _returnTypeConstraint;
 
         /// <summary>
         /// Initializes a new instance of <see cref="OperationConfiguration" /> class.
@@ -89,6 +92,16 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public DerivedTypeConstraintConfiguration BindingDerivedTypeConstraint { get { return _bindingTypeConstraint; } }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public DerivedTypeConstraintConfiguration ReturnDerivedTypeConstraint { get { return _returnTypeConstraint; } }
+
+        /// <summary>
         /// The type returned when the operation is invoked.
         /// </summary>
         public IEdmTypeConfiguration ReturnType { get; set; }
@@ -107,6 +120,77 @@ namespace Microsoft.AspNet.OData.Builder
         /// The EntitySetPathExpression that entities are returned from.
         /// </summary>
         public IEnumerable<string> EntitySetPath { get; internal set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="derivedType"></param>
+        protected void AddBindingDerivedTypeConstraintImpl(Type derivedType)
+        {
+            if (_bindingParameter == null)
+            {
+                throw new InvalidOperationException("Binding type not specified");
+            }
+
+            AddDerivedTypeConstraintImpl(_bindingParameter.TypeConfiguration, derivedType, ref _bindingTypeConstraint);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="derivedType"></param>
+        protected void AddReturnDerivedTypeConstraintImpl(Type derivedType)
+        {
+            if (_bindingParameter == null)
+            {
+                throw new InvalidOperationException("Binding type not specified");
+            }
+
+            AddDerivedTypeConstraintImpl(ReturnType, derivedType, ref _returnTypeConstraint);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static void AddDerivedTypeConstraintImpl(IEdmTypeConfiguration basedType, Type derivedType, ref DerivedTypeConstraintConfiguration derivedTypeConfig)
+        {
+            if (derivedTypeConfig != null)
+            {
+                derivedTypeConfig.Add(derivedType);
+                return;
+            }
+
+            Type bindingClrType;
+            switch (basedType.Kind)
+            {
+                case EdmTypeKind.Complex:
+                case EdmTypeKind.Entity:
+                    StructuralTypeConfiguration structuralType = (StructuralTypeConfiguration)basedType;
+                    bindingClrType = structuralType.ClrType;
+                    break;
+
+                case EdmTypeKind.Collection:
+                    CollectionTypeConfiguration collectionTypeConfiguration = (CollectionTypeConfiguration)basedType;
+                    switch (collectionTypeConfiguration.ElementType.Kind)
+                    {
+                        case EdmTypeKind.Complex:
+                        case EdmTypeKind.Entity:
+                            structuralType = (StructuralTypeConfiguration)collectionTypeConfiguration.ElementType;
+                            bindingClrType = structuralType.ClrType;
+                            break;
+
+                        default:
+                            throw new InvalidOperationException("Can't add binding type derived for non collection of structured type");
+                    }
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Can't add binding type derived for non structured type");
+            }
+
+            derivedTypeConfig = new DerivedTypeConstraintConfiguration(bindingClrType);
+            derivedTypeConfig.Add(derivedType);
+        }
 
         /// <summary>
         /// Get the bindingParameter. 

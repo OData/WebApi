@@ -946,6 +946,47 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal("Remove Old Movies", removeOldTitle.Title);
         }
 
+        [Fact]
+        public void CanConfigureDerivedForFunction()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntitySet<Creature>("Creatures").EntityType.HasKey(c => c.Id);
+            builder.EntityType<Animal>().DerivesFrom<Creature>();
+            builder.EntityType<Human>().DerivesFrom<Creature>();
+            builder.EntityType<Gene>().DerivesFrom<Creature>(); // No restriction
+            builder.EntityType<StateZoo>().DerivesFrom<Zoo>(); // No restriction
+            builder.EntityType<NationZoo>().DerivesFrom<Zoo>();
+            builder.EntityType<SeaZoo>().DerivesFrom<Zoo>();
+            var zooType = builder.EntityType<Zoo>();
+
+            var function = zooType.Function("MyFunction").ReturnsFromEntitySet<Creature>("Creatures");
+
+            function.HasBindingTypeConstraint<SeaZoo>().HasBindingTypeConstraint<NationZoo>()
+                .HasReturnTypeConstraint<Animal>().HasReturnTypeConstraint<Human>();
+
+            IEdmModel model = builder.GetEdmModel();
+
+            string csdl = MetadataTest.GetCSDL(model);
+            Assert.NotNull(csdl);
+
+            Assert.Contains("<Annotations Target=\"Default.MyFunction(Microsoft.AspNet.OData.Test.Builder.TestModels.Zoo)/$ReturnType\">" +
+            "<Annotation Term=\"Org.OData.Validation.V1.DerivedTypeConstraint\">" +
+               "<Collection>" +
+                  "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Animal</String>" +
+                  "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Human</String>" +
+               "</Collection>" +
+            "</Annotation>" +
+          "</Annotations>" +
+          "<Annotations Target=\"Default.MyFunction(Microsoft.AspNet.OData.Test.Builder.TestModels.Zoo)/bindingParameter\">" +
+            "<Annotation Term=\"Org.OData.Validation.V1.DerivedTypeConstraint\">" +
+               "<Collection>" +
+                  "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.SeaZoo</String>" +
+                  "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.NationZoo</String>" +
+               "</Collection>" +
+            "</Annotation>" +
+          "</Annotations>", csdl);
+        }
+
         public class Movie
         {
             public int ID { get; set; }

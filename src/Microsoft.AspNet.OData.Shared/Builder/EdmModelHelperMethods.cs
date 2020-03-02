@@ -192,28 +192,40 @@ namespace Microsoft.AspNet.OData.Builder
             return String.Join("/", bindings);
         }
 
-        private static void AddOperationParameters(EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
+        private static void AddOperationParameters(this EdmModel model, EdmOperation operation, OperationConfiguration operationConfiguration, Dictionary<Type, IEdmType> edmTypeMap)
         {
+            IEdmOperationParameter bindingParameter = null;
             foreach (ParameterConfiguration parameter in operationConfiguration.Parameters)
             {
+                IEdmOperationParameter operationParameter;
                 bool isParameterNullable = parameter.Nullable;
                 IEdmTypeReference parameterTypeReference = GetEdmTypeReference(edmTypeMap, parameter.TypeConfiguration, nullable: isParameterNullable);
                 if (parameter.IsOptional)
                 {
                     if (parameter.DefaultValue != null)
                     {
-                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference, parameter.DefaultValue);
+                        operationParameter = operation.AddOptionalParameter(parameter.Name, parameterTypeReference, parameter.DefaultValue);
                     }
                     else
                     {
-                        operation.AddOptionalParameter(parameter.Name, parameterTypeReference);
+                        operationParameter = operation.AddOptionalParameter(parameter.Name, parameterTypeReference);
                     }
                 }
                 else
                 {
-                    IEdmOperationParameter operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
+                    operationParameter = new EdmOperationParameter(operation, parameter.Name, parameterTypeReference);
                     operation.AddParameter(operationParameter);
                 }
+
+                if (operationConfiguration.BindingParameter == parameter)
+                {
+                    bindingParameter = operationParameter;
+                }
+            }
+
+            if (bindingParameter != null && operationConfiguration.BindingDerivedTypeConstraint != null)
+            {
+                model.AddDerivedTypeConstraintAnnotation(bindingParameter, edmTypeMap, operationConfiguration.BindingDerivedTypeConstraint);
             }
         }
 
@@ -322,7 +334,12 @@ namespace Microsoft.AspNet.OData.Builder
                     model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                AddOperationParameters(operation, operationConfiguration, edmTypeMap);
+                if (operationConfiguration.ReturnDerivedTypeConstraint != null && operationConfiguration.ReturnType != null)
+                {
+                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.ReturnDerivedTypeConstraint);
+                }
+
+                model.AddOperationParameters(operation, operationConfiguration, edmTypeMap);
 
                 if (operationConfiguration.IsBindable)
                 {
@@ -646,6 +663,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             var collectionExpression = new EdmCollectionExpression(collectionConstants);
             EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
+            annotation.SetSerializationLocation(model, derivedTypeConstraint.Location);
             model.SetVocabularyAnnotation(annotation);
         }
 

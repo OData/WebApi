@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Csdl;
 
 namespace Microsoft.AspNet.OData.Builder
 {
@@ -28,6 +29,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             ClrBaseType = baseType;
             _derivedTypes = new HashSet<Type>();
+            Location = EdmVocabularyAnnotationSerializationLocation.OutOfLine;
         }
 
         /// <summary>
@@ -52,6 +54,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// 
         /// </summary>
+        public EdmVocabularyAnnotationSerializationLocation Location { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="derivedType"></param>
         public void Add(Type derivedType)
         {
@@ -72,15 +79,6 @@ namespace Microsoft.AspNet.OData.Builder
 
             _derivedTypes.Add(derivedType);
         }
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <typeparam name="TBase"></typeparam>
-    public class DerivedTypeConstraintConfiguration<TBase>
-    {
-
     }
 
     /// <summary>

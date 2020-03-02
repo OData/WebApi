@@ -74,6 +74,48 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDerived"></typeparam>
+        /// <returns></returns>
+        public ActionConfiguration HasBindingTypeConstraint<TDerived>()
+        {
+            return HasBindingTypeConstraint(typeof(TDerived));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public ActionConfiguration HasBindingTypeConstraint(Type type)
+        {
+            AddBindingDerivedTypeConstraintImpl(type);
+            return this;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TDerived"></typeparam>
+        /// <returns></returns>
+        public ActionConfiguration HasReturnTypeConstraint<TDerived>()
+        {
+            return HasReturnTypeConstraint(typeof(TDerived));
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public ActionConfiguration HasReturnTypeConstraint(Type type)
+        {
+            AddReturnDerivedTypeConstraintImpl(type);
+            return this;
+        }
+
+        /// <summary>
         /// Register a factory that creates feed actions links.
         /// </summary>
         public ActionConfiguration HasFeedActionLink(Func<ResourceSetContext, Uri> actionLinkFactory, bool followsConventions)

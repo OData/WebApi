@@ -307,6 +307,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 return batchPreferences;
             }
+
             if (string.IsNullOrEmpty(batchPreferences))
             {
                 return individualPreferences;
@@ -314,7 +315,7 @@ namespace Microsoft.AspNet.OData.Batch
             // get the name of each preference to avoid adding duplicates from batch
             IEnumerable<string> individualList = individualPreferences.SplitPreferences().Select(pref => pref.Trim());
             HashSet<string> individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
-            
+
             
             IEnumerable<string> filteredBatchList = batchPreferences.SplitPreferences().Select(pref => pref.Trim())
                 // do not add duplicate preferences from batch

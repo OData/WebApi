@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -45,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         public string Name { get; set; }
 
-        public IList<OrderDetail> Details { get; set;}
+        public IList<OrderDetail> Details { get; set; }
 
         public int Price { get; set; }
         [Page]
@@ -65,12 +66,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         public string SpecialName { get; set; }
     }
 
-    [Page(PageSize =2)]
+    [Page(PageSize = 2)]
     public class Address
     {
         public string Name { get; set; }
 
         public string Street { get; set; }
+    }
+
+    [Page(PageSize = 2)]
+    public class Date
+    {
+        [Key]
+        public DateTime DateValue { get; set; }
     }
 
     public class SkipTokenEdmModel
@@ -81,6 +89,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             builder.EntitySet<Customer>("Customers");
             builder.EntitySet<Order>("Orders");
             builder.EntitySet<OrderDetail>("Details");
+            builder.EntitySet<Date>("Dates");
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

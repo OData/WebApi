@@ -112,7 +112,10 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             // Arrange
             const string caseInSensitive = "?$fIlTer=iD Eq 33";
-            ODataUriResolver resolver = new CaseInsensitiveResolver();
+            ODataUriResolver resolver = new ODataUriResolver
+            {
+                EnableCaseInsensitive = true,
+            };
             HttpServer server = new HttpServer(InitializeConfiguration("QueryCompositionCustomer", true, resolver));
             HttpClient client = new HttpClient(server);
 

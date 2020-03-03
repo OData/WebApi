@@ -1,23 +1,22 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
 using AspNetCore3xEndpointSample.Web.Models;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OData.Edm;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Batch;
-using Microsoft.AspNet.OData.Formatter.Deserialization;
-using System;
-using System.Runtime.InteropServices.ComTypes;
-using Microsoft.AspNetCore.Http;
 using Microsoft.OData;
-using System.Collections.Generic;
-using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.OData.Edm;
 
 namespace AspNetCore3xEndpointSample.Web
 {
@@ -48,9 +47,10 @@ namespace AspNetCore3xEndpointSample.Web
 
             IEdmModel model = EdmModelBuilder.GetEdmModel();
 
-            app.UseRouting();
-
+            // Please add "UseODataBatching()" before "UseRouting()" to support OData $batch.
             app.UseODataBatching();
+
+            app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {

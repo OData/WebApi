@@ -114,6 +114,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
                     {
                         this.ClientFactory = app.ApplicationServices.GetRequiredService<IHttpClientFactory>();
 
+                        // should add ODataBatch middleware before the routing middelware
+                        app.UseODataBatching();
                         app.UseRouting();
                         app.UseEndpoints(endpoints =>
                         {

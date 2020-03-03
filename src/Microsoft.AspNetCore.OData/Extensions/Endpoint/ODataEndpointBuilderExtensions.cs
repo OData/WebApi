@@ -588,8 +588,7 @@ namespace Microsoft.AspNet.OData.Extensions
             ODataBatchHandler batchHandler = subServiceProvider.GetService<ODataBatchHandler>();
             if (batchHandler != null)
             {
-                // TODO: for the $batch, i need more time to refactor/test it.
-                // batchHandler.ODataRoute = route;
+                // TODO: for the $batch, need refactor/test it for more.
                 batchHandler.ODataRouteName = routeName;
 
                 string batchPath = String.IsNullOrEmpty(routePrefix)
@@ -597,6 +596,7 @@ namespace Microsoft.AspNet.OData.Extensions
                     : '/' + routePrefix + '/' + ODataRouteConstants.Batch;
 
                 ODataBatchPathMapping batchMapping = builder.ServiceProvider.GetRequiredService<ODataBatchPathMapping>();
+                batchMapping.IsEndpointRouting = true;
                 batchMapping.AddRoute(routeName, batchPath);
             }
 

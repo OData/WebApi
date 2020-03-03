@@ -1,15 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
@@ -17,6 +24,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
 {
     public class EndpointEfCoreTests : EndpointTestBase<EndpointEfCoreTests>
     {
+        public static IEdmModel EdmModel;
+
         private const string CustomersBaseUrl = "{0}/odata/EpCustomers";
 
         public EndpointEfCoreTests(EndpointTestFixture<EndpointEfCoreTests> fixture)
@@ -38,7 +47,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
 
             configuration.MaxTop(2).Expand().Select().OrderBy().Filter();
 
-            configuration.MapODataRoute("odata", "odata", EndpointModelGenerator.GetConventionalEdmModel());
+            EdmModel = EndpointModelGenerator.GetConventionalEdmModel();
+            configuration.MapODataRoute("odata", "odata",
+                EdmModel,
+                new DefaultODataPathHandler(),
+                ODataRoutingConventions.CreateDefault(),
+                new DefaultODataBatchHandler());
         }
 
         [Fact]
@@ -185,6 +199,79 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
             Assert.Equal(new[] { "Id", "Title" }, order.Properties().Select(p => p.Name));
             Assert.Equal("1", order["Id"].ToString());
             Assert.Equal("104m", order["Title"].ToString());
+        }
+
+        [Fact]
+        public async Task CanReadDataInBatchUsingEndpointRouting()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/odata/$batch", this.BaseAddress);
+            Uri address = new Uri(this.BaseAddress, UriKind.Absolute);
+
+            string relativeToServiceRootUri = "EpCustomers";
+            string relativeToHostUri = address.LocalPath.TrimEnd(new char[] { '/' }) + "/odata/EpCustomers";
+            string absoluteUri = this.BaseAddress + "/odata/EpCustomers";
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+            {
+                ""requests"":[
+                    {
+                    ""id"": ""2"",
+                    ""method"": ""get"",
+                    ""url"": """ + relativeToServiceRootUri + @""",
+                    ""headers"": { ""Accept"": ""application/json""}
+                    },
+                    {
+                    ""id"": ""3"",
+                    ""method"": ""get"",
+                    ""url"": """ + relativeToHostUri + @"""
+                    },
+                    {
+                    ""id"": ""4"",
+                    ""method"": ""get"",
+                    ""url"": """ + absoluteUri + @""",
+                    ""headers"": { ""Accept"": ""application/json""}
+                    }
+                ]
+            }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Equal("application/json", response.Content.Headers.ContentType.MediaType);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            var model = EdmModel;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), model))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            subResponseCount++;
+                            Assert.Equal(200, operationMessage.StatusCode);
+                            Assert.Contains("application/json", operationMessage.Headers.Single(h => String.Equals(h.Key, "Content-Type", StringComparison.OrdinalIgnoreCase)).Value);
+                            using (var innerMessageReader = new ODataMessageReader(operationMessage, new ODataMessageReaderSettings(), model))
+                            {
+                                var innerReader = innerMessageReader.CreateODataResourceSetReader();
+                                while (innerReader.Read()) ;
+                            }
+                            break;
+                    }
+                }
+            }
+
+            Assert.Equal(3, subResponseCount);
         }
     }
 }

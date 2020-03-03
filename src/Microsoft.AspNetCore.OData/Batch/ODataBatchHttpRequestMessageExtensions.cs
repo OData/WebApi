@@ -16,6 +16,9 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+#if !NETSTANDARD2_0
+using Microsoft.AspNetCore.Http.Features;
+#endif
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -285,12 +288,35 @@ namespace Microsoft.AspNet.OData.Batch
                 return new Uri(request.GetDisplayUrl());
             }
 
+            HttpContext context = request.HttpContext;
+
+#if !NETSTANDARD2_0
+            // Here's workaround to help "EndpointLinkGenerator" to generator
+            ODataBatchPathMapping batchMapping = request.HttpContext.RequestServices.GetRequiredService<ODataBatchPathMapping>();
+            if (batchMapping.IsEndpointRouting)
+            {
+                context = new DefaultHttpContext
+                {
+                    RequestServices = request.HttpContext.RequestServices,
+                };
+
+                IEndpointFeature endpointFeature = new ODataEndpointFeature();
+                endpointFeature.Endpoint = new Endpoint((d) => null, null, "anything");
+                context.Features.Set(endpointFeature);
+
+                context.Request.Scheme = request.Scheme;
+                context.Request.Host = request.Host;
+            }
+
+            context.Request.ODataFeature().RouteName = oDataRouteName;
+#endif
+
             // The IActionContextAccessor and ActionContext will be present after routing but not before
             // GetUrlHelper only uses the HttpContext and the Router, which we have so construct a dummy
             // action context.
             ActionContext actionContext = new ActionContext
             {
-                HttpContext = request.HttpContext,
+                HttpContext = context,
                 RouteData = new RouteData(),
                 ActionDescriptor = new ActionDescriptor()
             };
@@ -316,5 +342,12 @@ namespace Microsoft.AspNet.OData.Batch
             }
             return new Uri(baseAddress);
         }
+
+#if !NETSTANDARD2_0
+        internal class ODataEndpointFeature : IEndpointFeature
+        {
+            public Endpoint Endpoint { get; set; }
+        }
+#endif
     }
 }

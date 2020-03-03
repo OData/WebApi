@@ -199,6 +199,13 @@ namespace Microsoft.AspNet.OData.Batch
                     continue;
                 }
 
+#if !NETSTANDARD2_0
+                if (kvp.Key == typeof(IEndpointFeature))
+                {
+                    continue;
+                }
+#endif
+
                 features[kvp.Key] = kvp.Value;
             }
 

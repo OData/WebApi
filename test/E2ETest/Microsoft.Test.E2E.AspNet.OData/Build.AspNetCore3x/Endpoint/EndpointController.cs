@@ -127,7 +127,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
 
         public void Dispose()
         {
-            _context.Dispose();
+            // DO NOT dispose _context. Otherwise the $batch will get exception to complain about the re-using the disposed object.
+            // _context.Dispose();
         }
     }
 }

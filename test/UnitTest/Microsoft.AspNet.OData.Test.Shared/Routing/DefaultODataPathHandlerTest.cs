@@ -2446,7 +2446,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             // Arrange & Act
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            ODataUriResolver resolver = new CaseInsensitiveResolver();
+            ODataUriResolver resolver = new ODataUriResolver
+            {
+                EnableCaseInsensitive = true,
+            };
 
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
@@ -2489,7 +2492,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             // Arrange
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            ODataUriResolver resolver = new UnqualifiedCaseInsensitiveResolver();
+            ODataUriResolver resolver = new UnqualifiedODataUriResolver
+            {
+                EnableCaseInsensitive = true,
+            };
 
             // Act
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);

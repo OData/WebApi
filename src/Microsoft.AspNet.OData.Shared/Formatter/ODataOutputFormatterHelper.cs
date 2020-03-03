@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
@@ -379,6 +380,8 @@ namespace Microsoft.AspNet.OData.Formatter
 
         private static Microsoft.OData.UriParser.ODataPath GeneratePath(IEdmNavigationSource navigationSource)
         {
+            Contract.Assert(navigationSource != null);
+
             switch (navigationSource.NavigationSourceKind())
             {
                 case EdmNavigationSourceKind.EntitySet:
@@ -389,14 +392,11 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 case EdmNavigationSourceKind.ContainedEntitySet:
                     IEdmContainedEntitySet containedEntitySet = (IEdmContainedEntitySet)navigationSource;
-                    var path = GeneratePath(containedEntitySet.ParentNavigationSource);
+                    Microsoft.OData.UriParser.ODataPath path = GeneratePath(containedEntitySet.ParentNavigationSource);
                     IList<ODataPathSegment> segments = new List<ODataPathSegment>();
-                    if (path != null)
+                    foreach (var item in path)
                     {
-                        foreach (var item in path)
-                        {
-                            segments.Add(item);
-                        }
+                        segments.Add(item);
                     }
 
                     segments.Add(new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource));

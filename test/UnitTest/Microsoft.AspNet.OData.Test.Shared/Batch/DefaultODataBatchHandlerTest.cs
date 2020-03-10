@@ -488,7 +488,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             var orderId = 2;
             var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
             var createRefPayload = @"{""@odata.id"":""$3""}";
-            
+
             var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
             batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
             HttpContent httpContent = new StringContent($@"
@@ -527,7 +527,7 @@ Accept-Charset: UTF-8
 
             httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
             batchRequest.Content = httpContent;
-            
+
             var response = await client.SendAsync(batchRequest);
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
@@ -542,137 +542,97 @@ Accept-Charset: UTF-8
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
 
-        public static TheoryDataSet<Dictionary<string, IEnumerable<string>>, (string, string, string)> BatchHeadersTestData
+        public static readonly TheoryDataSet<IEnumerable<string>, string, string, string> _batchHeadersTestData = new TheoryDataSet<IEnumerable<string>, string, string, string>()
         {
-            get
             {
-                return new TheoryDataSet<Dictionary<string, IEnumerable<string>>, (string, string, string)>()
+                // should not copy over content type and content length headers to individual request
+                Enumerable.Empty<string>(),
+                "GET,ContentType=,ContentLength=,Prefer=",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+            },
+            {
+                // should not copy over preferences that should not be inherited
+                new []
                 {
-                    {
-                        // should not copy over content type and content length headers to individual request
-                        new Dictionary<string, IEnumerable<string>>(),
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
-                        )
-                    },
-                    {
-                        // should not copy over preferences that should not be inherited
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            { "Prefer", new string[] { "respond-async, odata.continue-on-error" } }
-                        },
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
-                        )
-                    },
-                    {
-                        // inheritable preferences should be copied over
-                        // and combined with the individual request's own preferences if any
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            { "Prefer", new string[] { "allow-entityreferences, include-annotations=\"display.*\"" } }
-                        },
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
-                        )
-                    },
-                    {
-                        // if batch Prefer header contains both inheritable and non-inheritable preferences,
-                        // the non-inheritable ones should be removed before merging with individual request's own preferences
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            { "Prefer", new string[] { "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error" } }
-                        },
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
-                        )
-                    },
-                    {
-                        // if batch and individual request define the same preference, then the one from the individual request should be retained
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            {
-                                "Prefer", new string[]
-                                {
-                                    "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200"
-                                }
-                            }
-                        },
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
-                        )
-                    },
-                    {
-                        // should correctly handle preferences that contain parameters
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            {
-                                "Prefer", new string[]
-                                {
-                                    "allow-entityreferences, respond-async, foo; param=paramValue," +
-                                    "include-annotations=\"display.*\", continue-on-error, wait=200"
-                                }
-                            }
-                        },
-                        (
-                        "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200",
-                        "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\"",
-                        "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200"
-                        )
-                    },
-                    {
-                        // should correctly parse preferences with commas in their quoted values
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            {
-                                "Prefer", new string[]
-                                {
-                                    @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300"""
-                                }
-                            }
-                        },
-                        (
-                        @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\""",
-                        @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
-                        @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\"""
-                        )
-                    },
-                    {
-                        // should correctly handle batch request with multiple Prefer headers and should not copy duplicate references
-                        new Dictionary<string, IEnumerable<string>>()
-                        {
-                            {
-                                "Prefer", new string[]
-                                {
-                                    @"allow-entityreferences, respond-async, wait=300",
-                                    @"continue-on-error, wait=250, include-annotations=display"
-                                }
-                            }
-                        },
-                        (
-                            @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, wait=300, include-annotations=display",
-                            @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=display",
-                            @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, wait=300, include-annotations=display"
-                        )
-                    }       
-                };
+                    "respond-async, odata.continue-on-error"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+            },
+            {
+                // inheritable preferences should be copied over
+                // and combined with the individual request's own preferences if any
+                new []
+                {
+                    "allow-entityreferences, include-annotations=\"display.*\""
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+            },
+            {
+                // if batch Prefer header contains both inheritable and non-inheritable preferences,
+                // the non-inheritable ones should be removed before merging with individual request's own preferences
+                new []
+                {
+                    "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+            },
+            {
+                // if batch and individual request define the same preference, then the one from the individual request should be retained
+                new []
+                {
+                   "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
+            },
+            {
+                // should correctly handle preferences that contain parameters
+                new []
+                {
+                    "allow-entityreferences, respond-async, foo; param=paramValue,include-annotations=\"display.*\", continue-on-error, wait=200"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200"
+            },
+            {
+                // should correctly parse preferences with commas in their quoted values
+                new []
+                {
+                    @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300"""
+                },
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\""",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\"""
+            },
+            {
+                // should correctly handle batch request with multiple Prefer headers and should not copy duplicate references
+                new []
+                {
+                    @"allow-entityreferences, respond-async, wait=300",
+                    @"continue-on-error, wait=250, include-annotations=display"
+                },
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, wait=300, include-annotations=display",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=display",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, wait=300, include-annotations=display"
             }
-        }
+        };
 
         [Theory]
-        [MemberData(nameof(BatchHeadersTestData))]
-        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(IDictionary<string, IEnumerable<string>> batchHeaders,
-            (string getRequest, string deleteRequest, string postRequest) expectedHeaders)
+        [MemberData(nameof(_batchHeadersTestData))]
+        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(
+            IEnumerable<string> batchPreferHeaderValues,
+            string getRequest,
+            string deleteRequest,
+            string postRequest)
         {
             var batchRef = $"batch_{Guid.NewGuid()}";
             var changesetRef = $"changeset_{Guid.NewGuid()}";
@@ -680,7 +640,7 @@ Accept-Charset: UTF-8
             var acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
             var postPayload = "Bar";
 
-            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController)};
+            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController) };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 var builder = ODataConventionModelBuilderFactory.Create(config);
@@ -695,10 +655,8 @@ Accept-Charset: UTF-8
 
             var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
             batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
-            foreach (var item in batchHeaders)
-            {
-                batchRequest.Headers.Add(item.Key, item.Value);
-            }
+            batchRequest.Headers.Add("Prefer", batchPreferHeaderValues);
+
             var batchContent = $@"
 --{batchRef}
 Content-Type: application/http
@@ -747,9 +705,9 @@ Accept-Charset: UTF-8
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
             var responseContent = await response.Content.ReadAsStringAsync();
-            Assert.Contains(expectedHeaders.getRequest, responseContent);
-            Assert.Contains(expectedHeaders.deleteRequest, responseContent);
-            Assert.Contains(expectedHeaders.postRequest, responseContent);
+            Assert.Contains(getRequest, responseContent);
+            Assert.Contains(deleteRequest, responseContent);
+            Assert.Contains(postRequest, responseContent);
         }
 #endif
     }
@@ -757,12 +715,13 @@ Accept-Charset: UTF-8
     public class BatchTestCustomer
     {
         private static Lazy<IList<BatchTestCustomer>> _customers =
-            new Lazy<IList<BatchTestCustomer>>(() => {
+            new Lazy<IList<BatchTestCustomer>>(() =>
+            {
                 BatchTestCustomer customer01 = new BatchTestCustomer { Id = 1, Name = "Customer 01" };
                 customer01.Orders = new List<BatchTestOrder> { BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(1)) };
 
                 BatchTestCustomer customer02 = new BatchTestCustomer { Id = 2, Name = "Customer 02" };
-                
+
                 return new List<BatchTestCustomer> { customer01, customer02 };
             });
 
@@ -781,10 +740,11 @@ Accept-Charset: UTF-8
 
     public class BatchTestOrder
     {
-        private static Lazy<IList<BatchTestOrder>> _orders = 
-            new Lazy<IList<BatchTestOrder>>(() => {
+        private static Lazy<IList<BatchTestOrder>> _orders =
+            new Lazy<IList<BatchTestOrder>>(() =>
+            {
                 BatchTestOrder order01 = new BatchTestOrder { Id = 1, Amount = 100 };
-                
+
                 return new List<BatchTestOrder> { order01 };
             });
 

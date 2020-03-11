@@ -87,4 +87,40 @@ namespace AspNetCore3xEndpointSample.Web.Controllers
             return Ok(_context.Customers.FirstOrDefault(c => c.Id == key));
         }
     }
+
+    public class ImageAdsController : ODataController
+    {
+        private IList<ImageAd> imageAds = new List<ImageAd>
+        {
+            new ImageAd
+            {
+                Id = 1,
+                Images = new List<Image>
+                {
+                    new Image { Id = 11, Name = "abc" },
+                    new Image { Id = 12, Name = "xyz" }
+                }
+            },
+            new SubImageAd
+            {
+                Id = 2,
+                Images = new List<Image>
+                {
+                    new Image { Id = 21, Name = "ijk" },
+                    new Image { Id = 22, Name = "efg" }
+                },
+                SubImages = new List<Image>
+                {
+                    new Image { Id = 31, Name = "bcd" },
+                    new Image { Id = 42, Name = "opq" }
+                },
+            }
+        };
+
+        [EnableQuery]
+        public IActionResult Get()
+        {
+            return Ok(imageAds);
+        }
+    }
 }

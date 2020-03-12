@@ -73,8 +73,7 @@ namespace Microsoft.AspNet.OData.Query
 
             _queryOptionParser = new ODataQueryOptionParser(
                 context.Model,
-                context.ElementType,
-                context.NavigationSource,
+                context.Path.Path,
                 normalizedQueryParameters);
 
             // Note: the context.RequestContainer must be set by the ODataQueryOptions constructor.

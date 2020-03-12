@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
 using AspNetCore3xEndpointSample.Web.Models;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
@@ -11,12 +9,13 @@ using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using System;
+using System.Collections.Generic;
 
 namespace AspNetCore3xEndpointSample.Web
 {
@@ -32,7 +31,8 @@ namespace AspNetCore3xEndpointSample.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CustomerOrderContext>(opt => opt.UseLazyLoadingProxies().UseInMemoryDatabase("CustomerOrderList"));
+            //services.AddDbContext<CustomerOrderContext>(opt => opt.UseLazyLoadingProxies().UseInMemoryDatabase("CustomerOrderList"));
+            //services.AddScoped<CustomerOrderContext>(_ => new CustomerOrderContext(Configuration.GetConnectionString("DefaultConnection")));
             services.AddOData();
             services.AddRouting();
         }
@@ -54,6 +54,7 @@ namespace AspNetCore3xEndpointSample.Web
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.Expand();
                 endpoints.MapODataRoute(
                     "nullPrefix", null,
                     b =>

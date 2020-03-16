@@ -110,9 +110,19 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
         /// <returns>Updated configuration object.</returns>
-        public NavigationPropertyConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        public NavigationPropertyConfiguration HasDerivedTypeConstraints(params Type[] subtypes)
         {
-            AddDerivedTypeConstraintImpl(subtypes);
+            DerivedTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerivedType to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public NavigationPropertyConfiguration HasDerivedTypeConstraint<TDerivedType>()
+        {
+            DerivedTypeConstraints.AddConstraint<TDerivedType>();
             return this;
         }
 

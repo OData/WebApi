@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
         private string _namespace;
+        private IEdmTypeConfiguration _returnType;
 
         /// <summary>
         /// Initializes a new instance of <see cref="OperationConfiguration" /> class.
@@ -28,7 +29,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             Name = name;
             ModelBuilder = builder;
-            DerivedTypeConstraint = new DerivedTypeConstraintSet();
+            DerivedTypeConstraints = new DerivedTypeConstraintSet();
         }
 
         /// <summary>
@@ -92,7 +93,18 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// The type returned when the operation is invoked.
         /// </summary>
-        public IEdmTypeConfiguration ReturnType { get; set; }
+        public IEdmTypeConfiguration ReturnType
+        {
+            get { return _returnType; }
+            set
+            {
+                _returnType = value;
+                if (value != null)
+                {
+                    DerivedTypeConstraints.ClrBaseType = value.ClrType;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the return is nullable or not.
@@ -150,7 +162,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Type constraints for the return type of the operation.
         /// </summary>
-        internal DerivedTypeConstraintSet DerivedTypeConstraint { get; private set; }
+        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Sets the return type to a single EntityType instance.
@@ -244,16 +256,6 @@ namespace Microsoft.AspNet.OData.Builder
         internal void SetBindingParameterImplementation(string name, IEdmTypeConfiguration bindingParameterType)
         {
             _bindingParameter = new BindingParameterConfiguration(name, bindingParameterType);
-        }
-
-        internal void AddDerivedTypeConstraintToReturnTypeImpl(params Type[] constraints)
-        {
-            if (ReturnType == null)
-            {
-                Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
-            }
-
-            DerivedTypeConstraint.ValidateAndAddConstraints(ReturnType.ClrType, constraints);
         }
 
         /// <summary>

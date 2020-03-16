@@ -26,8 +26,8 @@ namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 
             if (!edmProperty.AddedExplicitly)
             {
-                DerivedTypeConstraintAttribute derivedTypeConstraint = attribute as DerivedTypeConstraintAttribute;
-                edmProperty.DerivedTypeConstraints.ValidateAndAddConstraints(edmProperty.RelatedClrType, derivedTypeConstraint.DerivedTypeConstraints);
+                DerivedTypeConstraintAttribute derivedTypeConstraintAttribute = attribute as DerivedTypeConstraintAttribute;
+                edmProperty.DerivedTypeConstraints.AddConstraints(derivedTypeConstraintAttribute.DerivedTypeConstraints);
             }
         }
     }

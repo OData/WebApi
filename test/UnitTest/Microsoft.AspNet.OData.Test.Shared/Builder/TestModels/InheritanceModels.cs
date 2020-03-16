@@ -100,6 +100,21 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public Animal SpecialAnimal { get; set; }
     }
 
+    public class StateZoo : Zoo
+    {
+
+    }
+
+    public class NationZoo : Zoo
+    {
+
+    }
+
+    public class SeaZoo : Zoo
+    {
+
+    }
+
     public class Creature
     {
         public int Id { get; set; }
@@ -108,6 +123,10 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
     public class Animal : Creature
     {
         public int Age { get; set; }
+    }
+
+    public class Gene : Creature
+    {
     }
 
     public class Human : Animal

@@ -325,9 +325,9 @@ namespace Microsoft.AspNet.OData.Builder
                     model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                if (operationConfiguration.DerivedTypeConstraint != null)
+                if (operationConfiguration.DerivedTypeConstraints != null)
                 {
-                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.DerivedTypeConstraint);
+                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.DerivedTypeConstraints);
                 }
 
                 model.AddOperationParameters(operation, operationConfiguration, edmTypeMap);
@@ -681,16 +681,16 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         internal static void AddDerivedTypeConstraintAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target, 
-            Dictionary<Type, IEdmType> edmTypeMap, IEnumerable<Type> types)
+            Dictionary<Type, IEdmType> edmTypeMap, DerivedTypeConstraintSet derivedTypeConstraints)
         {
-            if (!types.Any())
+            if (!derivedTypeConstraints.Any())
             {
                 return;
             }
 
             IEdmTerm term = ValidationVocabularyModel.DerivedTypeConstraintTerm;
             List<EdmStringConstant> collectionConstants = new List<EdmStringConstant>();
-            foreach (var type in types)
+            foreach (var type in derivedTypeConstraints)
             {
                 if (edmTypeMap.ContainsKey(type))
                 {
@@ -704,6 +704,7 @@ namespace Microsoft.AspNet.OData.Builder
 
             var collectionExpression = new EdmCollectionExpression(collectionConstants);
             EdmVocabularyAnnotation annotation = new EdmVocabularyAnnotation(target, term, collectionExpression);
+            annotation.SetSerializationLocation(model, derivedTypeConstraints.Location);
             model.SetVocabularyAnnotation(annotation);
         }
 

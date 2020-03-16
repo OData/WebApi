@@ -62,9 +62,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
             var mainSupplier = modelBuilder.Singleton<Supplier>("MainSupplier");
 
-            var suppliers = modelBuilder.EntitySet<Supplier>("Suppliers").AddDerivedTypeConstraint(typeof(ToiletPaperSupplier));
+            var suppliers = modelBuilder.EntitySet<Supplier>("Suppliers").HasDerivedTypeConstraint<ToiletPaperSupplier>();
 
-            mainSupplier.AddDerivedTypeConstraint(typeof(ToiletPaperSupplier));
+            mainSupplier.HasDerivedTypeConstraints(typeof(ToiletPaperSupplier));
 
             suppliers.HasEditLink(entityContext =>
                 {
@@ -113,7 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             supplier.CollectionProperty(s => s.Addresses);
             supplier.CollectionProperty(s => s.Tags);
             supplier.EnumProperty(s => s.CountryOrRegion);
-            supplier.ComplexProperty(s => s.MainAddress).AddDerivedTypeConstraint(typeof(Address));
+            supplier.ComplexProperty(s => s.MainAddress).HasDerivedTypeConstraints(typeof(Address));
 
             var productFamily = families.EntityType;
             productFamily.HasKey(pf => pf.ID);
@@ -123,7 +123,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             // Create relationships and bindings in one go
             products.HasRequiredBinding(p => p.Family, families);
             families.HasManyBinding(pf => pf.Products, products);
-            families.HasOptionalBinding(pf => pf.Supplier, suppliers).NavigationProperty.AddDerivedTypeConstraint(typeof(ToiletPaperSupplier));
+            families.HasOptionalBinding(pf => pf.Supplier, suppliers).NavigationProperty.HasDerivedTypeConstraint<ToiletPaperSupplier>();
             suppliers.HasManyBinding(s => s.ProductFamilies, families);
 
             // Create navigation Link builders
@@ -176,11 +176,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
               }));
               }, true);
 
-            var function = supplier.Function("GetAddress").Returns<Address>().AddDerivedTypeConstraint(typeof(Address));
+            var function = supplier.Function("GetAddress").Returns<Address>().HasDerivedTypeConstraint<Address>();
+            function.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
             function.Parameter<int>("value");
 
-            var action = modelBuilder.Action("GetAddress").Returns<Address>().AddDerivedTypeConstraint(typeof(Address));
-            action.Parameter<Supplier>("supplier").AddDerivedTypeConstraint(typeof(ToiletPaperSupplier));
+            var action = modelBuilder.Action("GetAddress").Returns<Address>().HasDerivedTypeConstraints(typeof(Address));
+            action.Parameter<Supplier>("supplier").HasDerivedTypeConstraint<ToiletPaperSupplier>();
+            function.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
 
             return modelBuilder.GetEdmModel();
         }
@@ -229,18 +231,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             };
 
             Assert.All(vocabularyAnnotations, isDerivedTypeConstraintTerm);
-            Assert.Equal("MainAddress", vocabularyAnnotations[0].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[0].Target).ToString());
-            Assert.Equal("Supplier", vocabularyAnnotations[1].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[1].Target).ToString());
-            Assert.Equal("Suppliers", vocabularyAnnotations[2].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[2].Target).ToString());
-            Assert.Equal("MainSupplier", vocabularyAnnotations[3].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[3].Target).ToString());
-            Assert.Equal("supplier", vocabularyAnnotations[6].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[6].Target).ToString());
+            Assert.Equal("MainAddress", vocabularyAnnotations[2].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[2].Target).ToString());
+            Assert.Equal("Supplier", vocabularyAnnotations[3].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[3].Target).ToString());
+            Assert.Equal("supplier", vocabularyAnnotations[4].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[4].Target).ToString());
+            Assert.Equal("Suppliers", vocabularyAnnotations[5].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[5].Target).ToString());
+            Assert.Equal("MainSupplier", vocabularyAnnotations[6].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[6].Target).ToString());
 
-            var declaringOperation = vocabularyAnnotations[4].Target.GetType().GetProperty("DeclaringOperation")
-                .GetValue(vocabularyAnnotations[4].Target);
+
+            var declaringOperation = vocabularyAnnotations[0].Target.GetType().GetProperty("DeclaringOperation")
+                .GetValue(vocabularyAnnotations[0].Target);
             Assert.Equal("GetAddress", declaringOperation.GetType().GetProperty("Name").GetValue(declaringOperation).ToString());
 
-            declaringOperation = vocabularyAnnotations[5].Target.GetType().GetProperty("DeclaringOperation")
-                .GetValue(vocabularyAnnotations[5].Target);
+            declaringOperation = vocabularyAnnotations[1].Target.GetType().GetProperty("DeclaringOperation")
+                .GetValue(vocabularyAnnotations[1].Target);
             Assert.Equal("GetAddress", declaringOperation.GetType().GetProperty("Name").GetValue(declaringOperation).ToString());
 
             Assert.Equal(7, vocabularyAnnotations.Count);

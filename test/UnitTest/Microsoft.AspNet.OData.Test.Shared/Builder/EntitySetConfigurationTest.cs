@@ -234,5 +234,32 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.False(navigationLink.FollowsConventions);
             Assert.Equal(link2, navigationLink.Factory(null, null));
         }
+
+        [Fact]
+        public void CanConfigureDerivedTypeConstraints()
+        {
+            // Arrange
+            ODataModelBuilder builder = ODataModelBuilderMocks.GetModelBuilderMock<ODataModelBuilder>();
+            builder.EntityType<Animal>().DerivesFrom<Creature>();
+            builder.EntityType<Human>().DerivesFrom<Creature>();
+            var creaturesConfiguration = builder.EntitySet<Creature>("Creatures");
+            creaturesConfiguration.HasDerivedTypeConstraint<Animal>().HasDerivedTypeConstraint<Human>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+            string csdl = MetadataTest.GetCSDL(model);
+
+            // Assert    
+            Assert.NotNull(csdl);
+            string expected = "<EntitySet Name=\"Creatures\" EntityType=\"Microsoft.AspNet.OData.Test.Builder.TestModels.Creature\">" +
+                "<Annotation Term=\"Org.OData.Validation.V1.DerivedTypeConstraint\">" +
+                    "<Collection>" + 
+                        "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Animal</String>" + 
+                        "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Human</String>" +
+                    "</Collection>" +
+               "</Annotation>" + 
+             "</EntitySet>";
+            Assert.Contains(expected, csdl);
+        }
     }
 }

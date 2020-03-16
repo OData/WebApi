@@ -72,13 +72,19 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
         /// <returns>Updated configuration object.</returns>
-        public EntitySetConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        public EntitySetConfiguration HasDerivedTypeConstraints(params Type[] subtypes)
         {
-            foreach (Type subType in subtypes)
-            {
-                AddDerivedTypeConstraintImpl(subType);
-            }
+            DerivedTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
 
+        /// <summary>
+        /// Adds TDerived to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public EntitySetConfiguration HasDerivedTypeConstraint<TDerivedType>()
+        {
+            DerivedTypeConstraints.AddConstraint<TDerivedType>();
             return this;
         }
     }

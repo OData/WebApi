@@ -83,7 +83,6 @@ namespace Microsoft.AspNet.OData.Builder
             _editLinkBuilder = null;
             _readLinkBuilder = null;
             _navigationPropertyLinkBuilders = new Dictionary<NavigationPropertyConfiguration, NavigationLinkBuilder>();
-
         }
 
         /// <summary>
@@ -105,9 +104,9 @@ namespace Microsoft.AspNet.OData.Builder
         public Type ClrType { get; private set; }
 
         /// <summary>
-        /// Collection that determines the derived type constraints
+        /// Set that determines the derived type constraints
         /// </summary>
-        internal DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the name of this navigation source.
@@ -462,14 +461,6 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             return Enumerable.Empty<NavigationPropertyBindingConfiguration>();
-        }
-
-        /// <summary>
-        /// Adds types to the list of derived type constraints.
-        /// </summary>
-        internal void AddDerivedTypeConstraintImpl(params Type[] subtypes)
-        {
-            DerivedTypeConstraints.ValidateAndAddConstraints(subtypes);
         }
 
         /// <summary>

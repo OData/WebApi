@@ -31,9 +31,19 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
         /// <returns>Updated configuration object.</returns>
-        public SingletonConfiguration<TEntityType> AddDerivedTypeConstraint(params Type[] subtypes)
+        public SingletonConfiguration<TEntityType> HasDerivedTypeConstraints(params Type[] subtypes)
         {
-            Singleton.AddDerivedTypeConstraint(subtypes);
+            Singleton.HasDerivedTypeConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerivedType to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public SingletonConfiguration<TEntityType> HasDerivedTypeConstraints<TDerivedType>() where TDerivedType : TEntityType
+        {
+            Singleton.HasDerivedTypeConstraints(typeof(TDerivedType));
             return this;
         }
     }

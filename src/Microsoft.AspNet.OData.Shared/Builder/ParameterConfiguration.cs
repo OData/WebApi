@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Builder
             Name = name;
             TypeConfiguration = parameterType;
 
-            DerivedTypeConstraints = new DerivedTypeConstraintSet();
+            DerivedTypeConstraints = new DerivedTypeConstraintSet(parameterType.ClrType);
 
             Type elementType;
             Nullable = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
@@ -75,9 +75,19 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
         /// <returns>Updated configuration object.</returns>
-        public ParameterConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        public ParameterConfiguration HasDerivedTypeConstraints(params Type[] subtypes)
         {
-            DerivedTypeConstraints.ValidateAndAddConstraints(TypeConfiguration.ClrType, subtypes);
+            DerivedTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerivedType to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public ParameterConfiguration HasDerivedTypeConstraint<TDerivedType>()
+        {
+            DerivedTypeConstraints.AddConstraint<TDerivedType>();
             return this;
         }
 

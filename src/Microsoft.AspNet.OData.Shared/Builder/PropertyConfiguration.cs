@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData.Builder
             AddedExplicitly = true;
             _name = property.Name;
             QueryConfiguration = new QueryConfiguration();
-            DerivedTypeConstraints = new DerivedTypeConstraintSet();
+            DerivedTypeConstraints = new DerivedTypeConstraintSet(property.PropertyType);
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// List of allowed derived types that are allowed for the property. 
         /// </summary>
-        internal DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="PropertyKind"/> of the property.
@@ -163,14 +163,6 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets or sets the <see cref="QueryConfiguration"/>.
         /// </summary>
         public QueryConfiguration QueryConfiguration { get; set; }
-
-        /// <summary>
-        /// Adds subtypes to the set of derived type constraints.
-        /// </summary>
-        internal void AddDerivedTypeConstraintImpl(params Type[] subtypes)
-        {
-            DerivedTypeConstraints.ValidateAndAddConstraints(RelatedClrType, subtypes);
-        }
 
         /// <summary>
         /// Sets the property as not filterable.

@@ -1,72 +1,94 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Common;
-using Microsoft.OData.UriParser;
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData.Common;
+using Microsoft.OData.Edm.Csdl;
 
 namespace Microsoft.AspNet.OData.Builder
 {
-    internal class DerivedTypeConstraintSet : HashSet<Type>
+    /// <summary>
+    /// Set of derived type constraints. 
+    /// </summary>
+    public class DerivedTypeConstraintSet : HashSet<Type>
     {
         /// <summary>
-        /// 
+        /// Initializes a DerivedTypeConstraintSet instance without setting a base type.
         /// </summary>
         public DerivedTypeConstraintSet()
         {
+            Location = EdmVocabularyAnnotationSerializationLocation.Inline;
         }
 
+        /// <summary>
+        /// Initializes a DerivedTypeContraintSet instance with a base type specified.
+        /// </summary>
+        /// <param name="baseType">CLR type of the base class.</param>
         public DerivedTypeConstraintSet(Type baseType)
+            : base()
         {
             ClrBaseType = baseType;
         }
 
+        /// <summary>
+        /// CLR Type of the base class. 
+        /// </summary>
         public Type ClrBaseType { get; set; }
 
-        public void ValidateAndAddConstraints(IEnumerable<Type> types)
-        {
-            if (ClrBaseType == null)
-            {
-                Error.InvalidOperation(SRResources.BaseTypeNotSpecified);
-            }
+        /// <summary>
+        /// Location of the derived type constraint annotation. By default, it will be inline.
+        /// </summary>
+        public EdmVocabularyAnnotationSerializationLocation Location { get; set; }
 
-            ValidateAndAddConstraints(ClrBaseType, types);
+        /// <summary>
+        /// Add TDerivedType to the set of derived type constraints.
+        /// </summary>
+        /// <typeparam name="TDerivedType">Derived Type.</typeparam>
+        /// <returns>Updated DerivedTypeConstraint set.</returns>
+        public DerivedTypeConstraintSet AddConstraint<TDerivedType>()
+        {
+            ValidateAndAddSingleConstraint(typeof(TDerivedType));
+            return this;
         }
 
-        public void ValidateAndAddConstraints(Type baseType, IEnumerable<Type> types)
+        /// <summary>
+        /// Add the derived type constraints to the set. 
+        /// </summary>
+        /// <param name="derivedTypes">Derived types to be added to the set.</param>
+        public void AddConstraints(IEnumerable<Type> derivedTypes)
         {
-            if (!types.Any())
+            if (!derivedTypes.Any())
             {
-                ValidateAndAddSingleConstraint(baseType, baseType);
-
+                ValidateAndAddSingleConstraint(ClrBaseType);
                 return;
             }
 
-            foreach (Type t in types)
+            foreach (Type type in derivedTypes)
             {
-                ValidateAndAddSingleConstraint(baseType, t);
+                ValidateAndAddSingleConstraint(type);
             }
         }
 
-        private void ValidateAndAddSingleConstraint(Type baseType, Type typeToAdd)
+        private void ValidateAndAddSingleConstraint(Type typeToAdd)
         {
-            if (baseType == null)
+            if (ClrBaseType == null)
             {
                 throw Error.InvalidOperation(SRResources.NoClrTypeSpecified);
             }
-            else if (!baseType.IsAssignableFrom(typeToAdd) && typeToAdd != baseType)
+            else if (!ClrBaseType.IsAssignableFrom(typeToAdd) && typeToAdd != ClrBaseType)
             {
-                throw Error.InvalidOperation(SRResources.NotADerivedType, typeToAdd.Name, baseType.Name);
+                throw Error.InvalidOperation(SRResources.NotADerivedType, typeToAdd.Name, ClrBaseType.Name);
             }
 
-            if (this.Contains(typeToAdd))
+            if (!this.Add(typeToAdd))
             {
                 throw Error.InvalidOperation(SRResources.ConstraintAlreadyExists, typeToAdd.Name);
             }
-
-            this.Add(typeToAdd);
         }
     }
 }

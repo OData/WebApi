@@ -234,13 +234,33 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
-        /// Adds subtypes to the list of derived type constraints.
+        /// Adds subtypes to the list of derived type constraints for the return type.
         /// </summary>
         /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
         /// <returns>Updated configuration object.</returns>
-        public ActionConfiguration AddDerivedTypeConstraint(params Type[] subtypes)
+        public ActionConfiguration HasDerivedTypeConstraints(params Type[] subtypes)
         {
-            AddDerivedTypeConstraintToReturnTypeImpl(subtypes);
+            if (ReturnType == null)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
+            }
+
+            DerivedTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerivedType to the list of derived type constraints for the return type.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public ActionConfiguration HasDerivedTypeConstraint<TDerivedType>()
+        {
+            if (ReturnType == null)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
+            }
+
+            DerivedTypeConstraints.AddConstraint<TDerivedType>();
             return this;
         }
 

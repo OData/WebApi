@@ -299,7 +299,7 @@ namespace Microsoft.AspNet.OData.Batch
                         value.ToLowerInvariant().StartsWith(prefToIgnore)
                     )
                 );
-            return string.Join(", ", preferencesToInherit);
+            return string.Join(",", preferencesToInherit);
         }
 
         /// <summary>
@@ -329,9 +329,9 @@ namespace Microsoft.AspNet.OData.Batch
             IEnumerable<string> filteredBatchList = SplitPreferences(batchPreferences)
                 // do not add duplicate preferences from batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
-            string filteredBatchPreferences = string.Join(", ", filteredBatchList);
+            string filteredBatchPreferences = string.Join(",", filteredBatchList);
 
-            return string.Join(", ", individualPreferences, filteredBatchPreferences);
+            return string.Join(",", individualPreferences, filteredBatchPreferences);
         }
 
         /// <summary>

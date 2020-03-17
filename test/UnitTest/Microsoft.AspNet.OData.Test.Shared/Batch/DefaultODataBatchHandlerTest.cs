@@ -548,7 +548,7 @@ Accept-Charset: UTF-8
                 // should not copy over content type and content length headers to individual request
                 Enumerable.Empty<string>(),
                 "GET,ContentType=,ContentLength=,Prefer=",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient",
                 "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
             },
             {
@@ -558,7 +558,7 @@ Accept-Charset: UTF-8
                     "respond-async, odata.continue-on-error"
                 },
                 "GET,ContentType=,ContentLength=,Prefer=",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient",
                 "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
             },
             {
@@ -568,9 +568,9 @@ Accept-Charset: UTF-8
                 {
                     "allow-entityreferences, include-annotations=\"display.*\""
                 },
-                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\""
             },
             {
                 // if batch Prefer header contains both inheritable and non-inheritable preferences,
@@ -579,9 +579,9 @@ Accept-Charset: UTF-8
                 {
                     "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error"
                 },
-                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\""
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\""
             },
             {
                 // if batch and individual request define the same preference, then the one from the individual request should be retained
@@ -589,9 +589,9 @@ Accept-Charset: UTF-8
                 {
                    "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200"
                 },
-                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\\\"display.*\\\"",
-                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\\\"display.*\\\", wait=200"
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\",wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\",wait=200"
             },
             {
                 // should correctly handle preferences that contain parameters
@@ -599,9 +599,9 @@ Accept-Charset: UTF-8
                 {
                     "allow-entityreferences, respond-async, foo; param=paramValue,include-annotations=\"display.*\", continue-on-error, wait=200"
                 },
-                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200",
-                "DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\"",
-                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, foo; param=paramValue, include-annotations=\\\"display.*\\\", wait=200"
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\",wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\",wait=200"
             },
             {
                 // should correctly parse preferences with commas in their quoted values
@@ -609,9 +609,9 @@ Accept-Charset: UTF-8
                 {
                     @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300"""
                 },
-                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\""",
-                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=\""display.*,foo\""",
-                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, include-annotations=\""display.*,foo\"", wait=\""200,\\\""300\"""
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\""display.*,foo\"",wait=\""200,\\\""300\""",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\""display.*,foo\""",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\""display.*,foo\"",wait=\""200,\\\""300\"""
             },
             {
                 // should correctly handle batch request with multiple Prefer headers and should not copy duplicate references
@@ -620,9 +620,9 @@ Accept-Charset: UTF-8
                     @"allow-entityreferences, respond-async, wait=300",
                     @"continue-on-error, wait=250, include-annotations=display"
                 },
-                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences, wait=300, include-annotations=display",
-                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100, handling=lenient, allow-entityreferences, include-annotations=display",
-                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences, wait=300, include-annotations=display"
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,wait=300,include-annotations=display",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=display",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,wait=300,include-annotations=display"
             }
         };
 
@@ -678,7 +678,7 @@ OData-Version: 4.0
 OData-MaxVersion: 4.0
 Accept: application/json;odata.metadata=minimal
 Accept-Charset: UTF-8
-Prefer: wait=100, handling=lenient
+Prefer: wait=100,handling=lenient
 
 
 --{batchRef}

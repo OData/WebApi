@@ -293,13 +293,12 @@ namespace Microsoft.AspNet.OData.Batch
         private static string GetPreferencesToInheritFromBatch(string batchPreferences)
         {
             IEnumerable<string> preferencesToInherit = SplitPreferences(batchPreferences)
-                .Where(value => 
+                .Where(value =>
                     !nonInheritablePreferences.Any(
-                        prefToIgnore => 
-                        value.Trim().ToLowerInvariant().StartsWith(prefToIgnore)
+                        prefToIgnore =>
+                        value.ToLowerInvariant().StartsWith(prefToIgnore)
                     )
-                )
-                .Select(value => value.Trim());
+                );
             return string.Join(", ", preferencesToInherit);
         }
 
@@ -323,11 +322,11 @@ namespace Microsoft.AspNet.OData.Batch
                 return individualPreferences;
             }
             // get the name of each preference to avoid adding duplicates from batch
-            IEnumerable<string> individualList = SplitPreferences(individualPreferences).Select(pref => pref.Trim());
+            IEnumerable<string> individualList = SplitPreferences(individualPreferences);
             HashSet<string> individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
 
             
-            IEnumerable<string> filteredBatchList = SplitPreferences(batchPreferences).Select(pref => pref.Trim())
+            IEnumerable<string> filteredBatchList = SplitPreferences(batchPreferences)
                 // do not add duplicate preferences from batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
             string filteredBatchPreferences = string.Join(", ", filteredBatchList);
@@ -369,8 +368,8 @@ namespace Microsoft.AspNet.OData.Batch
                 }
                 else if (c == ',' && !insideQuotedValue)
                 {
-                    string result = preferences.Substring(preferenceStartIndex, currentIndex - preferenceStartIndex);
-                    string prefName = result.Split('=')[0];
+                    string result = preferences.Substring(preferenceStartIndex, currentIndex - preferenceStartIndex).Trim();
+                    string prefName = result.Split('=')[0].Trim();
                     // do not add duplicate preference
                     if (!addedPreferences.Contains(prefName))
                     {
@@ -384,7 +383,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (preferences.Length > preferenceStartIndex + 1)
             {
-                yield return preferences.Substring(preferenceStartIndex);
+                yield return preferences.Substring(preferenceStartIndex).Trim();
             }
         }
     }

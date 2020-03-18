@@ -1,6 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,12 +13,12 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
-using Newtonsoft.Json;
 #if !NETCORE
 using System.Web.Http;
 using System.Web.Http.Routing;
 #else
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 #endif
 
 namespace Microsoft.AspNet.OData.Test.Batch
@@ -196,6 +195,42 @@ namespace Microsoft.AspNet.OData.Test.Batch
 
             // Assert
             Assert.Equal(expectedResponses, batchResponses.Length);
+        }
+
+        [Fact]
+        public async Task ProcessBatchAsync_DoesNotCopyContentHeadersToGetAndDelete()
+        {
+            MockHttpServer server = new MockHttpServer(request =>
+            {
+                string responseContent = $"{request.Method},{request.Content?.Headers.ContentLength},{request.Content?.Headers.ContentType}";
+                return new HttpResponseMessage { Content = new StringContent(responseContent) };
+            });
+            DefaultODataBatchHandler batchHandler = new DefaultODataBatchHandler(server);
+            HttpRequestMessage batchRequest = new HttpRequestMessage(HttpMethod.Post, "http://example.com/$batch")
+            {
+                Content = new MultipartContent("mixed")
+                {
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Get, "http://example.com/")),
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Delete, "http://example.com/")),
+                    ODataBatchRequestHelper.CreateODataRequestContent(new HttpRequestMessage(HttpMethod.Post, "http://example.com/values")
+                    {
+                        Content = new StringContent("bar")
+                    }),
+                }
+            };
+            batchRequest.EnableHttpDependencyInjectionSupport();
+
+            var response = await batchHandler.ProcessBatchAsync(batchRequest, CancellationToken.None);
+            var batchContent = Assert.IsType<ODataBatchContent>(response.Content);
+            var subResponses = batchContent.Responses.ToArray();
+            var getResponse = (OperationResponseItem)subResponses[0];
+            var deleteResponse = (OperationResponseItem)subResponses[1];
+            var postResponse = (OperationResponseItem)subResponses[2];
+
+            Assert.Equal(3, subResponses.Length);
+            Assert.Equal("GET,0,", await getResponse.Response.Content.ReadAsStringAsync());
+            Assert.Equal("DELETE,0,", await deleteResponse.Response.Content.ReadAsStringAsync());
+            Assert.Equal("POST,3,text/plain; charset=utf-8", await postResponse.Response.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -424,7 +459,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
                 (await errorResponse.Response.Content.ReadAsAsync<HttpError>()).Message);
         }
 #else
- 
+
         [Fact]
         public async Task SendAsync_Works_ForBatchRequestWithInsertedEntityReferencedInAnotherRequest()
         {
@@ -453,7 +488,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             var orderId = 2;
             var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
             var createRefPayload = @"{""@odata.id"":""$3""}";
-            
+
             var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
             batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
             HttpContent httpContent = new StringContent($@"
@@ -492,7 +527,7 @@ Accept-Charset: UTF-8
 
             httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
             batchRequest.Content = httpContent;
-            
+
             var response = await client.SendAsync(batchRequest);
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
@@ -506,18 +541,187 @@ Accept-Charset: UTF-8
 
             Assert.NotNull(customer.Orders?.SingleOrDefault(d => d.Id.Equals(orderId)));
         }
+
+        public static readonly TheoryDataSet<IEnumerable<string>, string, string, string> _batchHeadersTestData = new TheoryDataSet<IEnumerable<string>, string, string, string>()
+        {
+            {
+                // should not copy over content type and content length headers to individual request
+                Enumerable.Empty<string>(),
+                "GET,ContentType=,ContentLength=,Prefer=",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+            },
+            {
+                // should not copy over preferences that should not be inherited
+                new []
+                {
+                    "respond-async, odata.continue-on-error"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+            },
+            {
+                // inheritable preferences should be copied over
+                // and combined with the individual request's own preferences if any
+                new []
+                {
+                    "allow-entityreferences, include-annotations=\"display.*\""
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\""
+            },
+            {
+                // if batch Prefer header contains both inheritable and non-inheritable preferences,
+                // the non-inheritable ones should be removed before merging with individual request's own preferences
+                new []
+                {
+                    "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\""
+            },
+            {
+                // if batch and individual request define the same preference, then the one from the individual request should be retained
+                new []
+                {
+                   "allow-entityreferences, respond-async, include-annotations=\"display.*\", continue-on-error, wait=200"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\",wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\\\"display.*\\\",wait=200"
+            },
+            {
+                // should correctly handle preferences that contain parameters
+                new []
+                {
+                    "allow-entityreferences, respond-async, foo; param=paramValue,include-annotations=\"display.*\", continue-on-error, wait=200"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\",wait=200",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\"",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,foo; param=paramValue,include-annotations=\\\"display.*\\\",wait=200"
+            },
+            {
+                // should correctly parse preferences with commas in their quoted values
+                new []
+                {
+                    @"allow-entityreferences, respond-async, include-annotations=""display.*,foo"", continue-on-error, wait=""200,\""300"""
+                },
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,include-annotations=\""display.*,foo\"",wait=\""200,\\\""300\""",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=\""display.*,foo\""",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,include-annotations=\""display.*,foo\"",wait=\""200,\\\""300\"""
+            },
+            {
+                // should correctly handle batch request with multiple Prefer headers and should not copy duplicate references
+                new []
+                {
+                    @"allow-entityreferences, respond-async, wait=300",
+                    @"continue-on-error, wait=250, include-annotations=display"
+                },
+                @"GET,ContentType=,ContentLength=,Prefer=allow-entityreferences,wait=300,include-annotations=display",
+                @"DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient,allow-entityreferences,include-annotations=display",
+                @"POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer=allow-entityreferences,wait=300,include-annotations=display"
+            }
+        };
+
+        [Theory]
+        [MemberData(nameof(_batchHeadersTestData))]
+        public async Task SendAsync_CorrectlyCopiesHeadersToIndividualRequests(
+            IEnumerable<string> batchPreferHeaderValues,
+            string getRequest,
+            string deleteRequest,
+            string postRequest)
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+            var acceptJsonFullMetadata = "application/json;odata.metadata=minimal";
+            var postPayload = "Bar";
+
+            Type[] controllers = new[] { typeof(BatchTestHeadersCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestHeadersCustomer>("BatchTestHeadersCustomers");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+                config.Expand();
+                config.EnableDependencyInjection();
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            batchRequest.Headers.Add("Prefer", batchPreferHeaderValues);
+
+            var batchContent = $@"
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestHeadersCustomers HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+
+
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+DELETE {endpoint}/BatchTestHeadersCustomers(1) HTTP/1.1
+OData-Version: 4.0
+OData-MaxVersion: 4.0
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+Prefer: wait=100,handling=lenient
+
+
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+POST {endpoint}/BatchTestHeadersCustomers HTTP/1.1
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Content-Type: text/plain; charset=utf-8
+Content-Length: {postPayload.Length}
+Accept: {acceptJsonFullMetadata}
+Accept-Charset: UTF-8
+
+{postPayload}
+--{batchRef}--
+";
+
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed; boundary={batchRef}");
+            httpContent.Headers.ContentLength = batchContent.Length;
+            batchRequest.Content = httpContent;
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Assert.Contains(getRequest, responseContent);
+            Assert.Contains(deleteRequest, responseContent);
+            Assert.Contains(postRequest, responseContent);
+        }
 #endif
     }
 
     public class BatchTestCustomer
     {
         private static Lazy<IList<BatchTestCustomer>> _customers =
-            new Lazy<IList<BatchTestCustomer>>(() => {
+            new Lazy<IList<BatchTestCustomer>>(() =>
+            {
                 BatchTestCustomer customer01 = new BatchTestCustomer { Id = 1, Name = "Customer 01" };
                 customer01.Orders = new List<BatchTestOrder> { BatchTestOrder.Orders.SingleOrDefault(d => d.Id.Equals(1)) };
 
                 BatchTestCustomer customer02 = new BatchTestCustomer { Id = 2, Name = "Customer 02" };
-                
+
                 return new List<BatchTestCustomer> { customer01, customer02 };
             });
 
@@ -536,10 +740,11 @@ Accept-Charset: UTF-8
 
     public class BatchTestOrder
     {
-        private static Lazy<IList<BatchTestOrder>> _orders = 
-            new Lazy<IList<BatchTestOrder>>(() => {
+        private static Lazy<IList<BatchTestOrder>> _orders =
+            new Lazy<IList<BatchTestOrder>>(() =>
+            {
                 BatchTestOrder order01 = new BatchTestOrder { Id = 1, Amount = 100 };
-                
+
                 return new List<BatchTestOrder> { order01 };
             });
 
@@ -612,4 +817,33 @@ Accept-Charset: UTF-8
             return Created(order);
         }
     }
+#if NETCORE
+    public class BatchTestHeadersCustomersController : TestODataController
+    {
+        private string GetResponseString(string method)
+        {
+            return $"{method},ContentType={HttpContext.Request.ContentType},ContentLength={HttpContext.Request.ContentLength},"
+                + $"Prefer={HttpContext.Request.Headers["Prefer"]}";
+        }
+        public string Get()
+        {
+            return GetResponseString("GET");
+        }
+
+        public string Delete(int key)
+        {
+            return GetResponseString("DELETE");
+        }
+
+        public string Post()
+        {
+            return GetResponseString("POST");
+        }
+    }
+
+    public class BatchTestHeadersCustomer
+    {
+        public int Id { get; set; }
+    }
+#endif
 }

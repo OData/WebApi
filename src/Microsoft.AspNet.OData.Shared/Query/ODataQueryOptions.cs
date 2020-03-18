@@ -947,8 +947,7 @@ namespace Microsoft.AspNet.OData.Query
                         RawValues.Select = kvp.Value;
                         break;
                     case "$count":
-                        ThrowIfEmpty(kvp.Value, "$count");
-                        RawValues.Count = kvp.Value;
+                        RawValues.Count = kvp.Value ?? "true";
                         Count = new CountQueryOption(kvp.Value, Context, _queryOptionParser);
                         break;
                     case "$expand":

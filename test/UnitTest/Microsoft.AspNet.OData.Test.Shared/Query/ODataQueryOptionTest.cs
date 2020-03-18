@@ -219,7 +219,6 @@ namespace Microsoft.AspNet.OData.Test.Query
 
         [Theory]
         [InlineData("$filter")]
-        [InlineData("$count")]
         [InlineData("$orderby")]
         [InlineData("$skip")]
         [InlineData("$top")]

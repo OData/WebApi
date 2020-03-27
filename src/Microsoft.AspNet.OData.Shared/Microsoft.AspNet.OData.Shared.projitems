@@ -16,7 +16,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintAttribute.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintSet.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PrecisionPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClrEnumMemberAnnotation.cs" />

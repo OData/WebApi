@@ -987,7 +987,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var action = zooType.Action("MyAction").ReturnsFromEntitySet<Creature>("Creatures");
 
             action.BindingParameter.HasDerivedTypeConstraint<SeaZoo>().HasDerivedTypeConstraint<NationZoo>();
-            action.HasDerivedTypeConstraint<Animal>().HasDerivedTypeConstraint<Human>();
+            action.HasDerivedTypeConstraintForReturnType<Animal>().HasDerivedTypeConstraintForReturnType<Human>();
             IEdmModel model = builder.GetEdmModel();
 
             string csdl = MetadataTest.GetCSDL(model);

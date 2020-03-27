@@ -29,7 +29,6 @@ namespace Microsoft.AspNet.OData.Builder
         {
             Name = name;
             ModelBuilder = builder;
-            DerivedTypeConstraints = new DerivedTypeConstraintSet();
         }
 
         /// <summary>
@@ -99,10 +98,6 @@ namespace Microsoft.AspNet.OData.Builder
             set
             {
                 _returnType = value;
-                if (value != null)
-                {
-                    DerivedTypeConstraints.ClrBaseType = value.ClrType;
-                }
             }
         }
 
@@ -162,7 +157,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Type constraints for the return type of the operation.
         /// </summary>
-        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintConfiguration ReturnTypeConstraints { get; protected set; }
 
         /// <summary>
         /// Sets the return type to a single EntityType instance.

@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData.Builder
             Name = name;
             EntityType = entityType;
             ClrType = entityType.ClrType;
-            DerivedTypeConstraints = new DerivedTypeConstraintSet(entityType.ClrType);
+            DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
             _url = Name;
 
             _editLinkBuilder = null;
@@ -106,7 +106,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Set that determines the derived type constraints
         /// </summary>
-        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintConfiguration DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the name of this navigation source.

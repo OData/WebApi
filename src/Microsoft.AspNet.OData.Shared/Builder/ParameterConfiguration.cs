@@ -32,7 +32,7 @@ namespace Microsoft.AspNet.OData.Builder
             Name = name;
             TypeConfiguration = parameterType;
 
-            DerivedTypeConstraints = new DerivedTypeConstraintSet(parameterType.ClrType);
+            DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
 
             Type elementType;
             Nullable = TypeHelper.IsCollection(parameterType.ClrType, out elementType)
@@ -66,9 +66,9 @@ namespace Microsoft.AspNet.OData.Builder
         public string DefaultValue { get; protected set; }
 
         /// <summary>
-        /// List of allowed derived types that are allowed for the property. 
+        /// Configuration that lists derived types that are allowed for the property. 
         /// </summary>
-        internal DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintConfiguration DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Adds subtypes to the list of derived type constraints.

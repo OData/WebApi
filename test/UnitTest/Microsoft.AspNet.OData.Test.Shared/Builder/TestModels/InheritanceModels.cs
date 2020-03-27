@@ -138,7 +138,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
     {
         public int Id { get; set; }
 
-        [DerivedTypeConstraint]
+        [DerivedTypeConstraint(typeof(Animal))]
         public Animal Animal { get; set; }
         public Human Human { get; set; }
     }

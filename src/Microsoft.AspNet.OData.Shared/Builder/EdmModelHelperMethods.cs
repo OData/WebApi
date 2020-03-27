@@ -216,7 +216,9 @@ namespace Microsoft.AspNet.OData.Builder
                     operation.AddParameter(operationParameter);
                 }
 
-                 model.AddDerivedTypeConstraintAnnotation(operationParameter, edmTypeMap, parameter.DerivedTypeConstraints);
+                Type clrType = parameter.TypeConfiguration != null ? parameter.TypeConfiguration.ClrType : null; 
+                parameter.DerivedTypeConstraints.ValidateConstraints(clrType);
+                model.AddDerivedTypeConstraintAnnotation(operationParameter, edmTypeMap, parameter.DerivedTypeConstraints);
             }
         }
 
@@ -325,9 +327,9 @@ namespace Microsoft.AspNet.OData.Builder
                     model.SetAnnotationValue(operation, new ReturnedEntitySetAnnotation(operationConfiguration.NavigationSource.Name));
                 }
 
-                if (operationConfiguration.DerivedTypeConstraints != null)
+                if (operationConfiguration.ReturnTypeConstraints != null)
                 {
-                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.DerivedTypeConstraints);
+                    model.AddDerivedTypeConstraintAnnotation(operation.GetReturn(), edmTypeMap, operationConfiguration.ReturnTypeConstraints);
                 }
 
                 model.AddOperationParameters(operation, operationConfiguration, edmTypeMap);
@@ -665,6 +667,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 if (pair.Value.DerivedTypeConstraints != null)
                 {
+                    pair.Value.DerivedTypeConstraints.ValidateConstraints(pair.Value.RelatedClrType);
                     model.AddDerivedTypeConstraintAnnotation(pair.Key, edmTypeMap.EdmTypes, pair.Value.DerivedTypeConstraints);
                 }
             }         
@@ -675,22 +678,23 @@ namespace Microsoft.AspNet.OData.Builder
         {
             if (navigationSourceConfiguration != null)
             {
+                navigationSourceConfiguration.DerivedTypeConstraints.ValidateConstraints(navigationSourceConfiguration.ClrType);
                 model.AddDerivedTypeConstraintAnnotation(target,
                     edmTypeMap.EdmTypes, navigationSourceConfiguration.DerivedTypeConstraints);
             }
         }
 
         internal static void AddDerivedTypeConstraintAnnotation(this EdmModel model, IEdmVocabularyAnnotatable target, 
-            Dictionary<Type, IEdmType> edmTypeMap, DerivedTypeConstraintSet derivedTypeConstraints)
+            Dictionary<Type, IEdmType> edmTypeMap, DerivedTypeConstraintConfiguration derivedTypeConstraints)
         {
-            if (!derivedTypeConstraints.Any())
+            if (!derivedTypeConstraints.ConstraintSet.Any())
             {
                 return;
             }
 
             IEdmTerm term = ValidationVocabularyModel.DerivedTypeConstraintTerm;
             List<EdmStringConstant> collectionConstants = new List<EdmStringConstant>();
-            foreach (var type in derivedTypeConstraints)
+            foreach (var type in derivedTypeConstraints.ConstraintSet)
             {
                 if (edmTypeMap.ContainsKey(type))
                 {

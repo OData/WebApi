@@ -936,7 +936,7 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.NavigationPropertyBindingConfiguration]] Bindings  { public get; }
 	System.Type ClrType  { public get; }
-	DerivedTypeConstraintSet DerivedTypeConstraints  { public get; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	EntityTypeConfiguration EntityType  { public virtual get; }
 	string Name  { public get; }
 
@@ -992,7 +992,6 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 
 public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 	BindingParameterConfiguration BindingParameter  { public virtual get; }
-	DerivedTypeConstraintSet DerivedTypeConstraints  { public get; }
 	System.Collections.Generic.IEnumerable`1[[System.String]] EntitySetPath  { public get; }
 	bool FollowsConventions  { public get; protected set; }
 	string FullyQualifiedName  { public get; }
@@ -1008,6 +1007,7 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
 	bool ReturnNullable  { public get; public set; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
+	DerivedTypeConstraintConfiguration ReturnTypeConstraints  { public get; protected set; }
 	string Title  { public get; public set; }
 
 	public ParameterConfiguration AddParameter (string name, IEdmTypeConfiguration parameterType)
@@ -1022,6 +1022,7 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
 	string DefaultValue  { public get; protected set; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	bool IsOptional  { public get; protected set; }
 	string Name  { public get; protected set; }
 	bool Nullable  { public get; public set; }
@@ -1040,7 +1041,7 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	bool AddedExplicitly  { public get; public set; }
 	bool AutoExpand  { public get; public set; }
 	StructuralTypeConfiguration DeclaringType  { public get; }
-	DerivedTypeConstraintSet DerivedTypeConstraints  { public get; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	bool DisableAutoExpandWhenSelectIsPresent  { public get; public set; }
 	bool IsRestricted  { public get; }
 	PropertyKind Kind  { public abstract get; }
@@ -1278,8 +1279,8 @@ public class Microsoft.AspNet.OData.Builder.ActionConfiguration : OperationConfi
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetActionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedActionLink ()
 	public ActionConfiguration HasActionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
-	public ActionConfiguration HasDerivedTypeConstraint ()
-	public ActionConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
+	public ActionConfiguration HasDerivedTypeConstraintForReturnType ()
+	public ActionConfiguration HasDerivedTypeConstraintsForReturnType (System.Type[] subtypes)
 	public ActionConfiguration HasFeedActionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] actionLinkFactory, bool followsConventions)
 	public ActionConfiguration Returns ()
 	public ActionConfiguration Returns (System.Type clrReturnType)
@@ -1387,14 +1388,13 @@ public class Microsoft.AspNet.OData.Builder.DecimalPropertyConfiguration : Preci
 	System.Nullable`1[[System.Int32]] Scale  { public get; public set; }
 }
 
-public class Microsoft.AspNet.OData.Builder.DerivedTypeConstraintSet : System.Collections.Generic.HashSet`1[[System.Type]], IEnumerable, IDeserializationCallback, ISerializable, ICollection`1, IEnumerable`1, IReadOnlyCollection`1, ISet`1 {
-	public DerivedTypeConstraintSet ()
-	public DerivedTypeConstraintSet (System.Type baseType)
+public class Microsoft.AspNet.OData.Builder.DerivedTypeConstraintConfiguration {
+	public DerivedTypeConstraintConfiguration ()
+	public DerivedTypeConstraintConfiguration (Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation location)
 
-	System.Type ClrBaseType  { public get; public set; }
 	Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation Location  { public get; public set; }
 
-	public DerivedTypeConstraintSet AddConstraint ()
+	public DerivedTypeConstraintConfiguration AddConstraint ()
 	public void AddConstraints (System.Collections.Generic.IEnumerable`1[[System.Type]] derivedTypes)
 }
 
@@ -1523,8 +1523,8 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedFunctionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetFunctionLink ()
-	public FunctionConfiguration HasDerivedTypeConstraint ()
-	public FunctionConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
+	public FunctionConfiguration HasDerivedTypeConstraintForReturnType ()
+	public FunctionConfiguration HasDerivedTypeConstraintsForReturnType (System.Type[] subtypes)
 	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration HasFunctionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration Returns ()

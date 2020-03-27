@@ -962,8 +962,8 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var function = zooType.Function("MyFunction").ReturnsFromEntitySet<Creature>("Creatures");
 
             function.BindingParameter.HasDerivedTypeConstraint<SeaZoo>().HasDerivedTypeConstraint<NationZoo>();
-            function.HasDerivedTypeConstraint<Animal>().HasDerivedTypeConstraint<Human>();
-            function.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.Inline;
+            function.HasDerivedTypeConstraintForReturnType<Animal>().HasDerivedTypeConstraintForReturnType<Human>();
+            function.ReturnTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
 
             function.BindingParameter.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
 

@@ -38,7 +38,7 @@ namespace Microsoft.AspNet.OData.Builder
             AddedExplicitly = true;
             _name = property.Name;
             QueryConfiguration = new QueryConfiguration();
-            DerivedTypeConstraints = new DerivedTypeConstraintSet(property.PropertyType);
+            DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
         }
 
         /// <summary>
@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// List of allowed derived types that are allowed for the property. 
         /// </summary>
-        public DerivedTypeConstraintSet DerivedTypeConstraints { get; private set; }
+        public DerivedTypeConstraintConfiguration DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="PropertyKind"/> of the property.

@@ -176,13 +176,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
               }));
               }, true);
 
-            var function = supplier.Function("GetAddress").Returns<Address>().HasDerivedTypeConstraint<Address>();
-            function.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
+            var function = supplier.Function("GetAddress").Returns<Address>().HasDerivedTypeConstraintForReturnType<Address>();
+            function.ReturnTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
             function.Parameter<int>("value");
 
-            var action = modelBuilder.Action("GetAddress").Returns<Address>().HasDerivedTypeConstraints(typeof(Address));
+            var action = modelBuilder.Action("GetAddress").Returns<Address>().HasDerivedTypeConstraintsForReturnType(typeof(Address));
             action.Parameter<Supplier>("supplier").HasDerivedTypeConstraint<ToiletPaperSupplier>();
-            function.DerivedTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
+            action.ReturnTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
 
             return modelBuilder.GetEdmModel();
         }

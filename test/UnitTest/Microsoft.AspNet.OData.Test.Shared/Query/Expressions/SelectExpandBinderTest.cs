@@ -133,9 +133,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var unaryExpression = (UnaryExpression)((MethodCallExpression)queryable.Expression).Arguments.Single(a => a is UnaryExpression);
             var expressionString = unaryExpression.Operand.ToString();
 #if NETCORE
-            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id, Nullable`1) == null)}", expressionString);
+            Assert.Contains("IsNull = (Convert($it.Customer.Id, Nullable`1) == null)}", expressionString);
 #else
-            Assert.Contains("IsNull = (Convert(Param_1.Customer.Id) == null)}", expressionString);
+            Assert.Contains("IsNull = (Convert($it.Customer.Id) == null)}", expressionString);
 #endif
         }
 

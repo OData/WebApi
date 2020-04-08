@@ -683,7 +683,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             string queryUrl =
                 string.Format(
                     AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalAmount))"
-                    + "/compute(TotalAmount mul 2 as DoubleAmount, length(Name) as NameLen)"
+                    + "/filter(Name ne null)/compute(TotalAmount mul 2 as DoubleAmount, length(Name) as NameLen)"
                     + "&$orderby=TotalAmount",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -699,19 +699,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;
-            Assert.Equal(3, results.Count);
-            Assert.Equal("0", results[0]["TotalAmount"].ToString());
-            Assert.Equal("0", results[0]["DoubleAmount"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["NameLen"]);
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
-            Assert.Equal("2000", results[1]["TotalAmount"].ToString());
-            Assert.Equal("4000", results[1]["DoubleAmount"].ToString());
+            Assert.Equal(2, results.Count);
+            Assert.Equal("2000", results[0]["TotalAmount"].ToString());
+            Assert.Equal("4000", results[0]["DoubleAmount"].ToString());
+            Assert.Equal("9", results[0]["NameLen"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
+            Assert.Equal("2500", results[1]["TotalAmount"].ToString());
+            Assert.Equal("5000", results[1]["DoubleAmount"].ToString());
             Assert.Equal("9", results[1]["NameLen"].ToString());
-            Assert.Equal("Customer0", results[1]["Name"].ToString());
-            Assert.Equal("2500", results[2]["TotalAmount"].ToString());
-            Assert.Equal("5000", results[2]["DoubleAmount"].ToString());
-            Assert.Equal("9", results[2]["NameLen"].ToString());
-            Assert.Equal("Customer1", results[2]["Name"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
         }
 
         [Fact]
@@ -720,7 +716,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=compute(length(Name) as NameLen)/groupby((Name), aggregate(Id with sum as TotalId, NameLen with max as NameLen))"
+                    AggregationTestBaseUrl + "?$apply=filter(Name ne null)/compute(length(Name) as NameLen)/groupby((Name), aggregate(Id with sum as TotalId, NameLen with max as NameLen))"
                     + "&$orderby=TotalId",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
@@ -736,16 +732,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;
-            Assert.Equal(3, results.Count);
-            Assert.Equal("10", results[0]["TotalId"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["NameLen"]);
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
-            Assert.Equal("20", results[1]["TotalId"].ToString());
+            Assert.Equal(2, results.Count);
+            Assert.Equal("20", results[0]["TotalId"].ToString());
+            Assert.Equal("9", results[0]["NameLen"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
+            Assert.Equal("25", results[1]["TotalId"].ToString());
             Assert.Equal("9", results[1]["NameLen"].ToString());
-            Assert.Equal("Customer0", results[1]["Name"].ToString());
-            Assert.Equal("25", results[2]["TotalId"].ToString());
-            Assert.Equal("9", results[2]["NameLen"].ToString());
-            Assert.Equal("Customer1", results[2]["Name"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
         }
 
         [Fact]
@@ -754,7 +747,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             // Arrange
             string queryUrl =
                 string.Format(
-                    AggregationTestBaseUrl + "?$apply=compute(length(Name) as NameLen)",
+                    AggregationTestBaseUrl + "?$apply=compute(length(Name) as NameLen)&$filter=Name ne null",
                     BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
@@ -769,7 +762,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             var results = result["value"] as JArray;
-            Assert.Equal(10, results.Count);
+            Assert.Equal(9, results.Count);
             foreach (var customer in results)
             {
                 Assert.NotNull(customer["Id"]);

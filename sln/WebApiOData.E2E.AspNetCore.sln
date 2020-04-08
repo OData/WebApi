@@ -22,6 +22,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Test.E2E.AspNetCo
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{3571a6b6-b859-4fa2-a96f-40956bfc3837}*SharedItemsImports = 5
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

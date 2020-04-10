@@ -129,7 +129,7 @@ ForEach ($directory in $SysDirectory::EnumerateDirectories($PROGRAMFILESX86 + "\
     $directoryName = $directoryName.substring(0, $directoryName.LastIndexOf('A'))
 
     # parse to double "10.0"
-    $versionNo = [System.Double]::Parse($directoryName)
+    $versionNo = [System.Double]::Parse($directoryName, [System.Globalization.CultureInfo]::InvariantCulture)
 
     $fileobject = $null
     $fileobject = New-Object System.Object

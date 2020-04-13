@@ -15,14 +15,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Singleton
 {
-    public class SingletonClientTest : WebHostTestBase
+    public class SingletonClientTest : WebHostTestBase<SingletonClientTest>
     {
-        public SingletonClientTest(WebHostTestFixture fixture)
+        public SingletonClientTest(WebHostTestFixture<SingletonClientTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

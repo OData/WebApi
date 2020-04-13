@@ -17,14 +17,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class JsonSingleResultExpandTests : WebHostTestBase
+    public class JsonSingleResultExpandTests : WebHostTestBase<JsonSingleResultExpandTests>
     {
-        public JsonSingleResultExpandTests(WebHostTestFixture fixture)
+        public JsonSingleResultExpandTests(WebHostTestFixture<JsonSingleResultExpandTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Routes.Clear();

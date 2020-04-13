@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common
 {
     public static class ODataTestExtension
     {
-        public static Task ClearRepositoryAsync(this WebHostTestBase test, string entityName)
+        public static Task ClearRepositoryAsync<TTest>(this WebHostTestBase<TTest> test, string entityName)
         {
             return test.Client.DeleteAsync(test.BaseAddress + "/" + entityName);
         }

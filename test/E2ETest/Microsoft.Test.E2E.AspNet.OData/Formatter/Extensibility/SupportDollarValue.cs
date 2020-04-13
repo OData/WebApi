@@ -66,14 +66,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
     }
 
 #if !NETCORE // TODO #939: Enable these tests for AspNetCore
-    public class SupportDollarValueTest : WebHostTestBase
+    public class SupportDollarValueTest : WebHostTestBase<SupportDollarValueTest>
     {
-        public SupportDollarValueTest(WebHostTestFixture fixture)
+        public SupportDollarValueTest(WebHostTestFixture<SupportDollarValueTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.
                 MapODataServiceRoute(

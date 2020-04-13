@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class CustomConventionActionMetadataTests : WebHostTestBase
+    public class CustomConventionActionMetadataTests : WebHostTestBase<CustomConventionActionMetadataTests>
     {
-        public CustomConventionActionMetadataTests(WebHostTestFixture fixture)
+        public CustomConventionActionMetadataTests(WebHostTestFixture<CustomConventionActionMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var conventions = ODataRoutingConventions.CreateDefault();
             configuration.MapODataServiceRoute("CustomActionConventions", "CustomActionConventions", GetCustomActionConventionsModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

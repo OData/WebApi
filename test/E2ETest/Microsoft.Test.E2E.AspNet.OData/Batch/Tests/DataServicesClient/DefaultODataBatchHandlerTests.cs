@@ -88,14 +88,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
         }
     }
 
-    public class DefaultBatchHandlerCUDBatchTests : WebHostTestBase
+    public class DefaultBatchHandlerCUDBatchTests : WebHostTestBase<DefaultBatchHandlerCUDBatchTests>
     {
-        public DefaultBatchHandlerCUDBatchTests(WebHostTestFixture fixture)
+        public DefaultBatchHandlerCUDBatchTests(WebHostTestFixture<DefaultBatchHandlerCUDBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -549,14 +549,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class DefaultBatchHandlerQueryBatchTests : WebHostTestBase
+    public class DefaultBatchHandlerQueryBatchTests : WebHostTestBase<DefaultBatchHandlerQueryBatchTests>
     {
-        public DefaultBatchHandlerQueryBatchTests(WebHostTestFixture fixture)
+        public DefaultBatchHandlerQueryBatchTests(WebHostTestFixture<DefaultBatchHandlerQueryBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute(
                 "batch",
@@ -618,14 +618,14 @@ Content-Type: application/json;odata.metadata=minimal
     }
 
 
-    public class DefaultBatchHandlerErrorsBatchTests : WebHostTestBase
+    public class DefaultBatchHandlerErrorsBatchTests : WebHostTestBase<DefaultBatchHandlerErrorsBatchTests>
     {
-        public DefaultBatchHandlerErrorsBatchTests(WebHostTestFixture fixture)
+        public DefaultBatchHandlerErrorsBatchTests(WebHostTestFixture<DefaultBatchHandlerErrorsBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute(
                 "batch",
@@ -685,14 +685,14 @@ Content-Type: application/json;odata.metadata=minimal
     }
 
 
-    public class DefaultBatchHandlerLinksBatchTests : WebHostTestBase
+    public class DefaultBatchHandlerLinksBatchTests : WebHostTestBase<DefaultBatchHandlerLinksBatchTests>
     {
-        public DefaultBatchHandlerLinksBatchTests(WebHostTestFixture fixture)
+        public DefaultBatchHandlerLinksBatchTests(WebHostTestFixture<DefaultBatchHandlerLinksBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute(
                 "batch",
@@ -738,14 +738,14 @@ Content-Type: application/json;odata.metadata=minimal
         }
     }
 
-    public class DefaultBatchHandlerContinueOnErrorBatchTests : WebHostTestBase
+    public class DefaultBatchHandlerContinueOnErrorBatchTests : WebHostTestBase<DefaultBatchHandlerContinueOnErrorBatchTests>
     {
-        public DefaultBatchHandlerContinueOnErrorBatchTests(WebHostTestFixture fixture)
+        public DefaultBatchHandlerContinueOnErrorBatchTests(WebHostTestFixture<DefaultBatchHandlerContinueOnErrorBatchTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             ODataModelBuilder builder = configuration.CreateConventionModelBuilder();
             configuration.MapODataServiceRoute(

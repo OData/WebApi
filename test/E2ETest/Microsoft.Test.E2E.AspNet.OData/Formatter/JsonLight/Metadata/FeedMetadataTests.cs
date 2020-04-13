@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class FeedMetadataTests : WebHostTestBase
+    public class FeedMetadataTests : WebHostTestBase<FeedMetadataTests>
     {
-        public FeedMetadataTests(WebHostTestFixture fixture)
+        public FeedMetadataTests(WebHostTestFixture<FeedMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.EnableODataSupport(GetEdmModel(configuration));
             configuration.AddODataQueryFilter();

@@ -51,14 +51,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
     }
 
-    public class NestedClassTests : WebHostTestBase
+    public class NestedClassTests : WebHostTestBase<NestedClassTests>
     {
-        public NestedClassTests(WebHostTestFixture fixture)
+        public NestedClassTests(WebHostTestFixture<NestedClassTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

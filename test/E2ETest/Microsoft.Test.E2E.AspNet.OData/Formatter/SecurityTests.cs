@@ -69,14 +69,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class DosSecurityTests : WebHostTestBase
+    public class DosSecurityTests : WebHostTestBase<DosSecurityTests>
     {
-        public DosSecurityTests(WebHostTestFixture fixture)
+        public DosSecurityTests(WebHostTestFixture<DosSecurityTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MaxReceivedMessageSize = int.MaxValue;
             configuration.RemoveNonODataFormatters();

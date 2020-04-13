@@ -33,14 +33,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class BaseAddressFactoryTest : WebHostTestBase
+    public class BaseAddressFactoryTest : WebHostTestBase<BaseAddressFactoryTest>
     {
-        public BaseAddressFactoryTest(WebHostTestFixture fixture)
+        public BaseAddressFactoryTest(WebHostTestFixture<BaseAddressFactoryTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(BaseAddressFactoryModelsController) };
             configuration.AddControllers(controllers);

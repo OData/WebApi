@@ -15,14 +15,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
 {
-    public class ModelBuildersMetadataTests : WebHostTestBase
+    public class ModelBuildersMetadataTests : WebHostTestBase<ModelBuildersMetadataTests>
     {
-        public ModelBuildersMetadataTests(WebHostTestFixture fixture)
+        public ModelBuildersMetadataTests(WebHostTestFixture<ModelBuildersMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("convention", "convention", GetConventionModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

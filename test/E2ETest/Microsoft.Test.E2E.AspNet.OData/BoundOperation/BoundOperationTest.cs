@@ -23,14 +23,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
 {
-    public class BoundOperationTest : WebHostTestBase
+    public class BoundOperationTest : WebHostTestBase<BoundOperationTest>
     {
         private const string CollectionOfEmployee = "Collection(NS.Employee)";
         private const string CollectionOfManager = "Collection(NS.Manager)";
         private const string Employee = "NS.Employee";
         private const string Manager = "NS.Manager";
 
-        public BoundOperationTest(WebHostTestFixture fixture)
+        public BoundOperationTest(WebHostTestFixture<BoundOperationTest> fixture)
             :base(fixture)
         {
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
             return responseForPost;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

@@ -61,22 +61,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class ODataResultTests : WebHostTestBase
+    public class ODataResultTests : WebHostTestBase<ODataResultTests>
     {
-        private WebRouteConfiguration _configuration;
+        private static IEdmModel Model;
 
-        public ODataResultTests(WebHostTestFixture fixture)
+        public ODataResultTests(WebHostTestFixture<ODataResultTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
-            _configuration = configuration;
-
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 
-            configuration.EnableODataSupport(GetEdmModel(configuration));
+            Model = GetEdmModel(configuration);
+            configuration.EnableODataSupport(Model);
         }
 
         private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -93,7 +92,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         {
             // Arrange
             var ctx = new DataServiceContext(new Uri(this.BaseAddress), ODataProtocolVersion.V4);
-            ctx.Format.UseJson(GetEdmModel(_configuration));
+            ctx.Format.UseJson(Model);
 
             ctx.AddObject(
                 "ODataResult_Model1",

@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
 {
-    public class CaseInsensitiveTest : WebHostTestBase
+    public class CaseInsensitiveTest : WebHostTestBase<CaseInsensitiveTest>
     {
-        public CaseInsensitiveTest(WebHostTestFixture fixture)
+        public CaseInsensitiveTest(WebHostTestFixture<CaseInsensitiveTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(CustomersController), typeof(OrdersController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

@@ -18,14 +18,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class InvalidQueryTests : WebHostTestBase
+    public class InvalidQueryTests : WebHostTestBase<InvalidQueryTests>
     {
-        public InvalidQueryTests(WebHostTestFixture fixture)
+        public InvalidQueryTests(WebHostTestFixture<InvalidQueryTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.Count().Filter().OrderBy().Expand().MaxTop(null);

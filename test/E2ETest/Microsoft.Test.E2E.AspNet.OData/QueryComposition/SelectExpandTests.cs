@@ -21,9 +21,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class SelectExpandTests : WebHostTestBase
+    public class SelectExpandTests : WebHostTestBase<SelectExpandTests>
     {
-        public SelectExpandTests(WebHostTestFixture fixture)
+        public SelectExpandTests(WebHostTestFixture<SelectExpandTests> fixture)
             : base(fixture)
         {
         }
@@ -31,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         private static readonly int SelectCustomerPropertyCount =
             typeof(SelectCustomer).GetProperties().Length + 1;  // The +1 is for SelectOrders@odata.count.
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(SelectCustomerController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

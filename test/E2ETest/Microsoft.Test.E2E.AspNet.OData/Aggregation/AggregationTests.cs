@@ -17,17 +17,18 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class AggregationTestsEFClassic: AggregationTests
+    public class AggregationTestsEFClassic: AggregationTests<AggregationTestsEFClassic>
     {
-        public AggregationTestsEFClassic(WebHostTestFixture fixture)
+        public AggregationTestsEFClassic(WebHostTestFixture<AggregationTestsEFClassic> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController));
-            base.UpdateConfiguration(configuration);
+
+            UpdateConfigureOnBase(configuration);
         }
 
         [Theory]
@@ -54,50 +55,50 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 
 #if NETCORE
-    public class AggregationTestsEFCoreInMemory : AggregationTests
+    public class AggregationTestsEFCoreInMemory : AggregationTests<AggregationTestsEFCoreInMemory>
     {
-        public AggregationTestsEFCoreInMemory(WebHostTestFixture fixture)
+        public AggregationTestsEFCoreInMemory(WebHostTestFixture<AggregationTestsEFCoreInMemory> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreInMemory>));
-            base.UpdateConfiguration(configuration);
+
+            UpdateConfigureOnBase(configuration);
         }
     }
 
-    public class AggregationTestsEFCoreSql : AggregationTests
+    public class AggregationTestsEFCoreSql : AggregationTests<AggregationTestsEFCoreSql>
     {
-        public AggregationTestsEFCoreSql(WebHostTestFixture fixture)
+        public AggregationTestsEFCoreSql(WebHostTestFixture<AggregationTestsEFCoreSql> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CoreCustomersController<AggregationContextCoreSql>));
-            base.UpdateConfiguration(configuration);
+
+            UpdateConfigureOnBase(configuration);
         }
     }
 #endif
 
 
 #if !NETCORE
-    public class LinqToSqlAggregationTests : WebHostTestBase
+    public class LinqToSqlAggregationTests : WebHostTestBase<LinqToSqlAggregationTests>
     {
         protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
 
-        public LinqToSqlAggregationTests(WebHostTestFixture fixture)
+        public LinqToSqlAggregationTests(WebHostTestFixture<LinqToSqlAggregationTests> fixture)
             : base(fixture)
         {
         }
 
-
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
-
             configuration.AddControllers(typeof(LinqToSqlCustomersController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -128,16 +129,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
     }
 #endif
 
-    public abstract class AggregationTests : WebHostTestBase
+    public abstract class AggregationTests<T> : WebHostTestBase<T>
     {
         protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
 
-        public AggregationTests(WebHostTestFixture fixture)
+        public AggregationTests(WebHostTestFixture<T> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigureOnBase(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

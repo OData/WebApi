@@ -17,14 +17,14 @@ using JsonLightModel = Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metad
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class ComplexTypeTests : WebHostTestBase
+    public class ComplexTypeTests : WebHostTestBase<ComplexTypeTests>
     {
-        public ComplexTypeTests(WebHostTestFixture fixture)
+        public ComplexTypeTests(WebHostTestFixture<ComplexTypeTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute("Complex", "Complex", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.AddODataQueryFilter();

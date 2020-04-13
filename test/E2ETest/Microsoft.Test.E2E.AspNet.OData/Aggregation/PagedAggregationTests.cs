@@ -13,16 +13,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 {
-    public class PagedAggregationTests : WebHostTestBase
+    public class PagedAggregationTests : WebHostTestBase<PagedAggregationTests>
     {
         private const string AggregationTestBaseUrl = "{0}/pagedaggregation/Customers";
 
-        public PagedAggregationTests(WebHostTestFixture fixture)
+        public PagedAggregationTests(WebHostTestFixture<PagedAggregationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof (Paged.CustomersController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

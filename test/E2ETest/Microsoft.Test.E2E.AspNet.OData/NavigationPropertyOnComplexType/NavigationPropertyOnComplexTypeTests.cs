@@ -14,16 +14,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
 {
-    public class NavigationPropertyOnComplexType : WebHostTestBase
+    public class NavigationPropertyOnComplexType : WebHostTestBase<NavigationPropertyOnComplexType>
     {
         private const string PeopleBaseUrl = "{0}/odata/People";
 
-        public NavigationPropertyOnComplexType(WebHostTestFixture fixture)
+        public NavigationPropertyOnComplexType(WebHostTestFixture<NavigationPropertyOnComplexType> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(PeopleController));
             configuration.JsonReferenceLoopHandling =

@@ -19,14 +19,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AlternateKeys
 {
-    public class AlternateKeysTest : WebHostTestBase
+    public class AlternateKeysTest : WebHostTestBase<AlternateKeysTest>
     {
-        public AlternateKeysTest(WebHostTestFixture fixture)
+        public AlternateKeysTest(WebHostTestFixture<AlternateKeysTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[]
             {

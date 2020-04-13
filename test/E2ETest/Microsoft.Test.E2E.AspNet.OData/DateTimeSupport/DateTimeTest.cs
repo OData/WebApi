@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
 {
-    public class DateTimeTest : WebHostTestBase
+    public class DateTimeTest : WebHostTestBase<DateTimeTest>
     {
-        public DateTimeTest(WebHostTestFixture fixture)
+        public DateTimeTest(WebHostTestFixture<DateTimeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(FilesController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

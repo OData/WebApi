@@ -14,14 +14,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class SelectTypeExplosionTests : WebHostTestBase
+    public class SelectTypeExplosionTests : WebHostTestBase<SelectTypeExplosionTests>
     {
-        public SelectTypeExplosionTests(WebHostTestFixture fixture)
+        public SelectTypeExplosionTests(WebHostTestFixture<SelectTypeExplosionTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Count().Filter().OrderBy().Expand().MaxTop(null);
 #if NETCORE

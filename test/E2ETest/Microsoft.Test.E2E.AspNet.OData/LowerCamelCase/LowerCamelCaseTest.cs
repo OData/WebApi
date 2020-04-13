@@ -19,14 +19,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
 {
-    public class LowerCamelCaseTest : WebHostTestBase
+    public class LowerCamelCaseTest : WebHostTestBase<LowerCamelCaseTest>
     {
-        public LowerCamelCaseTest(WebHostTestFixture fixture)
+        public LowerCamelCaseTest(WebHostTestFixture<LowerCamelCaseTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

@@ -13,9 +13,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         DataServiceContext WriterClient(Uri serviceRoot, ODataProtocolVersion protocolVersion);
     }
 
-    public abstract class ODataFormatterTestBase : WebHostTestBase, IODataFormatterTestBase
+    public abstract class ODataFormatterTestBase<TTest> : WebHostTestBase<TTest>, IODataFormatterTestBase
     {
-        public ODataFormatterTestBase(WebHostTestFixture fixture)
+        public ODataFormatterTestBase(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

@@ -202,14 +202,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
     }
     #endregion
 
-    public class SpecialPrimaryKeyTypesInLinkGenerationTests : WebHostTestBase
+    public class SpecialPrimaryKeyTypesInLinkGenerationTests : WebHostTestBase<SpecialPrimaryKeyTypesInLinkGenerationTests>
     {
-        public SpecialPrimaryKeyTypesInLinkGenerationTests(WebHostTestFixture fixture)
+        public SpecialPrimaryKeyTypesInLinkGenerationTests(WebHostTestFixture<SpecialPrimaryKeyTypesInLinkGenerationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             var builder = configuration.CreateConventionModelBuilder();

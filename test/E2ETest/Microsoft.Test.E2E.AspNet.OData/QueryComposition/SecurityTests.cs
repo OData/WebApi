@@ -11,9 +11,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class SecurityTests : WebHostTestBase
+    public class SecurityTests : WebHostTestBase<SecurityTests>
     {
-        public SecurityTests(WebHostTestFixture fixture)
+        public SecurityTests(WebHostTestFixture<SecurityTests> fixture)
             :base(fixture)
         {
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

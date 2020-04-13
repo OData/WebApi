@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelAliasing
 {
-    public class QueryTests : WebHostTestBase
+    public class QueryTests : WebHostTestBase<QueryTests>
     {
-        public QueryTests(WebHostTestFixture fixture)
+        public QueryTests(WebHostTestFixture<QueryTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("convention", "convention", GetConventionModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

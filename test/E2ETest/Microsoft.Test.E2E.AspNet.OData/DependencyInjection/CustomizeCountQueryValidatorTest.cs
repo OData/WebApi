@@ -16,17 +16,17 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
-    public class CustomizeCountQueryValidatorTest : WebHostTestBase
+    public class CustomizeCountQueryValidatorTest : WebHostTestBase<CustomizeCountQueryValidatorTest>
     {
         private const string CustomerBaseUrl = "{0}/customcountvalidator/Customers";
         private const string OrderBaseUrl = "{0}/customcountvalidator/Orders";
 
-        public CustomizeCountQueryValidatorTest(WebHostTestFixture fixture)
+        public CustomizeCountQueryValidatorTest(WebHostTestFixture<CustomizeCountQueryValidatorTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
             configuration.JsonReferenceLoopHandling =

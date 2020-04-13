@@ -11,14 +11,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ETags
 {
-    public class ETagCurrencyTokenEfContextTest : WebHostTestBase
+    public class ETagCurrencyTokenEfContextTest : WebHostTestBase<ETagCurrencyTokenEfContextTest>
     {
-        public ETagCurrencyTokenEfContextTest(WebHostTestFixture fixture)
+        public ETagCurrencyTokenEfContextTest(WebHostTestFixture<ETagCurrencyTokenEfContextTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(DominiosController)};
             configuration.AddControllers(controllers);

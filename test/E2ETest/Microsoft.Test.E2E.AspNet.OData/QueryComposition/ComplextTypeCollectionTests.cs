@@ -17,14 +17,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
 {
-    public class ComplextTypeCollectionTests : WebHostTestBase
+    public class ComplextTypeCollectionTests : WebHostTestBase<ComplextTypeCollectionTests>
     {
-        public ComplextTypeCollectionTests(WebHostTestFixture fixture)
+        public ComplextTypeCollectionTests(WebHostTestFixture<ComplextTypeCollectionTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
 

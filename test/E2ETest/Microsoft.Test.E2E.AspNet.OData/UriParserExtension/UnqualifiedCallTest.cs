@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.UriParserExtension
 {
-    public class UnqualifiedCallTest : WebHostTestBase
+    public class UnqualifiedCallTest : WebHostTestBase<UnqualifiedCallTest>
     {
-        public UnqualifiedCallTest(WebHostTestFixture fixture)
+        public UnqualifiedCallTest(WebHostTestFixture<UnqualifiedCallTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(CustomersController), typeof(OrdersController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

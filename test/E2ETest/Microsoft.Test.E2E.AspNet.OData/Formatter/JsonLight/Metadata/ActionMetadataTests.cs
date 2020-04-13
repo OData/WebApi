@@ -22,14 +22,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class ActionMetadataTests : WebHostTestBase
+    public class ActionMetadataTests : WebHostTestBase<ActionMetadataTests>
     {
-        public ActionMetadataTests(WebHostTestFixture fixture)
+        public ActionMetadataTests(WebHostTestFixture<ActionMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute("Actions", "Actions", GetActionsModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.AddODataQueryFilter();

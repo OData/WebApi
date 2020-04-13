@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 {
-    public class DateWithEfTest : WebHostTestBase
+    public class DateWithEfTest : WebHostTestBase<DateWithEfTest>
     {
-        public DateWithEfTest(WebHostTestFixture fixture)
+        public DateWithEfTest(WebHostTestFixture<DateWithEfTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] {typeof (EfPeopleController)};
             configuration.AddControllers(controllers);

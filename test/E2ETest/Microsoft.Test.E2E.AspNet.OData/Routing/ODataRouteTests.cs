@@ -16,14 +16,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class ODataRouteTests : WebHostTestBase
+    public class ODataRouteTests : WebHostTestBase<ODataRouteTests>
     {
-        public ODataRouteTests(WebHostTestFixture fixture)
+        public ODataRouteTests(WebHostTestFixture<ODataRouteTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.MapODataServiceRoute("noPrefix", "", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
             configuration.MapODataServiceRoute("prefix", "prefix", GetEdmModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

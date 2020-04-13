@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttributeTest
 {
-    public class FilterAttributeTest : WebHostTestBase
+    public class FilterAttributeTest : WebHostTestBase<FilterAttributeTest>
     {
         private const string CustomerBaseUrl = "{0}/enablequery/Customers";
         private const string OrderBaseUrl = "{0}/enablequery/Orders";
@@ -20,12 +20,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.FilterAttribut
         private const string ModelBoundOrderBaseUrl = "{0}/modelboundapi/Orders";
         private const string ModelBoundCarBaseUrl = "{0}/modelboundapi/Cars";
 
-        public FilterAttributeTest(WebHostTestFixture fixture)
+        public FilterAttributeTest(WebHostTestFixture<FilterAttributeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController),
                     typeof(CarsController));

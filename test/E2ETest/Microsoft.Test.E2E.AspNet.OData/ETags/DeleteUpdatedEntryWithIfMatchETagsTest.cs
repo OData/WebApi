@@ -17,14 +17,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ETags
 {
-    public class DeleteUpdatedEntryWithIfMatchETagsTest : WebHostTestBase
+    public class DeleteUpdatedEntryWithIfMatchETagsTest : WebHostTestBase<DeleteUpdatedEntryWithIfMatchETagsTest>
     {
-        public DeleteUpdatedEntryWithIfMatchETagsTest(WebHostTestFixture fixture)
+        public DeleteUpdatedEntryWithIfMatchETagsTest(WebHostTestFixture<DeleteUpdatedEntryWithIfMatchETagsTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);

@@ -13,14 +13,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ODataCountTest
 {
-    public class ODataCountTest : WebHostTestBase
+    public class ODataCountTest : WebHostTestBase<ODataCountTest>
     {
-        public ODataCountTest(WebHostTestFixture fixture)
+        public ODataCountTest(WebHostTestFixture<ODataCountTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(HeroesController) };
             configuration.AddControllers(controllers);

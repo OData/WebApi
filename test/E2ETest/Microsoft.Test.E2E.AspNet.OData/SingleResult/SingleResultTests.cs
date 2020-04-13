@@ -11,16 +11,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.SingleResultTest
 {
-    public class SingleResultTests : WebHostTestBase
+    public class SingleResultTests : WebHostTestBase<SingleResultTests>
     {
         private const string BaseUrl = "{0}/singleresult/Customers";
 
-        public SingleResultTests(WebHostTestFixture fixture)
+        public SingleResultTests(WebHostTestFixture<SingleResultTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof (CustomersController));
             configuration.JsonReferenceLoopHandling =

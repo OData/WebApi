@@ -15,16 +15,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Cast
 {
-    public class CastTest : WebHostTestBase
+    public class CastTest : WebHostTestBase<CastTest>
     {
         private static string[] dataSourceTypes = new string[] { "IM", "EF" };// In Memory and Entity Framework
 
-        public CastTest(WebHostTestFixture fixture)
+        public CastTest(WebHostTestFixture<CastTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(ProductsController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

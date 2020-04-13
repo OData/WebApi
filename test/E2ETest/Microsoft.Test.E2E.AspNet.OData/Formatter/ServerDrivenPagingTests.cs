@@ -37,14 +37,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class ServerDrivenPagingTests : WebHostTestBase
+    public class ServerDrivenPagingTests : WebHostTestBase<ServerDrivenPagingTests>
     {
-        public ServerDrivenPagingTests(WebHostTestFixture fixture)
+        public ServerDrivenPagingTests(WebHostTestFixture<ServerDrivenPagingTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.RemoveNonODataFormatters();
             configuration.EnableODataSupport(GetEdmModel(configuration));

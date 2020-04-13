@@ -19,14 +19,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class AttributeRoutingTests : WebHostTestBase
+    public class AttributeRoutingTests : WebHostTestBase<AttributeRoutingTests>
     {
-        public AttributeRoutingTests(WebHostTestFixture fixture)
+        public AttributeRoutingTests(WebHostTestFixture<AttributeRoutingTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.AddControllers(new Type[] { typeof(DogsController), typeof(CatsController), typeof(OwnersController) });

@@ -44,14 +44,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class ODataValueProviderTests : WebHostTestBase
+    public class ODataValueProviderTests : WebHostTestBase<ODataValueProviderTests>
     {
-        public ODataValueProviderTests(WebHostTestFixture fixture)
+        public ODataValueProviderTests(WebHostTestFixture<ODataValueProviderTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefault();

@@ -25,14 +25,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
 {
-    public class UntypedSerializationTests : WebHostTestBase
+    public class UntypedSerializationTests : WebHostTestBase<UntypedSerializationTests>
     {
-        public UntypedSerializationTests(WebHostTestFixture fixture)
+        public UntypedSerializationTests(WebHostTestFixture<UntypedSerializationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();

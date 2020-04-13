@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData
 {
-    public class DeltaQueryTests : WebHostTestBase
+    public class DeltaQueryTests : WebHostTestBase<DeltaQueryTests>
     {
-        public DeltaQueryTests(WebHostTestFixture fixture)
+        public DeltaQueryTests(WebHostTestFixture<DeltaQueryTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

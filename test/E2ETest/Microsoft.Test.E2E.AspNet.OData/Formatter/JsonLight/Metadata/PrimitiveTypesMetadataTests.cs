@@ -21,14 +21,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 {
-    public class PrimitiveTypesMetadataTests : WebHostTestBase
+    public class PrimitiveTypesMetadataTests : WebHostTestBase<PrimitiveTypesMetadataTests>
     {
-        public PrimitiveTypesMetadataTests(WebHostTestFixture fixture)
+        public PrimitiveTypesMetadataTests(WebHostTestFixture<PrimitiveTypesMetadataTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             IList<IODataRoutingConvention> conventions = ODataRoutingConventions.CreateDefault();
             conventions.Insert(0, new ReflectedPropertyRoutingConvention());

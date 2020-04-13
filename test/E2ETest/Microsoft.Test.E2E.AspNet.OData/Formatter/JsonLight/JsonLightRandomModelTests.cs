@@ -25,9 +25,9 @@ using Microsoft.Test.E2E.AspNet.OData.Common.TypeCreator;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
-    public class JsonLightRandomModelTests : RandomModelTests
+    public class JsonLightRandomModelTests : RandomModelTests<JsonLightRandomModelTests>
     {
-        public JsonLightRandomModelTests(WebHostTestFixture fixture)
+        public JsonLightRandomModelTests(WebHostTestFixture<JsonLightRandomModelTests> fixture)
             :base(fixture)
         {
         }
@@ -86,7 +86,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

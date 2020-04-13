@@ -42,9 +42,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public abstract class CollectionPropertyTests : ODataFormatterTestBase
+    public abstract class CollectionPropertyTests<TTest> : ODataFormatterTestBase<TTest>
     {
-        public CollectionPropertyTests(WebHostTestFixture fixture)
+        public CollectionPropertyTests(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

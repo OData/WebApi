@@ -14,14 +14,14 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    public class ErrorMessagesTests : WebHostTestBase
+    public class ErrorMessagesTests : WebHostTestBase<ErrorMessagesTests>
     {
-        public ErrorMessagesTests(WebHostTestFixture fixture)
+        public ErrorMessagesTests(WebHostTestFixture<ErrorMessagesTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

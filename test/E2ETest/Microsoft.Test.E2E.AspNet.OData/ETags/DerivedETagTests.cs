@@ -18,14 +18,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ETags
 {
-    public class DerivedETagTests : WebHostTestBase
+    public class DerivedETagTests : WebHostTestBase<DerivedETagTests>
     {
-        public DerivedETagTests(WebHostTestFixture fixture)
+        public DerivedETagTests(WebHostTestFixture<DerivedETagTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().Select().MaxTop(null);

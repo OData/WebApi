@@ -12,19 +12,19 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest
 {
-    public class PageAttributeTest : WebHostTestBase
+    public class PageAttributeTest : WebHostTestBase<PageAttributeTest>
     {
         private const string CustomerBaseUrl = "{0}/enablequery/Customers";
         private const string OrderBaseUrl = "{0}/enablequery/Orders";
         private const string ModelBoundCustomerBaseUrl = "{0}/modelboundapi/Customers";
         private const string ModelBoundOrderBaseUrl = "{0}/modelboundapi/Orders";
 
-        public PageAttributeTest(WebHostTestFixture fixture)
+        public PageAttributeTest(WebHostTestFixture<PageAttributeTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
             configuration.JsonReferenceLoopHandling =

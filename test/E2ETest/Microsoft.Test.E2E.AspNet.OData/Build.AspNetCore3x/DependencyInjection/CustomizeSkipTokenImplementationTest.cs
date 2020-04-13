@@ -16,17 +16,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
-    public class CustomizeSkipTokenImplementationTest : WebHostTestBase
+    public class CustomizeSkipTokenImplementationTest : WebHostTestBase<CustomizeSkipTokenImplementationTest>
     {
         private const string CustomerBaseUrl = "{0}/customskiptoken/Customers";
-        private const string OrderBaseUrl = "{0}/customskiptoken/Orders";
 
-        public CustomizeSkipTokenImplementationTest(WebHostTestFixture fixture)
+        public CustomizeSkipTokenImplementationTest(WebHostTestFixture<CustomizeSkipTokenImplementationTest> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
             configuration.JsonReferenceLoopHandling =

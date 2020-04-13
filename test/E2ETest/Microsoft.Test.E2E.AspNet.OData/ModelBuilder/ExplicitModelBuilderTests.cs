@@ -18,14 +18,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 {
-    public class ExplicitModelBuilderTests : WebHostTestBase
+    public class ExplicitModelBuilderTests : WebHostTestBase<ExplicitModelBuilderTests>
     {
-        public ExplicitModelBuilderTests(WebHostTestFixture fixture)
+        public ExplicitModelBuilderTests(WebHostTestFixture<ExplicitModelBuilderTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
 

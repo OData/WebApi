@@ -22,14 +22,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Enums
 {
-    public class EnumsTest : WebHostTestBase
+    public class EnumsTest : WebHostTestBase<EnumsTest>
     {
-        public EnumsTest(WebHostTestFixture fixture)
+        public EnumsTest(WebHostTestFixture<EnumsTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
             configuration.AddControllers(controllers);

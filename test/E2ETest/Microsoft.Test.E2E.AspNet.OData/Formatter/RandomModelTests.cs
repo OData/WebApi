@@ -16,11 +16,11 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 {
-    public abstract class RandomModelTests : WebHostTestBase, IODataFormatterTestBase
+    public abstract class RandomModelTests<TTest> : WebHostTestBase<TTest>, IODataFormatterTestBase
     {
         private static ODataModelTypeCreator creator = null;
 
-        public RandomModelTests(WebHostTestFixture fixture)
+        public RandomModelTests(WebHostTestFixture<TTest> fixture)
             :base(fixture)
         {
         }

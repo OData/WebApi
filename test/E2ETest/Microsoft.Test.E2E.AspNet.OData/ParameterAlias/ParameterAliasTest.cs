@@ -14,14 +14,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
 {
-    public class ParameterAliasTest : WebHostTestBase
+    public class ParameterAliasTest : WebHostTestBase<ParameterAliasTest>
     {
-        public ParameterAliasTest(WebHostTestFixture fixture)
+        public ParameterAliasTest(WebHostTestFixture<ParameterAliasTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(TradesController) };
             configuration.AddControllers(controllers);

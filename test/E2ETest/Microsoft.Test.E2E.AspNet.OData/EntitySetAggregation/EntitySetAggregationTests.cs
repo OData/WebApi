@@ -13,16 +13,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
 {
-    public class EntitySetAggregationTests : WebHostTestBase
+    public class EntitySetAggregationTests : WebHostTestBase<EntitySetAggregationTests>
     {
         private const string AggregationTestBaseUrl = "{0}/aggregation/Customers";
 
-        public EntitySetAggregationTests(WebHostTestFixture fixture)
+        public EntitySetAggregationTests(WebHostTestFixture<EntitySetAggregationTests> fixture)
             : base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

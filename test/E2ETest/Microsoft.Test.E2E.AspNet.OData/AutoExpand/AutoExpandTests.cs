@@ -15,11 +15,11 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 {
-    public class AutoExpandTests : WebHostTestBase
+    public class AutoExpandTests : WebHostTestBase<AutoExpandTests>
     {
         private const string AutoExpandTestBaseUrl = "{0}/autoexpand/Customers(5)";
 
-        public AutoExpandTests(WebHostTestFixture fixture)
+        public AutoExpandTests(WebHostTestFixture<AutoExpandTests> fixture)
             :base(fixture)
         {
         }
@@ -39,18 +39,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             }
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(
-                typeof (CustomersController), 
+                typeof (CustomersController),
                 typeof (PeopleController),
                 typeof (NormalOrdersController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute(
-                "autoexpand", 
-                "autoexpand", 
+                "autoexpand",
+                "autoexpand",
                 AutoExpandEdmModel.GetEdmModel(configuration));
         }
 

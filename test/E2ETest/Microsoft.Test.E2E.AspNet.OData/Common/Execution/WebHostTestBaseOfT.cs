@@ -10,16 +10,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     /// <summary>
     /// The WebHostTestBase creates a web host to be used for a test.
     /// </summary>
-    public abstract class WebHostTestBase : IClassFixture<WebHostTestFixture>, IDisposable
+    public abstract class WebHostTestBase<TTest> : IClassFixture<WebHostTestFixture<TTest>>, IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WebHostTestBase"/> class.
         /// </summary>
         /// <param name="fixture">The fixture used to initialize the web service.</param>
-        protected WebHostTestBase(WebHostTestFixture fixture)
+        protected WebHostTestBase(WebHostTestFixture<TTest> fixture)
         {
-            // Initialize the fixture and get the client and base address.
-            fixture.Initialize(this.UpdateConfiguration);
             this.BaseAddress = fixture.BaseAddress;
             this.Client = new HttpClient();
         }
@@ -33,12 +31,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// An HttpClient to use with the server.
         /// </summary>
         public HttpClient Client { get; set; }
-
-        /// <summary>
-        /// A configuration method for the server.
-        /// </summary>
-        /// <param name="configuration"></param>
-        protected abstract void UpdateConfiguration(WebRouteConfiguration configuration);
    
         public void Dispose()
         {

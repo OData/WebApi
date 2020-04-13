@@ -18,16 +18,16 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DependencyInjection
 {
-    public class CustomizeSerializerTest : WebHostTestBase
+    public class CustomizeSerializerTest : WebHostTestBase<CustomizeSerializerTest>
     {
         private const string CustomerBaseUrl = "{0}/customserializer/Customers";
 
-        public CustomizeSerializerTest(WebHostTestFixture fixture)
+        public CustomizeSerializerTest(WebHostTestFixture<CustomizeSerializerTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
             configuration.JsonReferenceLoopHandling =

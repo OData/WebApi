@@ -10,9 +10,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
-    public class JsonLightMixScenarioTests : MixScenarioTestsOData
+    public class JsonLightMixScenarioTests : MixScenarioTestsOData<JsonLightMixScenarioTests>
     {
-        public JsonLightMixScenarioTests(WebHostTestFixture fixture)
+        public JsonLightMixScenarioTests(WebHostTestFixture<JsonLightMixScenarioTests> fixture)
             :base(fixture)
         {
         }
@@ -33,7 +33,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             return ctx;
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.EnableODataSupport(GetEdmModel(configuration), "odata");
         }

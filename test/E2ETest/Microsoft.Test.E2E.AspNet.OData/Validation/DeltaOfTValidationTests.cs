@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Validation
 {
-    public class DeltaOfTValidationTests : WebHostTestBase
+    public class DeltaOfTValidationTests : WebHostTestBase<DeltaOfTValidationTests>
     {
-        public DeltaOfTValidationTests(WebHostTestFixture fixture)
+        public DeltaOfTValidationTests(WebHostTestFixture<DeltaOfTValidationTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             config.Routes.Clear();
             config.MapODataServiceRoute("odata", "odata", GetModel(config), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());

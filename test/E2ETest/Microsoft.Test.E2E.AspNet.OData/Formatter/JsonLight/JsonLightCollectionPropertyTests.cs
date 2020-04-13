@@ -10,9 +10,9 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
 {
-    public class JsonLightCollectionPropertyTests : CollectionPropertyTests
+    public class JsonLightCollectionPropertyTests : CollectionPropertyTests<JsonLightCollectionPropertyTests>
     {
-        public JsonLightCollectionPropertyTests(WebHostTestFixture fixture)
+        public JsonLightCollectionPropertyTests(WebHostTestFixture<JsonLightCollectionPropertyTests> fixture)
             :base(fixture)
         {
         }
@@ -49,7 +49,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight
             await SupportPostCollectionPropertyByEntityPayload();
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.RemoveNonODataFormatters();

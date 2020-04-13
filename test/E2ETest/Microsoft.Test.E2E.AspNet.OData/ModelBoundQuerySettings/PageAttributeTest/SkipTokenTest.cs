@@ -12,18 +12,18 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
-    public class SkipTokenTest : WebHostTestBase
+    public class SkipTokenTest : WebHostTestBase<SkipTokenTest>
     {
         private const string CustomerBaseUrl = "{0}/skiptokentest/Customers";
         private const string OrderBaseUrl = "{0}/skiptokentest/Orders";
         private const string DatesBaseUrl = "{0}/skiptokentest/Dates";
 
-        public SkipTokenTest(WebHostTestFixture fixture)
+        public SkipTokenTest(WebHostTestFixture<SkipTokenTest> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        protected static void UpdateConfigure(WebRouteConfiguration configuration)
         {
             configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController));
             configuration.JsonReferenceLoopHandling =

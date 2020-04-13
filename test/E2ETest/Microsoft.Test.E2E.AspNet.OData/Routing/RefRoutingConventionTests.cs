@@ -20,14 +20,14 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Routing
 {
-    public class RefRoutingConventionTests : WebHostTestBase
+    public class RefRoutingConventionTests : WebHostTestBase<RefRoutingConventionTests>
     {
-        public RefRoutingConventionTests(WebHostTestFixture fixture)
+        public RefRoutingConventionTests(WebHostTestFixture<RefRoutingConventionTests> fixture)
             :base(fixture)
         {
         }
 
-        protected override void UpdateConfiguration(WebRouteConfiguration config)
+        protected static void UpdateConfigure(WebRouteConfiguration config)
         {
             var controllers = new[] { typeof(CustomersController), typeof(OrdersController), typeof(AddressesController) };
             config.AddControllers(controllers);

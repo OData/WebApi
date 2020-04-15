@@ -31,10 +31,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Models.ProductFamilies
 
         public ICollection<Address> Addresses { get; set; }
 
+        public Address MainAddress { get; set; }
+
         public ICollection<string> Tags { get; set; }
 
         public virtual ICollection<ProductFamily> ProductFamilies { get; set; }
 
         public CountryOrRegion CountryOrRegion { get; set; }
+    }
+
+    public class ToiletPaperSupplier : Supplier
+    {
+        public int price { get; set; }
     }
 }

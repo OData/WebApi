@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Builder
@@ -18,6 +19,32 @@ namespace Microsoft.AspNet.OData.Builder
         internal SingletonConfiguration(ODataModelBuilder modelBuilder, SingletonConfiguration configuration)
             : base(modelBuilder, configuration)
         {
+        }
+
+        internal SingletonConfiguration Singleton
+        {
+            get { return (SingletonConfiguration)Configuration; }
+        }
+
+        /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public SingletonConfiguration<TEntityType> HasDerivedTypeConstraints(params Type[] subtypes)
+        {
+            Singleton.HasDerivedTypeConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerivedType to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public SingletonConfiguration<TEntityType> HasDerivedTypeConstraints<TDerivedType>() where TDerivedType : TEntityType
+        {
+            Singleton.HasDerivedTypeConstraints(typeof(TDerivedType));
+            return this;
         }
     }
 }

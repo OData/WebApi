@@ -9,6 +9,8 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Vocabularies;
+using Microsoft.OData.Edm.Vocabularies.V1;
 using Microsoft.OData.UriParser;
 using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
@@ -21,7 +23,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
     public class ExplicitModelBuilderTests : WebHostTestBase
     {
         public ExplicitModelBuilderTests(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
@@ -44,6 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             enumContry.Member(CountryOrRegion.USA);
 
             var products = modelBuilder.EntitySet<Product>("Products");
+            var toiletPaperSupplier = modelBuilder.EntityType<ToiletPaperSupplier>();
             products.HasEditLink(entityContext =>
                 {
                     object id;
@@ -57,7 +60,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                         }));
                 }, true);
 
-            var suppliers = modelBuilder.EntitySet<Supplier>("Suppliers");
+            var mainSupplier = modelBuilder.Singleton<Supplier>("MainSupplier");
+
+            var suppliers = modelBuilder.EntitySet<Supplier>("Suppliers").HasDerivedTypeConstraint<ToiletPaperSupplier>();
+
+            mainSupplier.HasDerivedTypeConstraints(typeof(ToiletPaperSupplier));
+
             suppliers.HasEditLink(entityContext =>
                 {
                     object id;
@@ -76,7 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                 {
                     object id;
                     entityContext.EdmObject.TryGetPropertyValue("ID", out id);
-                    return new Uri(entityContext.GetUrlHelper().Link(ODataTestConstants.DefaultRouteName, 
+                    return new Uri(entityContext.GetUrlHelper().Link(ODataTestConstants.DefaultRouteName,
                         new
                         {
                             odataPath = ResourceContextHelper.CreateODataLink(entityContext,
@@ -105,6 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             supplier.CollectionProperty(s => s.Addresses);
             supplier.CollectionProperty(s => s.Tags);
             supplier.EnumProperty(s => s.CountryOrRegion);
+            supplier.ComplexProperty(s => s.MainAddress).HasDerivedTypeConstraints(typeof(Address));
 
             var productFamily = families.EntityType;
             productFamily.HasKey(pf => pf.ID);
@@ -114,7 +123,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             // Create relationships and bindings in one go
             products.HasRequiredBinding(p => p.Family, families);
             families.HasManyBinding(pf => pf.Products, products);
-            families.HasOptionalBinding(pf => pf.Supplier, suppliers);
+            families.HasOptionalBinding(pf => pf.Supplier, suppliers).NavigationProperty.HasDerivedTypeConstraint<ToiletPaperSupplier>();
             suppliers.HasManyBinding(s => s.ProductFamilies, families);
 
             // Create navigation Link builders
@@ -135,48 +144,54 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                 }, true);
 
             families.HasNavigationPropertiesLink(
-                productFamily.NavigationProperties,
-                (entityContext, navigationProperty) =>
-                {
-                    object id;
-                    entityContext.EdmObject.TryGetPropertyValue("ID", out id);
-                    return new Uri(entityContext.GetUrlHelper().Link(ODataTestConstants.DefaultRouteName,
-                new
-                {
-                    odataPath = ResourceContextHelper.CreateODataLink(entityContext,
-                        new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("ID", id) }, entityContext.StructuredType as IEdmEntityType, null),
-                        new NavigationPropertySegment(navigationProperty, null))
-                }));
-                }, true);
+              productFamily.NavigationProperties,
+              (entityContext, navigationProperty) =>
+              {
+                  object id;
+                  entityContext.EdmObject.TryGetPropertyValue("ID", out id);
+                  return new Uri(entityContext.GetUrlHelper().Link(ODataTestConstants.DefaultRouteName,
+              new
+              {
+                  odataPath = ResourceContextHelper.CreateODataLink(entityContext,
+                      new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                      new KeySegment(new[] { new KeyValuePair<string, object>("ID", id) }, entityContext.StructuredType as IEdmEntityType, null),
+                      new NavigationPropertySegment(navigationProperty, null))
+              }));
+              }, true);
 
             suppliers.HasNavigationPropertiesLink(
-                supplier.NavigationProperties,
-                (entityContext, navigationProperty) =>
-                {
-                    object id;
-                    entityContext.EdmObject.TryGetPropertyValue("ID", out id);
-                    return new Uri(entityContext.GetUrlHelper().Link(
-                ODataTestConstants.DefaultRouteName,
-                new
-                {
-                    odataPath = ResourceContextHelper.CreateODataLink(entityContext,
-                        new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
-                        new KeySegment(new[] { new KeyValuePair<string, object>("ID", id) }, entityContext.StructuredType as IEdmEntityType, null),
-                        new NavigationPropertySegment(navigationProperty, null))
-                }));
-                }, true);
+              supplier.NavigationProperties,
+              (entityContext, navigationProperty) =>
+              {
+                  object id;
+                  entityContext.EdmObject.TryGetPropertyValue("ID", out id);
+                  return new Uri(entityContext.GetUrlHelper().Link(
+              ODataTestConstants.DefaultRouteName,
+              new
+              {
+                  odataPath = ResourceContextHelper.CreateODataLink(entityContext,
+                      new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                      new KeySegment(new[] { new KeyValuePair<string, object>("ID", id) }, entityContext.StructuredType as IEdmEntityType, null),
+                      new NavigationPropertySegment(navigationProperty, null))
+              }));
+              }, true);
+
+            var function = supplier.Function("GetAddress").Returns<Address>().HasDerivedTypeConstraintForReturnType<Address>();
+            function.ReturnTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
+            function.Parameter<int>("value");
+
+            var action = modelBuilder.Action("GetAddress").Returns<Address>().HasDerivedTypeConstraintsForReturnType(typeof(Address));
+            action.Parameter<Supplier>("supplier").HasDerivedTypeConstraint<ToiletPaperSupplier>();
+            action.ReturnTypeConstraints.Location = Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation.OutOfLine;
 
             return modelBuilder.GetEdmModel();
         }
 
         [Fact]
-
         public async Task VerifyMetaDataIsGeneratedCorrectly()
         {
             var response = await Client.GetAsync(this.BaseAddress + "/$metadata");
-            var stream = await response.Content.ReadAsStreamAsync();
-            IODataResponseMessage message = new ODataMessageWrapper(stream, response.Content.Headers);
+            var stream = await response.Content.ReadAsStreamAsync(); IODataResponseMessage message = new ODataMessageWrapper(stream, response.Content.Headers);
             var reader = new ODataMessageReader(message);
             var edmModel = reader.ReadMetadataDocument();
 
@@ -184,7 +199,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
 
             var container = edmModel.EntityContainer;
             Assert.Equal("Container", container.Name);
-            Assert.Equal(3, container.Elements.Count());
+            Assert.Equal(5, container.Elements.Count());
 
             var address = edmModel.SchemaElements.OfType<IEdmComplexType>().First();
             Assert.Equal("Address", address.Name);
@@ -198,7 +213,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var supplier = edmModel.SchemaElements.First(e => e.Name == "Supplier") as IEdmEntityType;
             Assert.Single(supplier.Key());
             Assert.Equal("ID", supplier.Key().First().Name);
-            Assert.Equal(6, supplier.Properties().Count());
+            Assert.Equal(7, supplier.Properties().Count());
 
             var addressesProperty = supplier.Properties().First(p => p.Name == "Addresses").Type.AsCollection();
             Assert.Equal(typeof(Address).FullName, addressesProperty.CollectionDefinition().ElementType.FullName());
@@ -207,6 +222,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var tagsProperty = supplier.Properties().First(p => p.Name == "Tags").Type.AsCollection();
             Assert.Equal("Edm.String", tagsProperty.CollectionDefinition().ElementType.FullName());
             Assert.True(tagsProperty.IsNullable);
+
+            var vocabularyAnnotations = edmModel.VocabularyAnnotations.ToList();
+
+            Action<IEdmVocabularyAnnotation> isDerivedTypeConstraintTerm = a =>
+            {
+                Assert.Equal(ValidationVocabularyModel.DerivedTypeConstraintTerm, a.Term);
+            };
+
+            Assert.All(vocabularyAnnotations, isDerivedTypeConstraintTerm);
+            Assert.Equal("MainAddress", vocabularyAnnotations[2].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[2].Target).ToString());
+            Assert.Equal("Supplier", vocabularyAnnotations[3].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[3].Target).ToString());
+            Assert.Equal("supplier", vocabularyAnnotations[4].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[4].Target).ToString());
+            Assert.Equal("Suppliers", vocabularyAnnotations[5].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[5].Target).ToString());
+            Assert.Equal("MainSupplier", vocabularyAnnotations[6].Target.GetType().GetProperty("Name").GetValue(vocabularyAnnotations[6].Target).ToString());
+
+
+            var declaringOperation = vocabularyAnnotations[0].Target.GetType().GetProperty("DeclaringOperation")
+                .GetValue(vocabularyAnnotations[0].Target);
+            Assert.Equal("GetAddress", declaringOperation.GetType().GetProperty("Name").GetValue(declaringOperation).ToString());
+
+            declaringOperation = vocabularyAnnotations[1].Target.GetType().GetProperty("DeclaringOperation")
+                .GetValue(vocabularyAnnotations[1].Target);
+            Assert.Equal("GetAddress", declaringOperation.GetType().GetProperty("Name").GetValue(declaringOperation).ToString());
+
+            Assert.Equal(7, vocabularyAnnotations.Count);
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.OData.Builder
             new DataContractAttributeEdmTypeConvention(),
             new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
             new DataMemberAttributeEdmPropertyConvention(),
+            new DerivedTypeConstraintAttributeConvention(),
             new RequiredAttributeEdmPropertyConvention(),
             new DefaultValueAttributeEdmPropertyConvention(),
             new ConcurrencyCheckAttributeEdmPropertyConvention(),

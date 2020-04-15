@@ -225,7 +225,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var supplier = edmModel.SchemaElements.Where(e => e.Name == "Supplier").First() as IEdmEntityType;
             Assert.Single(supplier.Key());
             Assert.Equal("ID", supplier.Key().First().Name);
-            Assert.Equal(6, supplier.Properties().Count());
+            Assert.Equal(7, supplier.Properties().Count());
 
             var addressesProperty = supplier.Properties().First(p => p.Name == "Addresses").Type.AsCollection();
             Assert.Equal(typeof(Address).FullName, addressesProperty.CollectionDefinition().ElementType.FullName());

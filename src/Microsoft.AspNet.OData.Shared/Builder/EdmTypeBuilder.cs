@@ -26,6 +26,7 @@ namespace Microsoft.AspNet.OData.Builder
         private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
         private readonly Dictionary<IEdmProperty, ModelBoundQuerySettings> _propertiesQuerySettings = new Dictionary<IEdmProperty, ModelBoundQuerySettings>();
+        private readonly Dictionary<IEdmProperty, PropertyConfiguration> _propertyConfigurations = new Dictionary<IEdmProperty, PropertyConfiguration>();
         private readonly Dictionary<IEdmStructuredType, ModelBoundQuerySettings> _structuredTypeQuerySettings = new Dictionary<IEdmStructuredType, ModelBoundQuerySettings>();
         private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
         private readonly Dictionary<IEdmStructuredType, PropertyInfo> _openTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
@@ -42,6 +43,7 @@ namespace Microsoft.AspNet.OData.Builder
             _properties.Clear();
             _members.Clear();
             _openTypes.Clear();
+            _propertyConfigurations.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IEdmTypeConfiguration config in _configurations)
@@ -293,6 +295,8 @@ namespace Microsoft.AspNet.OData.Builder
                     {
                         _propertiesQuerySettings.Add(edmProperty, property.QueryConfiguration.ModelBoundQuerySettings);
                     }
+
+                    _propertyConfigurations[edmProperty] = property;
                 }
             }
         }
@@ -452,6 +456,8 @@ namespace Microsoft.AspNet.OData.Builder
                     {
                         _propertiesQuerySettings.Add(edmProperty, prop.QueryConfiguration.ModelBoundQuerySettings);
                     }
+
+                    _propertyConfigurations[edmProperty] = prop;
                 }
             }
         }
@@ -544,7 +550,8 @@ namespace Microsoft.AspNet.OData.Builder
                 builder._propertiesQuerySettings,
                 builder._structuredTypeQuerySettings,
                 builder._members,
-                builder._openTypes);
+                builder._openTypes,
+                builder._propertyConfigurations);
         }
 
         /// <summary>

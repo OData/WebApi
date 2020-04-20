@@ -389,6 +389,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [Fact]
+        public async Task PatchDeltaCustomers()
+        {
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers");
+            dynamic data = new ExpandoObject();
+            data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+            string content = JsonConvert.SerializeObject(data);
+            patch.Content = new StringContent(content);
+            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await Client.SendAsync(patch);
+
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task PatchDeltaOrders()
+        {
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaOrders");
+            dynamic data = new ExpandoObject();
+            data.Details = "Changed Detail";
+            string content = JsonConvert.SerializeObject(data);
+            patch.Content = new StringContent(content);
+            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await Client.SendAsync(patch);
+
+            Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
         public async Task PatchShouldSupportNonSettableCollectionProperties()
         {
             HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
@@ -409,8 +437,36 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(3, query.Orders.Count);
         }
     }
+    public class DeltaOrdersController : TestODataController
+    {
+        private static List<DeltaOrder> orders;
+        static DeltaOrdersController()
+        {
+            orders = new List<DeltaOrder>();
 
-    public class DeltaCustomersController : TestODataController
+            var order = new DeltaOrder();
+            order.Id = 1;
+            order.Details = "new Order";
+
+            orders.Add(order);
+        }
+
+        [AcceptVerbs("PATCH")]
+        public ITestActionResult Patch(Delta<DeltaOrder> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var order = orders.Where(c => c.Id == 1).FirstOrDefault();
+            patch.Patch(order);
+            return Ok(orders);
+        }
+
+
+    }
+        public class DeltaCustomersController : TestODataController
     {
         private static List<DeltaCustomer> customers;
 
@@ -465,6 +521,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
             patch.Patch(customer);
             return Ok(customer);
+        }
+
+        [AcceptVerbs("PATCH")]
+        public ITestActionResult PatchDeltaCustomers(Delta<DeltaCustomer> patch)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var customer = customers.Where(c => c.Id == 5).FirstOrDefault();
+            patch.Patch(customer);
+            return Ok(customers);
         }
     }
 

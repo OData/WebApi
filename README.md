@@ -2,8 +2,8 @@
 
  Build  | Status
 --------|---------
-Rolling | ![Image of status badge](https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master%20-%20Rolling)
-Nightly | ![Image of status badge](https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master%20-%20Nightly)
+WebApi Rolling | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Rolling"/> 
+WebApi Nightly | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Nightly"/> 
 
 ### Introduction
 

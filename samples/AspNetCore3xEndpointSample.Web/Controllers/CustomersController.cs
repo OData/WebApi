@@ -86,5 +86,21 @@ namespace AspNetCore3xEndpointSample.Web.Controllers
         {
             return Ok(_context.Customers.FirstOrDefault(c => c.Id == key));
         }
+
+        /// <summary>
+        /// If testing in IISExpress with the POST request to: http://localhost:2087/test/my/a/Customers
+        /// Content-Type : application/json
+        /// {
+        ///    "Name": "Jonier","
+        /// }
+        /// 
+        /// Check the reponse header, you can see 
+        /// "Location" : "http://localhost:2087/test/my/a/Customers(0)"
+        /// </summary>
+        [EnableQuery]
+        public IActionResult Post([FromBody]Customer customer)
+        {
+            return Created(customer);
+        }
     }
 }

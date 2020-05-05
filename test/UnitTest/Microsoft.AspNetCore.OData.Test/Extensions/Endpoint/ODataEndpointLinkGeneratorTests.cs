@@ -57,6 +57,42 @@ namespace Microsoft.AspNet.OData.Test.Extensions
             Assert.Equal("ms/2", path);
         }
 
+        [Theory]
+        [InlineData("/test")]
+        [InlineData("/test/other")]
+        public void GetPathByAddressReturnsCorrectODataPathWithPathBase(string pathBase)
+        {
+            // Arrange
+            int address = 1;
+            IPerRouteContainer container = new PerRouteContainer();
+            container.AddRoute("odata", "ms/{data}");
+
+            IServiceProvider serviceProvider = new ServiceCollection()
+                .AddSingleton<IPerRouteContainer>(container)
+                .BuildServiceProvider();
+
+            HttpContext httpContext = new DefaultHttpContext
+            {
+                RequestServices = serviceProvider
+            };
+
+            httpContext.Request.PathBase = pathBase;
+            httpContext.ODataFeature().RouteName = "odata";
+            RouteValueDictionary values = new RouteValueDictionary();
+            values["odataPath"] = "";
+
+            RouteValueDictionary ambientValues = new RouteValueDictionary();
+            ambientValues["data"] = 2;
+
+            // Act
+            Mock<LinkGenerator> mock = new Mock<LinkGenerator>();
+            ODataEndpointLinkGenerator linkGenerator = new ODataEndpointLinkGenerator(mock.Object);
+            string path = linkGenerator.GetPathByAddress(httpContext, address, values, ambientValues);
+
+            // Assert
+            Assert.Equal(pathBase + "/ms/2", path);
+        }
+
         [Fact]
         public void GetPathByAddressCallInnerLinkGeneratorGetPathByAddress()
         {

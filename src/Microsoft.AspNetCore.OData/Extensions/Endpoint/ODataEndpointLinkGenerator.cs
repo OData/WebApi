@@ -54,6 +54,16 @@ namespace Microsoft.AspNet.OData.Extensions
                     }
                     string link = CombinePathSegments(routePrefix, odataPath);
                     link = UriEncode(link);
+
+                    // A workaround to include the PathBase, a good solution is to use ASP.NET Core provided the APIs
+                    // at https://github.com/dotnet/aspnetcore/blob/master/src/Http/Http.Extensions/src/UriHelper.cs#L48
+                    // to build the absolute Uri. But, here only needs the "PathBase + Path (without OData path)",
+                    HttpRequest request = httpContext.Request;
+                    if (request != null && request.PathBase != null && request.PathBase.HasValue)
+                    {
+                        return request.PathBase.Value + "/" + link;
+                    }
+
                     return link;
                 }
             }

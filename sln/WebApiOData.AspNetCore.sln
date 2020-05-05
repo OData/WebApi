@@ -21,10 +21,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.AspNetCore.OData.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore3xODataSample.Web", "..\samples\AspNetCore3xODataSample.Web\AspNetCore3xODataSample.Web.csproj", "{C5DD33B7-A5C9-431C-93D1-C2176C20F12B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AspNetCore3xEndpointSample.Web", "..\samples\AspNetCore3xEndpointSample.Web\AspNetCore3xEndpointSample.Web.csproj", "{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCore3xEndpointSample.Web", "..\samples\AspNetCore3xEndpointSample.Web\AspNetCore3xEndpointSample.Web.csproj", "{7E23621F-31D5-4A0D-AFDA-987B1866B8AF}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{0fc1bf5e-f882-43d8-9451-ed9fa90dea4c}*SharedItemsImports = 5
+		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{2b8085f7-3625-489e-a963-e29c2bd1aa76}*SharedItemsImports = 5
 		..\src\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems*{b6b951b6-c3f0-4b8e-8955-e039145e7dec}*SharedItemsImports = 13
 		..\test\UnitTest\Microsoft.AspNet.OData.Test.Shared\Microsoft.AspNet.OData.Test.Shared.projitems*{d909e7ab-3281-46ea-929b-f35fe7e94b0f}*SharedItemsImports = 13
 	EndGlobalSection

@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (context.Response.Body != null && context.Response.Body.Length != 0)
             {
-                using (Stream stream = batchResponse.GetStream())
+                using (Stream stream = asyncWriter ? await batchResponse.GetStreamAsync() : batchResponse.GetStream())
                 {
                     context.RequestAborted.ThrowIfCancellationRequested();
                     context.Response.Body.Seek(0L, SeekOrigin.Begin);
@@ -70,7 +70,14 @@ namespace Microsoft.AspNet.OData.Batch
                     ODataBatchStream batchStream = context.Response.Body as ODataBatchStream;
                     if (batchStream != null)
                     {
-                        batchStream.InternalDispose();
+                        if (asyncWriter)
+                        {
+                            await batchStream.InternalDisposeAsync();
+                        }
+                        else
+                        {
+                            batchStream.InternalDispose();
+                        }
                     }
                 }
             }

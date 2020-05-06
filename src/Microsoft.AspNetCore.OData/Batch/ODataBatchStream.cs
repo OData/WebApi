@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.OData.Batch
 {
@@ -21,6 +22,20 @@ namespace Microsoft.AspNet.OData.Batch
             if (!isDisposed)
             {
                 base.Flush();
+                base.Close();
+                base.Dispose();
+                isDisposed = true;
+            }
+        }
+
+        /// <summary>
+        /// Dispose the batch stream and underlying resources
+        /// </summary>
+        internal async Task InternalDisposeAsync()
+        {
+            if (!isDisposed)
+            {
+                await base.FlushAsync();
                 base.Close();
                 base.Dispose();
                 isDisposed = true;

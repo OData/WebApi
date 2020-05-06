@@ -132,9 +132,9 @@ namespace Microsoft.AspNet.OData.Batch
             request.RegisterForDispose(reader);
 
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();
-            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             Guid batchId = Guid.NewGuid();
-            while (batchReader.Read())
+            while (await batchReader.ReadAsync())
             {
                 if (batchReader.State == ODataBatchReaderState.ChangesetStart)
                 {

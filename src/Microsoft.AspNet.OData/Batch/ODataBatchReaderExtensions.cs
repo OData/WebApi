@@ -46,6 +46,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("reader");
             }
+
             if (reader.State != ODataBatchReaderState.ChangesetStart)
             {
                 throw Error.InvalidOperation(
@@ -56,13 +57,14 @@ namespace Microsoft.AspNet.OData.Batch
 
             Guid changeSetId = Guid.NewGuid();
             List<HttpRequestMessage> requests = new List<HttpRequestMessage>();
-            while (reader.Read() && reader.State != ODataBatchReaderState.ChangesetEnd)
+            while (await reader.ReadAsync() && reader.State != ODataBatchReaderState.ChangesetEnd)
             {
                 if (reader.State == ODataBatchReaderState.Operation)
                 {
                     requests.Add(await ReadOperationInternalAsync(reader, batchId, changeSetId, cancellationToken));
                 }
             }
+
             return requests;
         }
 
@@ -146,14 +148,14 @@ namespace Microsoft.AspNet.OData.Batch
         private static async Task<HttpRequestMessage> ReadOperationInternalAsync(
             ODataBatchReader reader, Guid batchId, Guid? changeSetId, CancellationToken cancellationToken, bool bufferContentStream = true)
         {
-            ODataBatchOperationRequestMessage batchRequest = reader.CreateOperationRequestMessage();
+            ODataBatchOperationRequestMessage batchRequest = await reader.CreateOperationRequestMessageAsync();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = new HttpMethod(batchRequest.Method);
             request.RequestUri = batchRequest.Url;
 
             if (bufferContentStream)
             {
-                using (Stream stream = batchRequest.GetStream())
+                using (Stream stream = await batchRequest.GetStreamAsync())
                 {
                     MemoryStream bufferedStream = new MemoryStream();
                     // Passing in the default buffer size of 81920 so that we can also pass in a cancellation token
@@ -164,7 +166,7 @@ namespace Microsoft.AspNet.OData.Batch
             }
             else
             {
-                request.Content = new LazyStreamContent(() => batchRequest.GetStream());
+                request.Content = new LazyStreamContent(() => batchRequest.GetStreamAsync().Result);
             }
 
             foreach (var header in batchRequest.Headers)

@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Batch
         {
             await WriteMessageAsync(writer, response, cancellationToken, false);
         }
-        
+
         /// <summary>
         /// Writes a single OData batch response.
         /// </summary>
@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.OData.Batch
                     batchResponse.SetHeader(header.Key, String.Join(",", header.Value));
                 }
 
-                using (Stream stream = batchResponse.GetStream())
+                using (Stream stream = asyncWriter ? await batchResponse.GetStreamAsync() : batchResponse.GetStream())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     await response.Content.CopyToAsync(stream);

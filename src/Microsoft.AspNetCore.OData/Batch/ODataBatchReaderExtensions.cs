@@ -139,7 +139,7 @@ namespace Microsoft.AspNet.OData.Batch
             // Not using bufferContentStream. Unlike AspNet, AspNetCore cannot guarantee the disposal
             // of the stream in the context of execution so there is no choice but to copy the stream
             // from the batch reader.
-            using (Stream stream = batchRequest.GetStream())
+            using (Stream stream = await batchRequest.GetStreamAsync())
             {
                 MemoryStream bufferedStream = new MemoryStream();
                 // Passing in the default buffer size of 81920 so that we can also pass in a cancellation token

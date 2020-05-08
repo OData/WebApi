@@ -2454,6 +2454,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	OrderByQueryOption OrderBy  { public get; }
 	ODataRawQueryOptions RawValues  { public get; }
 	System.Net.Http.HttpRequestMessage Request  { public get; }
+	System.Nullable`1[[System.Int32]] RequestPrefersMaxPageSize  { public get; }
 	SelectExpandQueryOption SelectExpand  { public get; }
 	SkipQueryOption Skip  { public get; }
 	SkipTokenQueryOption SkipToken  { public get; }

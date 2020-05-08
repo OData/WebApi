@@ -218,7 +218,10 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
             }
 
-            options = defaultOptions;
+            options.CompatibilityOptions = defaultOptions.CompatibilityOptions;
+            options.EnableContinueOnErrorHeader = defaultOptions.EnableContinueOnErrorHeader;
+            options.NullDynamicPropertyIsEnabled = defaultOptions.NullDynamicPropertyIsEnabled;
+            options.UrlKeyDelimiter = defaultOptions.UrlKeyDelimiter;
         }
 
         public static ODataOptions GetDefaultODataOptions(this IServiceProvider serviceProvider)

@@ -321,10 +321,10 @@ namespace Microsoft.AspNet.OData.Test.Batch
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
             ODataMessageReader reader = await batchRequest.Content
                 .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None);
-            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
-            batchReader.Read();
+            await batchReader.ReadAsync();
 
             var response = await batchHandler.ExecuteChangeSetAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None);
 
@@ -365,7 +365,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             };
             ODataMessageReader reader = await batchRequest.Content
                 .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None);
-            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
 
             var response = await batchHandler.ExecuteChangeSetAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None);
 
@@ -397,10 +397,10 @@ namespace Microsoft.AspNet.OData.Test.Batch
             batchRequest.RegisterForDispose(new StringContent(String.Empty));
             ODataMessageReader reader = await batchRequest.Content
                 .GetODataMessageReaderAsync(new ODataMessageReaderSettings { BaseUri = new Uri("http://example.com") }, CancellationToken.None);
-            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
-            batchReader.Read();
+            await batchReader.ReadAsync();
 
             var response = await batchHandler.ExecuteOperationAsync(batchReader, Guid.NewGuid(), batchRequest, CancellationToken.None);
 

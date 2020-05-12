@@ -557,7 +557,18 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    if (dynamicPropertyValue is IDelta)
+                    {
+                        dynamic deltaObject = dynamicPropertyValue;
+                        dynamic instance = deltaObject.GetInstance();
+
+                        deltaObject.CopyChangedValues(instance);
+                        tempDictionary[dynamicPropertyName] = instance;
+                    }
+                    else
+                    {
+                        tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    }
                 }
             }
 

@@ -116,7 +116,7 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
-            if (name == null)
+            if (string.IsNullOrWhiteSpace(name))
             {
                 throw Error.ArgumentNull("name");
             }

@@ -116,6 +116,29 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                // Dynamic property can have the same name as the dynamic property dictionary.
+                if (name == _dynamicDictionaryPropertyinfo.Name ||
+                    !_allProperties.ContainsKey(name))
+                {
+                    if (_dynamicDictionaryCache == null)
+                    {
+                        _dynamicDictionaryCache =
+                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
+                    }
+
+                    _dynamicDictionaryCache[name] = value;
+                    _changedDynamicProperties.Add(name);
+                    return true;
+                }
+            }
+
             if (value is IDelta)
             {
                 return TrySetNestedResourceInternal(name, value);
@@ -534,7 +557,18 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    if (dynamicPropertyValue is IDelta)
+                    {
+                        dynamic deltaObject = dynamicPropertyValue;
+                        dynamic instance = deltaObject.GetInstance();
+
+                        deltaObject.CopyChangedValues(instance);
+                        tempDictionary[dynamicPropertyName] = instance;
+                    }
+                    else
+                    {
+                        tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    }
                 }
             }
 
@@ -589,24 +623,6 @@ namespace Microsoft.AspNet.OData
             if (name == null)
             {
                 throw Error.ArgumentNull("name");
-            }
-
-            if (_dynamicDictionaryPropertyinfo != null)
-            {
-                // Dynamic property can have the same name as the dynamic property dictionary.
-                if (name == _dynamicDictionaryPropertyinfo.Name ||
-                    !_allProperties.ContainsKey(name))
-                {
-                    if (_dynamicDictionaryCache == null)
-                    {
-                        _dynamicDictionaryCache =
-                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
-                    }
-
-                    _dynamicDictionaryCache[name] = value;
-                    _changedDynamicProperties.Add(name);
-                    return true;
-                }
             }
 
             if (!_updatableProperties.Contains(name))

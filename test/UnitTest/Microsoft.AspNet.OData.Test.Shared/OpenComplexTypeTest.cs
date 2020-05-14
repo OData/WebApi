@@ -185,6 +185,50 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public async Task OpenComplexType_PatchComplexTypeDynamicProperty()
+        {
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""250EFC6E-8FA4-4B68-951C-F1E26DE09D1D"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""Telephone"":{
+                    ""@odata.type"":""#Microsoft.AspNet.OData.Test.Phone"",
+                    ""ContactName"":""ContactNameX"",
+                    ""PhoneNumber"":13,
+                    ""Spec"":{""ScreenSize"":7}
+                }
+            }";
+
+            await ExecutePatchRequest(payload);
+        }
+
+        [Fact]
+        public async Task OpenComplexType_PatchComplexTypeDynamicProperty_Nested()
+        {
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""40CEEEDE-031C-45CB-9E44-E6017D635814"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""Building"":{
+                    ""@odata.type"":""#Microsoft.AspNet.OData.Test.Building"",
+                    ""BuildingName"":""BuildingNameY"",
+                    ""Telephone"":{
+                        ""@odata.type"":""#Microsoft.AspNet.OData.Test.Phone"",
+                        ""ContactName"":""ContactNameZ"",
+                        ""PhoneNumber"":17,
+                        ""Spec"":{""ScreenSize"":5}
+                    }
+                }
+            }";
+
+            await ExecutePatchRequest(payload);
+        }
+
+        [Fact]
         public async Task OpenComplexType_PatchNestedComplexTypeProperty_DoubleNested()
         {
             string payload = @"{
@@ -267,6 +311,7 @@ namespace Microsoft.AspNet.OData.Test
         {
             ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<OpenCustomer>("OpenCustomers");
+            builder.ComplexType<Building>();
             return builder.GetEdmModel();
         }
 
@@ -409,7 +454,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("City " + key, origin.City); // not changed
             Assert.NotNull(origin.DynamicProperties);
 
-            Assert.Equal(3, origin.DynamicProperties.Count); // include the origin dynamic properties
+            Assert.True(origin.DynamicProperties.Count >= 3); // Including the origin dynamic properties
 
             KeyValuePair<string, object> dynamicPropertyBirthDay = origin.DynamicProperties.FirstOrDefault(e => e.Key == "BirthDay");
             Assert.Equal(new Date(2016, 1, 29), dynamicPropertyBirthDay.Value);
@@ -485,6 +530,38 @@ namespace Microsoft.AspNet.OData.Test
 
                     // --- LineB ---
                     Assert.NotNull(origin.LineB);
+                    break;
+
+                case "250EFC6E-8FA4-4B68-951C-F1E26DE09D1D":
+                    Assert.True(origin.DynamicProperties.ContainsKey("Telephone"));
+                    // Telephone dynamic property
+                    Phone telephone = origin.DynamicProperties["Telephone"] as Phone;
+                    Assert.NotNull(telephone);
+                    Assert.Equal("ContactNameX", telephone.ContactName);
+                    Assert.Equal(13, telephone.PhoneNumber);
+
+                    // Nested complex property
+                    Assert.NotNull(telephone.Spec);
+                    Assert.Equal(7, telephone.Spec.ScreenSize);
+                    break;
+
+                case "40CEEEDE-031C-45CB-9E44-E6017D635814":
+                    Assert.True(origin.DynamicProperties.ContainsKey("Building"));
+                    // Building dynamic property
+                    Building building = origin.DynamicProperties["Building"] as Building;
+                    Assert.NotNull(building);
+                    Assert.Equal("BuildingNameY", building.BuildingName);
+
+                    // Nested telephone complex dynamic property
+                    Assert.True(building.DynamicProperties.ContainsKey("Telephone"));
+                    Phone phone = building.DynamicProperties["Telephone"] as Phone;
+                    Assert.NotNull(phone);
+                    Assert.Equal("ContactNameZ", phone.ContactName);
+                    Assert.Equal(17, phone.PhoneNumber);
+
+                    // Nested complex property
+                    Assert.NotNull(phone.Spec);
+                    Assert.Equal(5, phone.Spec.ScreenSize);
                     break;
 
                 default:
@@ -577,5 +654,11 @@ namespace Microsoft.AspNet.OData.Test
         public string Make { get; set; }
 
         public int ScreenSize { get; set; }
+    }
+
+    public class Building
+    {
+        public string BuildingName { get; set; }
+        public IDictionary<string, object> DynamicProperties { get; set; } = new Dictionary<string, object>();
     }
 }

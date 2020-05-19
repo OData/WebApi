@@ -99,7 +99,6 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
             request.Content = new StringContent(Payload);
-            request.Content.Headers.ContentLength = Payload.Length;
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -148,7 +147,6 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, requestUri);
             request.Content = new StringContent(payload);
-            request.Content.Headers.ContentLength = payload.Length;
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
             HttpResponseMessage response = await client.SendAsync(request);
 
@@ -284,7 +282,6 @@ namespace Microsoft.AspNet.OData.Test
             // Act
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("Patch"), requestUri);
             request.Content = new StringContent(payload);
-            request.Content.Headers.ContentLength = payload.Length;
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             HttpResponseMessage response = await client.SendAsync(request);

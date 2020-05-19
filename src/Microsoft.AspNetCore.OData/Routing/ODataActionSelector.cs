@@ -232,11 +232,9 @@ namespace Microsoft.AspNet.OData.Routing
                 return false;
             }
 
-            var methodInfo = action.MethodInfo;
-            var attributes = methodInfo.GetCustomAttributes(false);
-
-            return attributes.OfType<IActionHttpMethodProvider>().Any(
-                methodProvider => methodProvider.HttpMethods.Contains(method.ToUpperInvariant()));
+            return action.MethodInfo.GetCustomAttributes(false)
+                .OfType<IActionHttpMethodProvider>()
+                .Any(methodProvider => methodProvider.HttpMethods.Contains(method.ToUpperInvariant()));
         }
 
         private class ActionIdAndParameters

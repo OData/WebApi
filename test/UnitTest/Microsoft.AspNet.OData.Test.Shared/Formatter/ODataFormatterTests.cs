@@ -490,8 +490,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 request.Content = new StringContent(
                     string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                        'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
-                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application /json");
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                 request.Headers.Accept.ParseAdd("application/json");
 
                 // Act
@@ -558,8 +558,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
             request.Content = new StringContent(
                 string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                    'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
-            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application /json");
+                        'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
 
             HttpResponseMessage response = await client.SendAsync(request);
@@ -584,8 +584,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 request.Content = new StringContent(
                     string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                        'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
-                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application /json");
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
                 request.Headers.Accept.ParseAdd("application/json;odata.metadata=full");
 
                 // Act

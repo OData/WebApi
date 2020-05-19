@@ -208,8 +208,8 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool RequestHasBody(RouteContext context)
         {
-            return context.HttpContext.Request.ContentLength > 0 ||
-                !string.IsNullOrEmpty(context.HttpContext.Request.ContentType);
+            string method = context.HttpContext.Request.Method.ToLowerInvariant();
+            return method == "post" || method == "put" || method == "patch";
         }
 
         private class ActionIdAndParameters

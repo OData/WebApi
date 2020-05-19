@@ -280,7 +280,6 @@ namespace Microsoft.AspNet.OData.Test
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, Uri);
 
             request.Content = new StringContent(Payload);
-            request.Content.Headers.ContentLength = Payload.Length;
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
@@ -306,7 +305,6 @@ namespace Microsoft.AspNet.OData.Test
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, Uri);
 
             request.Content = new StringContent(Payload);
-            request.Content.Headers.ContentLength = Payload.Length;
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act

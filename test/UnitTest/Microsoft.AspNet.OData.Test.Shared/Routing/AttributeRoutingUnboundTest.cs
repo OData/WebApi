@@ -199,7 +199,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
             string requestUri = "http://localhost/CreateConventionCustomerById";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
             request.Content = new StringContent(message);
-            request.Content.Headers.ContentLength = message.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
 

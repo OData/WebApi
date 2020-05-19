@@ -17,9 +17,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 #else
     using Microsoft.AspNetCore.Routing;
 #endif
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
+
 
 namespace Microsoft.AspNet.OData.Routing
 {

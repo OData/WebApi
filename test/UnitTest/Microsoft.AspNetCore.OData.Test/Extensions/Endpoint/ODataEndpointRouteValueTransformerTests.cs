@@ -4,12 +4,14 @@
 #if !NETCOREAPP2_0
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -19,6 +21,7 @@ using Microsoft.OData.Edm;
 using Microsoft.OData;
 using Moq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Microsoft.AspNet.OData.Test.Extensions
 {
@@ -102,6 +105,96 @@ namespace Microsoft.AspNet.OData.Test.Extensions
 
             Assert.NotNull(httpContext.ODataFeature().Path);
             Assert.Same(actionDescriptor, httpContext.ODataFeature().ActionDescriptor);
+        }
+
+        [Theory]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void TransformAsyncReturnsCorrectRouteValuesForNonOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        {
+            // Arrange
+            IEndpointRouteBuilder builder = EndpointRouteBuilderFactory.Create("odata",
+                c => c.AddService(ServiceLifetime.Singleton, b => GetEdmModel()));
+
+            HttpContext httpContext = new DefaultHttpContext
+            {
+                RequestServices = builder.ServiceProvider
+            };
+
+            var httpMethod = isOptionsRequest ? HttpMethod.Options : HttpMethod.Get;
+
+            HttpRequest request = SetHttpRequest(httpContext, httpMethod, "http://localhost:123/Customers(1)");
+            RouteValueDictionary values = new RouteValueDictionary();
+            values.Add("ODataEndpointPath_odata", "Customers(1)");
+
+            ActionDescriptor actionDescriptor = new ControllerActionDescriptor
+            {
+                ControllerName = "Customers",
+                ActionName = "Get",
+                EndpointMetadata = GenerateMetadata(includeMetadata)
+            };
+
+            IActionSelector actionSelector = new MockActionSelector(actionDescriptor);
+
+            // Act
+            ODataEndpointRouteValueTransformer transformer = new ODataEndpointRouteValueTransformer(actionSelector);
+            ValueTask<RouteValueDictionary> actual = transformer.TransformAsync(httpContext, values);
+            var endpoint = httpContext.GetEndpoint();
+            // Assert the metadata is empty when options requests are sent and the controller is not annotated
+            Assert.Null(endpoint);
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        public void TransformAsyncReturnsCorrectRouteValuesForOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        {
+            // Arrange
+            IEndpointRouteBuilder builder = EndpointRouteBuilderFactory.Create("odata",
+                c => c.AddService(ServiceLifetime.Singleton, b => GetEdmModel()));
+
+            HttpContext httpContext = new DefaultHttpContext
+            {
+                RequestServices = builder.ServiceProvider
+            };
+
+            var httpMethod = isOptionsRequest ? HttpMethod.Options : HttpMethod.Get;
+
+            HttpRequest request = SetHttpRequest(httpContext, httpMethod, "http://localhost:123/Customers(1)");
+            RouteValueDictionary values = new RouteValueDictionary();
+            values.Add("ODataEndpointPath_odata", "Customers(1)");
+
+            ActionDescriptor actionDescriptor = new ControllerActionDescriptor
+            {
+                ControllerName = "Customers",
+                ActionName = "Get",
+                EndpointMetadata = GenerateMetadata(includeMetadata)
+            };
+
+            IActionSelector actionSelector = new MockActionSelector(actionDescriptor);
+
+            // Act
+            ODataEndpointRouteValueTransformer transformer = new ODataEndpointRouteValueTransformer(actionSelector);
+            ValueTask<RouteValueDictionary> actual = transformer.TransformAsync(httpContext, values);
+            var endpoint = httpContext.GetEndpoint();
+            // Assert the metadata is empty when options requests are sent and the controller is not annotated
+            Assert.NotNull(endpoint);
+            Assert.NotNull(endpoint.Metadata);
+            Assert.NotNull(endpoint.DisplayName);
+            // 
+            Assert.Null(endpoint.RequestDelegate);
+        }
+
+        private IList<object> GenerateMetadata(bool includeMetadata)
+        {
+            if (includeMetadata)
+            {
+                return new List<object>()
+                    {
+                        new EnableCorsAttribute("Default")
+                    };
+            }
+            return ImmutableList<object>.Empty;
         }
 
         private static IEdmModel GetEdmModel()

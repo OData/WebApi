@@ -169,7 +169,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\AggregationBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ComputeBinder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\TransformationBinderBase.cs" />    
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\TransformationBinderBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ApplyQueryOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ExpressionBinderBase.cs" />
@@ -252,6 +252,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Results\ResultHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\DynamicPropertyRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationSourceRoutingConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\RequestMethodExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SelectControllerResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\DefaultODataPathHandler.cs" />

@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 string httpMethodName;
 
-                switch (controllerContext.Request.Method)
+                switch (controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     case ODataRequestMethod.Get:
                         httpMethodName = "Get";

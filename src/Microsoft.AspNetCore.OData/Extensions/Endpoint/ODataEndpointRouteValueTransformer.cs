@@ -3,6 +3,7 @@
 
 #if !NETSTANDARD2_0
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -109,6 +110,18 @@ namespace Microsoft.AspNet.OData.Extensions
                         // For example, we have two "Get" methods in same controller, in order to help "EndpointSelector" 
                         // to select the correct Endpoint, we save the ActionDescriptor value into ODataFeature.
                         odataFeature.ActionDescriptor = controllerActionDescriptor;
+                        // Add handler to handle options calls. The routing criteria has been patched to allow endpoint discovery using the correct cors headers
+                        if (request.Method.Equals("OPTIONS",StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            var metadata = actionDescriptor.EndpointMetadata;
+                            // For option request can set this as the action will be handled by the cors middleware 
+                            var metadataCollection = metadata!=null && metadata.Any()
+                                ? new EndpointMetadataCollection(actionDescriptor.EndpointMetadata)
+                                : EndpointMetadataCollection.Empty;
+                            // This workaround allows the default cors middleware to read the annotations if the user has them enabling fine-grained cors access control with endpoints
+                            var endpoint = new Endpoint(null, metadataCollection, controllerActionDescriptor.ActionName);
+                            httpContext.SetEndpoint(endpoint);
+                        }
 
                         return new ValueTask<RouteValueDictionary>(newValues);
                     }

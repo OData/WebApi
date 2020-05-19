@@ -89,7 +89,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             request.Headers.Add("accept", "application/json");
 
             request.Content = new StringContent(EntityPayload);
-            request.Content.Headers.ContentLength = EntityPayload.Length;
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
 
             // Act

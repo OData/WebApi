@@ -558,7 +558,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "http://localhost/EnumCustomers");
             request.Content = new StringContent(
                 string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
-                        'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                            'ID':0,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             request.Headers.Accept.ParseAdd(acceptHeader);
 

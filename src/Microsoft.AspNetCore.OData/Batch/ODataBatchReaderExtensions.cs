@@ -148,9 +148,6 @@ namespace Microsoft.AspNet.OData.Batch
                 request.Body = bufferedStream;
             }
 
-            // remove the content length and content type headers in case the batchRequest item doesn't have a body
-            request.ContentLength = null;
-            request.ContentType = null;
             foreach (var header in batchRequest.Headers)
             {
                 string headerName = header.Key;

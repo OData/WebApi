@@ -9,8 +9,9 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Abstractions;
+using System.IO;
 #if NETCOREAPP2_0
-    using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.OData;
     using Microsoft.AspNetCore.Mvc.Internal;
@@ -97,9 +98,11 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// <param name="routeBuilder"></param>
         /// <param name="actionName">Name of the action ebging routed to</param>
         /// <param name="routeDataValues">Key-value pairs to add to the route data</param>
+        /// <param name="method">HTTP request method</param>
         /// <param name="bodyContent">Request body content</param>
         /// <returns></returns>
-        public static RouteContext SetupRouteContext(IRouteBuilder routeBuilder, string actionName, Dictionary<string, object> routeDataValues, string bodyContent)
+        public static RouteContext SetupRouteContext(IRouteBuilder routeBuilder, string actionName,
+            Dictionary<string, object> routeDataValues,string method, string bodyContent)
         {
             var request = RequestFactory.Create(routeBuilder);
             var routeContext = new RouteContext(request.HttpContext);
@@ -114,8 +117,14 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 routeData.Values[keyValuePair.Key] = keyValuePair.Value;
             }
 
+            request.Method = method;
+
             if (bodyContent != null)
             {
+                var stream = new MemoryStream();
+                var writer = new StreamWriter(stream);
+                writer.Write(bodyContent);
+                request.Body = stream;
                 request.ContentLength = bodyContent.Length;
             }
 

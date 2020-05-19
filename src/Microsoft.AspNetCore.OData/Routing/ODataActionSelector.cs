@@ -10,12 +10,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Routing;
 #if NETSTANDARD2_0
     using Microsoft.AspNetCore.Mvc.Internal;
     using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.Logging;
 #else
-    using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Routing;
 #endif
 
 
@@ -118,7 +119,7 @@ namespace Microsoft.AspNet.OData.Routing
                         {
                             return p.ParameterType != typeof(ODataPath) &&
                             !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
-                        })));
+                        }), c));
 
                 // retrieve the optional parameters
                 routeData.Values.TryGetValue(ODataRouteConstants.OptionalParameters, out object wrapper);
@@ -142,9 +143,21 @@ namespace Microsoft.AspNet.OData.Routing
                     .ThenByDescending(c => c.TotalParameterCount)
                     .ToList();
 
-                return (matchedCandidates.Any())
-                    ? candidates.Where(c => c.Id == matchedCandidates.FirstOrDefault().Id).FirstOrDefault()
-                    : null;
+                // if there are still mulitple candidate actions at this point,
+                // prioritize actions which explicitly declare the request method
+                // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
+                if (matchedCandidates.Count() > 1)
+                {
+                    var bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                        ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
+
+                    if (bestCandidate != null)
+                    {
+                        return bestCandidate.ActionDescriptor;
+                    }
+                }
+
+                return matchedCandidates.Select(c => c.ActionDescriptor).FirstOrDefault();
             }
 
             return _innerSelector.SelectBestCandidate(context, candidates);
@@ -212,13 +225,28 @@ namespace Microsoft.AspNet.OData.Routing
             return method == "post" || method == "put" || method == "patch";
         }
 
+        private bool ActionAcceptsMethod(ControllerActionDescriptor action, string method)
+        {
+            if (action == null)
+            {
+                return false;
+            }
+
+            var methodInfo = action.MethodInfo;
+            var attributes = methodInfo.GetCustomAttributes(false);
+
+            return attributes.OfType<IActionHttpMethodProvider>().Any(
+                methodProvider => methodProvider.HttpMethods.Contains(method.ToUpperInvariant()));
+        }
+
         private class ActionIdAndParameters
         {
-            public ActionIdAndParameters(string id, int parameterCount, IEnumerable<ParameterDescriptor> filteredParameters)
+            public ActionIdAndParameters(string id, int parameterCount, IEnumerable<ParameterDescriptor> filteredParameters, ActionDescriptor descriptor)
             {
                 Id = id;
                 TotalParameterCount = parameterCount;
                 FilteredParameters = filteredParameters.ToList();
+                ActionDescriptor = descriptor;
             }
 
             public string Id { get; set; }
@@ -226,6 +254,8 @@ namespace Microsoft.AspNet.OData.Routing
             public int TotalParameterCount { get; set; }
 
             public IList<ParameterDescriptor> FilteredParameters { get; private set; }
+
+            public ActionDescriptor ActionDescriptor { get; set; }
         }
     }
 }

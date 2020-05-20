@@ -1197,16 +1197,16 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Page ()
 	public StructuralTypeConfiguration`1 Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
 	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
-	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
@@ -2870,6 +2870,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string Controller = "controller"
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
+	public static readonly string KeyCountKey = "{keyCount}"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"

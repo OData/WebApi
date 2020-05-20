@@ -117,75 +117,19 @@ namespace Microsoft.AspNet.OData.Routing
         {
             var parameters = action.GetParameters();
             var routeData = context.RouteData;
-            var conventionsStore = context.Request.ODataProperties().RoutingConventionsStore;
-            var matchedBody = false;
-            var route = routeData.Route as ODataRoute;
-            var routePrefix = route?.RoutePrefix;
-            var availableKeys = routeData.Values.Keys
-                .Where(k => routePrefix != "{" + k + "}"
-                    && k != ODataRouteConstants.Action
-                    && k != ODataRouteConstants.Controller
-                    && k != ODataRouteConstants.ODataPath)
-                .Select(k => k.ToUpperInvariant())
-                .ToList();
 
-            if (parameters.Count == 0 && availableKeys.Count > 0)
+            int keyCount = 0;
+            if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCountKey))
+            {
+                keyCount = (int)routeData.Values[ODataRouteConstants.KeyCountKey];
+            }
+
+            if (parameters.Count < keyCount)
             {
                 return false;
             }
 
-            foreach (var p in parameters)
-            {
-                string parameterName = p.ParameterName.ToUpperInvariant();
-                if (availableKeys.Contains(parameterName))
-                {
-                    continue;
-                }
-                if (conventionsStore.Keys.Any(key => key.Contains(p.ParameterName)))
-                {
-                    continue;
-                }
-                if (context.Request.GetQueryNameValuePairs().Any(kvp => kvp.Key == p.ParameterName))
-                {
-                    continue;
-                }
-                if (!matchedBody && RequestHasBody(context))
-                {
-                    matchedBody = true;
-                    continue;
-                }
-                if (p.ParameterType == typeof(ODataPath))
-                {
-                    continue;
-                }
-                if (IsODataQueryOptions(p.ParameterType))
-                {
-                    continue;
-                }
-                if (p.IsOptional)
-                {
-                    continue;
-                }
-                return false;
-            }
             return true;
-        }
-
-        private static bool RequestHasBody(HttpControllerContext context)
-        {
-            var content = context.Request.Content;
-            return content?.Headers.ContentLength > 0 || content?.Headers.ContentType != null;
-        }
-
-        private static bool IsODataQueryOptions(Type parameterType)
-        {
-            if (parameterType == null)
-            {
-                return false;
-            }
-            return ((parameterType == typeof(ODataQueryOptions)) ||
-                    (parameterType.IsGenericType &&
-                     parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>)));
         }
     }
 }

@@ -121,7 +121,8 @@ namespace Microsoft.AspNet.OData.Routing
                 IList<string> availableKeys = routeData.Values.Keys
                     .Where((key) => !routePrefixes.Any(prefix => prefix == "{" + key + "}")
                         && key != ODataRouteConstants.Action
-                        && key != ODataRouteConstants.ODataPath)
+                        && key != ODataRouteConstants.ODataPath
+                        && key != ODataRouteConstants.KeyCountKey)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
 
@@ -158,7 +159,8 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys, optionalWrapper, c.TotalParameterCount, availableKeysCount))
+                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys,
+                        optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount)
                     .ToList();
@@ -238,6 +240,7 @@ namespace Microsoft.AspNet.OData.Routing
                     }
                 }
 
+                // if
                 if (ParameterHasRegisteredModelBinder(p))
                 {
                     continue;

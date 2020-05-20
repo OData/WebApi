@@ -281,7 +281,10 @@ namespace Microsoft.AspNet.OData.Routing
             {
                 var binder = _modelBinderFactory.CreateBinder(binderContext);
                 // ignore some built-in model binders because we already account for parameters that come from the request
-                return (!(binder is SimpleTypeModelBinder) && !(binder is BodyModelBinder) && !(binder is ComplexTypeModelBinder));
+                return (!(binder is SimpleTypeModelBinder)
+                    && !(binder is BodyModelBinder)
+                    && !(binder is ComplexTypeModelBinder)
+                    && !(binder is BinderTypeModelBinder));
             }
             catch { }
 

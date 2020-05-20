@@ -10,13 +10,15 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using System.IO;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using System.Linq;
 #if NETCOREAPP2_0
 using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using Microsoft.OData;
     using Microsoft.AspNetCore.Mvc.Internal;
 #else
-    using Moq;
+using Moq;
 #endif
 
 
@@ -61,10 +63,12 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// the specified controller
         /// </summary>
         /// <param name="controllerType"></param>
+        /// <param name="actionName">Action name of the action descriptors to return</param>
         /// <param name="routeBuilder"></param>
         /// <param name="actionSelector"></param>
         /// <param name="actionDescriptors"></param>
         public static void SetupActionSelector(System.Type controllerType,
+           string actionName,
            out IRouteBuilder routeBuilder,
            out ODataActionSelector actionSelector,
            out IReadOnlyList<ControllerActionDescriptor> actionDescriptors)
@@ -73,22 +77,31 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             routeBuilder = RoutingConfigurationFactory.Create();
             actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
                 as IReadOnlyList<ControllerActionDescriptor>;
+            actionDescriptors = actionDescriptors.Where(a => a.ActionName == actionName).ToList();
             var serviceProvider = routeBuilder.ServiceProvider;
             var actionsProvider = serviceProvider.GetRequiredService<IActionDescriptorCollectionProvider>();
             var actionConstraintsProvider = serviceProvider.GetRequiredService<ActionConstraintCache>();
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+            var modelBinderFactory = serviceProvider.GetRequiredService<IModelBinderFactory>();
+            var modelMetadataProvider = serviceProvider.GetRequiredService<IModelMetadataProvider>();
             actionSelector = new ODataActionSelector(
                 actionsProvider,
                 actionConstraintsProvider,
-                loggerFactory);
+                loggerFactory,
+                modelBinderFactory,
+                modelMetadataProvider);
         }
 #else
         {
             var innerActionSelectorMock = new Mock<IActionSelector>();
-            actionSelector = new ODataActionSelector(innerActionSelectorMock.Object);
             routeBuilder = RoutingConfigurationFactory.Create();
+            var serviceProvider = routeBuilder.ServiceProvider;
+            var modelBinderFactory = (IModelBinderFactory)serviceProvider.GetService(typeof(IModelBinderFactory));
+            var modelMetadataProvider = (IModelMetadataProvider)serviceProvider.GetService(typeof(IModelMetadataProvider));
+            actionSelector = new ODataActionSelector(innerActionSelectorMock.Object, modelBinderFactory, modelMetadataProvider);
             actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
                 as IReadOnlyList<ControllerActionDescriptor>;
+            actionDescriptors = actionDescriptors.Where(a => a.ActionName == actionName).ToList();
         }
 #endif
 

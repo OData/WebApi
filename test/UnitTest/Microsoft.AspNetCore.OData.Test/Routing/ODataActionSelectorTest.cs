@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
 using Xunit;
+using System.Threading;
 
 namespace Microsoft.AspNet.OData.Test.Routing
 {
@@ -84,6 +85,19 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         ("PUT", "{}"),
                         (typeof(KeyBodyController), "Put",
                         new [] { typeof(int), typeof(Delta<object>) })
+                    },
+                    // actions that declare extra parameters with registered model binders
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(ExtraParametersWithOwnModelBindersController), "Get",
+                        new [] { typeof(int), typeof(System.Threading.CancellationToken) })
+                    },
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        ("PUT", "{}"),
+                        (typeof(ExtraParametersWithOwnModelBindersController), "Put",
+                        new [] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
                     }
                 };
             }
@@ -106,6 +120,17 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         new Dictionary<string, object>() { { "someValue", 1 } },
                         ("PUT", null),
                         (typeof(NoParamController), "Put")
+                    },
+                    // Action has extra parameters that don't have associated model binders
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(ExtraParametersWithoutModelBindersController), "Get")
+                    },
+                    {
+                        new Dictionary<string, object> { { "key", 1 } },
+                        ("PUT", ""),
+                        (typeof(ExtraParametersWithoutModelBindersController), "Put")
                     }
                 };
             }
@@ -119,8 +144,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
             (Type ControllerType, string ActionName, Type[] Signature) expectedAction)
         {
             // Arrange
-            ODataActionSelectorTestHelper.SetupActionSelector(expectedAction.ControllerType, out var routeBuilder,
-                out var actionSelector, out var actionDescriptors);
+            ODataActionSelectorTestHelper.SetupActionSelector(expectedAction.ControllerType, expectedAction.ActionName,
+                out var routeBuilder, out var actionSelector, out var actionDescriptors);
             var routeContext = ODataActionSelectorTestHelper.SetupRouteContext(routeBuilder, expectedAction.ActionName, routeDataValues,
                 requestData.Method, requestData.Body);
 
@@ -141,7 +166,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             (Type ControllerType, string ActionName) actionData)
         {
             // Arrange
-            ODataActionSelectorTestHelper.SetupActionSelector(actionData.ControllerType, out var routeBuilder,
+            ODataActionSelectorTestHelper.SetupActionSelector(actionData.ControllerType, actionData.ActionName, out var routeBuilder,
                 out var actionSelector, out var actionDescriptors);
             var routeContext = ODataActionSelectorTestHelper.SetupRouteContext(routeBuilder, actionData.ActionName, routeDataValues,
                 requestData.Method, requestData.Body);
@@ -206,4 +231,19 @@ namespace Microsoft.AspNet.OData.Test.Routing
     {
         public void Get() { }
     }
+
+    public class ExtraParametersWithOwnModelBindersController
+    {
+        public void Get(int key, System.Threading.CancellationToken cancellationToken) { }
+
+        public void Put(int key, System.Threading.CancellationToken cancellationToken, Delta<object> delta) { }
+    }
+
+    public class ExtraParametersWithoutModelBindersController
+    {
+        public void Get(int key, UnknownModel other) { }
+        public void Put(int key, UnknownModel other, Delta<object> delta) { }
+    }
+
+    public class UnknownModel { }
 }

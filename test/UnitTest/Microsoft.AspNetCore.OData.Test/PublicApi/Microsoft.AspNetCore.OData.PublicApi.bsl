@@ -3080,7 +3080,7 @@ public class Microsoft.AspNet.OData.Routing.DefaultODataPathValidator : Microsof
 }
 
 public class Microsoft.AspNet.OData.Routing.ODataActionSelector : IActionSelector {
-	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, Microsoft.AspNetCore.Mvc.Internal.ActionConstraintCache actionConstraintProviders, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
+	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, Microsoft.AspNetCore.Mvc.Internal.ActionConstraintCache actionConstraintProviders, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelBinderFactory modelBinderFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider modelMetadataProvider)
 
 	public virtual Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor SelectBestCandidate (Microsoft.AspNetCore.Routing.RouteContext context, System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] candidates)
 	public virtual System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] SelectCandidates (Microsoft.AspNetCore.Routing.RouteContext context)

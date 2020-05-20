@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.Routing;
 #if NETSTANDARD2_0
     using Microsoft.AspNetCore.Mvc.Internal;
@@ -29,6 +31,8 @@ namespace Microsoft.AspNet.OData.Routing
     public class ODataActionSelector : IActionSelector
     {
         private readonly IActionSelector _innerSelector;
+        private IModelBinderFactory _modelBinderFactory;
+        private IModelMetadataProvider _modelMetadataProvider;
 
 #if NETSTANDARD2_0
         /// <summary>
@@ -37,21 +41,32 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="actionDescriptorCollectionProvider">IActionDescriptorCollectionProvider instance from dependency injection.</param>
         /// <param name="actionConstraintProviders">ActionConstraintCache instance from dependency injection.</param>
         /// <param name="loggerFactory">ILoggerFactory instance from dependency injection.</param>
+        /// <param name="modelBinderFactory"></param>
+        /// <param name="modelMetadataProvider"></param>
         public ODataActionSelector(
             IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,
             ActionConstraintCache actionConstraintProviders,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            IModelBinderFactory modelBinderFactory,
+            IModelMetadataProvider modelMetadataProvider
+        )
         {
             _innerSelector = new ActionSelector(actionDescriptorCollectionProvider, actionConstraintProviders, loggerFactory);
+            _modelBinderFactory = modelBinderFactory;
+            _modelMetadataProvider = modelMetadataProvider;
         }
 #else
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
         /// <param name="innerSelector">The inner action selector.</param>
-        public ODataActionSelector(IActionSelector innerSelector)
+        /// <param name="modelBinderFactory"></param>
+        /// <param name="modelMetadataProvider"></param>
+        public ODataActionSelector(IActionSelector innerSelector, IModelBinderFactory modelBinderFactory, IModelMetadataProvider modelMetadataProvider)
         {
             _innerSelector = innerSelector;
+            _modelBinderFactory = modelBinderFactory;
+            _modelMetadataProvider = modelMetadataProvider;
         }
 #endif
 
@@ -204,6 +219,11 @@ namespace Microsoft.AspNet.OData.Routing
                     }
                 }
 
+                if (ParameterHasRegisteredModelBinder(p))
+                {
+                    continue;
+                }
+
                 // if parameter is not bound to a key in the path,
                 // assume that it's bound to the request body
                 // only one parameter should be considered bound to the body
@@ -235,6 +255,37 @@ namespace Microsoft.AspNet.OData.Routing
             return action.MethodInfo.GetCustomAttributes(false)
                 .OfType<IActionHttpMethodProvider>()
                 .Any(methodProvider => methodProvider.HttpMethods.Contains(method.ToUpperInvariant()));
+        }
+
+        private bool ParameterHasRegisteredModelBinder(ParameterDescriptor param)
+        {
+            if (_modelBinderFactory == null || _modelMetadataProvider == null)
+            {
+                return false;
+            }
+
+            var modelMetadata = _modelMetadataProvider.GetMetadataForType(param.ParameterType);
+            var binderContext = new ModelBinderFactoryContext()
+            {
+                Metadata = modelMetadata,
+                BindingInfo = param.BindingInfo,
+
+                // We're using the model metadata as the cache token here so that TryUpdateModelAsync calls
+                // for the same model type can share a binder. This won't overlap with normal model binding
+                // operations because they use the ParameterDescriptor for the token.
+                CacheToken = modelMetadata,
+
+            };
+
+            try
+            {
+                var binder = _modelBinderFactory.CreateBinder(binderContext);
+                // ignore some built-in model binders because we already account for parameters that come from the request
+                return (!(binder is SimpleTypeModelBinder) && !(binder is BodyModelBinder) && !(binder is ComplexTypeModelBinder));
+            }
+            catch { }
+
+            return false;
         }
 
         private class ActionIdAndParameters

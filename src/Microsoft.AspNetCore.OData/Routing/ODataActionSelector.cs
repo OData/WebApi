@@ -242,7 +242,7 @@ namespace Microsoft.AspNet.OData.Routing
         private bool RequestHasBody(RouteContext context)
         {
             string method = context.HttpContext.Request.Method.ToLowerInvariant();
-            return method == "post" || method == "put" || method == "patch";
+            return method == "post" || method == "put" || method == "patch" || method == "merge";
         }
 
         private bool ActionAcceptsMethod(ControllerActionDescriptor action, string method)

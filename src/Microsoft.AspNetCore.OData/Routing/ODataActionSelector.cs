@@ -158,7 +158,7 @@ namespace Microsoft.AspNet.OData.Routing
                     .ThenByDescending(c => c.TotalParameterCount)
                     .ToList();
 
-                // if there are still mulitple candidate actions at this point,
+                // if there are still multiple candidate actions at this point,
                 // prioritize actions which explicitly declare the request method
                 // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
                 if (matchedCandidates.Count() > 1)
@@ -166,6 +166,12 @@ namespace Microsoft.AspNet.OData.Routing
                     var bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
 
+                    if (bestCandidate != null)
+                    {
+                        return bestCandidate.ActionDescriptor;
+                    }
+
+                    bestCandidate = matchedCandidates.FirstOrDefault(candidate => candidate.FilteredParameters.Count() == availableKeys.Count());
                     if (bestCandidate != null)
                     {
                         return bestCandidate.ActionDescriptor;

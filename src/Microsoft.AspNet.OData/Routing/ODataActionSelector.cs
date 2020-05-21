@@ -119,9 +119,9 @@ namespace Microsoft.AspNet.OData.Routing
             var routeData = context.RouteData;
 
             int keyCount = 0;
-            if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCountKey))
+            if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCount))
             {
-                keyCount = (int)routeData.Values[ODataRouteConstants.KeyCountKey];
+                keyCount = (int)routeData.Values[ODataRouteConstants.KeyCount];
             }
 
             if (parameters.Count < keyCount)

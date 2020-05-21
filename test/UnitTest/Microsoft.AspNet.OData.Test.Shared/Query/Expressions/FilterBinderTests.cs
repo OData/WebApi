@@ -1643,7 +1643,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
             // expression tree is guaranteed by expression string above
-            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
 
@@ -1663,8 +1664,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            // expression tree is guaranteed by expression string above
-            var values = (IList<SimpleEnum?>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            // expression tree is guaranteed by expression string above\
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
         
@@ -1677,7 +1679,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
             // expression tree is guaranteed by expression string above
-            var values = (IList<SimpleEnum?>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
         }
 

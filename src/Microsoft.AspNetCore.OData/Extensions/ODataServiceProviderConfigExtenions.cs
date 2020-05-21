@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
             }
 
-            querySettings = defaultQuerySettings;
+            querySettings.CopySettings(defaultQuerySettings);
         }
 
         public static DefaultQuerySettings GetDefaultQuerySettings(this IServiceProvider serviceProvider)

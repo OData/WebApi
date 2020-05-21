@@ -41,14 +41,14 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="actionDescriptorCollectionProvider">IActionDescriptorCollectionProvider instance from dependency injection.</param>
         /// <param name="actionConstraintProviders">ActionConstraintCache instance from dependency injection.</param>
         /// <param name="loggerFactory">ILoggerFactory instance from dependency injection.</param>
-        /// <param name="modelBinderFactory"></param>
-        /// <param name="modelMetadataProvider"></param>
+        /// <param name="modelBinderFactory">IModelBinderFactory instance from dependency injection</param>
+        /// <param name="modelMetadataProvider">IModelMetadataProvider instance from dependency injection</param>
         public ODataActionSelector(
             IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,
             ActionConstraintCache actionConstraintProviders,
             ILoggerFactory loggerFactory,
-            IModelBinderFactory modelBinderFactory,
-            IModelMetadataProvider modelMetadataProvider
+            IModelBinderFactory modelBinderFactory = null,
+            IModelMetadataProvider modelMetadataProvider = null
         )
         {
             _innerSelector = new ActionSelector(actionDescriptorCollectionProvider, actionConstraintProviders, loggerFactory);
@@ -60,9 +60,12 @@ namespace Microsoft.AspNet.OData.Routing
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
         /// <param name="innerSelector">The inner action selector.</param>
-        /// <param name="modelBinderFactory"></param>
-        /// <param name="modelMetadataProvider"></param>
-        public ODataActionSelector(IActionSelector innerSelector, IModelBinderFactory modelBinderFactory, IModelMetadataProvider modelMetadataProvider)
+        /// <param name="modelBinderFactory">IModelBinderFactory instance from dependency injection</param>
+        /// <param name="modelMetadataProvider">IModelMetadataProvider instance from dependency injection</param>
+        public ODataActionSelector(
+            IActionSelector innerSelector,
+            IModelBinderFactory modelBinderFactory = null,
+            IModelMetadataProvider modelMetadataProvider = null)
         {
             _innerSelector = innerSelector;
             _modelBinderFactory = modelBinderFactory;
@@ -122,14 +125,14 @@ namespace Microsoft.AspNet.OData.Routing
                     .Where((key) => !routePrefixes.Any(prefix => prefix == "{" + key + "}")
                         && key != ODataRouteConstants.Action
                         && key != ODataRouteConstants.ODataPath
-                        && key != ODataRouteConstants.KeyCountKey)
+                        && key != ODataRouteConstants.KeyCount)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
 
                 int availableKeysCount = 0;
-                if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCountKey))
+                if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCount))
                 {
-                    availableKeysCount = (int) routeData.Values[ODataRouteConstants.KeyCountKey];
+                    availableKeysCount = (int) routeData.Values[ODataRouteConstants.KeyCount];
                 }
 
                 // Filter out types we know how to bind out of the parameter lists. These values
@@ -240,7 +243,8 @@ namespace Microsoft.AspNet.OData.Routing
                     }
                 }
 
-                // if
+                // if we can't find the parameter in the request, check whether
+                // there's a special model binder registered to handle it
                 if (ParameterHasRegisteredModelBinder(p))
                 {
                     continue;

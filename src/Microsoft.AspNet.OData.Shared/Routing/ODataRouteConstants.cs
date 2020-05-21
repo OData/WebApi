@@ -71,6 +71,6 @@ namespace Microsoft.AspNet.OData.Routing
         /// <summary>
         /// Route data key that tracks the number of key segments
         /// </summary>
-        public static readonly string KeyCountKey = "{keyCount}";
+        public static readonly string KeyCount = "{keyCount}";
     }
 }

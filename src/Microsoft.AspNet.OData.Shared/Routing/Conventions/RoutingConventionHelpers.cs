@@ -230,13 +230,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
         private static void IncrementKeyCount(IDictionary<string, object> routeValues)
         {
-            if (routeValues.TryGetValue(ODataRouteConstants.KeyCountKey, out object count))
+            if (routeValues.TryGetValue(ODataRouteConstants.KeyCount, out object count))
             {
-                routeValues[ODataRouteConstants.KeyCountKey] = ((int)count) + 1;
+                routeValues[ODataRouteConstants.KeyCount] = ((int)count) + 1;
             }
             else
             {
-                routeValues[ODataRouteConstants.KeyCountKey] = 1;
+                routeValues[ODataRouteConstants.KeyCount] = 1;
             }
         }
 

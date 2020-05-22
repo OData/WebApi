@@ -1359,7 +1359,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 castedList.Add(member);
             }
 
-            return Expression.Constant(castedList);
+            if (QuerySettings.EnableConstantParameterization)
+            {
+                return LinqParameterContainer.Parameterize(listType, castedList);
+            }
+
+            return Expression.Constant(castedList, listType);
         }
 
         private Expression BindCastSingleValue(SingleValueFunctionCallNode node)

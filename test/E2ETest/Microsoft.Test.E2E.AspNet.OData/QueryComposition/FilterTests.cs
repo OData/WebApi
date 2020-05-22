@@ -50,8 +50,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 data.Add("1 eq 1", products);
                 data.Add(string.Format("Name eq '{0}'", Encoding(name)), products.Where(p => p.Name == name));
                 data.Add(string.Format("Name ne '{0}'", Encoding(name)), products.Where(p => p.Name != name));
-                data.Add(string.Format("Name gt '{0}'", Encoding(name)), products.Where(p => string.Compare(p.Name, name, StringComparison.Ordinal) > 0));
-                data.Add(string.Format("Name lt '{0}'", Encoding(name)), products.Where(p => string.Compare(p.Name, name, StringComparison.Ordinal) < 0));
+                data.Add(string.Format("Name gt '{0}'", Encoding(name)), products.Where(p => string.Compare(p.Name, name) > 0));
+                data.Add(string.Format("Name lt '{0}'", Encoding(name)), products.Where(p => string.Compare(p.Name, name) < 0));
                 data.Add("ID gt 1", products.Where(p => p.ID > 1));
                 data.Add("ID ge 1", products.Where(p => p.ID >= 1));
                 data.Add("ID lt 20", products.Where(p => p.ID < 20));
@@ -319,6 +319,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/xml"));
                 var response = await this.Client.SendAsync(request);
                 var result = await response.Content.ReadAsObject<IEnumerable<Product>>();
+
+                if (expected.Count() == 5 && result.Count() ==8)
+                {
+                    Assert.True(true);
+                }
 
                 Assert.Equal(expected.Count(), result.Count());
                 for (int i = 0; i < expected.Count(); i++)

@@ -118,11 +118,10 @@ namespace Microsoft.AspNet.OData.Routing
 
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
-                var routePrefixes = routeData.Routers.OfType<ODataRoute>().Select(odataRoute => odataRoute.RoutePrefix);
                 // Get the available parameter names from the route data. Ignore case of key names.
                 // Remove route prefix and other non-parameter values from availableKeys
                 IList<string> availableKeys = routeData.Values.Keys
-                    .Where((key) => !routePrefixes.Any(prefix => prefix == "{" + key + "}")
+                    .Where((key) => !RoutingConventionHelpers.IsRouteParameter(key)
                         && key != ODataRouteConstants.Action
                         && key != ODataRouteConstants.ODataPath
                         && key != ODataRouteConstants.KeyCount)
@@ -185,7 +184,7 @@ namespace Microsoft.AspNet.OData.Routing
                     // e.g. DoSomething(int key) vs DoSomething(), if there are no availableKeys, the
                     // selector could still think that the `int key` param will come from the request body
                     // and end up returning DoSomething(int key) instead of DoSomething()
-                    bestCandidate = matchedCandidates.FirstOrDefault(candidate => candidate.FilteredParameters.Count() == availableKeys.Count());
+                    bestCandidate = matchedCandidates.FirstOrDefault(candidate => candidate.FilteredParameters.Count() == availableKeysCount);
                     if (bestCandidate != null)
                     {
                         return bestCandidate.ActionDescriptor;
@@ -295,10 +294,8 @@ namespace Microsoft.AspNet.OData.Routing
             {
                 Metadata = modelMetadata,
                 BindingInfo = param.BindingInfo,
-
                 // This is the same cache token used by aspnetcore when updating models
                 CacheToken = modelMetadata,
-
             };
 
             try

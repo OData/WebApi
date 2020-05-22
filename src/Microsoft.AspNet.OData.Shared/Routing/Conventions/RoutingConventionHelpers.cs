@@ -228,18 +228,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             odataValues[prefixName] = odataValue;
         }
 
-        private static void IncrementKeyCount(IDictionary<string, object> routeValues)
-        {
-            if (routeValues.TryGetValue(ODataRouteConstants.KeyCount, out object count))
-            {
-                routeValues[ODataRouteConstants.KeyCount] = ((int)count) + 1;
-            }
-            else
-            {
-                routeValues[ODataRouteConstants.KeyCount] = 1;
-            }
-        }
-
         public static void AddFunctionParameterToRouteData(this IWebApiControllerContext controllerContext, OperationSegment functionSegment)
         {
             Contract.Assert(controllerContext != null);
@@ -315,6 +303,33 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 // Remove the type name of the ODataEnumValue and keep the value.
                 routeData[name] = enumValue.Value;
+            }
+
+            IncrementKeyCount(routeData);
+        }
+
+        public static void AddNavigationPropertyToRouteData(this IWebApiControllerContext controllerContext,
+            NavigationPropertyLinkSegment navigationLinkSegment)
+        {
+            controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
+            IncrementKeyCount(controllerContext.RouteData);
+        }
+
+        /// <summary>
+        /// Increments the number of keys, navigation properties and operation parameters
+        /// parameters. This count is tracked by the <see cref="ODataRouteConstants.KeyCount"/> key
+        /// in the controller context route data.
+        /// </summary>
+        /// <param name="routeValues"></param>
+        public static void IncrementKeyCount(IDictionary<string, object> routeValues)
+        {
+            if (routeValues.TryGetValue(ODataRouteConstants.KeyCount, out object count))
+            {
+                routeValues[ODataRouteConstants.KeyCount] = ((int)count) + 1;
+            }
+            else
+            {
+                routeValues[ODataRouteConstants.KeyCount] = 1;
             }
         }
 

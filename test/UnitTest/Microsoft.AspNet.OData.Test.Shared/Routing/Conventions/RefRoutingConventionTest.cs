@@ -60,8 +60,8 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
                 Assert.Equal(4, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
-                Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values[ODataRouteConstants.KeyCount]);
                 Assert.Equal(ordersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values[ODataRouteConstants.KeyCount]);
             }
         }
 
@@ -112,8 +112,8 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
                 Assert.Equal(4, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
-                Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values[ODataRouteConstants.KeyCount]);
                 Assert.Equal(specialOrdersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values[ODataRouteConstants.KeyCount]);
             }
         }
 

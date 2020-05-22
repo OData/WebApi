@@ -64,5 +64,16 @@ namespace Microsoft.AspNet.OData.Query
         /// Gets or sets a value indicating whether the service will use skiptoken or not.
         /// </summary>
         public bool EnableSkipToken { get; set; }
+
+        internal void CopySettings(DefaultQuerySettings settings)
+        {
+            this.EnableCount = settings.EnableCount;
+            this.EnableExpand = settings.EnableExpand;
+            this.EnableFilter = settings.EnableFilter;
+            this.EnableOrderBy = settings.EnableOrderBy;
+            this.EnableSelect = settings.EnableSelect;
+            this.EnableSkipToken = settings.EnableSkipToken;
+            this.MaxTop = settings.MaxTop;
+        }
     }
 }

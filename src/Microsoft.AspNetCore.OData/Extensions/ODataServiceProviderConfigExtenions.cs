@@ -23,18 +23,18 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull(nameof(defaultQuerySettings));
             }
 
-            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
-            {
-                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
-            }
-
             DefaultQuerySettings querySettings = serviceProvider.GetRequiredService<DefaultQuerySettings>();
             if (querySettings == null)
             {
                 throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
             }
 
-            querySettings = defaultQuerySettings;
+            querySettings.CopySettings(defaultQuerySettings);
+            
+            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
+            {
+                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
+            }
         }
 
         public static DefaultQuerySettings GetDefaultQuerySettings(this IServiceProvider serviceProvider)

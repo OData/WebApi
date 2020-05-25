@@ -124,6 +124,13 @@ namespace Microsoft.AspNet.OData.Routing
                 keyCount = (int)routeData.Values[ODataRouteConstants.KeyCount];
             }
 
+            // navigationProperty is optional in some cases, therefore an action
+            // should not be rejected simply because it does not declare a navigationProperty parameter
+            if (routeData.Values.ContainsKey(ODataRouteConstants.NavigationProperty))
+            {
+                keyCount -= 1;
+            }
+
             if (parameters.Count < keyCount)
             {
                 return false;

@@ -131,18 +131,18 @@ namespace Microsoft.AspNet.OData.Routing
                 int availableKeysCount = 0;
                 if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCount))
                 {
-                    availableKeysCount = (int) routeData.Values[ODataRouteConstants.KeyCount];
+                    availableKeysCount = (int)routeData.Values[ODataRouteConstants.KeyCount];
                 }
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
                 var considerCandidates = candidates
-                    .Select(c => new ActionIdAndParameters(c.Id, c.Parameters.Count, c.Parameters
-                        .Where(p =>
-                        {
-                            return p.ParameterType != typeof(ODataPath) &&
-                                !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
-                        }), c));
+                    .Select(c => new ActionIdAndParameters(
+                        id: c.Id,
+                        parameterCount: c.Parameters.Count,
+                        filteredParameters: c.Parameters.Where(p => p.ParameterType != typeof(ODataPath) &&
+                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType)),
+                        descriptor: c));
 
                 // retrieve the optional parameters
                 routeData.Values.TryGetValue(ODataRouteConstants.OptionalParameters, out object wrapper);
@@ -168,7 +168,7 @@ namespace Microsoft.AspNet.OData.Routing
                     .ToList();
 
                 // if there are still multiple candidate actions at this point, let's try some tie-breakers
-                if (matchedCandidates.Count() > 1)
+                if (matchedCandidates.Count > 1)
                 {
                     // prioritize actions which explicitly declare the request method
                     // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
@@ -197,9 +197,21 @@ namespace Microsoft.AspNet.OData.Routing
             return _innerSelector.SelectBestCandidate(context, candidates);
         }
 
-        private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys,
-            ODataOptionalParameter optionalWrapper, int totalParameterCount, int availableKeysCount)
+        private bool TryMatch(
+            RouteContext context,
+            IList<ParameterDescriptor> parameters,
+            IList<string> availableKeys,
+            ODataOptionalParameter optionalWrapper,
+            int totalParameterCount,
+            int availableKeysCount)
         {
+            // navigationProperty is optional in some cases, therefore an action
+            // should not be rejected simply because it does not declare a navigationProperty parameter
+            if (availableKeys.Contains(ODataRouteConstants.NavigationProperty.ToLowerInvariant()))
+            {
+                availableKeysCount -= 1;
+            }
+
             // reject action if it doesn't declare a parameter for each segment key
             // e.g. Get() will be rejected for route /Persons/1
             if (totalParameterCount < availableKeysCount)

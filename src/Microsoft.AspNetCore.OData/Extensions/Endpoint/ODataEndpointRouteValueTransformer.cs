@@ -111,12 +111,12 @@ namespace Microsoft.AspNet.OData.Extensions
                         // to select the correct Endpoint, we save the ActionDescriptor value into ODataFeature.
                         odataFeature.ActionDescriptor = controllerActionDescriptor;
                         // Add handler to handle options calls. The routing criteria has been patched to allow endpoint discovery using the correct cors headers
-                        if (request.Method.Equals("OPTIONS",StringComparison.InvariantCultureIgnoreCase))
+                        if (request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
                         {
                             var metadata = actionDescriptor.EndpointMetadata;
                             // For option request can set this as the action will be handled by the cors middleware 
-                            var metadataCollection = metadata!=null && metadata.Any()
-                                ? new EndpointMetadataCollection(actionDescriptor.EndpointMetadata)
+                            var metadataCollection = metadata?.Any() == true
+                                ? new EndpointMetadataCollection(metadata)
                                 : EndpointMetadataCollection.Empty;
                             // This workaround allows the default cors middleware to read the annotations if the user has them enabling fine-grained cors access control with endpoints
                             var endpoint = new Endpoint(null, metadataCollection, controllerActionDescriptor.ActionName);

@@ -469,8 +469,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             HttpResponseMessage response = await client.SendAsync(request);
 
             // Assert
+            var res = await response.Content.ReadAsStringAsync();
+            JObject json = JObject.Parse(res);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            JObject json = JObject.Parse(await response.Content.ReadAsStringAsync());
             JToken value = json["value"].Children().First();
 
             var anonymousResponse = new { Count = 0 };

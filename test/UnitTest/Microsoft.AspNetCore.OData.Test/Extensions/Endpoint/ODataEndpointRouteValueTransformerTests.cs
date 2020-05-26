@@ -110,9 +110,9 @@ namespace Microsoft.AspNet.OData.Test.Extensions
         [Theory]
         [InlineData(false, true)]
         [InlineData(false, false)]
-        public void TransformAsyncReturnsCorrectRouteValuesForNonOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        public async void TransformAsyncReturnsCorrectRouteValuesForNonOptionRequests(bool isOptionsRequest, bool includeMetadata)
         {
-            var endpoint = GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
+            var endpoint = await GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
             // Assert the metadata is empty when options requests are sent and the controller is not annotated
 
             Assert.Null(endpoint);
@@ -121,9 +121,9 @@ namespace Microsoft.AspNet.OData.Test.Extensions
         [Theory]
         [InlineData(true, true)]
         [InlineData(true, false)]
-        public void TransformAsyncReturnsCorrectRouteValuesForOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        public async void TransformAsyncReturnsCorrectRouteValuesForOptionRequests(bool isOptionsRequest, bool includeMetadata)
         {
-            var endpoint = GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
+            var endpoint = await GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
 
             Assert.NotNull(endpoint);
             Assert.NotNull(endpoint.Metadata);
@@ -131,7 +131,7 @@ namespace Microsoft.AspNet.OData.Test.Extensions
             Assert.Null(endpoint.RequestDelegate);
         }
 
-        private Endpoint GenerateCorsEndPoint(bool isOptionsRequest, bool includeMetadata)
+        private async Task<Endpoint> GenerateCorsEndPoint(bool isOptionsRequest, bool includeMetadata)
         {
             // Arrange
             IEndpointRouteBuilder builder = EndpointRouteBuilderFactory.Create("odata",
@@ -158,7 +158,7 @@ namespace Microsoft.AspNet.OData.Test.Extensions
             IActionSelector actionSelector = new MockActionSelector(actionDescriptor);
 
             ODataEndpointRouteValueTransformer transformer = new ODataEndpointRouteValueTransformer(actionSelector);
-            transformer.TransformAsync(httpContext, values);
+            await transformer.TransformAsync(httpContext, values);
             return httpContext.GetEndpoint();
         }
 

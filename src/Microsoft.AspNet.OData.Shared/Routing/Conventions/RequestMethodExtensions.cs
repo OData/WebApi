@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
                 else
                 {
-                    return ODataRequestMethod.Unknown;
+                    return ODataRequestMethod.Options;
                 }
             }
 

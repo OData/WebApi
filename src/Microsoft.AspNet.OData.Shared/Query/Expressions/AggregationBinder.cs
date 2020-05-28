@@ -402,16 +402,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // we need cast it to IEnumerable<baseType> during expression building (IEnumerable)$it
             // however for EF6 we need to use $it.AsQueryable() due to limitations in types of casts that will properly translated
             Expression asQuerableExpression = null;
-            if (ClassicEF)
-            {
+            //if (ClassicEF)
+            //{
                 var asQuerableMethod = ExpressionHelperMethods.QueryableAsQueryable.MakeGenericMethod(baseType);
                 asQuerableExpression = Expression.Call(null, asQuerableMethod, accum);
-            }
-            else
-            {
-                var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
-                asQuerableExpression = Expression.Convert(accum, queryableType);
-            }
+            //}
+            //else
+            //{
+            //    var queryableType = typeof(IEnumerable<>).MakeGenericType(baseType);
+            //    asQuerableExpression = Expression.Convert(accum, queryableType);
+            //}
 
             // $count is a virtual property, so there's not a propertyLambda to create.
             if (expression.Method == AggregationMethod.VirtualPropertyCount)
@@ -586,6 +586,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 // .GroupBy($it => new NoGroupByWrapper())
                 groupLambda = Expression.Lambda(Expression.New(this._groupByClrType), this.LambdaParameter);
             }
+            
 
             return ExpressionHelpers.GroupBy(query, groupLambda, elementType, this._groupByClrType);
         }

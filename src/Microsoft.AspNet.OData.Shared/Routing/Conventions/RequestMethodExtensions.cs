@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;
 
@@ -14,43 +15,19 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <returns></returns>
         internal static ODataRequestMethod GetRequestMethodOrPreflightMethod(this IWebApiRequestMessage request)
         {
-            if (request.Method == ODataRequestMethod.Options)
+            if (request.Method != ODataRequestMethod.Options)
             {
-                IEnumerable<string> values;
-                if (request.Headers.TryGetValues("Access-Control-Request-Method", out values))
-                {
-                    return ConvertToODataRequestMethod(values.FirstOrDefault());
-                }
-                else
-                {
-                    return ODataRequestMethod.Options;
-                }
+                return request.Method;
             }
 
-            return request.Method;
-        }
-        /// <summary>
-        /// Converts string request method to ODataRequestMethod
-        /// </summary>
-        /// <param name="requestMethod"></param>
-        /// <returns></returns>
-        private static ODataRequestMethod ConvertToODataRequestMethod(string requestMethod)
-        {
-            if (requestMethod == null)
+            IEnumerable<string> values;
+            if (!request.Headers.TryGetValues("Access-Control-Request-Method", out values))
             {
                 return ODataRequestMethod.Unknown;
             }
 
-            switch (requestMethod.ToUpperInvariant())
-            {
-                case "GET": return ODataRequestMethod.Get;
-                case "POST": return ODataRequestMethod.Post;
-                case "PUT": return ODataRequestMethod.Put;
-                case "PATCH": return ODataRequestMethod.Patch;
-                case "DELETE": return ODataRequestMethod.Delete;
-                case "MERGE": return ODataRequestMethod.Merge;
-                default: return ODataRequestMethod.Unknown;
-            }
+            ODataRequestMethod preflightMethod;
+            return Enum.TryParse<ODataRequestMethod>(values.FirstOrDefault(), true, out preflightMethod) ? preflightMethod : ODataRequestMethod.Unknown;
         }
     }
 }

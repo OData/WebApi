@@ -347,11 +347,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             // Create method to get property collections to aggregate
             MethodInfo selectManyMethod
-                = ExpressionHelperMethods.EnumerableSelectManyGeneric.MakeGenericMethod(baseElementType, selectedElementType);
+                = ExpressionHelperMethods.EnumerableSelectManyGeneric.MakeGenericMethod(baseType == this.ElementType ? this.ElementType: baseElementType, selectedElementType);
 
             // Create the lambda that acceses the property in the selectMany clause.
-            var selectManyParam = Expression.Parameter(baseElementType, "$it");
-            var propertyExpression = Expression.Property(selectManyParam, expression.Expression.NavigationProperty.Name);
+            var selectManyParam = baseType == this.ElementType ? this.LambdaParameter : Expression.Parameter(baseElementType, "$it");
+            var propertyExpression = Expression.Property(source, expression.Expression.NavigationProperty.Name);
             var selectManyLambda = Expression.Lambda(propertyExpression, selectManyParam);
 
             // Get expression to get collection of entities

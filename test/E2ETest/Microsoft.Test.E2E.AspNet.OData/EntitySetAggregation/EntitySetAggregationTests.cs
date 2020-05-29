@@ -109,8 +109,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.EntitySetAggregation
             HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            
             var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             var value = result["value"];
             var totalId = value.First["TotalId"].ToObject<int>();
             var orders = value.First["Orders"];

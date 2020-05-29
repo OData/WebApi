@@ -164,8 +164,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             if (_aggregateExpressions != null
                 && _aggregateExpressions.OfType<AggregateExpression>().Any(e => e.Method != AggregationMethod.VirtualPropertyCount)
-                && _groupingProperties != null
-                && _groupingProperties.Any()
+                //&& _groupingProperties != null
+                //&& _groupingProperties.Any()
                 && (FlattenedPropertyContainer == null || !FlattenedPropertyContainer.Any()))
             {
                 var wrapperType = typeof(FlatteningWrapper<>).MakeGenericType(this.ElementType);

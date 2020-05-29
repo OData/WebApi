@@ -284,8 +284,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         internal IEdmTypeReference GetEdmType(object instance, Type type)
         {
             IEdmTypeReference edmType;
-
-            if (type.IsGenericType() && EdmLibHelpers.IsDynamicTypeWrapper(type.GetGenericArguments()[0]))
+            if (type != null && type.IsGenericType() && EdmLibHelpers.IsDynamicTypeWrapper(type.GetGenericArguments()[0]))
             {
                return this.Path.Segments.OfType<EntitySetSegment>().FirstOrDefault()?.EdmType?.ToEdmTypeReference(true);
             }

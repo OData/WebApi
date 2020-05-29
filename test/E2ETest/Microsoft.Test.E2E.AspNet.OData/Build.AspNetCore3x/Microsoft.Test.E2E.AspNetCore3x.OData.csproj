@@ -14,7 +14,7 @@
     <AssemblyName>Microsoft.Test.E2E.AspNetCore3x.OData</AssemblyName>
     <OutputPath>$(WebStackRootPath)bin\$(Configuration)\E2ETest\AspNetCore\</OutputPath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(WebStackRootPath)sln\</SolutionDir>
-    <DefineConstants>$(DefineConstants);NETCORE;PORTABLELIB</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE3x;PORTABLELIB</DefineConstants>
     <FileAlignment>512</FileAlignment>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>

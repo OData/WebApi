@@ -624,8 +624,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         [InlineData("?$apply=aggregate(Order/Price with min as Result)", "0")]
         [InlineData("?$apply=aggregate(Order/Price with max as Result)", "900")]
         [InlineData("?$apply=aggregate(Order/Price with average as Result)", "450")]
+#if !NETCORE3x
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)", "10")]
         [InlineData("?$apply=aggregate(Order/Price with countdistinct as Result)&$orderby=Result", "10")]
+#endif
         public async Task AggregateMethodWorks(string query, string expectedResult)
         {
             // Arrange

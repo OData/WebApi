@@ -140,7 +140,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Arrange
             OperationImportRoutingConvention importConvention = new OperationImportRoutingConvention();
             ODataPath odataPath = new DefaultODataPathHandler().Parse(EdmModel, "http://localhost/", "RateByName");
-            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/");
+            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/");
             var actionMap = SelectActionHelper.CreateActionMap("RateByName");
 
             // Act

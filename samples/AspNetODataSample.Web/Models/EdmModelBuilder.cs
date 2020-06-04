@@ -16,6 +16,10 @@ namespace AspNetODataSample.Web.Models
             {
                 var builder = new ODataConventionModelBuilder();
                 builder.EntitySet<TodoItem>("TodoItems");
+
+                var function = builder.Function("RateByOrder");
+                function.Parameter<int>("order");
+                function.Returns<string>();
                 _model = builder.GetEdmModel();
             }
 

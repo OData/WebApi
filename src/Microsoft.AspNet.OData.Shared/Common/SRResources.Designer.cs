@@ -3051,7 +3051,7 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Could not find any parser able to process '{0}' payload in the request.
+        ///   Looks up a localized string similar to Could not find any parser able to process '{0}' payload in the request..
         /// </summary>
         internal static string CannotFindParserForRequestMediaType
         {

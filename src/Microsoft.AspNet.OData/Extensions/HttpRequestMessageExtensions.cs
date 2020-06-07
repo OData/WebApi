@@ -16,6 +16,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,8 +32,8 @@ namespace Microsoft.AspNet.OData.Extensions
     public static class HttpRequestMessageExtensions
     {
         private const string PropertiesKey = "Microsoft.AspNet.OData.Properties";
-        private const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
         private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
+        internal const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
 
         /// <summary>
         /// Gets the <see cref="HttpRequestMessageProperties"/> instance containing OData methods and properties
@@ -409,6 +410,64 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
+        }
+        /// <summary>
+        /// Checks whether the request is a POST targeted at a resource path ending in /$query.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="odataPath">The OData path.</param>
+        /// <returns>true if the request path has $query segment.</returns>
+        internal static bool IsQueryRequest(this HttpRequestMessage request, string odataPath)
+        {
+            return request.Method.Equals(HttpMethod.Post) && 
+                odataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        /// <summary>
+        /// Transforms a POST request targeted at a resource path ending in $query into a GET request. 
+        /// The query options are parsed from the request body and appended to the request URL.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="requestContainerFactory">Request container factory.</param>
+        internal static void TransformQueryRequest(this HttpRequestMessage request, Func<IServiceProvider> requestContainerFactory)
+        {
+            if (requestContainerFactory == null)
+            {
+                throw Error.ArgumentNull("requestContainerFactory");
+            }
+
+            IServiceProvider requestContainer = requestContainerFactory();
+
+            // Fetch parsers available in the request container for parsing the query options in the request body
+            IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();
+            IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(
+                d => d.MediaTypeMapping.TryMatchMediaType(request) > 0);
+
+            string mediaType = request.Content.Headers.ContentType != null ? request.Content.Headers.ContentType.MediaType : string.Empty;
+
+            if (queryOptionsParser == null)
+            {
+                throw new ODataException(string.Format(
+                    CultureInfo.InvariantCulture,
+                    SRResources.CannotFindParserForRequestMediaType,
+                    mediaType));
+            }
+
+            string queryString = queryOptionsParser.Parse(request.Content.ReadAsStreamAsync().Result);
+
+            string requestPath = request.RequestUri.LocalPath;
+            requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+
+            Uri requestUri = request.RequestUri;
+            request.RequestUri = new Uri(string.Format(
+                CultureInfo.InvariantCulture,
+                "{0}://{1}{2}{3}{4}",
+                requestUri.Scheme,
+                requestUri.Host,
+                requestUri.Port,
+                requestPath,
+                queryString));
+            request.Method = HttpMethod.Get;
         }
 
         /// <summary>

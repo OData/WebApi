@@ -2438,6 +2438,12 @@ public sealed class Microsoft.AspNet.OData.Formatter.ODataOutputFormatterFactory
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataOutputFormatter]] Create ()
 }
 
+public class Microsoft.AspNet.OData.Formatter.ContentTypeMediaTypeMapping : MediaTypeMapping {
+	public ContentTypeMediaTypeMapping (string mediaType)
+
+	public virtual double TryMatchMediaType (Microsoft.AspNetCore.Http.HttpRequest request)
+}
+
 [
 DefaultMemberAttribute(),
 ]
@@ -2653,6 +2659,12 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 	Disabled = 2
 }
 
+public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
+	MediaTypeMapping MediaTypeMapping  { public abstract get; }
+
+	string Parse (System.IO.Stream requestStream)
+}
+
 public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
 	string MapProperty (string propertyName)
 }
@@ -2682,6 +2694,10 @@ public abstract class Microsoft.AspNet.OData.Query.SkipTokenHandler {
 	public abstract IQueryable`1 ApplyTo (IQueryable`1 query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Uri GenerateNextPageLink (System.Uri baseUri, int pageSize, object instance, ODataSerializerContext context)
+}
+
+public sealed class Microsoft.AspNet.OData.Query.ODataQueryOptionsParserFactory {
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.IODataQueryOptionsParser]] Create ()
 }
 
 public class Microsoft.AspNet.OData.Query.ApplyQueryOption {
@@ -2985,6 +3001,14 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
+public class Microsoft.AspNet.OData.Query.TextPlainODataQueryOptionsParser : IODataQueryOptionsParser {
+	public TextPlainODataQueryOptionsParser ()
+
+	MediaTypeMapping MediaTypeMapping  { public virtual get; }
+
+	public virtual string Parse (System.IO.Stream requestStream)
+}
+
 public class Microsoft.AspNet.OData.Query.TopQueryOption {
 	public TopQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
@@ -3194,6 +3218,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
 	public static readonly string OptionalParameters = "Microsoft.AspNet.OData.Routing.ODataOptionalParameter"
+	public static readonly string QuerySegment = "$query"
 	public static readonly string RelatedKey = "relatedKey"
 	public static readonly string VersionConstraintName = "ODataVersionConstraint"
 }

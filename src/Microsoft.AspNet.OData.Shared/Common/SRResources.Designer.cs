@@ -3038,5 +3038,27 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("WriteToStreamAsyncMustHaveRequest", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to parse query options payload..
+        /// </summary>
+        internal static string CannotParseQueryOptionsPayload
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotParseQueryOptionsPayload", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find any parser able to process '{0}' payload in the request.
+        /// </summary>
+        internal static string CannotFindParserForRequestMediaType
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotFindParserForRequestMediaType", resourceCulture);
+            }
+        }
     }
 }

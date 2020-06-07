@@ -928,4 +928,10 @@
   <data name="ReturnTypeOfOperationNotSpecified" xml:space="preserve">
     <value>Return type of operation is not specified.</value>
   </data>
+  <data name="CannotParseQueryOptionsPayload" xml:space="preserve">
+    <value>Unable to parse query options payload.</value>
+  </data>
+  <data name="CannotFindParserForRequestMediaType" xml:space="preserve">
+    <value>Could not find parser designed to handle '{0}' query options payload</value>
+  </data>
 </root>

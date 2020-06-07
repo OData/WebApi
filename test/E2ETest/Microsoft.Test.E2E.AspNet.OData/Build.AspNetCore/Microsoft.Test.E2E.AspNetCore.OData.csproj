@@ -30,6 +30,15 @@
     <Compile Include="..\Batch\Tests\DataServicesClient\UnbufferedODataBatchHandlerTests.cs">
       <Link>Batch\Tests\DataServicesClient\UnbufferedODataBatchHandlerTests.cs</Link>
     </Compile>
+    <Compile Include="..\Build.AspNet\DollarQuery\DollarQueryCustomersController.cs">
+      <Link>DollarQuery\DollarQueryCustomersController.cs</Link>
+    </Compile>
+    <Compile Include="..\Build.AspNet\DollarQuery\DollarQueryModels.cs">
+      <Link>DollarQuery\DollarQueryModels.cs</Link>
+    </Compile>
+    <Compile Include="..\Build.AspNet\DollarQuery\DollarQueryTests.cs">
+      <Link>DollarQuery\DollarQueryTests.cs</Link>
+    </Compile>
     <Compile Include="..\Common\Controllers\ModelStateErrorHandlingAttribute.cs">
       <Link>Common\Controllers\ModelStateErrorHandlingAttribute.cs</Link>
     </Compile>

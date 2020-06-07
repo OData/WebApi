@@ -75,6 +75,7 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
+    <Compile Include="Formatter\ContentTypeMediaTypeMapping.cs" />
     <Compile Include="Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProvider.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="Query\ODataQueryOptions.cs" />
     <Compile Include="PerRequestContentNegotiator.cs" />
     <Compile Include="Query\ODataQueryOptionsOfTEntity.cs" />
+    <Compile Include="Query\TextPlainODataQueryOptionsParser.cs" />
     <Compile Include="ResourceContext.cs" />
     <Compile Include="ResourceSetContext.cs" />
     <Compile Include="Results\CreatedODataResult.cs" />

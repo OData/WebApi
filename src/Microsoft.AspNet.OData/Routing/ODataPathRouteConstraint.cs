@@ -47,10 +47,31 @@ namespace Microsoft.AspNet.OData.Routing
                 object oDataPathValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
+                    string odataPath = oDataPathValue as string;
+                    Func<IServiceProvider> requestContainerFactory = () =>
+                    {
+                        // Delegate is reused. We need to ensure only one request container is created
+                        if (request.Properties.ContainsKey(Extensions.HttpRequestMessageExtensions.RequestContainerKey))
+                        {
+                            return (IServiceProvider)request.Properties[Extensions.HttpRequestMessageExtensions.RequestContainerKey];
+                        }
+
+                        return request.CreateRequestContainer(RouteName);
+                    };
+
+                    // Check whether the request is a POST targeted at a resource path ending in /$query
+                    if (request.IsQueryRequest(odataPath))
+                    {
+                        request.TransformQueryRequest(requestContainerFactory);
+
+                        odataPath = odataPath.Substring(0, odataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+                        values[ODataRouteConstants.ODataPath] = odataPath;
+                    }
+
                     string requestLeftPart = request.RequestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.RequestUri.Query;
 
-                    path = GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(RouteName));
+                    path = GetODataPath(odataPath, requestLeftPart, queryString, requestContainerFactory);
                 }
 
                 if (path != null)

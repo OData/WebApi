@@ -11,6 +11,7 @@ using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
@@ -449,6 +450,57 @@ namespace Microsoft.AspNet.OData.Extensions
                     requestScope.Dispose();
                 }
             }
+        }
+
+        /// <summary>
+        /// Checks whether the request is a POST targeted at a resource path ending in /$query.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="odataPath">The OData path.</param>
+        /// <returns>true if the request path has $query segment.</returns>
+        internal static bool IsQueryRequest(this HttpRequest request, string odataPath)
+        {
+            return request.Method.Equals(HttpMethods.Post) && 
+                odataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        /// <summary>
+        /// Transforms a POST request targeted at a resource path ending in $query into a GET request. 
+        /// The query options are parsed from the request body and appended to the request URL.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="requestContainerFactory">Request container factory.</param>
+        internal static void TransformQueryRequest(this HttpRequest request, Func<IServiceProvider> requestContainerFactory)
+        {
+            if (requestContainerFactory == null)
+            {
+                throw Error.ArgumentNull("requestContainerFactory");
+            }
+
+            IServiceProvider requestContainer = requestContainerFactory();
+
+            // Fetch parsers available in the request container for parsing the query options in the request body
+            IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();
+            IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(
+                d => d.MediaTypeMapping.TryMatchMediaType(request) > 0);
+
+            if (queryOptionsParser == null)
+            {
+                throw new ODataException(string.Format(
+                    CultureInfo.InvariantCulture, 
+                    SRResources.CannotFindParserForRequestMediaType,
+                    request.ContentType));
+            }
+
+            string queryString = queryOptionsParser.Parse(request.Body);
+
+            // Request path starts with a /
+            string requestPath = request.Path.Value;
+            requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+
+            request.Path = new PathString(requestPath);
+            request.QueryString = new QueryString(queryString);
+            request.Method = HttpMethods.Get;
         }
 
         /// <summary>

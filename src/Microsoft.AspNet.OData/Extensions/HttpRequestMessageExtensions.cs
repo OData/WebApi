@@ -415,12 +415,12 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Checks whether the request is a POST targeted at a resource path ending in /$query.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="odataPath">The OData path.</param>
+        /// <param name="oDataPath">The OData path.</param>
         /// <returns>true if the request path has $query segment.</returns>
-        internal static bool IsQueryRequest(this HttpRequestMessage request, string odataPath)
+        internal static bool IsQueryRequest(this HttpRequestMessage request, string oDataPath)
         {
             return request.Method.Equals(HttpMethod.Post) && 
-                odataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
+                oDataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
         }
 
         /// <summary>
@@ -443,7 +443,7 @@ namespace Microsoft.AspNet.OData.Extensions
             IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(
                 d => d.MediaTypeMapping.TryMatchMediaType(request) > 0);
 
-            string mediaType = request.Content.Headers.ContentType != null ? request.Content.Headers.ContentType.MediaType : string.Empty;
+            string mediaType = request.Content.Headers.ContentType?.MediaType ?? string.Empty;
 
             if (queryOptionsParser == null)
             {
@@ -459,14 +459,7 @@ namespace Microsoft.AspNet.OData.Extensions
             requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
 
             Uri requestUri = request.RequestUri;
-            request.RequestUri = new Uri(string.Format(
-                CultureInfo.InvariantCulture,
-                "{0}://{1}{2}{3}{4}",
-                requestUri.Scheme,
-                requestUri.Host,
-                requestUri.Port,
-                requestPath,
-                queryString));
+            request.RequestUri = new UriBuilder(requestUri.Scheme, requestUri.Host, requestUri.Port, requestPath, queryString).Uri;
             request.Method = HttpMethod.Get;
         }
 

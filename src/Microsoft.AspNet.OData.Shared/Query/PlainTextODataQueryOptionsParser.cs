@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData.Query
     /// The query options are passed in the request body as plain text.
     /// </summary>
     /// <remarks>This class derives from a platform-specific class.</remarks>
-    public partial class TextPlainODataQueryOptionsParser : IODataQueryOptionsParser
+    public partial class PlainTextODataQueryOptionsParser : IODataQueryOptionsParser
     {
         /// <inheritdoc/>
         public MediaTypeMapping MediaTypeMapping { get; } = new ContentTypeMediaTypeMapping("text/plain");

@@ -242,7 +242,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\TextPlainODataQueryOptionsParserTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ODataQueryValidatorTest.cs" />

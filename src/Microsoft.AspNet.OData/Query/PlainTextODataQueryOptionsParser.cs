@@ -1,14 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.OData;
 using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Query
 {
-    public partial class TextPlainODataQueryOptionsParser
+    [SuppressMessage("Microsoft.Naming", "CA1702:CompoundWordsShouldBeCasedCorrectly", Justification="Spelling correct in this context")]
+    public partial class PlainTextODataQueryOptionsParser
     {
         /// <inheritdoc/>
         public string Parse(Stream requestStream)
@@ -26,7 +27,7 @@ namespace Microsoft.AspNet.OData.Query
                     requestStream.Position = 0;
                 }
 
-                requestStream.CopyToAsync(memoryStream);
+                requestStream.CopyTo(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);
             }
@@ -41,7 +42,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 try
                 {
-                    // Based on OData OASIS Standard, the request body is expected to contain the query portion of the URL 
+                    // Based on OData OASIS Standard, the request body is expected to contain the query options part of OData URL 
                     // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed) 
                     // and MUST follow the expected syntax rules
 
@@ -49,7 +50,7 @@ namespace Microsoft.AspNet.OData.Query
                     // - Would it be a single query option per line?
                     // - Would the parser be responsible for adding the & separator?
                     // - Would the parser try to detect the & separator and add where necessary?
-                    string result = reader.ReadToEndAsync().Result;
+                    string result = reader.ReadToEnd();
 
                     if (!string.IsNullOrWhiteSpace(result))
                     {

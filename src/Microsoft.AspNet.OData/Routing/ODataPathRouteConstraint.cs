@@ -47,31 +47,32 @@ namespace Microsoft.AspNet.OData.Routing
                 object oDataPathValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
-                    string odataPath = oDataPathValue as string;
+                    string oDataPath = oDataPathValue as string;
                     Func<IServiceProvider> requestContainerFactory = () =>
                     {
                         // Delegate is reused. We need to ensure only one request container is created
-                        if (request.Properties.ContainsKey(Extensions.HttpRequestMessageExtensions.RequestContainerKey))
+                        object requestContainer;
+                        if (request.Properties.TryGetValue(Extensions.HttpRequestMessageExtensions.RequestContainerKey, out requestContainer))
                         {
-                            return (IServiceProvider)request.Properties[Extensions.HttpRequestMessageExtensions.RequestContainerKey];
+                            return (IServiceProvider)requestContainer;
                         }
 
                         return request.CreateRequestContainer(RouteName);
                     };
 
                     // Check whether the request is a POST targeted at a resource path ending in /$query
-                    if (request.IsQueryRequest(odataPath))
+                    if (request.IsQueryRequest(oDataPath))
                     {
                         request.TransformQueryRequest(requestContainerFactory);
 
-                        odataPath = odataPath.Substring(0, odataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
-                        values[ODataRouteConstants.ODataPath] = odataPath;
+                        oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+                        values[ODataRouteConstants.ODataPath] = oDataPath;
                     }
 
                     string requestLeftPart = request.RequestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.RequestUri.Query;
 
-                    path = GetODataPath(odataPath, requestLeftPart, queryString, requestContainerFactory);
+                    path = GetODataPath(oDataPath, requestLeftPart, queryString, requestContainerFactory);
                 }
 
                 if (path != null)

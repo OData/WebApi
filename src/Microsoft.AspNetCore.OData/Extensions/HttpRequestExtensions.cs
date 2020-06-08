@@ -456,12 +456,12 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Checks whether the request is a POST targeted at a resource path ending in /$query.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="odataPath">The OData path.</param>
+        /// <param name="oDataPath">The OData path.</param>
         /// <returns>true if the request path has $query segment.</returns>
-        internal static bool IsQueryRequest(this HttpRequest request, string odataPath)
+        internal static bool IsQueryRequest(this HttpRequest request, string oDataPath)
         {
             return request.Method.Equals(HttpMethods.Post) && 
-                odataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
+                oDataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
         }
 
         /// <summary>

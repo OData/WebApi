@@ -258,7 +258,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SelectControllerResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SingletonRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\DefaultODataPathHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\TextPlainODataQueryOptionsParser.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\IODataQueryOptionsParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataParameterValue.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\DefaultODataPathValidator.cs" />

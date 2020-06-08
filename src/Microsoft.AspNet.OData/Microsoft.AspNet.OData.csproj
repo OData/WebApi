@@ -110,7 +110,7 @@
     <Compile Include="Query\ODataQueryOptions.cs" />
     <Compile Include="PerRequestContentNegotiator.cs" />
     <Compile Include="Query\ODataQueryOptionsOfTEntity.cs" />
-    <Compile Include="Query\TextPlainODataQueryOptionsParser.cs" />
+    <Compile Include="Query\PlainTextODataQueryOptionsParser.cs" />
     <Compile Include="ResourceContext.cs" />
     <Compile Include="ResourceSetContext.cs" />
     <Compile Include="Results\CreatedODataResult.cs" />

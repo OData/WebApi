@@ -5,11 +5,10 @@ using System;
 using System.IO;
 using Microsoft.OData;
 using Microsoft.AspNet.OData.Common;
-using System.Diagnostics;
 
 namespace Microsoft.AspNet.OData.Query
 {
-    public partial class TextPlainODataQueryOptionsParser
+    public partial class PlainTextODataQueryOptionsParser
     {
         /// <inheritdoc/>
         public string Parse(Stream requestStream)
@@ -27,7 +26,7 @@ namespace Microsoft.AspNet.OData.Query
                     requestStream.Position = 0;
                 }
 
-                requestStream.CopyTo(memoryStream);
+                requestStream.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);
             }
@@ -42,7 +41,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 try
                 {
-                    // Based on OData OASIS Standard, the request body is expected to contain the query options part of OData URL 
+                    // Based on OData OASIS Standard, the request body is expected to contain the query portion of the URL 
                     // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed) 
                     // and MUST follow the expected syntax rules
 
@@ -50,7 +49,7 @@ namespace Microsoft.AspNet.OData.Query
                     // - Would it be a single query option per line?
                     // - Would the parser be responsible for adding the & separator?
                     // - Would the parser try to detect the & separator and add where necessary?
-                    string result = reader.ReadToEnd();
+                    string result = reader.ReadToEndAsync().Result;
 
                     if (!string.IsNullOrWhiteSpace(result))
                     {

@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData.Extensions
             if (routeName != null)
             {
                 HttpRequest request = httpContext.Request;
-                string odataPath = oDataPathValue as string;
+                string oDataPath = oDataPathValue as string;
                 Func<IServiceProvider> requestContainerFactory = () =>
                 {
                     // Delegate is reused. We need to ensure only one request container is created
@@ -81,12 +81,12 @@ namespace Microsoft.AspNet.OData.Extensions
                 };
 
                 // Check whether the request is a POST targeted at a resource path ending in /$query
-                if (request.IsQueryRequest(odataPath))
+                if (request.IsQueryRequest(oDataPath))
                 {
                     request.TransformQueryRequest(requestContainerFactory);
 
-                    odataPath = odataPath.Substring(0, odataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
-                    values[ODataRouteConstants.ODataPath] = odataPath;
+                    oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+                    values[ODataRouteConstants.ODataPath] = oDataPath;
                 }
 
                 // We need to call Uri.GetLeftPart(), which returns an encoded Url.
@@ -96,7 +96,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
                 // Call ODL to parse the Request URI.
-                ODataPath path = ODataPathRouteConstraint.GetODataPath(odataPath, requestLeftPart, queryString, requestContainerFactory);
+                ODataPath path = ODataPathRouteConstraint.GetODataPath(oDataPath, requestLeftPart, queryString, requestContainerFactory);
                 if (path != null)
                 {
                     // Set all the properties we need for routing, querying, formatting

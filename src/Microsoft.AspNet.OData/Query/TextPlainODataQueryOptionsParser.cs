@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.OData;
 using Microsoft.AspNet.OData.Common;
+using System.Diagnostics;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -20,14 +21,17 @@ namespace Microsoft.AspNet.OData.Query
 
             try
             {
-                // Reset request stream position - just in case
-                requestStream.Position = 0;
+                // Reset request stream position if possible
+                if (requestStream.CanSeek)
+                {
+                    requestStream.Position = 0;
+                }
 
                 requestStream.CopyTo(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);
             }
-            catch (Exception)
+            catch
             {
                 memoryStream.Dispose();
 
@@ -54,7 +58,7 @@ namespace Microsoft.AspNet.OData.Query
                         queryString = result[0] == '?' ? result : '?' + result;
                     }
                 }
-                catch (Exception)
+                catch
                 {
                     throw new ODataException(SRResources.CannotParseQueryOptionsPayload);
                 }

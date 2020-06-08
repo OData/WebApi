@@ -2623,6 +2623,14 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.UnaryOperatorNode nodeIn)
 }
 
+public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IODataQueryOptionsParser {
+	public PlainTextODataQueryOptionsParser ()
+
+	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public virtual get; }
+
+	public virtual string Parse (System.IO.Stream requestStream)
+}
+
 public class Microsoft.AspNet.OData.Query.QueryFilterProvider : IFilterProvider {
 	public QueryFilterProvider (System.Web.Http.Filters.IActionFilter queryFilter)
 
@@ -2671,14 +2679,6 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
 	public void Validate (ODataValidationSettings validationSettings)
-}
-
-public class Microsoft.AspNet.OData.Query.TextPlainODataQueryOptionsParser : IODataQueryOptionsParser {
-	public TextPlainODataQueryOptionsParser ()
-
-	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public virtual get; }
-
-	public virtual string Parse (System.IO.Stream requestStream)
 }
 
 public class Microsoft.AspNet.OData.Query.TopQueryOption {

@@ -18,10 +18,7 @@ namespace Microsoft.AspNet.OData.Query
         private Dictionary<string, bool> _orderByConfigurations = new Dictionary<string, bool>();
         private Dictionary<string, bool> _filterConfigurations = new Dictionary<string, bool>();
 
-        internal static ModelBoundQuerySettings DefaultModelBoundQuerySettings = new ModelBoundQuerySettings
-        {
-            _maxTop = 0
-        };
+        internal static ModelBoundQuerySettings DefaultModelBoundQuerySettings = new ModelBoundQuerySettings();
 
         /// <summary>
         /// Instantiates a new instance of the <see cref="ModelBoundQuerySettings"/> class

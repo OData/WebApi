@@ -33,8 +33,8 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// Checks whether the specified method is a suitable match
         /// for the specified action
         /// </summary>
-        /// <param name="action"></param>
-        /// <param name="method"></param>
+        /// <param name="action">Controller action to match</param>
+        /// <param name="method">Candidate method to compare</param>
         /// <returns></returns>
         public static bool ActionMatchesMethod(ActionDescriptor action, MethodInfo method)
         {
@@ -42,11 +42,13 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             {
                 return false;
             }
+
             var parameters = method.GetParameters();
             if (parameters.Length != action.Parameters.Count)
             {
                 return false;
             }
+
             for (var i = 0; i < parameters.Length; i++)
             {
                 if (parameters[i].Name != action.Parameters[i].Name ||
@@ -55,6 +57,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -120,6 +123,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             var request = RequestFactory.Create(routeBuilder);
             var routeContext = new RouteContext(request.HttpContext);
             var routeData = routeContext.RouteData;
+            var routingConventionsStore = routeContext.HttpContext.ODataFeature().RoutingConventionsStore;
             var odataPath = new ODataPath();
             routeContext.HttpContext.ODataFeature().Path = odataPath;
             
@@ -132,7 +136,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 keyCount++;
             }
 
-            routeContext.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount] = keyCount;
+            routingConventionsStore[ODataRouteConstants.KeyCount] = keyCount;
 
             request.Method = method;
 

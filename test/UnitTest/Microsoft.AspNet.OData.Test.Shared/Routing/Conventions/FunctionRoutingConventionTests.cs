@@ -132,7 +132,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
-            Assert.Equal(1, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
 
         [Fact]
@@ -190,7 +190,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal("any", SelectActionHelper.GetRouteData(request).Values["city"]);
-            Assert.Equal(2, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(2, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal("IsUpgradedWithParam", selectedAction);
             Assert.Single(SelectActionHelper.GetRouteData(request).Values);
             Assert.Equal("any", SelectActionHelper.GetRouteData(request).Values["city"]);
-            Assert.Equal(1, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
 
         [Fact]
@@ -249,7 +249,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal(5, SelectActionHelper.GetRouteData(request).Values["parameter"]);
-            Assert.Equal(2, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(2, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
     }
 }

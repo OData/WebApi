@@ -500,7 +500,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         [InlineData("NotFoundCustomers(10)", "DELETE")]
         [InlineData("NotFoundCustomers(10)", "PUT")]
         [InlineData("NotFoundCustomers(10)", "PATCH")]
-        public async Task ActionsDontMatch_ReturnsNotFound(string uri, string httpMethod)
+        public async Task ActionsDoNotMatch_ReturnsNotFound(string uri, string httpMethod)
         {
             // Arrange & Act
             HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(

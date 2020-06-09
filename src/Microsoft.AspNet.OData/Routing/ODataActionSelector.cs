@@ -117,11 +117,12 @@ namespace Microsoft.AspNet.OData.Routing
         {
             var parameters = action.GetParameters();
             var routeData = context.RouteData;
+            var routingConventionsStore = context.Request.ODataProperties().RoutingConventionsStore;
 
             int keyCount = 0;
-            if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCount))
+            if (routingConventionsStore.ContainsKey(ODataRouteConstants.KeyCount))
             {
-                keyCount = (int)routeData.Values[ODataRouteConstants.KeyCount];
+                keyCount = (int)routingConventionsStore[ODataRouteConstants.KeyCount];
             }
 
             // navigationProperty is optional in some cases, therefore an action

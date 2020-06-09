@@ -14,6 +14,7 @@ using Xunit;
 using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -152,12 +153,13 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal("GetDynamicPropertyFromAccount", selectedAction);
 
             var routeData = SelectActionHelper.GetRouteData(request);
+            var routingConventionsStore = SelectActionHelper.GetRoutingConventionsStore(request);
             Assert.Equal(4, routeData.Values.Count);
             Assert.Equal(7, routeData.Values["key"]);
             Assert.Equal(7, routeData.Values["keyID"]);
             Assert.Equal("Amount", routeData.Values["dynamicProperty"]);
             Assert.Equal("Amount", (routeData.Values[ODataParameterValue.ParameterValuePrefix + "dynamicProperty"] as ODataParameterValue).Value);
-            Assert.Equal(1, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(1, routingConventionsStore[ODataRouteConstants.KeyCount]);
         }
 
         [Theory]
@@ -205,10 +207,11 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Equal("GetDynamicProperty", selectedAction);
 
             var routeData = SelectActionHelper.GetRouteData(request);
+            var routingConventionsStore = SelectActionHelper.GetRoutingConventionsStore(request);
             Assert.Equal(4, routeData.Values.Count);
             Assert.Equal(7, routeData.Values["key"]);
             Assert.Equal(7, routeData.Values["keyID"]);
-            Assert.Equal(1, request.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount]);
+            Assert.Equal(1, routingConventionsStore[ODataRouteConstants.KeyCount]);
             Assert.Equal("DynamicPropertyA", routeData.Values["dynamicProperty"]);
             Assert.Equal("DynamicPropertyA", (routeData.Values[ODataParameterValue.ParameterValuePrefix + "dynamicProperty"] as ODataParameterValue).Value);
         }

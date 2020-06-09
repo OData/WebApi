@@ -48,8 +48,8 @@ namespace Microsoft.AspNet.OData.Routing
             IActionDescriptorCollectionProvider actionDescriptorCollectionProvider,
             ActionConstraintCache actionConstraintProviders,
             ILoggerFactory loggerFactory,
-            IModelBinderFactory modelBinderFactory = null,
-            IModelMetadataProvider modelMetadataProvider = null
+            IModelBinderFactory modelBinderFactory,
+            IModelMetadataProvider modelMetadataProvider
         )
         {
             _innerSelector = new ActionSelector(actionDescriptorCollectionProvider, actionConstraintProviders, loggerFactory);
@@ -65,8 +65,8 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="modelMetadataProvider">IModelMetadataProvider instance from dependency injection</param>
         public ODataActionSelector(
             IActionSelector innerSelector,
-            IModelBinderFactory modelBinderFactory = null,
-            IModelMetadataProvider modelMetadataProvider = null)
+            IModelBinderFactory modelBinderFactory,
+            IModelMetadataProvider modelMetadataProvider)
         {
             _innerSelector = innerSelector;
             _modelBinderFactory = modelBinderFactory;

@@ -192,7 +192,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     }
                 }
 
-                IncrementKeyCount(controllerContext.RouteData);
+                IncrementKeyCount(routingConventionsStore);
             }
         }
 
@@ -305,14 +305,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 routeData[name] = enumValue.Value;
             }
 
-            IncrementKeyCount(routeData);
+            IncrementKeyCount(values);
         }
 
         public static void AddNavigationPropertyToRouteData(this IWebApiControllerContext controllerContext,
             NavigationPropertyLinkSegment navigationLinkSegment)
         {
             controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
-            IncrementKeyCount(controllerContext.RouteData);
+            IncrementKeyCount(controllerContext.Request.Context.RoutingConventionsStore);
         }
 
         /// <summary>
@@ -320,16 +320,16 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// parameters. This count is tracked by the <see cref="ODataRouteConstants.KeyCount"/> key
         /// in the controller context route data.
         /// </summary>
-        /// <param name="routeValues"></param>
-        public static void IncrementKeyCount(IDictionary<string, object> routeValues)
+        /// <param name="routingConventionsStore">Store where the key count is stored</param>
+        public static void IncrementKeyCount(IDictionary<string, object> routingConventionsStore)
         {
-            if (routeValues.TryGetValue(ODataRouteConstants.KeyCount, out object count))
+            if (routingConventionsStore.TryGetValue(ODataRouteConstants.KeyCount, out object count))
             {
-                routeValues[ODataRouteConstants.KeyCount] = ((int)count) + 1;
+                routingConventionsStore[ODataRouteConstants.KeyCount] = ((int)count) + 1;
             }
             else
             {
-                routeValues[ODataRouteConstants.KeyCount] = 1;
+                routingConventionsStore[ODataRouteConstants.KeyCount] = 1;
             }
         }
 

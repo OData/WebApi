@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
@@ -115,6 +116,7 @@ namespace Microsoft.AspNet.OData.Routing
         {
             RouteData routeData = context.RouteData;
             ODataPath odataPath = context.HttpContext.ODataFeature().Path;
+            IDictionary<string, object> routingConventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
 
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
@@ -123,15 +125,14 @@ namespace Microsoft.AspNet.OData.Routing
                 IList<string> availableKeys = routeData.Values.Keys
                     .Where((key) => !RoutingConventionHelpers.IsRouteParameter(key)
                         && key != ODataRouteConstants.Action
-                        && key != ODataRouteConstants.ODataPath
-                        && key != ODataRouteConstants.KeyCount)
+                        && key != ODataRouteConstants.ODataPath)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
 
                 int availableKeysCount = 0;
-                if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCount))
+                if (routingConventionsStore.ContainsKey(ODataRouteConstants.KeyCount))
                 {
-                    availableKeysCount = (int)routeData.Values[ODataRouteConstants.KeyCount];
+                    availableKeysCount = (int)routingConventionsStore[ODataRouteConstants.KeyCount];
                 }
 
                 // Filter out types we know how to bind out of the parameter lists. These values
@@ -279,7 +280,10 @@ namespace Microsoft.AspNet.OData.Routing
         private bool RequestHasBody(RouteContext context)
         {
             string method = context.HttpContext.Request.Method.ToLowerInvariant();
-            return method == "post" || method == "put" || method == "patch" || method == "merge";
+            return method.Equals("post", StringComparison.OrdinalIgnoreCase) ||
+                method.Equals("put", StringComparison.OrdinalIgnoreCase) ||
+                method.Equals("patch", StringComparison.OrdinalIgnoreCase) ||
+                method.Equals("merge", StringComparison.OrdinalIgnoreCase);
         }
 
         private bool ActionAcceptsMethod(ControllerActionDescriptor action, string method)

@@ -132,7 +132,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 keyCount++;
             }
 
-            routeData.Values[ODataRouteConstants.KeyCount] = keyCount;
+            routeContext.HttpContext.ODataFeature().RoutingConventionsStore[ODataRouteConstants.KeyCount] = keyCount;
 
             request.Method = method;
 

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System;
 using System.IO;
 using Microsoft.OData;
 using Microsoft.AspNet.OData.Common;
@@ -20,12 +19,6 @@ namespace Microsoft.AspNet.OData.Query
 
             try
             {
-                // Reset request stream position if possible
-                if (requestStream.CanSeek)
-                {
-                    requestStream.Position = 0;
-                }
-
                 requestStream.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);

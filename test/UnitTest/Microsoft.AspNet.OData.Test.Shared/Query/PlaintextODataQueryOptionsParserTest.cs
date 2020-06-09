@@ -33,18 +33,6 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public void Parse_WithReadStream()
-        {
-            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(QueryOptionsString));
-            var reader = new StreamReader(memoryStream);
-
-            var result = new PlainTextODataQueryOptionsParser().Parse(memoryStream);
-            
-            Assert.Equal('?' + QueryOptionsString, result);
-            reader.Dispose();
-        }
-
-        [Fact]
         public void Parse_WithEmptyStream()
         {
             var memoryStream = new MemoryStream();

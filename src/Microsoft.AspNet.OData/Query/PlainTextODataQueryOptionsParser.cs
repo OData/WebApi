@@ -21,12 +21,6 @@ namespace Microsoft.AspNet.OData.Query
 
             try
             {
-                // Reset request stream position if possible
-                if (requestStream.CanSeek)
-                {
-                    requestStream.Position = 0;
-                }
-
                 requestStream.CopyTo(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);

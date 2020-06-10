@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -97,6 +98,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var response = await this.Client.SendAsync(request);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task TestODataQueryOptionsInRequestBody_ReturnsExpectedResult()
+        {
+            string requestUri = this.BaseAddress + CustomersResourcePath + "/$query";
+            var contentType = "text/plain";
+            var queryOptionsPayload = "$filter=Id eq 1";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Content = new StringContent(queryOptionsPayload);
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
+
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(ApplicationJsonODataMinimalMetadataStreamingTrue));
+
+            var response = await this.Client.SendAsync(request);
+            Assert.True(response.IsSuccessStatusCode);
+
+            var contentAsString = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
         }
 
         [Fact]

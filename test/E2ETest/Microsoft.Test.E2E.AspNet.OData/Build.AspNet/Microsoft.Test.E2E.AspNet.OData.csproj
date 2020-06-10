@@ -1081,6 +1081,15 @@
     <Compile Include="..\DollarLevels\DollarLevelsTest.cs">
       <Link>DollarLevels\DollarLevelsTest.cs</Link>
     </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryCustomersController.cs">
+      <Link>DollarQuery\DollarQueryCustomersController.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryModels.cs">
+      <Link>DollarQuery\DollarQueryModels.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryTests.cs">
+      <Link>DollarQuery\DollarQueryTests.cs</Link>
+    </Compile>
     <Compile Include="..\Enums\EnumsController.cs">
       <Link>Enums\EnumsController.cs</Link>
     </Compile>
@@ -1847,9 +1856,6 @@
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
-    <Compile Include="DollarQuery\DollarQueryCustomersController.cs" />
-    <Compile Include="DollarQuery\DollarQueryModels.cs" />
-    <Compile Include="DollarQuery\DollarQueryTests.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

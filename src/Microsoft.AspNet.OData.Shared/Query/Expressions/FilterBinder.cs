@@ -514,13 +514,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (IsIQueryable(collection.Type))
             {
-                var castedToSingleValueType = Expression.Call(null, ExpressionHelperMethods.QueryableCastGeneric.MakeGenericMethod(singleValue.Type), collection);
-                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), castedToSingleValueType, singleValue);
+                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
             }
             else
             {
-                var castedToSingleValueType = Expression.Call(null, ExpressionHelperMethods.EnumerableCastGeneric.MakeGenericMethod(singleValue.Type), collection);
-                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), castedToSingleValueType, singleValue);
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
             }
         }
 

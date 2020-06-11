@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
@@ -17,15 +17,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         private const string CustomerBaseUrl = "{0}/skiptokentest/Customers";
         private const string OrderBaseUrl = "{0}/skiptokentest/Orders";
         private const string DatesBaseUrl = "{0}/skiptokentest/Dates";
+        private const string DateOffsetsBaseUrl = "{0}/skiptokentest/DateOffsets";
 
         public SkipTokenTest(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController));
+            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController), typeof(DateOffsetsController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MaxTop(2).Expand().Filter().OrderBy().SkipToken();
@@ -144,11 +145,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [Theory]
         [InlineData("Token", "$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-3")]
-        [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2")]
+        [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth-2000-01-02T00%3A00%3A00Z,Id-2")]
         [InlineData("Skill", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-4")]
         public async Task GenerateSkiptokenWithDifferentPrimitive(string property, string expected)
         {
-            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby="+ property, BaseAddress);
+            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby=" + property, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpClient client = new HttpClient();
@@ -162,7 +163,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [Theory]
         [InlineData("?$orderby=Token&$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-3", "$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-7")]
-        [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2", "$skiptoken=DateTimeOfBirth-2000-01-04T00:00:00Z,Id-4")]
+        [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2", "$skiptoken=DateTimeOfBirth-2000-01-04T00%3A00%3A00Z,Id-4")]
         [InlineData("?$orderby=Skill&$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-4", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-8")]
         public async Task ConsumeSkiptokenWithOtherPrimitives(string nextLink, string expected)
         {
@@ -267,6 +268,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(string.Format(DatesBaseUrl, "") + expected, result);
+        }
+
+        [Theory]
+        [InlineData("", "?$skiptoken=DateValue-2020-06-11T00%3A00%3A01%2B01%3A00")]
+        [InlineData("?$skiptoken=DateValue-2020-06-11T00%3A00%3A01%2B01%3A00", "?$skiptoken=DateValue-2020-06-11T00%3A00%3A03%2B01%3A00")]
+        public async Task GenerateEncodedSkipTokenOnEntityWithDateTimeOffset(string queryOptions, string expected)
+        {
+            string queryUrl = string.Format(DateOffsetsBaseUrl, BaseAddress) + queryOptions;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
         }
     }
 }

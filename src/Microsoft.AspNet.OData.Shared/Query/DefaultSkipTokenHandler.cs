@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
@@ -143,6 +144,10 @@ namespace Microsoft.AspNet.OData.Query
                     var dateTime = (DateTime)value;
                     var dateTimeOffsetValue = TimeZoneInfoHelper.ConvertToDateTimeOffset(dateTime);
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(dateTimeOffsetValue, ODataVersion.V401, model);
+                }
+                else if (edmProperty.Type.IsDateTimeOffset() && value is DateTimeOffset)
+                {
+                    uriLiteral = WebUtility.UrlEncode(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model));
                 }
                 else
                 {

@@ -1,11 +1,11 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData;
+using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNet.OData;
-using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
@@ -189,5 +189,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [EnableQuery]
         public List<Date> Get() => _dates;
+    }
+
+    public class DateOffsetsController : TestODataController
+    {
+        private static readonly DateTimeOffset _baseDate = new DateTimeOffset(new DateTime(2020, 06, 11), TimeSpan.FromHours(1));
+        private readonly List<DateOffset> _dates = Enumerable.Range(0, 5).Select(i => new DateOffset() { DateValue = _baseDate.AddSeconds(i) }).ToList();
+
+        [EnableQuery]
+        public List<DateOffset> Get() => _dates;
     }
 }

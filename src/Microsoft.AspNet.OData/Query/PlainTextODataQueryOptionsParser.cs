@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Microsoft.OData;
 using Microsoft.AspNet.OData.Common;
 
@@ -12,7 +13,7 @@ namespace Microsoft.AspNet.OData.Query
     public partial class PlainTextODataQueryOptionsParser
     {
         /// <inheritdoc/>
-        public string Parse(Stream requestStream)
+        public async Task<string> ParseAsync(Stream requestStream)
         {
             string queryString = string.Empty;
 
@@ -21,7 +22,7 @@ namespace Microsoft.AspNet.OData.Query
 
             try
             {
-                requestStream.CopyTo(memoryStream);
+                await requestStream.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
                 reader = new StreamReader(memoryStream);
             }
@@ -39,12 +40,7 @@ namespace Microsoft.AspNet.OData.Query
                     // Based on OData OASIS Standard, the request body is expected to contain the query options part of OData URL 
                     // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed) 
                     // and MUST follow the expected syntax rules
-
-                    // For consideration: support multiline
-                    // - Would it be a single query option per line?
-                    // - Would the parser be responsible for adding the & separator?
-                    // - Would the parser try to detect the & separator and add where necessary?
-                    string result = reader.ReadToEnd();
+                    string result = await reader.ReadToEndAsync();
 
                     if (!string.IsNullOrWhiteSpace(result))
                     {

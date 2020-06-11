@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -453,7 +454,8 @@ namespace Microsoft.AspNet.OData.Extensions
                     mediaType));
             }
 
-            string queryString = queryOptionsParser.Parse(request.Content.ReadAsStreamAsync().Result);
+            Stream requestStream = request.Content.ReadAsStreamAsync().Result;
+            string queryString = queryOptionsParser.ParseAsync(requestStream).Result;
 
             string requestPath = request.RequestUri.LocalPath;
             requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));

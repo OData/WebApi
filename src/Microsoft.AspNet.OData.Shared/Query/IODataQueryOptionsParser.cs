@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
+using System.Threading.Tasks;
 #if !NETCORE
 using System.Net.Http.Formatting;
 #else
@@ -28,6 +29,6 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         /// <param name="requestStream">A <see cref="T:System.IO.Stream" /> containing the query options.</param>
         /// <returns>A string representing the query options part of an OData URL.</returns>
-        string Parse(Stream requestStream);
+        Task<string> ParseAsync(Stream requestStream);
     }
 }

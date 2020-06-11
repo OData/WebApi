@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -492,7 +494,7 @@ namespace Microsoft.AspNet.OData.Extensions
                     request.ContentType));
             }
 
-            string queryString = queryOptionsParser.Parse(request.Body);
+            string queryString = queryOptionsParser.ParseAsync(request.Body).Result;
 
             // Request path starts with a /
             string requestPath = request.Path.Value;

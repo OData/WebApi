@@ -3,6 +3,7 @@
 
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Xunit;
@@ -14,40 +15,40 @@ namespace Microsoft.AspNet.OData.Test.Query
         private const string QueryOptionsString = "$filter=Id le 5";
 
         [Fact]
-        public void Parse_WithQueryOptionsInStream()
+        public async Task Parse_WithQueryOptionsInStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(QueryOptionsString));
 
-            var result = new PlainTextODataQueryOptionsParser().Parse(memoryStream);
+            var result = await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream);
 
             Assert.Equal('?' + QueryOptionsString, result);
         }
 
         [Fact]
-        public void Parse_WithDisposedStream()
+        public async Task Parse_WithDisposedStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(QueryOptionsString));
             memoryStream.Dispose();
 
-            Assert.Throws<ODataException>(() => new PlainTextODataQueryOptionsParser().Parse(memoryStream));
+            await Assert.ThrowsAsync<ODataException>(async() => await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream));
         }
 
         [Fact]
-        public void Parse_WithEmptyStream()
+        public async Task Parse_WithEmptyStream()
         {
             var memoryStream = new MemoryStream();
 
-            var result = new PlainTextODataQueryOptionsParser().Parse(memoryStream);
+            var result = await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream);
 
             Assert.Equal("", result);
         }
 
         [Fact]
-        public void Parse_WithQueryStringSeparatorIncludedInStream()
+        public async Task Parse_WithQueryStringSeparatorIncludedInStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes('?' + QueryOptionsString));
 
-            var result = new PlainTextODataQueryOptionsParser().Parse(memoryStream);
+            var result = await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream);
 
             Assert.Equal('?' + QueryOptionsString, result);
         }

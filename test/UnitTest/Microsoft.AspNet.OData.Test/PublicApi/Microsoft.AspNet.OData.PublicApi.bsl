@@ -2337,7 +2337,7 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
 	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public abstract get; }
 
-	string Parse (System.IO.Stream requestStream)
+	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
 public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
@@ -2628,7 +2628,10 @@ public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IOD
 
 	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public virtual get; }
 
-	public virtual string Parse (System.IO.Stream requestStream)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
 public class Microsoft.AspNet.OData.Query.QueryFilterProvider : IFilterProvider {

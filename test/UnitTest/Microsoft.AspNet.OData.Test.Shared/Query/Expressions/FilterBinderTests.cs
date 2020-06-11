@@ -599,6 +599,17 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        public void AnyInOnNavigation(string filter, string expression)
+        {
+            var filters = VerifyQueryDeserialization(
+               filter,
+               expression,
+               NotTesting);
+        }
+
+        [Theory]
         [InlineData("Category/QueryableProducts/any(P: false)", "$it => False")]
         [InlineData("Category/QueryableProducts/any(P: false and P/ProductName eq 'Snacks')", "$it => $it.Category.QueryableProducts.Any(P => (False AndAlso (P.ProductName == \"Snacks\")))")]
         [InlineData("Category/QueryableProducts/any(P: true)", "$it => $it.Category.QueryableProducts.Any()")]

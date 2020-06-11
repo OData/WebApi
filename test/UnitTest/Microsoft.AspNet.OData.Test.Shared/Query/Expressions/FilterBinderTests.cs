@@ -610,12 +610,13 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => ($it.NullableIntProp == null)")]
+        [InlineData("QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
         public void Test(string filter, string expectedResult)
         {
             // Arrange
             IEdmModel model = GetModel<Category>();
-            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.Category");
             IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
             IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
             ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);

@@ -610,6 +610,32 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => ($it.NullableIntProp == null)")]
+        public void Test(string filter, string expectedResult)
+        {
+            // Arrange
+            IEdmModel model = GetModel<Category>();
+            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.DataTypes");
+            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
+            IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
+            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
+            ODataQueryContext context = new ODataQueryContext(model, typeof(Category));
+            context.RequestContainer = new MockContainer();
+            FilterClause filterClause = new FilterQueryOption(filter, context, parser).FilterClause;
+
+            // Act
+            Expression actualExpression = FilterBinder.Bind(
+                filterClause,
+                typeof(Category),
+                model,
+                WebApiAssembliesResolverFactory.Create(),
+                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
+
+            // Assert
+            VerifyExpression(actualExpression, expectedResult);
+        }
+
+        [Theory]
         [InlineData("Category/QueryableProducts/any(P: false)", "$it => False")]
         [InlineData("Category/QueryableProducts/any(P: false and P/ProductName eq 'Snacks')", "$it => $it.Category.QueryableProducts.Any(P => (False AndAlso (P.ProductName == \"Snacks\")))")]
         [InlineData("Category/QueryableProducts/any(P: true)", "$it => $it.Category.QueryableProducts.Any()")]

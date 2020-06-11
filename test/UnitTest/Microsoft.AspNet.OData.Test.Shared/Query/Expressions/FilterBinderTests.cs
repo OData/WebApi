@@ -599,41 +599,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
-        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))")]
         public void AnyInOnNavigation(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization(
                filter,
                expression,
                NotTesting);
-        }
-
-        [Theory]
-        [InlineData("QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
-        [InlineData("EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
-        public void Test(string filter, string expectedResult)
-        {
-            // Arrange
-            IEdmModel model = GetModel<Category>();
-            IEdmType targetEdmType = model.FindType("Microsoft.AspNet.OData.Test.Query.Expressions.Category");
-            IEdmNavigationSource targetNavigationSource = model.FindDeclaredEntitySet("Microsoft.AspNet.OData.Test.Query.Expressions.Products");
-            IDictionary<string, string> queryOptions = new Dictionary<string, string> { { "$filter", filter } };
-            ODataQueryOptionParser parser = new ODataQueryOptionParser(model, targetEdmType, targetNavigationSource, queryOptions);
-            ODataQueryContext context = new ODataQueryContext(model, typeof(Category));
-            context.RequestContainer = new MockContainer();
-            FilterClause filterClause = new FilterQueryOption(filter, context, parser).FilterClause;
-
-            // Act
-            Expression actualExpression = FilterBinder.Bind(
-                filterClause,
-                typeof(Category),
-                model,
-                WebApiAssembliesResolverFactory.Create(),
-                new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False });
-
-            // Assert
-            VerifyExpression(actualExpression, expectedResult);
         }
 
         [Theory]

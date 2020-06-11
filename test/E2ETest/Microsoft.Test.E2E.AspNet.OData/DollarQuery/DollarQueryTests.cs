@@ -1,11 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+
 using System;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
@@ -84,7 +85,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
 
         [Theory]
         [MemberData(nameof(ODataQueryOptionsData))]
-        public async Task TestODataQueryOptionsInRequestBody_ForSupportedMediaType(string resourcePath, string queryOptionsPayload)
+        public async Task ODataQueryOptionsInRequestBody_ForSupportedMediaType(string resourcePath, string queryOptionsPayload)
         {   
             string requestUri = this.BaseAddress + resourcePath + "/$query";
             var contentType = "text/plain";
@@ -101,7 +102,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
         }
 
         [Fact]
-        public async Task TestODataQueryOptionsInRequestBody_ReturnsExpectedResult()
+        public async Task ODataQueryOptionsInRequestBody_ReturnsExpectedResult()
         {
             string requestUri = this.BaseAddress + CustomersResourcePath + "/$query";
             var contentType = "text/plain";
@@ -121,7 +122,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
         }
 
         [Fact]
-        public async Task TestODataQueryOptionsInRequestBody_ForUnsupportedMediaType()
+        public async Task ODataQueryOptionsInRequestBody_ForUnsupportedMediaType()
         {
             string requestUri = this.BaseAddress + CustomersResourcePath + "/$query";
             var contentType = "application/xml";
@@ -139,7 +140,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
         }
 
         [Fact]
-        public async Task TestODataQueryOptionsInRequestBody_Empty()
+        public async Task ODataQueryOptionsInRequestBody_Empty()
         {
             string requestUri = this.BaseAddress + CustomersResourcePath + "/$query";
             var contentType = "text/plain";
@@ -153,6 +154,49 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var response = await this.Client.SendAsync(request);
 
             Assert.True(response.IsSuccessStatusCode);
+        }
+
+        [Fact]
+        public async Task ODataQueryOptionsInRequestBody_MitigateLimitViolationOnLongUrl()
+        {
+#if NETCORE
+            // KestrelServerLimits.MaxRequestLineSize equals 8192 so setting query string length to that value
+            // should be enough to make us breach the threshold
+            // NOTE: Change of limit could cause test to start failing
+            var queryStringLength = 8192;
+#else
+            // Microsoft Owin Hosting is used
+            // 414 Request-URI too long failure code expected
+            var queryStringLength = 16384;
+#endif
+            var baseUri = this.BaseAddress + CustomersResourcePath;
+            var builder = new StringBuilder();
+            var loremIpsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
+
+            builder.AppendFormat("$filter=Name eq '{0}", loremIpsum);
+            // Ensure that query string breaches the threshold
+            do
+            {
+                builder.AppendFormat(" {0}", loremIpsum);
+            } while (builder.Length < queryStringLength);
+
+            builder.Append("'");
+            var queryOptionsString = builder.ToString();
+
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, baseUri + '?' + queryOptionsString);
+            getRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(ApplicationJsonODataMinimalMetadataStreamingTrue));
+
+            var getResponse = await this.Client.SendAsync(getRequest);
+            Assert.False(getResponse.IsSuccessStatusCode);
+
+            // Now send the same query string in the request body
+            var postRequest = new HttpRequestMessage(HttpMethod.Post, baseUri + "/$query");
+            var contentType = "text/plain";
+            postRequest.Content = new StringContent(queryOptionsString);
+            postRequest.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
+
+            var postResponse = await this.Client.SendAsync(postRequest);
+            Assert.True(postResponse.IsSuccessStatusCode);
         }
     }
 }

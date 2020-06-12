@@ -1652,10 +1652,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "SimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Cast().Contains($it.SimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
@@ -1676,7 +1676,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
@@ -1689,7 +1689,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
         }
@@ -2892,11 +2892,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void CollectionConstants_Are_Parameterized()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
-                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)");
+                "$it => System.Collections.Generic.List`1[System.String].Cast().Contains($it.ProductName)");
 
             Expression<Func<Product, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<string>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] { "Prod1", "Prod2" }, values);
         }
@@ -2905,14 +2905,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void CollectionConstants_Are_Not_Parameterized_If_Disabled()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
-                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)",
+                "$it => System.Collections.Generic.List`1[System.String].Cast().Contains($it.ProductName)",
                 settingsCustomizer: (settings) =>
                 {
                     settings.EnableConstantParameterization = false;
                 });
 
             Expression<Func<Product, bool>> expression = result.WithNullPropagation;
-            var values = (IList<string>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            var values = (IList<string>)((ConstantExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0]).Value;
             Assert.Equal(new[] { "Prod1", "Prod2" }, values);
         }
 
@@ -2921,14 +2921,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "SimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)",
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Cast().Contains($it.SimpleEnumProp)",
                 settingsCustomizer: (settings) =>
                 {
                     settings.EnableConstantParameterization = false;
                 });
 
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
-            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0]).Value;
             Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second }, values);
         }
 

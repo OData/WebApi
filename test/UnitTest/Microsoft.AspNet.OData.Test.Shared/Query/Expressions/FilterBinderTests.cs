@@ -599,8 +599,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))")]
-        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))")]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/QueryableProducts/any(P: P/Discontinued in (false))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Cast().Contains(P.Discontinued))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/Discontinued in (false))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Cast().Contains(P.Discontinued))")]
         public void AnyInOnNavigation(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization(

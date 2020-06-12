@@ -1673,7 +1673,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "NullableSimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
             var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
@@ -1686,7 +1686,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "NullableSimpleEnumProp in ('First', null)",
-                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
             var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];

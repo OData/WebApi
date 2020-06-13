@@ -220,6 +220,27 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_Element_ProjectedValueWithNull_DoesNotThrow()
+        {
+            // Arrange
+            QueryOrder order = new QueryOrder
+            {
+                Strings = null,
+            };
+            Expression source = Expression.Constant(order);
+            SelectExpandClause selectExpandClause = ParseSelectExpand("Strings", null, _model, _order, _orders);
+            Assert.NotNull(selectExpandClause);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpandClause, _order, _orders);
+
+            // Assert
+            SelectExpandWrapper<QueryOrder> orderWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryOrder>;
+            string[] strings = orderWrapper.Container.ToDictionary(PropertyMapper)["Strings"] as string[];
+            Assert.Equal(order.Strings, strings);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_Collection_AppliesPageSize_AndOrderBy()
         {
             // Arrange
@@ -1862,6 +1883,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public QueryCustomer Customer { get; set; }
 
         public IDictionary<string, object> OrderProperties { get; set; }
+
+        public string[] Strings { get; set; }
     }
 
     public class QueryCustomer

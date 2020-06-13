@@ -1050,6 +1050,23 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
+            // Avoid calling source.Select($it => $it).ToList() on array types.
+            if (source.Type.IsArray)
+            {
+                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                {
+                    // source == null ? null : projectedCollection
+                    return Expression.Condition(
+                           test: Expression.Equal(source, Expression.Constant(null)),
+                           ifTrue: Expression.Constant(null, source.Type),
+                           ifFalse: source);
+                }
+                else
+                {
+                    return source;
+                }
+            }
+
             // expression
             //      source.Select((ElementType element) => new Wrapper { })
             var selectMethod = GetSelectMethod(elementType, projection.Type);

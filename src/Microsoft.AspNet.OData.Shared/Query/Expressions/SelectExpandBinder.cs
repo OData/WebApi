@@ -1050,7 +1050,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
-            // Avoid calling source.Select($it => $it).ToList() on array types.
+            // Avoid calling source.Select($it => $it) and source.Select($it => $it).ToList() on array types.
             if (source.Type.IsArray)
             {
                 if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)

@@ -1050,20 +1050,23 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
             }
 
-            // Avoid calling source.Select($it => $it) and source.Select($it => $it).ToList() on array types.
+            // Avoid calling source.Select($it => $it) and source.Select($it => $it).ToList() on arrays with value types.
             if (source.Type.IsArray)
             {
-                if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                if (elementType.IsValueType || elementType == typeof(string))
                 {
-                    // source == null ? null : projectedCollection
-                    return Expression.Condition(
-                           test: Expression.Equal(source, Expression.Constant(null)),
-                           ifTrue: Expression.Constant(null, source.Type),
-                           ifFalse: source);
-                }
-                else
-                {
-                    return source;
+                    if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
+                    {
+                        // source == null ? null : projectedCollection
+                        return Expression.Condition(
+                               test: Expression.Equal(source, Expression.Constant(null)),
+                               ifTrue: Expression.Constant(null, source.Type),
+                               ifFalse: source);
+                    }
+                    else
+                    {
+                        return source;
+                    }
                 }
             }
 

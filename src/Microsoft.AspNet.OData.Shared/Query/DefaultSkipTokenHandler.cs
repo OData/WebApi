@@ -145,16 +145,14 @@ namespace Microsoft.AspNet.OData.Query
                     var dateTimeOffsetValue = TimeZoneInfoHelper.ConvertToDateTimeOffset(dateTime);
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(dateTimeOffsetValue, ODataVersion.V401, model);
                 }
-                else if (edmProperty.Type.IsDateTimeOffset() && value is DateTimeOffset)
-                {
-                    uriLiteral = WebUtility.UrlEncode(ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model));
-                }
                 else
                 {
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
                 }
 
-                skipTokenBuilder.Append(edmProperty.Name).Append(propertyDelimiter).Append(uriLiteral).Append(islast ? String.Empty : CommaDelimiter.ToString());
+                var encodedUriLiteral = WebUtility.UrlEncode(uriLiteral);
+
+                skipTokenBuilder.Append(edmProperty.Name).Append(propertyDelimiter).Append(encodedUriLiteral).Append(islast ? String.Empty : CommaDelimiter.ToString());
                 count++;
             }
 

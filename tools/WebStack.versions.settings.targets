@@ -25,7 +25,7 @@
   -->
   <PropertyGroup>
     <VersionStartYear Condition="'$(VersionStartYear)' == ''">2020</VersionStartYear>
-    <VersionDateCode>$([System.Convert]::ToUInt16('$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))'))</VersionDateCode>
+    <VersionDateCode>$([System.Convert]::ToInt16('$([MSBuild]::Add(1, $([MSBuild]::Subtract($([System.DateTime]::Now.Year), $(VersionStartYear)))))$([System.DateTime]::Now.ToString("MMdd"))'))</VersionDateCode>
     <VersionRevision Condition="'$(VersionRevision)' == '' OR '$(VersionRevision)' == '0'">$([System.Convert]::ToString($(VersionDateCode)))</VersionRevision>
   </PropertyGroup>
 
@@ -114,10 +114,10 @@
   <Target Name="ValidateVersionValues">
     <!-- Throw if any of the version values is not int16 -->
     <PropertyGroup>
-      <VersionMajor>$([System.Convert]::ToUInt16('$(VersionMajor)'))</VersionMajor>
-      <VersionMinor>$([System.Convert]::ToUInt16('$(VersionMinor)'))</VersionMinor>
+      <VersionMajor>$([System.Convert]::ToInt16('$(VersionMajor)'))</VersionMajor>
+      <VersionMinor>$([System.Convert]::ToInt16('$(VersionMinor)'))</VersionMinor>
       <VersionBuild>$([System.Convert]::ToUInt16('$(VersionBuild)'))</VersionBuild>
-      <VersionRevision>$([System.Convert]::ToUInt16('$(VersionRevision)'))</VersionRevision>
+      <VersionRevision>$([System.Convert]::ToInt16('$(VersionRevision)'))</VersionRevision>
     </PropertyGroup>
   </Target>
 

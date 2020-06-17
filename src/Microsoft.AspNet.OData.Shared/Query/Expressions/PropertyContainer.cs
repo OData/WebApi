@@ -225,6 +225,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             public override object GetValue()
             {
+                if (Collection == null)
+                {
+                    return null;
+                }
+
                 if (TotalCount == null)
                 {
                     return new TruncatedCollection<T>(Collection, PageSize);

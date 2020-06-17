@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.AspNet.OData.Common;
@@ -128,7 +129,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             for (int i = 0; i < expressions.Count; i++)
             {
-                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next" + i), expressions[i]));
+                memberBindings.Add(Expression.Bind(namedPropertyType.GetProperty("Next" + i.ToString(CultureInfo.CurrentCulture)), expressions[i]));
             }
 
             if (property.NullCheck != null)

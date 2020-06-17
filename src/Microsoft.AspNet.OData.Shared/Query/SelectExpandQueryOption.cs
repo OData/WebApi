@@ -52,10 +52,9 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("queryOptionParser");
             }
 
-            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
-            if (entityType == null)
+            if (!(context.ElementType is IEdmStructuredType))
             {
-                throw Error.Argument("context", SRResources.SelectNonEntity, context.ElementType.ToTraceString());
+                throw Error.Argument(SRResources.SelectNonStructured, context.ElementType);
             }
 
             Context = context;
@@ -88,10 +87,9 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.Argument(SRResources.SelectExpandEmptyOrNull);
             }
 
-            IEdmEntityType entityType = context.ElementType as IEdmEntityType;
-            if (entityType == null)
+            if (!(context.ElementType is IEdmStructuredType))
             {
-                throw Error.Argument("context", SRResources.SelectNonEntity, context.ElementType.ToTraceString());
+                throw Error.Argument("context", SRResources.SelectNonStructured, context.ElementType.ToTraceString());
             }
 
             Context = context;
@@ -592,7 +590,16 @@ namespace Microsoft.AspNet.OData.Query
                 item = new ExpandedNavigationSelectItem(
                     expandItem.PathToNavigationProperty,
                     expandItem.NavigationSource,
-                    currentSelectExpandClause);
+                    currentSelectExpandClause,
+                    expandItem.FilterOption,
+                    expandItem.OrderByOption,
+                    expandItem.TopOption,
+                    expandItem.SkipOption,
+                    expandItem.CountOption,
+                    expandItem.SearchOption,
+                    null,
+                    expandItem.ComputeOption,
+                    expandItem.ApplyOption);
 
                 level--;
 

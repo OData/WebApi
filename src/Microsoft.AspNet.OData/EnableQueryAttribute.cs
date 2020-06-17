@@ -27,6 +27,7 @@ namespace Microsoft.AspNet.OData
     /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit
     /// http://go.microsoft.com/fwlink/?LinkId=279712.
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "The majority of types referenced by this method result from HttpActionExecutedContext")]
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
         Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = false)]
@@ -183,7 +184,7 @@ namespace Microsoft.AspNet.OData
             // Get model for the request
             IEdmModel model = request.GetModel();
 
-            if (model == EdmCoreModel.Instance || model.GetEdmType(elementClrType) == null)
+            if (model == EdmCoreModel.Instance || model.GetTypeMappingCache().GetEdmType(elementClrType, model) == null)
             {
                 // user has not configured anything or has registered a model without the element type
                 // let's create one just for this type and cache it in the action descriptor

@@ -62,5 +62,14 @@ namespace Microsoft.AspNet.OData.Test.Query
                 o => o.EnableConstantParameterization,
                 expectedDefaultValue: true);
         }
+
+        [Fact]
+        public void EnableCorrelatedSubqueryBuffering_Property_RoundTrips()
+        {
+            ReflectionAssert.BooleanProperty<ODataQuerySettings>(
+                new ODataQuerySettings(),
+                o => o.EnableCorrelatedSubqueryBuffering,
+                expectedDefaultValue: false);
+        }
     }
 }

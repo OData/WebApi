@@ -828,7 +828,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -850,7 +850,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -872,7 +872,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(6, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Park));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -894,7 +894,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(6, model.SchemaElements.Count());
             model.AssertHasComplexType(typeof(Park));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -905,7 +905,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.Null(creatureType);
         }
 
-#region ClassInheritance
+        #region ClassInheritance
         //    Zoo {  Id (int), SpecialAnimal (Animal) }
         //
         //                 Creature
@@ -913,7 +913,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         //                  Animal
         //                   /  \
         //               Human   Horse
-#endregion
+        #endregion
 
         [Fact]
         public void ModelBuilder_Figures_EntityType_AndBaseTypeMappedAsEntityTypeExplicitly()
@@ -927,7 +927,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count()); // 5 types + entity container
+            Assert.Equal(11, model.SchemaElements.Count()); // 5 types + entity container
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Creature));
             model.AssertHasEntityType(typeof(Animal), typeof(Creature));
@@ -947,7 +947,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());  // 5 types + entity container
+            Assert.Equal(11, model.SchemaElements.Count());  // 5 types + entity container
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Creature));
             model.AssertHasComplexType(typeof(Animal), typeof(Creature));
@@ -967,7 +967,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());
+            Assert.Equal(11, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Creature));
             model.AssertHasComplexType(typeof(Animal), typeof(Creature));
@@ -987,7 +987,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());  // 5 types + entity container
+            Assert.Equal(11, model.SchemaElements.Count());  // 5 types + entity container
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Creature));
             model.AssertHasEntityType(typeof(Animal), typeof(Creature));
@@ -1007,7 +1007,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());  // 5 types + entity container
+            Assert.Equal(11, model.SchemaElements.Count());  // 5 types + entity container
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Creature));
             model.AssertHasEntityType(typeof(Animal), typeof(Creature));
@@ -1027,7 +1027,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());  // 5 types + entity container
+            Assert.Equal(11, model.SchemaElements.Count());  // 5 types + entity container
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Creature));
             model.AssertHasComplexType(typeof(Animal), typeof(Creature));
@@ -1047,7 +1047,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -1066,7 +1066,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -1085,7 +1085,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -1104,7 +1104,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Animal));
             model.AssertHasComplexType(typeof(Human), typeof(Animal));
@@ -1127,7 +1127,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasEntityType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Animal));
             model.AssertHasComplexType(typeof(Human), typeof(Animal));
@@ -1150,7 +1150,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Act & Assert
-            Assert.Equal(5, model.SchemaElements.Count()); // 4 types + entity container
+            Assert.Equal(9, model.SchemaElements.Count()); // 4 types + entity container
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -1169,7 +1169,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Act & Assert
-            Assert.Equal(5, model.SchemaElements.Count()); // 4 types + entity container
+            Assert.Equal(9, model.SchemaElements.Count()); // 4 types + entity container
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasEntityType(typeof(Animal));
             model.AssertHasEntityType(typeof(Human), typeof(Animal));
@@ -1188,7 +1188,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(9, model.SchemaElements.Count());
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Animal));
             model.AssertHasComplexType(typeof(Human), typeof(Animal));
@@ -1207,7 +1207,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(6, model.SchemaElements.Count());
+            Assert.Equal(11, model.SchemaElements.Count());
             model.AssertHasComplexType(typeof(Zoo));
             model.AssertHasComplexType(typeof(Creature));
             model.AssertHasComplexType(typeof(Animal), typeof(Creature));
@@ -1227,7 +1227,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // Assert
-            Assert.Equal(5, model.SchemaElements.Count());
+            Assert.Equal(6, model.SchemaElements.Count());
             IEdmEntityType zooHorse = model.AssertHasEntityType(typeof(ZooHorse));
             model.AssertHasComplexType(typeof(Animal));
             model.AssertHasComplexType(typeof(Human), typeof(Animal));
@@ -2718,6 +2718,27 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
+        public void ModelBuilder_DerivedTypeConstraintAttribute()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntityType<Park>();
+            builder.EntityType<ZooHorse>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model.AssertHasEntityType(typeof(Park)));
+            Assert.NotNull(model.AssertHasEntityType(typeof(ZooHorse)));
+
+            List<IEdmVocabularyAnnotation> annotations = model.VocabularyAnnotations.ToList();
+            Assert.True(annotations.Count == 2);
+            Assert.True(annotations[0].Term == ValidationVocabularyModel.DerivedTypeConstraintTerm);
+            Assert.True(annotations[1].Term == ValidationVocabularyModel.DerivedTypeConstraintTerm);
+        }
+
+        [Fact]
         public void ModelBuilder_MediaTypeAttribute()
         {
             // Arrange
@@ -2873,11 +2894,18 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             builder.EntityType<BadOpenEntityType>();
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one dynamic property container in type 'BadOpenEntityType'. " +
+                "Each open type must have at most one dynamic property container. (Parameter 'propertyInfo')");
+#else
             ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
                 "propertyInfo",
                 "Found more than one dynamic property container in type 'BadOpenEntityType'. " +
                 "Each open type must have at most one dynamic property container.\r\n" +
                 "Parameter name: propertyInfo");
+#endif
         }
 
         [Fact]
@@ -2888,11 +2916,18 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             builder.EntityType<BadBaseOpenEntityType>();
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one dynamic property container in type 'BadDerivedOpenEntityType'. " +
+                "Each open type must have at most one dynamic property container. (Parameter 'propertyInfo')");
+#else
             ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
                 "propertyInfo",
                 "Found more than one dynamic property container in type 'BadDerivedOpenEntityType'. " +
                 "Each open type must have at most one dynamic property container.\r\n" +
                 "Parameter name: propertyInfo");
+#endif
         }
 
         [Fact]
@@ -3146,7 +3181,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.Equal(EdmTypeKind.Complex, calendar.TypeKind);
             Assert.True(calendar.IsAbstract);
 
-            IEdmComplexType gregorianCalendar  = model.SchemaElements.OfType<IEdmComplexType>()
+            IEdmComplexType gregorianCalendar = model.SchemaElements.OfType<IEdmComplexType>()
                 .FirstOrDefault(e => e.FullTypeName() == "System.Globalization.GregorianCalendar");
             Assert.NotNull(gregorianCalendar);
             Assert.Equal(EdmTypeKind.Complex, gregorianCalendar.TypeKind);

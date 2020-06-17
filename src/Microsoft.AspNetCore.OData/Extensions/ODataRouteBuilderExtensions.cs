@@ -38,23 +38,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            if (defaultQuerySettings == null)
-            {
-                throw Error.ArgumentNull("defaultQuerySettings");
-            }
-
-            if (!defaultQuerySettings.MaxTop.HasValue || defaultQuerySettings.MaxTop > 0)
-            {
-                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = defaultQuerySettings.MaxTop;
-            }
-
-            DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
-            if (querySettings == null)
-            {
-                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
-            }
-
-            querySettings = defaultQuerySettings;
+            builder.ServiceProvider.SetDefaultQuerySettings(defaultQuerySettings);
             return builder;
         }
 
@@ -69,13 +53,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings querySettings = builder.ServiceProvider.GetRequiredService<DefaultQuerySettings>();
-            if (querySettings == null)
-            {
-                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(DefaultQuerySettings));
-            }
-
-            return querySettings;
+            return builder.ServiceProvider.GetDefaultQuerySettings();
         }
 
         /// <summary>
@@ -88,13 +66,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.MaxTop = maxTopValue;
-            if (!maxTopValue.HasValue || maxTopValue > 0)
-            {
-                ModelBoundQuerySettings.DefaultModelBoundQuerySettings.MaxTop = maxTopValue;
-            }
-
+            builder.ServiceProvider.MaxTop(maxTopValue);
             return builder;
         }
 
@@ -110,8 +82,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableExpand = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.Expand(setting);
             return builder;
         }
 
@@ -125,8 +96,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableExpand = true;
+            builder.ServiceProvider.Expand();
             return builder;
         }
 
@@ -142,8 +112,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableSelect = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.Select(setting);
             return builder;
         }
 
@@ -157,8 +126,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableSelect = true;
+            builder.ServiceProvider.Select();
             return builder;
         }
 
@@ -173,8 +141,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableFilter = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.Filter(setting);
             return builder;
         }
 
@@ -188,8 +155,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableFilter = true;
+            builder.ServiceProvider.Filter();
             return builder;
         }
 
@@ -204,8 +170,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableOrderBy = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.OrderBy(setting);
             return builder;
         }
 
@@ -219,8 +184,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableOrderBy = true;
+            builder.ServiceProvider.OrderBy();
             return builder;
         }
 
@@ -235,8 +199,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableCount = setting == QueryOptionSetting.Allowed;
+            builder.ServiceProvider.Count(setting);
             return builder;
         }
 
@@ -250,8 +213,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableCount = true;
+            builder.ServiceProvider.Count();
             return builder;
         }
 
@@ -265,9 +227,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableSkipToken = true;
-
+            builder.ServiceProvider.SkipToken();
             return builder;
         }
 
@@ -281,9 +241,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            DefaultQuerySettings defaultQuerySettings = builder.GetDefaultQuerySettings();
-            defaultQuerySettings.EnableSkipToken = setting == QueryOptionSetting.Allowed;
-
+            builder.ServiceProvider.SkipToken(setting);
             return builder;
         }
 
@@ -299,18 +257,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            if (defaultOptions == null)
-            {
-                throw Error.ArgumentNull("defaultOptions");
-            }
-
-            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
-            if (options == null)
-            {
-                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
-            }
-
-            options = defaultOptions;
+            builder.ServiceProvider.SetDefaultODataOptions(defaultOptions);
             return builder;
         }
 
@@ -325,13 +272,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("builder");
             }
 
-            ODataOptions options = builder.ServiceProvider.GetRequiredService<ODataOptions>();
-            if (options == null)
-            {
-                throw Error.InvalidOperation(SRResources.MissingODataServices, nameof(ODataOptions));
-            }
-
-            return options;
+            return builder.ServiceProvider.GetDefaultODataOptions();
         }
 
         /// <summary>
@@ -469,6 +410,23 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return TimeZoneInfoHelper.TimeZone;
+        }
+
+        /// <summary>
+        /// Set the CompatibilityOptions.
+        /// </summary>
+        /// <param name="builder">The <see cref="IRouteBuilder"/>.</param>
+        /// <param name="options">The <see cref="CompatibilityOptions"/></param>
+        public static IRouteBuilder SetCompatibilityOptions(this IRouteBuilder builder, CompatibilityOptions options)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            ODataOptions defaultOptions = builder.GetDefaultODataOptions();
+            defaultOptions.CompatibilityOptions = options;
+            return builder;
         }
 
         /// <summary>

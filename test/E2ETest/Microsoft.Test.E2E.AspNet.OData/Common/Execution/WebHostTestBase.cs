@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Net.Http;
 using Xunit;
 
@@ -9,7 +10,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     /// <summary>
     /// The WebHostTestBase creates a web host to be used for a test.
     /// </summary>
-    public abstract class WebHostTestBase : IClassFixture<WebHostTestFixture>
+    public abstract class WebHostTestBase : IClassFixture<WebHostTestFixture>, IDisposable
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="WebHostTestBase"/> class.
@@ -38,5 +39,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// </summary>
         /// <param name="configuration"></param>
         protected abstract void UpdateConfiguration(WebRouteConfiguration configuration);
+   
+        public void Dispose()
+        {
+            if(Client != null)
+            {
+                Client.Dispose();
+            }
+
+            Client = null;
+        }
     }
 }

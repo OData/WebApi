@@ -156,9 +156,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ParameterAlias
         }
 
         [HttpGet]
-        public ITestActionResult HandleUnmappedRequest(ODataPath path)
+        public ITestActionResult HandleUnmappedRequest(ODataPath odataPath)
         {
-            var functionSegment = path.Segments.ElementAt(1) as OperationSegment;
+            var functionSegment = odataPath.Segments.ElementAt(1) as OperationSegment;
             if (functionSegment != null)
             {
                 return Ok(functionSegment.GetParameterValue("productName") as string);

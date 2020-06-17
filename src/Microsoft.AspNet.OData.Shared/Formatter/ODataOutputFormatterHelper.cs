@@ -138,8 +138,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 annotationFilter = messageWrapper.PreferHeader().AnnotationFilter;
             }
 
-            ODataMessageWrapper responseMessageWrapper = getODataMessageWrapper(internalRequest.RequestContainer);
-            IODataResponseMessage responseMessage = responseMessageWrapper;
+            IODataResponseMessage responseMessage = getODataMessageWrapper(internalRequest.RequestContainer);
             if (annotationFilter != null)
             {
                 responseMessage.PreferenceAppliedHeader().AnnotationFilter = annotationFilter;
@@ -200,7 +199,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.MetadataLevel = metadataLevel;
                 writeContext.QueryOptions = internalRequest.Context.QueryOptions;
 
-                //Set the SelectExpandClause on the context if it was explicitly specified. 
+                //Set the SelectExpandClause on the context if it was explicitly specified.
                 if (selectExpandDifferentFromQueryOptions != null)
                 {
                     writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;

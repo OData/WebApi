@@ -94,6 +94,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.LowerCamelCase
             return Ok(_employees.AsQueryable());
         }
 
+        [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.SkipToken, PageSize = 2)]
+        public ITestActionResult GetPagedOnCollectionOfEmployee()
+        {
+            return Ok(_employees.AsQueryable());
+        }
+
         [EnableQuery(MaxExpansionDepth = 3)]
         [ODataRoute("Employees/Microsoft.Test.E2E.AspNet.OData.LowerCamelCase.Manager")]
         public ITestActionResult GetManagers()

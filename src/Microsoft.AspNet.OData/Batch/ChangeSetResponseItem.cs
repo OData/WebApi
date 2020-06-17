@@ -40,23 +40,37 @@ namespace Microsoft.AspNet.OData.Batch
         /// </summary>
         /// <param name="writer">The <see cref="ODataBatchWriter"/>.</param>
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
-        public override async Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken)
+        /// <param name="asyncWriter">Whether or not the writer is writing asynchronously.</param>
+        public override async Task WriteResponseAsync(ODataBatchWriter writer, CancellationToken cancellationToken, bool asyncWriter)
         {
             if (writer == null)
             {
                 throw Error.ArgumentNull("writer");
             }
 
-            writer.WriteStartChangeset();
-
-            foreach (HttpResponseMessage responseMessage in Responses)
+            if (asyncWriter)
             {
-                await WriteMessageAsync(writer, responseMessage, cancellationToken);
+                await writer.WriteStartChangesetAsync();
+
+                foreach (HttpResponseMessage responseMessage in Responses)
+                {
+                    await WriteMessageAsync(writer, responseMessage, cancellationToken, asyncWriter);
+                }
+
+                await writer.WriteEndChangesetAsync();
             }
+            else
+            {
+                writer.WriteStartChangeset();
 
-            writer.WriteEndChangeset();
+                foreach (HttpResponseMessage responseMessage in Responses)
+                {
+                    await WriteMessageAsync(writer, responseMessage, cancellationToken, asyncWriter);
+                }
+
+                writer.WriteEndChangeset();
+            }
         }
-
         /// <summary>
         /// Gets a value that indicates if the responses in this item are successful.
         /// </summary>

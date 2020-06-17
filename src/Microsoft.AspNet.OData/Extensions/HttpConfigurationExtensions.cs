@@ -51,6 +51,8 @@ namespace Microsoft.AspNet.OData.Extensions
 
         private const string NonODataRootContainerKey = "Microsoft.AspNet.OData.NonODataRootContainerKey";
 
+        private const string CompatibilityOptionsKey = "Microsoft.AspNet.OData.CompatibilityOptionsKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -432,6 +434,21 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Set the ODataCompatibilityOption.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        /// <param name="options">The <see cref="CompatibilityOptions"/></param>
+        public static void SetCompatibilityOptions(this HttpConfiguration configuration, CompatibilityOptions options)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[CompatibilityOptionsKey] = options;
+        }
+
+        /// <summary>
         /// Check the null dynamic property is enable or not.
         /// </summary>
         /// <returns></returns>
@@ -466,6 +483,23 @@ namespace Microsoft.AspNet.OData.Extensions
 
             configuration.Properties[UrlKeyDelimiterKey] = null;
             return null;
+        }
+
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(CompatibilityOptionsKey, out value))
+            {
+                return (CompatibilityOptions)value;
+            }
+
+            configuration.Properties[CompatibilityOptionsKey] = CompatibilityOptions.None;
+            return CompatibilityOptions.None;
         }
 
         /// <summary>

@@ -14,7 +14,10 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Internal;
+#if NETCOREAPP3_1
+#else
+    using Microsoft.AspNetCore.Mvc.Internal;
+#endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
@@ -767,7 +770,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return null;
         }
 
-        private class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory
+#if NETCOREAPP3_1
+        public class TestHttpResponseStreamWriterFactory
+#else
+        public class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory
+#endif
         {
             public const int DefaultBufferSize = 16 * 1024;
 

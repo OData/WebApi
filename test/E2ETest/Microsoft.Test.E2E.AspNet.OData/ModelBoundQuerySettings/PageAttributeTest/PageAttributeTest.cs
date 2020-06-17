@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Xunit;
@@ -29,6 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MaxTop(2).Expand();
+            configuration.SetCompatibilityOptions(CompatibilityOptions.AllowNextLinkWithNonPositiveTopValue);
             configuration.MapODataServiceRoute("enablequery", "enablequery",
                 PageAttributeEdmModel.GetEdmModel(configuration));
             configuration.MapODataServiceRoute("modelboundapi", "modelboundapi",
@@ -179,6 +181,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains("$skip=1", result);
+        }
+
+        [Fact]
+        public async Task CompatibilityFlagRespectedForNextLink()
+        {
+            string queryUrl = string.Format(ModelBoundOrderBaseUrl + "/Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SpecialOrder" + "?$top=5", BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("$top=0&$skip=5", result);
         }
     }
 }

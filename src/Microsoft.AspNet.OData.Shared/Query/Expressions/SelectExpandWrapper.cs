@@ -18,7 +18,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             (IEdmModel m, IEdmStructuredType t) => DefaultPropertyMapper;
 
         private Dictionary<string, object> _containerDict;
-        private TypedEdmEntityObject _typedEdmEntityObject;
+        private TypedEdmStructuredObject _typedEdmStructuredObject;
 
         /// <summary>
         /// Gets or sets the property container that contains the properties being expanded. 
@@ -50,12 +50,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (InstanceType != null)
             {
-                IEdmEntityType entityType = model.FindType(InstanceType) as IEdmEntityType;
-                return entityType.ToEdmTypeReference(true);
+                IEdmStructuredType structuredType = model.FindType(InstanceType) as IEdmStructuredType;
+                IEdmEntityType entityType = structuredType as IEdmEntityType;
+
+                if (entityType != null)
+                {
+                    return entityType.ToEdmTypeReference(true);
+                }
+
+                return structuredType.ToEdmTypeReference(true);
             }
 
             Type elementType = GetElementType();
-            return model.GetEdmTypeReference(elementType);
+            return model.GetTypeMappingCache().GetEdmType(elementType, model);
         }
 
         /// <inheritdoc />
@@ -75,10 +82,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             // fall back to the instance.
             if (UseInstanceForProperties && UntypedInstance != null)
             {
-                _typedEdmEntityObject = _typedEdmEntityObject ??
+                if (GetEdmType() is IEdmComplexTypeReference)
+                {
+                    _typedEdmStructuredObject = _typedEdmStructuredObject ??
+                    new TypedEdmComplexObject(UntypedInstance, GetEdmType() as IEdmComplexTypeReference, GetModel());
+                }
+                else
+                {
+                    _typedEdmStructuredObject = _typedEdmStructuredObject ??
                     new TypedEdmEntityObject(UntypedInstance, GetEdmType() as IEdmEntityTypeReference, GetModel());
+                }
 
-                return _typedEdmEntityObject.TryGetPropertyValue(propertyName, out value);
+                return _typedEdmStructuredObject.TryGetPropertyValue(propertyName, out value);
             }
 
             value = null;

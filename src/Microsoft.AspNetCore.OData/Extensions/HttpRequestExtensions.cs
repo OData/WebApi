@@ -263,10 +263,11 @@ namespace Microsoft.AspNet.OData.Extensions
         /// </summary>
         /// <param name="request">The request on which to base the next page link.</param>
         /// <param name="pageSize">The number of results allowed per page.</param>
+        /// <param name="encodeUrl">Optional Parameter to determine whether the nextpace url should be encoded.</param>
         /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(this HttpRequest request, int pageSize)
+        public static Uri GetNextPageLink(this HttpRequest request, int pageSize,bool encodeUrl =false)
         {
-            return GetNextPageLink(request, pageSize, null, null);
+            return  GetNextPageLink(request, pageSize, null, null);
         }
 
         /// <summary>
@@ -276,8 +277,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="pageSize">The number of results allowed per page.</param>
         /// <param name="instance">Object which can be used to generate the skiptoken value.</param>
         /// <param name="objectToSkipTokenValue">Function that takes in the last object and returns the skiptoken value string.</param>
+        /// <param name="encodeUrl">Optional Parameter to determine whether the nextpace url should be encoded.</param>
         /// <returns>A next page link.</returns>
-        public static Uri GetNextPageLink(this HttpRequest request, int pageSize, object instance, Func<object,string> objectToSkipTokenValue)
+        public static Uri GetNextPageLink(this HttpRequest request, int pageSize, object instance, Func<object,string> objectToSkipTokenValue, bool encodeUrl = false)
         {
             if (request == null)
             {

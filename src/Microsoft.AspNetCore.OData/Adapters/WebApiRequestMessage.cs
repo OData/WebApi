@@ -138,10 +138,11 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <param name="pageSize">The page size.</param>
         /// <param name="instance">Object which will be used to generate the skiptoken value.</param>
         /// <param name="objToSkipTokenValue">Function that takes in an instance and returns the skiptoken value string.</param>
+        /// <param name="encodeUrl">Optional Parameter to determine whether the nextpace url should be encoded.</param>
         /// <returns></returns>
-        public Uri GetNextPageLink(int pageSize, object instance = null, Func<object, string> objToSkipTokenValue = null)
+        public Uri GetNextPageLink(int pageSize, object instance = null, Func<object, string> objToSkipTokenValue = null,bool encodeUrl =false)
         {
-            return this.innerRequest.GetNextPageLink(pageSize, instance, objToSkipTokenValue);
+            return this.innerRequest.GetNextPageLink(pageSize, instance, objToSkipTokenValue,encodeUrl:encodeUrl);
         }
 
         /// <summary>

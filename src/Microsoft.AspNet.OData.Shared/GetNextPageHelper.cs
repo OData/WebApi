@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Text;
+using System.Web;
 
 namespace Microsoft.AspNet.OData
 {
@@ -14,7 +15,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal static partial class GetNextPageHelper
     {
-        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null, CompatibilityOptions options = CompatibilityOptions.None)
+        internal static Uri GetNextPageLink(Uri requestUri, IEnumerable<KeyValuePair<string, string>> queryParameters, int pageSize, object instance = null, Func<object, string> objectToSkipTokenValue = null, CompatibilityOptions options = CompatibilityOptions.None, bool encodeUrl = false)
         {
             Contract.Assert(requestUri != null);
             Contract.Assert(queryParameters != null);
@@ -96,7 +97,7 @@ namespace Microsoft.AspNet.OData
 
             UriBuilder uriBuilder = new UriBuilder(requestUri)
             {
-                Query = queryBuilder.ToString()
+                Query = encodeUrl? HttpUtility.UrlEncode( queryBuilder.ToString()): queryBuilder.ToString()
             };
 
             return uriBuilder.Uri;

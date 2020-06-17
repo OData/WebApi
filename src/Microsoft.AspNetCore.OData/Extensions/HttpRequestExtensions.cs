@@ -293,23 +293,37 @@ namespace Microsoft.AspNet.OData.Extensions
                 uriBuilder.Port = request.Host.Port.Value;
             }
 
+            CompatibilityOptions compatibilityOptions = request.GetCompatibilityOptions();
+
             IEnumerable<KeyValuePair<string, string>> queryParameters = request.Query.SelectMany(kvp => kvp.Value, (kvp, value) => new KeyValuePair<string, string>(kvp.Key, value));
-            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue);
+            return GetNextPageHelper.GetNextPageLink(uriBuilder.Uri, queryParameters, pageSize, instance, objectToSkipTokenValue, compatibilityOptions);
         }
 
         /// <summary>
-        /// Retrieves the Content-ID to Location mapping associated with the request.
+        /// Gets the set of flags for <see cref="CompatibilityOptions"/> from ODataOptions. 
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <returns>The Content-ID to Location mapping associated with this request, or <c>null</c> if there isn't one.</returns>
-        public static IDictionary<string, string> GetODataContentIdMapping(this HttpRequest request)
+        /// <returns>Set of flags for <see cref="CompatibilityOptions"/> from ODataOptions.</returns>
+        internal static CompatibilityOptions GetCompatibilityOptions(this HttpRequest request)
         {
             if (request == null)
             {
                 throw Error.ArgumentNull("request");
             }
 
-            return null;
+            if (request.HttpContext == null)
+            {
+                return CompatibilityOptions.None;
+            }
+
+            ODataOptions options = request.HttpContext.RequestServices.GetRequiredService<ODataOptions>();
+
+            if (options == null)
+            {
+                return CompatibilityOptions.None;
+            }
+
+            return options.CompatibilityOptions;
         }
 
         internal static ODataVersion? ODataServiceVersion(this HttpRequest request)

@@ -577,12 +577,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// <summary>
     /// Platform-agnostic version of IActionHttpMethodProviders.
     /// </summary>
+    [AttributeUsage(AttributeTargets.Method)]
     public class HttpDeleteAttribute : Microsoft.AspNetCore.Mvc.HttpDeleteAttribute { }
+    [AttributeUsage(AttributeTargets.Method)]
     public class HttpGetAttribute : Microsoft.AspNetCore.Mvc.HttpGetAttribute { }
+    [AttributeUsage(AttributeTargets.Method)]
     public class HttpPatchAttribute : Microsoft.AspNetCore.Mvc.HttpPatchAttribute { }
+    [AttributeUsage(AttributeTargets.Method)]
     public class HttpPostAttribute : Microsoft.AspNetCore.Mvc.HttpPostAttribute { }
+    [AttributeUsage(AttributeTargets.Method)]
     public class HttpPutAttribute : Microsoft.AspNetCore.Mvc.HttpPutAttribute { }
-    public class AcceptVerbsAttribute : Attribute, IActionHttpMethodProvider, IRouteTemplateProvider
+    [AttributeUsage(AttributeTargets.Method)]
+    public sealed class AcceptVerbsAttribute : Attribute, IActionHttpMethodProvider, IRouteTemplateProvider
     {
         private int? _order;
         public AcceptVerbsAttribute(params string[] methods)

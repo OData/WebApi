@@ -10,9 +10,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.AspNetCore.Mvc.Internal;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
+#if NETSTANDARD2_0
+    using Microsoft.AspNetCore.Mvc.Internal;
+    using Microsoft.AspNetCore.Routing;
+    using Microsoft.Extensions.Logging;
+#else
+    using Microsoft.AspNetCore.Routing;
+#endif
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -24,6 +28,7 @@ namespace Microsoft.AspNet.OData.Routing
     {
         private readonly IActionSelector _innerSelector;
 
+#if NETSTANDARD2_0
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
         /// </summary>
@@ -37,6 +42,16 @@ namespace Microsoft.AspNet.OData.Routing
         {
             _innerSelector = new ActionSelector(actionDescriptorCollectionProvider, actionConstraintProviders, loggerFactory);
         }
+#else
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ODataActionSelector" /> class.
+        /// </summary>
+        /// <param name="innerSelector">The inner action selector.</param>
+        public ODataActionSelector(IActionSelector innerSelector)
+        {
+            _innerSelector = innerSelector;
+        }
+#endif
 
         /// <inheritdoc />
         public IReadOnlyList<ActionDescriptor> SelectCandidates(RouteContext context)

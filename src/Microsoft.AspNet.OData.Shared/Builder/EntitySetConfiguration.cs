@@ -66,5 +66,26 @@ namespace Microsoft.AspNet.OData.Builder
         {
             return _feedSelfLinkFactory;
         }
+
+        /// <summary>
+        /// Adds subtypes to the list of derived type constraints.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public EntitySetConfiguration HasDerivedTypeConstraints(params Type[] subtypes)
+        {
+            DerivedTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerived to the list of derived type constraints.
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public EntitySetConfiguration HasDerivedTypeConstraint<TDerivedType>()
+        {
+            DerivedTypeConstraints.AddConstraint<TDerivedType>();
+            return this;
+        }
     }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
@@ -85,7 +86,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                         {
                             Id = i * 3 - 2,
                             Details = details
-                            
+
                         },
                         new Order
                         {
@@ -179,5 +180,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
                 }
             }
         }
+    }
+
+    public class DatesController : TestODataController
+    {
+        private static readonly DateTime _baseDate = new DateTime(2019, 11, 09, 0, 0, 0, DateTimeKind.Utc);
+        private readonly List<Date> _dates = Enumerable.Range(0, 5).Select(i => new Date() { DateValue = _baseDate.AddSeconds(i) }).ToList();
+
+        [EnableQuery]
+        public List<Date> Get() => _dates;
     }
 }

@@ -537,8 +537,8 @@
   <data name="SelectionTypeNotSupported" xml:space="preserve">
     <value>$select does not support selections of type '{0}'.</value>
   </data>
-  <data name="SelectNonEntity" xml:space="preserve">
-    <value>The type '{0}' is not an entity type. Only entity types support $select and $expand.</value>
+  <data name="SelectNonStructured" xml:space="preserve">
+    <value>The type '{0}' is not a structured type. Only structured types support $select and $expand.</value>
   </data>
   <data name="PropertyNotFound" xml:space="preserve">
     <value>The EDM instance of type '{0}' is missing the property '{1}'.</value>
@@ -579,6 +579,12 @@
   </data>
   <data name="UnsupportedSelectExpandPath" xml:space="preserve">
     <value>A path within the select or expand query option is not supported.</value>
+  </data>
+  <data name="InvalidSegmentInSelectExpandPath" xml:space="preserve">
+    <value>A segment '{0}' within the select or expand query option is not supported.</value>
+  </data>
+  <data name="InvalidLastSegmentInSelectExpandPath" xml:space="preserve">
+    <value>The last segment '{0}' of the select or expand query option is not supported.</value>
   </data>
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
@@ -903,5 +909,23 @@
   </data>
   <data name="ApplyQueryOptionNotSupportedForLinq2SQL" xml:space="preserve">
     <value>$apply query options not supported for LINQ to SQL providers</value>
+  </data>
+  <data name="CantFindEdmType" xml:space="preserve">
+    <value>Cannot find EdmType corresponding to {0}</value>
+  </data>
+  <data name="ConstraintAlreadyExists" xml:space="preserve">
+    <value>Type {0} already added as derived type constraint</value>
+  </data>
+  <data name="NoClrTypeSpecified" xml:space="preserve">
+    <value>No CLR Type specified for this configuration.</value>
+  </data>
+  <data name="NotADerivedType" xml:space="preserve">
+    <value>{0} is not a subclass of {1}. Cannot add this derived type constraint.</value>
+  </data>
+  <data name="BaseTypeNotSpecified" xml:space="preserve">
+    <value>The base type for the derived type constraint set is not specified. </value>
+  </data>
+  <data name="ReturnTypeOfOperationNotSpecified" xml:space="preserve">
+    <value>Return type of operation is not specified.</value>
   </data>
 </root>

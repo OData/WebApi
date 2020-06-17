@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Cast
 {
-    public class DataSource
+    public class DataSource: IDisposable
     {
         private static ProductsContext _context = null;
         private static IQueryable<Product> _products = null;
@@ -44,11 +44,43 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                             ID=3,
                             Name="Name3",
                             Domain=Domain.Both,
-                             Weight=3.3,
+                            Weight=3.3,
                             DimensionInCentimeter=new List<int>{3,4,5},
                             ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
                         },
-                      
+                        new AirPlane()
+                        {
+                            ID=4,
+                            Name="Name4",
+                            Domain=Domain.Both,
+                            Weight=4.4,
+                            DimensionInCentimeter=new List<int>{4,5,6},
+                            ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
+                            Speed=100
+                        },
+                        new JetPlane()
+                        {
+                            ID=5,
+                            Name="Name5",
+                            Domain=Domain.Military,
+                            Weight=5.5,
+                            DimensionInCentimeter=new List<int>{6,7,8},
+                            ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
+                            Speed=100,
+                            Company="Boeing"
+                        },
+                        new JetPlane()
+                        {
+                            ID=6,
+                            Name="Name6",
+                            Domain=Domain.Civil,
+                            Weight=6.6,
+                            DimensionInCentimeter=new List<int>{7,8,9},
+                            ManufacturingDate=new System.DateTimeOffset(2013,1,1,0,0,0,TimeSpan.FromHours(8)),
+                            Speed=500,
+                            Company="AirBus"
+                        },
+
                    }.AsQueryable<Product>();
                 }
                 return _products;
@@ -73,6 +105,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
                     _context.SaveChanges();
                 }
                 return _context.Products;
+            }
+        }
+
+        public void Dispose()
+        {
+            if(_context != null) 
+            {
+                // _context.Dispose();
             }
         }
     }

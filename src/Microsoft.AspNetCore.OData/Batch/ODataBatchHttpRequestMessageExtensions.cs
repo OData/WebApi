@@ -16,6 +16,9 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+#if !NETSTANDARD2_0
+using Microsoft.AspNetCore.Http.Features;
+#endif
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -193,19 +196,29 @@ namespace Microsoft.AspNet.OData.Batch
             HttpResponse response = request.HttpContext.Response;
 
             StringValues acceptHeader = request.Headers["Accept"];
-            string contentType = null;
-            if (StringValues.IsNullOrEmpty(acceptHeader)
-                || acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
+            string responseContentType = null;
+            if (StringValues.IsNullOrEmpty(acceptHeader))
             {
-                contentType = String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid());
+                // In absence of accept, if request was JSON then default response to be JSON.
+                // Note that, if responseContentType is not set, then it will default to multipart/mixed
+                // when constructing the BatchContent, so we don't need to handle that case here
+                if (!String.IsNullOrEmpty(request.ContentType)
+                && request.ContentType.IndexOf(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1)
+                {
+                    responseContentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
+                }
             }
-            else if (acceptHeader.Any( h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase)))
+            else if (acceptHeader.Any(h => h.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
             {
-                contentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
+                responseContentType = String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}", Guid.NewGuid());
+            }
+            else if (acceptHeader.Any(h => h.IndexOf(ODataBatchHttpRequestExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1))
+            {
+                responseContentType = ODataBatchHttpRequestExtensions.BatchMediaTypeJson;
             }
 
             response.StatusCode = (int)HttpStatusCode.OK;
-            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer, contentType);
+            ODataBatchContent batchContent = new ODataBatchContent(responses, requestContainer, responseContentType);
             foreach (var header in batchContent.Headers)
             {
                 // Copy headers from batch content, overwriting any existing headers.
@@ -275,12 +288,35 @@ namespace Microsoft.AspNet.OData.Batch
                 return new Uri(request.GetDisplayUrl());
             }
 
+            HttpContext context = request.HttpContext;
+
+#if !NETSTANDARD2_0
+            // Here's workaround to help "EndpointLinkGenerator" to generator
+            ODataBatchPathMapping batchMapping = request.HttpContext.RequestServices.GetRequiredService<ODataBatchPathMapping>();
+            if (batchMapping.IsEndpointRouting)
+            {
+                context = new DefaultHttpContext
+                {
+                    RequestServices = request.HttpContext.RequestServices,
+                };
+
+                IEndpointFeature endpointFeature = new ODataEndpointFeature();
+                endpointFeature.Endpoint = new Endpoint((d) => null, null, "anything");
+                context.Features.Set(endpointFeature);
+
+                context.Request.Scheme = request.Scheme;
+                context.Request.Host = request.Host;
+            }
+
+            context.Request.ODataFeature().RouteName = oDataRouteName;
+#endif
+
             // The IActionContextAccessor and ActionContext will be present after routing but not before
             // GetUrlHelper only uses the HttpContext and the Router, which we have so construct a dummy
             // action context.
             ActionContext actionContext = new ActionContext
             {
-                HttpContext = request.HttpContext,
+                HttpContext = context,
                 RouteData = new RouteData(),
                 ActionDescriptor = new ActionDescriptor()
             };
@@ -306,5 +342,12 @@ namespace Microsoft.AspNet.OData.Batch
             }
             return new Uri(baseAddress);
         }
+
+#if !NETSTANDARD2_0
+        internal class ODataEndpointFeature : IEndpointFeature
+        {
+            public Endpoint Endpoint { get; set; }
+        }
+#endif
     }
 }

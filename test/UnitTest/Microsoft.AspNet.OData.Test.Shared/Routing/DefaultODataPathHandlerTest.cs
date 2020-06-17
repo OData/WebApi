@@ -648,18 +648,16 @@ namespace Microsoft.AspNet.OData.Test.Routing
             IEdmProperty expectedEdmElement = _model.SchemaElements.OfType<IEdmEntityType>()
                 .SingleOrDefault(e => e.Name == "RoutingCustomer").Properties().SingleOrDefault(p => p.Name == "Name");
             IEdmType expectedType = expectedEdmElement.Type.Definition;
-
             // Act
             ODataPath path = _parser.Parse(_model, _serviceRoot, odataPath);
             ODataPathSegment segment = path.Segments.Last();
 
             // Assert
             Assert.NotNull(segment);
+            Assert.NotNull(path.NavigationSource);
 
             PropertySegment propertySegment = Assert.IsType<PropertySegment>(segment);
-
             Assert.Equal(expectedText, propertySegment.ToUriLiteral());
-            Assert.Null(path.NavigationSource);
 
             Assert.Same(expectedEdmElement, propertySegment.Property);
         }
@@ -699,12 +697,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
             // Assert
             Assert.NotNull(segment);
+            Assert.NotNull(path.NavigationSource);
 
             PropertySegment propertySegment = Assert.IsType<PropertySegment>(segment);
 
             Assert.Equal(expectedText, propertySegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
             Assert.Same(expectedType, path.EdmType);
             Assert.Same(expectedEdmElement, propertySegment.Property);
         }
@@ -726,10 +724,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
             // Assert
             Assert.NotNull(segment);
+            Assert.NotNull(path.NavigationSource);
 
             PropertySegment propertySegment = Assert.IsType<PropertySegment>(segment);
             Assert.Equal(expectedText, propertySegment.ToUriLiteral());
-            Assert.Null(path.NavigationSource);
             Assert.Same(expectedType, path.EdmType);
 
             Assert.Same(expectedEdmElement, propertySegment.Property);
@@ -775,7 +773,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
             Assert.Equal(expectText, propertySegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
+            Assert.NotNull(path.NavigationSource);
             Assert.NotNull(path.EdmType);
             Assert.Equal("Edm.Boolean", (path.EdmType as IEdmPrimitiveType).FullName());
         }
@@ -796,7 +794,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
             Assert.Equal("$value", valueSegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
+            Assert.NotNull(path.NavigationSource);
             Assert.NotNull(path.EdmType);
             Assert.Equal("Edm.String", (path.EdmType as IEdmPrimitiveType).FullName());
         }
@@ -817,7 +815,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
             Assert.Equal("$value", valueSegment.ToUriLiteral());
 
-            Assert.Null(path.NavigationSource);
             Assert.NotNull(path.EdmType);
             Assert.Equal("Microsoft.AspNet.OData.Test.Routing.Address", (path.EdmType as IEdmComplexType).FullName());
         }
@@ -2449,7 +2446,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             // Arrange & Act
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            ODataUriResolver resolver = new CaseInsensitiveResolver();
+            ODataUriResolver resolver = new ODataUriResolver
+            {
+                EnableCaseInsensitive = true,
+            };
 
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);
 
@@ -2492,7 +2492,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             // Arrange
             DefaultODataPathHandler pathHandler = new DefaultODataPathHandler();
-            ODataUriResolver resolver = new UnqualifiedCaseInsensitiveResolver();
+            ODataUriResolver resolver = new UnqualifiedODataUriResolver
+            {
+                EnableCaseInsensitive = true,
+            };
 
             // Act
             ODataPath odataPath = pathHandler.Parse(_model, _serviceRoot, path, resolver);

@@ -312,7 +312,7 @@ namespace Microsoft.AspNet.OData.Builder
             if (resourceContext.NavigationSource.EntityType() != bindingParameterType.Definition)
             {
                 actionPathSegments.Add(new TypeSegment((IEdmEntityType)bindingParameterType.Definition, null));
-                    // entity set can be null
+                // entity set can be null
             }
 
             OperationSegment operationSegment = new OperationSegment(new[] { action }, null);

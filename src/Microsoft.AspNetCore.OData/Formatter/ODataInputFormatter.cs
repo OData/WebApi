@@ -8,6 +8,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
@@ -119,6 +120,14 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
+#if !NETSTANDARD2_0
+                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
+                if (body != null)
+                {
+                    body.AllowSynchronousIO = true;
+                }
+#endif
+
                 Func<ODataDeserializerContext> getODataDeserializerContext = () =>
                 {
                     return new ODataDeserializerContext

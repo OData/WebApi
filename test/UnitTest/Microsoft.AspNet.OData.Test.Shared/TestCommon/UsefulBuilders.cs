@@ -115,6 +115,7 @@ namespace Microsoft.AspNet.OData.Test.Common
             customer.Property(c => c.Website);
             customer.Property(c => c.SharePrice);
             customer.Property(c => c.ShareSymbol);
+            customer.Property(c => c.StartDate);
             return builder;
         }
 
@@ -216,6 +217,15 @@ namespace Microsoft.AspNet.OData.Test.Common
             return builder;
         }
 
+        public static ODataModelBuilder Add_Employee_EntityType_With_HomeAddress(this ODataModelBuilder builder)
+        {
+            builder.Add_Employee_EntityType();
+            builder.Add_Address_ComplexType();
+            var customer = builder.EntityType<Employee>();
+            customer.ComplexProperty(c => c.HomeAddress);
+            return builder;
+        }
+
         public static ODataModelBuilder Add_CompanyEmployees_Relationship(this ODataModelBuilder builder)
         {
             builder.EntityType<Company>().HasMany(c => c.ComplanyEmployees);
@@ -260,6 +270,12 @@ namespace Microsoft.AspNet.OData.Test.Common
         public static ODataModelBuilder Add_CustomerOrders_Relationship(this ODataModelBuilder builder)
         {
             builder.EntityType<Customer>().HasMany(c => c.Orders);
+            return builder;
+        }
+
+        public static ODataModelBuilder Add_CustomerCompany_Relationship(this ODataModelBuilder builder)
+        {
+            builder.EntityType<Customer>().HasOptional(c => c.Company);
             return builder;
         }
 

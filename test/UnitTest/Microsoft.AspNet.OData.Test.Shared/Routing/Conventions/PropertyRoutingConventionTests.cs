@@ -112,8 +112,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "NameFromCustomer", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -134,8 +135,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "AccountOfSpecialAccountFromCustomer", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Fact]
@@ -155,8 +157,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal("GetEnumCollectionPropFromDollarCountEntity", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -272,8 +275,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "OtherAccountsFromCustomer", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -294,8 +298,9 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.NotNull(selectedAction);
             Assert.Equal(prefix + "EnumCollectionProp", selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(7, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
     }
 }

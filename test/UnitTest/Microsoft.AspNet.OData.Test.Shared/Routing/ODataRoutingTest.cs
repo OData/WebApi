@@ -57,6 +57,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(ProductsController),
                 typeof(EnumCustomersController),
                 typeof(DestinationsController),
+                typeof(IncidentsController),
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -126,6 +127,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "PATCH", "Products(10)", "Patch(10)" },
                     { "MERGE", "Products(10)", "Patch(10)" },
                     { "DELETE", "Products(10)", "Delete(10)" },
+                    // entity by key  defaults using keyID as param name
+                    { "GET", "Incidents(10)", "Get(10) with keyID" },
+                    { "PUT", "Incidents(10)", "Put(10) with keyID" },
+                    { "PATCH", "Incidents(10)", "Patch(10) with keyID" },
+                    { "MERGE", "Incidents(10)", "Patch(10) with keyID" },
+                    { "DELETE", "Incidents(10)", "Delete(10) with keyID" },
                     // entity by key
                     { "GET", "RoutingCustomers(10)", "GetRoutingCustomer(10)" },
                     { "PUT", "RoutingCustomers(10)", "PutRoutingCustomer(10)" },
@@ -143,6 +150,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "RoutingCustomers(10)/Address", "GetAddress(10)" },
                     { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name", "GetName(10)" },
                     { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Company", "GetCompanyFromVIP(10)" },
+                    { "GET", "Incidents(10)/Name", "GetName(10) with keyID" },
                     // refs
                     { "PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
                     { "POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
@@ -854,6 +862,35 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     Color = Color.Red | Color.Blue
                 }
             });
+        }
+    }
+
+    public class IncidentsController : TestODataController
+    {
+        public string Get(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Get({0}) with keyID", keyID);
+        }
+
+        public string Put(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Put({0}) with keyID", keyID);
+        }
+
+        [AcceptVerbs("PATCH", "MERGE")]
+        public string Patch(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Patch({0}) with keyID", keyID);
+        }
+
+        public string Delete(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Delete({0}) with keyID", keyID);
+        }
+
+        public string GetName(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetName({0}) with keyID", keyID);
         }
     }
 }

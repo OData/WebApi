@@ -47,6 +47,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
         {
             string eTag;
 
+             // DeleteUpdatedEntryWithIfMatchETagsTests will change #"0" customer
+             // PutUpdatedEntryWithIfMatchETagsTests will change #"1"customer
+             // PatchUpdatedEntryWithIfMatchETagsTest will change #"2" customer
+             // So, this case uses "4"
+            int customerId = 4;
             var getUri = this.BaseAddress + "/odata/ETagsCustomers?$format=json";
             using (var response = await Client.GetAsync(getUri))
             {
@@ -56,11 +61,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ETags
                 var result = json.GetValue("value") as JArray;
                 Assert.NotNull(result);
 
-                eTag = result[0]["@odata.etag"].ToString();
+                eTag = result[customerId]["@odata.etag"].ToString();
                 Assert.False(String.IsNullOrEmpty(eTag));
             }
 
-            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/odata/ETagsCustomers(0)");
+            var getRequestWithEtag = new HttpRequestMessage(HttpMethod.Get, this.BaseAddress + "/odata/ETagsCustomers(" + customerId + ")");
             getRequestWithEtag.Headers.IfNoneMatch.ParseAdd(eTag);
             using (var response = await Client.SendAsync(getRequestWithEtag))
             {

@@ -16,6 +16,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
     {
         private const string CustomerBaseUrl = "{0}/skiptokentest/Customers";
         private const string OrderBaseUrl = "{0}/skiptokentest/Orders";
+        private const string DatesBaseUrl = "{0}/skiptokentest/Dates";
 
         public SkipTokenTest(WebHostTestFixture fixture)
             :base(fixture)
@@ -24,12 +25,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController));
+            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MaxTop(2).Expand().Filter().OrderBy().SkipToken();
             configuration.MapODataServiceRoute("skiptokentest", "skiptokentest",
                 SkipTokenEdmModel.GetEdmModel(configuration));
+            configuration.SetTimeZoneInfo(TimeZoneInfo.Utc);
         }
 
         [Theory]
@@ -249,6 +251,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.DoesNotContain("$skiptoken", result);
             Assert.Contains("&$skip=2", result);
+        }
+
+        [Theory]
+        [InlineData("", "?$skiptoken=DateValue-2019-11-09T00:00:01Z")]
+        [InlineData("?$skiptoken=DateValue-2019-11-09T00:00:01Z", "?$skiptoken=DateValue-2019-11-09T00:00:03Z")]
+        public async Task GenerateSkiptokenOnEntitySetWithDateTime(string queryOptions, string expected)
+        {
+            string queryUrl = string.Format(DatesBaseUrl, BaseAddress) + queryOptions;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(string.Format(DatesBaseUrl, "") + expected, result);
         }
     }
 }

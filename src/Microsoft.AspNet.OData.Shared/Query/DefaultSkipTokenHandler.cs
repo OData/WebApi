@@ -72,7 +72,7 @@ namespace Microsoft.AspNet.OData.Query
                         return GenerateSkipTokenValue(obj, model, orderByNodes);
                     };
 
-                    return GetNextPageHelper.GetNextPageLink(baseUri, pageSize, instance, skipTokenGenerator);
+                    return GetNextPageHelper.GetNextPageLink(baseUri, pageSize, instance, skipTokenGenerator,encodeUrl:true);
                 }
 
                 if (context.QueryOptions != null && context.QueryOptions.OrderBy != null)
@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Query
                 };
             }
 
-            return context.InternalRequest.GetNextPageLink(pageSize, instance, skipTokenGenerator);
+            return context.InternalRequest.GetNextPageLink(pageSize, instance, skipTokenGenerator, encodeUrl: true);
         }
 
         /// <summary>

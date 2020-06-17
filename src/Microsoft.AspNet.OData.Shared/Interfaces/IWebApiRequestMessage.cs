@@ -86,8 +86,9 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <param name="pageSize">The page size.</param>
         /// <param name="instance">The instance based on which the skiptoken value is generated</param>
         /// <param name="objToSkipTokenValue">Function that takes in the last object and returns the skiptoken value string.</param>
+        /// <param name="encodeUrl">Optional Parameter to determine whether the nextpace url should be encoded.</param>
         /// <returns></returns>
-        Uri GetNextPageLink(int pageSize, object instance, Func<object, string> objToSkipTokenValue);
+        Uri GetNextPageLink(int pageSize, object instance, Func<object, string> objToSkipTokenValue,bool encodeUrl);
 
         /// <summary>
         /// Get a list of content Id mappings associated with the request.

@@ -43,9 +43,6 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public Date DateProperty { get; set; }
         public Date? NullableDateProperty { get; set; }
 
-        public Guid GuidProperty { get; set; }
-        public Guid? NullableGuidProperty { get; set; }
-
         public TimeOfDay TimeOfDayProperty { get; set; }
         public TimeOfDay? NullableTimeOfDayProperty { get; set; }
 

@@ -599,20 +599,16 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
-        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
-        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
-        [InlineData("Category/QueryableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
-        [InlineData("Category/EnumerableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
-        [InlineData("Category/QueryableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
-        [InlineData("Category/EnumerableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
-        [InlineData("Category/QueryableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
-        [InlineData("Category/EnumerableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
-        public void AnyInOnNavigation(string filter, string expression, string expressionWithNullPropagation)
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(P.ProductID))")]
+        [InlineData("Category/QueryableProducts/any(P: P/Discontinued in (false))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Cast().Contains(P.Discontinued))")]
+        [InlineData("Category/EnumerableProducts/any(P: P/Discontinued in (false))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Cast().Contains(P.Discontinued))")]
+        public void AnyInOnNavigation(string filter, string expression)
         {
             var filters = VerifyQueryDeserialization(
                filter,
                expression,
-               expressionWithNullPropagation);
+               NotTesting);
         }
 
         [Theory]
@@ -1656,10 +1652,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "SimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Cast().Contains($it.SimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
@@ -1677,10 +1673,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "NullableSimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
@@ -1690,10 +1686,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "NullableSimpleEnumProp in ('First', null)",
-                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Cast().Contains($it.NullableSimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
         }
@@ -2873,18 +2869,6 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
         }
 
-        [Theory]
-        [InlineData("Category/Product/ProductID in (1)", "$it => System.Collections.Generic.List`1[System.Int32].Contains($it.Category.Product.ProductID)", "$it => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.ProductID)))")]
-        [InlineData("Category/Product/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Guid].Contains($it.Category.Product.GuidProperty)", "$it => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.GuidProperty)))")]
-        [InlineData("Category/Product/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains($it.Category.Product.NullableGuidProperty)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, $it.Category.Product.NullableGuidProperty))")]
-        public void InOnNavigation(string filter, string expression, string expressionWithNullPropagation)
-        {
-            var filters = VerifyQueryDeserialization(
-               filter,
-               expression,
-               expressionWithNullPropagation);
-        }
-
         [Fact]
         public void MultipleConstants_Are_Parameterized()
         {
@@ -2908,11 +2892,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void CollectionConstants_Are_Parameterized()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
-                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)");
+                "$it => System.Collections.Generic.List`1[System.String].Cast().Contains($it.ProductName)");
 
             Expression<Func<Product, bool>> expression = result.WithNullPropagation;
 
-            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var memberAccess = (MemberExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0];
             var values = (IList<string>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] { "Prod1", "Prod2" }, values);
         }
@@ -2921,14 +2905,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void CollectionConstants_Are_Not_Parameterized_If_Disabled()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
-                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)",
+                "$it => System.Collections.Generic.List`1[System.String].Cast().Contains($it.ProductName)",
                 settingsCustomizer: (settings) =>
                 {
                     settings.EnableConstantParameterization = false;
                 });
 
             Expression<Func<Product, bool>> expression = result.WithNullPropagation;
-            var values = (IList<string>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            var values = (IList<string>)((ConstantExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0]).Value;
             Assert.Equal(new[] { "Prod1", "Prod2" }, values);
         }
 
@@ -2937,14 +2921,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             var result = VerifyQueryDeserialization<DataTypes>(
                 "SimpleEnumProp in ('First', 'Second')",
-                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)",
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Cast().Contains($it.SimpleEnumProp)",
                 settingsCustomizer: (settings) =>
                 {
                     settings.EnableConstantParameterization = false;
                 });
 
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
-            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression)((MethodCallExpression)expression.Body).Arguments[0]).Arguments[0]).Value;
             Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second }, values);
         }
 

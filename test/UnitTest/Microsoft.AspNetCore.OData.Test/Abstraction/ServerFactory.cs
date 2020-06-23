@@ -105,6 +105,68 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             return server;
         }
 
+#if !NETCOREAPP2_0
+        /// <summary>
+        /// Create an TestServer.
+        /// </summary>
+        /// <param name="controllers">The controllers to use.</param>
+        /// <param name="configureAction">The route configuration action.</param>
+        /// <returns>An TestServer.</returns>
+        public static TestServer CreateWithEndpointRouting(
+            Type[] controllers,
+            Action<IEndpointRouteBuilder> configureEndpoints,
+            Action<IServiceCollection> configureService = null,
+            Action<IApplicationBuilder> configureBuilder = null)
+        {
+            IWebHostBuilder builder = WebHost.CreateDefaultBuilder();
+            builder.ConfigureServices(services =>
+            {
+                services.AddOData();
+                configureService?.Invoke(services);
+            });
+
+            builder.Configure(app =>
+            {
+                app.Use(next => context =>
+                {
+                    var body = context.Features.Get<IHttpBodyControlFeature>();
+                    if (body != null)
+                    {
+                        body.AllowSynchronousIO = true;
+                    }
+
+                    return next(context);
+                });
+
+                app.UseODataBatching();
+                app.UseRouting();
+                configureBuilder?.Invoke(app);
+                app.UseEndpoints((endpoints) =>
+                {
+                    
+                    var appBuilder = endpoints.CreateApplicationBuilder();
+                    ApplicationPartManager applicationPartManager = appBuilder.ApplicationServices.GetRequiredService<ApplicationPartManager>();
+                    applicationPartManager.ApplicationParts.Clear();
+
+                    if (controllers != null)
+                    {
+                        AssemblyPart part = new AssemblyPart(new MockAssembly(controllers));
+                        applicationPartManager.ApplicationParts.Add(part);
+                    }
+
+                    // Insert a custom ControllerFeatureProvider to bypass the IsPublic restriction of controllers
+                    // to allow for nested controllers which are excluded by the built-in ControllerFeatureProvider.
+                    applicationPartManager.FeatureProviders.Clear();
+                    applicationPartManager.FeatureProviders.Add(new TestControllerFeatureProvider());
+
+                    configureEndpoints(endpoints);
+                });
+            });
+
+            return new TestServer(builder);
+        }
+#endif
+
         /// <summary>
         /// Create an HttpClient from a server.
         /// </summary>

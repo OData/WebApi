@@ -66,6 +66,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var product = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.Product");
             var products = model.FindDeclaredEntitySet("Products");
             var myProduct = model.FindDeclaredSingleton("MyProduct");
+            var customers = model.FindDeclaredEntitySet("RoutingCustomers");
+            var vipCustomer = model.FindDeclaredSingleton("VipCustomer");
             var productFunction = model.FindDeclaredBoundOperations("Default.FunctionBoundToProduct", product).First(f => f.Parameters.Count() == 1);
             var topProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "TopProductOfAll");
             var getProducts = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetProducts");
@@ -92,6 +94,15 @@ namespace Microsoft.AspNet.OData.Test.Authorization
 
             AddPermissionsTo(model, productFunction, operationRestrictions, "Product.Function");
             AddPermissionsTo(model, topProduct, operationRestrictions, "Product.Top");
+
+            model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
+                customers,
+                model.FindTerm(readRestrictions),
+                new EdmRecordExpression(
+                    CreatePermissionProperty(new string[] { "Customer.Read", "Product.ReadAll" }),
+                    new EdmPropertyConstructor("ReadByKeyRestrictions", CreatePermission(new[] { "Customer.ReadByKey" })))));
+
+            AddPermissionsTo(model, vipCustomer, readRestrictions, "VipCustomer.Read");
 
             AddPermissionsTo(model, getProducts, operationRestrictions, "Customer.GetProducts");
             AddPermissionsTo(model, getFavoriteProduct, operationRestrictions, "Customer.GetFavoriteProduct");
@@ -171,6 +182,38 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         // singleton actions
         [InlineData("POST", "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP/GetSalesPerson", "Customer.GetSalesPerson", "GetSalesPerson()")]
         [InlineData("POST", "VipCustomer/GetFavoriteProduct", "Customer.GetFavoriteProduct", "GetFavoriteProduct()")]
+        // entityset/key/property
+        [InlineData("GET", "Products(10)/Name", "Product.ReadByKey", "GetProductName(10)")]
+        [InlineData("GET", "Products(10)/Name/$value", "Product.ReadByKey", "GetProductName(10)")]
+        [InlineData("GET", "Products(10)/Tags/$count", "Product.ReadByKey", "GetProductTags(10)")]
+        [InlineData("DELETE", "Products(10)/Name", "Product.Update", "DeleteProductName(10)")]
+        [InlineData("PATCH", "Products(10)/Name", "Product.Update", "PatchProductName(10)")]
+        [InlineData("PUT", "Products(10)/Name", "Product.Update", "PutProductName(10)")]
+        [InlineData("POST", "Products(10)/Tags", "Product.Update", "PostProductTags(10)")]
+        // entityset/key/cast/property
+        [InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "Product.ReadByKey", "GetProductName(10)")]
+        [InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name/$value", "Product.ReadByKey", "GetProductName(10)")]
+        [InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags/$count", "Product.ReadByKey", "GetProductTags(10)")]
+        [InlineData("DELETE", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "Product.Update", "DeleteProductName(10)")]
+        [InlineData("PATCH", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "Product.Update", "PatchProductName(10)")]
+        [InlineData("PUT", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "Product.Update", "PutProductName(10)")]
+        [InlineData("POST", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags", "Product.Update", "PostProductTags(10)")]
+        // singleton/property
+        [InlineData("GET", "MyProduct/Name", "MyProduct.Read", "GetMyProductName")]
+        [InlineData("GET", "MyProduct/Name/$value", "MyProduct.Read", "GetMyProductName")]
+        [InlineData("GET", "MyProduct/Tags/$count", "MyProduct.Read", "GetMyProductTags")]
+        [InlineData("DELETE", "MyProduct/Name", "MyProduct.Update", "DeleteMyProductName")]
+        [InlineData("PATCH", "MyProduct/Name", "MyProduct.Update", "PatchMyProductName")]
+        [InlineData("PUT", "MyProduct/Name", "MyProduct.Update", "PutMyProductName")]
+        [InlineData("POST", "MyProduct/Tags", "MyProduct.Update", "PostMyProductTags")]
+        // singleton/cast/property
+        [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Read", "GetMyProductName")]
+        [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name/$value", "MyProduct.Read", "GetMyProductName")]
+        [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags/$count", "MyProduct.Read", "GetMyProductTags")]
+        [InlineData("DELETE", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Update", "DeleteMyProductName")]
+        [InlineData("PATCH", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Update", "PatchMyProductName")]
+        [InlineData("PUT", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Update", "PutMyProductName")]
+        [InlineData("POST", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags", "MyProduct.Update", "PostMyProductTags")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -324,6 +367,36 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             return "TopProductOfAll()";
         }
+
+        public string GetName(int key)
+        {
+            return $"GetProductName({key})";
+        }
+
+        public string PutToName(int key)
+        {
+            return $"PutProductName({key})";
+        }
+
+        public string PatchToName(int key)
+        {
+            return $"PatchProductName({key})";
+        }
+
+        public string DeleteToName(int key)
+        {
+            return $"DeleteProductName({key})";
+        }
+
+        public string PostToTags(int key)
+        {
+            return $"PostProductTags({key})";
+        }
+
+        public string GetTags(int key)
+        {
+            return $"GetProductTags({key})";
+        }
     }
 
     public class MyProductController: TestODataController
@@ -362,6 +435,36 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             return "FunctionBoundToProduct()";
         }
+
+        public string GetName()
+        {
+            return "GetMyProductName";
+        }
+
+        public string PutToName()
+        {
+            return "PutMyProductName";
+        }
+
+        public string PatchToName()
+        {
+            return "PatchMyProductName";
+        }
+
+        public string DeleteToName()
+        {
+            return "DeleteMyProductName";
+        }
+
+        public string PostToTags()
+        {
+            return "PostMyProductTags";
+        }
+
+        public string GetTags()
+        {
+            return "GetMyProductTags";
+        }
     }
 
     public class RoutingCustomersController: TestODataController
@@ -391,6 +494,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string GetFavoriteProduct()
         {
             return "GetFavoriteProduct()";
+        }
+
+        public string GetName()
+        {
+            return "GetName()";
         }
     }
 

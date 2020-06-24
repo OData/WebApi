@@ -305,6 +305,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             public int ID { get; set; }
             public string Name { get; set; }
+            public List<string> Tags { get; set; }
             public virtual List<RoutingCustomer> RoutingCustomers { get; set; }
         }
 

@@ -78,6 +78,42 @@ namespace Microsoft.AspNet.OData.Authorization
                 }
             }
 
+            // properties
+            if (template == "~/entityset/key/property" ||
+                template == "~/entityset/key/cast/property" ||
+                template == "~/entityset/key/property/cast" ||
+                template == "~/entityset/key/cast/property/cast" ||
+                template == "~/entityset/key/property/$value" ||
+                template == "~/entityset/key/cast/property/$value" ||
+                template == "~/entityset/key/property/$count" ||
+                template == "~/entityset/key/cast/property/$count" ||
+                template == "~/singleton/property" ||
+                template == "~/singleton/cast/property" ||
+                template == "~/singleton/property/cast" ||
+                template == "~/singleton/cast/property/cast" ||
+                template == "~/singleton/property/$value" ||
+                template == "~/singleton/cast/property/$value" ||
+                template == "~/singleton/property/$count" ||
+                template == "~/singleton/cast/property/$count")
+            {
+                var isSingleton = template.StartsWith("~/singleton");
+                var annotations = isSingleton ?
+                    model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath)):
+                    model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
+
+                if (method == "GET")
+                {
+                    return isSingleton ?
+                        GetReadPermissions(annotations):
+                        GetReadByKeyPermissions(annotations);
+                }
+                else if (method == "PUT" || method == "MERGE" || method == "PATCH" || method == "DELETE" || method == "POST")
+                {
+                    return GetUpdatePermissions(annotations);
+                }
+            }
+
+            // functions and actions
             if (template == "~/entityset/key/function"
                 || template == "~/entityset/key/cast/function"
                 || template == "~/entityset/key/function/$count"

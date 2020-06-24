@@ -32,7 +32,10 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var controllers = new[]
             {
                 typeof(ProductsController),
-                typeof(MyProductController)
+                typeof(MyProductController),
+                typeof(RoutingCustomersController),
+                typeof(VipCustomerController),
+                typeof(SalesPeopleController)
             };
 
             var server = TestServerFactory.CreateWithEndpointRouting(controllers, endpoints =>
@@ -65,6 +68,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var myProduct = model.FindDeclaredSingleton("MyProduct");
             var productFunction = model.FindDeclaredBoundOperations("Default.FunctionBoundToProduct", product).First(f => f.Parameters.Count() == 1);
             var topProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "TopProductOfAll");
+            var getProducts = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetProducts");
+            var getFavoriteProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetFavoriteProduct");
+            var getSalesPerson = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPerson");
+            var getSalesPeople = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPeople");
+            var getVIPRoutingCustomers = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetVIPRoutingCustomers");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
                 products,
@@ -84,6 +92,12 @@ namespace Microsoft.AspNet.OData.Test.Authorization
 
             AddPermissionsTo(model, productFunction, operationRestrictions, "Product.Function");
             AddPermissionsTo(model, topProduct, operationRestrictions, "Product.Top");
+
+            AddPermissionsTo(model, getProducts, operationRestrictions, "Customer.GetProducts");
+            AddPermissionsTo(model, getFavoriteProduct, operationRestrictions, "Customer.GetFavoriteProduct");
+            AddPermissionsTo(model, getSalesPerson, operationRestrictions, "Customer.GetSalesPerson");
+            AddPermissionsTo(model, getSalesPeople, operationRestrictions, "Customer.GetSalesPeople");
+            AddPermissionsTo(model, getVIPRoutingCustomers, operationRestrictions, "SalesPerson.GetVip");
         }
 
         void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)
@@ -147,6 +161,16 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         //[InlineData("GET", "MyProduct/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
         [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct()")]
         //[InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundtoProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
+        // entity actions
+        [InlineData("POST", "SalesPeople(10)/GetVIPRoutingCustomers", "SalesPerson.GetVip", "GetVIPRoutingCustomers(10)")]
+        [InlineData("POST", "SalesPeople/GetVIPRoutingCustomers", "SalesPerson.GetVip", "GetVIPRoutingCustomers()")]
+        [InlineData("POST", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/GetSalesPerson", "Customer.GetSalesPerson", "GetSalesPersonOnVIP(10)")]
+        // entityset actions
+        [InlineData("POST", "RoutingCustomers/GetProducts", "Customer.GetProducts", "GetProducts()")]
+        [InlineData("POST", "RoutingCustomers/Microsoft.AspNet.OData.Test.Routing.VIP/GetSalesPeople", "Customer.GetSalesPeople", "GetSalesPeopleOnVIP()")]
+        // singleton actions
+        [InlineData("POST", "VipCustomer/Microsoft.AspNet.OData.Test.Routing.VIP/GetSalesPerson", "Customer.GetSalesPerson", "GetSalesPerson()")]
+        [InlineData("POST", "VipCustomer/GetFavoriteProduct", "Customer.GetFavoriteProduct", "GetFavoriteProduct()")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -337,6 +361,49 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string FunctionBoundToProduct()
         {
             return "FunctionBoundToProduct()";
+        }
+    }
+
+    public class RoutingCustomersController: TestODataController
+    {
+        public string GetProducts()
+        {
+            return "GetProducts()";
+        }
+        public string GetSalesPersonOnVIP(int key)
+        {
+            return $"GetSalesPersonOnVIP({key})";
+        }
+
+        public string GetSalesPeopleOnCollectionOfVIP()
+        {
+            return "GetSalesPeopleOnVIP()";
+        }
+    }
+
+    public class VipCustomerController: TestODataController
+    {
+        public string GetSalesPerson()
+        {
+            return "GetSalesPerson()";
+        }
+
+        public string GetFavoriteProduct()
+        {
+            return "GetFavoriteProduct()";
+        }
+    }
+
+    public class SalesPeopleController: TestODataController
+    {
+        public string GetVIPRoutingCustomers(int key)
+        {
+            return $"GetVIPRoutingCustomers({key})";
+        }
+
+        public string GetVIPRoutingCustomers()
+        {
+            return "GetVIPRoutingCustomers()";
         }
     }
 }

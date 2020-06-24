@@ -56,6 +56,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             ActionReturnsCollectionFromEntitySet<VIP>(builder, getVIPS, "RoutingCustomers");
 
             builder.EntityType<RoutingCustomer>().Collection.Action("GetProducts").ReturnsCollectionFromEntitySet<Product>("Products");
+            builder.EntityType<RoutingCustomer>().Action("GetFavoriteProduct").ReturnsFromEntitySet<Product>("Products");
             builder.EntityType<VIP>().Action("GetSalesPerson").ReturnsFromEntitySet<SalesPerson>("SalesPeople");
             builder.EntityType<VIP>().Collection.Action("GetSalesPeople").ReturnsCollectionFromEntitySet<SalesPerson>("SalesPeople");
 

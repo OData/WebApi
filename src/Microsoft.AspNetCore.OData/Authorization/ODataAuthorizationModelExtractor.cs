@@ -90,6 +90,13 @@ namespace Microsoft.AspNet.OData.Authorization
                 || template == "~/singleton/function/$count"
                 || template == "~/singleton/cast/function"
                 || template == "~/singleton/cast/function/$count"
+                // actions
+                || template == "~/entityset/action"
+                || template == "~/entityset/cast/action"
+                || template == "~/entityset/key/action"
+                || template == "~/entityset/key/cast/action"
+                || template == "~/singleton/action"
+                || template == "~/singleton/cast/action"
                 )
             {
                 var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForOperation(a, odataPath));

@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Authorization
                 || (template == "~/entityset/cast/$count" && method == "GET"))
             {
                 var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetEntitySetReadRestrictions(annotations);
+                return GetReadPermissions(annotations);
             }
 
             if ((template == "~/entityset" && method == "POST")
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Authorization
                 || (template == "~/entityset/key/cast" && method == "GET"))
             {
                 var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetEntitySetReadByKeyRestrictions(annotations);
+                return GetReadByKeyPermissions(annotations);
             }
 
             if ((template == "~/entityset/key" || template == "~/entityset/key/cast")
@@ -61,6 +61,23 @@ namespace Microsoft.AspNet.OData.Authorization
                 return GetDeletePermissions(annotations);
             }
 
+            if ((template == "~/singleton" || template == "~/singleton/cast"))
+            {
+                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath));
+                if (method == "GET")
+                {
+                    return GetReadPermissions(annotations);
+                }
+                else if (method == "PUT" || method == "MERGE" || method == "PATCH")
+                {
+                    return GetUpdatePermissions(annotations);
+                }
+                else if (method == "DELETE")
+                {
+                    return GetDeletePermissions(annotations);
+                }
+            }
+
             return Enumerable.Empty<PermissionData>();
         }
 
@@ -74,9 +91,35 @@ namespace Microsoft.AspNet.OData.Authorization
             return false;
         }
 
-        private static IEnumerable<PermissionData> GetEntitySetReadRestrictions(IEnumerable<IEdmVocabularyAnnotation> annotations)
+        private static bool IsAnnotationForSingleton(IEdmVocabularyAnnotation annotation, Routing.ODataPath path)
+        {
+            if (annotation.Target is IEdmSingleton target && path.Segments[0] is SingletonSegment segment)
+            {
+                return target.Name == segment.Singleton.Name;
+            }
+
+            return false;
+        }
+
+        private static IEnumerable<PermissionData> GetReadPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
         {
             return GetPermissions(ODataCapabilityRestrictionsConstants.ReadRestrictions, annotations);
+        }
+
+        private static IEnumerable<PermissionData> GetReadByKeyPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
+        {
+            foreach (var annotation in annotations)
+            {
+                if (annotation.Term.FullName() == ODataCapabilityRestrictionsConstants.ReadRestrictions && annotation.Value is IEdmRecordExpression record)
+                {
+                    var readByKeyProperty = record.FindProperty("ReadByKeyRestrictions");
+                    var readByKeyValue = readByKeyProperty?.Value as IEdmRecordExpression;
+                    var permissionsProperty = readByKeyValue?.FindProperty("Permissions");
+                    return ExtractPermissionsFromProperty(permissionsProperty);
+                }
+            }
+
+            return Enumerable.Empty<PermissionData>();
         }
 
         private static IEnumerable<PermissionData> GetInsertPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
@@ -101,22 +144,6 @@ namespace Microsoft.AspNet.OData.Authorization
                 if (annotation.Term.FullName() == restrictionType)
                 {
                     return ExtractPermissionsFromAnnotation(annotation);
-                }
-            }
-
-            return Enumerable.Empty<PermissionData>();
-        }
-
-        private static IEnumerable<PermissionData> GetEntitySetReadByKeyRestrictions(IEnumerable<IEdmVocabularyAnnotation> annotations)
-        {
-            foreach (var annotation in annotations)
-            {
-                if (annotation.Term.FullName() == ODataCapabilityRestrictionsConstants.ReadRestrictions && annotation.Value is IEdmRecordExpression record)
-                {
-                    var readByKeyProperty = record.FindProperty("ReadByKeyRestrictions");
-                    var readByKeyValue = readByKeyProperty?.Value as IEdmRecordExpression;
-                    var permissionsProperty = readByKeyValue?.FindProperty("Permissions");
-                    return ExtractPermissionsFromProperty(permissionsProperty);
                 }
             }
 

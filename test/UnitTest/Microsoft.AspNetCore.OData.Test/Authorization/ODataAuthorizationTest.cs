@@ -30,7 +30,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             
             var controllers = new[]
             {
-                typeof(ProductsController)
+                typeof(ProductsController),
+                typeof(MyProductController)
             };
 
             var server = TestServerFactory.CreateWithEndpointRouting(controllers, endpoints =>
@@ -52,29 +53,37 @@ namespace Microsoft.AspNet.OData.Test.Authorization
 
         void AddPermissions(EdmModel model)
         {
-            var entitySet = model.FindDeclaredEntitySet("Products");
+            var readRestrictions = "Org.OData.Capabilities.V1.ReadRestrictions";
+            var insertRestrictions = "Org.OData.Capabilities.V1.InsertRestrictions";
+            var updateRestrictions = "Org.OData.Capabilities.V1.UpdateRestrictions";
+            var deleteRestrictions = "Org.OData.Capabilities.V1.DeleteRestrictions";
+
+            var products = model.FindDeclaredEntitySet("Products");
+            var myProduct = model.FindDeclaredSingleton("MyProduct");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
-                entitySet,
-                model.FindTerm("Org.OData.Capabilities.V1.ReadRestrictions"),
+                products,
+                model.FindTerm(readRestrictions),
                 new EdmRecordExpression(
                     CreatePermissionProperty(new string[] { "Product.Read", "Product.ReadAll" }),
                     new EdmPropertyConstructor("ReadByKeyRestrictions", CreatePermission(new[] { "Product.ReadByKey" })))));
 
-            model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
-                entitySet,
-                model.FindTerm("Org.OData.Capabilities.V1.InsertRestrictions"),
-                CreatePermission(new[] { "Product.Insert" })));
 
-            model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
-                entitySet,
-                model.FindTerm("Org.OData.Capabilities.V1.DeleteRestrictions"),
-                CreatePermission(new[] { "Product.Delete" })));
+            AddPermissionsTo(model, products, insertRestrictions, "Product.Insert");
+            AddPermissionsTo(model, products, deleteRestrictions, "Product.Delete");
+            AddPermissionsTo(model, products, updateRestrictions, "Product.Update");
 
+            AddPermissionsTo(model, myProduct, readRestrictions, "MyProduct.Read");
+            AddPermissionsTo(model, myProduct, deleteRestrictions, "MyProduct.Delete");
+            AddPermissionsTo(model, myProduct, updateRestrictions, "MyProduct.Update");
+        }
+
+        void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)
+        {
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
-                entitySet,
-                model.FindTerm("Org.OData.Capabilities.V1.UpdateRestrictions"),
-                CreatePermission(new[] { "Product.Update" })));
+                target,
+                model.FindTerm(restrictionName),
+                CreatePermission(scopes)));
         }
 
         [Theory]
@@ -101,6 +110,15 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("PATCH", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "Product.Update", "PATCH SpecialProduct(10)")]
         [InlineData("MERGE", "Products(10)", "Product.Update", "PATCH Products(10)")]
         [InlineData("MERGE", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "Product.Update", "PATCH SpecialProduct(10)")]
+        // /singleton and /singleton/cast
+        [InlineData("GET", "MyProduct", "MyProduct.Read", "GET MyProduct")]
+        [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Read", "GET MySpecialProduct")]
+        [InlineData("PUT", "MyProduct", "MyProduct.Update", "PUT MyProduct")]
+        [InlineData("PUT", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PUT MySpecialProduct")]
+        [InlineData("PATCH", "MyProduct", "MyProduct.Update", "PATCH MyProduct")]
+        [InlineData("PATCH", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PATCH MySpecialProduct")]
+        [InlineData("MERGE", "MyProduct", "MyProduct.Update", "PATCH MyProduct")]
+        [InlineData("MERGE", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PATCH MySpecialProduct")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -228,6 +246,39 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string PatchSpecialProduct(int key)
         {
             return $"PATCH SpecialProduct({key})";
+        }
+    }
+
+    public class MyProductController: TestODataController
+    {
+        public string Get()
+        {
+            return "GET MyProduct";
+        }
+
+        public string GetFromSpecialProduct()
+        {
+            return "GET MySpecialProduct";
+        }
+
+        public string Put()
+        {
+            return "PUT MyProduct";
+        }
+
+        public string PutFromSpecialProduct()
+        {
+            return "PUT MySpecialProduct";
+        }
+
+        public string Patch()
+        {
+            return "PATCH MyProduct";
+        }
+
+        public string PatchFromSpecialProduct()
+        {
+            return "PATCH MySpecialProduct";
         }
     }
 }

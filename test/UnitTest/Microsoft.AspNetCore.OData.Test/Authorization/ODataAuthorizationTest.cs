@@ -23,6 +23,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
     public class ODataAuthorizationTest
     {
         private readonly HttpClient _client;
+
         public ODataAuthorizationTest()
         {
             var model = ODataRoutingModel.GetModel() as EdmModel;
@@ -57,9 +58,13 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var insertRestrictions = "Org.OData.Capabilities.V1.InsertRestrictions";
             var updateRestrictions = "Org.OData.Capabilities.V1.UpdateRestrictions";
             var deleteRestrictions = "Org.OData.Capabilities.V1.DeleteRestrictions";
+            var operationRestrictions = "Org.OData.Capabilities.V1.OperationRestrictions";
 
+            var product = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.Product");
             var products = model.FindDeclaredEntitySet("Products");
             var myProduct = model.FindDeclaredSingleton("MyProduct");
+            var productFunction = model.FindDeclaredBoundOperations("Default.FunctionBoundToProduct", product).First(f => f.Parameters.Count() == 1);
+            var topProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "TopProductOfAll");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
                 products,
@@ -76,6 +81,9 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             AddPermissionsTo(model, myProduct, readRestrictions, "MyProduct.Read");
             AddPermissionsTo(model, myProduct, deleteRestrictions, "MyProduct.Delete");
             AddPermissionsTo(model, myProduct, updateRestrictions, "MyProduct.Update");
+
+            AddPermissionsTo(model, productFunction, operationRestrictions, "Product.Function");
+            AddPermissionsTo(model, topProduct, operationRestrictions, "Product.Top");
         }
 
         void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)
@@ -119,6 +127,26 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("PATCH", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PATCH MySpecialProduct")]
         [InlineData("MERGE", "MyProduct", "MyProduct.Update", "PATCH MyProduct")]
         [InlineData("MERGE", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PATCH MySpecialProduct")]
+        // bound functions
+        // TODO should support different function overloads with different permissions
+        // TODO create test with functions bound to derived types
+        // TODO figure out why /$count returns a 404
+        [InlineData("GET", "Products(10)/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct(10)")]
+        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1)", "Product.Function", "FunctionBoundToProduct(10, 1)")]
+        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1, P2=2, P3='3')", "Product.Function", "FunctionBoundToProduct(10, 1, 2, 3)")]
+        //[InlineData("GET", "Products(10)/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct(10)")]
+        [InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct(10)")]
+        //[InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct(10)")]
+        // entityset functions
+        [InlineData("GET", "Products/TopProductOfAll", "Product.Top", "TopProductOfAll()")]
+        //[InlineData("GET", "Products/TopProductOfAll/$count", "Product.Top", "TopProductOfAll()")]
+        [InlineData("GET", "Products/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/TopProductOfAll", "Product.Top", "TopProductOfAll()")]
+        //[InlineData("GET", "Products/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/TopProductOfAll/$count", "Product.Top", "TopProductOfAll()")]
+        // singleton functions
+        [InlineData("GET", "MyProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct()")]
+        //[InlineData("GET", "MyProduct/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
+        [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct()")]
+        //[InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundtoProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -247,6 +275,31 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             return $"PATCH SpecialProduct({key})";
         }
+
+        public string FunctionBoundToProduct(int key)
+        {
+            return $"FunctionBoundToProduct({key})";
+        }
+
+        public string FunctionBoundToProduct(int key, int P1)
+        {
+            return $"FunctionBoundToProduct({key}, {P1})";
+        }
+
+        public string FunctionBoundToProduct(int key, int P1, int P2, string P3)
+        {
+            return $"FunctionBoundToProduct({key}, {P1}, {P2}, {P3})";
+        }
+
+        public string FunctionBoundToProductOnSpecialProduct(int key)
+        {
+            return $"FunctionBoundToSpecialProduct({key})";
+        }
+
+        public string TopProductOfAll()
+        {
+            return "TopProductOfAll()";
+        }
     }
 
     public class MyProductController: TestODataController
@@ -279,6 +332,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string PatchFromSpecialProduct()
         {
             return "PATCH MySpecialProduct";
+        }
+
+        public string FunctionBoundToProduct()
+        {
+            return "FunctionBoundToProduct()";
         }
     }
 }

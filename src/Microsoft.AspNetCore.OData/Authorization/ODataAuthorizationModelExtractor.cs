@@ -78,6 +78,25 @@ namespace Microsoft.AspNet.OData.Authorization
                 }
             }
 
+            if (template == "~/entityset/key/function"
+                || template == "~/entityset/key/cast/function"
+                || template == "~/entityset/key/function/$count"
+                || template == "~/entityset/key/cast/function/$count"
+                || template == "~/entityset/function"
+                || template == "~/entityset/function/$count"
+                || template == "~/entityset/cast/function"
+                || template == "~/entityset/cast/function/$count"
+                || template == "~/singleton/function"
+                || template == "~/singleton/function/$count"
+                || template == "~/singleton/cast/function"
+                || template == "~/singleton/cast/function/$count"
+                )
+            {
+                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForOperation(a, odataPath));
+                return GetOperationPermissions(annotations);
+            }
+
+
             return Enumerable.Empty<PermissionData>();
         }
 
@@ -96,6 +115,22 @@ namespace Microsoft.AspNet.OData.Authorization
             if (annotation.Target is IEdmSingleton target && path.Segments[0] is SingletonSegment segment)
             {
                 return target.Name == segment.Singleton.Name;
+            }
+
+            return false;
+        }
+
+        private static bool IsAnnotationForOperation(IEdmVocabularyAnnotation annotation, Routing.ODataPath path)
+        {
+            var segment = path.Segments.Last() as OperationSegment;
+            if (segment == null)
+            {
+                segment = path.Segments[path.Segments.Count() - 2] as OperationSegment;
+            }
+
+            if (annotation.Target is IEdmOperation target && segment != null)
+            {
+                return target.FullName() == segment.Operations.First().FullName();
             }
 
             return false;
@@ -135,6 +170,11 @@ namespace Microsoft.AspNet.OData.Authorization
         private static IEnumerable<PermissionData> GetUpdatePermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
         {
             return GetPermissions(ODataCapabilityRestrictionsConstants.UpdateRestrictions, annotations);
+        }
+
+        private static IEnumerable<PermissionData> GetOperationPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
+        {
+            return GetPermissions(ODataCapabilityRestrictionsConstants.OperationRestrictions, annotations);
         }
 
         private static IEnumerable<PermissionData> GetPermissions(string restrictionType, IEnumerable<IEdmVocabularyAnnotation> annotations)

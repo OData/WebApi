@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             var model = ODataRoutingModel.GetModel() as EdmModel;
             AddPermissions(model as EdmModel);
-            
+
             var controllers = new[]
             {
                 typeof(ProductsController),
@@ -62,13 +62,16 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var updateRestrictions = "Org.OData.Capabilities.V1.UpdateRestrictions";
             var deleteRestrictions = "Org.OData.Capabilities.V1.DeleteRestrictions";
             var operationRestrictions = "Org.OData.Capabilities.V1.OperationRestrictions";
+            //var navigationRestrictions = "Org.OData.Capabilities.V1.NavigationRestrictions";
 
-            var product = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.Product");
+            var product = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.Product") as IEdmEntityType;
+            //var productCustomers = product.NavigationProperties().First(p => p.Name == "RoutingCustomers");
             var products = model.FindDeclaredEntitySet("Products");
             var myProduct = model.FindDeclaredSingleton("MyProduct");
             var customers = model.FindDeclaredEntitySet("RoutingCustomers");
             var vipCustomer = model.FindDeclaredSingleton("VipCustomer");
-            var productFunction = model.FindDeclaredBoundOperations("Default.FunctionBoundToProduct", product).First(f => f.Parameters.Count() == 1);
+            var salesPeople = model.FindDeclaredEntitySet("SalesPeople");
+            var productFunction = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "FunctionBoundToProduct");
             var topProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "TopProductOfAll");
             var getProducts = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetProducts");
             var getFavoriteProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetFavoriteProduct");
@@ -99,16 +102,31 @@ namespace Microsoft.AspNet.OData.Test.Authorization
                 customers,
                 model.FindTerm(readRestrictions),
                 new EdmRecordExpression(
-                    CreatePermissionProperty(new string[] { "Customer.Read", "Product.ReadAll" }),
+                    CreatePermissionProperty(new string[] { "Customer.Read", "Customer.ReadAll" }),
                     new EdmPropertyConstructor("ReadByKeyRestrictions", CreatePermission(new[] { "Customer.ReadByKey" })))));
 
             AddPermissionsTo(model, vipCustomer, readRestrictions, "VipCustomer.Read");
+
+            model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
+                salesPeople,
+                model.FindTerm(readRestrictions),
+                new EdmRecordExpression(
+                    CreatePermissionProperty(new string[] { "SalesPerson.Read", "SalesPerson.ReadAll" }),
+                    new EdmPropertyConstructor("ReadByKeyRestrictions", CreatePermission(new[] { "SalesPerson.ReadByKey" })))));
 
             AddPermissionsTo(model, getProducts, operationRestrictions, "Customer.GetProducts");
             AddPermissionsTo(model, getFavoriteProduct, operationRestrictions, "Customer.GetFavoriteProduct");
             AddPermissionsTo(model, getSalesPerson, operationRestrictions, "Customer.GetSalesPerson");
             AddPermissionsTo(model, getSalesPeople, operationRestrictions, "Customer.GetSalesPeople");
             AddPermissionsTo(model, getVIPRoutingCustomers, operationRestrictions, "SalesPerson.GetVip");
+
+            //model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
+            //    productCustomers,
+            //    model.FindTerm(navigationRestrictions),
+            //    new EdmRecordExpression(
+            //        new EdmPropertyConstructor("ReadRestrictions", CreatePermission("Product.ReadCustomer")),
+            //        new EdmPropertyConstructor("InsertRestrictions", CreatePermission("Product.InsertCustomer")),
+            //        new EdmPropertyConstructor("UpdateRestrictions", CreatePermission("Product.UpdateCustomer")))));
         }
 
         void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)
@@ -214,6 +232,12 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("PATCH", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Update", "PatchMyProductName")]
         [InlineData("PUT", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Name", "MyProduct.Update", "PutMyProductName")]
         [InlineData("POST", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags", "MyProduct.Update", "PostMyProductTags")]
+        // dynamic properties
+        [InlineData("GET", "SalesPeople(10)/SomeProperty", "SalesPerson.ReadByKey", "GetSalesPersonDynamicProperty(10, SomeProperty)")]
+        // entityset/key/navigation
+        [InlineData("GET", "Products(10)/RoutingCustomers", "Customer.Read", "GetProductCustomers(10)")]
+        // TODO add tests for /navigation
+
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -233,7 +257,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             Assert.Equal(expectedResponse, response.Content.AsObjectContentValue());
         }
 
-        static IEdmExpression CreatePermission(string[] scopeNames)
+        static IEdmExpression CreatePermission(params string[] scopeNames)
         {
             var restriction = new EdmRecordExpression(
                 CreatePermissionProperty(scopeNames));
@@ -241,7 +265,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             return restriction;
         }
 
-        static IEdmPropertyConstructor CreatePermissionProperty(string[] scopeNames)
+        static IEdmPropertyConstructor CreatePermissionProperty(params string[] scopeNames)
         {
             var scopes = scopeNames.Select(scope => new EdmRecordExpression(
                    new EdmPropertyConstructor("Scope", new EdmStringConstant(scope)),
@@ -397,6 +421,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             return $"GetProductTags({key})";
         }
+
+        public string GetRoutingCustomers(int key)
+        {
+            return $"GetProductCustomers({key})";
+        }
     }
 
     public class MyProductController: TestODataController
@@ -512,6 +541,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string GetVIPRoutingCustomers()
         {
             return "GetVIPRoutingCustomers()";
+        }
+
+        public string GetDynamicProperty(int key, string dynamicProperty)
+        {
+            return $"GetSalesPersonDynamicProperty({key}, {dynamicProperty})";
         }
     }
 }

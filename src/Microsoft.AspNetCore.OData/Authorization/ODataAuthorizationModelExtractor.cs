@@ -79,32 +79,21 @@ namespace Microsoft.AspNet.OData.Authorization
             }
 
             // properties
-            if (template == "~/entityset/key/property" ||
-                template == "~/entityset/key/cast/property" ||
-                template == "~/entityset/key/property/cast" ||
-                template == "~/entityset/key/cast/property/cast" ||
-                template == "~/entityset/key/property/$value" ||
-                template == "~/entityset/key/cast/property/$value" ||
-                template == "~/entityset/key/property/$count" ||
-                template == "~/entityset/key/cast/property/$count" ||
-                template == "~/singleton/property" ||
-                template == "~/singleton/cast/property" ||
-                template == "~/singleton/property/cast" ||
-                template == "~/singleton/cast/property/cast" ||
-                template == "~/singleton/property/$value" ||
-                template == "~/singleton/cast/property/$value" ||
-                template == "~/singleton/property/$count" ||
-                template == "~/singleton/cast/property/$count")
+            if (template.StartsWith("~/entityset/key/property") ||
+                template.StartsWith("~/entityset/key/cast/property") ||
+                template.StartsWith("~/singleton/property") ||
+                template.StartsWith("~/singleton/cast/property") ||
+                template.EndsWith("/dynamicproperty"))
             {
                 var isSingleton = template.StartsWith("~/singleton");
                 var annotations = isSingleton ?
-                    model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath)):
+                    model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath)) :
                     model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
 
                 if (method == "GET")
                 {
                     return isSingleton ?
-                        GetReadPermissions(annotations):
+                        GetReadPermissions(annotations) :
                         GetReadByKeyPermissions(annotations);
                 }
                 else if (method == "PUT" || method == "MERGE" || method == "PATCH" || method == "DELETE" || method == "POST")
@@ -113,27 +102,51 @@ namespace Microsoft.AspNet.OData.Authorization
                 }
             }
 
+            // navigation properties
+            if (template.EndsWith("/navigation") || template.EndsWith("/navigation/$count"))
+            {
+                NavigationPropertySegment navigationSegment =
+                    (odataPath.Segments.Last() as NavigationPropertySegment) ??
+                    odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPropertySegment;
+
+                var setName = navigationSegment.NavigationSource.Name;
+                var entitySet = model.FindDeclaredEntitySet(setName);
+                var annotations = entitySet.VocabularyAnnotations(model);
+                //var annotations = navigationSegment.NavigationProperty.VocabularyAnnotations(model);
+                //navigationSegment.NavigationSource.FindNavigationTarget(navigationSegment.NavigationProperty)
+                
+                if (method == "GET")
+                {
+                    return GetReadPermissions(annotations);
+                }
+                else if (method == "PATCH" || method == "PUT" || method == "MERGE")
+                {
+                    return GetUpdatePermissions(annotations);
+                }
+                else if (method == "POST")
+                {
+                    return GetInsertPermissions(annotations);
+                }
+                else if (method == "DELETE")
+                {
+                    return GetDeletePermissions(annotations);
+                }
+                
+            }
+
             // functions and actions
-            if (template == "~/entityset/key/function"
-                || template == "~/entityset/key/cast/function"
-                || template == "~/entityset/key/function/$count"
-                || template == "~/entityset/key/cast/function/$count"
-                || template == "~/entityset/function"
-                || template == "~/entityset/function/$count"
-                || template == "~/entityset/cast/function"
-                || template == "~/entityset/cast/function/$count"
-                || template == "~/singleton/function"
-                || template == "~/singleton/function/$count"
-                || template == "~/singleton/cast/function"
-                || template == "~/singleton/cast/function/$count"
-                // actions
-                || template == "~/entityset/action"
-                || template == "~/entityset/cast/action"
-                || template == "~/entityset/key/action"
-                || template == "~/entityset/key/cast/action"
-                || template == "~/singleton/action"
-                || template == "~/singleton/cast/action"
-                )
+            if (template.StartsWith("~/entityset/key/function") ||
+                template.StartsWith("~/entityset/key/cast/function") ||
+                template.StartsWith("~/entityset/function") ||
+                template.StartsWith("~/entityset/cast/function") ||
+                template.StartsWith("~/singleton/function") ||
+                template.StartsWith("~/singleton/cast/function") ||
+                template.StartsWith("~/entityset/key/action") ||
+                template.StartsWith("~/entityset/key/cast/action") ||
+                template.StartsWith("~/entityset/action") ||
+                template.StartsWith("~/entityset/cast/action") ||
+                template.StartsWith("~/singleton/action") ||
+                template.StartsWith("~/singleton/cast/action"))
             {
                 var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForOperation(a, odataPath));
                 return GetOperationPermissions(annotations);
@@ -184,6 +197,8 @@ namespace Microsoft.AspNet.OData.Authorization
             return GetPermissions(ODataCapabilityRestrictionsConstants.ReadRestrictions, annotations);
         }
 
+
+
         private static IEnumerable<PermissionData> GetReadByKeyPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
         {
             foreach (var annotation in annotations)
@@ -233,16 +248,27 @@ namespace Microsoft.AspNet.OData.Authorization
             return Enumerable.Empty<PermissionData>();
         }
 
-        private static IEnumerable<PermissionData> ExtractPermissionsFromAnnotation(IEdmVocabularyAnnotation annotation)
+        private static IEnumerable<PermissionData> GetNavigationPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations, string restrictionsType)
         {
-            var value = annotation.Value;
-            if (value is IEdmRecordExpression record)
+            var annotation = annotations.FirstOrDefault(a => a.Term.FullName() == ODataCapabilityRestrictionsConstants.NavigationRestrictions);
+            if (annotation != null && annotation.Value is IEdmRecordExpression record)
             {
-                var permissionsProperty = record.FindProperty("Permissions");
-                return ExtractPermissionsFromProperty(permissionsProperty);
+                var restriction = record.Properties.FirstOrDefault(p => p.Name == restrictionsType);
+                return ExtractPermissionsFromRecord(restriction?.Value as IEdmRecordExpression);
             }
 
             return Enumerable.Empty<PermissionData>();
+        }
+
+        private static IEnumerable<PermissionData> ExtractPermissionsFromAnnotation(IEdmVocabularyAnnotation annotation)
+        {
+            return ExtractPermissionsFromRecord(annotation.Value as IEdmRecordExpression);
+        }
+
+        private static IEnumerable<PermissionData> ExtractPermissionsFromRecord(IEdmRecordExpression record)
+        {
+            var permissionsProperty = record?.FindProperty("Permissions");
+            return ExtractPermissionsFromProperty(permissionsProperty);
         }
 
         private static IEnumerable<PermissionData> ExtractPermissionsFromProperty(IEdmPropertyConstructor permissionsProperty)

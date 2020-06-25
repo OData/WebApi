@@ -37,5 +37,9 @@ namespace Microsoft.AspNet.OData.Authorization
         /// 
         /// </summary>
         public static readonly string OperationRestrictions = $"{CapabilitiesNamespace}.OperationRestrictions";
+        /// <summary>
+        /// 
+        /// </summary>
+        public static readonly string NavigationRestrictions = $"{CapabilitiesNamespace}.NavigationRestrictions";
     }
 }

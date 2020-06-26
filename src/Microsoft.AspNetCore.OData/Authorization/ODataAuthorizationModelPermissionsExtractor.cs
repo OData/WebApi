@@ -1,21 +1,23 @@
-﻿using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Routing;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.OData.Edm;
 using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.UriParser;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Authorization
 {
-    internal static class ODataAuthorizationModelExtractor
+    internal static class ODataAuthorizationModelPermissionsExtractor
     {
-        internal static IEnumerable<PermissionData> ExtractPermissionRestrictions(this IEdmModel model, HttpContext context)
+        /// <summary>
+        /// Extract permissions from the <paramref name="model"/> that should apply to the current request.
+        /// </summary>
+        /// <param name="model">The OData model.</param>
+        /// <param name="context">The HTTP context.</param>
+        /// <returns></returns>
+        internal static IEnumerable<PermissionData> ExtractPermissionsForRequest(this IEdmModel model, HttpContext context)
         {
             var odataFeature = context.ODataFeature();
 

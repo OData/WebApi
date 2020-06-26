@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData.Authorization
 {
+    /// <summary>
+    /// Represents permission restrictions extracted from an OData model.
+    /// </summary>
     internal class PermissionData
     {
         public string SchemeName { get; set; }

@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNet.OData.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -20,7 +17,6 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <returns></returns>
         public static IServiceCollection AddODataAuthorization(this IServiceCollection services)
         {
-            services.AddSingleton<IAuthorizationPolicyProvider, ODataAuthorizationPolicyProvider>();
             services.AddSingleton<IAuthorizationHandler, ODataAuthorizationHandler>();
             return services;
         }

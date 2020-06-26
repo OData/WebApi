@@ -64,10 +64,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var updateRestrictions = "Org.OData.Capabilities.V1.UpdateRestrictions";
             var deleteRestrictions = "Org.OData.Capabilities.V1.DeleteRestrictions";
             var operationRestrictions = "Org.OData.Capabilities.V1.OperationRestrictions";
-            //var navigationRestrictions = "Org.OData.Capabilities.V1.NavigationRestrictions";
 
             var product = model.FindDeclaredType("Microsoft.AspNet.OData.Test.Routing.Product") as IEdmEntityType;
-            //var productCustomers = product.NavigationProperties().First(p => p.Name == "RoutingCustomers");
             var products = model.FindDeclaredEntitySet("Products");
             var myProduct = model.FindDeclaredSingleton("MyProduct");
             var customers = model.FindDeclaredEntitySet("RoutingCustomers");
@@ -125,14 +123,6 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             AddPermissionsTo(model, getSalesPerson, operationRestrictions, "Customer.GetSalesPerson");
             AddPermissionsTo(model, getSalesPeople, operationRestrictions, "Customer.GetSalesPeople");
             AddPermissionsTo(model, getVIPRoutingCustomers, operationRestrictions, "SalesPerson.GetVip");
-
-            //model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
-            //    productCustomers,
-            //    model.FindTerm(navigationRestrictions),
-            //    new EdmRecordExpression(
-            //        new EdmPropertyConstructor("ReadRestrictions", CreatePermission("Product.ReadCustomer")),
-            //        new EdmPropertyConstructor("InsertRestrictions", CreatePermission("Product.InsertCustomer")),
-            //        new EdmPropertyConstructor("UpdateRestrictions", CreatePermission("Product.UpdateCustomer")))));
         }
 
         void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)

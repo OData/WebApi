@@ -31,11 +31,10 @@ namespace Microsoft.AspNet.OData.Authorization
         /// <returns></returns>
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ODataAuthorizationScopesRequirement requirement)
         {
-            var claim = context.User?.FindFirst("Scope");
             var getScopes = this._scopesFinder ?? DefaultFindScopes;
             var scopes = await getScopes(context);
 
-            if (scopes.Any(scope => requirement.AllowedScopes.Contains(scope)))
+            if (scopes != null && scopes.Any(scope => requirement.AllowedScopes.Contains(scope)))
             {
                 context.Succeed(requirement);
             }

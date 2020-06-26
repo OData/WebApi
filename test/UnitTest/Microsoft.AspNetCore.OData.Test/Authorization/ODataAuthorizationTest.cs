@@ -242,6 +242,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         // entityset/key/navigation
         [InlineData("GET", "Products(10)/RoutingCustomers", "Customer.Read", "GetProductCustomers(10)")]
         // TODO add tests for /navigation
+        // TODO add tests for /navigation/$ref
         // unbound action
         [InlineData("POST", "GetRoutingCustomerById", "GetRoutingCustomerById", "GetRoutingCustomerById")]
         // unbound function

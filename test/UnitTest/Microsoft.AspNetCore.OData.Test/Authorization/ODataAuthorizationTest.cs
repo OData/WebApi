@@ -46,7 +46,16 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             }, services =>
             {
                 services.AddAuthorization();
-                services.AddODataAuthorization();
+                services.AddODataAuthorization((context) =>
+                {
+                    var perm = context.User?.FindFirst("Permission")?.Value;
+                    if (perm == null)
+                    {
+                        return Task.FromResult(Enumerable.Empty<string>());
+                    }
+
+                    return Task.FromResult(new string[] { perm }.AsEnumerable());
+                });
                 services.AddRouting();
                 services.AddAuthentication("AuthScheme").AddScheme<CustomAuthOptions, CustomAuthHandler>("AuthScheme", options => { });
             }, app =>
@@ -289,10 +298,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var identity = new System.Security.Principal.GenericIdentity("Me");
-            var scopes = Request.Headers["Scope"];
-            if (scopes.Count != 0)
+            var scopeValues = Request.Headers["Scope"];
+            if (scopeValues.Count != 0)
             {
-                identity.AddClaim(new System.Security.Claims.Claim("Scope", scopes.ToArray()[0]));
+                var scope = scopeValues.ToArray()[0];
+                identity.AddClaim(new System.Security.Claims.Claim("Permission", scope));
             }
 
             var principal = new System.Security.Principal.GenericPrincipal(identity, Array.Empty<string>());

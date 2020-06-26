@@ -107,10 +107,13 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 
 #if !NETCOREAPP2_0
         /// <summary>
-        /// Create an TestServer.
+        /// Create a TestServer that uses endpoint routing.
         /// </summary>
         /// <param name="controllers">The controllers to use.</param>
-        /// <param name="configureAction">The route configuration action.</param>
+        /// <param name="configureEndpoints">The endpoints configuration action.</param>
+        /// <param name="configureService">The service collection configuration action.</param>
+        /// <param name="configureBuilder">The app builder configuration action.
+        /// This can be used to add additional middleware before the endpoints middleware.</param>
         /// <returns>An TestServer.</returns>
         public static TestServer CreateWithEndpointRouting(
             Type[] controllers,

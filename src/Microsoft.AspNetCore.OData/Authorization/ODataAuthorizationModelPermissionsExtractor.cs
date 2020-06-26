@@ -85,7 +85,16 @@ namespace Microsoft.AspNet.OData.Authorization
                 template.StartsWith("~/entityset/key/cast/property") ||
                 template.StartsWith("~/singleton/property") ||
                 template.StartsWith("~/singleton/cast/property") ||
-                template.EndsWith("/dynamicproperty"))
+                template.EndsWith("/dynamicproperty") ||
+                // navigation properties $ref
+                template == "~/entityset/key/navigation/$ref" ||
+                template == "~/entityset/key/cast/navigation/$ref" ||
+                template == "~/singleton/navigation/$ref" ||
+                template == "~/singleton/cast/navigation/$ref" ||
+                template == "~/entityset/key/navigation/key/$ref" ||
+                template == "~/entityset/key/cast/navigation/key/$ref" ||
+                template == "~/singleton/navigation/key/$ref" ||
+                template == "~/singleton/cast/navigation/key/$ref")
             {
                 var isSingleton = template.StartsWith("~/singleton");
                 var annotations = isSingleton ?

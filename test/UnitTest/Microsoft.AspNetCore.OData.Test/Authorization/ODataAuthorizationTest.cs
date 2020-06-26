@@ -1,9 +1,11 @@
 ﻿#if !NETCOREAPP2_0
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Extensions;
 using Microsoft.AspNet.OData.Test.Routing;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -78,6 +80,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var getSalesPerson = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPerson");
             var getSalesPeople = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPeople");
             var getVIPRoutingCustomers = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetVIPRoutingCustomers");
+            var getRoutingCustomerById = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetRoutingCustomerById");
+            var unboundFunction = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "UnboundFunction");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
                 products,
@@ -97,6 +101,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
 
             AddPermissionsTo(model, productFunction, operationRestrictions, "Product.Function");
             AddPermissionsTo(model, topProduct, operationRestrictions, "Product.Top");
+            AddPermissionsTo(model, getRoutingCustomerById, operationRestrictions, "GetRoutingCustomerById");
+            AddPermissionsTo(model, unboundFunction, operationRestrictions, "UnboundFunction");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
                 customers,
@@ -237,7 +243,11 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         // entityset/key/navigation
         [InlineData("GET", "Products(10)/RoutingCustomers", "Customer.Read", "GetProductCustomers(10)")]
         // TODO add tests for /navigation
-
+        // unbound action
+        [InlineData("POST", "GetRoutingCustomerById", "GetRoutingCustomerById", "GetRoutingCustomerById")]
+        // unbound function
+        [InlineData("GET", "UnboundFunction", "UnboundFunction", "UnboundFunction")]
+        [InlineData("GET", "Products(10)/RoutingCustomers(20)/Address/Street", "Product.ReadCustomer", "GetProductRoutingCustomerAddressStreet")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -426,6 +436,13 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         {
             return $"GetProductCustomers({key})";
         }
+
+        [HttpGet]
+        [ODataRoute("Products({key})/RoutingCustomers({relatedKey})/Address/Street")]
+        public string GetProductCustomerAddressStreet(int key, int relatedKey)
+        {
+            return "GetProductCustomerAddressStreet";
+        }
     }
 
     public class MyProductController: TestODataController
@@ -510,6 +527,20 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string GetSalesPeopleOnCollectionOfVIP()
         {
             return "GetSalesPeopleOnVIP()";
+        }
+
+        [HttpPost]
+        [ODataRoute("GetRoutingCustomerById")]
+        public string GetRoutingCustomerById()
+        {
+            return "GetRoutingCustomerById";
+        }
+
+        [HttpGet]
+        [ODataRoute("UnboundFunction")]
+        public string UnboundFunction()
+        {
+            return "UnboundFunction";
         }
     }
 

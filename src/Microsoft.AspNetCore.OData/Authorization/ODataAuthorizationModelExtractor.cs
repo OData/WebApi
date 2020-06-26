@@ -152,6 +152,17 @@ namespace Microsoft.AspNet.OData.Authorization
                 return GetOperationPermissions(annotations);
             }
 
+            // unbound functions and actions
+            if (template == "~/unboundaction" || template == "~/unboundfunction")
+            {
+                var segment = odataPath.Segments.Last() as OperationImportSegment;
+                var annotations = segment.OperationImports.FirstOrDefault()?.Operation.VocabularyAnnotations(model);
+                if (annotations != null)
+                {
+                    return GetOperationPermissions(annotations);
+                }
+            }
+
 
             return Enumerable.Empty<PermissionData>();
         }

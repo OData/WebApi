@@ -25,279 +25,192 @@ namespace Microsoft.AspNet.OData.Authorization
             var template = odataPath.PathTemplate;
             var method = context.Request.Method;
 
-            if ((template == "~/entityset" && method == "GET")
-                || (template == "~/entityset/cast" && method == "GET")
-                || (template == "~/entityset/$count" && method == "GET")
-                || (template == "~/entityset/cast/$count" && method == "GET"))
+            if (template.EndsWith("$ref"))
             {
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetReadPermissions(annotations);
-            }
-
-            if ((template == "~/entityset" && method == "POST")
-                || (template == "~/entityset/cast" && method == "POST"))
-            {
-                // insert
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetInsertPermissions(annotations);
-            }
-
-            if ((template == "~/entityset/key" && method == "GET")
-                || (template == "~/entityset/key/cast" && method == "GET"))
-            {
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetReadByKeyPermissions(annotations);
-            }
-
-            if ((template == "~/entityset/key" || template == "~/entityset/key/cast")
-                && new string[] { "PUT", "PATCH", "MERGE" }.Contains(method))
-            {
-                // update
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetUpdatePermissions(annotations);
-            }
-
-            if ((template == "~/entityset/key" || template == "~/entityset/key/cast") && method == "DELETE")
-            {
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-                return GetDeletePermissions(annotations);
-            }
-
-            if ((template == "~/singleton" || template == "~/singleton/cast"))
-            {
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath));
-                if (method == "GET")
+                // for ref segments, we apply the permission of the entity that contains the navigation property
+                // e.g. for Customers(10)/Products/$ref, we apply the read key permissions of Customers
+                var index = odataPath.Segments.Count - 2;
+                while (!(odataPath.Segments[index] is KeySegment || odataPath.Segments[index] is SingletonSegment) && index > 0)
                 {
-                    return GetReadPermissions(annotations);
+                    index--;
                 }
-                else if (method == "PUT" || method == "MERGE" || method == "PATCH")
+
+                if (odataPath.Segments[index] is SingletonSegment singletonSegment)
                 {
-                    return GetUpdatePermissions(annotations);
+                    var annotations = singletonSegment.Singleton.VocabularyAnnotations(model);
+                    if (method == "GET")
+                    {
+                        return GetReadPermissions(annotations);
+                    }
+                    else if (method == "PATCH" || method == "PUT" || method == "MERGE" || method == "POST" || method == "DELETE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
                 }
-                else if (method == "DELETE")
+                else if (odataPath.Segments[index] is KeySegment keySegment)
                 {
-                    return GetDeletePermissions(annotations);
+                    var entitySet = keySegment.NavigationSource as IEdmEntitySet;
+                    var annotations = entitySet.VocabularyAnnotations(model);
+
+                    if (method == "GET")
+                    {
+                        return GetReadByKeyPermissions(annotations);
+                    }
+                    else if (method == "PUT" || method == "POST" || method == "MERGE" || method == "PATCH" || method == "DELETE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
                 }
             }
-
-            // properties
-            if (template.StartsWith("~/entityset/key/property") ||
-                template.StartsWith("~/entityset/key/cast/property") ||
-                template.StartsWith("~/singleton/property") ||
-                template.StartsWith("~/singleton/cast/property") ||
-                template.EndsWith("/dynamicproperty") ||
-                // navigation properties $ref
-                template == "~/entityset/key/navigation/$ref" ||
-                template == "~/entityset/key/cast/navigation/$ref" ||
-                template == "~/singleton/navigation/$ref" ||
-                template == "~/singleton/cast/navigation/$ref" ||
-                template == "~/entityset/key/navigation/key/$ref" ||
-                template == "~/entityset/key/cast/navigation/key/$ref" ||
-                template == "~/singleton/navigation/key/$ref" ||
-                template == "~/singleton/cast/navigation/key/$ref")
+            else if (template.EndsWith("/property") ||
+                template.EndsWith("/property/$value") ||
+                template.EndsWith("/property/$count"))
             {
-                var isSingleton = template.StartsWith("~/singleton");
-                var annotations = isSingleton ?
-                    model.VocabularyAnnotations.Where(a => IsAnnotationForSingleton(a, odataPath)) :
-                    model.VocabularyAnnotations.Where(a => IsAnnotationForEntitySet(a, odataPath));
-
-                if (method == "GET")
+                // find the key segment, or singleton the precedes the property
+                var index = odataPath.Segments.Count - 1;
+                while (!(odataPath.Segments[index] is SingletonSegment || odataPath.Segments[index] is KeySegment) && index > 0)
                 {
-                    return isSingleton ?
-                        GetReadPermissions(annotations) :
-                        GetReadByKeyPermissions(annotations);
+                    index--;
                 }
-                else if (method == "PUT" || method == "MERGE" || method == "PATCH" || method == "DELETE" || method == "POST")
+
+                if (odataPath.Segments[index] is SingletonSegment singletonSegment)
                 {
-                    return GetUpdatePermissions(annotations);
+                    var annotations = singletonSegment.Singleton.VocabularyAnnotations(model);
+                    if (method == "GET")
+                    {
+                        return GetReadPermissions(annotations);
+                    }
+                    else if (method == "PATCH" || method == "PUT" || method == "MERGE" || method == "POST" || method == "DELETE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
+                }
+                else if (odataPath.Segments[index] is KeySegment keySegment)
+                { 
+                    var entitySet = keySegment.NavigationSource as IEdmEntitySet;
+                    var annotations = entitySet.VocabularyAnnotations(model);
+
+                    if (method == "GET")
+                    {
+                        return GetReadByKeyPermissions(annotations);
+                    }
+                    else if (method == "PUT" || method == "POST" || method == "MERGE" || method == "PATCH" || method == "DELETE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
                 }
             }
-
-            // navigation properties
-            if (template.EndsWith("/navigation") || template.EndsWith("/navigation/$count"))
+            else
             {
-                NavigationPropertySegment navigationSegment =
-                    (odataPath.Segments.Last() as NavigationPropertySegment) ??
-                    odataPath.Segments[odataPath.Segments.Count - 2] as NavigationPropertySegment;
+                ODataPathSegment mainSegment = null;
+                for (var index = odataPath.Segments.Count - 1; index >= 0; index--)
+                {
+                    var segment = odataPath.Segments[index];
+                    if (segment is EntitySetSegment ||
+                        segment is SingletonSegment ||
+                        segment is NavigationPropertySegment ||
+                        segment is OperationSegment ||
+                        segment is OperationImportSegment ||
+                        segment is KeySegment)
+                    {
+                        mainSegment = segment;
+                        break;
+                    }
+                }
 
-                var entitySet = navigationSegment.NavigationSource as IEdmEntitySet;
-                var singleton = navigationSegment.NavigationSource as IEdmSingleton;
-                var annotations = entitySet?.VocabularyAnnotations(model) ?? singleton?.VocabularyAnnotations(model);
-              
-                if (method == "GET")
+                if (mainSegment is EntitySetSegment entitySetSegment)
                 {
-                    return GetReadPermissions(annotations);
+                    var annotations = entitySetSegment.EntitySet.VocabularyAnnotations(model);
+                    if (method == "GET")
+                    {
+                        return GetReadPermissions(annotations);
+                    }
+                    else if (method == "POST")
+                    {
+                        return GetInsertPermissions(annotations);
+                    }
+                    else if (method == "PATCH" || method == "PUT" || method == "MERGE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
                 }
-                else if (method == "PATCH" || method == "PUT" || method == "MERGE")
+                else if (mainSegment is SingletonSegment singletonSegment)
                 {
-                    return GetUpdatePermissions(annotations);
+                    var annotations = singletonSegment.Singleton.VocabularyAnnotations(model);
+                    if (method == "GET")
+                    {
+                        return GetReadPermissions(annotations);
+                    }
+                    else if (method == "POST")
+                    {
+                        return GetInsertPermissions(annotations);
+                    }
+                    else if (method == "PATCH" || method == "PUT" || method == "MERGE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
+                    else if (method == "DELETE")
+                    {
+                        return GetDeletePermissions(annotations);
+                    }
                 }
-                else if (method == "POST")
+                else if (mainSegment is KeySegment keySegment)
                 {
-                    return GetInsertPermissions(annotations);
-                }
-                else if (method == "DELETE")
-                {
-                    return GetDeletePermissions(annotations);
-                }
-                
-            }
+                    var entitySet = keySegment.NavigationSource as IEdmEntitySet;
+                    var annotations = entitySet.VocabularyAnnotations(model);
 
-            // functions and actions
-            if (template.StartsWith("~/entityset/key/function") ||
-                template.StartsWith("~/entityset/key/cast/function") ||
-                template.StartsWith("~/entityset/function") ||
-                template.StartsWith("~/entityset/cast/function") ||
-                template.StartsWith("~/singleton/function") ||
-                template.StartsWith("~/singleton/cast/function") ||
-                template.StartsWith("~/entityset/key/action") ||
-                template.StartsWith("~/entityset/key/cast/action") ||
-                template.StartsWith("~/entityset/action") ||
-                template.StartsWith("~/entityset/cast/action") ||
-                template.StartsWith("~/singleton/action") ||
-                template.StartsWith("~/singleton/cast/action"))
-            {
-                var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForOperation(a, odataPath));
-                return GetOperationPermissions(annotations);
-            }
-
-            // unbound functions and actions
-            if (template == "~/unboundaction" || template == "~/unboundfunction")
-            {
-                var segment = odataPath.Segments.Last() as OperationImportSegment;
-                var annotations = segment.OperationImports.FirstOrDefault()?.Operation.VocabularyAnnotations(model);
-                if (annotations != null)
+                    if (method == "GET")
+                    {
+                        return GetReadByKeyPermissions(annotations);
+                    }
+                    else if (method == "PUT" || method == "POST" || method == "MERGE" || method == "PATCH")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
+                    else if (method == "DELETE")
+                    {
+                        return GetDeletePermissions(annotations);
+                    }
+                }
+                else if (mainSegment is NavigationPropertySegment navigationSegment)
                 {
+                    var entitySet = navigationSegment.NavigationSource as IEdmEntitySet;
+                    var singleton = navigationSegment.NavigationSource as IEdmSingleton;
+                    var annotations = entitySet?.VocabularyAnnotations(model) ?? singleton?.VocabularyAnnotations(model);
+
+                    if (method == "GET")
+                    {
+                        return GetReadPermissions(annotations);
+                    }
+                    else if (method == "PATCH" || method == "PUT" || method == "MERGE")
+                    {
+                        return GetUpdatePermissions(annotations);
+                    }
+                    else if (method == "POST")
+                    {
+                        return GetInsertPermissions(annotations);
+                    }
+                    else if (method == "DELETE")
+                    {
+                        return GetDeletePermissions(annotations);
+                    }
+                }
+                else if (mainSegment is OperationSegment operationSegment)
+                {
+                    //var annotations = operationSegment.Operations.First().VocabularyAnnotations(model);
+                    var annotations = model.VocabularyAnnotations.Where(a => IsAnnotationForOperation(a, odataPath));
+                    return GetOperationPermissions(annotations);
+                }
+                else if (mainSegment is OperationImportSegment operationImportSegment)
+                {
+                    var annotations = operationImportSegment.OperationImports.First().Operation.VocabularyAnnotations(model);
                     return GetOperationPermissions(annotations);
                 }
             }
 
-            ODataPathSegment mainSegment = null;
-            foreach (var segment in odataPath.Segments)
-            {
-                if (segment is EntitySetSegment ||
-                    segment is SingletonSegment ||
-                    segment is NavigationPropertySegment ||
-                    segment is OperationSegment ||
-                    segment is OperationImportSegment ||
-                    segment is KeySegment)
-                {
-                    mainSegment = segment;
-                }
-            }
-
-            if (mainSegment is EntitySetSegment entitySetSegment)
-            {
-                var annotations = entitySetSegment.EntitySet.VocabularyAnnotations(model);
-                if (method == "GET")
-                {
-                    return GetReadPermissions(annotations);
-                }
-                else if (method == "POST")
-                {
-                    return GetInsertPermissions(annotations);
-                }
-                else if (method == "PATCH" || method == "PUT" || method == "MERGE")
-                {
-                    return GetUpdatePermissions(annotations);
-                }
-            }
-            else if (mainSegment is SingletonSegment singletonSegment)
-            {
-                var annotations = singletonSegment.Singleton.VocabularyAnnotations(model);
-                if (method == "GET")
-                {
-                    return GetReadPermissions(annotations);
-                }
-                else if (method == "POST")
-                {
-                    return GetInsertPermissions(annotations);
-                }
-                else if (method == "PATCH" || method == "PUT" || method == "MERGE")
-                {
-                    return GetUpdatePermissions(annotations);
-                }
-                else if (method == "DELETE")
-                {
-                    return GetDeletePermissions(annotations);
-                }
-            }
-            else if (mainSegment is KeySegment keySegment)
-            {
-                var name = keySegment.NavigationSource.Name;
-                var entitySet = model.FindDeclaredEntitySet(name);
-                var annotations = entitySet.VocabularyAnnotations(model);
-
-                if (method == "GET")
-                {
-                    return GetReadByKeyPermissions(annotations);
-                }
-                else if (method == "PUT" || method == "POST" || method == "MERGE" || method == "PATCH")
-                {
-                    return GetUpdatePermissions(annotations);
-                }
-                else if (method == "DELETE")
-                {
-                    return GetDeletePermissions(annotations);
-                }
-            }
-            else if (mainSegment is NavigationPropertySegment navigationSegment)
-            {
-                var entitySet = navigationSegment.NavigationSource as IEdmEntitySet;
-                var singleton = navigationSegment.NavigationSource as IEdmSingleton;
-                var annotations = entitySet?.VocabularyAnnotations(model) ?? singleton?.VocabularyAnnotations(model);
-
-                if (method == "GET")
-                {
-                    return GetReadPermissions(annotations);
-                }
-                else if (method == "PATCH" || method == "PUT" || method == "MERGE")
-                {
-                    return GetUpdatePermissions(annotations);
-                }
-                else if (method == "POST")
-                {
-                    return GetInsertPermissions(annotations);
-                }
-                else if (method == "DELETE")
-                {
-                    return GetDeletePermissions(annotations);
-                }
-            }
-            else if (mainSegment is OperationSegment operationSegment)
-            {
-                var annotations = operationSegment.Operations.First().VocabularyAnnotations(model);
-                return GetOperationPermissions(annotations);
-            }
-            else if (mainSegment is OperationImportSegment operationImportSegment)
-            {
-                var annotations = operationImportSegment.OperationImports.First().VocabularyAnnotations(model);
-                return GetOperationPermissions(annotations);
-            }
-
-
             return Enumerable.Empty<PermissionData>();
         }
 
-        private static bool IsAnnotationForEntitySet(IEdmVocabularyAnnotation annotation, Routing.ODataPath path)
-        {
-            if (annotation.Target is IEdmEntitySet target && path.Segments[0] is EntitySetSegment segment)
-            {
-                return target.Name == segment.EntitySet.Name;
-            }
-
-            return false;
-        }
-
-        private static bool IsAnnotationForSingleton(IEdmVocabularyAnnotation annotation, Routing.ODataPath path)
-        {
-            if (annotation.Target is IEdmSingleton target && path.Segments[0] is SingletonSegment segment)
-            {
-                return target.Name == segment.Singleton.Name;
-            }
-
-            return false;
-        }
 
         private static bool IsAnnotationForOperation(IEdmVocabularyAnnotation annotation, Routing.ODataPath path)
         {
@@ -319,8 +232,6 @@ namespace Microsoft.AspNet.OData.Authorization
         {
             return GetPermissions(ODataCapabilityRestrictionsConstants.ReadRestrictions, annotations);
         }
-
-
 
         private static IEnumerable<PermissionData> GetReadByKeyPermissions(IEnumerable<IEdmVocabularyAnnotation> annotations)
         {

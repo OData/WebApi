@@ -247,7 +247,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("POST", "GetRoutingCustomerById", "GetRoutingCustomerById", "GetRoutingCustomerById")]
         // unbound function
         [InlineData("GET", "UnboundFunction", "UnboundFunction", "UnboundFunction")]
-        [InlineData("GET", "Products(10)/RoutingCustomers(20)/Address/Street", "Product.ReadCustomer", "GetProductRoutingCustomerAddressStreet")]
+        // complex routes requiring ODataRoute attribute
+        [InlineData("GET", "Products(10)/RoutingCustomers(20)/Address/Street", "Customer.ReadByKey", "GetProductRoutingCustomerAddressStreet")]
         public async void RestrictsPermissions(string method, string endpoint, string permission, string expectedResponse)
         {
             var uri = $"http://localhost/odata/{endpoint}";
@@ -440,9 +441,9 @@ namespace Microsoft.AspNet.OData.Test.Authorization
 
         [HttpGet]
         [ODataRoute("Products({key})/RoutingCustomers({relatedKey})/Address/Street")]
-        public string GetProductCustomerAddressStreet(int key, int relatedKey)
+        public string GetProductRoutingCustomerAddressStreet(int key, int relatedKey)
         {
-            return "GetProductCustomerAddressStreet";
+            return "GetProductRoutingCustomerAddressStreet";
         }
     }
 

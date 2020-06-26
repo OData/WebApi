@@ -118,6 +118,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
                     CreatePermissionProperty(new string[] { "Customer.Read", "Customer.ReadAll" }),
                     new EdmPropertyConstructor("ReadByKeyRestrictions", CreatePermission(new[] { "Customer.ReadByKey" })))));
 
+            AddPermissionsTo(model, customers, insertRestrictions, "Customer.Insert");
+
             AddPermissionsTo(model, vipCustomer, readRestrictions, "VipCustomer.Read");
 
             model.AddVocabularyAnnotation(new EdmVocabularyAnnotation(
@@ -239,10 +241,15 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("POST", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/Tags", "MyProduct.Update", "PostMyProductTags")]
         // dynamic properties
         [InlineData("GET", "SalesPeople(10)/SomeProperty", "SalesPerson.ReadByKey", "GetSalesPersonDynamicProperty(10, SomeProperty)")]
-        // entityset/key/navigation
+        // navigation properties
         [InlineData("GET", "Products(10)/RoutingCustomers", "Customer.Read", "GetProductCustomers(10)")]
-        // TODO add tests for /navigation
-        // TODO add tests for /navigation/$ref
+        [InlineData("POST", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/RoutingCustomers", "Customer.Insert", "PostMyProductCustomer")]
+        // $ref
+        [InlineData("GET", "Products(10)/RoutingCustomers(20)/$ref","Product.ReadByKey", "GetProductCustomerRef(10, 20)")]
+        [InlineData("POST", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/RoutingCustomers/$ref", "MyProduct.Update", "CreateMyProductCustomerRef")]
+        [InlineData("DELETE", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/RoutingCustomers(20)/$ref", "Product.Update", "DeleteProductCustomerRef(10, 20)")]
+        [InlineData("DELETE", "MyProduct/RoutingCustomers(20)/$ref", "MyProduct.Update", "DeleteMyProductCustomerRef(20)")]
+        [InlineData("PUT", "Products(10)/RoutingCustomers/$ref", "Product.Update", "CreateProductCustomerRef(10)")]
         // unbound action
         [InlineData("POST", "GetRoutingCustomerById", "GetRoutingCustomerById", "GetRoutingCustomerById")]
         // unbound function
@@ -439,6 +446,22 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             return $"GetProductCustomers({key})";
         }
 
+        [ODataRoute("Products({key})/RoutingCustomers({relatedKey})/$ref")]
+        public string GetRefToRoutingCustomers(int key, int relatedKey)
+        {
+            return $"GetProductCustomerRef({key}, {relatedKey})";
+        }
+
+        public string DeleteRefToRoutingCustomers(int key, int relatedKey)
+        {
+            return $"DeleteProductCustomerRef({key}, {relatedKey})";
+        }
+
+        public string CreateRefToRoutingCustomers(int key)
+        {
+            return $"CreateProductCustomerRef({key})";
+        }
+
         [HttpGet]
         [ODataRoute("Products({key})/RoutingCustomers({relatedKey})/Address/Street")]
         public string GetProductRoutingCustomerAddressStreet(int key, int relatedKey)
@@ -512,6 +535,21 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         public string GetTags()
         {
             return "GetMyProductTags";
+        }
+
+        public string PostToRoutingCustomers()
+        {
+            return "PostMyProductCustomer";
+        }
+
+        public string CreateRefToRoutingCustomers()
+        {
+            return $"CreateMyProductCustomerRef";
+        }
+
+        public string DeleteRefToRoutingCustomers(int relatedKey)
+        {
+            return $"DeleteMyProductCustomerRef({relatedKey})";
         }
     }
 

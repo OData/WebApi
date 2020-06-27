@@ -46,15 +46,18 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             }, services =>
             {
                 services.AddAuthorization();
-                services.AddODataAuthorization((context) =>
+                services.AddODataAuthorization((options) =>
                 {
-                    var perm = context.User?.FindFirst("Permission")?.Value;
-                    if (perm == null)
+                    options.ScopesFinder = (context) =>
                     {
-                        return Task.FromResult(Enumerable.Empty<string>());
-                    }
+                        var perm = context.User?.FindFirst("Permission")?.Value;
+                        if (perm == null)
+                        {
+                            return Task.FromResult(Enumerable.Empty<string>());
+                        }
 
-                    return Task.FromResult(new string[] { perm }.AsEnumerable());
+                        return Task.FromResult(new string[] { perm }.AsEnumerable());
+                    };
                 });
                 services.AddRouting();
                 services.AddAuthentication("AuthScheme").AddScheme<CustomAuthOptions, CustomAuthHandler>("AuthScheme", options => { });
@@ -80,13 +83,21 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             var customers = model.FindDeclaredEntitySet("RoutingCustomers");
             var vipCustomer = model.FindDeclaredSingleton("VipCustomer");
             var salesPeople = model.FindDeclaredEntitySet("SalesPeople");
-            var productFunction = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "FunctionBoundToProduct");
+            var productFunction = model.SchemaElements.OfType<IEdmOperation>()
+                .First(o => o.Name == "FunctionBoundToProduct" && o.Parameters.Count() == 1);
+            var productFunction2 = model.SchemaElements.OfType<IEdmOperation>()
+                .First(o => o.Name == "FunctionBoundToProduct" && o.Parameters.Count() == 2);
+            var productFunction3 = model.SchemaElements.OfType<IEdmOperation>()
+                .First(o => o.Name == "FunctionBoundToProduct" && o.Parameters.Count() == 4);
             var topProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "TopProductOfAll");
             var getProducts = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetProducts");
             var getFavoriteProduct = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetFavoriteProduct");
             var getSalesPerson = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPerson");
             var getSalesPeople = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetSalesPeople");
-            var getVIPRoutingCustomers = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetVIPRoutingCustomers");
+            var getVIPRoutingCustomers = model.SchemaElements.OfType<IEdmOperation>()
+                .First(o => o.Name == "GetVIPRoutingCustomers" && o.IsBound && !o.Parameters.First().Type.IsCollection());
+            var getVIPRoutingCustomersBoundToCollection = model.SchemaElements.OfType<IEdmOperation>()
+                .First(o => o.Name == "GetVIPRoutingCustomers" && o.IsBound && o.Parameters.First().Type.IsCollection());
             var getRoutingCustomerById = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "GetRoutingCustomerById");
             var unboundFunction = model.SchemaElements.OfType<IEdmOperation>().First(o => o.Name == "UnboundFunction");
 
@@ -107,6 +118,8 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             AddPermissionsTo(model, myProduct, updateRestrictions, "MyProduct.Update");
 
             AddPermissionsTo(model, productFunction, operationRestrictions, "Product.Function");
+            AddPermissionsTo(model, productFunction2, operationRestrictions, "Product.Function2");
+            AddPermissionsTo(model, productFunction3, operationRestrictions, "Product.Function3");
             AddPermissionsTo(model, topProduct, operationRestrictions, "Product.Top");
             AddPermissionsTo(model, getRoutingCustomerById, operationRestrictions, "GetRoutingCustomerById");
             AddPermissionsTo(model, unboundFunction, operationRestrictions, "UnboundFunction");
@@ -134,6 +147,7 @@ namespace Microsoft.AspNet.OData.Test.Authorization
             AddPermissionsTo(model, getSalesPerson, operationRestrictions, "Customer.GetSalesPerson");
             AddPermissionsTo(model, getSalesPeople, operationRestrictions, "Customer.GetSalesPeople");
             AddPermissionsTo(model, getVIPRoutingCustomers, operationRestrictions, "SalesPerson.GetVip");
+            AddPermissionsTo(model, getVIPRoutingCustomersBoundToCollection, operationRestrictions, "SalesPerson.GetVipOnCollection");
         }
 
         void AddPermissionsTo(EdmModel model, IEdmVocabularyAnnotatable target, string restrictionName, params string[] scopes)
@@ -178,28 +192,20 @@ namespace Microsoft.AspNet.OData.Test.Authorization
         [InlineData("MERGE", "MyProduct", "MyProduct.Update", "PATCH MyProduct")]
         [InlineData("MERGE", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct", "MyProduct.Update", "PATCH MySpecialProduct")]
         // bound functions
-        // TODO should support different function overloads with different permissions
         // TODO create test with functions bound to derived types
-        // TODO figure out why /$count returns a 404
         [InlineData("GET", "Products(10)/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct(10)")]
-        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1)", "Product.Function", "FunctionBoundToProduct(10, 1)")]
-        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1, P2=2, P3='3')", "Product.Function", "FunctionBoundToProduct(10, 1, 2, 3)")]
-        //[InlineData("GET", "Products(10)/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct(10)")]
+        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1)", "Product.Function2", "FunctionBoundToProduct(10, 1)")]
+        [InlineData("GET", "Products(10)/FunctionBoundToProduct(P1=1, P2=2, P3='3')", "Product.Function3", "FunctionBoundToProduct(10, 1, 2, 3)")]
         [InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct(10)")]
-        //[InlineData("GET", "Products(10)/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct(10)")]
         // entityset functions
         [InlineData("GET", "Products/TopProductOfAll", "Product.Top", "TopProductOfAll()")]
-        //[InlineData("GET", "Products/TopProductOfAll/$count", "Product.Top", "TopProductOfAll()")]
         [InlineData("GET", "Products/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/TopProductOfAll", "Product.Top", "TopProductOfAll()")]
-        //[InlineData("GET", "Products/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/TopProductOfAll/$count", "Product.Top", "TopProductOfAll()")]
         // singleton functions
         [InlineData("GET", "MyProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct()")]
-        //[InlineData("GET", "MyProduct/FunctionBoundToProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
         [InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundToProduct", "Product.Function", "FunctionBoundToProduct()")]
-        //[InlineData("GET", "MyProduct/Microsoft.AspNet.OData.Test.Routing.SpecialProduct/FunctionBoundtoProduct/$count", "Product.Function", "FunctionBoundToProduct()")]
         // entity actions
         [InlineData("POST", "SalesPeople(10)/GetVIPRoutingCustomers", "SalesPerson.GetVip", "GetVIPRoutingCustomers(10)")]
-        [InlineData("POST", "SalesPeople/GetVIPRoutingCustomers", "SalesPerson.GetVip", "GetVIPRoutingCustomers()")]
+        [InlineData("POST", "SalesPeople/GetVIPRoutingCustomers", "SalesPerson.GetVipOnCollection", "GetVIPRoutingCustomers()")]
         [InlineData("POST", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/GetSalesPerson", "Customer.GetSalesPerson", "GetSalesPersonOnVIP(10)")]
         // entityset actions
         [InlineData("POST", "RoutingCustomers/GetProducts", "Customer.GetProducts", "GetProducts()")]

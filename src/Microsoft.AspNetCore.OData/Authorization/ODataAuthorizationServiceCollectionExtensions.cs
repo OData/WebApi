@@ -17,11 +17,13 @@ namespace Microsoft.AspNet.OData.Extensions
         /// Enables OData model-based authorization
         /// </summary>
         /// <param name="services">The service collection</param>
-        /// <param name="getScopes">Function to retrieve the authenticated user's scopes from the authorization context</param>
+        /// <param name="configureOptions">Action to configure the authorization options</param>
         /// <returns></returns>
-        public static IServiceCollection AddODataAuthorization(this IServiceCollection services, Func<AuthorizationHandlerContext, Task<IEnumerable<string>>> getScopes = null)
+        public static IServiceCollection AddODataAuthorization(this IServiceCollection services, Action<ODataAuthorizationOptions> configureOptions = null)
         {
-            services.AddSingleton<IAuthorizationHandler, ODataAuthorizationHandler>(_ => new ODataAuthorizationHandler(getScopes));
+            var options = new ODataAuthorizationOptions();
+            configureOptions?.Invoke(options);
+            services.AddSingleton<IAuthorizationHandler, ODataAuthorizationHandler>(_ => new ODataAuthorizationHandler(options.ScopesFinder));
             return services;
         }
     }

@@ -37,6 +37,7 @@ namespace Microsoft.AspNet.OData.Authorization
                 await this.next(context);
                 return;
             }
+
             IEdmModel model = context.Request.GetModel();
             if (model == null)
             {

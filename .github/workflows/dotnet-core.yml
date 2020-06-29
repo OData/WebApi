@@ -8,18 +8,32 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET Core
+    - uses: actions/checkout@v1
+    - name: Setup .NET Core 2.2.108
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.2.108
+    - name: Setup .NET Core 3.1.100
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1.101
-    - name: Install dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
+    - name: Setup side by side .NET SDKs on Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        SET DOTNET_22_ROOT=%DOTNET_ROOT:3.1.101=2.2.108%
+        xcopy /s /y /d %DOTNET_31_ROOT% %DOTNET_ROOT%
+      shell: cmd
+    - name: Setup side by side .NET SDKs on ${{ matrix.os }}
+      if: matrix.os != 'windows-latest'
+      run: |
+        rsync -a ${DOTNET_ROOT/3.1.101/2.2.108}/* $DOTNET_ROOT/
+    - name: Build with netcoreapp
+      run: dotnet build --configuration Release
+    - name: Unit Testing
+      run: dotnet test

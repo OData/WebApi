@@ -19,20 +19,20 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
-    - name: Setup .NET Core 3.1.100
+    - name: Setup .NET Core 3.1.301
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.101
+        dotnet-version: 3.1.301
     - name: Setup side by side .NET SDKs on Windows
       if: matrix.os == 'windows-latest'
       run: |
-        SET DOTNET_22_ROOT=%DOTNET_ROOT:3.1.101=2.2.108%
+        SET DOTNET_22_ROOT=%DOTNET_ROOT:3.1.301=2.2.108%
         xcopy /s /y /d %DOTNET_31_ROOT% %DOTNET_ROOT%
       shell: cmd
     - name: Setup side by side .NET SDKs on ${{ matrix.os }}
       if: matrix.os != 'windows-latest'
       run: |
-        rsync -a ${DOTNET_ROOT/3.1.101/2.2.108}/* $DOTNET_ROOT/
+        rsync -a ${DOTNET_ROOT/3.1.301/2.2.108}/* $DOTNET_ROOT/
     - name: Build with netcoreapp
       run: dotnet build --configuration Release
     - name: Unit Testing

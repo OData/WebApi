@@ -36,4 +36,4 @@ jobs:
     - name: Build with netcoreapp
       run: dotnet build .\\sln\\WebApiOData.AspNetCore.sln --configuration Release
     - name: Unit Testing
-      run: dotnet test
+      run: dotnet test .\\sln\\WebApiOData.AspNetCore.sln

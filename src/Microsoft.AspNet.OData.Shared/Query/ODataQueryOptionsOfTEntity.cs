@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -13,7 +14,9 @@ namespace Microsoft.AspNet.OData.Query
     /// Currently this only supports $filter, $orderby, $top, $skip.
     /// </summary>
     [ODataQueryParameterBinding]
-    public partial class ODataQueryOptions<TEntity> : ODataQueryOptions
+    public partial class ODataQueryOptions<TEntity> 
+        : ODataQueryOptions
+        , IODataQueryOptions<TEntity>
     {
         /// <summary>
         /// Gets the <see cref="ETag{TEntity}"/> from IfMatch header.

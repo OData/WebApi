@@ -34,6 +34,6 @@ jobs:
       run: |
         rsync -a ${DOTNET_ROOT/3.1.301/2.1.202}/* $DOTNET_ROOT/
     - name: Build with netcoreapp
-      run: dotnet build '/sln/WebApiOData.AspNetCore.sln' --configuration Release
+      run: dotnet build .\\sln\\WebApiOData.AspNetCore.sln --configuration Release
     - name: Unit Testing
       run: dotnet test

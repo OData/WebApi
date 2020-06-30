@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -13,7 +14,7 @@ namespace Microsoft.AspNet.OData.Query
     /// <summary>
     /// An implementation of <see cref="IFilterProvider" /> that applies an action filter to
     /// any action with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return type
-    /// that doesn't bind a parameter of type <see cref="ODataQueryOptions" />.
+    /// that doesn't bind a parameter of type <see cref="IODataQueryOptions" />.
     /// </summary>
     public class QueryFilterProvider : IFilterProvider
     {

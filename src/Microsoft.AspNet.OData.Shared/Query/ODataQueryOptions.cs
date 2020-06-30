@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Query
         private OrderByQueryOption _stableOrderBy;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from
+        /// Initializes a new instance of the <see cref="IODataQueryOptions"/> class based on the incoming request and some metadata information from
         /// the <see cref="ODataQueryContext"/>.
         /// </summary>
         /// <param name="context">The <see cref="ODataQueryContext"/> which contains the <see cref="IEdmModel"/> and some type information.</param>

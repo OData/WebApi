@@ -14,7 +14,7 @@ namespace Microsoft.AspNet.OData
     /// <remarks>
     /// This is essentially a <see cref="ValidateNeverAttribute"/>.
     /// </remarks>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
     internal sealed partial class NonValidatingParameterBindingAttribute : ModelBinderAttribute, IPropertyValidationFilter
     {
         /// <inheritdoc />

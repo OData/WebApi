@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -114,7 +115,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
-            ODataQueryOptions option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
                 AllowedQueryOptions = allow,
@@ -132,7 +133,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
-            var option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
                 "To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
@@ -153,7 +154,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
-            var option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
                 "To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
@@ -174,7 +175,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
-            ODataQueryOptions option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
                 AllowedQueryOptions = AllowedQueryOptions.Supported,
@@ -192,7 +193,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
-            var option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
                 "To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
@@ -213,7 +214,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$" + query);
-            ODataQueryOptions option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
                 AllowedQueryOptions = AllowedQueryOptions.All & ~AllowedQueryOptions.Supported,
@@ -231,7 +232,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
-            var option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
             var expectedMessage = string.Format(
                 "Query option '{0}' is not allowed. " +
                 "To allow it, set the 'AllowedQueryOptions' property on EnableQueryAttribute or QueryValidationSettings.",
@@ -251,7 +252,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
         {
             // Arrange
             var message = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$expand=Contacts/Contacts");
-            ODataQueryOptions option = new ODataQueryOptions(_context, message);
+            IODataQueryOptions option = new ODataQueryOptions(_context, message);
 
             Mock<SelectExpandQueryValidator> selectExpandValidator = new Mock<SelectExpandQueryValidator>(new DefaultQuerySettings());
             option.SelectExpand.Validator = selectExpandValidator.Object;

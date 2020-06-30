@@ -2,8 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
+using System;
 
 namespace Microsoft.AspNet.OData.Query.Validators
 {
@@ -17,7 +19,7 @@ namespace Microsoft.AspNet.OData.Query.Validators
         /// </summary>
         /// <param name="options">The OData query to validate.</param>
         /// <param name="validationSettings">The validation settings.</param>
-        public virtual void Validate(ODataQueryOptions options, ODataValidationSettings validationSettings)
+        public virtual void Validate(IODataQueryOptions options, ODataValidationSettings validationSettings)
         {
             if (options == null)
             {
@@ -62,14 +64,21 @@ namespace Microsoft.AspNet.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options.Count != null || options.InternalRequest.IsCountRequest())
+            if (options is ODataQueryOptions _options)
             {
-                ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
-
-                if (options.Count != null)
+                if (_options.Count != null || _options.InternalRequest.IsCountRequest())
                 {
-                    options.Count.Validate(validationSettings);
+                    ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
+
+                    if (_options.Count != null)
+                    {
+                        _options.Count.Validate(validationSettings);
+                    }
                 }
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
 
             if (options.SkipToken != null)

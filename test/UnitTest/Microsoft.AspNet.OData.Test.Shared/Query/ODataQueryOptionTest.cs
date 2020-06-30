@@ -557,7 +557,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?$orderby=UnknownProperty"
             );
 
-            var option = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions option = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ExceptionAssert.Throws<ODataException>(() =>
             {
                 option.ApplyTo(new List<Customer>().AsQueryable());
@@ -574,7 +574,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?$top=NotANumber"
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value 'NotANumber' for $top query option found. " +
@@ -602,7 +602,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?$skip=NotANumber"
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ExceptionAssert.Throws<ODataException>(() =>
                  options.ApplyTo(Customers),
                  "Invalid value 'NotANumber' for $skip query option found. " +
@@ -642,7 +642,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/entityset?" + oDataQuery
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, elementType), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, elementType), message);
             IQueryable finalQuery = options.ApplyTo(query);
 
             string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
@@ -663,7 +663,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             IQueryable finalQuery = options.ApplyTo(Customers);
             string queryExpression = finalQuery.Expression.ToString();
 
@@ -684,7 +684,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             IQueryable finalQuery = options.ApplyTo(Customers);
 
             string queryExpression = ExpressionStringBuilder.ToString(finalQuery.Expression);
@@ -707,7 +707,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ODataQuerySettings querySettings = new ODataQuerySettings
             {
                 EnsureStableOrdering = ensureStableOrdering
@@ -735,7 +735,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ODataQuerySettings querySettings = new ODataQuerySettings
             {
                 EnsureStableOrdering = ensureStableOrdering
@@ -759,7 +759,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?$orderby=CustomerId,Name"
             );
 
-            var options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions options = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
             ODataValidationSettings validationSettings = new ODataValidationSettings { MaxOrderByNodeCount = 1 };
 
             // Act & Assert
@@ -815,7 +815,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             );
 
             ODataQueryContext context = ValidationTestHelper.CreateCustomerContext(false);
-            ODataQueryOptions option = new ODataQueryOptions(context, message);
+            IODataQueryOptions option = new ODataQueryOptions(context, message);
             ODataValidationSettings settings = new ODataValidationSettings()
             {
                 AllowedQueryOptions = AllowedQueryOptions.OrderBy
@@ -881,7 +881,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + query);
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, queryable.ElementType);
-            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
 
             queryable = options.ApplyTo(queryable);
 
@@ -917,7 +917,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/?$filter=$it eq 6&$unknown=value");
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
-            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
 
             var queryable = options.ApplyTo(Enumerable.Range(0, 10).AsQueryable());
 
@@ -932,7 +932,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var message = RequestFactory.Create();
 
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
-            ODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
 
             ExceptionAssert.ThrowsArgumentNull(
                 () => queryOptions.ApplyTo(entity: null, querySettings: new ODataQuerySettings()),
@@ -963,7 +963,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var message = RequestFactory.Create();
 
             ODataQueryContext context = new ODataQueryContext(EdmCoreModel.Instance, typeof(int));
-            ODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(context, message);
 
             ExceptionAssert.ThrowsArgumentNull(
                 () => queryOptions.ApplyTo(entity: 42, querySettings: null),
@@ -982,7 +982,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost?" + parameter);
             ODataQueryContext context = new ODataQueryContext(model.Model, typeof(Customer));
-            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
 
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => queryOptions.ApplyTo(42, new ODataQuerySettings()),
@@ -999,7 +999,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
-            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
             Customer customer = new Customer
             {
                 CustomerId = 1,
@@ -1031,7 +1031,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
-            ODataQueryOptions options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
             IQueryable<Customer> customers =
                 Enumerable.Range(1, 10).Select(
                     i => new Customer
@@ -1080,7 +1080,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://localhost/?$filter=Id eq 42&$orderby=Id&$skip=42&$top=42&$count=true&$select=Id&$expand=Orders");
 
             // Act
-            ODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(context, request);
 
             // Assert
             Assert.NotNull(queryOptions.Filter);

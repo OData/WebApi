@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 
 namespace Microsoft.AspNet.OData
@@ -18,7 +19,8 @@ namespace Microsoft.AspNet.OData
             Contract.Assert(parameterType != null);
 
             if (parameterType.IsGenericType &&
-                parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>))
+                (parameterType.GetGenericTypeDefinition() == typeof(ODataQueryOptions<>) ||
+                 parameterType.GetGenericTypeDefinition() == typeof(IODataQueryOptions<>)))
             {
                 return parameterType.GetGenericArguments().Single();
             }

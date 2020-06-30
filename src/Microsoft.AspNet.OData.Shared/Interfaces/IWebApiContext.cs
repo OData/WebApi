@@ -63,9 +63,9 @@ namespace Microsoft.AspNet.OData.Interfaces
         SelectExpandClause ProcessedSelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ODataQueryOptions"/> of the request.
+        /// Gets or sets the <see cref="IODataQueryOptions"/> of the request.
         /// </summary>
-        ODataQueryOptions QueryOptions { get; set; }
+        IODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the total count for the OData response.

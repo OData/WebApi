@@ -437,12 +437,12 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	int MaxTop  { public get; public set; }
 	int PageSize  { public get; public set; }
 
-	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, ODataQueryOptions queryOptions)
-	public virtual object ApplyQuery (object entity, ODataQueryOptions queryOptions)
+	public virtual System.Linq.IQueryable ApplyQuery (System.Linq.IQueryable queryable, IODataQueryOptions queryOptions)
+	public virtual object ApplyQuery (object entity, IODataQueryOptions queryOptions)
 	public static Microsoft.AspNetCore.Mvc.SerializableError CreateErrorResponse (string message, params System.Exception exception)
 	public virtual Microsoft.OData.Edm.IEdmModel GetModel (System.Type elementClrType, Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor actionDescriptor)
 	public virtual void OnActionExecuted (Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext actionExecutedContext)
-	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, ODataQueryOptions queryOptions)
+	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, IODataQueryOptions queryOptions)
 }
 
 [
@@ -2548,6 +2548,10 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
 }
 
+[
+NonValidatingParameterBindingAttribute(),
+ODataQueryParameterBindingAttribute(),
+]
 public interface Microsoft.AspNet.OData.Interfaces.IODataQueryOptions {
 	ApplyQueryOption Apply  { public abstract get; }
 	ODataQueryContext Context  { public abstract get; }
@@ -2574,6 +2578,9 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataQueryOptions {
 	void Validate (ODataValidationSettings validationSettings)
 }
 
+[
+ODataQueryParameterBindingAttribute(),
+]
 public interface Microsoft.AspNet.OData.Interfaces.IODataQueryOptions`1 : IODataQueryOptions {
 	ETag`1 IfMatch  { public abstract get; }
 	ETag`1 IfNoneMatch  { public abstract get; }
@@ -3006,13 +3013,13 @@ public class Microsoft.AspNet.OData.Query.SkipTokenQueryOption {
 	public SkipTokenQueryOption (string rawValue, ODataQueryContext context, Microsoft.OData.UriParser.ODataQueryOptionParser queryOptionParser)
 
 	ODataQueryContext Context  { public get; }
-	ODataQueryOptions QueryOptions  { public get; }
+	IODataQueryOptions QueryOptions  { public get; }
 	ODataQuerySettings QuerySettings  { public get; }
 	string RawValue  { public get; }
 	SkipTokenQueryValidator Validator  { public get; }
 
-	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
-	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
+	public virtual IQueryable`1 ApplyTo (IQueryable`1 query, ODataQuerySettings querySettings, IODataQueryOptions queryOptions)
+	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, IODataQueryOptions queryOptions)
 	public void Validate (ODataValidationSettings validationSettings)
 }
 
@@ -3707,7 +3714,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	Microsoft.OData.Edm.IEdmNavigationProperty NavigationProperty  { public get; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 	ODataPath Path  { public get; public set; }
-	ODataQueryOptions QueryOptions  { public get; }
+	IODataQueryOptions QueryOptions  { public get; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; public set; }
 	string RootElementName  { public get; public set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
@@ -3838,7 +3845,7 @@ public class Microsoft.AspNet.OData.Query.Validators.FilterQueryValidator {
 public class Microsoft.AspNet.OData.Query.Validators.ODataQueryValidator {
 	public ODataQueryValidator ()
 
-	public virtual void Validate (ODataQueryOptions options, ODataValidationSettings validationSettings)
+	public virtual void Validate (IODataQueryOptions options, ODataValidationSettings validationSettings)
 }
 
 public class Microsoft.AspNet.OData.Query.Validators.OrderByQueryValidator {

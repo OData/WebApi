@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
@@ -682,7 +683,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 model,
                 model.FindDeclaredType("Microsoft.AspNet.OData.Test.Common.Models.AutoExpandCustomer"));
             var request = RequestFactory.Create(HttpMethod.Get, url);
-            var queryOption = new ODataQueryOptions(context, request);
+            ODataQueryOptions queryOption = new ODataQueryOptions(context, request);
             queryOption.AddAutoSelectExpandProperties();
             var selectExpand = queryOption.SelectExpand;
 

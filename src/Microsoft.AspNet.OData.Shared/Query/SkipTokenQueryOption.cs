@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Validators;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -74,7 +75,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// Gets or sets the QueryOptions
         /// </summary>
-        public ODataQueryOptions QueryOptions { get; private set; }
+        public IODataQueryOptions QueryOptions { get; private set; }
 
         /// <summary>
         /// Apply the $skiptoken query to the given IQueryable.
@@ -83,7 +84,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <param name="queryOptions">Information about the other query options.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
-        public virtual IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
+        public virtual IQueryable<T> ApplyTo<T>(IQueryable<T> query, ODataQuerySettings querySettings, IODataQueryOptions queryOptions)
         {
             QuerySettings = querySettings;
             QueryOptions = queryOptions;
@@ -97,7 +98,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="querySettings">The query settings to use while applying this query option.</param>
         /// <param name="queryOptions">Information about the other query options.</param>
         /// <returns>The new <see cref="IQueryable"/> after the skiptoken query has been applied to.</returns>
-        public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, ODataQueryOptions queryOptions)
+        public virtual IQueryable ApplyTo(IQueryable query, ODataQuerySettings querySettings, IODataQueryOptions queryOptions)
         {
             QuerySettings = querySettings;
             QueryOptions = queryOptions;

@@ -387,7 +387,7 @@ namespace Microsoft.AspNet.OData
             IWebApiActionDescriptor actionDescriptor,
             IWebApiRequestMessage request,
             Func<Type, IEdmModel> modelFunction,
-            Func<ODataQueryContext, ODataQueryOptions> createQueryOptionFunction,
+            Func<ODataQueryContext, IODataQueryOptions> createQueryOptionFunction,
             Action<HttpStatusCode> createResponseAction,
             Action<HttpStatusCode, string, Exception> createErrorAction)
         {
@@ -466,9 +466,9 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="queryable">The original queryable instance from the response message.</param>
         /// <param name="queryOptions">
-        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// The <see cref="IODataQueryOptions"/> instance constructed based on the incoming request.
         /// </param>
-        public virtual IQueryable ApplyQuery(IQueryable queryable, ODataQueryOptions queryOptions)
+        public virtual IQueryable ApplyQuery(IQueryable queryable, IODataQueryOptions queryOptions)
         {
             if (queryable == null)
             {
@@ -487,10 +487,10 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="entity">The original entity from the response message.</param>
         /// <param name="queryOptions">
-        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// The <see cref="IODataQueryOptions"/> instance constructed based on the incoming request.
         /// </param>
         /// <returns>The new entity after the $select and $expand query has been applied to.</returns>
-        public virtual object ApplyQuery(object entity, ODataQueryOptions queryOptions)
+        public virtual object ApplyQuery(object entity, IODataQueryOptions queryOptions)
         {
             if (entity == null)
             {
@@ -588,12 +588,12 @@ namespace Microsoft.AspNet.OData
             IWebApiActionDescriptor actionDescriptor,
             Func<Type, IEdmModel> modelFunction,
             IWebApiRequestMessage request,
-            Func<ODataQueryContext, ODataQueryOptions> createQueryOptionFunction)
+            Func<ODataQueryContext, IODataQueryOptions> createQueryOptionFunction)
         {
             ODataQueryContext queryContext = GetODataQueryContext(responseValue, singleResultCollection, actionDescriptor, modelFunction, request.Context.Path);
 
             // Create and validate the query options.
-            ODataQueryOptions queryOptions = createQueryOptionFunction(queryContext);
+            IODataQueryOptions queryOptions = createQueryOptionFunction(queryContext);
 
             // apply the query
             IEnumerable enumerable = responseValue as IEnumerable;
@@ -718,7 +718,7 @@ namespace Microsoft.AspNet.OData
         /// Validate the select and expand options.
         /// </summary>
         /// <param name="queryOptions">The query options.</param>
-        internal static void ValidateSelectExpandOnly(ODataQueryOptions queryOptions)
+        internal static void ValidateSelectExpandOnly(IODataQueryOptions queryOptions)
         {
             if (queryOptions.Filter != null || queryOptions.Count != null || queryOptions.OrderBy != null
                 || queryOptions.Skip != null || queryOptions.Top != null)

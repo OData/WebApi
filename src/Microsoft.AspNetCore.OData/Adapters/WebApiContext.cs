@@ -93,15 +93,14 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the parsed <see cref="ODataQueryOptions"/> of the request.
+        /// Gets or sets the parsed <see cref="IODataQueryOptions"/> of the request.
         /// </summary>
-        public ODataQueryOptions QueryOptions
+        public IODataQueryOptions QueryOptions
         {
             get
             {
                 // since we wanted to avoid a breaking change by modifying the interface, we cast to check if it is our ODataFeature class before we access the internal property. To be cleaned up with 8.x.
-                ODataFeature feature = this.innerFeature as ODataFeature;
-                if (feature != null)
+                if (this.innerFeature is ODataFeature feature)
                 {
                     return feature.QueryOptions;
                 }
@@ -110,8 +109,7 @@ namespace Microsoft.AspNet.OData.Adapters
             }
             set
             {
-                ODataFeature feature = this.innerFeature as ODataFeature;
-                if (feature != null)
+                if (this.innerFeature is ODataFeature feature)
                 {
                     feature.QueryOptions = value;
                 }
@@ -135,8 +133,7 @@ namespace Microsoft.AspNet.OData.Adapters
             get
             {
                 // since we wanted to avoid a breaking change by modifying the interface, we cast to check if it is our ODataFeature class before we access the internal property.  
-                ODataFeature feature = this.innerFeature as ODataFeature;
-                if (feature != null)
+                if (this.innerFeature is ODataFeature feature)
                 {
                     return feature.PageSize;
                 }
@@ -145,8 +142,7 @@ namespace Microsoft.AspNet.OData.Adapters
             }
             set
             {
-                ODataFeature feature = this.innerFeature as ODataFeature;
-                if (feature != null)
+                if (this.innerFeature is ODataFeature feature)
                 {
                     feature.PageSize = value;
                 }

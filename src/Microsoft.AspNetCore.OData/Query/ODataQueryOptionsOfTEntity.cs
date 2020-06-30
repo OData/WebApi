@@ -2,8 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData.Edm;
+using System;
 
 namespace Microsoft.AspNet.OData.Query
 {
@@ -11,7 +14,8 @@ namespace Microsoft.AspNet.OData.Query
     /// This defines a composite OData query options that can be used to perform query composition.
     /// Currently this only supports $filter, $orderby, $top, $skip.
     /// </summary>
-    public partial class ODataQueryOptions<TEntity> : ODataQueryOptions
+    public partial class ODataQueryOptions<TEntity> 
+        : ODataQueryOptions
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataQueryOptions"/> class based on the incoming request and some metadata information from

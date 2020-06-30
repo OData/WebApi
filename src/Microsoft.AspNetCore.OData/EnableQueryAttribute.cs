@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -118,14 +119,14 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Create and validate a new instance of <see cref="ODataQueryOptions"/> from a query and context.
+        /// Create and validate a new instance of <see cref="IODataQueryOptions"/> from a query and context.
         /// </summary>
         /// <param name="request">The incoming request.</param>
         /// <param name="queryContext">The query context.</param>
         /// <returns></returns>
-        private ODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
+        private IODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
         {
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
             ValidateQuery(request, queryOptions);
 
             return queryOptions;
@@ -191,11 +192,11 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="request">The incoming request.</param>
         /// <param name="queryOptions">
-        /// The <see cref="ODataQueryOptions"/> instance constructed based on the incoming request.
+        /// The <see cref="IODataQueryOptions"/> instance constructed based on the incoming request.
         /// </param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "Response disposed after being sent.")]
-        public virtual void ValidateQuery(HttpRequest request, ODataQueryOptions queryOptions)
+        public virtual void ValidateQuery(HttpRequest request, IODataQueryOptions queryOptions)
         {
             if (request == null)
             {

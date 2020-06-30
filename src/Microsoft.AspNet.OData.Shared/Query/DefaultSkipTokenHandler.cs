@@ -10,6 +10,7 @@ using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -181,7 +182,7 @@ namespace Microsoft.AspNet.OData.Query
             }
 
             ODataQuerySettings querySettings = skipTokenQueryOption.QuerySettings;
-            ODataQueryOptions queryOptions = skipTokenQueryOption.QueryOptions;
+            IODataQueryOptions queryOptions = skipTokenQueryOption.QueryOptions;
             IList<OrderByNode> orderByNodes = null;
 
             if (queryOptions != null)

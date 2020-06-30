@@ -3,6 +3,7 @@
 
 using System.Linq;
 using System.Net.Http;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Routing;
@@ -23,7 +24,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             const string filter = "$FiLtEr=name eQ 'nba'";
 
             // Act
-            ODataQueryOptions queryOptions = GetQueryOptions(filter);
+            IODataQueryOptions queryOptions = GetQueryOptions(filter);
 
             // Assert
             Assert.NotNull(queryOptions.Filter);
@@ -39,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             const string orderBy = "$oRdeRby=naMe";
 
             // Act
-            ODataQueryOptions queryOptions = GetQueryOptions(orderBy);
+            IODataQueryOptions queryOptions = GetQueryOptions(orderBy);
 
             // Assert
             Assert.NotNull(queryOptions.OrderBy);
@@ -55,7 +56,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             const string select = "$SeLecT=naMe";
 
             // Act
-            ODataQueryOptions queryOptions = GetQueryOptions(select);
+            IODataQueryOptions queryOptions = GetQueryOptions(select);
 
             // Assert
             Assert.NotNull(queryOptions.SelectExpand);
@@ -74,7 +75,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             const string expand = "$ExPAnd=ProdUCts";
 
             // Act
-            ODataQueryOptions queryOptions = GetQueryOptions(expand);
+            IODataQueryOptions queryOptions = GetQueryOptions(expand);
 
             // Assert
             Assert.NotNull(queryOptions.SelectExpand);
@@ -86,7 +87,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             Assert.Equal("Products", segment.NavigationProperty.Name);
         }
 
-        private static ODataQueryOptions GetQueryOptions(string queryOption)
+        private static IODataQueryOptions GetQueryOptions(string queryOption)
         {
             string uri = "Http://localhost/RoutingCustomers?" + queryOption;
 

@@ -431,7 +431,7 @@
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\PersonEntryInPlainOldJson.json" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\PersonRequestEntryInPlainOldJson.json" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ProductRequestEntry.json" />
-    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ProductsCSDL.xml" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ProductsCsdl.xml" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\SByteFullMetadata.json" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\SingleFullMetadata.json" />
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\StringFullMetadata.json" />

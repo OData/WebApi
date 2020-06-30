@@ -1671,8 +1671,8 @@ public class Microsoft.AspNet.OData.Builder.NavigationSourceLinkBuilderAnnotatio
 	public virtual System.Uri BuildReadLink (ResourceContext instanceContext, ODataMetadataLevel metadataLevel, System.Uri editLink)
 }
 
-public class Microsoft.AspNet.OData.Builder.NonbindingParameterConfiguration : ParameterConfiguration {
-	public NonbindingParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
+public class Microsoft.AspNet.OData.Builder.NonBindingParameterConfiguration : ParameterConfiguration {
+	public NonBindingParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 }
 
 public class Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder : ODataModelBuilder {
@@ -2548,6 +2548,37 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
 	Microsoft.AspNetCore.Mvc.IUrlHelper UrlHelper  { public abstract get; public abstract set; }
 }
 
+public interface Microsoft.AspNet.OData.Interfaces.IODataQueryOptions {
+	ApplyQueryOption Apply  { public abstract get; }
+	ODataQueryContext Context  { public abstract get; }
+	CountQueryOption Count  { public abstract get; }
+	FilterQueryOption Filter  { public abstract get; }
+	ETag IfMatch  { public abstract get; }
+	ETag IfNoneMatch  { public abstract get; }
+	OrderByQueryOption OrderBy  { public abstract get; }
+	ODataRawQueryOptions RawValues  { public abstract get; }
+	SelectExpandQueryOption SelectExpand  { public abstract get; }
+	SkipQueryOption Skip  { public abstract get; }
+	SkipTokenQueryOption SkipToken  { public abstract get; }
+	TopQueryOption Top  { public abstract get; }
+	ODataQueryValidator Validator  { public abstract get; public abstract set; }
+
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query)
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, AllowedQueryOptions ignoreQueryOptions)
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)
+	object ApplyTo (object entity, ODataQuerySettings querySettings)
+	System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
+	object ApplyTo (object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
+	OrderByQueryOption GenerateStableOrder ()
+	bool IsSupportedQueryOption (string queryOptionName)
+	void Validate (ODataValidationSettings validationSettings)
+}
+
+public interface Microsoft.AspNet.OData.Interfaces.IODataQueryOptions`1 : IODataQueryOptions {
+	ETag`1 IfMatch  { public abstract get; }
+	ETag`1 IfNoneMatch  { public abstract get; }
+}
+
 [
 FlagsAttribute(),
 ]
@@ -2768,23 +2799,23 @@ public class Microsoft.AspNet.OData.Query.ModelBoundQuerySettings {
 NonValidatingParameterBindingAttribute(),
 ODataQueryParameterBindingAttribute(),
 ]
-public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
+public class Microsoft.AspNet.OData.Query.ODataQueryOptions : IODataQueryOptions {
 	public ODataQueryOptions (ODataQueryContext context, Microsoft.AspNetCore.Http.HttpRequest request)
 
-	ApplyQueryOption Apply  { public get; }
-	ODataQueryContext Context  { public get; }
-	CountQueryOption Count  { public get; }
-	FilterQueryOption Filter  { public get; }
+	ApplyQueryOption Apply  { public virtual get; }
+	ODataQueryContext Context  { public virtual get; }
+	CountQueryOption Count  { public virtual get; }
+	FilterQueryOption Filter  { public virtual get; }
 	ETag IfMatch  { public virtual get; }
 	ETag IfNoneMatch  { public virtual get; }
-	OrderByQueryOption OrderBy  { public get; }
-	ODataRawQueryOptions RawValues  { public get; }
+	OrderByQueryOption OrderBy  { public virtual get; }
+	ODataRawQueryOptions RawValues  { public virtual get; }
 	Microsoft.AspNetCore.Http.HttpRequest Request  { public get; }
-	SelectExpandQueryOption SelectExpand  { public get; }
-	SkipQueryOption Skip  { public get; }
-	SkipTokenQueryOption SkipToken  { public get; }
-	TopQueryOption Top  { public get; }
-	ODataQueryValidator Validator  { public get; public set; }
+	SelectExpandQueryOption SelectExpand  { public virtual get; }
+	SkipQueryOption Skip  { public virtual get; }
+	SkipTokenQueryOption SkipToken  { public virtual get; }
+	TopQueryOption Top  { public virtual get; }
+	ODataQueryValidator Validator  { public virtual get; public virtual set; }
 
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, AllowedQueryOptions ignoreQueryOptions)
@@ -2794,7 +2825,7 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 	public virtual object ApplyTo (object entity, ODataQuerySettings querySettings, AllowedQueryOptions ignoreQueryOptions)
 	public virtual OrderByQueryOption GenerateStableOrder ()
 	internal virtual ETag GetETag (System.Net.Http.Headers.EntityTagHeaderValue etagHeaderValue)
-	public bool IsSupportedQueryOption (string queryOptionName)
+	public virtual bool IsSupportedQueryOption (string queryOptionName)
 	public static bool IsSystemQueryOption (string queryOptionName)
 	public static bool IsSystemQueryOption (string queryOptionName, bool isDollarSignOptional)
 	public static IQueryable`1 LimitResults (IQueryable`1 queryable, int limit, out System.Boolean& resultsLimited)
@@ -2805,11 +2836,11 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions {
 [
 ODataQueryParameterBindingAttribute(),
 ]
-public class Microsoft.AspNet.OData.Query.ODataQueryOptions`1 : ODataQueryOptions {
+public class Microsoft.AspNet.OData.Query.ODataQueryOptions`1 : ODataQueryOptions, IODataQueryOptions`1, IODataQueryOptions {
 	public ODataQueryOptions`1 (ODataQueryContext context, Microsoft.AspNetCore.Http.HttpRequest request)
 
-	ETag`1 IfMatch  { public get; }
-	ETag`1 IfNoneMatch  { public get; }
+	ETag`1 IfMatch  { public virtual get; }
+	ETag`1 IfNoneMatch  { public virtual get; }
 
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query)
 	public virtual System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, ODataQuerySettings querySettings)

@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
@@ -60,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
             Assert.Equal("10", query.Top.RawValue);
         }
 
@@ -100,7 +101,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 
             // Act
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
             ETag result = header.Equals("IfMatch") ? query.IfMatch : query.IfNoneMatch;
             dynamic dynamicResult = result;
 
@@ -124,7 +125,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             ODataQueryContext context = new ODataQueryContext(model, typeof(Customer));
 
             // Act
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
             ETag result = header.Equals("IfMatch") ? query.IfMatch : query.IfNoneMatch;
 
             // Assert
@@ -141,7 +142,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable()),
@@ -159,7 +160,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<KirklandCustomer>().AsQueryable()));
@@ -175,7 +176,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<Customer>().AsQueryable()));
@@ -191,7 +192,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.ThrowsArgument(
                 () => query.ApplyTo(Enumerable.Empty<int>().AsQueryable(), new ODataQuerySettings()),
@@ -209,7 +210,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<KirklandCustomer>().AsQueryable(), new ODataQuerySettings()));
@@ -225,7 +226,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             ODataQueryContext context = new ODataQueryContext(builder.GetEdmModel(), typeof(Customer));
 
-            ODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
+            IODataQueryOptions<Customer> query = new ODataQueryOptions<Customer>(context, request);
 
             ExceptionAssert.DoesNotThrow(
                 () => query.ApplyTo(Enumerable.Empty<Customer>().AsQueryable(), new ODataQuerySettings()));

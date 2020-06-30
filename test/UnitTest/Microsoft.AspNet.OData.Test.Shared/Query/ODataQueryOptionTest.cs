@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
@@ -39,6 +40,7 @@ using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
@@ -249,7 +251,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             );
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Assert
             Assert.Equal("Filter", queryOptions.RawValues.Filter);
@@ -285,7 +287,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             );
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Assert
             Assert.Equal("Filter", queryOptions.RawValues.Filter);
@@ -315,7 +317,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken"
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Act & Assert
             ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null), "query");
@@ -332,7 +334,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken"
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
             // Act & Assert
             ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(null, new ODataQuerySettings()), "query");
@@ -349,7 +351,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers/?$filter=Filter&$select=Select&$orderby=OrderBy&$expand=Expand&$top=10&$skip=20&$count=true&$skiptoken=SkipToken&$deltatoken=DeltaToken"
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
             // Act & Assert
             ExceptionAssert.ThrowsArgumentNull(() => queryOptions.ApplyTo(new Customer[0].AsQueryable(), null), "querySettings");
@@ -368,7 +370,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+
             ODataQuerySettings querySettings = new ODataQuerySettings
             {
                 EnsureStableOrdering = ensureStableOrdering,
@@ -397,7 +400,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                 "http://server/service/Customers?" + oDataQuery
             );
 
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+
             ODataQuerySettings querySettings = new ODataQuerySettings
             {
                 EnsureStableOrdering = ensureStableOrdering
@@ -426,7 +430,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             );
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
             OrderByQueryOption originalOption = queryOptions.OrderBy;
             ODataQuerySettings querySettings = new ODataQuerySettings();
 
@@ -463,7 +467,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                 HttpMethod.Get,
                 "http://server/service/Customers"
             );
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
             var entityType = queryOptions.Context.ElementClrType;
             Assert.NotNull(entityType);
             Assert.Equal(typeof(Customer).FullName, entityType.Namespace + "." + entityType.Name);
@@ -498,7 +502,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             }
             else
             {
-                var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+                IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
                 if (queryName == "$filter")
                 {
@@ -534,7 +538,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var message = RequestFactory.Create(HttpMethod.Get, uri);
 
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), message);
 
             // Assert: everything is null
             Assert.Null(queryOptions.RawValues.OrderBy);
@@ -1173,7 +1177,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             request.EnableHttpDependencyInjectionSupport();
 #endif
             // Act
-            var queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(new ODataQueryContext(model, typeof(Customer)), request);
 
             // Assert
             Assert.Equal("10", queryOptions.RawValues.Top);

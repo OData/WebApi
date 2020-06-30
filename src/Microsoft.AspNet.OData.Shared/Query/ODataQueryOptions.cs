@@ -30,6 +30,7 @@ namespace Microsoft.AspNet.OData.Query
     [ODataQueryParameterBinding]
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     public partial class ODataQueryOptions
+        : IODataQueryOptions
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethods(BindingFlags.Public | BindingFlags.Static)
             .Single(mi => mi.Name == "LimitResults" && mi.ContainsGenericParameters && mi.GetParameters().Length == 4);

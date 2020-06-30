@@ -466,17 +466,6 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
-        ///  Looks up a localized string similar to Cannot find ClrType corresponding to EdmType {0}.
-        /// </summary>
-        internal static string CannotFindClrType
-        {
-            get
-            {
-                return ResourceManager.GetString("CannotFindClrType", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to The given model does not contain the type &apos;{0}&apos;..
         /// </summary>
         internal static string ClrTypeNotInModel

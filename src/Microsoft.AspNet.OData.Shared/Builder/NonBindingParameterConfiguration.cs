@@ -13,14 +13,14 @@ namespace Microsoft.AspNet.OData.Builder
     /// - ~/.../Function?p1=value (only allowed if the Function is the last url path segment).
     /// </remarks>
     /// </summary>
-    public class NonBindingParameterConfiguration : ParameterConfiguration
+    public class NonbindingParameterConfiguration : ParameterConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="NonBindingParameterConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="NonbindingParameterConfiguration"/> class.
         /// </summary>
         /// <param name="name">The name of the parameter.</param>
         /// <param name="parameterType">The EDM type of the parameter.</param>
-        public NonBindingParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
+        public NonbindingParameterConfiguration(string name, IEdmTypeConfiguration parameterType)
             : base(name, parameterType)
         {
         }

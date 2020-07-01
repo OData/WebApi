@@ -258,7 +258,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public ParameterConfiguration AddParameter(string name, IEdmTypeConfiguration parameterType)
         {
-            ParameterConfiguration parameter = new NonBindingParameterConfiguration(name, parameterType);
+            ParameterConfiguration parameter = new NonbindingParameterConfiguration(name, parameterType);
             _parameters.Add(parameter);
             return parameter;
         }

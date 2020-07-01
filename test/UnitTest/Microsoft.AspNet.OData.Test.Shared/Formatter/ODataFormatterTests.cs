@@ -1066,7 +1066,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var controllers = new[]
             {
                 typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
-                typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+                typeof(Class.CollectionSerializerCustomersController), typeof(PresidentController)
             };
 
             var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>

@@ -27,9 +27,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         }
 
 #if NETCORE
-        public override void ValidateQuery(Microsoft.AspNetCore.Http.HttpRequest request, ODataQueryOptions queryOptions)
+        public override void ValidateQuery(Microsoft.AspNetCore.Http.HttpRequest request, IODataQueryOptions queryOptions)
 #else
-        public override void ValidateQuery(System.Net.Http.HttpRequestMessage request, ODataQueryOptions queryOptions)
+        public override void ValidateQuery(System.Net.Http.HttpRequestMessage request, IODataQueryOptions queryOptions)
 #endif
         {
             // Skip validation.

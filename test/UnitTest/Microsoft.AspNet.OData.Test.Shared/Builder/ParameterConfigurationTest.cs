@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
                     edmTypeConfiguration = ((EnumTypeConfiguration)edmTypeConfiguration).GetNullableEnumTypeConfiguration();
                 }
             }
-            NonBindingParameterConfiguration parameter = new NonBindingParameterConfiguration("name",
+            NonbindingParameterConfiguration parameter = new NonbindingParameterConfiguration("name",
                 edmTypeConfiguration);
 
             // Assert
@@ -85,7 +85,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             CollectionTypeConfiguration collectionType = new CollectionTypeConfiguration(elementTypeConfiguration,
                 typeof(IEnumerable<>).MakeGenericType(elementType));
 
-            NonBindingParameterConfiguration parameter = new NonBindingParameterConfiguration("name", collectionType);
+            NonbindingParameterConfiguration parameter = new NonbindingParameterConfiguration("name", collectionType);
 
             // Assert
             Assert.Equal(isNullable, parameter.Nullable);

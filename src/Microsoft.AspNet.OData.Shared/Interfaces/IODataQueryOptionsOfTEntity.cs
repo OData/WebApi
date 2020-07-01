@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Microsoft.AspNet.OData.Interfaces
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition.

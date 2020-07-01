@@ -4,7 +4,7 @@ using Microsoft.AspNet.OData.Query.Validators;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace Microsoft.AspNet.OData.Interfaces
+namespace Microsoft.AspNet.OData.Query
 {
     /// <summary>
     /// This defines a composite OData query options that can be used to perform query composition.

@@ -747,7 +747,7 @@ namespace Microsoft.AspNet.OData.Formatter
             return null;
         }
 
-        public static PropertyInfo GetInstanceAnnotationsDictionary(IEdmStructuredType edmType, IEdmModel edmModel)
+        public static PropertyInfo GetInstanceAnnotationsContainer(IEdmStructuredType edmType, IEdmModel edmModel)
         {
             if (edmType == null)
             {
@@ -759,8 +759,8 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("edmModel");
             }
 
-            InstanceAnnotationDictionaryAnnotation annotation =
-                edmModel.GetAnnotationValue<InstanceAnnotationDictionaryAnnotation>(edmType);
+            InstanceAnnotationContainerAnnotation annotation =
+                edmModel.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(edmType);
             if (annotation != null)
             {
                 return annotation.PropertyInfo;

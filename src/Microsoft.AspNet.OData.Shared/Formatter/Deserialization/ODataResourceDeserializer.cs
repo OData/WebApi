@@ -387,8 +387,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <summary>
         /// Deserializes the instance annotations from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.
         /// </summary>
-        /// <param name="resource">The object into which the structural properties should be read.</param>
-        /// <param name="resourceWrapper">The resource object containing the structural properties.</param>
+        /// <param name="resource">The object into which the annotations should be read.</param>
+        /// <param name="resourceWrapper">The resource object containing the annotations.</param>
         /// <param name="structuredType">The type of the resource.</param>
         /// <param name="readContext">The deserializer context.</param>
         public virtual void ApplyInstanceAnnotations(object resource, ODataResourceWrapper resourceWrapper,
@@ -399,7 +399,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("resourceWrapper");
             }
 
-            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.Resource, DeserializerProvider, readContext);
+            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.Resource,DeserializerProvider, readContext);
         }
 
         /// <summary>

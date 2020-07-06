@@ -97,7 +97,6 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-
         internal StructuralTypeConfiguration Configuration
         {
             get { return _configuration; }
@@ -360,22 +359,7 @@ namespace Microsoft.AspNet.OData.Builder
             _configuration.AddDynamicPropertyDictionary(propertyInfo);
         }
 
-        /// <summary>
-        /// Adds a InstanceAnnotations property dictionary property.
-        /// </summary>
-        /// <param name="propertyExpression">A lambda expression representing the instance annotation property dictionary for the relationship.
-        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
-            Justification = "Nested generics appropriate here")]
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
-            Justification = "More specific expression type is clearer")]
-        public void HasInstanceAnnotations(Expression<Func<TStructuralType, IDictionary<string, IDictionary<string, object>>>> propertyExpression)
-        {
-            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
-
-            Configuration.AddInstanceAnnotationDictionary(propertyInfo);
-        }
-
+  
         /// <summary>
         /// Configures a many relationship from this structural type.
         /// </summary>

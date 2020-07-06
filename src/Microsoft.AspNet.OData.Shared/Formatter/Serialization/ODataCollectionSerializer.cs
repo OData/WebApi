@@ -174,26 +174,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
                     Contract.Assert(actualType != null);
 
-                    //For instance annotations we need to use complex serializer for complex type and not ODataResourceSerializer
-                    if (isForAnnotations && actualType.IsComplex())
+                    if (itemSerializer == null)
                     {
-                        valueCollection.Add(
-                        new ODataResourceValueSerializer(SerializerProvider).CreateODataValue(item, actualType, writeContext).GetInnerValue());
-                    }
-                    else
-                    {
-                        itemSerializer = itemSerializer ?? SerializerProvider.GetEdmTypeSerializer(actualType);
-                        if (itemSerializer == null)
+                        //For instance annotations we need to use complex serializer for complex type and not ODataResourceSerializer
+                        if (isForAnnotations && actualType.IsStructured())
                         {
-                            throw new SerializationException(
-                                Error.Format(SRResources.TypeCannotBeSerialized, actualType.FullName()));
+                            itemSerializer = new ODataResourceValueSerializer(SerializerProvider);
                         }
-
-                        // ODataCollectionWriter expects the individual elements in the collection to be the underlying
-                        // values and not ODataValues.
-                        valueCollection.Add(
-                            itemSerializer.CreateODataValue(item, actualType, writeContext).GetInnerValue());
+                        else
+                        {
+                            itemSerializer = SerializerProvider.GetEdmTypeSerializer(actualType);
+                            if (itemSerializer == null)
+                            {
+                                throw new SerializationException(
+                                    Error.Format(SRResources.TypeCannotBeSerialized, actualType.FullName()));
+                            }
+                        }
                     }
+
+                    // ODataCollectionWriter expects the individual elements in the collection to be the underlying
+                    // values and not ODataValues.
+                    valueCollection.Add(
+                        itemSerializer.CreateODataValue(item, actualType, writeContext).GetInnerValue());
                 }
             }
 

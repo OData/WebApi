@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData.Builder
         private string _namespace;
         private string _name;
         private PropertyInfo _dynamicPropertyDictionary;
-        private PropertyInfo _instanceAnnotationDictionary;
+        private PropertyInfo _instanceAnnotationContainer;
         private StructuralTypeConfiguration _baseType;
         private bool _baseTypeConfigured;
 
@@ -149,15 +149,15 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public bool SupportsInstanceAnnotations
         {
-            get { return _instanceAnnotationDictionary != null; }
+            get { return _instanceAnnotationContainer != null; }
         }
 
         /// <summary>
         /// Gets the CLR property info of the instance annotations dictionary on this structural type.
         /// </summary>
-        public PropertyInfo InstanceAnnotationsDictionary
+        public PropertyInfo InstanceAnnotationsContainer
         {
-            get { return _instanceAnnotationDictionary; }
+            get { return _instanceAnnotationContainer; }
         }
 
         /// <summary>
@@ -513,14 +513,14 @@ namespace Microsoft.AspNet.OData.Builder
         /// Adds the property info of the instanceannotation to this structural type.
         /// </summary>
         /// <param name="propertyInfo">The property being added.</param>
-        public virtual void AddInstanceAnnotationDictionary(PropertyInfo propertyInfo)
+        public virtual void AddInstanceAnnotationContainer(PropertyInfo propertyInfo)
         {
             if (propertyInfo == null)
             {
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            BuilderHelper.ValidateAssignableFrom(typeof(IDictionary<string, IDictionary<string, object>>), propertyInfo.PropertyType, "IDictionary<string, IDictionary<string, object>>");
+            BuilderHelper.ValidateAssignableFrom(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
 
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {
@@ -533,12 +533,12 @@ namespace Microsoft.AspNet.OData.Builder
                 RemovedProperties.Remove(propertyInfo);
             }
 
-            if (_instanceAnnotationDictionary != null)
+            if (_instanceAnnotationContainer != null)
             {
                 throw Error.Argument("propertyInfo", SRResources.MoreThanOneAnnotationPropertyContainerFound, ClrType.Name);
             }
 
-            _instanceAnnotationDictionary = propertyInfo;
+            _instanceAnnotationContainer = propertyInfo;
         }
 
         /// <summary>

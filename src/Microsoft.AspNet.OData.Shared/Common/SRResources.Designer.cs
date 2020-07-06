@@ -1521,7 +1521,6 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
 
-
         /// <summary>
         ///   Looks up a localized string similar to Found more than one Annotation property container in type &apos;{0}&apos;. Each open type must have at most one Annotation property container..
         /// </summary>

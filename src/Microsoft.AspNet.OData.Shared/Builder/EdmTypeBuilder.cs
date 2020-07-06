@@ -46,7 +46,6 @@ namespace Microsoft.AspNet.OData.Builder
             _openTypes.Clear();
             _propertyConfigurations.Clear();
             _instanceAnnotableTypes.Clear();
-            _instanceAnnotableTypes.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IEdmTypeConfiguration config in _configurations)
@@ -98,7 +97,7 @@ namespace Microsoft.AspNet.OData.Builder
                     if (complex.SupportsInstanceAnnotations)
                     {
                         // add a mapping between the complex type and its instance annotation dictionary.
-                        _instanceAnnotableTypes.Add(complexType, complex.InstanceAnnotationsDictionary);
+                        _instanceAnnotableTypes.Add(complexType, complex.InstanceAnnotationsContainer);
                     }
 
                     edmType = complexType;
@@ -130,7 +129,7 @@ namespace Microsoft.AspNet.OData.Builder
                     if (entity.SupportsInstanceAnnotations)
                     {
                         // add a mapping between the entity type and its instance annotation dictionary.
-                        _instanceAnnotableTypes.Add(entityType, entity.InstanceAnnotationsDictionary);
+                        _instanceAnnotableTypes.Add(entityType, entity.InstanceAnnotationsContainer);
                     }
 
                     edmType = entityType;

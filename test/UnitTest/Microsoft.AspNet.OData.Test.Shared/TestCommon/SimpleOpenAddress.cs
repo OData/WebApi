@@ -10,5 +10,6 @@ namespace Microsoft.AspNet.OData.Test.Common
         public string Street { get; set; }
         public string City { get; set; }
         public IDictionary<string, object> Properties { get; set; }
+        public IDictionary<string, IDictionary<string, object>> InstanceAnnotations { get; set; }
     }
 }

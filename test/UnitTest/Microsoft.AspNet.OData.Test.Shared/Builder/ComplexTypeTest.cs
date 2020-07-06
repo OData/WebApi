@@ -173,8 +173,65 @@ namespace Microsoft.AspNet.OData.Test.Builder
 #endif
         }
 
+
+        [Fact]
+        public void AnnotationDictionaryProperty_Works_ToSetOComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            ComplexTypeConfiguration<SimpleAnnotationComplexType> complexType = builder.ComplexType<SimpleAnnotationComplexType>();
+            complexType.Property(c => c.IntProperty);
+            complexType.HasInstanceAnnotations(c => c.InstanceAnnotations);
+
+            // Act & Assert
+            Assert.True(complexType.IsWithInstanceAnnotations);
+        }
+
+        [Fact]
+        public void AddAnnotationDictionary_ThrowsException_IfMoreThanOneDynamicPropertyInComplexType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.ComplexType<BadAnnotationComplexType>();
+
+            // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one Annotation property container in type 'BadAnnotationComplexType'. " +
+                "Each open type must have at most one Annotation property container. (Parameter 'propertyInfo')");
+#else
+            ExceptionAssert.ThrowsArgument(() => builder.GetEdmModel(),
+                "propertyInfo",
+                "Found more than one Annotation property container in type 'BadAnnotationComplexType'. " +
+                "Each open type must have at most one Annotation property container.\r\n" +
+                "Parameter name: propertyInfo");
+#endif
+        }
+
         [Fact]
         public void GetEdmModel_WorksOnModelBuilder_ForOpenComplexType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            ComplexTypeConfiguration<SimpleAnnotationComplexType> complex = builder.ComplexType<SimpleAnnotationComplexType>();
+            complex.Property(c => c.IntProperty);
+            complex.HasInstanceAnnotations(c => c.InstanceAnnotations);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmComplexType complexType = Assert.Single(model.SchemaElements.OfType<IEdmComplexType>());
+            IEdmProperty edmProperty = Assert.Single(complexType.Properties());
+            Assert.Equal("IntProperty", edmProperty.Name);
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnModelBuilder_ForAnnotationComplexType()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -596,6 +653,19 @@ namespace Microsoft.AspNet.OData.Test.Builder
         public int IntProperty { get; set; }
         public IDictionary<string, object> DynamicProperties1 { get; set; }
         public IDictionary<string, object> DynamicProperties2 { get; set; }
+    }
+
+    public class SimpleAnnotationComplexType
+    {
+        public int IntProperty { get; set; }
+        public IDictionary<string, IDictionary<string, object>> InstanceAnnotations { get; set; }
+    }
+
+    public class BadAnnotationComplexType
+    {
+        public int IntProperty { get; set; }
+        public IDictionary<string, IDictionary<string, object>> InstanceAnnotations1 { get; set; }
+        public IDictionary<string, IDictionary<string, object>> InstanceAnnotations2 { get; set; }
     }
 
     public class MyDynamicProperty : Dictionary<string, object>

@@ -735,10 +735,32 @@ namespace Microsoft.AspNet.OData.Formatter
             if (edmModel == null)
             {
                 throw Error.ArgumentNull("edmModel");
-            }
+            }         
 
             DynamicPropertyDictionaryAnnotation annotation =
                 edmModel.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(edmType);
+            if (annotation != null)
+            {
+                return annotation.PropertyInfo;
+            }
+
+            return null;
+        }
+
+        public static PropertyInfo GetInstanceAnnotationsDictionary(IEdmStructuredType edmType, IEdmModel edmModel)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            InstanceAnnotationDictionaryAnnotation annotation =
+                edmModel.GetAnnotationValue<InstanceAnnotationDictionaryAnnotation>(edmType);
             if (annotation != null)
             {
                 return annotation.PropertyInfo;

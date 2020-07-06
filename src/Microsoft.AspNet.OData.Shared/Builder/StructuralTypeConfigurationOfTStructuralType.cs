@@ -97,6 +97,18 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets an indicator whether this EDM type is having instance annotations or not.
+        /// Returns <c>true</c> if this is having instance annotations; <c>false</c> otherwise.
+        /// </summary>
+        public bool IsWithInstanceAnnotations
+        {
+            get
+            {
+                return _configuration.IsWithInstanceAnnotations;
+            }
+        }
+
         internal StructuralTypeConfiguration Configuration
         {
             get { return _configuration; }
@@ -357,6 +369,22 @@ namespace Microsoft.AspNet.OData.Builder
             PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
 
             _configuration.AddDynamicPropertyDictionary(propertyInfo);
+        }
+
+        /// <summary>
+        /// Adds a InstanceAnnotations property dictionary property.
+        /// </summary>
+        /// <param name="propertyExpression">A lambda expression representing the instance annotation property dictionary for the relationship.
+        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "More specific expression type is clearer")]
+        public void HasInstanceAnnotations(Expression<Func<TStructuralType, IDictionary<string, IDictionary<string, object>>>> propertyExpression)
+        {
+            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+
+            Configuration.AddInstanceAnnotationDictionary(propertyInfo);
         }
 
         /// <summary>

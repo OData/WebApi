@@ -692,6 +692,48 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
         }
 
+
+
+        [Fact]
+        public void DynamicDictionaryProperty_Works_ToSetEntityTypeWithAnnotation()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+
+            // Act
+            EntityTypeConfiguration<SimpleAnnotationEntityType> entityType = builder.EntityType<SimpleAnnotationEntityType>();
+            entityType.HasKey(c => c.Id);
+            entityType.Property(c => c.Name);
+            entityType.HasInstanceAnnotations(c => c.InstanceAnnotations);
+
+            // Act & Assert
+            Assert.True(entityType.IsWithInstanceAnnotations);
+        }
+
+        [Fact]
+        public void GetEdmModel_WorksOnModelBuilder_ForAnnotationEntityType()
+        {
+            // Arrange
+            ODataModelBuilder builder = new ODataModelBuilder();
+            EntityTypeConfiguration<SimpleAnnotationEntityType> entity = builder.EntityType<SimpleAnnotationEntityType>();
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Name);
+            entity.HasInstanceAnnotations(c => c.InstanceAnnotations);
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType = Assert.Single(model.SchemaElements.OfType<IEdmEntityType>());
+            
+            Assert.Equal(2, entityType.Properties().Count());
+
+            Assert.True(entityType.Properties().Where(c => c.Name == "Id").Any());
+            Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
+        }
+
+
         [Fact]
         public void GetEdmModel_WorksOnModelBuilder_WithDateTime()
         {
@@ -726,6 +768,12 @@ namespace Microsoft.AspNet.OData.Test.Builder
             public IDictionary<string, object> DynamicProperties { get; set; }
         }
 
+        public class SimpleAnnotationEntityType
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public IDictionary<string, IDictionary<string, object>> InstanceAnnotations { get; set; }
+        }
         public class EntityTypeWithDateAndTimeOfDay
         {
             public Date Date { get; set; }

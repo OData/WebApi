@@ -557,6 +557,10 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     structuralType.AddDynamicPropertyDictionary(property);
                 }
+                else if (propertyKind == PropertyKind.Annotation)
+                {
+                    structuralType.AddInstanceAnnotationDictionary(property);
+                }
                 else
                 {
                     // don't add this property if the user has already added it.
@@ -698,6 +702,15 @@ namespace Microsoft.AspNet.OData.Builder
                 mappedType = null;
                 isCollection = false;
                 return PropertyKind.Dynamic;
+            }
+
+            // IDictionary<string, IDictionary<string, object>> is used as a container to save/retrieve instance annotation properties for a CLR type.
+            // It is different from other collections (for example, IDictionary<string,IDictionary<string, int>>)          
+            if (typeof(IDictionary<string, IDictionary<string, object>>).IsAssignableFrom(property.PropertyType))
+            {
+                mappedType = null;
+                isCollection = false;
+                return PropertyKind.Annotation;
             }
 
             PropertyKind propertyKind;

@@ -15,5 +15,6 @@ namespace Microsoft.AspNet.OData.Test.Common
         public string Website { get; set; }
         public List<SimpleOpenOrder> Orders { get; set; }
         public IDictionary<string, object> CustomerProperties { get; set; }
+        public IDictionary<string, IDictionary<string, object>> InstanceAnnotations { get; set; }
     }
 }

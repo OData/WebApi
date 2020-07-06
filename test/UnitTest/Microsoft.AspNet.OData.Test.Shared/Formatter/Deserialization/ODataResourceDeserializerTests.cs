@@ -486,6 +486,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             instAnn1.Add(new ODataInstanceAnnotation("NS.Test1",new ODataPrimitiveValue( 123) ));
             var instAnn = new List<ODataInstanceAnnotation>();
             instAnn.Add(new ODataInstanceAnnotation("NS.Test2", new ODataPrimitiveValue(345)));
+            var instAnn2 = new List<ODataInstanceAnnotation>();
+            instAnn2.Add(new ODataInstanceAnnotation("NS.ChildTest2", new ODataPrimitiveValue(999)));
 
             ODataResource[] complexResources =
             {
@@ -512,7 +514,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                     Properties = new[]
                     {
                         // declared properties
-                        new ODataProperty { Name = "Street", Value = "Street 2" },
+                        new ODataProperty { Name = "Street", Value = "Street 2" ,InstanceAnnotations =instAnn2},
                         new ODataProperty { Name = "City", Value = "City 2" },
 
                         // dynamic properties
@@ -592,6 +594,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             //Verify Instance Annotations
             Assert.Equal(2, customer.InstanceAnnotations.Count);
+            Assert.Equal(1, collectionValues[1].InstanceAnnotations.Count);
             Assert.Equal(string.Empty, customer.InstanceAnnotations.First().Key);
         }
 

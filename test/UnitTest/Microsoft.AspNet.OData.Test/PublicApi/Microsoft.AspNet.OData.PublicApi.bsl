@@ -2145,12 +2145,6 @@ public sealed class Microsoft.AspNet.OData.Formatter.ODataModelBinderConverter {
 	public static object Convert (object graph, Microsoft.OData.Edm.IEdmTypeReference edmTypeReference, System.Type clrType, string parameterName, ODataDeserializerContext readContext, System.IServiceProvider requestContainer)
 }
 
-public class Microsoft.AspNet.OData.Formatter.ContentTypeMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
-	public ContentTypeMediaTypeMapping (string mediaType)
-
-	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
-}
-
 [
 DefaultMemberAttribute(),
 ]
@@ -2335,8 +2329,7 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 }
 
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
-	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public abstract get; }
-
+	bool CanParse (System.Net.Http.HttpRequestMessage request)
 	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
@@ -2626,8 +2619,7 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IODataQueryOptionsParser {
 	public PlainTextODataQueryOptionsParser ()
 
-	System.Net.Http.Formatting.MediaTypeMapping MediaTypeMapping  { public virtual get; }
-
+	public virtual bool CanParse (System.Net.Http.HttpRequestMessage request)
 	[
 	AsyncStateMachineAttribute(),
 	]

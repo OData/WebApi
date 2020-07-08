@@ -441,8 +441,7 @@ namespace Microsoft.AspNet.OData.Extensions
 
             // Fetch parsers available in the request container for parsing the query options in the request body
             IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();
-            IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(
-                d => d.MediaTypeMapping.TryMatchMediaType(request) > 0);
+            IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(d => d.CanParse(request));
 
             string mediaType = request.Content.Headers.ContentType?.MediaType ?? string.Empty;
 

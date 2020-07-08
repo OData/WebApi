@@ -4,9 +4,11 @@
 using System.IO;
 using System.Threading.Tasks;
 #if !NETCORE
+using System.Net.Http;
 using System.Net.Http.Formatting;
 #else
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Http;
 #endif
 
 namespace Microsoft.AspNet.OData.Query
@@ -19,9 +21,15 @@ namespace Microsoft.AspNet.OData.Query
     public interface IODataQueryOptionsParser
     {
         /// <summary>
-        /// Gets the media type supported by the parser.
+        /// Determines whether this <see cref="IODataQueryOptionsParser"/> can parse the http request.
         /// </summary>
-        MediaTypeMapping MediaTypeMapping { get; }
+        /// <param name="request">The http request.</param>
+        /// <returns>true if this <see cref="IODataQueryOptionsParser"/> can parse the http request; false otherwise.</returns>
+#if !NETCORE
+        bool CanParse(HttpRequestMessage request);
+#else
+        bool CanParse(HttpRequest request);
+#endif
 
         /// <summary>
         /// Reads and parses the content of a <see cref="T:System.IO.Stream" /> 

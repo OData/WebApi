@@ -2438,12 +2438,6 @@ public sealed class Microsoft.AspNet.OData.Formatter.ODataOutputFormatterFactory
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataOutputFormatter]] Create ()
 }
 
-public class Microsoft.AspNet.OData.Formatter.ContentTypeMediaTypeMapping : MediaTypeMapping {
-	public ContentTypeMediaTypeMapping (string mediaType)
-
-	public virtual double TryMatchMediaType (Microsoft.AspNetCore.Http.HttpRequest request)
-}
-
 [
 DefaultMemberAttribute(),
 ]
@@ -2660,8 +2654,7 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 }
 
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
-	MediaTypeMapping MediaTypeMapping  { public abstract get; }
-
+	bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
 	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
@@ -2952,8 +2945,7 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IODataQueryOptionsParser {
 	public PlainTextODataQueryOptionsParser ()
 
-	MediaTypeMapping MediaTypeMapping  { public virtual get; }
-
+	public virtual bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
 	[
 	AsyncStateMachineAttribute(),
 	]

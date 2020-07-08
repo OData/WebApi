@@ -148,7 +148,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ContentTypeMediaTypeMappingTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\HttpRequestODataMessage.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataEnumDeserializerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContextTest.cs" />

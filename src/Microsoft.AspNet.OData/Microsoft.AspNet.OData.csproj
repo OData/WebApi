@@ -75,7 +75,6 @@
     <Compile Include="Extensions\HttpErrorExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Extensions\HttpRequestMessageProperties.cs" />
-    <Compile Include="Formatter\ContentTypeMediaTypeMapping.cs" />
     <Compile Include="Formatter\Deserialization\DefaultODataDeserializerProvider.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="Formatter\Deserialization\ODataDeserializerProvider.cs" />

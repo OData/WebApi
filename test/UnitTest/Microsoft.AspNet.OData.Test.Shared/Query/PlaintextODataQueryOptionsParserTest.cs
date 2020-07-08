@@ -2,9 +2,12 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.OData;
 using Xunit;
 
@@ -15,7 +18,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         private const string QueryOptionsString = "$filter=Id le 5";
 
         [Fact]
-        public async Task Parse_WithQueryOptionsInStream()
+        public async Task ParseAsync_WithQueryOptionsInStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(QueryOptionsString));
 
@@ -25,7 +28,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public async Task Parse_WithDisposedStream()
+        public async Task ParseAsync_WithDisposedStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(QueryOptionsString));
             memoryStream.Dispose();
@@ -34,7 +37,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public async Task Parse_WithEmptyStream()
+        public async Task ParseAsync_WithEmptyStream()
         {
             var memoryStream = new MemoryStream();
 
@@ -44,7 +47,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public async Task Parse_WithQueryStringSeparatorIncludedInStream()
+        public async Task ParseAsync_WithQueryStringSeparatorIncludedInStream()
         {
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes('?' + QueryOptionsString));
 
@@ -59,6 +62,54 @@ namespace Microsoft.AspNet.OData.Test.Query
             var parsers = ODataQueryOptionsParserFactory.Create();
 
             Assert.Contains(parsers, p => p.GetType().Equals(typeof(PlainTextODataQueryOptionsParser)));
+        }
+
+        [Fact]
+        public void CanParse_MatchesRequest_WithMatchingContentType()
+        {
+            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var payload = "$filter=Name eq 'Foo'";
+            var contentType = "text/plain";
+#if NETCORE
+            request.Body = new MemoryStream(Encoding.UTF8.GetBytes(payload));
+            request.ContentType = contentType;
+#else
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse(contentType);
+#endif
+            Assert.True(new PlainTextODataQueryOptionsParser().CanParse(request));
+        }
+
+        [Fact]
+        public void CanParse_DoesNotMatchRequest_WithNonMatchingContentType()
+        {
+            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var payload = "{}";
+            var contentType = "application/json";
+#if NETCORE
+            request.Body = new MemoryStream(Encoding.UTF8.GetBytes(payload));
+            request.ContentType = contentType;
+#else
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse(contentType);
+#endif
+            Assert.False(new PlainTextODataQueryOptionsParser().CanParse(request));
+        }
+
+        [Fact]
+        public void CanParse_MatchesRequest_WithNonExactContentType()
+        {
+            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var payload = "$filter=Name eq 'Foo'";
+            var contentType = "text/plain;charset=utf-8";
+#if NETCORE
+            request.Body = new MemoryStream(Encoding.UTF8.GetBytes(payload));
+            request.ContentType = contentType;
+#else
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse(contentType);
+#endif
+            Assert.True(new PlainTextODataQueryOptionsParser().CanParse(request));
         }
     }
 }

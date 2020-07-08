@@ -187,6 +187,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             getRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(ApplicationJsonODataMinimalMetadataStreamingTrue));
 
             var getResponse = await this.Client.SendAsync(getRequest);
+
+            // Should fail because threshold is exceeed
             Assert.False(getResponse.IsSuccessStatusCode);
 
             // Now send the same query string in the request body
@@ -196,6 +198,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             postRequest.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
 
             var postResponse = await this.Client.SendAsync(postRequest);
+            // Should pass because the query options were sent in the request body
             Assert.True(postResponse.IsSuccessStatusCode);
         }
     }

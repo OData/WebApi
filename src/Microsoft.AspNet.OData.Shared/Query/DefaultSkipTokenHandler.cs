@@ -196,9 +196,7 @@ namespace Microsoft.AspNet.OData.Query
                 }
             }
 
-            string skipTokenValue = WebUtility.UrlDecode(skipTokenQueryOption.RawValue);
-
-            return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenValue);
+           return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenQueryOption.RawValue);
         }
 
         /// <summary>

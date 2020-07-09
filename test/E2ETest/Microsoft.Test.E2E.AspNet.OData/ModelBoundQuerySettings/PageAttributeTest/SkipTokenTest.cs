@@ -83,6 +83,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            expected = "$skiptoken=" + WebUtility.UrlEncode(expected.Substring(11));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(expected, result);
         }
@@ -104,6 +105,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            expected = "$skiptoken=" + WebUtility.UrlEncode(expected.Substring(11));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(expected, result);
         }
@@ -156,6 +158,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            expected = "$skiptoken=" + WebUtility.UrlEncode(expected.Substring(11));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(expected, result);
         }
@@ -174,6 +177,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            expected = "$skiptoken=" + WebUtility.UrlEncode(expected.Substring(11));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(expected, result);
         }
@@ -211,9 +215,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData("$orderBy=Name", "Details?$orderby=Name&$skiptoken=Name-'2ndOrder',Id-2")]
-        [InlineData("$orderBy=Name desc", "$skiptoken=Name-'3rdOrder',Id-3")]
-        [InlineData("$orderBy=Name;$skip=1", "Details?$orderby=Name&$skiptoken=Name-'3rdOrder',Id-3")]
+        [InlineData("$orderBy=Name", "Details?$orderby=Name&$skiptoken=Name-%272ndOrder%27%2CId-2")]
+        [InlineData("$orderBy=Name desc", "$skiptoken=Name-%273rdOrder%27%2CId-3")]
+        [InlineData("$orderBy=Name;$skip=1", "Details?$orderby=Name&$skiptoken=Name-%273rdOrder%27%2CId-3")]
         public async Task NestedNestedQueryOptionInNextPageLink(string queryOption, string expected)
         {
             // Arrange
@@ -265,6 +269,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             HttpResponseMessage response = await client.SendAsync(request);
             string result = await response.Content.ReadAsStringAsync();
 
+            expected = "?$skiptoken=" + WebUtility.UrlEncode(expected.Substring(12));
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(string.Format(DatesBaseUrl, "") + expected, result);
         }

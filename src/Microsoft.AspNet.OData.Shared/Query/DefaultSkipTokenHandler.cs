@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
@@ -153,7 +154,9 @@ namespace Microsoft.AspNet.OData.Query
                 count++;
             }
 
-            return skipTokenBuilder.ToString();
+            string skipTokenEncoded= WebUtility.UrlEncode(skipTokenBuilder.ToString());
+
+            return skipTokenEncoded;
         }
 
         /// <summary>
@@ -193,7 +196,9 @@ namespace Microsoft.AspNet.OData.Query
                 }
             }
 
-            return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenQueryOption.RawValue);
+            string skipTokenValue = WebUtility.UrlDecode(skipTokenQueryOption.RawValue);
+
+            return ApplyToCore(query, querySettings, orderByNodes, skipTokenQueryOption.Context, skipTokenValue);
         }
 
         /// <summary>

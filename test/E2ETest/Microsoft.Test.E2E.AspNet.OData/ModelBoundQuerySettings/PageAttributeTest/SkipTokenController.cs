@@ -190,4 +190,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         [EnableQuery]
         public List<Date> Get() => _dates;
     }
+
+    public class DateOffsetsController : TestODataController
+    {
+        private static readonly DateTimeOffset _baseDate = new DateTimeOffset(new DateTime(2020, 06, 11), TimeSpan.FromHours(1));
+        private readonly List<DateOffset> _dates = Enumerable.Range(0, 5).Select(i => new DateOffset() { DateValue = _baseDate.AddSeconds(i) }).ToList();
+
+        [EnableQuery]
+        public List<DateOffset> Get() => _dates;
+    }
 }

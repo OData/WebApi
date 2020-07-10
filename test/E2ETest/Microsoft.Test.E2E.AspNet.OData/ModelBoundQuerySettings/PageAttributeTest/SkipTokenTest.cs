@@ -17,15 +17,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         private const string CustomerBaseUrl = "{0}/skiptokentest/Customers";
         private const string OrderBaseUrl = "{0}/skiptokentest/Orders";
         private const string DatesBaseUrl = "{0}/skiptokentest/Dates";
+        private const string DateOffsetsBaseUrl = "{0}/skiptokentest/DateOffsets";
 
         public SkipTokenTest(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController));
+            configuration.AddControllers(typeof(CustomersController), typeof(OrdersController), typeof(DatesController), typeof(DateOffsetsController));
             configuration.JsonReferenceLoopHandling =
                 Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.MaxTop(2).Expand().Filter().OrderBy().SkipToken();
@@ -68,11 +69,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData("?$orderby=Name", "$skiptoken=Name-'Customer2',Id-2")]
+        [InlineData("?$orderby=Name", "$skiptoken=Name-%27Customer2%27,Id-2")]
         [InlineData("?$expand=Orders", "$skiptoken=Id-2")]
         [InlineData("?$filter=Id gt 2", "$skiptoken=Id-4")]
-        [InlineData("?$orderby=Name desc", "$skiptoken=Name-'Customer8',Id-8")]
-        [InlineData("?$orderby=Name desc&$filter=Id gt 2&$expand=Orders", "$skiptoken=Name-'Customer8',Id-8")]
+        [InlineData("?$orderby=Name desc", "$skiptoken=Name-%27Customer8%27,Id-8")]
+        [InlineData("?$orderby=Name desc&$filter=Id gt 2&$expand=Orders", "$skiptoken=Name-%27Customer8%27,Id-8")]
         public async Task GenerateSkiptokenWithQueryOptions(string queryOption, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + queryOption, BaseAddress);
@@ -88,12 +89,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData("?$orderby=Name&$skiptoken=Name-'Customer2',Id-2", "$skiptoken=Name-'Customer4',Id-4")]
+        [InlineData("?$orderby=Name&$skiptoken=Name-'Customer2',Id-2", "$skiptoken=Name-%27Customer4%27,Id-4")]
         [InlineData("?$expand=Orders&$skiptoken=Id-2", "$skiptoken=Id-4")]
         [InlineData("?$filter=Id gt 2&$skiptoken=Id-4", "$skiptoken=Id-6")]
-        [InlineData("?$orderby=Name desc&$skiptoken=Name-'Customer8',Id-8", "$skiptoken=Name-'Customer6',Id-6")]
-        [InlineData("?$orderby=Name desc&$filter=Id gt 2&$expand=Orders&$skiptoken=Name-'Customer8',Id-8", "$skiptoken=Name-'Customer6',Id-6")]
-        [InlineData("?$orderby=Name%20desc&$filter=Id%20gt%202&$expand=Orders&$skiptoken=Name-'Customer6',Id-6", "$skiptoken=Name-'Customer4',Id-4")]
+        [InlineData("?$orderby=Name desc&$skiptoken=Name-'Customer8',Id-8", "$skiptoken=Name-%27Customer6%27,Id-6")]
+        [InlineData("?$orderby=Name desc&$filter=Id gt 2&$expand=Orders&$skiptoken=Name-'Customer8',Id-8", "$skiptoken=Name-%27Customer6%27,Id-6")]
+        [InlineData("?$orderby=Name%20desc&$filter=Id%20gt%202&$expand=Orders&$skiptoken=Name-'Customer6',Id-6", "$skiptoken=Name-%27Customer4%27,Id-4")]
         public async Task ConsumeNextLinkOnEntityType(string nextLink, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + nextLink, BaseAddress);
@@ -144,11 +145,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [Theory]
         [InlineData("Token", "$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-3")]
-        [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2")]
-        [InlineData("Skill", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-4")]
+        [InlineData("DateTimeOfBirth", "$skiptoken=DateTimeOfBirth-2000-01-02T00%3A00%3A00Z,Id-2")]
+        [InlineData("Skill", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill%27CSharp%27,Id-4")]
         public async Task GenerateSkiptokenWithDifferentPrimitive(string property, string expected)
         {
-            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby="+ property, BaseAddress);
+            string queryUrl = string.Format(CustomerBaseUrl + "?$orderby=" + property, BaseAddress);
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=full"));
             HttpClient client = new HttpClient();
@@ -162,8 +163,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
         [Theory]
         [InlineData("?$orderby=Token&$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-3", "$skiptoken=Token-5af3c516-2d3c-4033-95af-07591f18439c,Id-7")]
-        [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2", "$skiptoken=DateTimeOfBirth-2000-01-04T00:00:00Z,Id-4")]
-        [InlineData("?$orderby=Skill&$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-4", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-8")]
+        [InlineData("?$orderby=DateTimeOfBirth&$skiptoken=DateTimeOfBirth-2000-01-02T00:00:00Z,Id-2", "$skiptoken=DateTimeOfBirth-2000-01-04T00%3A00%3A00Z,Id-4")]
+        [InlineData("?$orderby=Skill&$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill'CSharp',Id-4", "$skiptoken=Skill-Microsoft.Test.E2E.AspNet.OData.Enums.Skill%27CSharp%27,Id-8")]
         public async Task ConsumeSkiptokenWithOtherPrimitives(string nextLink, string expected)
         {
             string queryUrl = string.Format(CustomerBaseUrl + nextLink, BaseAddress);
@@ -211,9 +212,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData("$orderBy=Name", "Details?$orderby=Name&$skiptoken=Name-'2ndOrder',Id-2")]
-        [InlineData("$orderBy=Name desc", "$skiptoken=Name-'3rdOrder',Id-3")]
-        [InlineData("$orderBy=Name;$skip=1", "Details?$orderby=Name&$skiptoken=Name-'3rdOrder',Id-3")]
+        [InlineData("$orderBy=Name", "Details?$orderby=Name&$skiptoken=Name-%272ndOrder%27,Id-2")]
+        [InlineData("$orderBy=Name desc", "$skiptoken=Name-%273rdOrder%27,Id-3")]
+        [InlineData("$orderBy=Name;$skip=1", "Details?$orderby=Name&$skiptoken=Name-%273rdOrder%27,Id-3")]
         public async Task NestedNestedQueryOptionInNextPageLink(string queryOption, string expected)
         {
             // Arrange
@@ -254,8 +255,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         }
 
         [Theory]
-        [InlineData("", "?$skiptoken=DateValue-2019-11-09T00:00:01Z")]
-        [InlineData("?$skiptoken=DateValue-2019-11-09T00:00:01Z", "?$skiptoken=DateValue-2019-11-09T00:00:03Z")]
+        [InlineData("", "?$skiptoken=DateValue-2019-11-09T00%3A00%3A01Z")]
+        [InlineData("?$skiptoken=DateValue-2019-11-09T00:00:01Z", "?$skiptoken=DateValue-2019-11-09T00%3A00%3A03Z")]
         public async Task GenerateSkiptokenOnEntitySetWithDateTime(string queryOptions, string expected)
         {
             string queryUrl = string.Format(DatesBaseUrl, BaseAddress) + queryOptions;
@@ -267,6 +268,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
 
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             Assert.Contains(string.Format(DatesBaseUrl, "") + expected, result);
+        }
+
+        [Theory]
+        [InlineData("", "?$skiptoken=DateValue-2020-06-11T00%3A00%3A01%2B01%3A00")]
+        [InlineData("?$skiptoken=DateValue-2020-06-11T00%3A00%3A01%2B01%3A00", "?$skiptoken=DateValue-2020-06-11T00%3A00%3A03%2B01%3A00")]
+        public async Task GenerateEncodedSkipTokenOnEntityWithDateTimeOffset(string queryOptions, string expected)
+        {
+            string queryUrl = string.Format(DateOffsetsBaseUrl, BaseAddress) + queryOptions;
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            HttpClient client = new HttpClient();
+
+            HttpResponseMessage response = await client.SendAsync(request);
+            string result = await response.Content.ReadAsStringAsync();
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains(expected, result);
         }
     }
 }

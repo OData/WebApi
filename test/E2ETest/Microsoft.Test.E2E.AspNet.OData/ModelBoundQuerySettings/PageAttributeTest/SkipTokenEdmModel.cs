@@ -81,6 +81,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
         public DateTime DateValue { get; set; }
     }
 
+    [Page(PageSize = 2)]
+    public class DateOffset
+    {
+        [Key]
+        public DateTimeOffset DateValue { get; set; }
+    }
+
     public class SkipTokenEdmModel
     {
         public static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
@@ -90,6 +97,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeT
             builder.EntitySet<Order>("Orders");
             builder.EntitySet<OrderDetail>("Details");
             builder.EntitySet<Date>("Dates");
+            builder.EntitySet<DateOffset>("DateOffsets");
             IEdmModel model = builder.GetEdmModel();
             return model;
         }

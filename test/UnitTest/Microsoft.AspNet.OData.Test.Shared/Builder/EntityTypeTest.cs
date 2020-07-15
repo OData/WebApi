@@ -706,7 +706,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             entityType.Property(c => c.Name);
             entityType.HasInstanceAnnotations(c => c.InstanceAnnotations);
 
-            // Act & Assert
+            // Assert
             Assert.True(entityType.IsWithInstanceAnnotations);
         }
 

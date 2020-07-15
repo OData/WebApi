@@ -175,7 +175,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
 
         [Fact]
-        public void AnnotationDictionaryProperty_Works_ToSetOComplexType()
+        public void AnnotationDictionaryProperty_Works_ToSetComplexType()
         {
             // Arrange
             ODataModelBuilder builder = new ODataModelBuilder();
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             complexType.Property(c => c.IntProperty);
             complexType.HasInstanceAnnotations(c => c.InstanceAnnotations);
 
-            // Act & Assert
+            // Assert
             Assert.True(complexType.IsWithInstanceAnnotations);
         }
 

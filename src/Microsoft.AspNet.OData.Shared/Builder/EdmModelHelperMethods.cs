@@ -556,12 +556,12 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         private static void AddInstanceAnnotationsDictionaryAnnotations(this EdmModel model,
-         Dictionary<IEdmStructuredType, PropertyInfo> openTypes)
+         Dictionary<IEdmStructuredType, PropertyInfo> instanceAnnotations)
         {
-            foreach (KeyValuePair<IEdmStructuredType, PropertyInfo> openType in openTypes)
+            foreach (KeyValuePair<IEdmStructuredType, PropertyInfo> instanceAnnotation in instanceAnnotations)
             {
-                IEdmStructuredType edmStructuredType = openType.Key;
-                PropertyInfo propertyInfo = openType.Value;
+                IEdmStructuredType edmStructuredType = instanceAnnotation.Key;
+                PropertyInfo propertyInfo = instanceAnnotation.Value;
                 model.SetAnnotationValue(edmStructuredType, new InstanceAnnotationDictionaryAnnotation(propertyInfo));
             }
         }

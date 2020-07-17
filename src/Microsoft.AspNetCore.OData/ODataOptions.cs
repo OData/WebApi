@@ -31,5 +31,10 @@ namespace Microsoft.AspNet.OData
         /// Gets or Sets the set of flags that have options for backward compatibility
         /// </summary>
         public CompatibilityOptions CompatibilityOptions { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether request body binding should be case insensitive.
+        /// </summary>
+        public bool EnableCaseInsensitiveModelBinding { get; set; }
     }
 }

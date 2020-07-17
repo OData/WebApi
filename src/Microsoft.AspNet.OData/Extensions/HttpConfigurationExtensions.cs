@@ -53,6 +53,8 @@ namespace Microsoft.AspNet.OData.Extensions
 
         private const string CompatibilityOptionsKey = "Microsoft.AspNet.OData.CompatibilityOptionsKey";
 
+        private const string EnableCaseInsensitiveModelBindingKey = "Microsoft.AspNet.OData.EnableCaseInsensitiveModelBindingKey";
+
         /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
@@ -264,6 +266,39 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             configuration.Services.Add(typeof(IFilterProvider), new QueryFilterProvider(queryFilter));
+        }
+
+        /// <summary>
+        /// Enables support for case insensitive model binding.
+        /// </summary>
+        /// <param name="configuration">The server configuration.</param>
+        public static void EnableODataCaseInsensitiveModelBinding(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            configuration.Properties[EnableCaseInsensitiveModelBindingKey] = true;
+        }
+
+        /// <summary>
+        /// Check the CaseInsensitiveModelBinding is enabled or not.
+        /// </summary>
+        /// <returns>True if CaseInsensitiveModelBinding is enabled; false otherwise</returns>
+        internal static bool HasEnabledCaseInsensitiveModelBinding(this HttpConfiguration configuration)
+        {
+            if (configuration == null)
+            {
+                throw Error.ArgumentNull("configuration");
+            }
+
+            object value;
+            if (configuration.Properties.TryGetValue(EnableCaseInsensitiveModelBindingKey, out value))
+            {
+                return (bool)value;
+            }
+            return false;
         }
 
         /// <summary>

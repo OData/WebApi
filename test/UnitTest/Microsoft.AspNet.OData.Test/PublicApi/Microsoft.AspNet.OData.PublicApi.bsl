@@ -1874,6 +1874,11 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpConfigurationExtension
 	[
 	ExtensionAttribute(),
 	]
+	public static void EnableODataCaseInsensitiveModelBinding (System.Web.Http.HttpConfiguration configuration)
+
+	[
+	ExtensionAttribute(),
+	]
 	public static System.Web.Http.HttpConfiguration Expand (System.Web.Http.HttpConfiguration configuration)
 
 	[

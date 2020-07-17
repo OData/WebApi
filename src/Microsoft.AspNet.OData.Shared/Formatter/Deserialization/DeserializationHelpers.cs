@@ -6,12 +6,17 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.Net.Http;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using System.Linq;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -19,9 +24,60 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     {
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
-        { 
-            IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
-                       
+        {
+            WebApiRequestMessage request = null;
+            if(readContext != null)
+            {
+                request = (WebApiRequestMessage)readContext.InternalRequest;
+            }
+
+            bool enableCaseInsensitiveModelBinding = false;
+
+            if(request != null)
+            {
+#if NETCORE
+                // In AspNetCore, we add our setting by adding a service to the ServiceCollection as below:
+                // services.AddSingleton(new ODataOptions() { EnableCaseInsensitiveModelBinding = true });
+                // We need to resolve the service so that we can get our setting.
+                var settings = request.innerRequest.HttpContext.RequestServices.GetService<ODataOptions>();
+                if(settings != null)
+                {
+                    enableCaseInsensitiveModelBinding = settings.EnableCaseInsensitiveModelBinding;
+                }
+#else
+                // In AspNet classic, we add our setting to HttpConfiguration.Properties as below:
+                // configuration.Properties[EnableCaseInsensitiveModelBindingKey] = true;
+                var container = request.innerRequest.GetConfiguration();
+                if(container != null)
+                {
+                    enableCaseInsensitiveModelBinding = container.HasEnabledCaseInsensitiveModelBinding();
+                }
+#endif
+            }
+
+            IEdmProperty edmProperty;
+
+            // Extract edmProperty using a Case-Sensitive match
+            edmProperty = resourceType.FindProperty(property.Name);
+
+            if (enableCaseInsensitiveModelBinding && edmProperty == null)
+            {
+                // if edmProperty is null, we try a Case-Insensitive match
+                var sProperties = resourceType.StructuralProperties().Where(k => k.Name.Equals(property.Name, StringComparison.OrdinalIgnoreCase));
+
+                // We throw an exception when we have more than 1 case-insensitive matches and no case sensitive matches.
+                if (sProperties.Count() > 1)
+                {
+                    throw new ODataException(Error.Format(SRResources.CannotDeserializeUnknownProperty, property.Name, resourceType.Definition));
+                }
+
+                if (sProperties.Count() == 1)
+                {
+                    var sProperty = sProperties.Single();
+                    edmProperty = resourceType.FindProperty(sProperty.Name);
+                }
+            }
+
             bool isDynamicProperty = false;
             string propertyName = property.Name;
             if (edmProperty != null)

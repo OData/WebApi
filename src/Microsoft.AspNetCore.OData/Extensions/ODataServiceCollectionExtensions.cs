@@ -114,6 +114,33 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
+        /// Enables case-insensitive model binding.
+        /// </summary>
+        /// <param name="builder">Odata Builder.</param>
+        public static IODataBuilder EnableODataCaseInsensitiveModelBinding(this IODataBuilder builder)
+        {
+            return EnableODataCaseInsensitiveModelBinding(builder, true);
+        }
+
+        /// <summary>
+        /// Enables case-insensitive model binding.
+        /// </summary>
+        /// <param name="builder">Odata Builder.</param>
+        /// <param name="enable">Whether to enable case-insensitive model binding.</param>
+        public static IODataBuilder EnableODataCaseInsensitiveModelBinding(this IODataBuilder builder, bool enable)
+        {
+            if (builder == null)
+            {
+                throw Error.ArgumentNull("builder");
+            }
+
+            var odataOptions = builder.Services.First(s => s.ServiceType == typeof(ODataOptions) && s.ImplementationType == typeof(ODataOptions));
+            builder.Services.Remove(odataOptions);
+            builder.Services.AddSingleton(new ODataOptions() { EnableCaseInsensitiveModelBinding = enable });
+            return builder;
+        }
+
+        /// <summary>
         /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
         /// type. To avoid processing unexpected or malicious queries, use the validation settings on
         /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit

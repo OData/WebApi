@@ -8,12 +8,16 @@ using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.Conventions;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Types;
+#if NETCORE
+using Microsoft.AspNetCore.Routing;
+#endif
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
@@ -367,6 +371,93 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                     resource: null,
                     deserializerProvider: null,
                     readContext: null));
+
+            // Assert
+            Assert.Equal(HelpfulErrorMessage, exception.Message);
+        }
+        
+        [Fact]
+        public void ApplyProperty_PassesWithCaseInsensitivePropertyName()
+        {
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "keY1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new Mock<IDelta>(MockBehavior.Strict);
+            Type propertyType = typeof(string);
+            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true).Verifiable();
+            resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
+
+#if NETCORE
+
+            IRouteBuilder builder = RoutingConfigurationFactory.CreateWithCaseInsensitiveModelBinding();
+
+            var request = RequestFactory.Create(builder);
+#else
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            configuration.EnableODataCaseInsensitiveModelBinding();
+            var request = RequestFactory.Create(configuration);
+#endif
+
+            ODataDeserializerContext context = new ODataDeserializerContext
+            {
+                Model = new EdmModel(),
+                Request = request
+            };
+
+            // Act
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
+                context);
+
+            // Assert
+            resource.Verify();
+        }
+
+        [Fact]
+        public void ApplyProperty_FailWithTwoCaseInsensitiveMatchesAndCaseSensitiveMatch()
+        {
+            const string HelpfulErrorMessage = "The property 'proPerty1' does not exist on type 'namespace.name'. Make sure to only use property names that are defined by the type.";
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "proPerty1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddStructuralProperty("Property1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+            entityType.AddStructuralProperty("property1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+#if NETCORE
+
+            IRouteBuilder builder = RoutingConfigurationFactory.CreateWithCaseInsensitiveModelBinding();
+
+            var request = RequestFactory.Create(builder);
+#else
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            configuration.EnableODataCaseInsensitiveModelBinding();
+            var request = RequestFactory.Create(configuration);
+#endif
+
+            ODataDeserializerContext context = new ODataDeserializerContext
+            {
+                Model = new EdmModel(),
+                Request = request
+            };
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() =>
+                DeserializationHelpers.ApplyProperty(
+                    property,
+                    entityTypeReference,
+                    resource: null,
+                    provider,
+                    context));
 
             // Assert
             Assert.Equal(HelpfulErrorMessage, exception.Message);

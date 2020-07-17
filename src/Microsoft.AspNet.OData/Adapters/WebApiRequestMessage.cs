@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// The inner request wrapped by this instance.
         /// </summary>
-        private HttpRequestMessage innerRequest;
+        internal HttpRequestMessage innerRequest;
 
         /// <summary>
         /// Initializes a new instance of the WebApiRequestMessage class.

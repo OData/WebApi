@@ -222,6 +222,7 @@ namespace Microsoft.AspNet.OData.Extensions
             options.EnableContinueOnErrorHeader = defaultOptions.EnableContinueOnErrorHeader;
             options.NullDynamicPropertyIsEnabled = defaultOptions.NullDynamicPropertyIsEnabled;
             options.UrlKeyDelimiter = defaultOptions.UrlKeyDelimiter;
+            options.EnableCaseInsensitiveModelBinding = defaultOptions.EnableCaseInsensitiveModelBinding;
         }
 
         public static ODataOptions GetDefaultODataOptions(this IServiceProvider serviceProvider)

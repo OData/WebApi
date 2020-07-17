@@ -193,6 +193,21 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void EnableODataCaseInsensitiveModelBinding_Sets_CaseInsensitiveModelBindingKeyFlag()
+        {
+            // Arrange
+            HttpConfiguration config = new HttpConfiguration();
+            bool initialConfig = config.HasEnabledCaseInsensitiveModelBinding();
+
+            // Act
+            config.EnableODataCaseInsensitiveModelBinding();
+
+            // Assert
+            Assert.False(initialConfig);
+            Assert.True(config.HasEnabledCaseInsensitiveModelBinding());
+        }
+
+        [Fact]
         public void SetUrlKeyDelimiter_Sets_UrlKeyDelimiter()
         {
             // Arrange

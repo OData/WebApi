@@ -538,6 +538,7 @@ public class Microsoft.AspNet.OData.ODataOptions {
 	public ODataOptions ()
 
 	CompatibilityOptions CompatibilityOptions  { public get; public set; }
+	bool EnableCaseInsensitiveModelBinding  { public get; public set; }
 	bool EnableContinueOnErrorHeader  { public get; public set; }
 	bool NullDynamicPropertyIsEnabled  { public get; public set; }
 	Microsoft.OData.ODataUrlKeyDelimiter UrlKeyDelimiter  { public get; public set; }
@@ -2370,6 +2371,16 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataServiceCollectionExte
 	ExtensionAttribute(),
 	]
 	public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddODataQueryFilter (Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.AspNetCore.Mvc.Filters.IActionFilter queryFilter)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static IODataBuilder EnableODataCaseInsensitiveModelBinding (IODataBuilder builder)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static IODataBuilder EnableODataCaseInsensitiveModelBinding (IODataBuilder builder, bool enable)
 }
 
 [

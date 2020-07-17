@@ -19,7 +19,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
+            IDictionary<string, string> propertyNamesMapping = new Dictionary<string, string>();
+            var sProperties = resourceType.StructuralProperties();
+            foreach(var prop in sProperties)
+            {
+                propertyNamesMapping.Add(prop.Name.ToLower(), prop.Name);
+            }
+
+            var findPropertName = propertyNamesMapping[property.Name.ToLower()];
+            IEdmProperty edmProperty = resourceType.FindProperty(findPropertName);
 
             bool isDynamicProperty = false;
             string propertyName = property.Name;

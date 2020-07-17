@@ -25,9 +25,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 propertyNamesMapping.Add(prop.Name.ToLower(), prop.Name);
             }
-
-            var findPropertName = propertyNamesMapping[property.Name.ToLower()];
-            IEdmProperty edmProperty = resourceType.FindProperty(findPropertName);
+            string name;
+            var findPropertyName = propertyNamesMapping.TryGetValue(property.Name.ToLower(), out name) ? name : property.Name;
+            IEdmProperty edmProperty = resourceType.FindProperty(findPropertyName);
 
             bool isDynamicProperty = false;
             string propertyName = property.Name;

@@ -71,6 +71,8 @@ namespace Microsoft.AspNet.OData.Builder
             // IEdmFunctionImportConventions's
             new ActionLinkGenerationConvention(),
             new FunctionLinkGenerationConvention(),
+
+            new DescriptionAnnotationConvention(),
         };
 
         // These hashset's keep track of edmtypes/navigation sources for which conventions

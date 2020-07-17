@@ -14,9 +14,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DerivedTypeConstraintAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\DescriptionAnnotationConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\DescriptionAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\PrecisionPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ClrEnumMemberAnnotation.cs" />
@@ -169,7 +171,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DynamicPropertyDictionaryAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\AggregationBinder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ComputeBinder.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\TransformationBinderBase.cs" />    
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\TransformationBinderBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ApplyQueryOption.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ExpressionBinderBase.cs" />

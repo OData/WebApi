@@ -66,7 +66,38 @@ namespace Microsoft.AspNet.OData.Builder
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
 
+            
+            AddDescriptionAnnotations(builder, model, edmTypeMap);
+            
+            
+
             return model;
+        }
+
+        private static void AddDescriptionAnnotations(ODataModelBuilder builder, EdmModel model, IReadOnlyDictionary<Type, IEdmType> edmTypeMap)
+        {
+	        foreach (var structuralType in builder.StructuralTypes)
+	        {
+		        
+		        if (!edmTypeMap.TryGetValue(structuralType.ClrType, out var edmType)) continue;
+		        if (!(edmType is IEdmVocabularyAnnotatable target)) continue;
+
+		        if (!string.IsNullOrEmpty(structuralType.Description))
+		        {
+			        model.SetDescriptionAnnotation(target, structuralType.Description);
+		        }
+
+		        if (edmType is IEdmStructuredType structuredType)
+		        {
+			        foreach (var (property, configuration) in structuredType.DeclaredProperties.Join(structuralType.Properties, p => p.Name, p => p.Name, (property, configuration) => (property, configuration)))
+			        {
+				        if (!string.IsNullOrEmpty(configuration.Description))
+				        {
+					        model.SetDescriptionAnnotation(property, configuration.Description);
+				        }
+			        }
+		        }
+	        }
         }
 
         private static void AddTypes(this EdmModel model, Dictionary<Type, IEdmType> types)

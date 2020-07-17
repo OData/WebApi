@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.OData.Builder
     public abstract class PropertyConfiguration
     {
         private string _name;
+        private string _description;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyConfiguration"/> class.
@@ -41,6 +42,7 @@ namespace Microsoft.AspNet.OData.Builder
             DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
         }
 
+        
         /// <summary>
         /// Gets or sets the name of the property.
         /// </summary>
@@ -58,6 +60,26 @@ namespace Microsoft.AspNet.OData.Builder
                 }
 
                 _name = value;
+            }
+        } 
+      
+        /// <summary>
+        /// Gets or sets the description of the property.
+        /// </summary>
+        public string Description
+        {
+            get
+            {
+	            return _description;
+            }
+            set
+            {
+                if (value == null)
+                {
+                    throw Error.PropertyNull();
+                }
+
+                _description = value;
             }
         }
 

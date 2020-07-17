@@ -654,6 +654,17 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Sets the description for this type.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public StructuralTypeConfiguration<TStructuralType> HasDescription(string value)
+        {
+	        _configuration.Description = value;
+	        return this;
+        }
+
+        /// <summary>
         /// Sets sortable properties depends on <see cref="QueryOptionSetting"/> of this structural type.
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> OrderBy(QueryOptionSetting setting, params string[] properties)

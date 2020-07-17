@@ -1104,6 +1104,7 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	bool AutoExpand  { public get; public set; }
 	StructuralTypeConfiguration DeclaringType  { public get; }
 	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
+	string Description  { public get; public set; }
 	bool DisableAutoExpandWhenSelectIsPresent  { public get; public set; }
 	bool IsRestricted  { public get; }
 	PropertyKind Kind  { public abstract get; }
@@ -1173,6 +1174,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	bool BaseTypeConfigured  { public virtual get; }
 	StructuralTypeConfiguration BaseTypeInternal  { protected virtual get; }
 	System.Type ClrType  { public virtual get; }
+	string Description  { public virtual get; public virtual set; }
 	System.Reflection.PropertyInfo DynamicPropertyDictionary  { public get; }
 	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
@@ -1231,6 +1233,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting)
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
+	public StructuralTypeConfiguration`1 HasDescription (string value)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
@@ -1248,7 +1251,6 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 OrderBy (QueryOptionSetting setting, string[] properties)
 	public StructuralTypeConfiguration`1 Page ()
 	public StructuralTypeConfiguration`1 Page (System.Nullable`1[[System.Int32]] maxTopValue, System.Nullable`1[[System.Int32]] pageSizeValue)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
@@ -1257,8 +1259,9 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()

@@ -3134,6 +3134,91 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             Assert.False(entityType.Properties().First(p => p.Name.Equals("UserType")).Type.IsNullable);
             Assert.False(entityType.Properties().First(p => p.Name.Equals("Contacts")).Type.IsNullable);
         }
+        
+        [Fact]
+        public void ConventionModelBuilder_tiontion_Set_On_EntityType()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            
+            // Act 
+            var user = builder.EntitySet<IdentityUser>("IdentityUsers");
+            user.EntityType.HasKey(p => new { p.Provider, p.UserId });
+            user.EntityType.HasDescription("Test description");
+            var edmModel = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(edmModel);
+            var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+            var annotation = entityType.VocabularyAnnotations(edmModel).First();
+            Assert.Equal("Description", annotation.Term.Name);
+            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
+            Assert.Equal("Test description", value.Value);
+        }
+        
+        [Fact]
+        public void ConventionModelBuilder_Description_Set_On_Property()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            
+            // Act 
+            var user = builder.EntitySet<IdentityUser>("IdentityUsers");
+            user.EntityType.HasKey(p => new { p.Provider, p.UserId });
+            user.EntityType.Property(i => i.Name).Description = "Returns the name of the user.";
+            var edmModel = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(edmModel);
+            var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+            var property = entityType.Properties().First(p => p.Name == "Name");
+
+            var annotation = property.VocabularyAnnotations(edmModel).First();
+            Assert.Equal("Description", annotation.Term.Name);
+            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
+            Assert.Equal("Returns the name of the user.", value.Value);
+        }
+        
+        [Fact]
+        public void ConventionModelBuilder_Description_Set_On_Entity_Via_Description_Attribute()
+        {
+            // Arrange
+            var builder = ODataConventionModelBuilderFactory.Create();
+            
+            // Act 
+            builder.EntitySet<DescriptionEntity>("DescriptionEntities");
+            var edmModel = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(edmModel);
+            var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+            var annotation = entityType.VocabularyAnnotations(edmModel).First();
+            Assert.Equal("Description", annotation.Term.Name);
+            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
+            Assert.Equal("The summary for this type.", value.Value);
+
+        }
+
+        [Fact]
+        public void ConventionModelBuilder_Description_Set_On_Property_Via_Description_Attribute()
+        {
+	        // Arrange
+	        var builder = ODataConventionModelBuilderFactory.Create();
+            
+	        // Act 
+	        builder.EntitySet<DescriptionPropertyEntity>("IdentityUsers");
+	        var edmModel = builder.GetEdmModel();
+
+	        // Assert
+	        Assert.NotNull(edmModel);
+	        var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+	        var property = entityType.Properties().First(p => p.Name == "Id");
+
+	        var annotation = property.VocabularyAnnotations(edmModel).First();
+	        Assert.Equal("Description", annotation.Term.Name);
+	        var value = Assert.IsType<EdmStringConstant>(annotation.Value);
+	        Assert.Equal("The summary for this property.", value.Value);
+        }
 
         [Fact]
         public void ConventionModelBuild_Work_With_AutoExpandEdmTypeAttribute()
@@ -3719,5 +3804,19 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         public byte[] Byte { get; set; }
 
         public string NonLength { get; set; }
+    }
+
+    [Description("The summary for this type.", LongDescription = "The long description for this type.")]
+    public class DescriptionEntity
+    {
+        [Key]
+        public int Id { get; set; }
+    }
+
+    public class DescriptionPropertyEntity
+    {
+	    [Key]
+	    [Description("The summary for this property.", LongDescription = "The long description for this property.")]
+	    public int Id { get; set; }
     }
 }

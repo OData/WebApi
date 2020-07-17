@@ -314,6 +314,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(HelpfulErrorMessage, exception.Message);
         }
 
+        [Fact]
+        public void ApplyProperty_PassesWithCaseInsensitivePropertyName()
+        {
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "keY1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new Mock<IDelta>(MockBehavior.Strict);
+            Type propertyType = typeof(string);
+            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true).Verifiable();
+            resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
+
+            // Act
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
+                new ODataDeserializerContext { Model = new EdmModel() });
+
+            // Assert
+            resource.Verify();
+        }
+
         private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)
         {
             Mock<IEdmProperty> property = new Mock<IEdmProperty>();

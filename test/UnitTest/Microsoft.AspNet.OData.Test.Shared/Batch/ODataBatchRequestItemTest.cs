@@ -47,4 +47,55 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
     }
 }
+#else
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNetCore.Http;
+using Xunit;
+
+namespace Microsoft.AspNet.OData.Test.Batch
+{
+    public class ODataBatchRequestItemTest
+    {
+        [Fact]
+        public async Task SendMessageAsync_Throws_WhenInvokerIsNull()
+        {
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => ODataBatchRequestItem.SendRequestAsync(null, new DefaultHttpContext(), null),
+                "handler");
+        }
+
+        [Fact]
+        public async Task SendMessageAsync_Throws_WhenRequestIsNull()
+        {
+            RequestDelegate handler = (c) => { return Task.CompletedTask; };
+            await ExceptionAssert.ThrowsArgumentNullAsync(
+                () => ODataBatchRequestItem.SendRequestAsync(handler, null, null),
+                "context");
+        }
+
+        [Fact]
+        public async Task SendMessageAsync_Resolves_Uri_From_ContentId()
+        {
+			// Arrange
+			DefaultHttpContext context = new DefaultHttpContext();
+            HttpResponseMessage response = new HttpResponseMessage();
+            RequestDelegate handler = (c) => { return Task.FromResult(response); };
+            Dictionary<string, string> contentIdLocationMappings = new Dictionary<string, string>();
+            contentIdLocationMappings.Add("1", "http://localhost:12345/odata/Customers(42)");
+            Uri unresolvedUri = new Uri("http://localhost:12345/odata/$1/Orders");
+            context.Request.CopyAbsoluteUrl(unresolvedUri);
+			
+			// Act
+            await ODataBatchRequestItem.SendRequestAsync(handler, context, contentIdLocationMappings);
+
+            // Assert
+            Assert.Equal("/odata/Customers(42)/Orders", context.Request.Path.ToString());
+        }
+    }
+}
 #endif

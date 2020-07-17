@@ -224,5 +224,14 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerRequest.GetWriterSettings(); }
         }
+
+        /// <summary>
+        /// Gets the HttpConfiguration associated with the request.
+        /// </summary>
+        /// <returns></returns>
+        public HttpConfiguration Configuration
+        {
+            get { return this.innerRequest.GetConfiguration(); }
+        }
     }
 }

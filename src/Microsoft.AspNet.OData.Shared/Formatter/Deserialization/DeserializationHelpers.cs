@@ -19,9 +19,33 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     {
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
-        { 
-            IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
-                       
+        {
+            IEdmProperty edmProperty;
+
+            // Extract edmProperty using a Case-Sensitive match
+            edmProperty = resourceType.FindProperty(property.Name);
+
+            if (readContext != null && !readContext.DisableCaseInsensitiveRequestPropertyBinding && edmProperty == null)
+            {
+                // if edmProperty is null, we try a Case-Insensitive match.
+                bool propertyMatched = false;
+
+                IEnumerable<IEdmStructuralProperty> structuralProperties = resourceType.StructuralProperties();
+                foreach(IEdmStructuralProperty structuralProperty in structuralProperties)
+                {
+                    if(structuralProperty.Name.Equals(property.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        // We throw an exception when we have more than 1 case-insensitive matches and no case sensitive matches.
+                        if (propertyMatched)
+                        {
+                            throw new ODataException(Error.Format(SRResources.CannotDeserializeUnknownProperty, property.Name, resourceType.Definition));
+                        }
+                        propertyMatched = true;
+                        edmProperty = resourceType.FindProperty(structuralProperty.Name);
+                    }
+                }
+            }
+
             bool isDynamicProperty = false;
             string propertyName = property.Name;
             if (edmProperty != null)

@@ -16,6 +16,7 @@ namespace Microsoft.AspNet.OData.Builder
     {
         private string _name;
         private string _description;
+        private string _longDescription;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyConfiguration"/> class.
@@ -64,23 +65,21 @@ namespace Microsoft.AspNet.OData.Builder
         } 
       
         /// <summary>
-        /// Gets or sets the description of the property.
+        /// Gets or sets the summary for the property.
         /// </summary>
         public string Description
         {
-            get
-            {
-	            return _description;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw Error.PropertyNull();
-                }
+            get => _description;
+            set => _description = value ?? throw Error.PropertyNull();
+        }
 
-                _description = value;
-            }
+        /// <summary>
+        /// Gets or sets the detailed description of the property.
+        /// </summary>
+        public string LongDescription
+        {
+            get => _longDescription;
+            set => _longDescription = value ?? throw Error.PropertyNull();
         }
 
         /// <summary>

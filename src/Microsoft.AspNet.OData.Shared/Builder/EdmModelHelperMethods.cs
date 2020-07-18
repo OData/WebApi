@@ -86,14 +86,22 @@ namespace Microsoft.AspNet.OData.Builder
 		        {
 			        model.SetDescriptionAnnotation(target, structuralType.Description);
 		        }
+		        if (!string.IsNullOrEmpty(structuralType.LongDescription))
+		        {
+			        model.SetLongDescriptionAnnotation(target, structuralType.LongDescription);
+		        }
 
 		        if (edmType is IEdmStructuredType structuredType)
 		        {
-			        foreach (var (property, configuration) in structuredType.DeclaredProperties.Join(structuralType.Properties, p => p.Name, p => p.Name, (property, configuration) => (property, configuration)))
+			        foreach (var entry in structuredType.DeclaredProperties.Join(structuralType.Properties, p => p.Name, p => p.Name, (property, configuration) => new {property, configuration}))
 			        {
-				        if (!string.IsNullOrEmpty(configuration.Description))
+				        if (!string.IsNullOrEmpty(entry.configuration.Description))
 				        {
-					        model.SetDescriptionAnnotation(property, configuration.Description);
+					        model.SetDescriptionAnnotation(entry.property, entry.configuration.Description);
+				        } 
+				        if (!string.IsNullOrEmpty(entry.configuration.LongDescription))
+				        {
+					        model.SetLongDescriptionAnnotation(entry.property, entry.configuration.LongDescription);
 				        }
 			        }
 		        }

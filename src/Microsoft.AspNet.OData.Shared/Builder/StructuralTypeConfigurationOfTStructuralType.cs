@@ -656,11 +656,29 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Sets the description for this type.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="summary">A short description for this type.</param>
+        /// <param name="detailedDescription">A detailed description for this type.</param>
         /// <returns></returns>
-        public StructuralTypeConfiguration<TStructuralType> HasDescription(string value)
+        public StructuralTypeConfiguration<TStructuralType> HasDescription(string summary, string detailedDescription)
         {
-	        _configuration.Description = value;
+	        _configuration.Description = summary;
+	        if (!string.IsNullOrEmpty(detailedDescription))
+	        {
+		        _configuration.LongDescription = detailedDescription;
+	        }
+
+	        return this;
+        }
+
+        /// <summary>
+        /// Sets the description for this type.
+        /// </summary>
+        /// <param name="summary">A short description for this type.</param>
+        /// <returns></returns>
+        public StructuralTypeConfiguration<TStructuralType> HasDescription(string summary)
+        {
+	        _configuration.Description = summary;
+            
 	        return this;
         }
 

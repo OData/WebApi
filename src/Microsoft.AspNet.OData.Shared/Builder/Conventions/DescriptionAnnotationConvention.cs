@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 
 namespace Microsoft.AspNet.OData.Builder.Conventions
 {
@@ -12,6 +13,10 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
 			if (attribute != null)
 			{
 				structuralType.Description = attribute.Description;
+				if (!string.IsNullOrEmpty(attribute.LongDescription))
+				{
+					structuralType.LongDescription = attribute.LongDescription;
+				}
 			}
 
 			foreach (var property in structuralType.Properties)
@@ -20,6 +25,10 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
 				if (attribute != null)
 				{
 					property.Description = attribute.Description;
+					if (!string.IsNullOrEmpty(attribute.LongDescription))
+					{
+						property.LongDescription = attribute.LongDescription;
+					}
 				}
 			}
 		

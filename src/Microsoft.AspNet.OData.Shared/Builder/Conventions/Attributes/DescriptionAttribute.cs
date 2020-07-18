@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Microsoft.AspNet.OData.Builder
+namespace Microsoft.AspNet.OData.Builder.Conventions.Attributes
 {
 	/// <summary>
 	/// Represents an <see cref="Attribute"/> that can be placed on a property or class to document its purpose. The content will be includes in the Odata metadata document.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
-	public class DescriptionAttribute : Attribute
+	public sealed class DescriptionAttribute : Attribute
 	{
 		/// <summary>
-		/// Gets or sets a summary about the purpose of the property or class.
+		/// Gets or summary about the purpose of the property or class.
 		/// </summary>
 		public string Description { get; }
 

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -3136,7 +3137,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
         
         [Fact]
-        public void ConventionModelBuilder_tiontion_Set_On_EntityType()
+        public void ConventionModelBuilder_Description_Set_On_EntityType()
         {
             // Arrange
             var builder = ODataConventionModelBuilderFactory.Create();
@@ -3144,18 +3145,25 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             // Act 
             var user = builder.EntitySet<IdentityUser>("IdentityUsers");
             user.EntityType.HasKey(p => new { p.Provider, p.UserId });
-            user.EntityType.HasDescription("Test description");
+            user.EntityType.HasDescription("Summary", "Detailed description");
             var edmModel = builder.GetEdmModel();
 
             // Assert
             Assert.NotNull(edmModel);
             var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
-            var annotation = entityType.VocabularyAnnotations(edmModel).First();
-            Assert.Equal("Description", annotation.Term.Name);
-            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
-            Assert.Equal("Test description", value.Value);
+            AssertAnnotations(entityType, edmModel);
         }
-        
+
+        private static void AssertAnnotations(IEdmVocabularyAnnotatable entityType, IEdmModel edmModel)
+        {
+	        var annotation = entityType.VocabularyAnnotations(edmModel).First(e => e.Term.Name == "Description");
+	        var value = Assert.IsType<EdmStringConstant>(annotation.Value);
+	        Assert.Equal("Summary", value.Value);
+	        annotation = entityType.VocabularyAnnotations(edmModel).First(e => e.Term.Name == "LongDescription");
+	        value = Assert.IsType<EdmStringConstant>(annotation.Value);
+	        Assert.Equal("Detailed description", value.Value);
+        }
+
         [Fact]
         public void ConventionModelBuilder_Description_Set_On_Property()
         {
@@ -3165,7 +3173,9 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             // Act 
             var user = builder.EntitySet<IdentityUser>("IdentityUsers");
             user.EntityType.HasKey(p => new { p.Provider, p.UserId });
-            user.EntityType.Property(i => i.Name).Description = "Returns the name of the user.";
+            var propertyConfiguration = user.EntityType.Property(i => i.Name);
+            propertyConfiguration.Description = "Summary";
+            propertyConfiguration.LongDescription = "Detailed description";
             var edmModel = builder.GetEdmModel();
 
             // Assert
@@ -3173,30 +3183,23 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
             var property = entityType.Properties().First(p => p.Name == "Name");
 
-            var annotation = property.VocabularyAnnotations(edmModel).First();
-            Assert.Equal("Description", annotation.Term.Name);
-            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
-            Assert.Equal("Returns the name of the user.", value.Value);
+            AssertAnnotations(property, edmModel);
         }
-        
+
         [Fact]
         public void ConventionModelBuilder_Description_Set_On_Entity_Via_Description_Attribute()
         {
-            // Arrange
-            var builder = ODataConventionModelBuilderFactory.Create();
-            
-            // Act 
-            builder.EntitySet<DescriptionEntity>("DescriptionEntities");
-            var edmModel = builder.GetEdmModel();
+	        // Arrange
+	        var builder = ODataConventionModelBuilderFactory.Create();
 
-            // Assert
-            Assert.NotNull(edmModel);
-            var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
-            var annotation = entityType.VocabularyAnnotations(edmModel).First();
-            Assert.Equal("Description", annotation.Term.Name);
-            var value = Assert.IsType<EdmStringConstant>(annotation.Value);
-            Assert.Equal("The summary for this type.", value.Value);
+	        // Act 
+	        builder.EntitySet<DescriptionEntity>("DescriptionEntities");
+	        var edmModel = builder.GetEdmModel();
 
+	        // Assert
+	        Assert.NotNull(edmModel);
+	        var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
+	        AssertAnnotations(entityType, edmModel);
         }
 
         [Fact]
@@ -3214,10 +3217,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
 	        var entityType = edmModel.SchemaElements.OfType<IEdmEntityType>().First();
 	        var property = entityType.Properties().First(p => p.Name == "Id");
 
-	        var annotation = property.VocabularyAnnotations(edmModel).First();
-	        Assert.Equal("Description", annotation.Term.Name);
-	        var value = Assert.IsType<EdmStringConstant>(annotation.Value);
-	        Assert.Equal("The summary for this property.", value.Value);
+	        AssertAnnotations(property, edmModel);
         }
 
         [Fact]
@@ -3806,7 +3806,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         public string NonLength { get; set; }
     }
 
-    [Description("The summary for this type.", LongDescription = "The long description for this type.")]
+    [Description("Summary", LongDescription = "Detailed description")]
     public class DescriptionEntity
     {
         [Key]
@@ -3816,7 +3816,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
     public class DescriptionPropertyEntity
     {
 	    [Key]
-	    [Description("The summary for this property.", LongDescription = "The long description for this property.")]
+	    [Description("Summary", LongDescription = "Detailed description")]
 	    public int Id { get; set; }
     }
 }

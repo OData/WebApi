@@ -72,6 +72,7 @@ namespace Microsoft.AspNet.OData.Builder
             new ActionLinkGenerationConvention(),
             new FunctionLinkGenerationConvention(),
 
+            // Documentation conventions
             new DescriptionAnnotationConvention(),
         };
 

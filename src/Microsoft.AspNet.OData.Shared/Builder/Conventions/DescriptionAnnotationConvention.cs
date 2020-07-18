@@ -31,8 +31,6 @@ namespace Microsoft.AspNet.OData.Builder.Conventions
 					}
 				}
 			}
-		
-			
 		}
 	}
 }

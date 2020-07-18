@@ -87,7 +87,6 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-
         /// <summary>
         /// Gets or sets the summary for the property.
         /// </summary>
@@ -105,7 +104,6 @@ namespace Microsoft.AspNet.OData.Builder
 	        get => _longDescription;
 	        set => _longDescription = value ?? throw Error.PropertyNull();
         }
-
         
         /// <summary>
         /// Gets or sets the namespace of this EDM type.

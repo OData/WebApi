@@ -66,10 +66,8 @@ namespace Microsoft.AspNet.OData.Builder
             // build the map from IEdmEntityType to IEdmFunctionImport
             model.SetAnnotationValue<BindableOperationFinder>(model, new BindableOperationFinder(model));
 
-            
+            // Add annotations for documentation
             AddDescriptionAnnotations(builder, model, edmTypeMap);
-            
-            
 
             return model;
         }

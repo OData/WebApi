@@ -42,7 +42,6 @@ namespace Microsoft.AspNet.OData.Builder
             QueryConfiguration = new QueryConfiguration();
             DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
         }
-
         
         /// <summary>
         /// Gets or sets the name of the property.

@@ -40,10 +40,10 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.Argument("bindingContext", SRResources.ModelBinderUtil_ModelMetadataCannotBeNull);
             }
             var modelTypeInfo = bindingContext.ModelType.GetTypeInfo();
-            if (bindingContext.ModelMetadata.IsComplexType && 
+            if (bindingContext.ModelMetadata.IsComplexType &&
                 !modelTypeInfo.IsAbstract &&
                 modelTypeInfo.GetConstructor(Type.EmptyTypes) != null &&
-                bindingContext.ModelMetadata.ModelType != typeof(string))
+                bindingContext.ModelName == "")
             {
                 return new ODataComplexTypeModelBinder().BindModelAsync(bindingContext);
             }

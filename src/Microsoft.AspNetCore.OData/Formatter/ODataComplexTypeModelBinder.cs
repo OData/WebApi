@@ -14,8 +14,6 @@ namespace Microsoft.AspNet.OData.Formatter
 {
     internal class ODataComplexTypeModelBinder : IModelBinder
     {
-        private readonly IDictionary<ModelMetadata, IModelBinder> _propertyBinders = null;
-
         private Func<object> _modelCreator;
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "We don't want to fail in model binding.")]
@@ -49,7 +47,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
             var modelMetadata = bindingContext.ModelMetadata;
             var propertyBindingSucceeded = false;
-
             for (var i = 0; i < modelMetadata.Properties.Count; i++)
             {
                 var property = modelMetadata.Properties[i];
@@ -191,11 +188,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         protected virtual Task BindProperty(ModelBindingContext bindingContext)
         {
-            //var binder = bindingContext.HttpContext.
-            //var binder = bindingContext.ValueProvider.ContainsPrefix(bindingContext.ModelName);
-           var binder = _propertyBinders[bindingContext.ModelMetadata];
-            return binder.BindModelAsync(bindingContext);
-
+            return new ODataModelBinder().BindModelAsync(bindingContext);
         }
 
         private async Task<ModelBindingResult> BindProperty(
@@ -255,8 +248,8 @@ namespace Microsoft.AspNet.OData.Formatter
             if (_modelCreator == null)
             {
                 _modelCreator = Expression
-                   .Lambda<Func<object>>(Expression.New(bindingContext.ModelType))
-                   .Compile();
+                          .Lambda<Func<object>>(Expression.New(bindingContext.ModelType))
+                          .Compile();
             }
 
             // If model creator throws an exception, we want to propagate it back up the call stack, since the

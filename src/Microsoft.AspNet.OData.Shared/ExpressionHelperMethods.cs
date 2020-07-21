@@ -25,12 +25,15 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _thenByDescendingMethod = GenericMethodOf(_ => Queryable.ThenByDescending<int, int>(default(IOrderedQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _enumerableThenByDescendingMethod = GenericMethodOf(_ => Enumerable.ThenByDescending<int, int>(default(IOrderedEnumerable<int>), default(Func<int, int>)));
         private static MethodInfo _countMethod = GenericMethodOf(_ => Queryable.LongCount<int>(default(IQueryable<int>)));
-        private static MethodInfo _enumerableGroupByMethod = GenericMethodOf(_ => Enumerable.GroupBy<int, int>(default(IQueryable<int>), default(Func<int, int>)));        
+        private static MethodInfo _enumerableGroupByMethod = GenericMethodOf(_ => Enumerable.GroupBy<int, int>(default(IQueryable<int>), default(Func<int, int>)));
         private static MethodInfo _groupByMethod = GenericMethodOf(_ => Queryable.GroupBy<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
         private static MethodInfo _aggregateMethod = GenericMethodOf(_ => Queryable.Aggregate<int, int>(default(IQueryable<int>), default(int), default(Expression<Func<int, int, int>>)));
         private static MethodInfo _skipMethod = GenericMethodOf(_ => Queryable.Skip<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableSkipMethod = GenericMethodOf(_ => Enumerable.Skip<int>(default(IEnumerable<int>), default(int)));
         private static MethodInfo _whereMethod = GenericMethodOf(_ => Queryable.Where<int>(default(IQueryable<int>), default(Expression<Func<int, bool>>)));
+
+        private static MethodInfo _queryableCastMethod = GenericMethodOf(_ => Queryable.Cast<int>(default(IQueryable<int>)));
+        private static MethodInfo _enumerableCastMethod = GenericMethodOf(_ => Enumerable.Cast<int>(default(IEnumerable<int>)));
 
         private static MethodInfo _queryableContainsMethod = GenericMethodOf(_ => Queryable.Contains<int>(default(IQueryable<int>), default(int)));
         private static MethodInfo _enumerableContainsMethod = GenericMethodOf(_ => Enumerable.Contains<int>(default(IEnumerable<int>), default(int)));
@@ -71,7 +74,7 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _queryableMaxMethod = GenericMethodOf(_ => Queryable.Max<int, int>(default(IQueryable<int>), default(Expression<Func<int, int>>)));
 
         private static MethodInfo _queryableDistinctMethod = GenericMethodOf(_ => Queryable.Distinct<int>(default(IQueryable<int>)));
-        
+
         private static MethodInfo _createQueryGenericMethod = GetCreateQueryGenericMethod();
 
         //Unlike the Sum method, the return types are not unique and do not match the input type of the expression.
@@ -253,6 +256,16 @@ namespace Microsoft.AspNet.OData
             get { return _whereMethod; }
         }
 
+        public static MethodInfo QueryableCastGeneric
+        {
+            get { return _queryableCastMethod; }
+        }
+
+        public static MethodInfo EnumerableCastGeneric
+        {
+            get { return _enumerableCastMethod; }
+        }
+
         public static MethodInfo QueryableContainsGeneric
         {
             get { return _queryableContainsMethod; }
@@ -272,7 +285,7 @@ namespace Microsoft.AspNet.OData
         {
             get { return _enumerableSelectMethod; }
         }
-        
+
         public static MethodInfo QueryableSelectManyGeneric
         {
             get { return _queryableSelectManyMethod; }
@@ -371,7 +384,7 @@ namespace Microsoft.AspNet.OData
             {
                 return (decimal?)Convert.ChangeType(value, typeof(decimal), CultureInfo.InvariantCulture);
             }
-            
+
             return null;
         }
 
@@ -390,7 +403,7 @@ namespace Microsoft.AspNet.OData
 
             return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
         }
-       
+
         private static Dictionary<Type, MethodInfo> GetQueryableAggregationMethods(string methodName)
         {
             //Sum to not have generic by property method return type so have to generate a table

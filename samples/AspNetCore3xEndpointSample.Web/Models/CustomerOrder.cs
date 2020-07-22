@@ -3,10 +3,9 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
 
 namespace AspNetCore3xEndpointSample.Web.Models
-{
+{/*
     public class Customer
     {
         public int Id { get; set; }
@@ -35,5 +34,5 @@ namespace AspNetCore3xEndpointSample.Web.Models
         public string City { get; set; }
 
         public string Street { get; set; }
-    }
+    }*/
 }

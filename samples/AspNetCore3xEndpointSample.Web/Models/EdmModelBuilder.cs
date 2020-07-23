@@ -17,6 +17,21 @@ namespace AspNetCore3xEndpointSample.Web.Models
                 var builder = new ODataConventionModelBuilder();
                 builder.EntitySet<Customer>("Customers");
                 builder.EntitySet<Order>("Orders");
+
+                // two overload function import
+                var function = builder.Function("CalcByRating");
+                function.Parameter<int>("order");
+                function.ReturnsFromEntitySet<Customer>("Customers");
+
+                function = builder.Function("CalcByRating");
+                function.Parameter<string>("name");
+                function.ReturnsFromEntitySet<Customer>("Customers");
+
+                // action import
+                var action = builder.Action("CalcByRatingAction");
+                action.Parameter<int>("order");
+                action.ReturnsFromEntitySet<Customer>("Customers");
+
                 _edmModel = builder.GetEdmModel();
             }
 

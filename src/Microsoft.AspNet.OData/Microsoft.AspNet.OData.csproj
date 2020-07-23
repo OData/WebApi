@@ -120,6 +120,7 @@
     <Compile Include="Routing\Conventions\EntityRoutingConvention.cs" />
     <Compile Include="Routing\Conventions\EntitySetRoutingConvention.cs" />
     <Compile Include="Routing\Conventions\FunctionRoutingConvention.cs" />
+    <Compile Include="Routing\Conventions\OperationImportRoutingConvention.cs" />
     <Compile Include="Routing\Conventions\IODataRoutingConvention.cs" />
     <Compile Include="Routing\Conventions\MetadataRoutingConvention.cs" />
     <Compile Include="Routing\Conventions\NavigationRoutingConvention.cs" />

@@ -21,18 +21,32 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// </returns>
         internal static SelectControllerResult SelectControllerImpl(ODataPath odataPath)
         {
+            ODataPathSegment firstSegment = odataPath.Segments.FirstOrDefault();
+
             // entity set
-            EntitySetSegment entitySetSegment = odataPath.Segments.FirstOrDefault() as EntitySetSegment;
+            EntitySetSegment entitySetSegment = firstSegment as EntitySetSegment;
             if (entitySetSegment != null)
             {
                 return new SelectControllerResult(entitySetSegment.EntitySet.Name, null);
             }
 
             // singleton
-            SingletonSegment singletonSegment = odataPath.Segments.FirstOrDefault() as SingletonSegment;
+            SingletonSegment singletonSegment = firstSegment as SingletonSegment;
             if (singletonSegment != null)
             {
                 return new SelectControllerResult(singletonSegment.Singleton.Name, null);
+            }
+
+            // operation import
+            OperationImportSegment importSegment = firstSegment as OperationImportSegment;
+            if (importSegment != null)
+            {
+                // There's two options: Each one has advantages/disadvantanges. Here picks #1.
+                // 1) map all operation import to a certain controller, for example: ODataOperationImportController
+                return new SelectControllerResult("ODataOperationImport", null);
+
+                // 2) map operation import to controller named using operation improt name, for example:  ResetDataController
+                // return new SelectControllerResult(importSegment.OperationImports.FirstOrDefault().Name, null);
             }
 
             return null;

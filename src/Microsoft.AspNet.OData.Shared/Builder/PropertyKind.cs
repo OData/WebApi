@@ -41,7 +41,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Represents a instance annotation property dictionary for a CLR type.
         /// </summary>
-        Annotation = 6
+        AnnotationDictionary = 6
     }
 }
 

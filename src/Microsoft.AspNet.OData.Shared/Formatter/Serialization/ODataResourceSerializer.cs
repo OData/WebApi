@@ -639,19 +639,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// AppendInstanceAnnotations
+        /// Method to append InstanceAnnotations to the ODataResource and Property
         /// </summary>
-        /// <param name="resource"></param>
-        /// <param name="resourceContext"></param>
-        [SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "edmTypeReference")]
+        /// <param name="resource">param for ODataResource</param>
+        /// <param name="resourceContext">param for ODataResourceContext</param>        
         public virtual void AppendInstanceAnnotations(ODataResource resource, ResourceContext resourceContext)
         {
             IEdmStructuredType structuredType = resourceContext.StructuredType;
             IEdmStructuredObject structuredObject = resourceContext.EdmObject;
-            object value;
-
             PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsDictionary(structuredType,
                 resourceContext.EdmModel);
+
+            object value;
+            
             if (instanceAnnotationInfo == null || structuredObject == null ||
                 !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
             {
@@ -669,42 +669,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         resource.InstanceAnnotations = new List<ODataInstanceAnnotation>();
                     }
 
-                    foreach (var annote in instanceAnnotationsDictionary[string.Empty])
+                    foreach (KeyValuePair<string,object> annotation in instanceAnnotationsDictionary[string.Empty])
                     {
-                        IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annote.Value,
-                           annote.Value.GetType());
+                        IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
+                           annotation.Value.GetType());
+                         
+                        ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
 
-                        ODataEdmTypeSerializer edmTypeSerializer;
-
-                        if (edmTypeReference.IsComplex() || edmTypeReference.IsEntity() || edmTypeReference.IsCollection())
-                        {
-                            if (edmTypeReference.IsCollection())
-                            {
-                                edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider,true);
-                            }
-                            else
-                            {
-                                edmTypeSerializer = new ODataComplexSerializer(SerializerProvider);
-                            }                            
-                        }
-                        else
-                        {
-                            edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-                        }
-                                                
                         if (edmTypeSerializer != null)
                         {
-                           ODataValue annoteVal = edmTypeSerializer.CreateODataValue(annote.Value, edmTypeReference, resourceContext.SerializerContext);
+                            ODataValue annotationValue = edmTypeSerializer.CreateODataValue(annotation.Value, edmTypeReference, resourceContext.SerializerContext);
 
-                            if (annoteVal != null)
+                            if (annotationValue != null)
                             {
-                                resource.InstanceAnnotations.Add(new ODataInstanceAnnotation(annote.Key, annoteVal));
+                                resource.InstanceAnnotations.Add(new ODataInstanceAnnotation(annotation.Key, annotationValue));
                             }
-                        }                       
+                        }
                     }
                 }
                 
-                foreach(var property in resource.Properties)
+                foreach(ODataProperty property in resource.Properties)
                 {
                     string propertyName = property.Name;
 
@@ -715,19 +699,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                             property.InstanceAnnotations = new List<ODataInstanceAnnotation>();
                         }
 
-                        foreach (var annote in instanceAnnotationsDictionary[propertyName])
+                        foreach (KeyValuePair<string,object> annotation in instanceAnnotationsDictionary[propertyName])
                         {
-                            IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annote.Value,
-                            annote.Value.GetType());
-                       
-                            ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                            IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
+                            annotation.Value.GetType());
+
+                            ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
                             if (edmTypeSerializer != null)
                             {
-                                ODataValue annoteVal = edmTypeSerializer.CreateODataValue(annote.Value, edmTypeReference, resourceContext.SerializerContext);
+                                ODataValue annotationValue = edmTypeSerializer.CreateODataValue(annotation.Value, edmTypeReference, resourceContext.SerializerContext);
 
-                                if (annoteVal != null)
+                                if (annotationValue != null)
                                 {
-                                    property.InstanceAnnotations.Add(new ODataInstanceAnnotation(annote.Key, annoteVal));
+                                    property.InstanceAnnotations.Add(new ODataInstanceAnnotation(annotation.Key, annotationValue));
                                 }
                             }
                         }
@@ -735,6 +719,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 } 
             }
 
+        }
+
+        private ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmTypeReference)
+        {
+            ODataEdmTypeSerializer edmTypeSerializer;
+           
+            if (edmTypeReference.IsCollection())
+            {
+                edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
+            }
+            else if (edmTypeReference.IsStructured())
+            {
+                    edmTypeSerializer = new ODataComplexSerializer(SerializerProvider);
+            }           
+            else
+            {
+                edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+            }
+
+            return edmTypeSerializer;
         }
 
         /// <summary>

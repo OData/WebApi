@@ -557,7 +557,7 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     structuralType.AddDynamicPropertyDictionary(property);
                 }
-                else if (propertyKind == PropertyKind.Annotation)
+                else if (propertyKind == PropertyKind.AnnotationDictionary)
                 {
                     structuralType.AddInstanceAnnotationDictionary(property);
                 }
@@ -710,7 +710,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 mappedType = null;
                 isCollection = false;
-                return PropertyKind.Annotation;
+                return PropertyKind.AnnotationDictionary;
             }
 
             PropertyKind propertyKind;

@@ -103,8 +103,7 @@ public abstract class Microsoft.AspNet.OData.EdmStructuredObject : Delta, IDynam
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
-	public System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] TryGetDynamicProperties ()
-	public System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] TryGetInstanceAnnotationDictionary ()
+	public System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] TryGetDynamicProperties ()	
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)
@@ -923,7 +922,7 @@ public enum Microsoft.AspNet.OData.Builder.OperationKind : int {
 }
 
 public enum Microsoft.AspNet.OData.Builder.PropertyKind : int {
-	Annotation = 6
+	AnnotationDictionary = 6
 	Collection = 2
 	Complex = 1
 	Dynamic = 5

@@ -97,17 +97,6 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        /// <summary>
-        /// Gets an indicator whether this EDM type is having instance annotations or not.
-        /// Returns <c>true</c> if this is having instance annotations; <c>false</c> otherwise.
-        /// </summary>
-        public bool IsWithInstanceAnnotations
-        {
-            get
-            {
-                return _configuration.IsWithInstanceAnnotations;
-            }
-        }
 
         internal StructuralTypeConfiguration Configuration
         {

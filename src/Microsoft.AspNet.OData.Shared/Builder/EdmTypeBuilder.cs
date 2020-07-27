@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Builder
         private readonly Dictionary<IEdmStructuredType, ModelBoundQuerySettings> _structuredTypeQuerySettings = new Dictionary<IEdmStructuredType, ModelBoundQuerySettings>();
         private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
         private readonly Dictionary<IEdmStructuredType, PropertyInfo> _openTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
-        private readonly Dictionary<IEdmStructuredType, PropertyInfo> _instanceAnnotations = new Dictionary<IEdmStructuredType, PropertyInfo>();
+        private readonly Dictionary<IEdmStructuredType, PropertyInfo> _instanceAnnotableTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
 
         internal EdmTypeBuilder(IEnumerable<IEdmTypeConfiguration> configurations)
         {
@@ -46,6 +46,7 @@ namespace Microsoft.AspNet.OData.Builder
             _openTypes.Clear();
             _propertyConfigurations.Clear();
             _instanceAnnotations.Clear();
+            _instanceAnnotableTypes.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IEdmTypeConfiguration config in _configurations)
@@ -94,10 +95,10 @@ namespace Microsoft.AspNet.OData.Builder
                         _openTypes.Add(complexType, complex.DynamicPropertyDictionary);
                     }
 
-                    if (complex.IsWithInstanceAnnotations)
+                    if (complex.SupportsInstanceAnnotations)
                     {
                         // add a mapping between the complex type and its instance annotation dictionary.
-                        _instanceAnnotations.Add(complexType, complex.InstanceAnnotationsDictionary);
+                        _instanceAnnotableTypes.Add(complexType, complex.InstanceAnnotationsDictionary);
                     }
 
                     edmType = complexType;
@@ -126,10 +127,10 @@ namespace Microsoft.AspNet.OData.Builder
                         _openTypes.Add(entityType, entity.DynamicPropertyDictionary);
                     }
 
-                    if (entity.IsWithInstanceAnnotations)
+                    if (entity.SupportsInstanceAnnotations)
                     {
                         // add a mapping between the entity type and its instance annotation dictionary.
-                        _instanceAnnotations.Add(entityType, entity.InstanceAnnotationsDictionary);
+                        _instanceAnnotableTypes.Add(entityType, entity.InstanceAnnotationsDictionary);
                     }
 
                     edmType = entityType;
@@ -568,7 +569,8 @@ namespace Microsoft.AspNet.OData.Builder
                 builder._members,
                 builder._openTypes,
                 builder._propertyConfigurations,
-                builder._instanceAnnotations);
+                builder._instanceAnnotations,
+                builder._instanceAnnotableTypes);
         }
 
         /// <summary>

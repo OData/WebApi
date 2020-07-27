@@ -147,7 +147,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Gets a value indicating whether this type has instance annotations or not.
         /// </summary>
-        public bool IsWithInstanceAnnotations
+        public bool SupportsInstanceAnnotations
         {
             get { return _instanceAnnotationDictionary != null; }
         }

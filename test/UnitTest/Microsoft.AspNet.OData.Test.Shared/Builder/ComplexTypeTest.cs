@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             complexType.HasInstanceAnnotations(c => c.InstanceAnnotations);
 
             // Assert
-            Assert.True(complexType.IsWithInstanceAnnotations);
+            Assert.True(complexType.Configuration.InstanceAnnotationsDictionary!=null);
         }
 
         [Fact]

@@ -459,7 +459,9 @@ namespace Microsoft.AspNet.OData.Builder
 
             // add dynamic dictionary property annotation for open types
             model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
-            model.AddInstanceAnnotationsDictionaryAnnotations(edmTypeMap.InstanceAnnotations);
+
+            // add instance annotation dictionary property annotations
+            model.AddInstanceAnnotationsDictionaryAnnotations(edmTypeMap.InstanceAnnotatableTypes);
 
             return edmTypes;
         }

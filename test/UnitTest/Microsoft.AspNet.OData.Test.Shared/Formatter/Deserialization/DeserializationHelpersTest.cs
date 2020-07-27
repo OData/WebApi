@@ -307,7 +307,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
 
             // Act
-            DeserializationHelpers.ApplyInstanceAnnotations(resource.Object, entityTypeReference, new ODataResourceWrapper(null), provider,
+            DeserializationHelpers.ApplyInstanceAnnotations(resource.Object, entityTypeReference, null, provider,
     new ODataDeserializerContext { Model = new EdmModel() });
 
             DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,

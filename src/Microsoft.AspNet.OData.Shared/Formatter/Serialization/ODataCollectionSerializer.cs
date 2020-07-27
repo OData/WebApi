@@ -174,10 +174,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     IEdmTypeReference actualType = writeContext.GetEdmType(item, item.GetType());
                     Contract.Assert(actualType != null);
 
+                    //For instance annotations we need to use complex serializer for complex type and not ODataResourceSerializer
                     if (isForAnnotations && actualType.IsComplex())
                     {
                         valueCollection.Add(
-                      new ODataComplexSerializer(SerializerProvider).CreateODataValue(item, actualType, writeContext).GetInnerValue());
+                        new ODataComplexSerializer(SerializerProvider).CreateODataValue(item, actualType, writeContext).GetInnerValue());
                     }
                     else
                     {

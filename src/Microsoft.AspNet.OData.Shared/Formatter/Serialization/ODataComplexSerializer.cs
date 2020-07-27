@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
@@ -25,6 +26,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public ODataComplexSerializer(ODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.Resource, serializerProvider)
         {
+            if (serializerProvider == null)
+            {
+                throw Error.ArgumentNull("serializerProvider");
+            }
         }
 
         /// <summary>
@@ -85,38 +90,38 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private ODataResourceValue CreateODataComplexResourceValue(object graph, IEdmComplexTypeReference expectedType, ODataSerializerContext writeContext)
         {
-            ODataResourceValue resval = new ODataResourceValue { TypeName = expectedType.FullName() };
-            List<ODataProperty> lstProp = new List<ODataProperty>();
+            ODataResourceValue resourceValue = new ODataResourceValue { TypeName = expectedType.FullName() };
+            List<ODataProperty> properties = new List<ODataProperty>();
 
-            foreach (var prop in graph.GetType().GetProperties())
+            foreach (PropertyInfo property in graph.GetType().GetProperties())
             {
-                if (prop != null)
+                if (property != null)
                 {
-                    object propValue = prop.GetValue(graph);
+                    object propertyValue = property.GetValue(graph);
 
-                    if (propValue != null)
+                    if (propertyValue != null)
                     {
-                        IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propValue,
-                         prop.GetType());
+                        IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
+                         property.GetType());
 
                         ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
 
                         if (edmTypeSerializer != null)
                         {
-                            ODataValue odataValue = edmTypeSerializer.CreateODataValue(propValue, edmTypeReference, writeContext);
+                            ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
 
                             if (odataValue != null)
                             {
-                                lstProp.Add(new ODataProperty { Name = prop.Name, Value = odataValue });
+                                properties.Add(new ODataProperty { Name = property.Name, Value = odataValue });
                             }
                         }
                     }
                 }
             }
 
-            resval.Properties = lstProp;
+            resourceValue.Properties = properties;
 
-            return resval;
+            return resourceValue;
         }
 
     }

@@ -710,6 +710,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 mappedType = null;
                 isCollection = false;
+
                 return PropertyKind.InstanceAnnotations;
             }
 

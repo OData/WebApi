@@ -3605,6 +3605,12 @@ public class Microsoft.AspNet.OData.Routing.Conventions.NavigationRoutingConvent
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
 }
 
+public class Microsoft.AspNet.OData.Routing.Conventions.OperationImportRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
+	public OperationImportRoutingConvention ()
+
+	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
+}
+
 public class Microsoft.AspNet.OData.Routing.Conventions.PropertyRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public PropertyRoutingConvention ()
 

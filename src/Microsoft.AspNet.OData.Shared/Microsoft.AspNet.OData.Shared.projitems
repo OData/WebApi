@@ -284,6 +284,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\AttributeRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\RoutingConventionHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\PropertyRoutingConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\OperationImportRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\IODataPathTemplateHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataRouteAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataRoutePrefixAttribute.cs" />

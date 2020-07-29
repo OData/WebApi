@@ -599,6 +599,23 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
+        public void AnyInOnNavigation(string filter, string expression, string expressionWithNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               filter,
+               expression,
+               expressionWithNullPropagation);
+        }
+
+        [Theory]
         [InlineData("Category/QueryableProducts/any(P: false)", "$it => False")]
         [InlineData("Category/QueryableProducts/any(P: false and P/ProductName eq 'Snacks')", "$it => $it.Category.QueryableProducts.Any(P => (False AndAlso (P.ProductName == \"Snacks\")))")]
         [InlineData("Category/QueryableProducts/any(P: true)", "$it => $it.Category.QueryableProducts.Any()")]
@@ -2854,6 +2871,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             RunFilters(filters,
                 new DataTypes(),
                 new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
+        }
+
+        [Theory]
+        [InlineData("Category/Product/ProductID in (1)", "$it => System.Collections.Generic.List`1[System.Int32].Contains($it.Category.Product.ProductID)", "$it => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.ProductID)))")]
+        [InlineData("Category/Product/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Guid].Contains($it.Category.Product.GuidProperty)", "$it => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.GuidProperty)))")]
+        [InlineData("Category/Product/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains($it.Category.Product.NullableGuidProperty)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, $it.Category.Product.NullableGuidProperty))")]
+        public void InOnNavigation(string filter, string expression, string expressionWithNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               filter,
+               expression,
+               expressionWithNullPropagation);
         }
 
         [Fact]

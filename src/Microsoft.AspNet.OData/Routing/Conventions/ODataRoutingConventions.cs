@@ -50,6 +50,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 new EntitySetRoutingConvention(),
                 new SingletonRoutingConvention(),
                 new EntityRoutingConvention(),
+                new OperationImportRoutingConvention(),
                 new NavigationRoutingConvention(),
                 new PropertyRoutingConvention(),
                 new DynamicPropertyRoutingConvention(),

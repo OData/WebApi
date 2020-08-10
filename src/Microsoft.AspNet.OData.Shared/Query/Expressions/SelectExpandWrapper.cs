@@ -30,7 +30,14 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// </summary>
         public string ModelID { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// The instance of the object that is being wrapped, if available.
+        /// </summary>
+        // Ideally this would be called "Instance" and SelectExpandWrapper<> would use the "new"
+        // keyword to replace it with a variation that returns the correct type. Unfortunately the
+        // scenarios that consume "Instance" do so using reflection, and such an approach would
+        // introduce ambiguity that would need to be handled in numerous places. Since this is an
+        // internal construct it fine to leave like this.
         public object UntypedInstance { get; set; }
 
         /// <summary>
@@ -42,6 +49,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// Indicates whether the underlying instance can be used to obtain property values.
         /// </summary>
         public bool UseInstanceForProperties { get; set; }
+
+        /// <inheritdoc />
+        object ISelectExpandWrapper.Instance
+        {
+            get { return UntypedInstance; }
+        }
 
         /// <inheritdoc />
         public IEdmTypeReference GetEdmType()

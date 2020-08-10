@@ -313,6 +313,22 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Indicates that SelectExpandWrapper&gt;&lt;.Instance will always be populated with the object being wrapped. This
+        /// behavior is not the default because it causes performance issues with Entity Framework.
+        /// </summary>
+        public bool AlwaysSetSelectExpandWrapperInstance
+        {
+            get
+            {
+                return _querySettings.AlwaysSetSelectExpandWrapperInstance;
+            }
+            set
+            {
+                _querySettings.AlwaysSetSelectExpandWrapperInstance = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the max value of $skip that a client can request.
         /// </summary>
         public int MaxSkip

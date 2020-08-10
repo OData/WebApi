@@ -25,6 +25,12 @@ namespace Microsoft.AspNet.OData.Query
         }
 
         /// <summary>
+        /// Indicates that SelectExpandWrapper&gt;&lt;.Instance will always be populated with the object being wrapped. This
+        /// behavior is not the default because it causes performance issues with Entity Framework.
+        /// </summary>
+        public bool AlwaysSetSelectExpandWrapperInstance { get; set; }
+
+        /// <summary>
         /// Gets or sets the maximum number of query results to return based on the type or property.
         /// </summary>
         /// <value>

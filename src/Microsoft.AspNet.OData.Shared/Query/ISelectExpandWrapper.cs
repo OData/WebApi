@@ -13,6 +13,12 @@ namespace Microsoft.AspNet.OData.Query
     public interface ISelectExpandWrapper
     {
         /// <summary>
+        /// The instance of the object that is being wrapped, if available.
+        /// </summary>
+        // The public contract should avoid propagating the "UntypedInstance" terminology.
+        object Instance { get; }
+
+        /// <summary>
         /// Projects the result of a $select and $expand query to a <see cref="IDictionary{TKey,TValue}" />.
         /// </summary>
         /// <returns>An <see cref="IDictionary{TKey,TValue}"/> representing the $select and $expand result.</returns>

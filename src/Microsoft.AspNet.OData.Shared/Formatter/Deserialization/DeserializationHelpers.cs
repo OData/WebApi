@@ -10,13 +10,9 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNet.OData.Formatter;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -25,8 +21,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            var request = (WebApiRequestMessage) readContext.InternalRequest;
-            var settings = request.innerRequest.HttpContext.RequestServices.GetService<IODataModelBinderSettings>();
+            WebApiRequestMessage request = null;
+            if(readContext != null)
+            {
+                request = (WebApiRequestMessage)readContext.InternalRequest;
+            }
+
+            IODataModelBinderSettings settings = null;
+
+            if(request != null)
+            {
+                settings = request.innerRequest.HttpContext.RequestServices.GetService<IODataModelBinderSettings>();
+            }
+
             IEdmProperty edmProperty;
 
             if (settings != null && settings.EnableCaseInsensitiveModelBinding)

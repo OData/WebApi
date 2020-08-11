@@ -2345,6 +2345,16 @@ public sealed class Microsoft.AspNet.OData.Extensions.ODataServiceCollectionExte
 	ExtensionAttribute(),
 	]
 	public static Microsoft.Extensions.DependencyInjection.IServiceCollection AddODataQueryFilter (Microsoft.Extensions.DependencyInjection.IServiceCollection services, Microsoft.AspNetCore.Mvc.Filters.IActionFilter queryFilter)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableODataCaseInsensitiveModelBinding (Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+
+	[
+	ExtensionAttribute(),
+	]
+	public static Microsoft.Extensions.DependencyInjection.IServiceCollection EnableODataCaseInsensitiveModelBinding (Microsoft.Extensions.DependencyInjection.IServiceCollection services, ODataModelBinderSettings settings)
 }
 
 [
@@ -2406,6 +2416,10 @@ public enum Microsoft.AspNet.OData.Formatter.ODataMetadataLevel : int {
 public interface Microsoft.AspNet.OData.Formatter.IETagHandler {
 	System.Net.Http.Headers.EntityTagHeaderValue CreateETag (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] properties)
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ParseETag (System.Net.Http.Headers.EntityTagHeaderValue etagHeaderValue)
+}
+
+public interface Microsoft.AspNet.OData.Formatter.IODataModelBinderSettings {
+	bool EnableCaseInsensitiveModelBinding  { public abstract get; public abstract set; }
 }
 
 public abstract class Microsoft.AspNet.OData.Formatter.MediaTypeMapping {
@@ -2488,6 +2502,12 @@ public class Microsoft.AspNet.OData.Formatter.ODataInputFormatter : Microsoft.As
 	public virtual bool CanRead (Microsoft.AspNetCore.Mvc.Formatters.InputFormatterContext context)
 	public static System.Uri GetDefaultBaseAddress (Microsoft.AspNetCore.Http.HttpRequest request)
 	public virtual System.Threading.Tasks.Task`1[[Microsoft.AspNetCore.Mvc.Formatters.InputFormatterResult]] ReadRequestBodyAsync (Microsoft.AspNetCore.Mvc.Formatters.InputFormatterContext context, System.Text.Encoding encoding)
+}
+
+public class Microsoft.AspNet.OData.Formatter.ODataModelBinderSettings : IODataModelBinderSettings {
+	public ODataModelBinderSettings ()
+
+	bool EnableCaseInsensitiveModelBinding  { public virtual get; public virtual set; }
 }
 
 public class Microsoft.AspNet.OData.Formatter.ODataOutputFormatter : Microsoft.AspNetCore.Mvc.Formatters.TextOutputFormatter, IMediaTypeMappingCollection, IApiResponseTypeMetadataProvider, IOutputFormatter {

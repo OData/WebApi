@@ -81,8 +81,8 @@ namespace Microsoft.AspNet.OData.Test.Batch
         [Fact]
         public async Task SendMessageAsync_Resolves_Uri_From_ContentId()
         {
-			// Arrange
-			DefaultHttpContext context = new DefaultHttpContext();
+            // Arrange
+            DefaultHttpContext context = new DefaultHttpContext();
             HttpResponseMessage response = new HttpResponseMessage();
             RequestDelegate handler = (c) => { return Task.FromResult(response); };
             Dictionary<string, string> contentIdLocationMappings = new Dictionary<string, string>();
@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             Uri unresolvedUri = new Uri("http://localhost:12345/odata/$1/Orders");
             context.Request.CopyAbsoluteUrl(unresolvedUri);
 			
-			// Act
+            // Act
             await ODataBatchRequestItem.SendRequestAsync(handler, context, contentIdLocationMappings);
 
             // Assert

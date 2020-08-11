@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 
@@ -166,6 +167,11 @@ namespace Microsoft.AspNet.OData
                 ServiceLifetime.Singleton,
                 typeof(ODataUriResolver),
                 sp => new UnqualifiedODataUriResolver { EnableCaseInsensitive = true });
+
+            /*builder.AddService(
+                ServiceLifetime.Singleton,
+                typeof(IODataModelBindingSettings),
+                sp => new ODataModelBinderSettings { EnableCaseInsensitiveModelBinding = true });*/
 
             return builder;
         }

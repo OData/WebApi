@@ -9,8 +9,13 @@ using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -19,15 +24,33 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            IDictionary<string, string> propertyNamesMapping = new Dictionary<string, string>();
-            var sProperties = resourceType.StructuralProperties();
-            foreach(var prop in sProperties)
+            //Microsoft.AspNetCore.Http.HttpContext;
+            //Http r = new HttpRequest().HttpContext.Request.GetRequestContainer().GetRequiredService<IODataModelBindingSettings>();
+            //var request = readContext.InternalRequest;
+            HttpContext context = new HttpContextAccessor().HttpContext;
+            var request = context.Request;
+            /*var uriResolver = request.RequestContainer.GetRequiredService<ODataUriResolver>();
+            var filters = request.RequestContainer.GetRequiredService<AspNetCore.Mvc.Filters.IFilterProvider>();
+            var settings = request.RequestContainer.GetRequiredService<IODataModelBindingSettings>();*/
+            var filters = request.GetRequestContainer().GetRequiredService<AspNetCore.Mvc.Filters.IFilterProvider>();
+            var settings = request.GetRequestContainer().GetRequiredService<IODataModelBindingSettings>();
+            IEdmProperty edmProperty;
+            if (settings.EnableCaseInsensitiveModelBinding)
             {
-                propertyNamesMapping.Add(prop.Name.ToLower(), prop.Name);
+                IDictionary<string, string> propertyNamesMapping = new Dictionary<string, string>();
+                var sProperties = resourceType.StructuralProperties();
+                foreach (var prop in sProperties)
+                {
+                    propertyNamesMapping.Add(prop.Name.ToLower(), prop.Name);
+                }
+                string name;
+                var findPropertyName = propertyNamesMapping.TryGetValue(property.Name.ToLower(), out name) ? name : property.Name;
+                edmProperty = resourceType.FindProperty(findPropertyName);
             }
-            string name;
-            var findPropertyName = propertyNamesMapping.TryGetValue(property.Name.ToLower(), out name) ? name : property.Name;
-            IEdmProperty edmProperty = resourceType.FindProperty(findPropertyName);
+            else
+            {
+                edmProperty = resourceType.FindProperty(property.Name);
+            }
 
             bool isDynamicProperty = false;
             string propertyName = property.Name;

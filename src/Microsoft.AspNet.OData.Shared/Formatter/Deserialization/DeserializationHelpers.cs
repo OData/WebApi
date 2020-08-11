@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -24,18 +25,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            //Microsoft.AspNetCore.Http.HttpContext;
-            //Http r = new HttpRequest().HttpContext.Request.GetRequestContainer().GetRequiredService<IODataModelBindingSettings>();
-            //var request = readContext.InternalRequest;
-            HttpContext context = new HttpContextAccessor().HttpContext;
-            var request = context.Request;
-            /*var uriResolver = request.RequestContainer.GetRequiredService<ODataUriResolver>();
-            var filters = request.RequestContainer.GetRequiredService<AspNetCore.Mvc.Filters.IFilterProvider>();
-            var settings = request.RequestContainer.GetRequiredService<IODataModelBindingSettings>();*/
-            var filters = request.GetRequestContainer().GetRequiredService<AspNetCore.Mvc.Filters.IFilterProvider>();
-            var settings = request.GetRequestContainer().GetRequiredService<IODataModelBindingSettings>();
+            var request = (WebApiRequestMessage) readContext.InternalRequest;
+            var settings = request.innerRequest.HttpContext.RequestServices.GetService<IODataModelBinderSettings>();
             IEdmProperty edmProperty;
-            if (settings.EnableCaseInsensitiveModelBinding)
+
+            if (settings != null && settings.EnableCaseInsensitiveModelBinding)
             {
                 IDictionary<string, string> propertyNamesMapping = new Dictionary<string, string>();
                 var sProperties = resourceType.StructuralProperties();

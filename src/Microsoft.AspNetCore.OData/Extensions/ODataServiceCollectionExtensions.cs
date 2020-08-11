@@ -9,7 +9,6 @@ using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
@@ -43,7 +42,6 @@ namespace Microsoft.AspNet.OData.Extensions
             // fluent extensions APIs to IRouteBuilder.
             services.AddSingleton<ODataOptions>();
             services.AddSingleton<DefaultQuerySettings>();
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
             // Add the batch path mapping class to store batch route names and prefixes.
             services.AddSingleton<ODataBatchPathMapping>();
@@ -143,10 +141,7 @@ namespace Microsoft.AspNet.OData.Extensions
         }
 
         /// <summary>
-        /// Enables query support for actions with an <see cref="IQueryable" /> or <see cref="IQueryable{T}" /> return
-        /// type. To avoid processing unexpected or malicious queries, use the validation settings on
-        /// <see cref="EnableQueryAttribute"/> to validate incoming queries. For more information, visit
-        /// http://go.microsoft.com/fwlink/?LinkId=279712.
+        /// Enables support for case insensitive model binding.
         /// </summary>
         /// <param name="services">The services collection.</param>
         public static IServiceCollection EnableODataCaseInsensitiveModelBinding(this IServiceCollection services)
@@ -156,7 +151,24 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.ArgumentNull("services");
             }
 
-            services.TryAddSingleton<IODataModelBindingSettings>(_ => new ODataModelBinderSettings { EnableCaseInsensitiveModelBinding = true});
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataModelBinderSettings>(new ODataModelBinderSettings { EnableCaseInsensitiveModelBinding = true }));
+
+            return services;
+        }
+
+        /// <summary>
+        /// Enables support for case insensitive model binding.
+        /// </summary>
+        /// <param name="services">The services collection.</param>
+        /// <param name="settings">Instance of <see cref="ODataModelBinderSettings" /></param>
+        public static IServiceCollection EnableODataCaseInsensitiveModelBinding(this IServiceCollection services, ODataModelBinderSettings settings)
+        {
+            if (services == null)
+            {
+                throw Error.ArgumentNull("services");
+            }
+
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IODataModelBinderSettings>(settings));
 
             return services;
         }

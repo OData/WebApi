@@ -6,7 +6,7 @@ namespace Microsoft.AspNet.OData.Formatter
     /// <summary>
     /// Settings to use during model binding.
     /// </summary>
-    public interface IODataModelBindingSettings
+    public interface IODataModelBinderSettings
     {
         /// <summary>
         /// Gets or sets a value indicating whether request body binding should be case insensitive.

@@ -168,11 +168,6 @@ namespace Microsoft.AspNet.OData
                 typeof(ODataUriResolver),
                 sp => new UnqualifiedODataUriResolver { EnableCaseInsensitive = true });
 
-            /*builder.AddService(
-                ServiceLifetime.Singleton,
-                typeof(IODataModelBindingSettings),
-                sp => new ODataModelBinderSettings { EnableCaseInsensitiveModelBinding = true });*/
-
             return builder;
         }
     }

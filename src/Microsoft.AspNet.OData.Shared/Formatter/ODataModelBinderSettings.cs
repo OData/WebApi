@@ -6,7 +6,7 @@ namespace Microsoft.AspNet.OData.Formatter
     /// <summary>
     /// This class describes the settings to use during model binding.
     /// </summary>
-    public class ODataModelBinderSettings : IODataModelBindingSettings
+    public class ODataModelBinderSettings : IODataModelBinderSettings
     {
         private bool _enableCaseInsensitiveModelBinding;
 

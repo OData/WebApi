@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 

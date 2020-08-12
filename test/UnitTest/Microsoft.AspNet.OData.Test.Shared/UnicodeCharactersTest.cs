@@ -78,7 +78,7 @@ namespace Microsoft.AspNet.OData.Test
 			Assert.True(response.Headers.TryGetValues("OData-EntityId", out values));
 			Assert.Single(values);
 			Assert.Equal("http://localhost/odata/UnicodeCharUsers('%C3%84rne%20Bj%C3%B8rn')", values.First());
-		}
+        }
 
 		private static HttpClient GetClient()
 		{

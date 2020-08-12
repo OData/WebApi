@@ -33,6 +33,7 @@ namespace Microsoft.AspNet.OData.Test
 				"}";
 
 			const string uri = "http://localhost/odata/UnicodeCharUsers";
+			const string expectedLocation = "http://localhost/odata/UnicodeCharUsers('%C3%84rne%20Bj%C3%B8rn')";
 
 			HttpClient client = GetClient();
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
@@ -45,7 +46,7 @@ namespace Microsoft.AspNet.OData.Test
 			// Assert
 			Assert.True(response.IsSuccessStatusCode);
 			Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-			Assert.Equal(new Uri("http://localhost/odata/UnicodeCharUsers('Ärne Bjørn')"), response.Headers.Location);
+			Assert.Equal(expectedLocation, response.Headers.Location.AbsoluteUri);
 		}
 
 		[Fact]
@@ -58,11 +59,12 @@ namespace Microsoft.AspNet.OData.Test
 				"}";
 
 			const string uri = "http://localhost/odata/UnicodeCharUsers";
-			const string preferNoContentHeaderValue = "return=minimal";
-
+			const string preferNoContent = "return=minimal";
+			const string expectedLocation = "http://localhost/odata/UnicodeCharUsers('%C3%84rne%20Bj%C3%B8rn')";
+			
 			HttpClient client = GetClient();
 			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
-			request.Headers.TryAddWithoutValidation("Prefer", preferNoContentHeaderValue);
+			request.Headers.TryAddWithoutValidation("Prefer", preferNoContent);
 
 			request.Content = new StringContent(payload);
 			request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
@@ -73,11 +75,11 @@ namespace Microsoft.AspNet.OData.Test
 			// Assert
 			Assert.True(response.IsSuccessStatusCode);
 			Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-			Assert.Equal(new Uri("http://localhost/odata/UnicodeCharUsers('Ärne Bjørn')"), response.Headers.Location);
+			Assert.Equal(expectedLocation, response.Headers.Location.AbsoluteUri);
 			IEnumerable<string> values;
 			Assert.True(response.Headers.TryGetValues("OData-EntityId", out values));
 			Assert.Single(values);
-			Assert.Equal("http://localhost/odata/UnicodeCharUsers('%C3%84rne%20Bj%C3%B8rn')", values.First());
+			Assert.Equal(expectedLocation, values.First());
         }
 
 		private static HttpClient GetClient()

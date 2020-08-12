@@ -404,6 +404,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelperTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnicodeCharactersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ArrayOfBoolean.json" />

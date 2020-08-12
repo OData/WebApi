@@ -2,7 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -44,6 +46,38 @@ namespace Microsoft.AspNet.OData.Test
 			Assert.True(response.IsSuccessStatusCode);
 			Assert.Equal(HttpStatusCode.Created, response.StatusCode);
 			Assert.Equal(new Uri("http://localhost/odata/UnicodeCharUsers('Ärne Bjørn')"), response.Headers.Location);
+		}
+
+		[Fact]
+		public async Task PostEntity_WithUnicodeCharactersInKey_PreferNoContent()
+		{
+			// Arrange
+			const string payload = "{" +
+				"\"LogonName\":\"Ärne Bjørn\"," +
+				"\"Email\":\"ärnebjørn@test.com\"" +
+				"}";
+
+			const string uri = "http://localhost/odata/UnicodeCharUsers";
+			const string preferNoContentHeaderValue = "return=minimal";
+
+			HttpClient client = GetClient();
+			HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, uri);
+			request.Headers.TryAddWithoutValidation("Prefer", preferNoContentHeaderValue);
+
+			request.Content = new StringContent(payload);
+			request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+			// Act
+			HttpResponseMessage response = await client.SendAsync(request);
+
+			// Assert
+			Assert.True(response.IsSuccessStatusCode);
+			Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+			Assert.Equal(new Uri("http://localhost/odata/UnicodeCharUsers('Ärne Bjørn')"), response.Headers.Location);
+			IEnumerable<string> values;
+			Assert.True(response.Headers.TryGetValues("OData-EntityId", out values));
+			Assert.Single(values);
+			Assert.Equal("http://localhost/odata/UnicodeCharUsers('%C3%84rne%20Bj%C3%B8rn')", values.First());
 		}
 
 		private static HttpClient GetClient()

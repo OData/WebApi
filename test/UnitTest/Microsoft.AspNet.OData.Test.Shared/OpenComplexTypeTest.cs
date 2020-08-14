@@ -271,6 +271,24 @@ namespace Microsoft.AspNet.OData.Test
             await ExecutePatchRequest(payload);
         }
 
+        [Fact]
+        public async Task OpenComplexType_PatchNestedComplexTypeProperty_GetInstance()
+        {
+            string payload = @"{
+                ""Street"":""UpdatedStreet"",
+                ""Token@odata.type"":""#Guid"",
+                ""Token"":""3CA243CF-460A-4144-B6EB-F5E1180ABDC8"",
+                ""BirthDay@odata.type"":""#Date"",
+                ""BirthDay"":""2016-01-29"",
+                ""LineA"": {
+                    ""Description"": ""DescriptionA"",
+                    ""PhoneInfo"" : {""ContactName"":""ContactNameA"", ""PhoneNumber"": 7654321}
+                }
+            }";
+
+            await ExecutePatchRequest(payload);
+        }
+
         private async Task ExecutePatchRequest(string payload)
         {
             // Arrange
@@ -563,7 +581,25 @@ namespace Microsoft.AspNet.OData.Test
                     Assert.NotNull(phone.Spec);
                     Assert.Equal(5, phone.Spec.ScreenSize);
                     break;
+                case "3CA243CF-460A-4144-B6EB-F5E1180ABDC8":
+                    OpenAddress addressInstance = address.GetInstance();
+                    Assert.NotNull(addressInstance);
 
+                    // Complex property
+                    Assert.NotNull(addressInstance.LineA);
+                    Assert.NotNull(addressInstance.LineA.PhoneInfo);
+                    Assert.Equal(7654321, addressInstance.LineA.PhoneInfo.PhoneNumber);
+
+                    object lineAValue;
+                    // Fetch LineA property using TryGetPropertyValue
+                    Assert.True(address.TryGetPropertyValue("LineA", out lineAValue));
+                    LineDetails lineA = lineAValue as LineDetails;
+                    Assert.NotNull(lineA);
+
+                    // Nested complex property
+                    Assert.NotNull(lineA.PhoneInfo);
+                    Assert.Equal(7654321, lineA.PhoneInfo.PhoneNumber);
+                    break;
                 default:
                     // Error
                     Assert.True(false, "Unexpected token value " + dynamicPropertyToken);

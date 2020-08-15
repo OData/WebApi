@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -177,7 +178,12 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer(RouteName);
             var serviceProvider = GetServiceProvider(configuration, RouteName);
             var request = RequestFactory.Create(configuration, RouteName);
+#if NETCORE
+            request.ODataFeature().Path = new ODataPath();
+            request.Method = method;
+#else
             request.Method = new HttpMethod(method);
+#endif
 
             var descriptors = ControllerDescriptorFactory.Create(configuration, "TestController", 
                 controllerType);

@@ -42,5 +42,10 @@ namespace Microsoft.AspNet.OData
         /// "Put"
         /// </summary>
         Put,
+
+        /// <summary>
+        /// "Head"
+        /// </summary>
+        Head,
     }
 }

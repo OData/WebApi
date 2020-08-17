@@ -417,9 +417,9 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : System.Web.Http.Filte
 	AllowedLogicalOperators AllowedLogicalOperators  { public get; public set; }
 	string AllowedOrderByProperties  { public get; public set; }
 	AllowedQueryOptions AllowedQueryOptions  { public get; public set; }
-	bool AlwaysSetSelectExpandWrapperInstance  { public get; public set; }
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
+	bool EnableDeterministicSelectExpandWrapperInstance  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
@@ -2333,7 +2333,7 @@ public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
 	string MapProperty (string propertyName)
 }
 
-public interface Microsoft.AspNet.OData.Query.ISelectExpandWrapper {
+public interface Microsoft.AspNet.OData.Query.ISelectExpandWrapper : IEdmEntityObject, IEdmObject, IEdmStructuredObject {
 	object Instance  { public abstract get; }
 
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ToDictionary ()
@@ -2496,9 +2496,9 @@ public class Microsoft.AspNet.OData.Query.ODataQueryOptions`1 : ODataQueryOption
 public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 	public ODataQuerySettings ()
 
-	bool AlwaysSetSelectExpandWrapperInstance  { public get; public set; }
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
+	bool EnableDeterministicSelectExpandWrapperInstance  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }

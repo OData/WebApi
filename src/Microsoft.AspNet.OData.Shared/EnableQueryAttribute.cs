@@ -118,6 +118,25 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Indicates that <see cref="ISelectExpandWrapper.Instance"/> will always be populated.
+        ///
+        /// By default it is only populated for "$select=*" scenarios, which means custom implementations of OData serializers cannot
+        /// make general assumptions about being able access the original instance returned from a controller. This behavior must be
+        /// explicitly requested as it will cause performance issues with Entity Framework.
+        /// </summary>
+        public bool EnableDeterministicSelectExpandWrapperInstance
+        {
+            get
+            {
+                return _querySettings.EnableDeterministicSelectExpandWrapperInstance;
+            }
+            set
+            {
+                _querySettings.EnableDeterministicSelectExpandWrapperInstance = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum depth of the Any or All elements nested inside the query. This limit helps prevent
         /// Denial of Service attacks.
         /// </summary>
@@ -309,22 +328,6 @@ namespace Microsoft.AspNet.OData
                         _validationSettings.AllowedOrderByProperties.Add(properties[i].Trim());
                     }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Indicates that SelectExpandWrapper&gt;&lt;.Instance will always be populated with the object being wrapped. This
-        /// behavior is not the default because it causes performance issues with Entity Framework.
-        /// </summary>
-        public bool AlwaysSetSelectExpandWrapperInstance
-        {
-            get
-            {
-                return _querySettings.AlwaysSetSelectExpandWrapperInstance;
-            }
-            set
-            {
-                _querySettings.AlwaysSetSelectExpandWrapperInstance = value;
             }
         }
 

@@ -11,7 +11,7 @@ using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData.Query.Expressions
 {
-    internal abstract class SelectExpandWrapper : IEdmEntityObject, ISelectExpandWrapper
+    internal abstract class SelectExpandWrapper : ISelectExpandWrapper
     {
         private static readonly IPropertyMapper DefaultPropertyMapper = new IdentityPropertyMapper();
         private static readonly Func<IEdmModel, IEdmStructuredType, IPropertyMapper> _mapperProvider =

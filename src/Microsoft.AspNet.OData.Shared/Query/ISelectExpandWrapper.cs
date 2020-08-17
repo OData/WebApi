@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.OData.Query
     /// <summary>
     /// Represents the result of a $select and $expand query operation.
     /// </summary>
-    public interface ISelectExpandWrapper
+    public interface ISelectExpandWrapper : IEdmEntityObject
     {
         /// <summary>
         /// The instance of the object that is being wrapped, if available.

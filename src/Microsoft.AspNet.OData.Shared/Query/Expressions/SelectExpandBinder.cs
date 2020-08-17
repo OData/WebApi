@@ -284,25 +284,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Expression.Constant(_modelID);
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, wrapperPropertyValueExpression));
 
-            if (_settings.AlwaysSetSelectExpandWrapperInstance)
+            if (IsSelectAll(selectExpandClause))
             {
                 // Initialize property 'Instance' on the wrapper class
                 wrapperProperty = wrapperType.GetProperty("Instance");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
-            }
-
-            if (IsSelectAll(selectExpandClause))
-            {
-                if (!_settings.AlwaysSetSelectExpandWrapperInstance)
-                {
-                    // Initialize property 'Instance' on the wrapper class
-                    wrapperProperty = wrapperType.GetProperty("Instance");
-                    wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
-                }
 
                 wrapperProperty = wrapperType.GetProperty("UseInstanceForProperties");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;
+            }
+            else if (_settings.EnableDeterministicSelectExpandWrapperInstance)
+            {
+                // Initialize property 'Instance' on the wrapper class
+                wrapperProperty = wrapperType.GetProperty("Instance");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
             }
             else
             {

@@ -60,12 +60,12 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         private static SelectExpandBinder GetBinder<T>(
             IEdmModel model,
-            bool alwaysSetSelectExpandWrapperInstance = false,
+            bool enableDeterministicSelectExpandWrapperInstance = false,
             HandleNullPropagationOption nullPropagation = HandleNullPropagationOption.False)
         {
             var settings = new ODataQuerySettings
             {
-                AlwaysSetSelectExpandWrapperInstance = alwaysSetSelectExpandWrapperInstance,
+                EnableDeterministicSelectExpandWrapperInstance = enableDeterministicSelectExpandWrapperInstance,
                 HandleNullPropagation = nullPropagation,
             };
 
@@ -104,13 +104,13 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
-        public void Bind_GeneratedExpression_ContainsExpandedObject(bool alwaysSetSelectExpandWrapperInstance)
+        public void Bind_GeneratedExpression_ContainsExpandedObject(bool enableDeterministicSelectExpandWrapperInstance)
         {
             // Arrange
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
             var settings = new ODataQuerySettings
             {
-                AlwaysSetSelectExpandWrapperInstance = alwaysSetSelectExpandWrapperInstance,
+                EnableDeterministicSelectExpandWrapperInstance = enableDeterministicSelectExpandWrapperInstance,
                 HandleNullPropagation = HandleNullPropagationOption.False,
             };
 
@@ -123,16 +123,17 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<QueryCustomer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
 
-            if (alwaysSetSelectExpandWrapperInstance)
+            if (enableDeterministicSelectExpandWrapperInstance)
             {
                 Assert.Same(_queryable.Single(), partialCustomer.Instance);
+                Assert.Null(partialCustomer.InstanceType);
             }
             else
             {
                 Assert.Null(partialCustomer.Instance);
+                Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", partialCustomer.InstanceType);
             }
 
-            Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", partialCustomer.InstanceType);
             IEnumerable<SelectExpandWrapper<QueryOrder>> innerOrders = partialCustomer.Container
                 .ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
             Assert.NotNull(innerOrders);
@@ -510,25 +511,26 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             if (alwaysSetSelectExpandWrapperInstance)
             {
                 Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+                Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
             }
             else
             {
                 Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+                Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
             }
 
-            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
             SelectExpandWrapper<QueryCustomer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
 
             if (alwaysSetSelectExpandWrapperInstance)
             {
                 Assert.Same(aCustomer, customerWrapper.Instance);
+                Assert.Null(customerWrapper.InstanceType);
             }
             else
             {
                 Assert.Null(customerWrapper.Instance);
+                Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", customerWrapper.InstanceType);
             }
-
-            Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", customerWrapper.InstanceType);
         }
 
         [Theory]

@@ -662,19 +662,20 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if(instanceAnnotationsDictionary != null)
             {
-                if (instanceAnnotationsDictionary.ContainsKey(string.Empty))
+                IDictionary<string, object> resourceAnnotations;
+                if (instanceAnnotationsDictionary.TryGetValue(string.Empty, out resourceAnnotations))
                 {
                     if (resource.InstanceAnnotations == null)
                     {
                         resource.InstanceAnnotations = new List<ODataInstanceAnnotation>();
                     }
 
-                    foreach (KeyValuePair<string,object> annotation in instanceAnnotationsDictionary[string.Empty])
+                    foreach (KeyValuePair<string,object> annotation in resourceAnnotations)
                     {
                         IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
                            annotation.Value.GetType());
                          
-                        ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                        ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
 
                         if (edmTypeSerializer != null)
                         {
@@ -692,14 +693,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     string propertyName = property.Name;
 
-                    if (instanceAnnotationsDictionary.ContainsKey(propertyName))
+                    IDictionary<string, object> propertyAnnotations;
+                    if (instanceAnnotationsDictionary.TryGetValue(propertyName, out propertyAnnotations))
                     {
                         if (property.InstanceAnnotations == null)
                         {
                             property.InstanceAnnotations = new List<ODataInstanceAnnotation>();
                         }
 
-                        foreach (KeyValuePair<string,object> annotation in instanceAnnotationsDictionary[propertyName])
+                        foreach (KeyValuePair<string,object> annotation in propertyAnnotations)
                         {
                             IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
                             annotation.Value.GetType());

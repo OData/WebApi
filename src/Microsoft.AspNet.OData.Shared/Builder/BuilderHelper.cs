@@ -15,14 +15,15 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// /// <param name="expectedType">Expected CLR Type</param>
         /// <param name="type"> CLR Type</param>
+        /// <param name="customTypeDescription"> Custom Type description</param>
         /// <returns></returns>
-        public static void ValidateAssignableFrom(Type expectedType, Type type)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1026:DefaultParametersShouldNotBeUsed")]
+        public static void ValidateAssignableFrom(Type expectedType, Type type, string customTypeDescription = null)
         {
             if(!expectedType.IsAssignableFrom(type))
             {
                 throw Error.Argument("propertyInfo", SRResources.ArgumentMustBeOfType,
-                   type.Name,
-                   expectedType.FullName);
+                   customTypeDescription ?? expectedType.FullName);
             }
         }
     }

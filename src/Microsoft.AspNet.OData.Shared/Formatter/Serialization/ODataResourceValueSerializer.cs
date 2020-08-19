@@ -18,12 +18,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// Represents an <see cref="ODataSerializer"/> for serializing <see cref="IEdmComplexType" />'s.
     /// </summary>
-    public class ODataComplexSerializer : ODataEdmTypeSerializer
+    public class ODataResourceValueSerializer : ODataEdmTypeSerializer
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataComplexSerializer"/>.
+        /// Initializes a new instance of <see cref="ODataResourceValueSerializer"/>.
         /// </summary>
-        public ODataComplexSerializer(ODataSerializerProvider serializerProvider)
+        public ODataResourceValueSerializer(ODataSerializerProvider serializerProvider)
             : base(ODataPayloadKind.Resource, serializerProvider)
         {
             if (serializerProvider == null)
@@ -37,7 +37,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="payloadKind">The kind of OData payload that this serializer generates.</param>
         /// <param name="serializerProvider">The <see cref="ODataSerializerProvider"/> to use to write inner objects.</param>
-        protected ODataComplexSerializer(ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+        protected ODataResourceValueSerializer(ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
             : base(payloadKind, serializerProvider)
         {
             if (serializerProvider == null)
@@ -74,7 +74,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             if (!expectedType.IsComplex())
             {
-                throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataComplexSerializer), expectedType.FullName());
+                throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataResourceValueSerializer), expectedType.FullName());
             }
 
             ODataResourceValue value = CreateODataComplexResourceValue(graph, expectedType.AsComplex(), writeContext);

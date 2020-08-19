@@ -178,7 +178,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (isForAnnotations && actualType.IsComplex())
                     {
                         valueCollection.Add(
-                        new ODataComplexSerializer(SerializerProvider).CreateODataValue(item, actualType, writeContext).GetInnerValue());
+                        new ODataResourceValueSerializer(SerializerProvider).CreateODataValue(item, actualType, writeContext).GetInnerValue());
                     }
                     else
                     {

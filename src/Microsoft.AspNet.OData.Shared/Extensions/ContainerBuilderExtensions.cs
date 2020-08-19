@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData.Extensions
             // Serializers.
             builder.AddService<ODataEnumSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataPrimitiveSerializer>(ServiceLifetime.Singleton);
-            builder.AddService<ODataComplexSerializer>(ServiceLifetime.Singleton);
+            builder.AddService<ODataResourceValueSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataDeltaFeedSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataResourceSetSerializer>(ServiceLifetime.Singleton);
             builder.AddService<ODataCollectionSerializer>(ServiceLifetime.Singleton);

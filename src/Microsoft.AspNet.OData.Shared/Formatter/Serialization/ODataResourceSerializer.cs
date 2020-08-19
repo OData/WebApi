@@ -674,7 +674,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
                            annotation.Value.GetType());
                          
-                        ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
+                        ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
 
                         if (edmTypeSerializer != null)
                         {
@@ -731,7 +731,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else if (edmTypeReference.IsStructured())
             {
-                    edmTypeSerializer = new ODataComplexSerializer(SerializerProvider);
+                    edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
             }           
             else
             {

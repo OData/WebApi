@@ -12,6 +12,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DerivedTypeConstraintAttributeEdmPropertyConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\BuilderHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
@@ -67,7 +68,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataRawValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataComplexSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataResourceValueSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />

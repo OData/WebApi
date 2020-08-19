@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <summary>
     /// This annotation indicates the mapping from a <see cref="IEdmStructuredType"/> to a <see cref="PropertyInfo"/>.
     /// The <see cref="IEdmStructuredType"/> is an open type and the <see cref="PropertyInfo"/> is the specific
-    /// property which is used in an open type to save/retrieve the instance annotations.
+    /// property which is used to save/retrieve the instance annotations.
     /// </summary>
     public class InstanceAnnotationDictionaryAnnotation
     {
@@ -26,23 +26,18 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!typeof(IDictionary<string,IDictionary<string, object> >).IsAssignableFrom(propertyInfo.PropertyType))
-            {
-                throw Error.Argument("propertyInfo", SRResources.InvalidPropertyInfoForAnnotationPropertyAnnotation,
-                    propertyInfo.PropertyType.Name,
-                    "IDictionary<string, IDictionary<string, object>>");
-            }
+            BuilderHelper.ValidateAssignableFrom(typeof(IDictionary<string, IDictionary<string, object>>), propertyInfo.PropertyType);
 
             PropertyInfo = propertyInfo;
         }
 
         /// <summary>
-        /// Gets the <see cref="PropertyInfo"/> which backs the instance annotations of the open type.
+        /// Gets the <see cref="PropertyInfo"/> which backs the instance annotations of the clr type/resource etc.
         /// </summary>
         public PropertyInfo PropertyInfo
         {
             get;
-            private set;
+            set;
         }
     }
 }

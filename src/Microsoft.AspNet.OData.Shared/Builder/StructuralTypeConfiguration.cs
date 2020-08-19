@@ -520,11 +520,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            if (!typeof(IDictionary<string, IDictionary<string,object>>).IsAssignableFrom(propertyInfo.PropertyType))
-            {
-                throw Error.Argument("propertyInfo", SRResources.ArgumentMustBeOfType,
-                    "IDictionary<string, IDictionary<string, object>>");
-            }
+            BuilderHelper.ValidateAssignableFrom(typeof(IDictionary<string, IDictionary<string, object>>), propertyInfo.PropertyType);
 
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {

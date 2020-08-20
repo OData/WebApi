@@ -36,12 +36,12 @@ namespace Microsoft.AspNet.OData.Test.Batch
         // if application/json is high proprity, return application/json
         [InlineData(new[] { "application/json;q=0.9", "multipart/mixed;q=0.5" }, "application/json")]
         [InlineData(new[] { "multipart/mixed;q=0.5", "application/json;q=0.9" }, "application/json")]
-        
-        // if proprities are same, return first
+
+        // if priorities are same, return first
         [InlineData(new[] { "multipart/mixed;q=0.9", "application/json;q=0.9" }, "multipart/mixed")]
         [InlineData(new[] { "multipart/mixed", "application/json" }, "multipart/mixed")]
-        
-        // if proprities are same, return first
+
+        // if priorities are same, return first
         [InlineData(new[] { "application/json;q=0.9", "multipart/mixed;q=0.9" }, "application/json")]
         [InlineData(new[] { "application/json", "multipart/mixed" }, "application/json")]
 

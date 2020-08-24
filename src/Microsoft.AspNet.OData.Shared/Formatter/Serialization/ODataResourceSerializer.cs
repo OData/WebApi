@@ -665,11 +665,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 IDictionary<string, object> resourceAnnotations;
                 if (instanceAnnotationsDictionary.TryGetValue(string.Empty, out resourceAnnotations))
                 {
-                    if (resource.InstanceAnnotations == null)
-                    {
-                        resource.InstanceAnnotations = new List<ODataInstanceAnnotation>();
-                    }
-
                     foreach (KeyValuePair<string,object> annotation in resourceAnnotations)
                     {
                         IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,

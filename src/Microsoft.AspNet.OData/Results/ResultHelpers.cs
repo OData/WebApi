@@ -60,7 +60,8 @@ namespace Microsoft.AspNet.OData.Results
         {
             if (response.StatusCode == HttpStatusCode.NoContent)
             {
-                response.Headers.TryAddWithoutValidation(EntityIdHeaderName, entityId().ToString());
+                Uri location = entityId();
+                response.Headers.TryAddWithoutValidation(EntityIdHeaderName, location.AbsoluteUri);
             }
         }
 

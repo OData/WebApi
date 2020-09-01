@@ -54,8 +54,9 @@ namespace Microsoft.AspNet.OData.Results
             HttpRequest request = context.HttpContext.Request;
             HttpResponse response = context.HttpContext.Response;
             IActionResult result = GetInnerActionResult(request);
-            response.Headers["Location"] = GenerateLocationHeader(request).ToString();
+            Uri location = GenerateLocationHeader(request);
 
+            response.Headers["Location"] = location.AbsoluteUri;
             // Since AddEntityId relies on the response, make sure to execute the result
             // before calling AddEntityId() to ensure the response code is set correctly.
             await result.ExecuteResultAsync(context);

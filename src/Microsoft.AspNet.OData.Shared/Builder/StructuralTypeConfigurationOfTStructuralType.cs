@@ -654,6 +654,35 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Sets the description for this type.
+        /// </summary>
+        /// <param name="summary">A short description for this type.</param>
+        /// <param name="detailedDescription">A detailed description for this type.</param>
+        /// <returns></returns>
+        public StructuralTypeConfiguration<TStructuralType> HasDescription(string summary, string detailedDescription)
+        {
+	        _configuration.Description = summary;
+	        if (!string.IsNullOrEmpty(detailedDescription))
+	        {
+		        _configuration.LongDescription = detailedDescription;
+	        }
+
+	        return this;
+        }
+
+        /// <summary>
+        /// Sets the description for this type.
+        /// </summary>
+        /// <param name="summary">A short description for this type.</param>
+        /// <returns></returns>
+        public StructuralTypeConfiguration<TStructuralType> HasDescription(string summary)
+        {
+	        _configuration.Description = summary;
+            
+	        return this;
+        }
+
+        /// <summary>
         /// Sets sortable properties depends on <see cref="QueryOptionSetting"/> of this structural type.
         /// </summary>
         public StructuralTypeConfiguration<TStructuralType> OrderBy(QueryOptionSetting setting, params string[] properties)

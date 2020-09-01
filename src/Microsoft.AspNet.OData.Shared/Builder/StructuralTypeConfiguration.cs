@@ -23,6 +23,8 @@ namespace Microsoft.AspNet.OData.Builder
         private PropertyInfo _dynamicPropertyDictionary;
         private StructuralTypeConfiguration _baseType;
         private bool _baseTypeConfigured;
+        private string _description;
+        private string _longDescription;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuralTypeConfiguration"/> class.
@@ -85,6 +87,24 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
+        /// <summary>
+        /// Gets or sets the summary for the property.
+        /// </summary>
+        public string Description
+        {
+	        get => _description;
+	        set => _description = value ?? throw Error.PropertyNull();
+        }
+
+        /// <summary>
+        /// Gets or sets the detailed description of the property.
+        /// </summary>
+        public string LongDescription
+        {
+	        get => _longDescription;
+	        set => _longDescription = value ?? throw Error.PropertyNull();
+        }
+        
         /// <summary>
         /// Gets or sets the namespace of this EDM type.
         /// </summary>

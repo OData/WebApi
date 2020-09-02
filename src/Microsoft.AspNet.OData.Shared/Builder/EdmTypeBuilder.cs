@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Builder
             _members.Clear();
             _openTypes.Clear();
             _propertyConfigurations.Clear();
-            _instanceAnnotations.Clear();
+            _instanceAnnotableTypes.Clear();
             _instanceAnnotableTypes.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
@@ -569,7 +569,6 @@ namespace Microsoft.AspNet.OData.Builder
                 builder._members,
                 builder._openTypes,
                 builder._propertyConfigurations,
-                builder._instanceAnnotations,
                 builder._instanceAnnotableTypes);
         }
 

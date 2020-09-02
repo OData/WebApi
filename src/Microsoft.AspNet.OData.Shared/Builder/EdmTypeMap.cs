@@ -20,7 +20,6 @@ namespace Microsoft.AspNet.OData.Builder
             Dictionary<Enum, IEdmEnumMember> enumMembers,
             Dictionary<IEdmStructuredType, PropertyInfo> openTypes,
             Dictionary<IEdmProperty, PropertyConfiguration> propertyConfigurations,
-            Dictionary<IEdmStructuredType, PropertyInfo> instanceAnnotations,
             Dictionary<IEdmStructuredType, PropertyInfo> instanceAnnotatableTypes )
         {
             EdmTypes = edmTypes;
@@ -31,7 +30,6 @@ namespace Microsoft.AspNet.OData.Builder
             EnumMembers = enumMembers;
             OpenTypes = openTypes;
             EdmPropertyConfigurations = propertyConfigurations;
-            InstanceAnnotations = instanceAnnotations;
             InstanceAnnotatableTypes = instanceAnnotatableTypes;
         }
 

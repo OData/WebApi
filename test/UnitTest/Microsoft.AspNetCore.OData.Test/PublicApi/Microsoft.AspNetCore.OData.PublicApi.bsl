@@ -974,6 +974,7 @@ public enum Microsoft.AspNet.OData.Builder.OperationKind : int {
 }
 
 public enum Microsoft.AspNet.OData.Builder.PropertyKind : int {
+	AnnotationDictionary = 6
 	Collection = 2
 	Complex = 1
 	Dynamic = 5
@@ -1177,6 +1178,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Reflection.PropertyInfo]] IgnoredProperties  { public get; }
+	System.Reflection.PropertyInfo InstanceAnnotationsDictionary  { public get; }
 	System.Nullable`1[[System.Boolean]] IsAbstract  { public virtual get; public virtual set; }
 	bool IsOpen  { public get; }
 	Microsoft.OData.Edm.EdmTypeKind Kind  { public abstract get; }
@@ -1187,6 +1189,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] Properties  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] RemovedProperties  { protected get; }
+	bool SupportsInstanceAnnotations  { public get; }
 
 	internal virtual void AbstractImpl ()
 	public virtual CollectionPropertyConfiguration AddCollectionProperty (System.Reflection.PropertyInfo propertyInfo)
@@ -1194,6 +1197,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual void AddInstanceAnnotationDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
@@ -1232,6 +1236,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
+	public void HasInstanceAnnotations (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
@@ -1252,19 +1257,23 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
 	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType)
 	public StructuralTypeConfiguration`1 Select (string[] properties)
 	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType, string[] properties)
+}
+
+public sealed class Microsoft.AspNet.OData.Builder.BuilderHelper {
+	public static void ValidateAssignableFrom (System.Type expectedType, System.Type type, params string customTypeDescription)
 }
 
 [
@@ -1599,6 +1608,12 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 	public FunctionConfiguration ReturnsEntityViaEntitySetPath (string[] entitySetPath)
 	public FunctionConfiguration ReturnsFromEntitySet (string entitySetName)
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
+}
+
+public class Microsoft.AspNet.OData.Builder.InstanceAnnotationDictionaryAnnotation {
+	public InstanceAnnotationDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
+
+	System.Reflection.PropertyInfo PropertyInfo  { public get; public set; }
 }
 
 public class Microsoft.AspNet.OData.Builder.LengthPropertyConfiguration : PrimitivePropertyConfiguration {
@@ -3341,6 +3356,7 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataPrimitiveDese
 public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceDeserializer : ODataEdmTypeDeserializer {
 	public ODataResourceDeserializer (ODataDeserializerProvider deserializerProvider)
 
+	public virtual void ApplyInstanceAnnotations (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperty (object resource, ODataNestedResourceInfoWrapper resourceInfoWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyStructuralProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
@@ -3423,6 +3439,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.EntitySelfLinks {
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataCollectionSerializer : ODataEdmTypeSerializer {
 	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider)
+	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider, bool isForAnnotations)
 
 	protected static void AddTypeNameAnnotationAsNeeded (Microsoft.OData.ODataCollectionValue value, ODataMetadataLevel metadataLevel)
 	public virtual Microsoft.OData.ODataCollectionValue CreateODataCollectionValue (System.Collections.IEnumerable enumerable, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataSerializerContext writeContext)
@@ -3493,6 +3510,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public ODataResourceSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual void AppendDynamicProperties (Microsoft.OData.ODataResource resource, SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+	public virtual void AppendInstanceAnnotations (Microsoft.OData.ODataResource resource, ResourceContext resourceContext)
 	public virtual string CreateETag (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, ResourceContext resourceContext)
@@ -3512,6 +3530,14 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSeri
 	public virtual Microsoft.OData.ODataResourceSet CreateResourceSet (System.Collections.IEnumerable resourceSetInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference resourceSetType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+}
+
+public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceValueSerializer : ODataEdmTypeSerializer {
+	public ODataResourceValueSerializer (ODataSerializerProvider serializerProvider)
+	protected ODataResourceValueSerializer (Microsoft.OData.ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext {
@@ -3755,6 +3781,12 @@ public class Microsoft.AspNet.OData.Routing.Conventions.MetadataRoutingConventio
 
 public class Microsoft.AspNet.OData.Routing.Conventions.NavigationRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public NavigationRoutingConvention ()
+
+	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
+}
+
+public class Microsoft.AspNet.OData.Routing.Conventions.OperationImportRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
+	public OperationImportRoutingConvention ()
 
 	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
 }

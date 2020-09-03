@@ -63,9 +63,9 @@ namespace Microsoft.AspNet.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options is IODataQueryOptions _options)
+            if (options is ODataQueryOptions _options)
             {
-                if (_options.Count != null /*|| _options.InternalRequest.IsCountRequest()*/)
+                if (_options.Count != null || _options.InternalRequest.IsCountRequest())
                 {
                     ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
 
@@ -74,10 +74,6 @@ namespace Microsoft.AspNet.OData.Query.Validators
                         _options.Count.Validate(validationSettings);
                     }
                 }
-            }
-            else
-            {
-                throw new NotSupportedException();
             }
 
             if (options.SkipToken != null)

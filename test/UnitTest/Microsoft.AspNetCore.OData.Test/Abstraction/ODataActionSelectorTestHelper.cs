@@ -125,10 +125,14 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             
             routeData.Values[ODataRouteConstants.ODataPath] = odataPath;
             routeData.Values[ODataRouteConstants.Action] = actionName;
+            int keyCount = 0;
             foreach (var keyValuePair in routeDataValues)
             {
                 routeData.Values[keyValuePair.Key] = keyValuePair.Value;
+                keyCount++;
             }
+
+            routeData.Values[ODataRouteConstants.KeyCountKey] = keyCount;
 
             request.Method = method;
 

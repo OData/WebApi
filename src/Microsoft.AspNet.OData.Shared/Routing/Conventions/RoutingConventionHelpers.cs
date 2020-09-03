@@ -191,6 +191,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         AddKeyValues(anotherKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
                     }
                 }
+
+                IncrementKeyCount(controllerContext.RouteData);
             }
         }
 
@@ -226,42 +228,15 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             odataValues[prefixName] = odataValue;
         }
 
-        public static void AddFunctionParameterToRouteData(this IWebApiControllerContext controllerContext, OperationImportSegment importSegment)
+        private static void IncrementKeyCount(IDictionary<string, object> routeValues)
         {
-            Contract.Assert(controllerContext != null);
-            Contract.Assert(importSegment != null);
-
-            IDictionary<string, object> routingConventionsStore = controllerContext.Request.Context.RoutingConventionsStore;
-
-            IEdmFunctionImport functionImport = importSegment.OperationImports.First() as IEdmFunctionImport;
-            if (functionImport == null)
+            if (routeValues.TryGetValue(ODataRouteConstants.KeyCountKey, out object count))
             {
-                return;
+                routeValues[ODataRouteConstants.KeyCountKey] = ((int)count) + 1;
             }
-
-            IEdmFunction function = functionImport.Function;
-            foreach (OperationSegmentParameter parameter in importSegment.Parameters)
+            else
             {
-                string name = parameter.Name;
-                object value = importSegment.GetParameterValue(name);
-
-                AddFunctionParameters(function, name, value, controllerContext.RouteData,
-                    routingConventionsStore, null);
-            }
-
-            // Append the optional parameters into RouteData.
-            ODataOptionalParameter optional = new ODataOptionalParameter();
-            foreach (var optionalParameter in function.Parameters.OfType<IEdmOptionalParameter>())
-            {
-                if (!importSegment.Parameters.Any(c => c.Name == optionalParameter.Name))
-                {
-                    optional.Add(optionalParameter);
-                }
-            }
-
-            if (optional.OptionalParameters.Any())
-            {
-                controllerContext.RouteData.Add(ODataRouteConstants.OptionalParameters, optional);
+                routeValues[ODataRouteConstants.KeyCountKey] = 1;
             }
         }
 

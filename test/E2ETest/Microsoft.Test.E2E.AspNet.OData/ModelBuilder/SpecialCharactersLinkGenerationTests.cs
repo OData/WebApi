@@ -56,7 +56,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             return Todoes.FirstOrDefault(t => t.Name == key);
         }
 
-        protected SpecialCharactersLinkGenerationTestsModel Patch(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
+        public SpecialCharactersLinkGenerationTestsModel Patch(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
         {
             var todo = Todoes.FirstOrDefault(t => t.Name == key);
             return todo;

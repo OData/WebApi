@@ -115,16 +115,21 @@ namespace Microsoft.AspNet.OData.Routing
 
             if (odataPath != null && routeData.Values.ContainsKey(ODataRouteConstants.Action))
             {
-                var odataRoute = routeData.Routers.OfType<ODataRoute>().FirstOrDefault();
-                var routePrefix = odataRoute?.RoutePrefix;
+                var routePrefixes = routeData.Routers.OfType<ODataRoute>().Select(odataRoute => odataRoute.RoutePrefix);
                 // Get the available parameter names from the route data. Ignore case of key names.
                 // Remove route prefix and other non-parameter values from availableKeys
                 IList<string> availableKeys = routeData.Values.Keys
-                    .Where((key) => routePrefix != "{" + key + "}"
+                    .Where((key) => !routePrefixes.Any(prefix => prefix == "{" + key + "}")
                         && key != ODataRouteConstants.Action
                         && key != ODataRouteConstants.ODataPath)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
+
+                int availableKeysCount = 0;
+                if (routeData.Values.ContainsKey(ODataRouteConstants.KeyCountKey))
+                {
+                    availableKeysCount = (int) routeData.Values[ODataRouteConstants.KeyCountKey];
+                }
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
@@ -133,7 +138,7 @@ namespace Microsoft.AspNet.OData.Routing
                         .Where(p =>
                         {
                             return p.ParameterType != typeof(ODataPath) &&
-                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
+                                !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType);
                         }), c));
 
                 // retrieve the optional parameters
@@ -153,24 +158,28 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys, optionalWrapper, c.TotalParameterCount))
+                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys, optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount)
                     .ToList();
 
-                // if there are still multiple candidate actions at this point,
-                // prioritize actions which explicitly declare the request method
-                // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
+                // if there are still multiple candidate actions at this point, let's try some tie-breakers
                 if (matchedCandidates.Count() > 1)
                 {
+                    // prioritize actions which explicitly declare the request method
+                    // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
                     var bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
-
                     if (bestCandidate != null)
                     {
                         return bestCandidate.ActionDescriptor;
                     }
-
+                    
+                    // also priorize actions that have the exact number of parameters as available keys
+                    // this helps disambiguate between overloads of actions that implement actions
+                    // e.g. DoSomething(int key) vs DoSomething(), if there are no availableKeys, the
+                    // selector could still think that the `int key` param will come from the request body
+                    // and end up returning DoSomething(int key) instead of DoSomething()
                     bestCandidate = matchedCandidates.FirstOrDefault(candidate => candidate.FilteredParameters.Count() == availableKeys.Count());
                     if (bestCandidate != null)
                     {
@@ -184,12 +193,16 @@ namespace Microsoft.AspNet.OData.Routing
             return _innerSelector.SelectBestCandidate(context, candidates);
         }
 
-        private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys, ODataOptionalParameter optionalWrapper, int totalParameterCount)
+        private bool TryMatch(RouteContext context, IList<ParameterDescriptor> parameters, IList<string> availableKeys,
+            ODataOptionalParameter optionalWrapper, int totalParameterCount, int availableKeysCount)
         {
-            if (totalParameterCount == 0 && availableKeys.Count > 0)
+            // reject action if it doesn't declare a parameter for each segment key
+            // e.g. Get() will be rejected for route /Persons/1
+            if (totalParameterCount < availableKeysCount)
             {
                 return false;
             }
+
             bool matchedBody = false;
             var conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
             // use the parameter name to match.
@@ -276,9 +289,7 @@ namespace Microsoft.AspNet.OData.Routing
                 Metadata = modelMetadata,
                 BindingInfo = param.BindingInfo,
 
-                // We're using the model metadata as the cache token here so that TryUpdateModelAsync calls
-                // for the same model type can share a binder. This won't overlap with normal model binding
-                // operations because they use the ParameterDescriptor for the token.
+                // This is the same cache token used by aspnetcore when updating models
                 CacheToken = modelMetadata,
 
             };

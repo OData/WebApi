@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.AspNet.OData.Query;
+﻿using System.Linq;
 using Microsoft.AspNet.OData.Test.Abstraction;
-using System.Linq;
+using Microsoft.AspNet.OData.Query;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Class
 {

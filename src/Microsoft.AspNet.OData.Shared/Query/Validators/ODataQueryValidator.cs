@@ -1,11 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
-using System;
 
 namespace Microsoft.AspNet.OData.Query.Validators
 {
@@ -64,9 +63,9 @@ namespace Microsoft.AspNet.OData.Query.Validators
                 options.Filter.Validate(validationSettings);
             }
 
-            if (options is ODataQueryOptions _options)
+            if (options is IODataQueryOptions _options)
             {
-                if (_options.Count != null || _options.InternalRequest.IsCountRequest())
+                if (_options.Count != null /*|| _options.InternalRequest.IsCountRequest()*/)
                 {
                     ValidateQueryOptionAllowed(AllowedQueryOptions.Count, validationSettings.AllowedQueryOptions);
 

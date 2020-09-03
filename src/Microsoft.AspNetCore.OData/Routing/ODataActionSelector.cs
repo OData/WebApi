@@ -14,12 +14,10 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Binders;
 using Microsoft.AspNetCore.Mvc.Routing;
+using Microsoft.AspNetCore.Routing;
 #if NETSTANDARD2_0
     using Microsoft.AspNetCore.Mvc.Internal;
-    using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.Logging;
-#else
-using Microsoft.AspNetCore.Routing;
 #endif
 
 
@@ -198,6 +196,18 @@ namespace Microsoft.AspNet.OData.Routing
             return _innerSelector.SelectBestCandidate(context, candidates);
         }
 
+        /// <summary>
+        /// Checks whether the a controller action matches the current route by comparing the parameters
+        /// of te action with the data in the route.
+        /// </summary>
+        /// <param name="context">The current <see cref="RouteContext"/></param>
+        /// <param name="parameters">Parameters of the action. This excludes the <see cref="ODataPath"/> and <see cref="Query.ODataQueryOptions"/> parameters</param>
+        /// <param name="availableKeys">The names of the keys found in the uri (entity set keys, related keys, operation parameters)</param>
+        /// <param name="optionalWrapper">Used to check whether a parameter is optional</param>
+        /// <param name="totalParameterCount">Total number of parameters in the action method</param>
+        /// <param name="availableKeysCount">The number of key segments found in the uri.
+        /// This might be less than the size of <paramref name="availableKeys"/> because some keys might have alias names</param>
+        /// <returns></returns>
         private bool TryMatch(
             RouteContext context,
             IList<ParameterDescriptor> parameters,

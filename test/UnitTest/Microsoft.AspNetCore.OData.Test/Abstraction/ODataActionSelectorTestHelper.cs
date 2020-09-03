@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using System.IO;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Linq;
+using System.Text;
 #if NETCOREAPP2_0
 using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -112,13 +113,13 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
         /// Create route context with the specified with the specified request data
         /// </summary>
         /// <param name="routeBuilder"></param>
-        /// <param name="actionName">Name of the action ebging routed to</param>
+        /// <param name="actionName">Name of the action being routed to</param>
         /// <param name="routeDataValues">Key-value pairs to add to the route data</param>
         /// <param name="method">HTTP request method</param>
         /// <param name="bodyContent">Request body content</param>
         /// <returns></returns>
         public static RouteContext SetupRouteContext(IRouteBuilder routeBuilder, string actionName,
-            Dictionary<string, object> routeDataValues,string method, string bodyContent)
+            Dictionary<string, object> routeDataValues, string method, string bodyContent)
         {
             var request = RequestFactory.Create(routeBuilder);
             var routeContext = new RouteContext(request.HttpContext);
@@ -142,10 +143,7 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
 
             if (bodyContent != null)
             {
-                var stream = new MemoryStream();
-                var writer = new StreamWriter(stream);
-                writer.Write(bodyContent);
-                request.Body = stream;
+                request.Body = new MemoryStream(Encoding.UTF8.GetBytes(bodyContent));
                 request.ContentLength = bodyContent.Length;
             }
 

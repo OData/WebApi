@@ -14,7 +14,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
     public class ODataActionSelectorTest
     {
 
-        //public static TheoryDataSet<Dictionary<string, object>, string, string, Type, string, Type[]> ScenariosWithCorrectAction
         public static TheoryDataSet<Dictionary<string, object>, (string Method, string Body), (Type ControllerType, string ActionName, Type[] Signature)> ScenariosWithCorrectAction
         {
             get
@@ -81,8 +80,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     },
                     {
                         new Dictionary<string, object> { { "key", 1 } },
-                        ("PUT", "{}"),
-                        (typeof(KeyBodyController), "Put",
+                        ("PATCH", "{}"),
+                        (typeof(KeyBodyController), "Patch",
                         new [] { typeof(int), typeof(Delta<object>) })
                     },
                     // actions that declare extra parameters with registered model binders
@@ -94,8 +93,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     },
                     {
                         new Dictionary<string, object> { { "key", 1 } },
-                        ("PUT", "{}"),
-                        (typeof(ExtraParametersWithOwnModelBindersController), "Put",
+                        ("PATCH", "{}"),
+                        (typeof(ExtraParametersWithOwnModelBindersController), "Patch",
                         new [] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
                     }
                 };
@@ -117,8 +116,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     // Action has parameters not in route values
                     {
                         new Dictionary<string, object>() { { "someValue", 1 } },
-                        ("PUT", null),
-                        (typeof(NoParamController), "Put")
+                        ("PATCH", null),
+                        (typeof(NoParamController), "Patch")
                     },
                     // Action has extra parameters that don't have associated model binders
                     {
@@ -128,8 +127,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     },
                     {
                         new Dictionary<string, object> { { "key", 1 } },
-                        ("PUT", ""),
-                        (typeof(ExtraParametersWithoutModelBindersController), "Put")
+                        ("PATCH", ""),
+                        (typeof(ExtraParametersWithoutModelBindersController), "Patch")
                     }
                 };
             }
@@ -218,7 +217,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
 
     public class KeyBodyController : TestODataController
     {
-        public void Put(int key, Delta<object> dt) { }
+        public void Patch(int key, Delta<object> dt) { }
     }
 
     public class BodyOnlyController : TestODataController
@@ -235,13 +234,13 @@ namespace Microsoft.AspNet.OData.Test.Routing
     {
         public void Get(int key, System.Threading.CancellationToken cancellationToken) { }
 
-        public void Put(int key, System.Threading.CancellationToken cancellationToken, Delta<object> delta) { }
+        public void Patch(int key, System.Threading.CancellationToken cancellationToken, Delta<object> delta) { }
     }
 
     public class ExtraParametersWithoutModelBindersController
     {
         public void Get(int key, UnknownModel other) { }
-        public void Put(int key, UnknownModel other, Delta<object> delta) { }
+        public void Patch(int key, UnknownModel other, Delta<object> delta) { }
     }
 
     public class UnknownModel { }

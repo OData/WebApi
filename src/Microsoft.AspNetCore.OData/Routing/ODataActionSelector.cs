@@ -20,7 +20,6 @@ using Microsoft.AspNetCore.Routing;
     using Microsoft.Extensions.Logging;
 #endif
 
-
 namespace Microsoft.AspNet.OData.Routing
 {
     /// <summary>
@@ -289,7 +288,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool RequestHasBody(RouteContext context)
         {
-            string method = context.HttpContext.Request.Method.ToLowerInvariant();
+            string method = context.HttpContext.Request.Method;
             return method.Equals("post", StringComparison.OrdinalIgnoreCase) ||
                 method.Equals("put", StringComparison.OrdinalIgnoreCase) ||
                 method.Equals("patch", StringComparison.OrdinalIgnoreCase) ||

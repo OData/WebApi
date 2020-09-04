@@ -197,7 +197,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         /// <summary>
         /// Checks whether the a controller action matches the current route by comparing the parameters
-        /// of te action with the data in the route.
+        /// of the action with the data in the route.
         /// </summary>
         /// <param name="context">The current <see cref="RouteContext"/></param>
         /// <param name="parameters">Parameters of the action. This excludes the <see cref="ODataPath"/> and <see cref="Query.ODataQueryOptions"/> parameters</param>

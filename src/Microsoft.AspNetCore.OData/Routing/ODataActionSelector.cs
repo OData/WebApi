@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -297,10 +298,7 @@ namespace Microsoft.AspNet.OData.Routing
 
         private bool ActionAcceptsMethod(ControllerActionDescriptor action, string method)
         {
-            if (action == null)
-            {
-                return false;
-            }
+            Contract.Assert(action != null);
 
             return action.MethodInfo.GetCustomAttributes(false)
                 .OfType<IActionHttpMethodProvider>()

@@ -15,9 +15,9 @@ using System.Linq;
 using System.Text;
 #if NETCOREAPP2_0
 using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Logging;
-    using Microsoft.OData;
-    using Microsoft.AspNetCore.Mvc.Internal;
+using Microsoft.Extensions.Logging;
+using Microsoft.OData;
+using Microsoft.AspNetCore.Mvc.Internal;
 #else
 using Moq;
 #endif
@@ -76,13 +76,14 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
            out IRouteBuilder routeBuilder,
            out ODataActionSelector actionSelector,
            out IReadOnlyList<ControllerActionDescriptor> actionDescriptors)
-#if NETCOREAPP2_0
+
         {
             routeBuilder = RoutingConfigurationFactory.Create();
             actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
                 as IReadOnlyList<ControllerActionDescriptor>;
             actionDescriptors = actionDescriptors.Where(a => a.ActionName == actionName).ToList();
             var serviceProvider = routeBuilder.ServiceProvider;
+#if NETCOREAPP2_0
             var actionsProvider = serviceProvider.GetRequiredService<IActionDescriptorCollectionProvider>();
             var actionConstraintsProvider = serviceProvider.GetRequiredService<ActionConstraintCache>();
             var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
@@ -96,16 +97,11 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 modelMetadataProvider);
         }
 #else
-        {
+        
             var innerActionSelectorMock = new Mock<IActionSelector>();
-            routeBuilder = RoutingConfigurationFactory.Create();
-            var serviceProvider = routeBuilder.ServiceProvider;
             var modelBinderFactory = (IModelBinderFactory)serviceProvider.GetService(typeof(IModelBinderFactory));
             var modelMetadataProvider = (IModelMetadataProvider)serviceProvider.GetService(typeof(IModelMetadataProvider));
             actionSelector = new ODataActionSelector(innerActionSelectorMock.Object, modelBinderFactory, modelMetadataProvider);
-            actionDescriptors = ControllerDescriptorFactory.Create(routeBuilder, controllerType.Name, controllerType)
-                as IReadOnlyList<ControllerActionDescriptor>;
-            actionDescriptors = actionDescriptors.Where(a => a.ActionName == actionName).ToList();
         }
 #endif
 

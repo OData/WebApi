@@ -4,12 +4,10 @@
 #if NETCORE
 using System;
 using Microsoft.AspNet.OData.Formatter.Serialization;
-using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
@@ -22,7 +20,6 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
-using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif

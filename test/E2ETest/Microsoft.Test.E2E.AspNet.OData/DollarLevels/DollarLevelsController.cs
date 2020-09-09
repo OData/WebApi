@@ -42,23 +42,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             }
         }
 
-        public ITestActionResult Get(ODataQueryOptions<DLManager> queryOptions)
+        public ITestActionResult Get(ODataQueryOptions<Test> queryOptions)
         {
-            ODataValidationSettings settings = new ODataValidationSettings();
-            settings.MaxExpansionDepth = 1;
-
-            try
+            
+            ODataQuerySettings settings1 = new ODataQuerySettings()
             {
-                queryOptions.Validate(settings);
-            }
-            catch (ODataException e)
-            {
-                var responseMessage = String.Format("The query specified in the URI is not valid. {0}", e.Message);
-                return BadRequest(responseMessage);
-            }
+                PageSize = 1, EnsureStableOrdering =false
+            };
 
-            var managers = queryOptions.ApplyTo(_DLManagers.AsQueryable()).AsQueryable();
-            return Ok(managers, managers.GetType());
+            var lst = new List<Test> { new Test { Id = "51" }, new Test { Id = "100" } };
+            var p = lst.AsQueryable();
+            var p1 = queryOptions.ApplyTo(p, settings1);
+            var p2 = p1.AsQueryable();
+
+            return Ok(p2);
         }
 
         [EnableQuery(MaxExpansionDepth = 4)]

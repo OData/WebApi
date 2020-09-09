@@ -14,6 +14,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             builder.EntitySet<DLManager>("DLManagers");
             builder.EntitySet<DLEmployee>("DLEmployees");
+            builder.EntitySet<Test>("Tests");
 
             builder.Namespace = typeof(DLManager).Namespace;
             return builder.GetEdmModel();

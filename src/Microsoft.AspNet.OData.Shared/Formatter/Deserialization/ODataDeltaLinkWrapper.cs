@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.
     /// </summary>
-    public sealed class ODataResourceWrapper : ODataItemBase
+    public sealed class ODataDeltaLinkWrapper : ODataItemBase
     {
         /// <summary>
         /// To check delta
@@ -17,13 +17,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public bool IsDeleted { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataResourceWrapper"/>.
+        /// Initializes a new instance of <see cref="ODataDeltaLinkWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataResourceWrapper(ODataResource item)
+        public ODataDeltaLinkWrapper(ODataDeltaLinkBase item)
             : base(item)
         {
-            NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
+           
         }
 
         /// <summary>
@@ -31,32 +31,27 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// </summary>
         /// <param name="item"></param>
         /// <param name="isDeleted"></param>
-        public ODataResourceWrapper(ODataResourceBase item, bool isDeleted)
+        public ODataDeltaLinkWrapper(ODataDeltaLinkBase item, bool isDeleted)
            : base(item)
         {
-            NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
             IsDeleted = isDeleted;
         }
 
         /// <summary>
         /// Gets the wrapped <see cref="ODataResource"/>.
         /// </summary>
-        public ODataResourceBase Resource
+        public ODataDeltaLinkBase DeltaLink
         {
             get
             {
                 if (IsDeleted)
                 {
-                    return Item as ODataDeletedResource;
+                    return Item as ODataDeltaDeletedLink;
                 }
 
-                return Item as ODataResource;             
+                return Item as ODataDeltaLink;             
             }
         }
-
-        /// <summary>
-        /// Gets the inner nested resource infos.
-        /// </summary>
-        public IList<ODataNestedResourceInfoWrapper> NestedResourceInfos { get; private set; }
+          
     }
 }

@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     /// <typeparam name="TStructuralType">TStructuralType is the type of the instance this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
-    public class Delta<TStructuralType> : TypedDelta, IDelta where TStructuralType : class
+    public class Delta<TStructuralType> : TypedDelta, IDelta,IEdmChangedObject<TStructuralType> where TStructuralType : class
     {
         // cache property accessors for this type and all its derived types.
         private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
@@ -106,6 +106,11 @@ namespace Microsoft.AspNet.OData
         {
             get { return typeof(TStructuralType); }
         }
+
+        /// <summary>
+        /// test
+        /// </summary>
+        public EdmDeltaEntityKind DeltaKind { get; set; }
 
         /// <inheritdoc/>
         public override void Clear()
@@ -678,6 +683,15 @@ namespace Microsoft.AspNet.OData
             _deltaNestedResources[name] = deltaNestedResource;
 
             return true;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public Microsoft.OData.Edm.IEdmTypeReference GetEdmType()
+        {
+            throw new NotImplementedException();
         }
     }
 }

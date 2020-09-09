@@ -23,9 +23,6 @@ using Microsoft.OData.UriParser;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #endif
-using Microsoft.AspNet.OData.Test.Formatter.Serialization.Models;
-using Microsoft.AspNet.OData.Extensions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Test.Query
 {

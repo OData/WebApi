@@ -37,8 +37,6 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Theory]
         [InlineData("http://localhost/Customers(1)/Orders", 10, null, false, "http://localhost/Customers(1)/Orders?$skip=10")]
         [InlineData("http://localhost/Customers?$expand=Orders", 10, null, false, "http://localhost/Customers?$expand=Orders&$skip=10")]
-        [InlineData("http://localhost/Customers(1)/Orders", 10, null, true, "http://localhost/Customers(1)/Orders?$skip=10")]
-        [InlineData("http://localhost/Customers?$expand=Orders", 10, null, true, "http://localhost/Customers?$expand=Orders&$skip=10")]
         public void GetNextPageLink_ReturnsCorrectNextLink(string baseUri, int pageSize, Object instance, bool enableSkipToken, string expectedUri)
         {
             var context = GetContext(enableSkipToken);
@@ -62,8 +60,6 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             var config = RoutingConfigurationFactory.CreateWithRootContainer("OData");
             var request = RequestFactory.Create(config, "OData");
-            //DefaultQuerySettings defaultQuerySettings = request.GetConfiguration().GetDefaultQuerySettings();
-            DefaultQuerySettings defaultQuerySettings = request.GetRequestContainer().GetRequiredService<DefaultQuerySettings>();
             ResourceContext resource = new ResourceContext();
             ODataSerializerContext context = new ODataSerializerContext(resource, edmProperty, queryContext, null);
             return context;

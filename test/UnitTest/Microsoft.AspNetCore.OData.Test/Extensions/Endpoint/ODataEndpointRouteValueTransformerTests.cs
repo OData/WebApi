@@ -108,22 +108,22 @@ namespace Microsoft.AspNet.OData.Test.Extensions
         }
 
         [Theory]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
-        public async void TransformAsyncReturnsCorrectRouteValuesForNonOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void TransformAsyncReturnsCorrectRouteValuesForNonOptionRequests(bool includeMetadata)
         {
-            var endpoint = await GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
+            var endpoint = await GenerateCorsEndPoint(false, includeMetadata);
             // Assert the metadata is empty when options requests are sent and the controller is not annotated
 
             Assert.Null(endpoint);
         }
 
         [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        public async void TransformAsyncReturnsCorrectRouteValuesForOptionRequests(bool isOptionsRequest, bool includeMetadata)
+        [InlineData(true)]
+        [InlineData(false)]
+        public async void TransformAsyncReturnsCorrectRouteValuesForOptionRequests(bool includeMetadata)
         {
-            var endpoint = await GenerateCorsEndPoint(isOptionsRequest, includeMetadata);
+            var endpoint = await GenerateCorsEndPoint(true, includeMetadata);
 
             Assert.NotNull(endpoint);
             Assert.NotNull(endpoint.Metadata);

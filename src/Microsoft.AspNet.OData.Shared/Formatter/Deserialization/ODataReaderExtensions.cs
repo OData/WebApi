@@ -85,29 +85,30 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                     else
                     {
-                        ODataItemBase parentItem = itemsStack.Peek();
-                        ODataResourceSetWrapper parentResourceSet = parentItem as ODataResourceSetWrapper;
-                        if (parentResourceSet != null)
-                        {
-                            parentResourceSet.Resources.Add(resourceWrapper);
-                        }
-                        else
-                        {
-                            ODataNestedResourceInfoWrapper parentNestedResource = (ODataNestedResourceInfoWrapper)parentItem;
-                            Contract.Assert(parentNestedResource.NestedResourceInfo.IsCollection == false, "Only singleton nested properties can contain resource as their child.");
-                            Contract.Assert(parentNestedResource.NestedItems.Count == 0, "Each nested property can contain only one resource as its direct child.");
-                            parentNestedResource.NestedItems.Add(resourceWrapper);
-                        }
+                        AddResourceToParent(itemsStack, resourceWrapper);
                     }
 
                     itemsStack.Push(resourceWrapper);
                     break;
 
                 case ODataReaderState.ResourceEnd:
+                case ODataReaderState.DeletedResourceEnd:
                     Contract.Assert(
                         itemsStack.Count > 0 && (reader.Item == null || itemsStack.Peek().Item == reader.Item),
                         "The resource which is ending should be on the top of the items stack.");
                     itemsStack.Pop();
+                    break;
+                case ODataReaderState.DeletedResourceStart:
+                    ODataDeletedResource deletedResource = (ODataDeletedResource)reader.Item;
+                    Contract.Assert(deletedResource != null, "Deleted resource should not be null");
+
+                    ODataResourceWrapper deletedResourceWrapper = new ODataResourceWrapper(deletedResource);
+
+                    Contract.Assert(itemsStack.Count != 0, "Deleted Resource should not be top level item");
+
+                    AddResourceToParent(itemsStack, deletedResourceWrapper);
+
+                    itemsStack.Push(deletedResourceWrapper);
                     break;
 
                 case ODataReaderState.NestedResourceInfoStart:
@@ -135,12 +136,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     Contract.Assert(resourceSet != null, "ResourceSet should never be null.");
 
                     ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(resourceSet);
+
                     if (itemsStack.Count > 0)
                     {
-                        ODataNestedResourceInfoWrapper parentNestedResourceInfo = (ODataNestedResourceInfoWrapper)itemsStack.Peek();
-                        Contract.Assert(parentNestedResourceInfo != null, "this has to be an inner resource set. inner resource sets always have a nested resource info.");
-                        Contract.Assert(parentNestedResourceInfo.NestedResourceInfo.IsCollection == true, "Only collection nested properties can contain resource set as their child.");
-                        parentNestedResourceInfo.NestedItems.Add(resourceSetWrapper);
+                        AddNestedResourceInfo(itemsStack, resourceSetWrapper);
                     }
                     else
                     {
@@ -151,6 +150,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     break;
 
                 case ODataReaderState.ResourceSetEnd:
+                case ODataReaderState.DeltaResourceSetEnd:
                     Contract.Assert(itemsStack.Count > 0 && itemsStack.Peek().Item == reader.Item, "The resource set which is ending should be on the top of the items stack.");
                     itemsStack.Pop();
                     break;
@@ -167,10 +167,70 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
 
                     break;
+                case ODataReaderState.DeltaResourceSetStart:
+                    ODataDeltaResourceSet deltaResourceSet = (ODataDeltaResourceSet)reader.Item;
+                    Contract.Assert(deltaResourceSet != null, "ResourceSet should never be null.");
+
+                    ODataDeltaResourceSetWrapper deltaResourceSetWrapper = new ODataDeltaResourceSetWrapper(deltaResourceSet);
+
+                    if (itemsStack.Count > 0)
+                    {
+                        AddNestedResourceInfo(itemsStack, deltaResourceSetWrapper);
+                    }
+                    else
+                    {
+                        topLevelItem = deltaResourceSetWrapper;
+                    }
+
+                    itemsStack.Push(deltaResourceSetWrapper);
+                    break;
+
+                case ODataReaderState.DeltaLink:
+                case ODataReaderState.DeltaDeletedLink:
+                    ODataDeltaLinkBase deltaLink = (ODataDeltaLinkBase)reader.Item;
+                    Contract.Assert(deltaLink != null, "Delta link should never be null.");
+
+                    ODataDeltaLinkWrapper deltaLinkWrapper = new ODataDeltaLinkWrapper(deltaLink);
+
+                    Contract.Assert(itemsStack.Count > 0, "Delta link should never be reported as top-level item.");
+
+                    ODataDeltaResourceSetWrapper linkResourceSetWrapper = (ODataDeltaResourceSetWrapper)itemsStack.Peek();
+
+                    Contract.Assert(linkResourceSetWrapper != null, "ODataDeltaResourceSetWrapper for delta link should not be null.");
+
+                    linkResourceSetWrapper.Items.Add(deltaLinkWrapper);
+
+                    break;
 
                 default:
                     Contract.Assert(false, "We should never get here, it means the ODataReader reported a wrong state.");
                     break;
+            }
+        }
+
+
+        private static void AddNestedResourceInfo(Stack<ODataItemBase> itemsStack, ODataResourceSetWrapperBase resourceSetWrapper)
+        {
+            ODataNestedResourceInfoWrapper parentNestedResourceInfo = (ODataNestedResourceInfoWrapper)itemsStack.Peek();
+            Contract.Assert(parentNestedResourceInfo != null, "this has to be an inner resource set. inner resource sets always have a nested resource info.");
+            Contract.Assert(parentNestedResourceInfo.NestedResourceInfo.IsCollection == true, "Only collection nested properties can contain resource set as their child.");
+            parentNestedResourceInfo.NestedItems.Add(resourceSetWrapper);
+        }
+
+        private static void AddResourceToParent(Stack<ODataItemBase> itemsStack, ODataResourceWrapper resourceWrapper)
+        {
+            ODataItemBase parentItem = itemsStack.Peek();
+            ODataResourceSetWrapperBase parentResourceSet = parentItem as ODataResourceSetWrapperBase;
+            if (parentResourceSet != null)
+            {
+                parentResourceSet.Items.Add(resourceWrapper);
+            }
+            else
+            {
+                ODataNestedResourceInfoWrapper parentNestedResource = (ODataNestedResourceInfoWrapper)parentItem;
+                Contract.Assert(parentNestedResource.NestedResourceInfo.IsCollection == false, "Only singleton nested properties can contain resource as their child.");
+                Contract.Assert(parentNestedResource.NestedItems.Count == 0, "Each nested property can contain only one resource as its direct child.");
+                parentNestedResource.NestedItems.Add(resourceWrapper);
             }
         }
     }

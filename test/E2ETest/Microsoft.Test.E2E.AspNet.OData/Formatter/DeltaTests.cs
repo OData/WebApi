@@ -41,6 +41,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Builder.TestModels.Recursive;
 using Microsoft.OData.Client;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common;
@@ -368,6 +369,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
     public class PatchtDeltaOfTTests : WebHostTestBase
     {
+        static IEdmModel model;
         public PatchtDeltaOfTTests(WebHostTestFixture fixture)
             :base(fixture)
         {
@@ -385,15 +387,35 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<DeltaCustomer>("DeltaCustomers");
             builder.EntitySet<DeltaOrder>("DeltaOrders");
-            return builder.GetEdmModel();
+            model = builder.GetEdmModel();
+            return model;
         }
 
+ 
         [Fact]
         public async Task PatchShouldSupportNonSettableCollectionProperties()
         {
+
+            var changedEntity = new EdmDeltaEntityObject(model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.Formatter.DeltaCustomer") as IEdmEntityType);
+            changedEntity.TrySetPropertyValue("Id", 1);
+            changedEntity.TrySetPropertyValue("FathersAge", 3);
+
             HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
-            dynamic data = new ExpandoObject();
-            data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+            var data = new ExpandoObject() as IDictionary<string, object>; 
+
+            foreach(var prop in changedEntity.GetChangedPropertyNames())
+            {
+                object val;
+                if(changedEntity.TryGetPropertyValue(prop, out val))
+                {
+                    data.Add(prop, val);
+                }
+                
+            }
+            //data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+            //data.Id = 1;
+            //data.FathersAge = 3;
+ 
             string content = JsonConvert.SerializeObject(data);
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -408,6 +430,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(3, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
+
+ 
     }
 
     public class DeltaCustomersController : TestODataController
@@ -453,6 +477,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
             entity.Put(customer);
             return Ok(customer);
+
         }
 
         [AcceptVerbs("PATCH", "MERGE")]
@@ -482,6 +507,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             _addresses = addresses.ToList();
             Orders = orders.ToList();
         }
+        
+        //[JsonProperty]
         public int Id { get; set; }
 
         private string _name = null;
@@ -493,6 +520,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
         public int Age { get; private set; }
 
+        //[JsonProperty]
         public int FathersAge { get; set; }
         public ICollection<DeltaOrder> Orders { get; private set; }
 

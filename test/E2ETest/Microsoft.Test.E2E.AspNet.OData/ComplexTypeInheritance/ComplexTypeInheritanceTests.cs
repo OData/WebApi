@@ -298,7 +298,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         'Center':{'X':1,'Y':2},
         'HasBorder':true
     },
-    'OptionalShapes': [ ]
+    'OptionalShapes': [
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
+        'Radius':1,
+        'Center':{'X':1,'Y':2},
+        'HasBorder':true
+    }]
 }";
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             request.Content = stringContent;

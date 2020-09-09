@@ -3,12 +3,12 @@
 
 using System;
 using System.Collections;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -18,16 +18,16 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> that can read OData resource sets.
     /// </summary>
-    public class ODataResourceSetDeserializer : ODataEdmTypeDeserializer
+    public class ODataDeltaResourceSetDeserializer : ODataEdmTypeDeserializer 
     {
         private static readonly MethodInfo CastMethodInfo = typeof(Enumerable).GetMethod("Cast");
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ODataResourceSetDeserializer"/> class.
+        /// Initializes a new instance of the <see cref="ODataDeltaResourceSetDeserializer"/> class.
         /// </summary>
         /// <param name="deserializerProvider">The deserializer provider to use to read inner objects.</param>
-        public ODataResourceSetDeserializer(ODataDeserializerProvider deserializerProvider)
-            : base(ODataPayloadKind.ResourceSet, deserializerProvider)
+        public ODataDeltaResourceSetDeserializer(ODataDeserializerProvider deserializerProvider)
+            : base(ODataPayloadKind.Delta, deserializerProvider)
         {
         }
 
@@ -50,28 +50,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             ODataReader resourceSetReader = messageReader.CreateODataResourceSetReader();
             object resourceSet = resourceSetReader.ReadResourceOrResourceSet();
-            return ReadInline(resourceSet, edmType, readContext);
-        }
-        
-        /// <inheritdoc />
-        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
-        {
-            if (messageReader == null)
-            {
-                throw Error.ArgumentNull("messageReader");
-            }
-
-            IEdmTypeReference edmType = readContext.GetEdmType(type);
-            Contract.Assert(edmType != null);
-
-            // TODO: is it ok to read the top level collection of entity?
-            if (!(edmType.IsCollection() && edmType.AsCollection().ElementType().IsStructured()))
-            {
-                throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
-            }
-
-            ODataReader resourceSetReader = await messageReader.CreateODataResourceSetReaderAsync();
-            object resourceSet = await resourceSetReader.ReadResourceOrResourceSetAsync();
             return ReadInline(resourceSet, edmType, readContext);
         }
 
@@ -105,19 +83,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmStructuredTypeReference elementType = edmType.AsCollection().ElementType().AsStructured();
             IEnumerable result;
 
-            if (resourceSet.IsDelta)
-            {
-                ODataDeltaResourceSetDeserializer deltaResourceSetDeserializer = new ODataDeltaResourceSetDeserializer(DeserializerProvider);
+            result = ReadDeltaResourceSet(resourceSet, elementType, readContext);
 
-                result = deltaResourceSetDeserializer.ReadDeltaResourceSet(resourceSet, elementType, readContext);
-            }
-            else
-            {
-                result = ReadResourceSet(resourceSet, elementType, readContext);
-            }
-             
             if (result != null && elementType.IsComplex())
-            {                
+            {
                 if (readContext.IsUntyped)
                 {
                     EdmComplexObjectCollection complexCollection = new EdmComplexObjectCollection(edmType.AsCollection());
@@ -140,6 +109,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 return result;
             }
+
         }
 
         /// <summary>
@@ -149,7 +119,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The deserializer context.</param>
         /// <param name="elementType">The element type of the resource set being read.</param>
         /// <returns>The deserialized resource set object.</returns>
-        public virtual IEnumerable ReadResourceSet(ODataResourceSetWrapper resourceSet, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
+        public virtual IEnumerable ReadDeltaResourceSet(ODataResourceSetWrapper resourceSet, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
         {
             ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(elementType);
             if (deserializer == null)
@@ -158,10 +128,115 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName()));
             }
 
+            Collection<object> coll = new Collection<object>();
+
             foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
             {
-                yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
+                if (resourceWrapper.IsDeleted)
+                {
+                    EdmDeltaDeletedEntityObject deletedEntity = DeSerializeDeletedEntity(readContext, resourceWrapper);
+                    coll.Add(deletedEntity);
+                }
+                else
+                {
+                    object changedEntity = deserializer.ReadInline(resourceWrapper, elementType, readContext);
+                    coll.Add(changedEntity);
+                }
+                
             }
+
+            foreach (ODataDeltaLinkWrapper deltaLinkWrapper in resourceSet.DeltaLinks)
+            {
+                IEdmDeltaLinkBase deltaLink = DeserializeDeltaLink(readContext, deltaLinkWrapper);
+                coll.Add(deltaLink);
+            }
+
+            return coll;
+        }
+
+        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeserializerContext readContext, ODataDeltaLinkWrapper deltaLinkWrapper)
+        {
+            ODataDeltaLinkBase deltalink = deltaLinkWrapper.DeltaLink;
+
+            if (deltalink == null)
+            {
+                throw new ODataException("Deleted link not present");
+            }
+
+            IEdmModel model = readContext.Model;
+
+            if (model == null)
+            {
+                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+            }
+
+            IEdmStructuredType actualType = model.FindType(deltalink.TypeAnnotation.TypeName) as IEdmStructuredType;
+            if (actualType == null)
+            {
+                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, deltalink.TypeAnnotation.TypeName));
+            }
+
+            if (actualType.IsAbstract)
+            {
+                string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, deltalink.TypeAnnotation.TypeName);
+                throw new ODataException(message);
+            }
+
+            IEdmEntityType actualEntityType = actualType as IEdmEntityType;
+
+            IEdmDeltaLinkBase edmDeltaLink;
+            if (deltaLinkWrapper.IsDeleted)
+            {
+                edmDeltaLink = new EdmDeltaDeletedLink(actualEntityType);
+            }
+            else
+            {
+                edmDeltaLink = new EdmDeltaLink(actualEntityType);
+            }
+            
+            edmDeltaLink.Source = deltalink.Source;
+            edmDeltaLink.Target = deltalink.Target;
+            edmDeltaLink.Relationship = deltalink.Relationship;
+
+            return edmDeltaLink;
+        }
+
+        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeserializerContext readContext, ODataResourceWrapper resourceWrapper)
+        {
+            ODataDeletedResource deletedResource = resourceWrapper.Resource as ODataDeletedResource;
+
+            if (deletedResource == null)
+            {
+                throw new ODataException("Deleted resource not present");
+            }
+
+            IEdmModel model = readContext.Model;
+
+            if (model == null)
+            {
+                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
+            }
+
+            IEdmStructuredType actualType = model.FindType(resourceWrapper.Resource.TypeName) as IEdmStructuredType;
+            if (actualType == null)
+            {
+                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.Resource.TypeName));
+            }
+
+            if (actualType.IsAbstract)
+            {
+                string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.Resource.TypeName);
+                throw new ODataException(message);
+            }
+
+            IEdmEntityType actualEntityType = actualType as IEdmEntityType;
+
+            EdmDeltaDeletedEntityObject deletedEntity = new EdmDeltaDeletedEntityObject(actualEntityType);
+
+            deletedEntity.Id = deletedResource.Id.ToString();
+            deletedEntity.Reason = deletedResource.Reason.Value;
+
+            return deletedEntity;
         }
     }
 }

@@ -413,7 +413,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 }
                 
             }
-             
+
             string content = JsonConvert.SerializeObject(data);
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -504,7 +504,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             _addresses = addresses.ToList();
             Orders = orders.ToList();
         }
-                
+
         public int Id { get; set; }
 
         private string _name = null;
@@ -515,7 +515,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         public int Age { get; private set; }
-                
+
         public int FathersAge { get; set; }
         public ICollection<DeltaOrder> Orders { get; private set; }
 

@@ -41,8 +41,10 @@ namespace Microsoft.AspNet.OData
         private Type _structuredType;
 
         private PropertyInfo _dynamicDictionaryPropertyinfo;
+        private PropertyInfo _instanceAnnotationsPropertyInfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
+        private IODataInstanceAnnotationContainer _instanceAnnotationCache;
         private IEdmTypeReference _edmType;
 
         /// <summary>
@@ -120,11 +122,32 @@ namespace Microsoft.AspNet.OData
         /// <param name="edmType">Edm type of the TStructuralType</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
             PropertyInfo dynamicDictionaryPropertyInfo, IEdmTypeReference edmType)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, edmType, instanceAnnotationsPropertyInfo: null)
+        {
+         
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        /// <param name="edmType">Edm type of the TStructuralType</param>
+        /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
+            PropertyInfo dynamicDictionaryPropertyInfo, IEdmTypeReference edmType, PropertyInfo instanceAnnotationsPropertyInfo)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(structuralType);
             InitializeProperties(updatableProperties);
             _edmType = edmType;
+            TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
+            _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
         }
 
         /// <inheritdoc/>
@@ -147,12 +170,10 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public EdmDeltaEntityKind DeltaKind { get; set; }
 
-
         /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
+        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
 
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
 
         /// <inheritdoc/>
         public override void Clear()
@@ -166,6 +187,21 @@ namespace Microsoft.AspNet.OData
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw Error.ArgumentNull("name");
+            }
+
+            if (_instanceAnnotationsPropertyInfo != null)
+            {                
+                if (name == _instanceAnnotationsPropertyInfo.Name)
+                {
+                    IODataInstanceAnnotationContainer annotationValue = value as IODataInstanceAnnotationContainer;
+                    if (_instanceAnnotationCache == null && annotationValue != null)
+                    {
+                        _instanceAnnotationCache =
+                            GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, annotationValue, create: true);
+                    }
+                                        
+                    return true;
+                }
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -202,6 +238,24 @@ namespace Microsoft.AspNet.OData
             if (name == null)
             {
                 throw Error.ArgumentNull("name");
+            }
+
+            if (_instanceAnnotationsPropertyInfo != null)
+            {
+                if (name == _instanceAnnotationsPropertyInfo.Name)
+                {
+                    if (_instanceAnnotationCache == null)
+                    {
+                        _instanceAnnotationCache =
+                            GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, null,create: false);
+                    }
+
+                    if(_instanceAnnotationCache != null)
+                    {
+                        value = _instanceAnnotationCache;
+                        return true;
+                    }                    
+                }
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -383,22 +437,15 @@ namespace Microsoft.AspNet.OData
                 else
                 {
                     //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta                     
-                    if (deltaNestedResource is EdmChangedObjectCollection)
-                    {
-                        deltaNestedResource.CopyChangedValues(originalNestedResource);
-                    }
-                    else
-                    {
-                        //Recursively patch the subtree.
-                        bool isDeltaType = TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
-                        Contract.Assert(isDeltaType, nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
+                       
+                    //Recursively patch the subtree.
+                    bool isDeltaType = deltaNestedResource is EdmChangedObjectCollection || TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
+                    Contract.Assert(isDeltaType, nestedResourceName + "should be EdmChangedObjectCollection, or Delta<T> with a corresponding type <T>, but is not.");
 
-                        deltaNestedResource.CopyChangedValues(originalNestedResource);
-                    }
+                    deltaNestedResource.CopyChangedValues(originalNestedResource);                    
                 }
             }
         }
-
 
         /// <summary>
         /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />)
@@ -478,6 +525,36 @@ namespace Microsoft.AspNet.OData
                 }
             }
         }
+
+        private static IODataInstanceAnnotationContainer GetInstanceannotationContainer(PropertyInfo propertyInfo,
+        TStructuralType entity, IODataInstanceAnnotationContainer value, bool create)
+        {
+            if (entity == null)
+            {
+                throw Error.ArgumentNull("entity");
+            }
+
+            object propertyValue = propertyInfo.GetValue(entity);
+            if (propertyValue != null)
+            {
+                return (IODataInstanceAnnotationContainer)propertyValue;
+            }
+
+            if (create)
+            {
+                if (!propertyInfo.CanWrite)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotSetAnnotationPropertyDictionary, propertyInfo.Name,
+                            entity.GetType().FullName);
+                }                
+
+                propertyInfo.SetValue(entity, value);
+                return value;
+            }
+
+            return null;
+        }
+
 
         private static IDictionary<string, object> GetDynamicPropertyDictionary(PropertyInfo propertyInfo,
             TStructuralType entity, bool create)
@@ -565,12 +642,12 @@ namespace Microsoft.AspNet.OData
                     .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
-            
+
+     
             if (updatableProperties != null)
             {
                 _updatableProperties = new HashSet<string>(updatableProperties);
                 _updatableProperties.IntersectWith(_allProperties.Keys);
-                _updatableProperties.Add("InstanceAnnotations");
             }
             else
             {
@@ -750,9 +827,9 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// GetEdmType method in herited from IEdmObject , not implemented
+        /// GetEdmType method in herited from IEdmObject
         /// </summary>
-        /// <returns>Returns the EdmType of the Type</returns>
+        /// <returns>Returns the EdmType of the Type, which could be null as well</returns>
         Microsoft.OData.Edm.IEdmTypeReference IEdmObject.GetEdmType()
         {
             return _edmType;

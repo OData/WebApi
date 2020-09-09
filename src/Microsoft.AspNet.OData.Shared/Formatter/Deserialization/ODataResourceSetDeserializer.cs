@@ -111,11 +111,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {
                 IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;
-                
-                Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
-                Type changedObjCollType = typeof(EdmChangedObjectCollection<>).MakeGenericType(type);
+                EdmChangedObjectCollection changedObjCollection;
 
-                EdmChangedObjectCollection changedObjCollection = Activator.CreateInstance(changedObjCollType, actualType) as EdmChangedObjectCollection;
+                if (readContext.IsUntyped)
+                {
+                    changedObjCollection = new EdmChangedObjectCollection(actualType);
+                }
+                else
+                {
+                    Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+                    Type changedObjCollType = typeof(EdmChangedObjectCollection<>).MakeGenericType(type);
+
+                    changedObjCollection = Activator.CreateInstance(changedObjCollType, actualType) as EdmChangedObjectCollection;
+                }
 
                 foreach (IEdmChangedObject changedObject in result)
                 {                
@@ -192,117 +200,17 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                     if(resourceWrapper != null)
                     {
-                        ODataDeletedResource deletedResource = resourceWrapper.ResourceBase as ODataDeletedResource;
-
-                        if (deletedResource != null)
-                        {
-                            yield return DeSerializeDeletedEntity(deletedResource, readContext, clrType);
-                        }
-                        else
-                        {
-                            yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
-                        }
+                        yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);                     
                     }
                     else
                     {
                         ODataDeltaLinkWrapper deltaLinkWrapper = odataItemBase as ODataDeltaLinkWrapper;
 
-                        Contract.Assert(deltaLinkWrapper != null, "ODataDeltaLinkWrapper should not be null");
-
-                        yield return DeserializeDeltaLink(deltaLinkWrapper, resourceSet.ResourceSetBase.TypeName, readContext);
+                        throw Error.NotSupported("DeltaLink not supported");
                     }                    
                 }
             }
         }
 
-
-        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeltaLinkWrapper deltaLinkWrapper, string typeName, ODataDeserializerContext readContext)
-        {
-            ODataDeltaLinkBase deltalink = deltaLinkWrapper.DeltaLink;
-
-            Contract.Assert(deltalink != null, "ODataDeltaLink should not be null");
-
-            IEdmModel model = readContext.Model;
-                
-            if (model == null)
-            {
-                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
-            }
-
-            IEdmEntityType actualType = model.FindType(typeName) as IEdmEntityType;
-            if (actualType == null)
-            {
-                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
-            }
-
-            if (actualType.IsAbstract)
-            {
-                string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, deltalink.TypeAnnotation.TypeName);
-                throw new ODataException(message);
-            }
-                        
-
-            IEdmDeltaLinkBase edmDeltaLink;
-            ODataDeltaDeletedLink deletedLink = deltaLinkWrapper.DeltaLink as ODataDeltaDeletedLink;
-            if (deletedLink != null)
-            {
-                edmDeltaLink = new EdmDeltaDeletedLink(actualType);
-            }
-            else
-            {
-                edmDeltaLink = new EdmDeltaLink(actualType);
-            }
-
-            edmDeltaLink.Source = deltalink.Source;
-            edmDeltaLink.Target = deltalink.Target;
-            edmDeltaLink.Relationship = deltalink.Relationship;
-
-            return edmDeltaLink;
-        }
-
-        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, ODataDeserializerContext readContext, Type clrType)
-        {
-            Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
-
-            IEdmModel model = readContext.Model;
-
-            if (model == null)
-            {
-                throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
-            }
-
-            string typeName = deletedResource.TypeName;
-
-            IEdmEntityType actualType = model.FindType(typeName) as IEdmEntityType;
-            if (actualType == null)
-            {
-                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
-            }
-          
-            if (actualType.IsAbstract)
-            {
-                string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, typeName);
-                throw new ODataException(message);
-            }
-
-            Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(clrType);
-
-            EdmDeltaDeletedEntityObject deletedEntity = Activator.CreateInstance(type, actualType) as EdmDeltaDeletedEntityObject;
-
-            deletedEntity.Id = deletedResource.Id == null? null : deletedResource.Id.ToString();
-            deletedEntity.Reason = deletedResource.Reason.Value;
-
-            SetProperties(deletedResource, deletedEntity);
-
-            return deletedEntity;
-        }
-
-        private static void SetProperties(ODataDeletedResource deletedResource, EdmDeltaDeletedEntityObject deletedEntity)
-        {
-            foreach (ODataProperty property in deletedResource.Properties)
-            {
-                deletedEntity.TrySetPropertyValue(property.Name, property.Value);
-            }
-        }
     }
 }

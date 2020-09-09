@@ -9,6 +9,6 @@ namespace Microsoft.AspNet.OData
     /// <typeparam name="TStructuralType">Generic Type for changed object</typeparam>
     public interface IEdmChangedObject<TStructuralType> : IEdmChangedObject
     {        
-        
+
     }
 }

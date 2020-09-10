@@ -47,5 +47,10 @@ namespace Microsoft.AspNet.OData
         /// "Head"
         /// </summary>
         Head,
+        
+        /// <summary>
+        /// "Options"
+        /// </summary>
+        Options
     }
 }

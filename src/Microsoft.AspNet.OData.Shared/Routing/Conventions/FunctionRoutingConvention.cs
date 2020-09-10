@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext,
             IWebApiActionMap actionMap)
         {
-            if (ODataRequestMethod.Get == controllerContext.Request.Method)
+            if (ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
             {
                 string actionName = null;
                 OperationSegment function = null;

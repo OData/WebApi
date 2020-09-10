@@ -19,7 +19,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             if (odataPath.PathTemplate == "~/singleton")
             {
                 SingletonSegment singletonSegment = (SingletonSegment)odataPath.Segments[0];
-                string httpMethodName = GetActionNamePrefix(controllerContext.Request.Method);
+                string httpMethodName = GetActionNamePrefix(controllerContext.Request.GetRequestMethodOrPreflightMethod());
 
                 if (httpMethodName != null)
                 {
@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 SingletonSegment singletonSegment = (SingletonSegment)odataPath.Segments[0];
                 IEdmEntityType entityType = (IEdmEntityType)odataPath.EdmType;
-                string httpMethodName = GetActionNamePrefix(controllerContext.Request.Method);
+                string httpMethodName = GetActionNamePrefix(controllerContext.Request.GetRequestMethodOrPreflightMethod());
 
                 if (httpMethodName != null)
                 {

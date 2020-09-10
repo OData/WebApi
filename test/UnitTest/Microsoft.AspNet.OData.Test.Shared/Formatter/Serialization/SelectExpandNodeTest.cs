@@ -39,18 +39,32 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         [Theory]
         [InlineData("ID,ID", "ID")]
         [InlineData("NS.upgrade,NS.upgrade", "NS.upgrade")]
-        public void DuplicatedSelectPathInOneDollarSelectThrows(string select, string error)
+        public void DuplicatedSelectPathInOneDollarSelectWorksAsSingle(string select, string expect)
         {
             // Arrange
             ODataQueryOptionParser parser = new ODataQueryOptionParser(_model.Model, _model.Customer, _model.Customers,
                 new Dictionary<string, string> { { "$select", select } });
 
             // Act
-            Action test = () => parser.ParseSelectAndExpand();
+            SelectExpandClause selectAndExpand = parser.ParseSelectAndExpand();
 
             // Assert
-            ExceptionAssert.Throws<ODataException>(test,
-                String.Format("Found mutliple select terms with same select path '{0}' at one $select, please combine them together.", error));
+            Assert.NotNull(selectAndExpand);
+            Assert.False(selectAndExpand.AllSelected);
+            SelectItem selectItem = Assert.Single(selectAndExpand.SelectedItems);
+            PathSelectItem pathSelectItem = Assert.IsType<PathSelectItem>(selectItem);
+            ODataPathSegment pathSegment = Assert.Single(pathSelectItem.SelectedPath);
+
+            if (expect == "ID")
+            {
+                PropertySegment propertySegment = Assert.IsType<PropertySegment>(pathSegment);
+                Assert.Equal(expect, propertySegment.Identifier);
+            }
+            else
+            {
+                OperationSegment operationSegment = Assert.IsType<OperationSegment>(pathSegment);
+                Assert.Equal(expect, operationSegment.Operations.Single().FullName());
+            }
         }
 
         [Theory]

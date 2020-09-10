@@ -21,7 +21,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            ODataRequestMethod requestMethod = controllerContext.Request.Method;
+            ODataRequestMethod requestMethod = controllerContext.Request.GetRequestMethodOrPreflightMethod();
 
             if (!IsSupportedRequestMethod(requestMethod))
             {

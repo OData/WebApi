@@ -21,18 +21,23 @@ namespace Microsoft.AspNet.OData.Query
 
             try
             {
-                byte[] bytes = new byte[requestStream.Length];
-
-                await requestStream.ReadAsync(bytes, 0, bytes.Length);
-                string content = Encoding.UTF8.GetString(bytes);
-
-                // Based on OData OASIS Standard, the request body is expected to contain the query portion of the URL 
-                // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed) 
-                // and MUST follow the expected syntax rules
-                if (!string.IsNullOrWhiteSpace(content))
+                using (var reader = new StreamReader(
+                    requestStream,
+                    encoding: Encoding.UTF8,
+                    detectEncodingFromByteOrderMarks: false,
+                    bufferSize: 1024,
+                    leaveOpen: true))
                 {
-                    // Query string is expected to start with ?
-                    queryString = content[0] == '?' ? content : '?' + content;
+                    string content = await reader.ReadToEndAsync();
+
+                    // Based on OData OASIS Standard, the request body is expected to contain the query portion of the URL
+                    // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed)
+                    // and MUST follow the expected syntax rules
+                    if (!string.IsNullOrWhiteSpace(content))
+                    {
+                        // Query string is expected to start with ?
+                        queryString = content[0] == '?' ? content : '?' + content;
+                    }
                 }
             }
             catch

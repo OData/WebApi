@@ -74,11 +74,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
         {
             ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
 
-            EntitySetConfiguration<DollarQueryCustomer> dollarQueryCustomers =
-                builder.EntitySet<DollarQueryCustomer>("DollarQueryCustomers");
-
-            EntitySetConfiguration<DollarQueryOrder> dollarQueryOrders =
-                builder.EntitySet<DollarQueryOrder>("DollarQueryOrders");
+            builder.EntitySet<DollarQueryCustomer>("DollarQueryCustomers");
+            builder.EntitySet<DollarQueryOrder>("DollarQueryOrders");
 
             return builder.GetEdmModel();
         }

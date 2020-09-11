@@ -75,6 +75,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ODataQueryOptionsParserFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\OrderByCountNode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParser.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\SkipTokenHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\DynamicTypeWrapperConverter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainer.generated.cs">

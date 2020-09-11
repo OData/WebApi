@@ -255,7 +255,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => EnsureAttributeMapping(convention, configuration),
                 "The path template 'Customers' on the action 'GetCustomers' in controller 'TestOData' is not a valid OData path template. " +
-                "The operation import overloads matching 'Customers' are invalid. This is most likely an error in the IEdmModel.");
+                "Resource not found for the segment 'Customers'.");
         }
 
         [Fact]

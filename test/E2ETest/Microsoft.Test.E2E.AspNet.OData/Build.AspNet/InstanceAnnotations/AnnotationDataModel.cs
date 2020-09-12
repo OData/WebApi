@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Builder;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace NS
         public Gender Gender { get; set; }
         public AccessLevel AccessLevel { get; set; }
         public FavoriteSports FavoriteSports { get; set; }
-        public IDictionary<string,IDictionary<string,object>> InstanceAnnotations { get; set; }
+        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
     [Flags]

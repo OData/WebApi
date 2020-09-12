@@ -72,12 +72,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <inheritdoc/>
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType, ODataSerializerContext writeContext)
         {
-            if (!expectedType.IsComplex())
+            if (!expectedType.IsStructured())
             {
                 throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataResourceValueSerializer), expectedType.FullName());
             }
 
-            ODataResourceValue value = CreateODataComplexResourceValue(graph, expectedType.AsComplex(), writeContext);
+            ODataResourceValue value = CreateODataResourceValue(graph, expectedType.AsStructured(), writeContext);
             if (value == null)
             {
                 return new ODataNullValue();
@@ -88,41 +88,37 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1804:RemoveUnusedLocals", MessageId = "edmTypeSerializer")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
-        private ODataResourceValue CreateODataComplexResourceValue(object graph, IEdmComplexTypeReference expectedType, ODataSerializerContext writeContext)
+        private ODataResourceValue CreateODataResourceValue(object graph, IEdmStructuredTypeReference expectedType, ODataSerializerContext writeContext)
         {
             ODataResourceValue resourceValue = new ODataResourceValue { TypeName = expectedType.FullName() };
             List<ODataProperty> properties = new List<ODataProperty>();
 
             foreach (PropertyInfo property in graph.GetType().GetProperties())
-            {
-                if (property != null)
+            {                
+                object propertyValue = property.GetValue(graph);
+
+                if (propertyValue != null)
                 {
-                    object propertyValue = property.GetValue(graph);
+                    IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
+                        property.GetType());
 
-                    if (propertyValue != null)
+                    ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+
+                    if (edmTypeSerializer != null)
                     {
-                        IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
-                         property.GetType());
+                        ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
 
-                        ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-
-                        if (edmTypeSerializer != null)
+                        if (odataValue != null)
                         {
-                            ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
-
-                            if (odataValue != null)
-                            {
-                                properties.Add(new ODataProperty { Name = property.Name, Value = odataValue });
-                            }
+                            properties.Add(new ODataProperty { Name = property.Name, Value = odataValue });
                         }
                     }
-                }
+                }                
             }
 
             resourceValue.Properties = properties;
 
             return resourceValue;
         }
-
     }
 }

@@ -3029,8 +3029,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
                 Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "EntityTypeWithAnnotation"));
             Assert.Single(entityType.Properties());
 
-            InstanceAnnotationDictionaryAnnotation instanceAnnoteDict =
-                model.GetAnnotationValue<InstanceAnnotationDictionaryAnnotation>(entityType);
+            InstanceAnnotationContainerAnnotation instanceAnnoteDict =
+                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(entityType);
 
             Assert.Equal("InstanceAnnotations", instanceAnnoteDict.PropertyInfo.Name);
         }
@@ -3056,11 +3056,11 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
                 Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "DerivedEntityTypeWithAnnotation"));
             Assert.Equal(2, derivedEntityType.Properties().Count());
 
-            InstanceAnnotationDictionaryAnnotation basePropertyAnnotation =
-                model.GetAnnotationValue<InstanceAnnotationDictionaryAnnotation>(baseEntityType);
+            InstanceAnnotationContainerAnnotation basePropertyAnnotation =
+                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(baseEntityType);
 
-            InstanceAnnotationDictionaryAnnotation derivedPropertyAnnotation =
-                model.GetAnnotationValue<InstanceAnnotationDictionaryAnnotation>(derivedEntityType);
+            InstanceAnnotationContainerAnnotation derivedPropertyAnnotation =
+                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(derivedEntityType);
 
             Assert.Equal(basePropertyAnnotation.PropertyInfo.Name, derivedPropertyAnnotation.PropertyInfo.Name);
         }
@@ -3677,7 +3677,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
     public class EntityTypeWithAnnotation
     {
         public int Id { get; set; }
-        public IDictionary<string,IDictionary<string, object> > InstanceAnnotations { get; set; }
+        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
     public class DerivedEntityTypeWithAnnotation : EntityTypeWithAnnotation

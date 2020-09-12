@@ -65,9 +65,9 @@ namespace Microsoft.AspNet.OData.Test.Builder
             StructuralTypeConfiguration configuration = mock.Object;
 
             // Act & Assert
-            ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationDictionary(property),
+            ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationContainer(property),
                 "propertyInfo",
-                string.Format("The argument must be of type '{0}'.", "IDictionary<string, IDictionary<string, object>>"));
+                string.Format("The argument must be of type '{0}'.", "IODataInstanceAnnotationContainer"));
         }
 
         /// <summary>

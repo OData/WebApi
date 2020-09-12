@@ -974,11 +974,11 @@ public enum Microsoft.AspNet.OData.Builder.OperationKind : int {
 }
 
 public enum Microsoft.AspNet.OData.Builder.PropertyKind : int {
-	AnnotationDictionary = 6
 	Collection = 2
 	Complex = 1
 	Dynamic = 5
 	Enum = 4
+	InstanceAnnotations = 6
 	Navigation = 3
 	Primitive = 0
 }
@@ -990,6 +990,15 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 	ODataModelBuilder ModelBuilder  { public abstract get; }
 	string Name  { public abstract get; }
 	string Namespace  { public abstract get; }
+}
+
+public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
+	void AddAnnotation (string annotationName, object value)
+	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllAnnotations ()
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotation (string propertyName)
+	object GetAnnotation (string annotationName)
+	object GetPropertyAnnotation (string propertyName, string annotationName)
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfiguration {
@@ -1197,7 +1206,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
-	public virtual void AddInstanceAnnotationDictionary (System.Reflection.PropertyInfo propertyInfo)
+	public virtual void AddInstanceAnnotationContainer (System.Reflection.PropertyInfo propertyInfo)
 	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
@@ -1610,8 +1619,8 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 	public FunctionConfiguration SetBindingParameter (string name, IEdmTypeConfiguration bindingParameterType)
 }
 
-public class Microsoft.AspNet.OData.Builder.InstanceAnnotationDictionaryAnnotation {
-	public InstanceAnnotationDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
+public class Microsoft.AspNet.OData.Builder.InstanceAnnotationContainerAnnotation {
+	public InstanceAnnotationContainerAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
 	System.Reflection.PropertyInfo PropertyInfo  { public get; public set; }
 }
@@ -1708,6 +1717,17 @@ public class Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder : ODataM
 	public ODataConventionModelBuilder Ignore ()
 	public ODataConventionModelBuilder Ignore (System.Type[] types)
 	public virtual void ValidateModel (Microsoft.OData.Edm.IEdmModel model)
+}
+
+public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
+	public ODataInstanceAnnotationContainer ()
+
+	public virtual void AddAnnotation (string annotationName, object value)
+	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllAnnotations ()
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotation (string propertyName)
+	public virtual object GetAnnotation (string annotationName)
+	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
 }
 
 public class Microsoft.AspNet.OData.Builder.ODataModelBuilder {

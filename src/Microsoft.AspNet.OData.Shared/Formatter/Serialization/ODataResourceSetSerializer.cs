@@ -361,7 +361,26 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
             Uri navigationLink =
                 linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-            Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
+
+            Uri nestedNextLink = null;
+
+            // In Contained Navigation, we don't have navigation property binding,
+            // Hence we cannot get the NavigationLink from the NavigationLinkBuilder
+            if (navigationLink != null)
+            {
+                // Non-Contained navigation
+                nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
+            }
+            else
+            {
+                // Contained navigation
+                var idLinkBuilder = new NavigationSourceLinkBuilderAnnotation(sourceNavigationSource, writeContext.Model);
+                var idlink = idLinkBuilder.BuildIdLink(writeContext.ExpandedResource);
+
+                var link = idlink.ToString() + "/" + writeContext.ExpandedResource.NavigationSource.Name;
+                nestedNextLink = new Uri(link);
+            }
+
             SkipTokenHandler nextLinkGenerator = null;
             if (writeContext.QueryContext != null)
             {

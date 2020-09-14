@@ -717,8 +717,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                 actualCustomers.Select(enumModel => enumModel.Id));
         }
         [Theory]
-        [InlineData("Simple has null", typeof(ODataException))]
-        [InlineData("null has Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'", typeof(ODataException))]
+        [InlineData("Simple has null", typeof(NotSupportedException))]
+        [InlineData("null has Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'", typeof(NotSupportedException))]
         [InlineData("Id has Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum'First'", typeof(ODataException))]
         [InlineData("null has null", typeof(NotSupportedException))]
         [InlineData("Simple has 23", typeof(ODataException))]

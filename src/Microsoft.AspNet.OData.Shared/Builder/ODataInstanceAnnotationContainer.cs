@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <param name="value">Value of Annotation</param>
-        public void AddAnnotation(string annotationName, object value)
+        public void AddTypeAnnotation(string annotationName, object value)
         {
             SetInstanceAnnotation(string.Empty, annotationName, value);
         }
@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <returns>Get Annotation value for the given annotation</returns>
-        public object GetAnnotation(string annotationName)
+        public object GetTypeAnnotation(string annotationName)
         {
             return GetInstanceAnnotation(string.Empty, annotationName);
         }

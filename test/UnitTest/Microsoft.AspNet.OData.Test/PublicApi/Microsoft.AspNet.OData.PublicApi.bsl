@@ -941,12 +941,12 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 }
 
 public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
-	void AddAnnotation (string annotationName, object value)
 	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	void AddTypeAnnotation (string annotationName, object value)
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
-	object GetAnnotation (string annotationName)
 	object GetPropertyAnnotation (string propertyName, string annotationName)
+	object GetTypeAnnotation (string annotationName)
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfiguration {
@@ -1668,12 +1668,12 @@ public class Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder : ODataM
 public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
 	public ODataInstanceAnnotationContainer ()
 
-	public virtual void AddAnnotation (string annotationName, object value)
 	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	public virtual void AddTypeAnnotation (string annotationName, object value)
 	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
 	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
-	public virtual object GetAnnotation (string annotationName)
 	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
+	public virtual object GetTypeAnnotation (string annotationName)
 }
 
 public class Microsoft.AspNet.OData.Builder.ODataModelBuilder {

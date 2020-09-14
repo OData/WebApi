@@ -666,6 +666,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 IDictionary<string, object> clrAnnotations = instanceAnnotationContainer.GetAllTypeAnnotations();
 
+                if (resource.InstanceAnnotations == null)
+                {
+                    resource.InstanceAnnotations = new List<ODataInstanceAnnotation>();
+                }
+
                 if (clrAnnotations != null)
                 {
                     foreach (KeyValuePair<string, object> annotation in clrAnnotations)

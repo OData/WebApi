@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -357,28 +358,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize, object obj)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
-            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
-            NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
-            Uri navigationLink =
-                linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
             Uri nestedNextLink = null;
+            IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
 
             // In Contained Navigation, we don't have navigation property binding,
             // Hence we cannot get the NavigationLink from the NavigationLinkBuilder
-            if (navigationLink != null)
+            if (writeContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
             {
-                // Non-Contained navigation
-                nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
+                // Contained navigation.
+                var linkBuilder = new NavigationSourceLinkBuilderAnnotation(sourceNavigationSource, writeContext.Model);
+                var idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
+
+                var link = idlink.ToString() + "/" + writeContext.NavigationSource.Name;
+                nestedNextLink = new Uri(link);
             }
             else
             {
-                // Contained navigation
-                var idLinkBuilder = new NavigationSourceLinkBuilderAnnotation(sourceNavigationSource, writeContext.Model);
-                var idlink = idLinkBuilder.BuildIdLink(writeContext.ExpandedResource);
+                // Non-Contained navigation.
+                NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
+                Uri navigationLink =
+                    linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
 
-                var link = idlink.ToString() + "/" + writeContext.ExpandedResource.NavigationSource.Name;
-                nestedNextLink = new Uri(link);
+                nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
             }
 
             SkipTokenHandler nextLinkGenerator = null;

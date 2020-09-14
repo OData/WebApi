@@ -20,7 +20,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             employee.EnumProperty<Gender>(c => c.Gender);
             employee.EnumProperty<AccessLevel>(c => c.AccessLevel);
             employee.ComplexProperty<FavoriteSports>(c => c.FavoriteSports);
-            employee.HasInstanceAnnotations(c => c.InstanceAnnotations);
             employee.Namespace = "NS";
 
             var skill = builder.EnumType<Skill>();

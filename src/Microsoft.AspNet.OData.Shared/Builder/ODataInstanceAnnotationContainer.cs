@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// Get All Annotations from CLR Type
         /// </summary>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        public IDictionary<string, object> GetAllAnnotations()
+        public IDictionary<string, object> GetAllTypeAnnotations()
         {
             return GetAllInstanceAnnotations(string.Empty);
         }
@@ -76,7 +76,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="propertyName">Name of Property</param>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        public IDictionary<string, object> GetAllPropertyAnnotation(string propertyName)
+        public IDictionary<string, object> GetAllPropertyAnnotations(string propertyName)
         {
             return GetAllInstanceAnnotations(propertyName);
         }
@@ -90,25 +90,16 @@ namespace Microsoft.AspNet.OData.Builder
                 instanceAnnotations.Add(propertyName, annotationDictionary);
             }
 
-            if (annotationDictionary.ContainsKey(annotationName))
-            {
-                annotationDictionary[annotationName] = value;
-            }
-            else
-            {
-                annotationDictionary.Add(annotationName, value);
-            }            
+            annotationDictionary[annotationName] = value;
         }
-
-
 
         private object GetInstanceAnnotation(string propertyName, string annotationName)
         {
-            IDictionary<string, object> annotaionDictionary;
-            if (instanceAnnotations.TryGetValue(propertyName, out annotaionDictionary))
+            IDictionary<string, object> annotationDictionary;
+            if (instanceAnnotations.TryGetValue(propertyName, out annotationDictionary))
             {
                 object annotationValue;
-                if (annotaionDictionary.TryGetValue(annotationName, out annotationValue))
+                if (annotationDictionary.TryGetValue(annotationName, out annotationValue))
                 {
                     return annotationValue;
                 }
@@ -119,10 +110,10 @@ namespace Microsoft.AspNet.OData.Builder
 
         private IDictionary<string, object> GetAllInstanceAnnotations(string propertyName)
         {
-            IDictionary<string, object> annotaionDictionary;
-            if (instanceAnnotations.TryGetValue(propertyName, out annotaionDictionary))
+            IDictionary<string, object> annotationDictionary;
+            if (instanceAnnotations.TryGetValue(propertyName, out annotationDictionary))
             {
-                return annotaionDictionary;
+                return annotationDictionary;
             }
 
             return null;

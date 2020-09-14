@@ -943,8 +943,8 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
 	void AddAnnotation (string annotationName, object value)
 	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
-	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllAnnotations ()
-	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotation (string propertyName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
 	object GetAnnotation (string annotationName)
 	object GetPropertyAnnotation (string propertyName, string annotationName)
 }
@@ -1135,7 +1135,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Reflection.PropertyInfo]] IgnoredProperties  { public get; }
-	System.Reflection.PropertyInfo InstanceAnnotationsDictionary  { public get; }
+	System.Reflection.PropertyInfo InstanceAnnotationsContainer  { public get; }
 	System.Nullable`1[[System.Boolean]] IsAbstract  { public virtual get; public virtual set; }
 	bool IsOpen  { public get; }
 	Microsoft.OData.Edm.EdmTypeKind Kind  { public abstract get; }
@@ -1193,7 +1193,6 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
-	public void HasInstanceAnnotations (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
@@ -1214,13 +1213,13 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
@@ -1671,8 +1670,8 @@ public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : I
 
 	public virtual void AddAnnotation (string annotationName, object value)
 	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
-	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllAnnotations ()
-	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotation (string propertyName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
 	public virtual object GetAnnotation (string annotationName)
 	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
 }

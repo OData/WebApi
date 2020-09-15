@@ -81,22 +81,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
                     TargetMultiplicity = EdmMultiplicity.One
                 });
 
-            // Add contained navigation
-            // Reviews
-            EdmEntityType customerReview = new EdmEntityType("Default", "Review");
-            customerReview.AddKeys(customerReview.AddStructuralProperty("ID", EdmPrimitiveTypeKind.Int32));
-            customerReview.AddStructuralProperty("Comment", EdmPrimitiveTypeKind.String);
-            model.AddElement(customerReview);
-
-            EdmNavigationProperty orderLinesNavProp = customerType.AddUnidirectionalNavigation(
-                new EdmNavigationPropertyInfo
-                {
-                    Name = "Reviews",
-                    TargetMultiplicity = EdmMultiplicity.Many,
-                    Target = customerReview,
-                    ContainsTarget = true,
-                });
-
             // Add Entity set
             var container = new EdmEntityContainer("Default", "Container");
             var customerSet = container.AddEntitySet("Customers", customerType);

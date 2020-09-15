@@ -1764,7 +1764,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         {
             // Arrange
             ODataWriter mockWriter = new Mock<ODataWriter>().Object;
-            IEdmNavigationProperty ordersProperty = _customerSet.EntityType().DeclaredNavigationProperties().First();
+            IEdmNavigationProperty ordersProperty = _customerSet.EntityType().DeclaredNavigationProperties().Single();
             Mock<ODataEdmTypeSerializer> expandedItemSerializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.ResourceSet);
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
             serializerProvider.Setup(p => p.GetEdmTypeSerializer(ordersProperty.Type))

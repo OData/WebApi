@@ -471,20 +471,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <param name="request">The request.</param>
         internal static void TransformQueryRequest(this HttpRequest request)
         {
-            IServiceProvider requestContainer = request.GetRequestContainer();
-
-            // Fetch parsers available in the request container for parsing the query options in the request body
-            IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();
-            IODataQueryOptionsParser queryOptionsParser = queryOptionsParsers.FirstOrDefault(d => d.CanParse(request));
-
-            if (queryOptionsParser == null)
-            {
-                throw new ODataException(string.Format(
-                    CultureInfo.InvariantCulture,
-                    SRResources.CannotFindParserForRequestMediaType,
-                    request.ContentType));
-            }
-
+            // Fetch parser capable of parsing the query options in the request body
+            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionParser(request);
+            // Parse query options in request body
             string queryOptions = queryOptionsParser.ParseAsync(request.Body).Result;
 
             string requestPath = request.Path.Value;

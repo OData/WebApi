@@ -191,6 +191,8 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         AddKeyValues(anotherKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
                     }
                 }
+
+                IncrementKeyCount(routingConventionsStore);
             }
         }
 
@@ -340,6 +342,33 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 // Remove the type name of the ODataEnumValue and keep the value.
                 routeData[name] = enumValue.Value;
+            }
+
+            IncrementKeyCount(values);
+        }
+
+        public static void AddNavigationPropertyToRouteData(this IWebApiControllerContext controllerContext,
+            NavigationPropertyLinkSegment navigationLinkSegment)
+        {
+            controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
+            IncrementKeyCount(controllerContext.Request.Context.RoutingConventionsStore);
+        }
+
+        /// <summary>
+        /// Increments the number of keys, navigation properties and operation parameters.
+        /// This count is tracked by the <see cref="ODataRouteConstants.KeyCount"/> key
+        /// in the controller context route data.
+        /// </summary>
+        /// <param name="routingConventionsStore">Store where the key count is stored</param>
+        public static void IncrementKeyCount(IDictionary<string, object> routingConventionsStore)
+        {
+            if (routingConventionsStore.TryGetValue(ODataRouteConstants.KeyCount, out object count))
+            {
+                routingConventionsStore[ODataRouteConstants.KeyCount] = ((int)count) + 1;
+            }
+            else
+            {
+                routingConventionsStore[ODataRouteConstants.KeyCount] = 1;
             }
         }
 

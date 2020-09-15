@@ -2332,7 +2332,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Dictionary<string, object> routeData = new Dictionary<string, object>();
             Assert.True(odataPathTemplate.TryMatch(odataPath, routeData));
 
-            Assert.Equal(keyValues.OrderBy(k => k), routeData.Where(d => !d.Key.StartsWith(ODataParameterValue.ParameterValuePrefix))
+            Assert.Equal(keyValues.OrderBy(k => k),
+                routeData.Where(d => !d.Key.StartsWith(ODataParameterValue.ParameterValuePrefix) && d.Key != ODataRouteConstants.KeyCount)
                 .Select(d => d.Key + ":" + d.Value).OrderBy(d => d));
         }
 

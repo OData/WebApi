@@ -283,7 +283,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             if (string.IsNullOrEmpty(propertyName))
             {
-                instanceAnnotationContainer.AddTypeAnnotation(annotation.Name, annotationValue);
+                instanceAnnotationContainer.AddResourceAnnotation(annotation.Name, annotationValue);
             }
             else
             {
@@ -327,7 +327,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     {
                         propertyInfo.SetValue(resource, instanceAnnotationContainer);
                     }
-
                 }
                 catch(Exception ex)
                 {

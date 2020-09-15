@@ -15,7 +15,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <param name="value">Value of Annotation</param>
-        void AddTypeAnnotation(string annotationName, object value);
+        void AddResourceAnnotation(string annotationName, object value);
 
         /// <summary>
         /// Method to Add an Instance Annotation to a property
@@ -30,7 +30,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <returns>Get Annotation value for the given annotation</returns>
-        object GetTypeAnnotation(string annotationName);
+        object GetResourceAnnotation(string annotationName);
 
         /// <summary>
         /// Get an Instance Annotation from the Property
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// Get All Annotations from CLR Type
         /// </summary>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        IDictionary<string,object> GetAllTypeAnnotations();
+        IDictionary<string,object> GetAllResourceAnnotations();
 
         /// <summary>
         /// Get all Annotations for a Property

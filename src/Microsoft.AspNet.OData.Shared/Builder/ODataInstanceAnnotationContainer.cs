@@ -25,7 +25,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <param name="value">Value of Annotation</param>
-        public void AddTypeAnnotation(string annotationName, object value)
+        public void AddResourceAnnotation(string annotationName, object value)
         {
             SetInstanceAnnotation(string.Empty, annotationName, value);
         }
@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="annotationName">Name of Annotation</param>
         /// <returns>Get Annotation value for the given annotation</returns>
-        public object GetTypeAnnotation(string annotationName)
+        public object GetResourceAnnotation(string annotationName)
         {
             return GetInstanceAnnotation(string.Empty, annotationName);
         }
@@ -66,7 +66,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// Get All Annotations from CLR Type
         /// </summary>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        public IDictionary<string, object> GetAllTypeAnnotations()
+        public IDictionary<string, object> GetAllResourceAnnotations()
         {
             return GetAllInstanceAnnotations(string.Empty);
         }

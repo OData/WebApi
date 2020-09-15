@@ -77,7 +77,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            var controllers = new[] { typeof(AccountsController), typeof(AnonymousAccountController), typeof(MetadataController) };
+            var controllers = new[] { typeof(AccountsController), typeof(AnonymousAccountController), typeof(MetadataController), typeof(PaginatedAccountsController) };
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
@@ -540,6 +540,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                 Assert.Equal("Accounts(100)/PayinPIs(101)", (string)payinPI["@odata.id"]);
                 Assert.Equal("#Microsoft.Test.E2E.AspNet.OData.Containment.PaymentInstrument", (string)payinPI["@odata.type"]);
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of collection type.
+        public async Task QueryPaginatedPayinPIsFromAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, mode).ToLower();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/PayinPIs?$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var json = await response.Content.ReadAsObject<JObject>();
+            var nextlink = (string)json["@odata.nextLink"];
+            Assert.NotNull(nextlink);
+            Assert.Contains(serviceRootUri, nextlink);
         }
 
         [Theory]

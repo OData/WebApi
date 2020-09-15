@@ -9,6 +9,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
     {
         private IList<Account> accounts = null;
         private Account anonymousAccount = null;
+        private IList<Account> paginatedAccounts = null;
 
         public Account AnonymousAccount
         {
@@ -54,6 +55,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                     InitAccounts();
                 }
                 return accounts;
+            }
+        }
+
+        public IList<Account> PaginatedAccounts
+        {
+            get
+            {
+                if (paginatedAccounts == null)
+                {
+                    InitPaginatedAccounts();
+                }
+                return paginatedAccounts;
             }
         }
 
@@ -125,6 +138,48 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                         GiftCardID = 200,
                         GiftCardNO = "BBA1-2BBC",
                         Amount = 2000,
+                    },
+                },
+            };
+        }
+
+        private void InitPaginatedAccounts()
+        {
+            paginatedAccounts = new List<Account>()
+            {
+                new Account()
+                {
+                   AccountID = 100,
+                        Name="Name100",
+                   PayoutPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 100,
+                       FriendlyName = "Payout PI: Paypal",
+                   },
+                    PayinPIs = new List<PaymentInstrument>()
+                    {
+                        new PaymentInstrument()
+                        {
+                            PaymentInstrumentID = 101,
+                            FriendlyName = "101 first PI",
+                            Statement =
+                                new Statement()
+                                {
+                                    StatementID=1,
+                                    TransactionDescription="Physical Goods.",
+                                },
+                        },
+                        new PaymentInstrument()
+                        {
+                            PaymentInstrumentID = 102,
+                            FriendlyName = "102 second PI",
+                            Statement =
+                                new Statement()
+                                {
+                                    StatementID=101,
+                                    TransactionDescription="Physical Goods.",
+                                },
+                        },
                     },
                 },
             };

@@ -781,6 +781,21 @@
   <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
   </data>
+  <data name="MoreThanOneAnnotationPropertyContainerFound" xml:space="preserve">
+    <value>Found more than one Annotation property container in type '{0}'. Each open type must have at most one Annotation property container.</value>
+  </data>
+  <data name="AnnotationPropertyNameAlreadyUsedAsDeclaredPropertyName" xml:space="preserve">
+    <value>The name of Annotation property '{0}' was already used as the declared property name of open type '{1}'.</value>
+  </data>
+  <data name="DuplicateAnnotationPropertyNameFound" xml:space="preserve">
+    <value>Duplicate Annotation property name '{0}' found in open type '{1}'. Each Annotation property name must be unique.</value>
+  </data>
+  <data name="CannotSetAnnotationPropertyDictionary" xml:space="preserve">
+    <value>The Annotation dictionary property '{0}' of type '{1}' cannot be set. The Annotation property dictionary must have a setter.</value>
+  </data>
+  <data name="InvalidPropertyInfoForAnnotationPropertyAnnotation" xml:space="preserve">
+    <value>Type '{0}' is not supported as Annotation property annotation. Referenced property must be of type '{1}'.</value>
+  </data>
   <data name="RequestUriTooShortForODataPath" xml:space="preserve">
     <value>Request URI '{0}' too short to contain OData path '{1}'.</value>
   </data>
@@ -798,6 +813,12 @@
   </data>
   <data name="TypeOfDynamicPropertyNotSupported" xml:space="preserve">
     <value>The type '{0}' of dynamic property '{1}' is not supported.</value>
+  </data>
+  <data name="InstanceAnnotationCannotBeSerialized" xml:space="preserve">
+    <value>The instance annotation for '{0}' with Edm type '{1}' cannot be serialized.</value>
+  </data>
+  <data name="TypeOfInstanceAnnotationNotSupported" xml:space="preserve">
+    <value>The type '{0}' of instance annotation '{1}' is not supported.</value>
   </data>
   <data name="CannotReconfigEntityTypeAsComplexType" xml:space="preserve">
     <value>The entity type '{0}' cannot be configured as a complex type because the derived type '{1}' is already configured as an entity type.</value>

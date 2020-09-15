@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.Edm.Vocabularies;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
@@ -442,6 +443,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // Try to add the dynamic properties if the structural type is open.
             AppendDynamicProperties(resource, selectExpandNode, resourceContext);
 
+            // Try to add instance annotations
+            AppendInstanceAnnotations(resource, resourceContext);
+
             if (selectExpandNode.SelectedActions != null)
             {
                 IEnumerable<ODataAction> actions = CreateODataActions(selectExpandNode.SelectedActions, resourceContext);
@@ -519,7 +523,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             Contract.Assert(resource != null);
             Contract.Assert(selectExpandNode != null);
-            Contract.Assert(resourceContext != null);
+            Contract.Assert(resourceContext != null);  
 
             if (!resourceContext.StructuredType.IsOpen || // non-open type
                 (!selectExpandNode.SelectAllDynamicProperties && selectExpandNode.SelectedDynamicProperties == null))
@@ -632,6 +636,111 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 resource.Properties = resource.Properties.Concat(dynamicProperties);
             }
+        }
+
+        /// <summary>
+        /// Method to append InstanceAnnotations to the ODataResource and Property.
+        /// Instance annotations are annotations for a resource or a property and couldb be of contain a primitive, comple , enum or collection type 
+        /// These will be saved in to an Instance annotation dictionary
+        /// </summary>
+        /// <param name="resource">param for ODataResource</param>
+        /// <param name="resourceContext">param for ODataResourceContext</param>        
+        public virtual void AppendInstanceAnnotations(ODataResource resource, ResourceContext resourceContext)
+        {
+            IEdmStructuredType structuredType = resourceContext.StructuredType;
+            IEdmStructuredObject structuredObject = resourceContext.EdmObject;
+            PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
+                resourceContext.EdmModel);
+
+            object value;
+            
+            if (instanceAnnotationInfo == null || structuredObject == null ||
+                !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
+            {
+                return;
+            }
+
+            IODataInstanceAnnotationContainer instanceAnnotationContainer = value as IODataInstanceAnnotationContainer;
+
+            if (instanceAnnotationContainer != null)
+            {
+                IDictionary<string, object> clrAnnotations = instanceAnnotationContainer.GetAllTypeAnnotations();
+
+                if (clrAnnotations != null)
+                {
+                    foreach (KeyValuePair<string, object> annotation in clrAnnotations)
+                    {
+                        AddODataAnnotations(resource.InstanceAnnotations, resourceContext, annotation);
+                    }
+                }
+                                
+                foreach(ODataProperty property in resource.Properties)
+                {
+                    string propertyName = property.Name;
+
+                    if (property.InstanceAnnotations == null)
+                    {
+                        property.InstanceAnnotations = new List<ODataInstanceAnnotation>();
+                    }
+
+                    IDictionary<string, object> propertyAnnotations = instanceAnnotationContainer.GetAllPropertyAnnotations(propertyName);
+
+                    if (propertyAnnotations != null)
+                    {
+                        foreach (KeyValuePair<string, object> annotation in propertyAnnotations)
+                        {
+                            AddODataAnnotations(property.InstanceAnnotations, resourceContext, annotation);
+                        }
+                    }                    
+                } 
+            }
+        }
+
+        private void AddODataAnnotations(ICollection<ODataInstanceAnnotation> InstanceAnnotations, ResourceContext resourceContext, KeyValuePair<string, object> annotation)
+        {
+            ODataValue annotationValue = null;
+
+            if (annotation.Value != null)
+            {
+                IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
+                                            annotation.Value.GetType());
+
+                ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
+
+                if (edmTypeSerializer != null)
+                {
+                    annotationValue = edmTypeSerializer.CreateODataValue(annotation.Value, edmTypeReference, resourceContext.SerializerContext);
+                }
+            }
+            else
+            {
+                annotationValue = new ODataNullValue();
+            }
+
+            if (annotationValue != null)
+            {
+                InstanceAnnotations.Add(new ODataInstanceAnnotation(annotation.Key, annotationValue));               
+            }            
+        }
+
+        private ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmTypeReference)
+        {
+            ODataEdmTypeSerializer edmTypeSerializer;
+           
+            if (edmTypeReference.IsCollection())
+            {
+                edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
+            }
+            else if (edmTypeReference.IsStructured())
+            {
+                edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
+            }           
+            else
+            {
+                edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+            }
+
+            return edmTypeSerializer;
         }
 
         /// <summary>

@@ -12,15 +12,15 @@
     },
     Products:
     [
-        {
-            "ID":1,
-            "Name":"Milk",
-            "Description":"Low fat milk",
-            "ReleaseDate":"1995-10-01T00:00:00z",
-            "DiscontinuedDate":null,
-            "Rating":3,
-            "Price":3.5
-        },
+      {
+        "ID": 1,
+        "Name": "Milk",
+        "Description": "Low fat milk",
+        "ReleaseDate": "1995-10-01T00:00:00z",
+        "DiscontinuedDate": "2005-10-03T00:00:00z",
+        "Rating": 3,
+        "Price": 3.5
+      },
         {
             "ID":2,
             "Name":"soda",

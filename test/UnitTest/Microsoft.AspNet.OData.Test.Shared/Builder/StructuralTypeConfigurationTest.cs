@@ -56,6 +56,20 @@ namespace Microsoft.AspNet.OData.Test.Builder
                 string.Format("The argument must be of type '{0}'.", "IDictionary<string, object>"));
         }
 
+        [Fact]
+        public void AddInstanceAnnotationDictionary_ThrowsIfTypeIsNotDictionary()
+        {
+            // Arrange
+            MockPropertyInfo property = new MockPropertyInfo(typeof(Int32), "Test");
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationContainer(property),
+                "propertyInfo",
+                string.Format("The argument must be of type '{0}'.", "IODataInstanceAnnotationContainer"));
+        }
+
         /// <summary>
         /// Tests the namespace assignment logic to ensure that user assigned namespaces are honored during registration.
         /// </summary>

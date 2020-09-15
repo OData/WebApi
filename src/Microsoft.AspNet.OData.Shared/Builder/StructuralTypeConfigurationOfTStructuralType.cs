@@ -359,6 +359,7 @@ namespace Microsoft.AspNet.OData.Builder
             _configuration.AddDynamicPropertyDictionary(propertyInfo);
         }
 
+  
         /// <summary>
         /// Configures a many relationship from this structural type.
         /// </summary>

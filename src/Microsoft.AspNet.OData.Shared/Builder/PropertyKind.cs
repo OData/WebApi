@@ -36,6 +36,12 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Represents a dynamic property dictionary for an open type.
         /// </summary>
-        Dynamic = 5
+        Dynamic = 5,
+
+        /// <summary>
+        /// Represents a instance annotation for a CLR type.
+        /// </summary>
+        InstanceAnnotations = 6
     }
 }
+

@@ -1954,6 +1954,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         {
                             value = clrMember;
                         }
+                        else
+                        {
+                            throw new ODataException(Error.Format(SRResources.CannotGetEnumClrMember, enumMember.Name));
+                        }
                     }
                     else
                     {

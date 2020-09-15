@@ -48,22 +48,13 @@ namespace Microsoft.AspNet.OData.Routing
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
                     string oDataPath = oDataPathValue as string;
-                    Func<IServiceProvider> requestContainerFactory = () =>
-                    {
-                        // Delegate is reused. We need to ensure only one request container is created
-                        object requestContainer;
-                        if (request.Properties.TryGetValue(Extensions.HttpRequestMessageExtensions.RequestContainerKey, out requestContainer))
-                        {
-                            return (IServiceProvider)requestContainer;
-                        }
-
-                        return request.CreateRequestContainer(RouteName);
-                    };
+                    // Create request container
+                    request.CreateRequestContainer(RouteName);
 
                     // Check whether the request is a POST targeted at a resource path ending in /$query
                     if (request.IsQueryRequest(oDataPath))
                     {
-                        request.TransformQueryRequest(requestContainerFactory);
+                        request.TransformQueryRequest();
 
                         oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
                         values[ODataRouteConstants.ODataPath] = oDataPath;
@@ -72,7 +63,7 @@ namespace Microsoft.AspNet.OData.Routing
                     string requestLeftPart = request.RequestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.RequestUri.Query;
 
-                    path = GetODataPath(oDataPath, requestLeftPart, queryString, requestContainerFactory);
+                    path = GetODataPath(oDataPath, requestLeftPart, queryString, () => request.GetRequestContainer());
                 }
 
                 if (path != null)

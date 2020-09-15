@@ -429,15 +429,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// The query options are parsed from the request body and appended to the request URL.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="requestContainerFactory">Request container factory.</param>
-        internal static void TransformQueryRequest(this HttpRequestMessage request, Func<IServiceProvider> requestContainerFactory)
+        internal static void TransformQueryRequest(this HttpRequestMessage request)
         {
-            if (requestContainerFactory == null)
-            {
-                throw Error.ArgumentNull("requestContainerFactory");
-            }
-
-            IServiceProvider requestContainer = requestContainerFactory();
+            IServiceProvider requestContainer = request.GetRequestContainer();
 
             // Fetch parsers available in the request container for parsing the query options in the request body
             IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();

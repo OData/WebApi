@@ -643,8 +643,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Instance annotations are annotations for a resource or a property and couldb be of contain a primitive, comple , enum or collection type 
         /// These will be saved in to an Instance annotation dictionary
         /// </summary>
-        /// <param name="resource">The <see cref="ODataResource"/> describing the resource.</param>
-        /// <param name="resourceContext">The context for the resource instance being written.</param>        
+        /// <param name="resource">The <see cref="ODataResource"/> describing the resource, which is being annotated.</param>
+        /// <param name="resourceContext">The context for the resource instance, which is being annotated.</param>        
         public virtual void AppendInstanceAnnotations(ODataResource resource, ResourceContext resourceContext)
         {
             IEdmStructuredType structuredType = resourceContext.StructuredType;

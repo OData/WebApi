@@ -182,6 +182,41 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                         },
                     },
                 },
+                new Account()
+                {
+                   AccountID = 200,
+                        Name="Name100",
+                   PayoutPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 200,
+                       FriendlyName = "Payout PI: Paypal",
+                   },
+                    PayinPIs = new List<PaymentInstrument>()
+                    {
+                        new PaymentInstrument()
+                        {
+                            PaymentInstrumentID = 201,
+                            FriendlyName = "201 first PI",
+                            Statement =
+                                new Statement()
+                                {
+                                    StatementID=1,
+                                    TransactionDescription="Physical Goods.",
+                                },
+                        },
+                        new PaymentInstrument()
+                        {
+                            PaymentInstrumentID = 202,
+                            FriendlyName = "202 second PI",
+                            Statement =
+                                new Statement()
+                                {
+                                    StatementID=201,
+                                    TransactionDescription="Physical Goods.",
+                                },
+                        },
+                    },
+                },
             };
         }
     }

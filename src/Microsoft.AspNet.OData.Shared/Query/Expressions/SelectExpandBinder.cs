@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private object Bind(object entity, SelectExpandQueryOption selectExpandQuery)
         {
-            _dataSourceProviderKind = DataSourceProviderKind.None;
+            _dataSourceProviderKind = DataSourceProviderKind.InMemory;
 
             // Needn't to verify the input, that's done at upper level.
             LambdaExpression projectionLambda = GetProjectionLambda(selectExpandQuery);
@@ -793,7 +793,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             Expression nullCheck = null;
-            if (_dataSourceProviderKind != DataSourceProviderKind.EFClassic)
+            if (_dataSourceProviderKind == DataSourceProviderKind.EFCore ||
+                _dataSourceProviderKind == DataSourceProviderKind.InMemory)
             {
                 nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
             }
@@ -824,7 +825,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     // With the following null check, EF5 and EF6 will throw except similar to:
                     // "Cannot compare elements of type 'xxxx'.Only primitive types, enumeration types and entity types are supported.
                     // EF Core has imporvement so the following null won't throw error.
-                    if (_dataSourceProviderKind != DataSourceProviderKind.EFClassic)
+                    if (_dataSourceProviderKind == DataSourceProviderKind.EFCore ||
+                        _dataSourceProviderKind == DataSourceProviderKind.InMemory)
                     {
                         propertyExpression.NullCheck = nullCheck;
                     }

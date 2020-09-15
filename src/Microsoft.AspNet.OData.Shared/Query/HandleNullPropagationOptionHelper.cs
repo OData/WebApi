@@ -92,6 +92,11 @@ namespace Microsoft.AspNet.OData.Query
         None,
 
         /// <summary>
+        /// In memory data source provider
+        /// </summary>
+        InMemory,
+
+        /// <summary>
         /// EF classic Data source provider
         /// </summary>
         EFClassic,

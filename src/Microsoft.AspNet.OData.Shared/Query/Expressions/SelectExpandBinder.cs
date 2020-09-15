@@ -26,6 +26,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private IEdmModel _model;
         private ODataQuerySettings _settings;
         private string _modelID;
+        private DataSourceProviderKind _dataSourceProviderKind;
 
         public SelectExpandBinder(ODataQuerySettings settings, ODataQueryContext context)
         {
@@ -38,6 +39,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
+            _dataSourceProviderKind = DataSourceProviderKind.None;
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
@@ -60,6 +62,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private object Bind(object entity, SelectExpandQueryOption selectExpandQuery)
         {
+            _dataSourceProviderKind = DataSourceProviderKind.None;
+
             // Needn't to verify the input, that's done at upper level.
             LambdaExpression projectionLambda = GetProjectionLambda(selectExpandQuery);
 
@@ -69,6 +73,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private IQueryable Bind(IQueryable queryable, SelectExpandQueryOption selectExpandQuery)
         {
+            _dataSourceProviderKind = queryable.GetDataSourceProviderKind();
+
             // Needn't to verify the input, that's done at upper level.
             Type elementType = selectExpandQuery.Context.ElementClrType;
 
@@ -786,6 +792,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return;
             }
 
+            Expression nullCheck = null;
+            if (_dataSourceProviderKind != DataSourceProviderKind.EF5 &&
+                _dataSourceProviderKind != DataSourceProviderKind.EF6)
+            {
+                nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
+            }
+
             Expression countExpression = CreateTotalCountExpression(propertyValue, pathSelectItem.CountOption);
 
             // be noted: the property structured type could be null, because the property maybe not a complex property.
@@ -806,7 +819,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
             if (subSelectExpandClause != null)
             {
-                if (structuralProperty.Type.IsCollection() && _settings.PageSize.HasValue)
+                if (!structuralProperty.Type.IsCollection())
+                {
+                    // EF5 and EF6 doesn't support to compare the complex with null.
+                    // With the following null check, EF5 and EF6 will throw except similar to:
+                    // "Cannot compare elements of type 'xxxx'.Only primitive types, enumeration types and entity types are supported.
+                    // EF Core has imporvement so the following null won't throw error.
+                    if (_dataSourceProviderKind != DataSourceProviderKind.EF5 && _dataSourceProviderKind != DataSourceProviderKind.EF6)
+                    {
+                        propertyExpression.NullCheck = nullCheck;
+                    }
+                }
+                else if (_settings.PageSize.HasValue)
                 {
                     propertyExpression.PageSize = _settings.PageSize.Value;
                 }
@@ -896,6 +920,23 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             return source;
+        }
+
+        private static Expression GetNullCheckExpression(IEdmStructuralProperty propertyToInclude, Expression propertyValue,
+            SelectExpandClause projection)
+        {
+            if (projection == null || propertyToInclude.Type.IsCollection())
+            {
+                return null;
+            }
+
+            if (IsSelectAll(projection) && propertyToInclude.Type.IsComplex())
+            {
+                // for Collections (Primitive, Enum, Complex collection), that's check above.	
+                return Expression.Equal(propertyValue, Expression.Constant(null));
+            }
+
+            return null;
         }
 
         private Expression GetNullCheckExpression(IEdmNavigationProperty propertyToExpand, Expression propertyValue,

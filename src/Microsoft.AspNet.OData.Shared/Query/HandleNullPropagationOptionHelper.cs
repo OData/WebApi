@@ -69,11 +69,11 @@ namespace Microsoft.AspNet.OData.Query
             string queryProviderNamespace = query.Provider.GetType().Namespace;
             switch (queryProviderNamespace)
             {
+                case EntityFrameworkQueryProviderNamespace:
+                case Linq2SqlQueryProviderNamespace:
                 case ObjectContextQueryProviderNamespaceEF5:
-                    return DataSourceProviderKind.EF5;
-
                 case ObjectContextQueryProviderNamespaceEF6:
-                    return DataSourceProviderKind.EF6;
+                    return DataSourceProviderKind.EFClassic;
 
                 case ObjectContextQueryProviderNamespaceEFCore2:
                     return DataSourceProviderKind.EFCore;
@@ -92,14 +92,14 @@ namespace Microsoft.AspNet.OData.Query
         None,
 
         /// <summary>
-        /// EF 5 Data source provider
+        /// In memory data source provider
         /// </summary>
-        EF5,
+        InMemory,
 
         /// <summary>
-        /// EF 6 Data source provider
+        /// EF classic Data source provider
         /// </summary>
-        EF6,
+        EFClassic,
 
         /// <summary>
         /// EF Core Data source provider

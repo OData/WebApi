@@ -26,25 +26,29 @@ using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Test.Query
 {
-    public class DefaultSkipTokenTests
+    public class DefaultSkipTokenHandlerTests
     {
         [Theory]
-        [InlineData("http://localhost/Customers(1)/Orders", 10, null, false, "http://localhost/Customers(1)/Orders?$skip=10")]
-        [InlineData("http://localhost/Customers?$expand=Orders", 10, null, false, "http://localhost/Customers?$expand=Orders&$skip=10")]
-        public void GetNextPageLink_ReturnsCorrectNextLink(string baseUri, int pageSize, Object instance, bool enableSkipToken, string expectedUri)
+        [InlineData("http://localhost/Customers(1)/Orders", "http://localhost/Customers(1)/Orders?$skip=10")]
+        [InlineData("http://localhost/Customers?$expand=Orders", "http://localhost/Customers?$expand=Orders&$skip=10")]
+        public void GetNextPageLink_ReturnsCorrectNextLink(string baseUri, string expectedUri)
         {
-            var context = GetContext(enableSkipToken);
-
+            // Arrange
+            var context = GetContext(false);
             var nextLinkGenerator = context.QueryContext.GetSkipTokenHandler();
-            var uri = nextLinkGenerator.GenerateNextPageLink(new Uri(baseUri), pageSize, instance, context);
+
+            // Act
+            var uri = nextLinkGenerator.GenerateNextPageLink(new Uri(baseUri), 10, null, context);
             var actualUri = uri.ToString();
+
+            // Assert
             Assert.Equal(expectedUri, actualUri);
         }
 
         private ODataSerializerContext GetContext(bool enableSkipToken = false)
         {
             CustomersModelWithInheritance model = new CustomersModelWithInheritance();
-            IEdmEntitySet entitySet = model.Model.EntityContainer.FindEntitySet("Customers");
+            IEdmEntitySet entitySet = model.Customers;
             IEdmEntityType entityType = entitySet.EntityType();
             IEdmProperty edmProperty = entityType.FindProperty("Name");
             IEdmType edmType = entitySet.Type;

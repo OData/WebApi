@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
+                    controllerContext.AddNavigationPropertyToRouteData(navigationLinkSegment);
                     return refActionName;
                 }
             }
@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments[1]);
                     }
 
-                    controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
+                    controllerContext.AddNavigationPropertyToRouteData(navigationLinkSegment);
                     controllerContext.AddKeyValueToRouteData((KeySegment)odataPath.Segments.Last(e => e is KeySegment), ODataRouteConstants.RelatedKey);
                     return refActionName;
                 }

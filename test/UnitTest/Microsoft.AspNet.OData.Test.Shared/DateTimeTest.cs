@@ -458,7 +458,7 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [HttpGet]
-        public DateTime CalcBirthday(DateTimeOffset dto)
+        public DateTime CalcBirthday(int key, DateTimeOffset dto)
         {
             Assert.Equal(DateTimeOffset.Parse("2012-12-22T01:02:03Z"), dto);
             return new DateTime(1978, 11, 15, 0, 12, 0, DateTimeKind.Utc);

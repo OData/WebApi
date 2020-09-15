@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Routing;
@@ -43,11 +45,18 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
                 descriptor.ActionName = methodInfo.Name;
                 descriptor.DisplayName = methodInfo.Name;
                 descriptor.MethodInfo = methodInfo;
+                descriptor.Parameters = methodInfo
+                    .GetParameters()
+                    .Select(p => new ParameterDescriptor
+                    {
+                        Name = p.Name,
+                        ParameterType = p.ParameterType
+                    })
+                    .ToList();
                 descriptors.Add(descriptor);
 
                 // For attribute routing tests, stash the root service provider on the descriptor.
                 descriptor.Properties["serviceProvider"] = routeBuilder.ServiceProvider;
-
             }
 
             // Add these descriptors to the global IActionDescriptorCollectionProvider.

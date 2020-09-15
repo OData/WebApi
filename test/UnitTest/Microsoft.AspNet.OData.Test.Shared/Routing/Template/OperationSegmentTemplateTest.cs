@@ -75,12 +75,14 @@ namespace Microsoft.AspNet.OData.Test.Routing.Template
 
             // Assert
             Assert.True(result);
-            Assert.Equal(4, values.Count);
+            Assert.Equal(5, values.Count);
             Assert.Equal(1, values["param1"]);
             Assert.Equal(2, values["param2"]);
 
             Assert.Equal(1, (values[ODataParameterValue.ParameterValuePrefix + "param1"] as ODataParameterValue).Value);
             Assert.Equal(2, (values[ODataParameterValue.ParameterValuePrefix + "param2"] as ODataParameterValue).Value);
+
+            Assert.Equal(2, values[ODataRouteConstants.KeyCount]);
         }
     }
 }

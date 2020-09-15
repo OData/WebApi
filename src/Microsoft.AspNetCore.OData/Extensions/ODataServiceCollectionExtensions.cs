@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -83,7 +84,10 @@ namespace Microsoft.AspNet.OData.Extensions
             // and pass all non-OData calls to this inner selector.
             services.AddSingleton<IActionSelector>(s =>
             {
-                return new ODataActionSelector((IActionSelector)s.GetRequiredService(selector.ImplementationType));
+                return new ODataActionSelector(
+                    (IActionSelector)s.GetRequiredService(selector.ImplementationType),
+                    (IModelBinderFactory)s.GetRequiredService(typeof(IModelBinderFactory)),
+                    (IModelMetadataProvider)s.GetRequiredService(typeof(IModelMetadataProvider)));
             });
 
             services.AddSingleton<ODataEndpointRouteValueTransformer>();

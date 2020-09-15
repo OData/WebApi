@@ -67,5 +67,11 @@ namespace Microsoft.AspNet.OData.Routing
         /// Route data key for the OData optional parameters.
         /// </summary>
         public static readonly string OptionalParameters = typeof(ODataOptionalParameter).FullName;
+
+        /// <summary>
+        /// Route data key that tracks the number of key segments,
+        /// navigation properties and operation parameters in the request URI
+        /// </summary>
+        public static readonly string KeyCount = "ODataRouteKeyCount";
     }
 }

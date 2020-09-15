@@ -58,6 +58,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(EnumCustomersController),
                 typeof(DestinationsController),
                 typeof(IncidentsController),
+                typeof(NotFoundWithIdCustomersController),
+                typeof(NotFoundCustomersController)
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -491,6 +493,22 @@ namespace Microsoft.AspNet.OData.Test.Routing
             string responseString = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectedError, responseString);
         }
+
+        [Theory]
+        [InlineData("NotFoundWithIdCustomers", "GET")]
+        [InlineData("NotFoundCustomers(10)", "GET")]
+        [InlineData("NotFoundCustomers(10)", "DELETE")]
+        [InlineData("NotFoundCustomers(10)", "PUT")]
+        [InlineData("NotFoundCustomers(10)", "PATCH")]
+        public async Task ActionsDoNotMatch_ReturnsNotFound(string uri, string httpMethod)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/" + uri));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 
     public class DateTimeOffsetKeyCustomersController : ODataController
@@ -891,6 +909,42 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public string GetName(int keyID)
         {
             return String.Format(CultureInfo.InvariantCulture, "GetName({0}) with keyID", keyID);
+        }
+    }
+
+    public class NotFoundWithIdCustomersController: TestODataController
+    {
+        public string Get(int key)
+        {
+            return $"Get({key})";
+        }
+    }
+
+    public class NotFoundCustomersController: TestODataController
+    {
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        public string Put()
+        {
+            return "Put()";
+        }
+
+        public string Patch()
+        {
+            return "Patch()";
+        }
+
+        public string Post()
+        {
+            return "Post()";
+        }
+
+        public string Delete()
+        {
+            return "Delete()";
         }
     }
 }

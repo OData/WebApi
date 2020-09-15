@@ -3,14 +3,18 @@
 
 
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.OData.Edm;
@@ -234,6 +238,103 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var postResponse = await this.Client.SendAsync(postRequest);
             // Should pass because the query options were sent in the request body
             Assert.True(postResponse.IsSuccessStatusCode);
+        }
+    }
+
+    public class CustomODataQueryOptionsParser : IODataQueryOptionsParser
+    {
+        private static MediaTypeHeaderValue supportedMediaType = MediaTypeHeaderValue.Parse("text/xml");
+
+#if !NETCORE
+        public bool CanParse(HttpRequestMessage request)
+        {
+            return request.Content.Headers.ContentType?.MediaType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+        }
+#else
+        public bool CanParse(AspNetCore.Http.HttpRequest request)
+        {
+            return request.ContentType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+        }
+#endif
+        public async Task<string> ParseAsync(Stream requestStream)
+        {
+            using (var reader = new StreamReader(
+                    requestStream,
+                    encoding: Encoding.UTF8,
+                    detectEncodingFromByteOrderMarks: false,
+                    bufferSize: 1024,
+                    leaveOpen: true))
+            {
+                var content = await reader.ReadToEndAsync();
+                var document = XDocument.Parse(content);
+                var queryOptions = document.Descendants("QueryOption").Select(d => 
+                new { 
+                    Option = d.Attribute("Option").Value, 
+                    d.Attribute("Value").Value
+                });
+
+                return string.Join("&", queryOptions.Select(d => d.Option + "=" + d.Value));
+            }
+        }
+    }
+
+    public class CustomQueryOptionsParserTests : WebHostTestBase
+    {
+        public CustomQueryOptionsParserTests(WebHostTestFixture fixture)
+            : base(fixture)
+        {
+        }
+
+        protected override void UpdateConfiguration(WebRouteConfiguration configuration)
+        {
+            IList<IODataQueryOptionsParser> queryOptionsParsers = ODataQueryOptionsParserFactory.Create();
+            queryOptionsParsers.Insert(0, new CustomODataQueryOptionsParser());
+
+            configuration.Routes.Clear();
+            configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
+            configuration.MapODataServiceRoute(
+                "odata",
+                "odata",
+                configureAction: containerBuilder => containerBuilder
+                    .AddService(Microsoft.OData.ServiceLifetime.Singleton, typeof(IEdmModel),
+                        _ => GetEdmModel(configuration))
+                    .AddService(Microsoft.OData.ServiceLifetime.Singleton, typeof(IODataPathHandler), 
+                        _ => new DefaultODataPathHandler()) 
+                    .AddService(Microsoft.OData.ServiceLifetime.Singleton, typeof(IEnumerable<IODataRoutingConvention>),
+                        _ => ODataRoutingConventions.CreateDefault())
+                    .AddService(Microsoft.OData.ServiceLifetime.Singleton, typeof(IEnumerable<IODataQueryOptionsParser>), 
+                        _ => queryOptionsParsers)
+                );
+        }
+
+        private static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
+        {
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
+
+            builder.EntitySet<DollarQueryCustomer>("DollarQueryCustomers");
+            builder.EntitySet<DollarQueryOrder>("DollarQueryOrders");
+
+            return builder.GetEdmModel();
+        }
+
+        [Fact]
+        public async Task ODataQueryOptionsInRequestBody_ForSupportedMediaType()
+        {
+            string requestUri = this.BaseAddress + "/odata/DollarQueryCustomers/$query";
+            var contentType = "text/xml";
+            var queryOptionsPayload = "<QueryOptions><QueryOption Option=\"$filter\" Value=\"Id eq 1\"/></QueryOptions>";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Content = new StringContent(queryOptionsPayload);
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
+
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=minimal"));
+
+            var response = await this.Client.SendAsync(request);
+            Assert.True(response.IsSuccessStatusCode);
+
+            var contentAsString = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
         }
     }
 }

@@ -934,4 +934,10 @@
   <data name="CannotFindParserForRequestMediaType" xml:space="preserve">
     <value>Could not find parser designed to handle '{0}' query options payload</value>
   </data>
+  <data name="QueryOptionsMustNotBeRepeated" xml:space="preserve">
+    <value>The same system query option, irrespective of casing or whether or not it is prefixed with a $, must not be specified more than once for any resource.</value>
+  </data>
+  <data name="QueryOptionsNotInExpectedFormat" xml:space="preserve">
+    <value>Query options in request body not in expected format: {0}. A series of field-value pairs that meet the defined syntax rules expected.</value>
+  </data>
 </root>

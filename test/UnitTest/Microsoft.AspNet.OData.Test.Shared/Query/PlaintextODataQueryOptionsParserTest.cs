@@ -16,6 +16,7 @@ namespace Microsoft.AspNet.OData.Test.Query
     public class PlainTextODataQueryOptionsParserTest
     {
         private const string QueryOptionsString = "$filter=Id le 5";
+        private const string Endpoint = "http://localhost/People/$query";
 
         [Fact]
         public async Task ParseAsync_WithQueryOptionsInStream()
@@ -24,7 +25,7 @@ namespace Microsoft.AspNet.OData.Test.Query
 
             var result = await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream);
 
-            Assert.Equal('?' + QueryOptionsString, result);
+            Assert.Equal(QueryOptionsString, result);
         }
 
         [Fact]
@@ -47,16 +48,6 @@ namespace Microsoft.AspNet.OData.Test.Query
         }
 
         [Fact]
-        public async Task ParseAsync_WithQueryStringSeparatorIncludedInStream()
-        {
-            var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes('?' + QueryOptionsString));
-
-            var result = await new PlainTextODataQueryOptionsParser().ParseAsync(memoryStream);
-
-            Assert.Equal('?' + QueryOptionsString, result);
-        }
-
-        [Fact]
         public void PlainTextODataQueryOptionsParser_IsReturnedBy_ODataQueryOptionsParserFactory()
         {
             var parsers = ODataQueryOptionsParserFactory.Create();
@@ -67,7 +58,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void CanParse_MatchesRequest_WithMatchingContentType()
         {
-            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var request = RequestFactory.Create(HttpMethod.Post, Endpoint);
             var payload = "$filter=Name eq 'Foo'";
             var contentType = "text/plain";
 #if NETCORE
@@ -83,7 +74,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void CanParse_DoesNotMatchRequest_WithNonMatchingContentType()
         {
-            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var request = RequestFactory.Create(HttpMethod.Post, Endpoint);
             var payload = "{}";
             var contentType = "application/json";
 #if NETCORE
@@ -99,7 +90,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void CanParse_MatchesRequest_WithNonExactContentType()
         {
-            var request = RequestFactory.Create(HttpMethod.Post, "http://localhost/People/$query");
+            var request = RequestFactory.Create(HttpMethod.Post, Endpoint);
             var payload = "$filter=Name eq 'Foo'";
             var contentType = "text/plain;charset=utf-8";
 #if NETCORE

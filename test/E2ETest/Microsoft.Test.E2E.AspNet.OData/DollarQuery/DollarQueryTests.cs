@@ -4,6 +4,7 @@
 
 using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -116,6 +117,42 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
 
             var contentAsString = response.Content.ReadAsStringAsync().Result;
             Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
+        }
+
+        [Fact]
+        public async Task ODataQueryOptionsInRequestBody_PlusQueryOptionsOnRequestUrl()
+        {
+            string requestUri = this.BaseAddress + CustomersResourcePath + "/$query?$orderby=Id desc";
+            var contentType = "text/plain";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Content = new StringContent("$filter=Id eq 1 or Id eq 9");
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
+
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(ApplicationJsonODataMinimalMetadataStreamingTrue));
+
+            var response = await this.Client.SendAsync(request);
+            Assert.True(response.IsSuccessStatusCode);
+
+            var contentAsString = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("\"value\":[{\"Id\":9,\"Name\":\"Customer Name 9\"},{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
+        }
+
+        [Fact]
+        public async Task ODataQueryOptionsInRequestBody_RepeatedOnRequestUrl()
+        {
+            string requestUri = this.BaseAddress + CustomersResourcePath + "/$query?$filter=Id eq 1";
+            var contentType = "text/plain";
+
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Content = new StringContent("$filter=Id eq 1");
+            request.Content.Headers.ContentType = new MediaTypeWithQualityHeaderValue(contentType);
+
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(ApplicationJsonODataMinimalMetadataStreamingTrue));
+
+            var response = await this.Client.SendAsync(request);
+            Assert.False(response.IsSuccessStatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         [Fact]

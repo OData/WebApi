@@ -67,23 +67,13 @@ namespace Microsoft.AspNet.OData.Extensions
             {
                 HttpRequest request = httpContext.Request;
                 string oDataPath = oDataPathValue as string;
-                Func<IServiceProvider> requestContainerFactory = () =>
-                {
-                    // Delegate is reused. We need to ensure only one request container is created
-                    IServiceProvider requestContainer = request.ODataFeature().RequestContainer;
-
-                    if (requestContainer != null)
-                    {
-                        return requestContainer;
-                    }
-
-                    return request.CreateRequestContainer(routeName);
-                };
+                // Create request container
+                request.CreateRequestContainer(routeName);
 
                 // Check whether the request is a POST targeted at a resource path ending in /$query
                 if (request.IsQueryRequest(oDataPath))
                 {
-                    request.TransformQueryRequest(requestContainerFactory);
+                    request.TransformQueryRequest();
 
                     oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
                     values[ODataRouteConstants.ODataPath] = oDataPath;
@@ -96,7 +86,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
                 // Call ODL to parse the Request URI.
-                ODataPath path = ODataPathRouteConstraint.GetODataPath(oDataPath, requestLeftPart, queryString, requestContainerFactory);
+                ODataPath path = ODataPathRouteConstraint.GetODataPath(oDataPath, requestLeftPart, queryString, () => request.GetRequestContainer());
                 if (path != null)
                 {
                     // Set all the properties we need for routing, querying, formatting

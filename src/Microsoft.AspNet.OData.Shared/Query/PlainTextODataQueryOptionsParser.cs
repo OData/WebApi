@@ -17,8 +17,6 @@ namespace Microsoft.AspNet.OData.Query
         /// <inheritdoc/>
         public async Task<string> ParseAsync(Stream requestStream)
         {
-            string queryString = string.Empty;
-
             try
             {
                 using (var reader = new StreamReader(
@@ -28,24 +26,16 @@ namespace Microsoft.AspNet.OData.Query
                     bufferSize: 1024,
                     leaveOpen: true))
                 {
-                    string content = await reader.ReadToEndAsync();
-
                     // Based on OData OASIS Standard, the request body is expected to contain the query portion of the URL
                     // and MUST use the same percent-encoding as in URLs (especially: no spaces, tabs, or line breaks allowed)
                     // and MUST follow the expected syntax rules
-                    if (!string.IsNullOrWhiteSpace(content))
-                    {
-                        // Query string is expected to start with ?
-                        queryString = content[0] == '?' ? content : '?' + content;
-                    }
+                    return await reader.ReadToEndAsync();
                 }
             }
             catch
             {
                 throw new ODataException(SRResources.CannotParseQueryOptionsPayload);
             }
-
-            return queryString;
         }
     }
 }

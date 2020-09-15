@@ -3060,5 +3060,27 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("CannotFindParserForRequestMediaType", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The same system query option, irrespective of casing or whether or not it is prefixed with a $, must not be specified more than once for any resource..
+        /// </summary>
+        internal static string QueryOptionsMustNotBeRepeated
+        {
+            get
+            {
+                return ResourceManager.GetString("QueryOptionMustNotBeRepeated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Query options in request body not in expected format: {0}. A series of field-value pairs that meet the defined syntax rules expected..
+        /// </summary>
+        internal static string QueryOptionsNotInExpectedFormat
+        {
+            get
+            {
+                return ResourceManager.GetString("QueryOptionsNotInExpectedFormat", resourceCulture);
+            }
+        }
     }
 }

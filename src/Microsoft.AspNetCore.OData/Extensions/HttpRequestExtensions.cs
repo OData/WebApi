@@ -6,10 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Interfaces;
@@ -471,15 +469,9 @@ namespace Microsoft.AspNet.OData.Extensions
         /// The query options are parsed from the request body and appended to the request URL.
         /// </summary>
         /// <param name="request">The request.</param>
-        /// <param name="requestContainerFactory">Request container factory.</param>
-        internal static void TransformQueryRequest(this HttpRequest request, Func<IServiceProvider> requestContainerFactory)
+        internal static void TransformQueryRequest(this HttpRequest request)
         {
-            if (requestContainerFactory == null)
-            {
-                throw Error.ArgumentNull("requestContainerFactory");
-            }
-
-            IServiceProvider requestContainer = requestContainerFactory();
+            IServiceProvider requestContainer = request.GetRequestContainer();
 
             // Fetch parsers available in the request container for parsing the query options in the request body
             IEnumerable<IODataQueryOptionsParser> queryOptionsParsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();
@@ -488,16 +480,26 @@ namespace Microsoft.AspNet.OData.Extensions
             if (queryOptionsParser == null)
             {
                 throw new ODataException(string.Format(
-                    CultureInfo.InvariantCulture, 
+                    CultureInfo.InvariantCulture,
                     SRResources.CannotFindParserForRequestMediaType,
                     request.ContentType));
             }
 
-            string queryString = queryOptionsParser.ParseAsync(request.Body).Result;
+            string queryOptions = queryOptionsParser.ParseAsync(request.Body).Result;
 
-            // Request path starts with a /
             string requestPath = request.Path.Value;
+            string queryString = request.QueryString.Value;
+
+            // Strip off the /$query part
             requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(queryString) && !string.IsNullOrWhiteSpace(queryOptions))
+            {
+                queryString += ('&' + queryOptions);
+            }
+            else if (!string.IsNullOrWhiteSpace(queryOptions))
+            {
+                queryString = '?' + queryOptions;
+            }
 
             request.Path = new PathString(requestPath);
             request.QueryString = new QueryString(queryString);

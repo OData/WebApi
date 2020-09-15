@@ -454,12 +454,23 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             Stream requestStream = request.Content.ReadAsStreamAsync().Result;
-            string queryString = queryOptionsParser.ParseAsync(requestStream).Result;
-
-            string requestPath = request.RequestUri.LocalPath;
-            requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+            string queryOptions = queryOptionsParser.ParseAsync(requestStream).Result;
 
             Uri requestUri = request.RequestUri;
+            string requestPath = requestUri.LocalPath;
+            string queryString = requestUri.Query;
+
+            // Strip off the /$query part
+            requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(queryString) && !string.IsNullOrWhiteSpace(queryOptions))
+            {
+                queryString += ('&' + queryOptions);
+            }
+            else if (!string.IsNullOrWhiteSpace(queryOptions))
+            {
+                queryString = '?' + queryOptions;
+            }
+
             request.RequestUri = new UriBuilder(requestUri.Scheme, requestUri.Host, requestUri.Port, requestPath, queryString).Uri;
             request.Method = HttpMethod.Get;
         }

@@ -5,9 +5,7 @@ using System.IO;
 using System.Threading.Tasks;
 #if !NETCORE
 using System.Net.Http;
-using System.Net.Http.Formatting;
 #else
-using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNetCore.Http;
 #endif
 

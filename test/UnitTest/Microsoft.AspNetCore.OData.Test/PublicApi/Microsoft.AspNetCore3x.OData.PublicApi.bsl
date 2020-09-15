@@ -3243,7 +3243,6 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string Controller = "controller"
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
-	public static readonly string KeyCount = "ODataRouteKeyCount"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
@@ -3307,7 +3306,7 @@ public class Microsoft.AspNet.OData.Routing.DefaultODataPathValidator : Microsof
 }
 
 public class Microsoft.AspNet.OData.Routing.ODataActionSelector : IActionSelector {
-	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionSelector innerSelector, Microsoft.AspNetCore.Mvc.ModelBinding.IModelBinderFactory modelBinderFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider modelMetadataProvider)
+	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionSelector innerSelector)
 
 	public virtual Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor SelectBestCandidate (Microsoft.AspNetCore.Routing.RouteContext context, System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] candidates)
 	public virtual System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] SelectCandidates (Microsoft.AspNetCore.Routing.RouteContext context)

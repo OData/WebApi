@@ -357,7 +357,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private static Uri GetNestedNextPageLink(ODataSerializerContext writeContext, int pageSize, object obj)
         {
             Contract.Assert(writeContext.ExpandedResource != null);
-            Uri nestedNextLink = null;
+            Uri navigationLink = null;
             IEdmNavigationSource sourceNavigationSource = writeContext.ExpandedResource.NavigationSource;
             NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
 
@@ -368,17 +368,17 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 // Contained navigation.
                 Uri idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
 
-                var link = idlink.ToString() + "/" + writeContext.NavigationSource.Name;
-                nestedNextLink = new Uri(link);
+                var link = idlink.ToString() + "/" + writeContext.NavigationProperty.Name;
+                navigationLink = new Uri(link);
             }
             else
             {
                 // Non-Contained navigation.
-                Uri navigationLink =
+                navigationLink =
                     linkBuilder.BuildNavigationLink(writeContext.ExpandedResource, writeContext.NavigationProperty);
-
-                nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
             }
+
+            Uri nestedNextLink = GenerateQueryFromExpandedItem(writeContext, navigationLink);
 
             SkipTokenHandler nextLinkGenerator = null;
             if (writeContext.QueryContext != null)

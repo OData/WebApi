@@ -549,7 +549,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         {
             await ResetDatasource();
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, mode).ToLower();
-            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/PayinPIs?$format={2}", BaseAddress, mode, mime);
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/PayinPIs?$filter=PaymentInstrumentID gt 1&$format={2}", BaseAddress, mode, mime);
 
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -557,7 +557,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var json = await response.Content.ReadAsObject<JObject>();
             var nextlink = (string)json["@odata.nextLink"];
             Assert.NotNull(nextlink);
-            Assert.Contains(serviceRootUri, nextlink);
+            nextlink = nextlink.Replace("%28", "(").Replace("%29", ")");
+            Assert.Contains("PaginatedAccounts(100)/PayinPIs?$filter=PaymentInstrumentID%20gt%201".ToLower(), nextlink.ToLower());
         }
 
         [Theory]
@@ -566,13 +567,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public async Task QueryExpandPaginatedPayinPIsFromAccount(string mode, string mime)
         {
             await ResetDatasource();
-            string requestUri = string.Format("{0}/{1}/PaginatedAccounts?$expand=PayinPIs&$format={2}", BaseAddress, mode, mime);
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts?$expand=PayinPIs($filter=PaymentInstrumentID gt 1)&$format={2}", BaseAddress, mode, mime);
 
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-            var json = await response.Content.ReadAsObject<JObject>();
-            Assert.Contains("PayinPIs@odata.nextLink", json.ToString());
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs?$filter=PaymentInstrumentID%20gt%201", BaseAddress, mode).ToLower(), payload);
         }
 
         [Theory]

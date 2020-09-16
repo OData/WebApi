@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 #if !NETCORE
@@ -44,16 +45,17 @@ namespace Microsoft.AspNet.OData.Query
         /// An <see cref="ODataException"/> is thrown if no capable parser is found.
         /// </returns>
 #if !NETCORE
-        public static IODataQueryOptionsParser GetQueryOptionParser(HttpRequestMessage request)
+        public static IODataQueryOptionsParser GetQueryOptionsParser(HttpRequestMessage request)
         {
             string contentType = request.Content.Headers.ContentType?.MediaType;
 #else
-        public static IODataQueryOptionsParser GetQueryOptionParser(HttpRequest request)
+        public static IODataQueryOptionsParser GetQueryOptionsParser(HttpRequest request)
         {
             string contentType = request.ContentType;
 #endif
 
             IServiceProvider requestContainer = request.GetRequestContainer();
+            Contract.Assert(requestContainer != null);
 
             // Fetch parsers available in the request container for parsing the query options in the request body
             IEnumerable<IODataQueryOptionsParser> parsers = requestContainer.GetRequiredService<IEnumerable<IODataQueryOptionsParser>>();

@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull("httpRequest");
             }
 
-            return request.ContentType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+            return request.ContentType?.StartsWith(SupportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
         }
     }
 }

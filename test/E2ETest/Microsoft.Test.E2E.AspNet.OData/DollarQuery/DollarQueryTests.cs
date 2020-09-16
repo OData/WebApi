@@ -243,17 +243,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
 
     public class CustomODataQueryOptionsParser : IODataQueryOptionsParser
     {
-        private static MediaTypeHeaderValue supportedMediaType = MediaTypeHeaderValue.Parse("text/xml");
+        private static MediaTypeHeaderValue SupportedMediaType = MediaTypeHeaderValue.Parse("text/xml");
 
 #if !NETCORE
         public bool CanParse(HttpRequestMessage request)
         {
-            return request.Content.Headers.ContentType?.MediaType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+            return request.Content.Headers.ContentType?.MediaType?.StartsWith(SupportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
         }
 #else
         public bool CanParse(AspNetCore.Http.HttpRequest request)
         {
-            return request.ContentType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+            return request.ContentType?.StartsWith(SupportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
         }
 #endif
         public async Task<string> ParseAsync(Stream requestStream)

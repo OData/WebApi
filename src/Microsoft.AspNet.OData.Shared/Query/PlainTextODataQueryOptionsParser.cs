@@ -12,7 +12,7 @@ namespace Microsoft.AspNet.OData.Query
 {
     public partial class PlainTextODataQueryOptionsParser
     {
-        private static MediaTypeHeaderValue supportedMediaType = MediaTypeHeaderValue.Parse("text/plain");
+        private static MediaTypeHeaderValue SupportedMediaType = MediaTypeHeaderValue.Parse("text/plain");
 
         /// <inheritdoc/>
         public async Task<string> ParseAsync(Stream requestStream)

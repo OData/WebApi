@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Extensions
     {
         private const string PropertiesKey = "Microsoft.AspNet.OData.Properties";
         private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
-        internal const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
+        private const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
 
         /// <summary>
         /// Gets the <see cref="HttpRequestMessageProperties"/> instance containing OData methods and properties
@@ -432,7 +432,7 @@ namespace Microsoft.AspNet.OData.Extensions
         internal static void TransformQueryRequest(this HttpRequestMessage request)
         {
             // Fetch parser capable of parsing the query options in the request body
-            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionParser(request);
+            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionsParser(request);
             // Parse query options in request body
             Stream requestStream = request.Content.ReadAsStreamAsync().Result;
             string queryOptions = queryOptionsParser.ParseAsync(requestStream).Result;

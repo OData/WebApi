@@ -472,7 +472,7 @@ namespace Microsoft.AspNet.OData.Extensions
         internal static void TransformQueryRequest(this HttpRequest request)
         {
             // Fetch parser capable of parsing the query options in the request body
-            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionParser(request);
+            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionsParser(request);
             // Parse query options in request body
             string queryOptions = queryOptionsParser.ParseAsync(request.Body).Result;
 
@@ -481,13 +481,16 @@ namespace Microsoft.AspNet.OData.Extensions
 
             // Strip off the /$query part
             requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(queryString) && !string.IsNullOrWhiteSpace(queryOptions))
+            if (!string.IsNullOrWhiteSpace(queryOptions))
             {
-                queryString += ('&' + queryOptions);
-            }
-            else if (!string.IsNullOrWhiteSpace(queryOptions))
-            {
-                queryString = '?' + queryOptions;
+                if (string.IsNullOrWhiteSpace(queryString))
+                {
+                    queryString = '?' + queryOptions;
+                }
+                else
+                {
+                    queryString += '&' + queryOptions;
+                }
             }
 
             request.Path = new PathString(requestPath);

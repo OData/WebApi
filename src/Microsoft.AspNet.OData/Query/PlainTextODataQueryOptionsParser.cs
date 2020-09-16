@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Query
 
             MediaTypeHeaderValue contentType = request.Content.Headers.ContentType;
 
-            return contentType?.MediaType?.StartsWith(supportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
+            return contentType?.MediaType?.StartsWith(SupportedMediaType.MediaType, StringComparison.Ordinal) == true ? true : false;
         }
     }
 }

@@ -2366,7 +2366,7 @@ public abstract class Microsoft.AspNet.OData.Query.SkipTokenHandler {
 
 public sealed class Microsoft.AspNet.OData.Query.ODataQueryOptionsParserFactory {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.IODataQueryOptionsParser]] Create ()
-	public static IODataQueryOptionsParser GetQueryOptionParser (System.Net.Http.HttpRequestMessage request)
+	public static IODataQueryOptionsParser GetQueryOptionsParser (System.Net.Http.HttpRequestMessage request)
 }
 
 public class Microsoft.AspNet.OData.Query.ApplyQueryOption {

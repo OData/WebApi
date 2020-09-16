@@ -33,8 +33,8 @@ namespace Microsoft.AspNet.OData.Extensions
     public static class HttpRequestMessageExtensions
     {
         private const string PropertiesKey = "Microsoft.AspNet.OData.Properties";
-        private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
         private const string RequestContainerKey = "Microsoft.AspNet.OData.RequestContainer";
+        private const string RequestScopeKey = "Microsoft.AspNet.OData.RequestScope";
 
         /// <summary>
         /// Gets the <see cref="HttpRequestMessageProperties"/> instance containing OData methods and properties
@@ -443,13 +443,16 @@ namespace Microsoft.AspNet.OData.Extensions
 
             // Strip off the /$query part
             requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
-            if (!string.IsNullOrWhiteSpace(queryString) && !string.IsNullOrWhiteSpace(queryOptions))
+            if (!string.IsNullOrWhiteSpace(queryOptions))
             {
-                queryString += ('&' + queryOptions);
-            }
-            else if (!string.IsNullOrWhiteSpace(queryOptions))
-            {
-                queryString = '?' + queryOptions;
+                if (string.IsNullOrWhiteSpace(queryString))
+                {
+                    queryString = '?' + queryOptions;
+                }
+                else
+                {
+                    queryString += '&' + queryOptions;
+                }
             }
 
             request.RequestUri = new UriBuilder(requestUri.Scheme, requestUri.Host, requestUri.Port, requestPath, queryString).Uri;

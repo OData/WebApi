@@ -240,6 +240,12 @@ namespace Microsoft.AspNet.OData
                 object value;
                 if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
                 {
+                    if (value is SelectExpandWrapper)
+                    {
+                        // Skip the select expand property
+                        continue;
+                    }
+
                     string propertyName = EdmLibHelpers.GetClrPropertyName(property, EdmModel);
 
                     if (TypeHelper.IsCollection(value.GetType()))

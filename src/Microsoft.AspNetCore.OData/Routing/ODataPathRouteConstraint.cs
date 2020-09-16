@@ -48,13 +48,26 @@ namespace Microsoft.AspNet.OData.Routing
                 object oDataPathValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
                 {
+                    string oDataPath = oDataPathValue as string;
+                    // Create request container
+                    request.CreateRequestContainer(RouteName);
+
+                    // Check whether the request is a POST targeted at a resource path ending in /$query
+                    if (request.IsQueryRequest(oDataPath))
+                    {
+                        request.TransformQueryRequest();
+
+                        oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+                        values[ODataRouteConstants.ODataPath] = oDataPath;
+                    }
+
                     // We need to call Uri.GetLeftPart(), which returns an encoded Url.
                     // The ODL parser does not like raw values.
                     Uri requestUri = new Uri(request.GetEncodedUrl());
                     string requestLeftPart = requestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
-                    path = GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(RouteName));
+                    path = GetODataPath(oDataPath, requestLeftPart, queryString, () => request.GetRequestContainer());
                 }
 
                 if (path != null)

@@ -1081,6 +1081,15 @@
     <Compile Include="..\DollarLevels\DollarLevelsTest.cs">
       <Link>DollarLevels\DollarLevelsTest.cs</Link>
     </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryCustomersController.cs">
+      <Link>DollarQuery\DollarQueryCustomersController.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryModels.cs">
+      <Link>DollarQuery\DollarQueryModels.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryTests.cs">
+      <Link>DollarQuery\DollarQueryTests.cs</Link>
+    </Compile>
     <Compile Include="..\Enums\EnumsController.cs">
       <Link>Enums\EnumsController.cs</Link>
     </Compile>

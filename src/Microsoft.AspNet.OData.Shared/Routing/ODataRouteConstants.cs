@@ -73,5 +73,10 @@ namespace Microsoft.AspNet.OData.Routing
         /// navigation properties and operation parameters in the request URI
         /// </summary>
         public static readonly string KeyCount = "ODataRouteKeyCount";
+
+        /// <summary>
+        /// Route template suffix for OData $query segment
+        /// </summary>
+        public static readonly string QuerySegment = "$query";
     }
 }

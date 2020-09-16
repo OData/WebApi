@@ -566,7 +566,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public async Task QueryExpandPaginatedPayinPIsFromAccount(string mode, string mime)
         {
             await ResetDatasource();
-            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, mode).ToLower();
             string requestUri = string.Format("{0}/{1}/PaginatedAccounts?$expand=PayinPIs&$format={2}", BaseAddress, mode, mime);
 
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);

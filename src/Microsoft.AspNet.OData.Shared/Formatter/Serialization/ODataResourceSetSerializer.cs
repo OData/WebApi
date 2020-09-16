@@ -365,8 +365,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (writeContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
             {
                 // Contained navigation.
-                var linkBuilder = new NavigationSourceLinkBuilderAnnotation(sourceNavigationSource, writeContext.Model);
-                var idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
+                //NavigationSourceLinkBuilderAnnotation linkBuilder = new NavigationSourceLinkBuilderAnnotation(sourceNavigationSource, writeContext.Model);
+                NavigationSourceLinkBuilderAnnotation linkBuilder = writeContext.Model.GetNavigationSourceLinkBuilder(sourceNavigationSource);
+                Uri idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
 
                 var link = idlink.ToString() + "/" + writeContext.NavigationSource.Name;
                 nestedNextLink = new Uri(link);

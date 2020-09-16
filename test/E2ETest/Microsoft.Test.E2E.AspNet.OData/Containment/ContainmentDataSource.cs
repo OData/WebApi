@@ -214,8 +214,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=201,
                                     TransactionDescription="Physical Goods.",
                                 },
-                        },
-                    },
+                        }
+                    }
                 },
             };
         }

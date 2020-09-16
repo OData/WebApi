@@ -991,6 +991,9 @@
     <Compile Include="..\Enums\EnumsTest.cs">
       <Link>Enums\EnumsTest.cs</Link>
     </Compile>
+    <Compile Include="..\Enums\EnumsAliasTest.cs">
+      <Link>Enums\EnumsAliasTest.cs</Link>
+    </Compile>
     <Compile Include="..\ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs">
       <Link>ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs</Link>
     </Compile>

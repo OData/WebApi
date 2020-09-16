@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -243,6 +244,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             Employee employee = Employees.FirstOrDefault(e => e.ID == id);
             var result = employee.AccessLevel.HasFlag(accessLevel);
             return Ok(result);
+        }
+    }
+
+    public class WeatherForecastController : TestODataController
+    {
+        private static readonly string[] Summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
+        [EnableQuery]
+        public IEnumerable<WeatherForecast> Get()
+        {
+            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            {
+                Id = index,
+                Status = index % 2 == 0 ? Status.SoldOut : Status.InStore,
+                Skill = index % 2 == 0 ? Skill.CSharp : Skill.Sql
+            })
+            .ToArray();
         }
     }
 }

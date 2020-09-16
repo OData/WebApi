@@ -345,6 +345,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Cannot Get the Enum Clr member using &apos;{0}&apos;..
+        /// </summary>
+        internal static string CannotGetEnumClrMember
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotGetEnumClrMember", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Cannot determine the Edm type for the CLR type &apos;{0}&apos; because the derived type &apos;{1}&apos; is configured as entity type and another derived type &apos;{2}&apos; is configured as complex type..
         /// </summary>
         internal static string CannotInferEdmType

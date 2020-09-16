@@ -940,4 +940,7 @@
   <data name="QueryOptionsNotInExpectedFormat" xml:space="preserve">
     <value>Query options in request body not in expected format: {0}. A series of field-value pairs that meet the defined syntax rules expected.</value>
   </data>
+  <data name="CannotGetEnumClrMember" xml:space="preserve">
+    <value>Cannot Get the Enum Clr member using '{0}'.</value>
+  </data>
 </root>

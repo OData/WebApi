@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Microsoft.Test.E2E.AspNet.OData.Enums
 {
@@ -47,5 +48,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
     {
         public Sport LikeMost { get; set; }
         public List<Sport> Like { get; set; }
+    }
+
+    [DataContract]
+    public enum Status
+    {
+        [EnumMember(Value = "Sold out")]
+        SoldOut,
+
+        [EnumMember(Value = "In store")]
+        InStore
+    }
+
+    public class WeatherForecast
+    {
+        public int Id { get; set; }
+
+        public Status Status { get; set; }
+
+        public Skill Skill { get; set; }
     }
 }

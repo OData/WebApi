@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -16,6 +17,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.Extensions.DependencyInjection;
@@ -409,6 +411,52 @@ namespace Microsoft.AspNet.OData.Extensions
             }
 
             return request.GetRequestContainer().GetServices<IODataRoutingConvention>();
+        }
+        /// <summary>
+        /// Checks whether the request is a POST targeted at a resource path ending in /$query.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        /// <param name="oDataPath">The OData path.</param>
+        /// <returns>true if the request path has $query segment.</returns>
+        internal static bool IsQueryRequest(this HttpRequestMessage request, string oDataPath)
+        {
+            return request.Method.Equals(HttpMethod.Post) && 
+                oDataPath?.TrimEnd('/').EndsWith('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        /// <summary>
+        /// Transforms a POST request targeted at a resource path ending in $query into a GET request. 
+        /// The query options are parsed from the request body and appended to the request URL.
+        /// </summary>
+        /// <param name="request">The request.</param>
+        internal static void TransformQueryRequest(this HttpRequestMessage request)
+        {
+            // Fetch parser capable of parsing the query options in the request body
+            IODataQueryOptionsParser queryOptionsParser = ODataQueryOptionsParserFactory.GetQueryOptionsParser(request);
+            // Parse query options in request body
+            Stream requestStream = request.Content.ReadAsStreamAsync().Result;
+            string queryOptions = queryOptionsParser.ParseAsync(requestStream).Result;
+
+            Uri requestUri = request.RequestUri;
+            string requestPath = requestUri.LocalPath;
+            string queryString = requestUri.Query;
+
+            // Strip off the /$query part
+            requestPath = requestPath.Substring(0, requestPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(queryOptions))
+            {
+                if (string.IsNullOrWhiteSpace(queryString))
+                {
+                    queryString = '?' + queryOptions;
+                }
+                else
+                {
+                    queryString += '&' + queryOptions;
+                }
+            }
+
+            request.RequestUri = new UriBuilder(requestUri.Scheme, requestUri.Host, requestUri.Port, requestPath, queryString).Uri;
+            request.Method = HttpMethod.Get;
         }
 
         /// <summary>

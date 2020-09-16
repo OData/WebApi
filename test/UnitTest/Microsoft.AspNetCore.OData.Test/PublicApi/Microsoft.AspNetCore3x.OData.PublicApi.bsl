@@ -994,11 +994,11 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 
 public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
 	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
-	void AddTypeAnnotation (string annotationName, object value)
+	void AddResourceAnnotation (string annotationName, object value)
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
-	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllResourceAnnotations ()
 	object GetPropertyAnnotation (string propertyName, string annotationName)
-	object GetTypeAnnotation (string annotationName)
+	object GetResourceAnnotation (string annotationName)
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfiguration {
@@ -1278,10 +1278,6 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType)
 	public StructuralTypeConfiguration`1 Select (string[] properties)
 	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType, string[] properties)
-}
-
-public sealed class Microsoft.AspNet.OData.Builder.BuilderHelper {
-	public static void ValidateAssignableFrom (System.Type expectedType, System.Type type, params string customTypeDescription)
 }
 
 [
@@ -1621,7 +1617,7 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 public class Microsoft.AspNet.OData.Builder.InstanceAnnotationContainerAnnotation {
 	public InstanceAnnotationContainerAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
-	System.Reflection.PropertyInfo PropertyInfo  { public get; public set; }
+	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 }
 
 public class Microsoft.AspNet.OData.Builder.LengthPropertyConfiguration : PrimitivePropertyConfiguration {
@@ -1722,11 +1718,11 @@ public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : I
 	public ODataInstanceAnnotationContainer ()
 
 	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
-	public virtual void AddTypeAnnotation (string annotationName, object value)
+	public virtual void AddResourceAnnotation (string annotationName, object value)
 	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllPropertyAnnotations (string propertyName)
-	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllTypeAnnotations ()
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetAllResourceAnnotations ()
 	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
-	public virtual object GetTypeAnnotation (string annotationName)
+	public virtual object GetResourceAnnotation (string annotationName)
 }
 
 public class Microsoft.AspNet.OData.Builder.ODataModelBuilder {
@@ -3243,6 +3239,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string Controller = "controller"
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
+	public static readonly string KeyCount = "ODataRouteKeyCount"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
@@ -3306,7 +3303,7 @@ public class Microsoft.AspNet.OData.Routing.DefaultODataPathValidator : Microsof
 }
 
 public class Microsoft.AspNet.OData.Routing.ODataActionSelector : IActionSelector {
-	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionSelector innerSelector)
+	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionSelector innerSelector, Microsoft.AspNetCore.Mvc.ModelBinding.IModelBinderFactory modelBinderFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider modelMetadataProvider)
 
 	public virtual Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor SelectBestCandidate (Microsoft.AspNetCore.Routing.RouteContext context, System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] candidates)
 	public virtual System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] SelectCandidates (Microsoft.AspNetCore.Routing.RouteContext context)

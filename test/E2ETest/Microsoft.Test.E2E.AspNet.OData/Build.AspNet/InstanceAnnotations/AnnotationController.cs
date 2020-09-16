@@ -5,9 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
-using NS;
+using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 {
@@ -113,6 +114,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 
         public ITestActionResult Post([FromBody]Employee employee)
         {
+            var instanceAnnotations = employee.InstanceAnnotations;
+            VerifyInstanceAnnotations(employee.Name, instanceAnnotations);
+
             employee.ID = Employees.Count + 1;
             Employees.Add(employee);
 
@@ -244,6 +248,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             Employee employee = Employees.FirstOrDefault(e => e.ID == id);
             var result = employee.AccessLevel.HasFlag(accessLevel);
             return Ok(result);
+        }
+
+        private void VerifyInstanceAnnotations(string name, IODataInstanceAnnotationContainer instanceAnnotationContainer)
+        {
+            switch (name)
+            {
+                case "Name1":
+                    Assert.Equal(1, instanceAnnotationContainer.GetResourceAnnotation("NS.Test"));
+                    break;
+                case "Name2":
+                    Assert.Equal(100, instanceAnnotationContainer.GetPropertyAnnotation("Gender","NS.TestGender"));
+                    break;
+                case "Name3":
+                    Assert.Equal(1, instanceAnnotationContainer.GetResourceAnnotation("NS.Test"));
+                    Assert.Equal(100, instanceAnnotationContainer.GetPropertyAnnotation("Gender", "NS.TestGender"));
+                    break;
+                case "Name4":
+                    Assert.Equal(100, instanceAnnotationContainer.GetResourceAnnotation("NS.Test1"));
+                    Assert.Equal("Testing", instanceAnnotationContainer.GetResourceAnnotation("NS.Test2"));
+                    Assert.Equal(500, instanceAnnotationContainer.GetPropertyAnnotation("Gender", "NS.TestGender"));
+                    Assert.Equal("TestName1", instanceAnnotationContainer.GetPropertyAnnotation("Name", "NS.TestName"));
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

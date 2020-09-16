@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData.Builder
         Dynamic = 5,
 
         /// <summary>
-        /// Represents a instance annotation for a CLR type.
+        /// Represents an instance annotation for a CLR type.
         /// </summary>
         InstanceAnnotations = 6
     }

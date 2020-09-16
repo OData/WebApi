@@ -4,7 +4,6 @@
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
-using NS;
 
 namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 {

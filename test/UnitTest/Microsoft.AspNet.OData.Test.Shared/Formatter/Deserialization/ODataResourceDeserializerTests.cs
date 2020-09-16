@@ -774,8 +774,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Properties = new[]
                     {
                         // declared properties
-                        new ODataProperty {Name = "Test1", Value = "Street 1"},
-                        new ODataProperty {Name = "Test2", Value = "City 1"},
+                        new ODataProperty {Name = "Street", Value = "Street 1"},
+                        new ODataProperty {Name = "City", Value = "City 1"},
                     }
             };
 
@@ -817,11 +817,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             var dict1 = customer.InstanceAnnotations.GetAllResourceAnnotations();
 
             Assert.Equal(1, dict1.Count);
-            Assert.Equal(typeof(ODataResourceValue), dict1["NS.Test2"].GetType());
-            var resValue = dict1["NS.Test2"] as ODataResourceValue;
+            Assert.Equal(typeof(SimpleOpenAddress), dict1["NS.Test2"].GetType());
+            var resValue = dict1["NS.Test2"] as SimpleOpenAddress;
             Assert.NotNull(resValue);
-            Assert.Equal(2, resValue.Properties.Count());
-            Assert.Equal("Test1", resValue.Properties.First().Name);
+            Assert.Equal("Street 1", resValue.Street);
+            Assert.Equal("City 1", resValue.City);
         }
 
         [Fact]

@@ -20,7 +20,6 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
-using NS;
 
 namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 {
@@ -56,8 +55,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             await ResetDatasource();
             string postUri = this.BaseAddress + "/convention/Employees?$format="+format;
 
-            var postContent = JObject.Parse(@"{""ID"":1,                                       
-                    ""Name"":""Name2"",
+            var postContent = JObject.Parse(@"{""ID"":1,
+                    ""Name"":""Name1"",
                     ""SkillSet"":[""Sql""],
                     ""Gender"":""Female"",
                     ""AccessLevel"":""Read,Write"",
@@ -67,22 +66,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
                     },
                     ""@NS.Test"":1}");
 
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
             using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
             {
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            }
-
-            using (HttpResponseMessage response = await this.Client.GetAsync(postUri))
-            {
-                response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-                Assert.Equal<int>(4, result.Count);
+                VerifyInstanceAnnotations("Name1", json.ToString());
             }
+
         }
-
-
 
         [Theory]
         [InlineData("application/json;odata.metadata=full")]
@@ -105,22 +99,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
                     },
                     }");
 
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
             using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
             {
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            }
-
-            using (HttpResponseMessage response = await this.Client.GetAsync(postUri))
-            {
-                response.EnsureSuccessStatusCode();
-
                 var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-                Assert.Equal<int>(4, result.Count);
+                VerifyInstanceAnnotations("Name2", json.ToString());
             }
         }
-
-
 
         [Theory]
         [InlineData("application/json;odata.metadata=full")]
@@ -132,7 +119,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
 
             var postContent = JObject.Parse(@"{""ID"":1,                                       
-                    ""Name"":""Name2"",
+                    ""Name"":""Name3"",
                     ""SkillSet"":[""Sql""],
                     ""Gender@NS.TestGender"":100,
                     ""Gender"":""Female"",
@@ -143,61 +130,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
                     },
                     ""@NS.Test"":1}");
 
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
             using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
             {
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            }
-
-            using (HttpResponseMessage response = await this.Client.GetAsync(postUri))
-            {
-                response.EnsureSuccessStatusCode();
-
                 var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-                Assert.Equal<int>(4, result.Count);
-            }
-        }
-
-
-        [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationAsResourceOnTypeTest(string format)
-        {
-            await ResetDatasource();
-            string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
-
-            var postContent1 =  @"{""ID"":1,                                       
-                    ""Name"":""Name2"",
-                    ""SkillSet"":[""Sql""],
-                    ""Gender"":""Female""
-                    }";
-
-             var postContent = JObject.Parse(@"{""ID"":1,                                       
-                    ""Name"":""Name2"",
-                    ""SkillSet"":[""Sql""],
-                    ""Gender@NS.TestGender"":100,
-                    ""Gender"":""Female"",
-                    ""AccessLevel"":""Read,Write"",
-                    ""FavoriteSports"":{
-                            ""LikeMost"":""Pingpong"",
-                            ""Like"":[""Pingpong"",""Basketball""]
-                    },
-                    ""@NS.Test"":"+ postContent1+"}");
-
-            using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
-            {
-                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            }
-
-            using (HttpResponseMessage response = await this.Client.GetAsync(postUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-                Assert.Equal<int>(4, result.Count);
+                VerifyInstanceAnnotations("Name3", json.ToString());
             }
         }
 
@@ -210,15 +148,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             await ResetDatasource();
             string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
 
-            var postContent1 = @"{""ID"":1,                                       
-                    ""Name"":""Name2"",
-                    ""SkillSet"":[""Sql""],
-                    ""Gender"":""Female""
-                    }";
-
             var postContent = JObject.Parse(@"{""ID"":1,                                       
-                    ""Name@NS.TestName"":""TestName"",                    
-                    ""Name"":""Name2"",
+                    ""Name@NS.TestName"":""TestName1"",                    
+                    ""Name"":""Name4"",
                     ""SkillSet"":[""Sql""],
                     ""Gender@NS.TestGender"":500,
                     ""Gender"":""Female"",
@@ -228,21 +160,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
                             ""Like"":[""Pingpong"",""Basketball""]
                     },
                     ""@NS.Test1"":100,
-                    ""@NS.Test2"":""Testing"",
-                    ""@NS.Test3"":" + postContent1 + "}");
+                    ""@NS.Test2"":""Testing""}");
 
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
             using (HttpResponseMessage response = await this.Client.PostAsJsonAsync(postUri, postContent))
             {
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            }
-
-            using (HttpResponseMessage response = await this.Client.GetAsync(postUri))
-            {
-                response.EnsureSuccessStatusCode();
-
                 var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-                Assert.Equal<int>(4, result.Count);
+                VerifyInstanceAnnotations("Name4", json.ToString());
             }
         }
         #endregion
@@ -254,6 +179,31 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             var response = await this.Client.PostAsync(uriReset, null);
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
             return response;
+        }
+
+        private void VerifyInstanceAnnotations(string name, string json)
+        {
+            switch (name)
+            {
+                case "Name1":
+                    Assert.Contains(@"""@NS.Test"": 1", json);
+                    break;
+                case "Name2":
+                    Assert.Contains(@"""Gender@NS.TestGender"": 100", json);
+                    break;
+                case "Name3":
+                    Assert.Contains(@"""@NS.Test"": 1", json);
+                    Assert.Contains(@"""Gender@NS.TestGender"": 100", json);
+                    break;
+                case "Name4":
+                    Assert.Contains(@"""@NS.Test1"": 100", json);
+                    Assert.Contains(@"""Gender@NS.TestGender"": 500", json);
+                    Assert.Contains(@"""@NS.Test2"": ""Testing""", json);
+                    Assert.Contains(@"""Name@NS.TestName"": ""TestName1""", json);
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

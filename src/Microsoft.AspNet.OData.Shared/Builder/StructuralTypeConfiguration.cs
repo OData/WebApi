@@ -520,7 +520,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            BuilderHelper.ValidateAssignableFrom(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
+            TypeHelper.ValidateAssignableFromForArgument(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
 
             if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
             {

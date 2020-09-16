@@ -964,4 +964,10 @@
   <data name="CannotGetEnumClrMember" xml:space="preserve">
     <value>Cannot Get the Enum Clr member using '{0}'.</value>
   </data>
+  <data name="CannotCreateInstanceForProperty" xml:space="preserve">
+    <value>Cannot Create an instance for the property '{0}'.</value>
+  </data>
+  <data name="PropertyTypeShouldBeOfType" xml:space="preserve">
+    <value>The Property should be of Type {0}.</value>
+  </data>
 </root>

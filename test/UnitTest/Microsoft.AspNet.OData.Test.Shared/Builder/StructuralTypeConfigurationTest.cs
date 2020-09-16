@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
@@ -66,8 +67,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // Act & Assert
             ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationContainer(property),
-                "propertyInfo",
-                string.Format("The argument must be of type '{0}'.", "IODataInstanceAnnotationContainer"));
+                "propertyInfo", string.Format(SRResources.PropertyTypeShouldBeOfType, "IODataInstanceAnnotationContainer"));
         }
 
         /// <summary>

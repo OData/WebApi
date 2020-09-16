@@ -5,7 +5,7 @@ using Microsoft.AspNet.OData.Builder;
 using System;
 using System.Collections.Generic;
 
-namespace NS
+namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 {
     public class Employee
     {

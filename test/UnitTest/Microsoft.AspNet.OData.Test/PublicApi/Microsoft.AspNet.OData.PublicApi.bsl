@@ -1228,10 +1228,6 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Select (SelectExpandType selectType, string[] properties)
 }
 
-public sealed class Microsoft.AspNet.OData.Builder.BuilderHelper {
-	public static void ValidateAssignableFrom (System.Type expectedType, System.Type type, params string customTypeDescription)
-}
-
 [
 EditorBrowsableAttribute(),
 ExtensionAttribute(),
@@ -1569,7 +1565,7 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 public class Microsoft.AspNet.OData.Builder.InstanceAnnotationContainerAnnotation {
 	public InstanceAnnotationContainerAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
-	System.Reflection.PropertyInfo PropertyInfo  { public get; public set; }
+	System.Reflection.PropertyInfo PropertyInfo  { public get; }
 }
 
 public class Microsoft.AspNet.OData.Builder.LengthPropertyConfiguration : PrimitivePropertyConfiguration {

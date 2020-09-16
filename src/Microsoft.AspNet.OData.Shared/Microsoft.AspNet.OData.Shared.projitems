@@ -12,13 +12,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DerivedTypeConstraintAttributeEdmPropertyConvention.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Builder\BuilderHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\MaxLengthAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\Conventions\Attributes\DefaultValueAttributeEdmPropertyConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DecimalPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\DerivedTypeConstraintConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Builder\InstanceAnnotationDictionaryAnnotation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\InstanceAnnotationContainerAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\IODataInstanceAnnotationContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\LengthPropertyConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ODataInstanceAnnotationContainer.cs" />

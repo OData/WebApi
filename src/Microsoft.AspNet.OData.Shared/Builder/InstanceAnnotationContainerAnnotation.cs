@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
@@ -26,7 +25,7 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.ArgumentNull("propertyInfo");
             }
 
-            BuilderHelper.ValidateAssignableFrom(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
+            TypeHelper.ValidateAssignableFromForArgument(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
 
             PropertyInfo = propertyInfo;
         }
@@ -36,8 +35,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         public PropertyInfo PropertyInfo
         {
-            get;
-            set;
+            get;          
         }
     }
 }

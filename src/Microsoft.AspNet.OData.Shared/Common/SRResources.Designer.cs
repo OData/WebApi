@@ -322,6 +322,14 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
 
+        internal static string CannotCreateInstanceForProperty
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotCreateInstanceForProperty", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Cannot define keys on type &apos;{0}&apos; deriving from &apos;{1}&apos;. The base type in the entity inheritance hierarchy already contains keys..
         /// </summary>
@@ -2422,6 +2430,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("PropertyMustHavePublicGetterAndSetter", resourceCulture);
             }
         }
+
+        /// <summary>
+        /// Looks up a localized string similar to PropertyType ShouldBeOf Type
+        /// </summary>
+        internal static string PropertyTypeShouldBeOfType
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyTypeShouldBeOfType", resourceCulture);
+            }
+        }
+        
 
         /// <summary>
         ///   Looks up a localized string similar to The EDM instance of type &apos;{0}&apos; is missing the property &apos;{1}&apos;..

@@ -43,8 +43,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             accounts.HasEditLink(c => c.GenerateSelfLink(true), true);
 
             var paginatedAccounts = builder.EntitySet<Account>("PaginatedAccounts");
-            accounts.HasIdLink(c => c.GenerateSelfLink(false), true);
-            accounts.HasEditLink(c => c.GenerateSelfLink(true), true);
+            paginatedAccounts.HasIdLink(c => c.GenerateSelfLink(true), true);
+            paginatedAccounts.HasEditLink(c => c.GenerateSelfLink(true), true);
 
             builder.Singleton<Account>("AnonymousAccount");
 

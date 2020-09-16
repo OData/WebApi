@@ -190,6 +190,9 @@
     <Compile Include="..\BoundOperation\BoundOperationTest.cs">
       <Link>BoundOperation\BoundOperationTest.cs</Link>
     </Compile>
+    <Compile Include="..\BoundOperation\BoundOperationContextUriTest.cs">
+      <Link>BoundOperation\BoundOperationContextUriTest.cs</Link>
+    </Compile>
     <Compile Include="..\Cast\CastContext.cs">
       <Link>Cast\CastContext.cs</Link>
     </Compile>

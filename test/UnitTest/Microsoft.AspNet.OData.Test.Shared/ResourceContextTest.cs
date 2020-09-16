@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;

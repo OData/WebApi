@@ -47,13 +47,13 @@ namespace Microsoft.AspNet.OData.Builder
         /// Get All Annotations from CLR Type
         /// </summary>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        IDictionary<string,object> GetAllResourceAnnotations();
+        IDictionary<string,object> GetResourceAnnotations();
 
         /// <summary>
         /// Get all Annotations for a Property
         /// </summary>
         /// <param name="propertyName">Name of Property</param>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        IDictionary<string, object> GetAllPropertyAnnotations(string propertyName);
+        IDictionary<string, object> GetPropertyAnnotations(string propertyName);
     }
 }

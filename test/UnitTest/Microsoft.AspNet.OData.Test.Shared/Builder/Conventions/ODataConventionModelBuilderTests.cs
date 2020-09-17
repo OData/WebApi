@@ -3029,8 +3029,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
                 Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "EntityTypeWithAnnotation"));
             Assert.Single(entityType.Properties());
 
-            InstanceAnnotationContainerAnnotation instanceAnnoteDict =
-                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(entityType);
+            ODataInstanceAnnotationContainerAnnotation instanceAnnoteDict =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(entityType);
 
             Assert.Equal("InstanceAnnotations", instanceAnnoteDict.PropertyInfo.Name);
         }
@@ -3056,11 +3056,11 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
                 Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "DerivedEntityTypeWithAnnotation"));
             Assert.Equal(2, derivedEntityType.Properties().Count());
 
-            InstanceAnnotationContainerAnnotation basePropertyAnnotation =
-                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(baseEntityType);
+            ODataInstanceAnnotationContainerAnnotation basePropertyAnnotation =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(baseEntityType);
 
-            InstanceAnnotationContainerAnnotation derivedPropertyAnnotation =
-                model.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(derivedEntityType);
+            ODataInstanceAnnotationContainerAnnotation derivedPropertyAnnotation =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(derivedEntityType);
 
             Assert.Equal(basePropertyAnnotation.PropertyInfo.Name, derivedPropertyAnnotation.PropertyInfo.Name);
         }

@@ -664,7 +664,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (instanceAnnotationContainer != null)
             {
-                IDictionary<string, object> clrAnnotations = instanceAnnotationContainer.GetAllResourceAnnotations();
+                IDictionary<string, object> clrAnnotations = instanceAnnotationContainer.GetResourceAnnotations();
 
                 if (clrAnnotations != null)
                 {
@@ -683,7 +683,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         property.InstanceAnnotations = new List<ODataInstanceAnnotation>();
                     }
 
-                    IDictionary<string, object> propertyAnnotations = instanceAnnotationContainer.GetAllPropertyAnnotations(propertyName);
+                    IDictionary<string, object> propertyAnnotations = instanceAnnotationContainer.GetPropertyAnnotations(propertyName);
 
                     if (propertyAnnotations != null)
                     {

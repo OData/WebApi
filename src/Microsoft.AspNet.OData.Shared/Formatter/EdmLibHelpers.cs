@@ -759,8 +759,8 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("edmModel");
             }
 
-            InstanceAnnotationContainerAnnotation annotation =
-                edmModel.GetAnnotationValue<InstanceAnnotationContainerAnnotation>(edmType);
+            ODataInstanceAnnotationContainerAnnotation annotation =
+                edmModel.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(edmType);
             if (annotation != null)
             {
                 return annotation.PropertyInfo;

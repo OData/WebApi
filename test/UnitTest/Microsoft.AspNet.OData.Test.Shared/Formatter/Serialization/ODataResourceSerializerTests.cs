@@ -913,7 +913,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             var in1 = new Dictionary<string, object>();
@@ -994,7 +994,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             var in1 = new Dictionary<string, object>();
@@ -1083,7 +1083,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             List<int> lst = new List<int> { 1, 2, 3 };
@@ -1168,7 +1168,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
@@ -1255,7 +1255,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
@@ -1343,10 +1343,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Type simpleEnumType = typeof(SimpleEnum);
             model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
-            model.SetAnnotationValue(addressType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(addressType, new ODataInstanceAnnotationContainerAnnotation(
             simpleOpenAddress.GetProperty("InstanceAnnotations")));
 
             var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
@@ -1436,7 +1436,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
                 simpleOpenAddress.GetProperty("Properties")));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
           simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             var in1 = new Dictionary<string, object>();
@@ -1547,7 +1547,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
                 simpleOpenAddress.GetProperty("Properties")));
 
-            model.SetAnnotationValue(customerType, new InstanceAnnotationContainerAnnotation(
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
               simpleOpenCustomer.GetProperty("InstanceAnnotations")));
 
             ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);

@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// Get All Annotations from CLR Type
         /// </summary>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        public IDictionary<string, object> GetAllResourceAnnotations()
+        public IDictionary<string, object> GetResourceAnnotations()
         {
             return GetAllInstanceAnnotations(string.Empty);
         }
@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="propertyName">Name of Property</param>
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
-        public IDictionary<string, object> GetAllPropertyAnnotations(string propertyName)
+        public IDictionary<string, object> GetPropertyAnnotations(string propertyName)
         {
             return GetAllInstanceAnnotations(propertyName);
         }

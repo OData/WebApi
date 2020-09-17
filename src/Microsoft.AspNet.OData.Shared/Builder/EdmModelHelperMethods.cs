@@ -564,7 +564,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 IEdmStructuredType edmStructuredType = instanceAnnotation.Key;
                 PropertyInfo propertyInfo = instanceAnnotation.Value;
-                model.SetAnnotationValue(edmStructuredType, new InstanceAnnotationContainerAnnotation(propertyInfo));
+                model.SetAnnotationValue(edmStructuredType, new ODataInstanceAnnotationContainerAnnotation(propertyInfo));
             }
         }
         private static void AddPropertiesQuerySettings(this EdmModel model,

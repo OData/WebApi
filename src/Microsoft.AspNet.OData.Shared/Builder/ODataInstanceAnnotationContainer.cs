@@ -8,7 +8,8 @@ using System.Text;
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>
-    /// Default implementation for IODataInstanceAnnotationContainer
+    ///Initializes a new instance of the <see cref="ODataInstanceAnnotationContainer"/> class.
+    ///Inteded as Default implementation for IODataInstanceAnnotationContainer
     /// </summary>
     public class ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer
     {

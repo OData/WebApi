@@ -87,35 +87,70 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private ODataResourceValue CreateODataResourceValue(object graph, IEdmStructuredTypeReference expectedType, ODataSerializerContext writeContext)
         {
-            ODataResourceValue resourceValue = new ODataResourceValue { TypeName = expectedType.FullName() };
             List<ODataProperty> properties = new List<ODataProperty>();
+            ODataResourceValue resourceValue = new ODataResourceValue();
 
-            foreach (PropertyInfo property in graph.GetType().GetProperties())
-            {                
-                object propertyValue = property.GetValue(graph);
-
-                if (propertyValue != null)
+            IDelta delta = graph as IDelta;
+            if (delta != null)
+            {
+                foreach (string propertyName in delta.GetChangedPropertyNames())
                 {
-                    IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
-                        property.GetType());
+                    object propertyValue;
+                    delta.TryGetPropertyValue(propertyName, out propertyValue);
 
-                    ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-
-                    if (edmTypeSerializer != null)
+                    if (propertyValue != null)
                     {
-                        ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
-
-                        if (odataValue != null)
-                        {
-                            properties.Add(new ODataProperty { Name = property.Name, Value = odataValue });
-                        }
+                        SetPropertyValue(writeContext, properties, propertyName, propertyValue);
                     }
-                }                
+                }
+
+                foreach (string propertyName in delta.GetUnchangedPropertyNames())
+                {
+                    object propertyValue;
+                    delta.TryGetPropertyValue(propertyName, out propertyValue);
+
+                    if (propertyValue != null)
+                    {
+                        SetPropertyValue(writeContext, properties, propertyName, propertyValue);
+                    }
+                }
             }
+            else
+            {
+                resourceValue.TypeName = expectedType.FullName();
+
+                foreach (PropertyInfo property in graph.GetType().GetProperties())
+                {
+                    object propertyValue = property.GetValue(graph);
+
+                    SetPropertyValue(writeContext, properties, property.Name, propertyValue);
+                }
+            }            
 
             resourceValue.Properties = properties;
 
             return resourceValue;
+        }
+
+        private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties,string propertyName, object propertyValue)
+        {
+            if (propertyValue != null)
+            {
+                IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
+                    propertyValue.GetType());
+
+                ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+
+                if (edmTypeSerializer != null)
+                {
+                    ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
+
+                    if (odataValue != null)
+                    {
+                        properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
+                    }
+                }
+            }
         }
     }
 }

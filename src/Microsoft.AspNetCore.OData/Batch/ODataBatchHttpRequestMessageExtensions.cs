@@ -198,7 +198,7 @@ namespace Microsoft.AspNet.OData.Batch
             IEnumerable<MediaTypeHeaderValue> acceptHeaders = MediaTypeHeaderValue.ParseList(request.Headers.GetCommaSeparatedValues("Accept"));
             string responseContentType = null;
 
-            foreach (var acceptHeader in acceptHeaders.OrderByDescending(h => h.Quality))
+            foreach (var acceptHeader in acceptHeaders.OrderByDescending(h => h.Quality == null ? 1 : h.Quality))
             {
                 if (acceptHeader.MediaType.Equals(ODataBatchHttpRequestExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase))
                 {

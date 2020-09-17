@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Microsoft.AspNet.OData.Batch
 {
@@ -35,19 +36,13 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (contentIdToLocationMapping != null)
             {
-                string queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : String.Empty;
-                string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(queryString, contentIdToLocationMapping);
-                if (!string.IsNullOrEmpty(resolvedRequestUrl))
-                {
-                    Uri resolvedUri = new Uri(resolvedRequestUrl, UriKind.RelativeOrAbsolute);
-                    if (resolvedUri.IsAbsoluteUri)
-                    {
-                        context.Request.CopyAbsoluteUrl(resolvedUri);
-                    }
-                    else
-                    {
-                        context.Request.QueryString = new QueryString(resolvedRequestUrl);
-                    }
+                string encodedUrl = context.Request.GetEncodedUrl();
+                string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(encodedUrl, contentIdToLocationMapping);
+                Uri resolvedUri;
+                if (!string.IsNullOrEmpty(resolvedRequestUrl)
+                    && Uri.TryCreate(resolvedRequestUrl, UriKind.Absolute, out resolvedUri))
+                { 
+                    context.Request.CopyAbsoluteUrl(resolvedUri);
                 }
 
                 context.Request.SetODataContentIdMapping(contentIdToLocationMapping);

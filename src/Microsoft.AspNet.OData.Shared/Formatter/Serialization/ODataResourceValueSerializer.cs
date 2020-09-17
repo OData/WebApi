@@ -88,17 +88,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private ODataResourceValue CreateODataResourceValue(object graph, IEdmStructuredTypeReference expectedType, ODataSerializerContext writeContext)
         {
             List<ODataProperty> properties = new List<ODataProperty>();
-            ODataResourceValue resourceValue = new ODataResourceValue();
-
+            ODataResourceValue resourceValue = new ODataResourceValue { TypeName = expectedType.FullName() };
+            
             IDelta delta = graph as IDelta;
             if (delta != null)
             {
                 foreach (string propertyName in delta.GetChangedPropertyNames())
                 {
                     object propertyValue;
-                    delta.TryGetPropertyValue(propertyName, out propertyValue);
-
-                    if (propertyValue != null)
+                    
+                    if (delta.TryGetPropertyValue(propertyName, out propertyValue))
                     {
                         SetPropertyValue(writeContext, properties, propertyName, propertyValue);
                     }
@@ -107,9 +106,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 foreach (string propertyName in delta.GetUnchangedPropertyNames())
                 {
                     object propertyValue;
-                    delta.TryGetPropertyValue(propertyName, out propertyValue);
-
-                    if (propertyValue != null)
+                    if(delta.TryGetPropertyValue(propertyName, out propertyValue))
                     {
                         SetPropertyValue(writeContext, properties, propertyName, propertyValue);
                     }
@@ -117,8 +114,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else
             {
-                resourceValue.TypeName = expectedType.FullName();
-
                 foreach (PropertyInfo property in graph.GetType().GetProperties())
                 {
                     object propertyValue = property.GetValue(graph);
@@ -134,23 +129,38 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties,string propertyName, object propertyValue)
         {
+            ODataValue odataValue = null;
             if (propertyValue != null)
             {
                 IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
                     propertyValue.GetType());
 
-                ODataEdmTypeSerializer edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                ODataEdmTypeSerializer edmTypeSerializer;
+
+                if (edmTypeReference.IsCollection())
+                {
+                    edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
+                }
+                else if (edmTypeReference.IsStructured())
+                {
+                    edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
+                }
+                else
+                {
+                    edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
+                }
 
                 if (edmTypeSerializer != null)
                 {
-                    ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
-
-                    if (odataValue != null)
-                    {
-                        properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
-                    }
+                    odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);                    
                 }
             }
+            else
+            {
+                odataValue = new ODataNullValue();
+            }
+
+            properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
         }
     }
 }

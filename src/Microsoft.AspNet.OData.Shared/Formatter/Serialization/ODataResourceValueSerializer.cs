@@ -74,6 +74,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw Error.InvalidOperation(SRResources.CannotWriteType, typeof(ODataResourceValueSerializer), expectedType.FullName());
             }
 
+            if (graph == null)
+            {
+                return new ODataNullValue();
+            }
+
             ODataResourceValue value = CreateODataResourceValue(graph, expectedType.AsStructured(), writeContext);
             if (value == null)
             {
@@ -89,7 +94,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             List<ODataProperty> properties = new List<ODataProperty>();
             ODataResourceValue resourceValue = new ODataResourceValue { TypeName = expectedType.FullName() };
-            
+  
             IDelta delta = graph as IDelta;
             if (delta != null)
             {
@@ -99,7 +104,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     
                     if (delta.TryGetPropertyValue(propertyName, out propertyValue))
                     {
-                        SetPropertyValue(writeContext, properties, propertyName, propertyValue);
+                        SetPropertyValue(writeContext, properties, expectedType, propertyName, propertyValue);
                     }
                 }
 
@@ -108,7 +113,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     object propertyValue;
                     if(delta.TryGetPropertyValue(propertyName, out propertyValue))
                     {
-                        SetPropertyValue(writeContext, properties, propertyName, propertyValue);
+                        SetPropertyValue(writeContext, properties, expectedType, propertyName, propertyValue);
                     }
                 }
             }
@@ -118,7 +123,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     object propertyValue = property.GetValue(graph);
 
-                    SetPropertyValue(writeContext, properties, property.Name, propertyValue);
+                    SetPropertyValue(writeContext, properties, expectedType, property.Name, propertyValue);
                 }
             }            
 
@@ -127,40 +132,40 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             return resourceValue;
         }
 
-        private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties,string propertyName, object propertyValue)
+        private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties, IEdmStructuredTypeReference expectedType, string propertyName, object propertyValue)
         {
-            ODataValue odataValue = null;
-            if (propertyValue != null)
+            IEdmTypeReference edmTypeReference;
+            ODataEdmTypeSerializer edmTypeSerializer;
+
+            edmTypeReference = propertyValue == null ? expectedType : writeContext.GetEdmType(propertyValue,
+                propertyValue.GetType());
+            edmTypeSerializer = GetResourceValueEdmTypeSerializer(edmTypeReference);
+
+            if (edmTypeSerializer != null)
             {
-                IEdmTypeReference edmTypeReference = writeContext.GetEdmType(propertyValue,
-                    propertyValue.GetType());
+                ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
+                properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
+            }
+        }
 
-                ODataEdmTypeSerializer edmTypeSerializer;
+        private ODataEdmTypeSerializer GetResourceValueEdmTypeSerializer(IEdmTypeReference edmTypeReference)
+        {
+            ODataEdmTypeSerializer edmTypeSerializer;
 
-                if (edmTypeReference.IsCollection())
-                {
-                    edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
-                }
-                else if (edmTypeReference.IsStructured())
-                {
-                    edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
-                }
-                else
-                {
-                    edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-                }
-
-                if (edmTypeSerializer != null)
-                {
-                    odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);                    
-                }
+            if (edmTypeReference.IsCollection())
+            {
+                edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
+            }
+            else if (edmTypeReference.IsStructured())
+            {
+                edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
             }
             else
             {
-                odataValue = new ODataNullValue();
+                edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
             }
 
-            properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
+            return edmTypeSerializer;
         }
     }
 }

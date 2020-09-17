@@ -1116,7 +1116,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.Equal("NS.test1", resource.InstanceAnnotations.First().Name);
             var resVal = resource.InstanceAnnotations.First().Value as ODataResourceValue;
             Assert.NotNull(resVal);
-            Assert.Equal(4, resVal.Properties.Count());
+            Assert.Equal(3, resVal.Properties.Count());
             Assert.Equal("ID", resVal.Properties.First().Name);
             Assert.Equal(3, resVal.Properties.First().Value);
         }

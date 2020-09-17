@@ -109,14 +109,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                         if (propertyValue == null)
                         {
+                            // We need expected property type only if property value is null, else it will get from the value
                             if (delta.TryGetPropertyType(propertyName, out propertyType))
                             {
                                 expectedPropType = writeContext.GetEdmType(propertyValue, propertyType) as IEdmStructuredTypeReference;
-                            }
-                            else
-                            {
-                                properties.Add(new ODataProperty { Name = propertyName, Value = new ODataNullValue() });
-                            }
+                            }                            
                         }
                         
                         SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
@@ -130,17 +127,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     {
                         Type propertyType;
                         IEdmStructuredTypeReference expectedPropType = null;
-
+                                                
                         if (propertyValue == null)
                         {
+                            // We need expected property type only if property value is null, else it will get from the value
                             if (delta.TryGetPropertyType(propertyName, out propertyType))
                             {
                                 expectedPropType = writeContext.GetEdmType(propertyValue, propertyType) as IEdmStructuredTypeReference;
-                            }
-                            else
-                            {
-                                properties.Add(new ODataProperty { Name = propertyName, Value = new ODataNullValue() });
-                            }
+                            }                         
                         }
 
                         SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
@@ -180,21 +174,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties, IEdmStructuredTypeReference expectedType, string propertyName, object propertyValue)
         {
-            IEdmTypeReference edmTypeReference;
-            ODataEdmTypeSerializer edmTypeSerializer = null;
-
-            edmTypeReference = propertyValue == null ? expectedType : writeContext.GetEdmType(propertyValue,
-                propertyValue.GetType());
-
-            if (edmTypeReference != null)
+            if (propertyValue == null && expectedType == null)
             {
-                edmTypeSerializer = GetResourceValueEdmTypeSerializer(edmTypeReference);
+                properties.Add(new ODataProperty { Name = propertyName, Value = new ODataNullValue() });
             }
-
-            if (edmTypeSerializer != null)
+            else
             {
-                ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
-                properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
+                IEdmTypeReference edmTypeReference;
+                ODataEdmTypeSerializer edmTypeSerializer = null;
+
+                edmTypeReference = propertyValue == null ? expectedType : writeContext.GetEdmType(propertyValue,
+                    propertyValue.GetType());
+
+                if (edmTypeReference != null)
+                {
+                    edmTypeSerializer = GetResourceValueEdmTypeSerializer(edmTypeReference);
+                }
+
+                if (edmTypeSerializer != null)
+                {
+                    ODataValue odataValue = edmTypeSerializer.CreateODataValue(propertyValue, edmTypeReference, writeContext);
+                    properties.Add(new ODataProperty { Name = propertyName, Value = odataValue });
+                }
             }
         }
 

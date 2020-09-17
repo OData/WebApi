@@ -68,6 +68,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Get Annotation value for the given annotation and property</returns>
         public object GetPropertyAnnotation(string propertyName, string annotationName)
         {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw Error.ArgumentNull("propertyName");
+            }
+
             return GetInstanceAnnotation(propertyName, annotationName);
         }
 
@@ -87,6 +92,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// <returns>Dictionary of string(annotation name) and object value(annotation value)</returns>
         public IDictionary<string, object> GetPropertyAnnotations(string propertyName)
         {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw Error.ArgumentNull("propertyName");
+            }
+
             return GetAllInstanceAnnotations(propertyName);
         }
 
@@ -106,6 +116,11 @@ namespace Microsoft.AspNet.OData.Builder
 
         private object GetInstanceAnnotation(string propertyName, string annotationName)
         {
+            if (string.IsNullOrEmpty(annotationName))
+            {
+                throw Error.ArgumentNull("annotationName");
+            }
+
             IDictionary<string, object> annotationDictionary;
             if (instanceAnnotations.TryGetValue(propertyName, out annotationDictionary))
             {

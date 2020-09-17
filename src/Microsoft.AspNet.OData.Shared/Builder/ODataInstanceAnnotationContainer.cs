@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Microsoft.AspNet.OData.Common;
 
 namespace Microsoft.AspNet.OData.Builder
 {
     /// <summary>    
     ///Intended as Default implementation for IODataInstanceAnnotationContainer
     /// </summary>
-    public class ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer
+    public sealed class ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer
     {
         private IDictionary<string, IDictionary<string, object>> instanceAnnotations;
 
@@ -42,6 +42,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// <param name="value">Value of Annotation</param>
         public void AddPropertyAnnotation(string propertyName, string annotationName, object value)
         {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                throw Error.ArgumentNull("propertyName");
+            }
+
             SetInstanceAnnotation(propertyName, annotationName, value);
         }
 
@@ -127,23 +132,19 @@ namespace Microsoft.AspNet.OData.Builder
 
         private static void ValidateInstanceAnnotation(string annotationName)
         {
-            bool hasDot = false;
-            foreach (char c in annotationName)
+            if (string.IsNullOrEmpty(annotationName))
             {
-                if(char.Equals(c,'#') || char.Equals(c, '@'))
-                {
-                    throw new ArgumentException(SRResources.InstanceAnnotationNotContain, "annotationName");
-                }
-
-                if (char.Equals(c, '.'))
-                {
-                    hasDot = true;
-                }
+                throw Error.ArgumentNull("annotationName");
             }
 
-            if (!hasDot)
+            if (annotationName[0] == '@' || annotationName[0] == '.' || annotationName[annotationName.Length-1] == '.')
             {
-                throw new ArgumentException(SRResources.InstanceAnnotationShouldContain, "annotationName");
+                throw new ArgumentException(SRResources.InstanceAnnotationNotContain, annotationName);
+            }
+
+            if (!annotationName.Contains("."))
+            {
+                throw new ArgumentException(SRResources.InstanceAnnotationShouldContain, annotationName);
             }
         }
     }

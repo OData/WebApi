@@ -1585,7 +1585,7 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to The instance annotation for should not contain @ or #.
+        ///   Looks up a localized string similar to The instance annotation for should not start with @ or #.
         /// </summary>
         internal static string InstanceAnnotationNotContain
         {
@@ -1603,6 +1603,28 @@ namespace Microsoft.AspNet.OData.Common
             get
             {
                 return ResourceManager.GetString("InstanceAnnotationShouldContain", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should not be empty.
+        /// </summary>
+        internal static string InstanceAnnotationNotEmpty
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationNotEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for property should not be empty.
+        /// </summary>
+        internal static string InstanceAnnotationPropertyNotEmpty
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationPropertyNotEmpty", resourceCulture);
             }
         }
 

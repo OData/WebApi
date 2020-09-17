@@ -894,24 +894,20 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.Equal(new DateTimeOffset(dateTime), dateTimeProperty.Value);
         }
 
-        [Fact]
-        public void CreateResource_ThrowsErr_WithBadInstanceAnnotations()
+        [Theory]
+        [InlineData("@NS.test1", "notcontain")]
+        [InlineData("NStest1.", "notcontain")]
+        [InlineData("NStest", "contain")]
+        public void CreateResource_ThrowsErr_WithBadInstanceAnnotations(string annotationName, string error)
         {
             var in1 = new Dictionary<string, object>();
-            in1.Add("NS.test@1", 123);
-
-            var in2 = new Dictionary<string, object>();
-            in2.Add("NStest2", 345);
+            in1.Add(annotationName, 123);
 
             var instAnn = new ODataInstanceAnnotationContainer();
 
             ExceptionAssert.ThrowsArgument(
-               () => AddInstanceAnnotations(instAnn, in1, string.Empty), "annotationName",
-               SRResources.InstanceAnnotationNotContain);
-
-            ExceptionAssert.ThrowsArgument(
-                () => AddInstanceAnnotations(instAnn, in2, string.Empty), "annotationName",
-                SRResources.InstanceAnnotationShouldContain);
+               () => AddInstanceAnnotations(instAnn, in1, string.Empty), annotationName,
+               error == "notcontain" ? SRResources.InstanceAnnotationNotContain : SRResources.InstanceAnnotationShouldContain);
         }
         
         [Fact]

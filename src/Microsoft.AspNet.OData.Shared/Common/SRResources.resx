@@ -971,9 +971,15 @@
     <value>The Property should be of Type {0}.</value>
   </data>
   <data name="InstanceAnnotationNotContain" xml:space="preserve">
-    <value>Instance Annotation name cannot have a '#' or '@' in it.</value>
+    <value>Instance Annotation name cannot have a '@' as the first character and cannot have a '.' as first or last character.</value>
   </data>
   <data name="InstanceAnnotationShouldContain" xml:space="preserve">
-    <value>Instance Annotation should have a '.' in it, usually in a format Namespace.TermName</value>
+    <value>Instance Annotation should have a '.' in it and should not be the first or last character, usually in a format Namespace.TermName</value>
+  </data>
+  <data name="InstanceAnnotationNotEmpty" xml:space="preserve">
+    <value>An Instance Annotation name cannot be null or empty.</value>
+  </data>
+  <data name="InstanceAnnotationPropertyNotEmpty" xml:space="preserve">
+    <value>InstanceAnnotation Property name cannot be null or empty.</value>
   </data>
 </root>

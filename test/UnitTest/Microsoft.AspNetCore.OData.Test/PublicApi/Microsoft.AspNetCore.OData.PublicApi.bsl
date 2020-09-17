@@ -1245,6 +1245,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
+	public void HasInstanceAnnotations (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
@@ -1265,13 +1266,13 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
@@ -1708,23 +1709,6 @@ public class Microsoft.AspNet.OData.Builder.ODataConventionModelBuilder : ODataM
 	public virtual void ValidateModel (Microsoft.OData.Edm.IEdmModel model)
 }
 
-public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
-	public ODataInstanceAnnotationContainer ()
-
-	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
-	public virtual void AddResourceAnnotation (string annotationName, object value)
-	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
-	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
-	public virtual object GetResourceAnnotation (string annotationName)
-	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
-}
-
-public class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainerAnnotation {
-	public ODataInstanceAnnotationContainerAnnotation (System.Reflection.PropertyInfo propertyInfo)
-
-	System.Reflection.PropertyInfo PropertyInfo  { public get; }
-}
-
 public class Microsoft.AspNet.OData.Builder.ODataModelBuilder {
 	public ODataModelBuilder ()
 
@@ -1880,6 +1864,17 @@ AttributeUsageAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.Builder.MediaTypeAttribute : System.Attribute {
 	public MediaTypeAttribute ()
+}
+
+public sealed class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
+	public ODataInstanceAnnotationContainer ()
+
+	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	public virtual void AddResourceAnnotation (string annotationName, object value)
+	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
+	public virtual object GetResourceAnnotation (string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
 }
 
 [

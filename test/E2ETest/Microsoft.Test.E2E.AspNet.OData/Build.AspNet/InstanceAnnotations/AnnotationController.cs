@@ -68,6 +68,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
                     }
                 },
             };
+
+            var instanceAnnot = new ODataInstanceAnnotationContainer();
+            instanceAnnot.AddResourceAnnotation("NS.Test2", 2);
+
+            Employees[1].InstanceAnnotations = instanceAnnot;
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]

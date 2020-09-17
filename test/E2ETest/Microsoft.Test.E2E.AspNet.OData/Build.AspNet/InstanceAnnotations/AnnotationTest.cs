@@ -143,6 +143,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
         [InlineData("application/json;odata.metadata=full")]
         [InlineData("application/json;odata.metadata=minimal")]
         [InlineData("application/json;odata.metadata=none")]
+        public async Task InstanceAnnotationGetTest(string format)
+        {
+            await ResetDatasource();
+            string getUri = this.BaseAddress + "/convention/Employees?$format=" + format;
+
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+            using (HttpResponseMessage response = await this.Client.GetAsync(getUri))
+            {
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Contains(@"""@NS.Test2"": 2", json.ToString());
+            }
+        }
+
+        [Theory]
+        [InlineData("application/json;odata.metadata=full")]
+        [InlineData("application/json;odata.metadata=minimal")]
+        [InlineData("application/json;odata.metadata=none")]
         public async Task InstanceAnnotationMultipleTest(string format)
         {
             await ResetDatasource();

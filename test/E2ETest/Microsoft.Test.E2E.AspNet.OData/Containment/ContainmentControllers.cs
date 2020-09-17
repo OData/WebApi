@@ -426,4 +426,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
     }
+
+    public class PaginatedAccountsController : TestODataController
+    {
+        private static ContainmentDataSource _dataSource = null;
+        public PaginatedAccountsController()
+        {
+            if (_dataSource == null)
+            {
+                _dataSource = new ContainmentDataSource();
+            }
+        }
+
+        [ODataRoute("PaginatedAccounts")]
+        [EnableQuery(PageSize =1)]
+        public ITestActionResult Get()
+        {
+            return Ok(_dataSource.PaginatedAccounts);
+        }
+
+        [EnableQuery(PageSize = 1)]
+        [ODataRoute("PaginatedAccounts({key})/PayinPIs")]
+        public ITestActionResult GetPayinPIsFromAccountImport(int key)
+        {
+            var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
+            return Ok(payinPIs);
+        }
+
+    }
 }

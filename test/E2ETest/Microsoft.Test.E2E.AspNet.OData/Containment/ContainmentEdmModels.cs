@@ -41,7 +41,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var accounts = builder.EntitySet<Account>("Accounts"); 
             accounts.HasIdLink(c => c.GenerateSelfLink(false), true);
             accounts.HasEditLink(c => c.GenerateSelfLink(true), true);
-            
+
+            var paginatedAccounts = builder.EntitySet<Account>("PaginatedAccounts");
+            paginatedAccounts.HasIdLink(c => c.GenerateSelfLink(true), true);
+            paginatedAccounts.HasEditLink(c => c.GenerateSelfLink(true), true);
+
             builder.Singleton<Account>("AnonymousAccount");
 
             AddBoundActionsAndFunctions(builder);
@@ -57,6 +61,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var paymentInstrumentType = builder.EntityType<PaymentInstrument>();
 
             builder.EntitySet<Account>("Accounts");
+
+            builder.EntitySet<Account>("PaginatedAccounts");
 
             builder.Singleton<Account>("AnonymousAccount");
 

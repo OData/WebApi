@@ -198,28 +198,32 @@ namespace Microsoft.AspNet.OData.Batch
             HttpHeaderValueCollection<MediaTypeWithQualityHeaderValue> acceptHeaderValues = request.Headers.Accept;
 
             MediaTypeHeaderValue responseContentType = null;
-            if (!acceptHeaderValues.Any())
+            foreach (MediaTypeWithQualityHeaderValue acceptHeader in acceptHeaderValues.OrderByDescending(h => h.Quality == null ? 1 : h.Quality))
+            {
+                if (acceptHeader.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase))
+                {
+                    responseContentType = MediaTypeHeaderValue.Parse(
+                    String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}",
+                        Guid.NewGuid()));
+                    break;
+                }
+                else if (acceptHeader.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase))
+                {
+                    responseContentType = MediaTypeHeaderValue.Parse(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson);
+                    break;
+                }
+            }
+
+            if (responseContentType == null)
             {
                 // In absence of accept, if request was JSON then default response to be JSON.
                 // Note that, if responseContentType is not set, then it will default to multipart/mixed
                 // when constructing the BatchContent, so we don't need to handle that case here
-                if (request.Content != null && request.Content.Headers.Any(h=>String.Equals(h.Key, ODataBatchHttpRequestMessageExtensions.ContentType, StringComparison.OrdinalIgnoreCase)
-                                        && h.Value.Any(v=>v.IndexOf(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1)))
+                if (request.Content != null && request.Content.Headers.Any(h => String.Equals(h.Key, ODataBatchHttpRequestMessageExtensions.ContentType, StringComparison.OrdinalIgnoreCase)
+                                        && h.Value.Any(v => v.IndexOf(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase) > -1)))
                 {
                     responseContentType = MediaTypeHeaderValue.Parse(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson);
                 }
-            }
-            else if (acceptHeaderValues.Any(
-                t => t.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeMime, StringComparison.OrdinalIgnoreCase)))
-            {
-                responseContentType = MediaTypeHeaderValue.Parse(
-                    String.Format(CultureInfo.InvariantCulture, "multipart/mixed;boundary=batchresponse_{0}",
-                        Guid.NewGuid()));
-            }
-            else if (acceptHeaderValues.Any(
-                t => t.MediaType.Equals(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson, StringComparison.OrdinalIgnoreCase)))
-            {
-                responseContentType = MediaTypeHeaderValue.Parse(ODataBatchHttpRequestMessageExtensions.BatchMediaTypeJson);
             }
 
             HttpResponseMessage response = request.CreateResponse(HttpStatusCode.OK);

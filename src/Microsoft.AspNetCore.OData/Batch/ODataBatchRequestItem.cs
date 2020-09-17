@@ -36,11 +36,12 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (contentIdToLocationMapping != null)
             {
-                string displayUrl = context.Request.GetDisplayUrl();
-                string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(displayUrl, contentIdToLocationMapping);
-                if (!string.IsNullOrEmpty(resolvedRequestUrl))
-                {
-                    Uri resolvedUri = new Uri(resolvedRequestUrl, UriKind.Absolute);
+                string encodedUrl = context.Request.GetEncodedUrl();
+                string resolvedRequestUrl = ContentIdHelpers.ResolveContentId(encodedUrl, contentIdToLocationMapping);
+                Uri resolvedUri;
+                if (!string.IsNullOrEmpty(resolvedRequestUrl)
+                    && Uri.TryCreate(resolvedRequestUrl, UriKind.Absolute, out resolvedUri))
+                { 
                     context.Request.CopyAbsoluteUrl(resolvedUri);
                 }
 

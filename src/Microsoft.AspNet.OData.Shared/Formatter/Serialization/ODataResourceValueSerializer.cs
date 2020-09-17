@@ -100,45 +100,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 foreach (string propertyName in delta.GetChangedPropertyNames())
                 {
-                    object propertyValue;
-                    
-                    if (delta.TryGetPropertyValue(propertyName, out propertyValue))
-                    {
-                        Type propertyType;
-                        IEdmStructuredTypeReference expectedPropType = null;
-
-                        if (propertyValue == null)
-                        {
-                            // We need expected property type only if property value is null, else it will get from the value
-                            if (delta.TryGetPropertyType(propertyName, out propertyType))
-                            {
-                                expectedPropType = writeContext.GetEdmType(propertyValue, propertyType) as IEdmStructuredTypeReference;
-                            }                            
-                        }
-                        
-                        SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
-                    }
+                    SetDeltaPropertyValue(writeContext, properties, delta, propertyName);
                 }
 
                 foreach (string propertyName in delta.GetUnchangedPropertyNames())
                 {
-                    object propertyValue;
-                    if(delta.TryGetPropertyValue(propertyName, out propertyValue))
-                    {
-                        Type propertyType;
-                        IEdmStructuredTypeReference expectedPropType = null;
-                                                
-                        if (propertyValue == null)
-                        {
-                            // We need expected property type only if property value is null, else it will get from the value
-                            if (delta.TryGetPropertyType(propertyName, out propertyType))
-                            {
-                                expectedPropType = writeContext.GetEdmType(propertyValue, propertyType) as IEdmStructuredTypeReference;
-                            }                         
-                        }
-
-                        SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
-                    }
+                    SetDeltaPropertyValue(writeContext, properties, delta, propertyName);
                 }
             }
             else
@@ -170,6 +137,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             resourceValue.Properties = properties;
 
             return resourceValue;
+        }
+
+        private void SetDeltaPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties, IDelta delta, string propertyName)
+        {
+            object propertyValue;
+
+            if (delta.TryGetPropertyValue(propertyName, out propertyValue))
+            {
+                Type propertyType;
+                IEdmStructuredTypeReference expectedPropType = null;
+
+                if (propertyValue == null)
+                {
+                    // We need expected property type only if property value is null, else it will get from the value
+                    if (delta.TryGetPropertyType(propertyName, out propertyType))
+                    {
+                        expectedPropType = writeContext.GetEdmType(propertyValue, propertyType) as IEdmStructuredTypeReference;
+                    }
+                }
+
+                SetPropertyValue(writeContext, properties, expectedPropType, propertyName, propertyValue);
+            }
         }
 
         private void SetPropertyValue(ODataSerializerContext writeContext, List<ODataProperty> properties, IEdmStructuredTypeReference expectedType, string propertyName, object propertyValue)

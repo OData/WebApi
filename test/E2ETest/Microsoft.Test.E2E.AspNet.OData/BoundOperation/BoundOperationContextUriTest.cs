@@ -35,7 +35,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         public async Task BoundFunctionWithNonContainmentReturnTypeWorksWithCorrectContextUri()
         {
             // Arrange
-            var requestUri = string.Format("{0}/odata/Projects/Default.GetProjectTask", BaseAddress);
+            var requestUri = string.Format("{0}/odata/Projects/Default.GetProjectTask()", BaseAddress);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Act
@@ -51,7 +51,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         public async Task BoundFunctionWithContainmentReturnTypeWorksWithCorrectContextUri()
         {
             // Arrange
-            var requestUri = string.Format("{0}/odata/Projects/Default.GetAssigments", BaseAddress);
+            var requestUri = string.Format("{0}/odata/Projects/Default.GetAssigments()", BaseAddress);
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             // Act
@@ -129,7 +129,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
     public class ProjectsController : TestODataController
     {
         [HttpGet]
-        public ITestActionResult GetProjectTask([FromBody]ODataActionParameters parameters)
+        public ITestActionResult GetProjectTask()
         {
             ProjectTask task = new ProjectTask
             {
@@ -145,7 +145,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BoundOperation
         }
 
         [HttpGet]
-        public ITestActionResult GetAssigments([FromBody]ODataActionParameters parameters)
+        public ITestActionResult GetAssigments()
         {
             var assignments = new ProjectTaskAssignment[]
             {

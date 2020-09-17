@@ -48,7 +48,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
         // no priority has q=1.0
         [InlineData(new[] { "application/json", "multipart/mixed;q=0.9" }, "application/json")]
         [InlineData(new[] { "application/json;q=0.9", "multipart/mixed" }, "multipart/mixed")]
-
         public async Task CreateODataBatchResponseAsync(string[] accept, string expected)
         {
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/$batch");
@@ -72,7 +71,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
         [InlineData("application/json; charset=utf-8", "application/json")]
         // if contentType is multipart/mixed, return multipart/mixed
         [InlineData("multipart/mixed", "multipart/mixed")]
-
         public async Task CreateODataBatchResponseAsyncWhenNoAcceptHeader(string contentType, string expected)
         {
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/$batch");

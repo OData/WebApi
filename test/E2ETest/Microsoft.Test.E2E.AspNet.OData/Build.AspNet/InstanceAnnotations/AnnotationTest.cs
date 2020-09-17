@@ -47,13 +47,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationOnTypeTest(string format)
+        [InlineData("application/json;odata.metadata=full","convention")]
+        [InlineData("application/json;odata.metadata=minimal", "convention")]
+        [InlineData("application/json;odata.metadata=none", "convention")]
+        [InlineData("application/json;odata.metadata=full", "explicit")]
+        [InlineData("application/json;odata.metadata=minimal", "explicit")]
+        [InlineData("application/json;odata.metadata=none", "explicit")]
+        public async Task InstanceAnnotationOnTypeTest(string format, string mode)
         {
             await ResetDatasource();
-            string postUri = this.BaseAddress + "/convention/Employees?$format="+format;
+            string postUri = this.BaseAddress + string.Format("/{0}/Employees?$format={1}", mode, format);
 
             var postContent = JObject.Parse(@"{""ID"":1,
                     ""Name"":""Name1"",
@@ -79,13 +82,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
         }
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationOnPropertyTest(string format)
+        [InlineData("application/json;odata.metadata=full", "convention")]
+        [InlineData("application/json;odata.metadata=minimal", "convention")]
+        [InlineData("application/json;odata.metadata=none", "convention")]
+        [InlineData("application/json;odata.metadata=full", "explicit")]
+        [InlineData("application/json;odata.metadata=minimal", "explicit")]
+        [InlineData("application/json;odata.metadata=none", "explicit")]
+        public async Task InstanceAnnotationOnPropertyTest(string format, string mode)
         {
             await ResetDatasource();
-            string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
+            string postUri = this.BaseAddress + string.Format("/{0}/Employees?$format={1}", mode, format);
 
             var postContent = JObject.Parse(@"{""ID"":1,                                       
                     ""Name"":""Name2"",
@@ -110,13 +116,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
         }
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationOnTypeAndPropertyTest(string format)
+        [InlineData("application/json;odata.metadata=full", "convention")]
+        [InlineData("application/json;odata.metadata=minimal", "convention")]
+        [InlineData("application/json;odata.metadata=none", "convention")]
+        [InlineData("application/json;odata.metadata=full", "explicit")]
+        [InlineData("application/json;odata.metadata=minimal", "explicit")]
+        [InlineData("application/json;odata.metadata=none", "explicit")]
+        public async Task InstanceAnnotationOnTypeAndPropertyTest(string format,string mode)
         {
             await ResetDatasource();
-            string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
+            string postUri = this.BaseAddress + string.Format("/{0}/Employees?$format={1}", mode, format);
 
             var postContent = JObject.Parse(@"{""ID"":1,                                       
                     ""Name"":""Name3"",
@@ -140,13 +149,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
         }
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationGetTest(string format)
+        [InlineData("application/json;odata.metadata=full", "convention")]
+        [InlineData("application/json;odata.metadata=minimal", "convention")]
+        [InlineData("application/json;odata.metadata=none", "convention")]
+        [InlineData("application/json;odata.metadata=full", "explicit")]
+        [InlineData("application/json;odata.metadata=minimal", "explicit")]
+        [InlineData("application/json;odata.metadata=none", "explicit")]
+        public async Task InstanceAnnotationGetTest(string format, string mode)
         {
             await ResetDatasource();
-            string getUri = this.BaseAddress + "/convention/Employees?$format=" + format;
+            string getUri = this.BaseAddress + string.Format("/{0}/Employees?$format={1}", mode, format);
 
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
             using (HttpResponseMessage response = await this.Client.GetAsync(getUri))
@@ -158,13 +170,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
         }
 
         [Theory]
-        [InlineData("application/json;odata.metadata=full")]
-        [InlineData("application/json;odata.metadata=minimal")]
-        [InlineData("application/json;odata.metadata=none")]
-        public async Task InstanceAnnotationMultipleTest(string format)
+        [InlineData("application/json;odata.metadata=full", "convention")]
+        [InlineData("application/json;odata.metadata=minimal", "convention")]
+        [InlineData("application/json;odata.metadata=none", "convention")]
+        [InlineData("application/json;odata.metadata=full", "explicit")]
+        [InlineData("application/json;odata.metadata=minimal", "explicit")]
+        [InlineData("application/json;odata.metadata=none", "explicit")]
+        public async Task InstanceAnnotationMultipleTest(string format, string mode)
         {
             await ResetDatasource();
-            string postUri = this.BaseAddress + "/convention/Employees?$format=" + format;
+            string postUri = this.BaseAddress + string.Format("/{0}/Employees?$format={1}", mode, format);
 
             var postContent = JObject.Parse(@"{""ID"":1,                                       
                     ""Name@NS.TestName"":""TestName1"",                    

@@ -11,6 +11,7 @@ using System.Runtime.Serialization;
 using System.Web.Http.Routing;
 #endif
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
@@ -893,6 +894,26 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             Assert.Equal(new DateTimeOffset(dateTime), dateTimeProperty.Value);
         }
 
+        [Fact]
+        public void CreateResource_ThrowsErr_WithBadInstanceAnnotations()
+        {
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test@1", 123);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NStest2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+
+            ExceptionAssert.ThrowsArgument(
+               () => AddInstanceAnnotations(instAnn, in1, string.Empty), "annotationName",
+               SRResources.InstanceAnnotationNotContain);
+
+            ExceptionAssert.ThrowsArgument(
+                () => AddInstanceAnnotations(instAnn, in2, string.Empty), "annotationName",
+                SRResources.InstanceAnnotationShouldContain);
+        }
+        
         [Fact]
         public void CreateResource_Works_WithInstanceAnnotations()
         {

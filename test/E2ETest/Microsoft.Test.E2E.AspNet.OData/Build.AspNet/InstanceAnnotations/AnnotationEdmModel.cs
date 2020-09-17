@@ -1,8 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using Microsoft.Test.E2E.AspNet.OData.Common;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
 namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
@@ -19,40 +24,37 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
             employee.EnumProperty<Gender>(c => c.Gender);
             employee.EnumProperty<AccessLevel>(c => c.AccessLevel);
             employee.ComplexProperty<FavoriteSports>(c => c.FavoriteSports);
-            employee.Namespace = "NS";
-
+            employee.HasInstanceAnnotations(c => c.InstanceAnnotations);           
+            
             var skill = builder.EnumType<Skill>();
             skill.Member(Skill.CSharp);
             skill.Member(Skill.Sql);
             skill.Member(Skill.Web);
-            skill.Namespace = "NS";
-
+            
             var gender = builder.EnumType<Gender>();
             gender.Member(Gender.Female);
             gender.Member(Gender.Male);
-            gender.Namespace = "NS";
-
+            
             var accessLevel = builder.EnumType<AccessLevel>();
             accessLevel.Member(AccessLevel.Execute);
             accessLevel.Member(AccessLevel.Read);
             accessLevel.Member(AccessLevel.Write);
-            accessLevel.Namespace = "NS";
-
+            
             var favoriteSports = builder.ComplexType<FavoriteSports>();
             favoriteSports.EnumProperty<Sport>(f => f.LikeMost);
             favoriteSports.CollectionProperty<Sport>(f => f.Like);
-            favoriteSports.Namespace = "NS";
-
+            
             var sport = builder.EnumType<Sport>();
             sport.Member(Sport.Basketball);
             sport.Member(Sport.Pingpong);
-            sport.Namespace = "NS";
-
+            
             AddBoundActionsAndFunctions(employee);
             AddUnboundActionsAndFunctions(builder);
 
             EntitySetConfiguration<Employee> employees = builder.EntitySet<Employee>("Employees");
-            builder.Namespace = "NS" ;
+            employees.HasEditLink(link, true);
+            employees.HasIdLink(link, true);
+            builder.Namespace = "NS";
             return builder.GetEdmModel();
         }
 
@@ -95,5 +97,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.InstanceAnnotations
 
             var actionConfiguration2 = odataModelBuilder.Action("ResetDataSource");
         }
+
+        private static Func<ResourceContext, Uri> link = entityContext =>
+        {
+            object id;
+            entityContext.EdmObject.TryGetPropertyValue("ID", out id);
+            string uri = ResourceContextHelper.CreateODataLink(entityContext,
+                            new EntitySetSegment(entityContext.NavigationSource as IEdmEntitySet),
+                            new KeySegment(new[] { new KeyValuePair<string, object>("ID", id) }, entityContext.StructuredType as IEdmEntityType, null));
+            return new Uri(uri);
+        };
     }
 }

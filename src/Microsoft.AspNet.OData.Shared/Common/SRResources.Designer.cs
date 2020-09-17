@@ -1585,6 +1585,28 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should not contain @ or #.
+        /// </summary>
+        internal static string InstanceAnnotationNotContain
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationNotContain", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should contain '.'.
+        /// </summary>
+        internal static string InstanceAnnotationShouldContain
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationShouldContain", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The type &apos;{0}&apos; of instance annotation &apos;{1}&apos; is not supported..
         /// </summary>
         internal static string TypeOfInstanceAnnotationNotSupported

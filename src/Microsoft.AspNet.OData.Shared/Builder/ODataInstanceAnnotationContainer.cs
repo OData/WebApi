@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -86,6 +87,8 @@ namespace Microsoft.AspNet.OData.Builder
 
         private void SetInstanceAnnotation(string propertyName, string annotationName, object value)
         {
+            ValidateInstanceAnnotation(annotationName);
+
             IDictionary<string, object> annotationDictionary;
             if (!instanceAnnotations.TryGetValue(propertyName, out annotationDictionary))
             {
@@ -120,6 +123,28 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             return null;
+        }
+
+        private static void ValidateInstanceAnnotation(string annotationName)
+        {
+            bool hasDot = false;
+            foreach (char c in annotationName)
+            {
+                if(char.Equals(c,'#') || char.Equals(c, '@'))
+                {
+                    throw new ArgumentException(SRResources.InstanceAnnotationNotContain, "annotationName");
+                }
+
+                if (char.Equals(c, '.'))
+                {
+                    hasDot = true;
+                }
+            }
+
+            if (!hasDot)
+            {
+                throw new ArgumentException(SRResources.InstanceAnnotationShouldContain, "annotationName");
+            }
         }
     }
 }

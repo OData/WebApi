@@ -970,4 +970,10 @@
   <data name="PropertyTypeShouldBeOfType" xml:space="preserve">
     <value>The Property should be of Type {0}.</value>
   </data>
+  <data name="InstanceAnnotationNotContain" xml:space="preserve">
+    <value>Instance Annotation name cannot have a '#' or '@' in it.</value>
+  </data>
+  <data name="InstanceAnnotationShouldContain" xml:space="preserve">
+    <value>Instance Annotation should have a '.' in it, usually in a format Namespace.TermName</value>
+  </data>
 </root>

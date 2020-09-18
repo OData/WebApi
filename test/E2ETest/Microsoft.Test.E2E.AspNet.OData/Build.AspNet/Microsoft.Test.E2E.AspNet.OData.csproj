@@ -1862,6 +1862,10 @@
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationController.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationDataModel.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationEdmModel.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationTest.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -1919,6 +1923,7 @@
   <ItemGroup>
     <Analyzer Include="..\..\..\..\sln\packages\xunit.analyzers.0.8.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

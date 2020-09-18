@@ -460,6 +460,9 @@ namespace Microsoft.AspNet.OData.Builder
             // add dynamic dictionary property annotation for open types
             model.AddDynamicPropertyDictionaryAnnotations(edmTypeMap.OpenTypes);
 
+            // add instance annotation dictionary property annotations
+            model.AddInstanceAnnotationsContainer(edmTypeMap.InstanceAnnotatableTypes);
+
             return edmTypes;
         }
 
@@ -554,6 +557,16 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
+        private static void AddInstanceAnnotationsContainer(this EdmModel model,
+         Dictionary<IEdmStructuredType, PropertyInfo> instanceAnnotations)
+        {
+            foreach (KeyValuePair<IEdmStructuredType, PropertyInfo> instanceAnnotation in instanceAnnotations)
+            {
+                IEdmStructuredType edmStructuredType = instanceAnnotation.Key;
+                PropertyInfo propertyInfo = instanceAnnotation.Value;
+                model.SetAnnotationValue(edmStructuredType, new ODataInstanceAnnotationContainerAnnotation(propertyInfo));
+            }
+        }
         private static void AddPropertiesQuerySettings(this EdmModel model,
             Dictionary<IEdmProperty, ModelBoundQuerySettings> edmPropertiesQuerySettings)
         {

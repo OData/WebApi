@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -18,9 +19,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     {
         internal static void ApplyProperty(ODataProperty property, IEdmStructuredTypeReference resourceType, object resource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
-        {
+        { 
             IEdmProperty edmProperty = resourceType.FindProperty(property.Name);
-
+                       
             bool isDynamicProperty = false;
             string propertyName = property.Name;
             if (edmProperty != null)
@@ -55,6 +56,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 SetDeclaredProperty(resource, propertyKind, propertyName, value, edmProperty, readContext);
             }
+        }
+
+        internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResource oDataResource,
+            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        {
+            PropertyInfo propertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType.StructuredDefinition(), readContext.Model);
+            if (propertyInfo == null)
+            {
+                return;
+            }
+
+            IODataInstanceAnnotationContainer instanceAnnotationContainer = GetAnnotationContainer(propertyInfo, resource);
+
+            SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, deserializerProvider, readContext);
         }
 
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
@@ -206,7 +221,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 {
                     return;
                 }
-
+                
                 IDictionary<string, object> dynamicPropertyDictionary;
                 object dynamicDictionaryObject = propertyInfo.GetValue(resource);
                 if (dynamicDictionaryObject == null)
@@ -233,6 +248,92 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 dynamicPropertyDictionary.Add(propertyName, value);
             }
+        }
+
+        internal static void SetInstanceAnnotations(ODataResource oDataResource, IODataInstanceAnnotationContainer instanceAnnotationContainer, 
+            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        {
+            if(oDataResource.InstanceAnnotations != null)
+            {
+                foreach (ODataInstanceAnnotation annotation in oDataResource.InstanceAnnotations)
+                {
+                    AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation,string.Empty);
+                }
+            }
+
+            foreach(ODataProperty property in oDataResource.Properties)
+            {
+                if(property.InstanceAnnotations != null)
+                {
+                    foreach (ODataInstanceAnnotation annotation in property.InstanceAnnotations)
+                    {
+                        AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation, property.Name);
+                    }
+                }
+            }
+        }
+
+        private static void AddInstanceAnnotationToContainer(IODataInstanceAnnotationContainer instanceAnnotationContainer, ODataDeserializerProvider deserializerProvider, 
+            ODataDeserializerContext readContext, ODataInstanceAnnotation annotation, string propertyName)
+        {
+            IEdmTypeReference propertyType = null;
+
+            object annotationValue = ConvertAnnotationValue(annotation.Value, ref propertyType, deserializerProvider, readContext);
+
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                instanceAnnotationContainer.AddResourceAnnotation(annotation.Name, annotationValue);
+            }
+            else
+            {
+                instanceAnnotationContainer.AddPropertyAnnotation(propertyName,annotation.Name, annotationValue);
+            }
+        }
+
+        public static IODataInstanceAnnotationContainer GetAnnotationContainer(PropertyInfo propertyInfo, object resource)
+        {
+            IDelta delta = resource as IDelta;
+            object value;
+            if (delta != null)
+            {
+                delta.TryGetPropertyValue(propertyInfo.Name, out value);
+            }
+            else
+            {
+                value = propertyInfo.GetValue(resource);
+            }
+
+            IODataInstanceAnnotationContainer instanceAnnotationContainer = value as IODataInstanceAnnotationContainer;
+
+            if (instanceAnnotationContainer == null)
+            {
+                try
+                {
+                    if (propertyInfo.PropertyType == typeof(ODataInstanceAnnotationContainer) || propertyInfo.PropertyType == typeof(IODataInstanceAnnotationContainer))
+                    {
+                        instanceAnnotationContainer = new ODataInstanceAnnotationContainer();
+                    }
+                    else
+                    {
+                        instanceAnnotationContainer = Activator.CreateInstance(propertyInfo.PropertyType) as IODataInstanceAnnotationContainer;
+                    }
+
+                    if(delta != null)
+                    {
+                        delta.TrySetPropertyValue(propertyInfo.Name, instanceAnnotationContainer);
+                    }
+                    else
+                    {
+                        propertyInfo.SetValue(resource, instanceAnnotationContainer);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    throw new ODataException(Error.Format(SRResources.CannotCreateInstanceForProperty, propertyInfo.Name), ex);
+                }
+            }
+
+            return instanceAnnotationContainer;
         }
 
         internal static object ConvertValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider,
@@ -273,6 +374,69 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             typeKind = EdmTypeKind.Primitive;
+            return oDataValue;
+        }
+
+        internal static object ConvertAnnotationValue(object oDataValue, ref IEdmTypeReference propertyType, ODataDeserializerProvider deserializerProvider,
+    ODataDeserializerContext readContext)
+        {
+            if (oDataValue == null)
+            {
+                return null;
+            }
+
+            ODataEnumValue enumValue = oDataValue as ODataEnumValue;
+            if (enumValue != null)
+            {
+                return ConvertEnumValue(enumValue, ref propertyType, deserializerProvider, readContext);
+            }
+
+            ODataCollectionValue collection = oDataValue as ODataCollectionValue;
+            if (collection != null)
+            {
+                return ConvertCollectionValue(collection, ref propertyType, deserializerProvider, readContext);
+            }
+
+            ODataUntypedValue untypedValue = oDataValue as ODataUntypedValue;
+            if (untypedValue != null)
+            {
+                Contract.Assert(!String.IsNullOrEmpty(untypedValue.RawValue));
+
+                if (untypedValue.RawValue.StartsWith("[", StringComparison.Ordinal) ||
+                    untypedValue.RawValue.StartsWith("{", StringComparison.Ordinal))
+                {
+                    throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, untypedValue.RawValue));
+                }
+
+                oDataValue = ConvertPrimitiveValue(untypedValue.RawValue);
+            }
+
+            ODataResourceValue annotationVal = oDataValue as ODataResourceValue;
+            if (annotationVal != null)
+            {
+                var annotationType = readContext.Model.FindDeclaredType(annotationVal.TypeName).ToEdmTypeReference(true) as IEdmStructuredTypeReference;
+
+                ODataResourceDeserializer deserializer = new ODataResourceDeserializer(deserializerProvider);
+
+                object resource = deserializer.CreateResourceInstance(annotationType, readContext);
+
+                if (resource != null)
+                {
+                    foreach (var prop in annotationVal.Properties)
+                    {
+                        deserializer.ApplyStructuralProperty(resource, prop, annotationType, readContext);
+                    }
+                }
+               
+                return resource;
+            }
+
+            ODataPrimitiveValue primitiveValue = oDataValue as ODataPrimitiveValue;
+            if (primitiveValue != null)
+            {
+                return EdmPrimitiveHelpers.ConvertPrimitiveValue(primitiveValue.Value, primitiveValue.Value.GetType());
+            }
+
             return oDataValue;
         }
 

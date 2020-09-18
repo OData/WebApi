@@ -466,6 +466,15 @@ namespace Microsoft.AspNet.OData
             return type;
         }
 
+        internal static void ValidateAssignableFromForArgument(Type expectedType, Type type, string customTypeDescription = null)
+        {
+            if (!expectedType.IsAssignableFrom(type))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyTypeShouldBeOfType,
+                   customTypeDescription ?? expectedType.FullName);
+            }
+        }
+
         private static Type GetInnerGenericType(Type interfaceType)
         {
             // Getting the type T definition if the returning type implements IEnumerable<T>

@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.AspNet.OData.Test.Common
 {
@@ -15,5 +16,6 @@ namespace Microsoft.AspNet.OData.Test.Common
         public string Website { get; set; }
         public List<SimpleOpenOrder> Orders { get; set; }
         public IDictionary<string, object> CustomerProperties { get; set; }
+        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 }

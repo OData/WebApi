@@ -58,3 +58,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.DerivedTypeConstraintConfiguration.#AddConstraint`1()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.ActionConfiguration.#HasDerivedTypeConstraintForReturnType`1()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.FunctionConfiguration.#HasDerivedTypeConstraintForReturnType`1()")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetAllResourceAnnotations()")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetResourceAnnotations()")]

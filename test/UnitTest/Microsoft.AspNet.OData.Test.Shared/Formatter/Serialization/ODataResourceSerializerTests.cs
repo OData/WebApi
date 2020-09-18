@@ -11,11 +11,13 @@ using System.Runtime.Serialization;
 using System.Web.Http.Routing;
 #endif
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder;
+using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Types;
 using Microsoft.OData;
@@ -59,7 +61,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             {
                 FirstName = "Foo",
                 LastName = "Bar",
-                ID = 10,
+                ID = 10,                
             };
 
             _orderSet = _model.EntityContainer.FindEntitySet("Orders");
@@ -893,6 +895,723 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
         }
 
         [Theory]
+        [InlineData("@NS.test1", "notcontain")]
+        [InlineData("NStest1.", "notcontain")]
+        [InlineData("NStest", "contain")]
+        public void CreateResource_ThrowsErr_WithBadInstanceAnnotations(string annotationName, string error)
+        {
+            var in1 = new Dictionary<string, object>();
+            in1.Add(annotationName, 123);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+
+            ExceptionAssert.ThrowsArgument(
+               () => AddInstanceAnnotations(instAnn, in1, string.Empty), annotationName,
+               error == "notcontain" ? SRResources.InstanceAnnotationNotContain : SRResources.InstanceAnnotationShouldContain);
+        }
+        
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", 123);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, string.Empty);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+            
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "Name").First().InstanceAnnotations.Count);
+        }
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_WithNullAnnotation()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", 123);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", null);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, string.Empty);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "Name").First().InstanceAnnotations.Count);
+        }
+
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_WithUntypedAnnotation()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            IEdmEntityType entityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "Customer");
+            EdmEntityObject customer1 = new EdmEntityObject(entityType);
+            customer1.TrySetPropertyValue("ID", 3);
+            customer1.TrySetPropertyValue("Name", "TestName");
+
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", customer1);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, string.Empty);
+         
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+            
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal("NS.test1", resource.InstanceAnnotations.First().Name);
+            var resVal = resource.InstanceAnnotations.First().Value as ODataResourceValue;
+            Assert.NotNull(resVal);
+            Assert.Equal(4, resVal.Properties.Count());
+            Assert.Equal("ID", resVal.Properties.First().Name);
+            Assert.Equal(3, resVal.Properties.First().Value);
+        }
+        private void AddInstanceAnnotations(IODataInstanceAnnotationContainer container, IDictionary<string, object> annotation, string propertyName)
+        {
+            if (string.IsNullOrEmpty(propertyName))
+            {
+                foreach (var kv in annotation)
+                {
+                    container.AddResourceAnnotation(kv.Key, kv.Value);
+                }
+            }
+            else
+            {
+                foreach (var kv in annotation)
+                {
+                    container.AddPropertyAnnotation(propertyName, kv.Key, kv.Value);
+                }
+            }
+        }
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_OfTypeCollection()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            List<int> lst = new List<int> { 1, 2, 3 };
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", lst);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, null);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "Name").First().InstanceAnnotations.Count);
+
+            var collVal = resource.InstanceAnnotations.First().Value as ODataCollectionValue;
+            Assert.NotNull(collVal);
+            Assert.Equal<IEnumerable<int>>((IEnumerable<int> )lst, (IEnumerable<int>)collVal.Items.Select(x => (int)x));
+        }
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_OfTypeComplex()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
+            
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", addr);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, null);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }                    
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(typeof(ODataResourceValue), resource.InstanceAnnotations.First().Value.GetType());
+            Assert.Equal("Default.Address", ((ODataResourceValue)resource.InstanceAnnotations.First().Value).TypeName);
+            Assert.Equal("152nd st", ((ODataResourceValue)resource.InstanceAnnotations.First().Value).Properties.ToList()[0].Value);
+            Assert.Equal("Redmond", ((ODataResourceValue)resource.InstanceAnnotations.First().Value).Properties.ToList()[1].Value);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "Name").First().InstanceAnnotations.Count);
+        }
+
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_OfTypeComplex_Collection()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
+
+            var lstAddr = new List<SimpleOpenAddress> (){ addr };
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", lstAddr);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, null);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                InstanceAnnotations = instAnn
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(typeof(ODataCollectionValue), resource.InstanceAnnotations.First().Value.GetType());
+            Assert.True( ((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.Count() ==1);           
+            Assert.Equal("Collection(Default.Address)", ((ODataCollectionValue)resource.InstanceAnnotations.First().Value).TypeName);            
+            Assert.Equal("152nd st", ((ODataResourceValue)((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.ToList().First()).Properties.ToList()[0].Value);
+            Assert.Equal("Redmond", ((ODataResourceValue)((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.ToList().First()).Properties.ToList()[1].Value);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "Name").First().InstanceAnnotations.Count);
+        }
+
+        [Fact]
+        public void CreateResource_Works_WithInstanceAnnotations_OnComplexType_AndPropertyInComplexType()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            model.SetAnnotationValue(addressType, new ODataInstanceAnnotationContainerAnnotation(
+            simpleOpenAddress.GetProperty("InstanceAnnotations")));
+
+            var addr = new SimpleOpenAddress { City = "Redmond", Street = "152nd st" };
+
+            var lstAddr = new List<SimpleOpenAddress>() { addr };
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", lstAddr);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, null);
+            AddInstanceAnnotations(instAnn, in2, "City");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, addressType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+            
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } },
+                    InstanceAnnotations = instAnn
+                }
+                
+            };
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                addressType.ToEdmTypeReference(false) as IEdmComplexTypeReference, customer.Address);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Address", resource.TypeName);
+            Assert.Equal(2, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "Street"));
+            Assert.Equal("a street", street.Value);
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(typeof(ODataCollectionValue), resource.InstanceAnnotations.First().Value.GetType());
+            Assert.True(((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.Count() == 1);
+            Assert.Equal("Collection(Default.Address)", ((ODataCollectionValue)resource.InstanceAnnotations.First().Value).TypeName);
+            Assert.Equal("152nd st", ((ODataResourceValue)((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.ToList().First()).Properties.ToList()[0].Value);
+            Assert.Equal("Redmond", ((ODataResourceValue)((ODataCollectionValue)(resource.InstanceAnnotations.First().Value)).Items.ToList().First()).Properties.ToList()[1].Value);
+            Assert.Equal(1, resource.Properties.ToList().Where(x => x.Name == "City").First().InstanceAnnotations.Count);
+        }
+
+
+        [Fact]
+        public void CreateResource_Works_ToAppendDynamicProperties_ForOpenEntityType_WithAnnotations()
+        {
+            // Arrange
+            IEdmModel model = SerializationTestsHelpers.SimpleOpenTypeModel();
+
+            IEdmEntitySet customers = model.EntityContainer.FindEntitySet("Customers");
+
+            IEdmEntityType customerType = model.FindDeclaredType("Default.Customer") as IEdmEntityType;
+            Type simpleOpenCustomer = typeof(SimpleOpenCustomer);
+            model.SetAnnotationValue(customerType, new ClrTypeAnnotation(simpleOpenCustomer));
+
+            IEdmComplexType addressType = model.FindDeclaredType("Default.Address") as IEdmComplexType;
+            Type simpleOpenAddress = typeof(SimpleOpenAddress);
+            model.SetAnnotationValue(addressType, new ClrTypeAnnotation(simpleOpenAddress));
+
+            IEdmEnumType enumType = model.FindDeclaredType("Default.SimpleEnum") as IEdmEnumType;
+            Type simpleEnumType = typeof(SimpleEnum);
+            model.SetAnnotationValue(enumType, new ClrTypeAnnotation(simpleEnumType));
+
+            model.SetAnnotationValue(customerType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenCustomer.GetProperty("CustomerProperties")));
+
+            model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
+                simpleOpenAddress.GetProperty("Properties")));
+
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+          simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", 123);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, null);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+            ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
+
+            SelectExpandNode selectExpandNode = new SelectExpandNode(null, customerType, model);
+            ODataSerializerContext writeContext = new ODataSerializerContext
+            {
+                Model = model,
+                Path = new ODataPath(new EntitySetSegment(customers))
+            };
+
+            SimpleOpenCustomer customer = new SimpleOpenCustomer()
+            {
+                CustomerId = 991,
+                Name = "Name #991",
+                Address = new SimpleOpenAddress
+                {
+                    City = "a city",
+                    Street = "a street",
+                    Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
+                },
+                CustomerProperties = new Dictionary<string, object>(),
+                InstanceAnnotations = instAnn
+            };
+            DateTime dateTime = new DateTime(2014, 10, 24, 0, 0, 0, DateTimeKind.Utc);
+            customer.CustomerProperties.Add("EnumProperty", SimpleEnum.Fourth);
+            customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
+            customer.CustomerProperties.Add("ListProperty", new List<int> { 5, 4, 3, 2, 1 });
+            customer.CustomerProperties.Add("DateTimeProperty", dateTime);
+
+            ResourceContext resourceContext = new ResourceContext(writeContext,
+                customerType.ToEdmTypeReference(false) as IEdmEntityTypeReference, customer);
+
+            // Act
+            ODataResource resource = serializer.CreateResource(selectExpandNode, resourceContext);
+
+            // Assert
+            Assert.Equal("Default.Customer", resource.TypeName);
+            Assert.Equal(6, resource.Properties.Count());
+
+            // Verify the declared properties
+            ODataProperty street = Assert.Single(resource.Properties.Where(p => p.Name == "CustomerId"));
+            Assert.Equal(991, street.Value);
+
+            ODataProperty city = Assert.Single(resource.Properties.Where(p => p.Name == "Name"));
+            Assert.Equal("Name #991", city.Value);
+
+            // Verify the nested open complex property
+            Assert.Empty(resource.Properties.Where(p => p.Name == "Address"));
+
+            // Verify the dynamic properties
+            ODataProperty enumProperty = Assert.Single(resource.Properties.Where(p => p.Name == "EnumProperty"));
+            ODataEnumValue enumValue = Assert.IsType<ODataEnumValue>(enumProperty.Value);
+            Assert.Equal("Fourth", enumValue.Value);
+            Assert.Equal("Default.SimpleEnum", enumValue.TypeName);
+
+            ODataProperty guidProperty = Assert.Single(resource.Properties.Where(p => p.Name == "GuidProperty"));
+            Assert.Equal(new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"), guidProperty.Value);
+
+            ODataProperty listProperty = Assert.Single(resource.Properties.Where(p => p.Name == "ListProperty"));
+            ODataCollectionValue collectionValue = Assert.IsType<ODataCollectionValue>(listProperty.Value);
+            Assert.Equal(new List<int> { 5, 4, 3, 2, 1 }, collectionValue.Items.OfType<int>().ToList());
+            Assert.Equal("Collection(Edm.Int32)", collectionValue.TypeName);
+
+            ODataProperty dateTimeProperty = Assert.Single(resource.Properties.Where(p => p.Name == "DateTimeProperty"));
+            Assert.Equal(new DateTimeOffset(dateTime), dateTimeProperty.Value);
+
+            //Verify Instance Annotations
+            Assert.Equal(1, resource.InstanceAnnotations.Count);
+            Assert.Equal(1, resource.Properties.ToList().Where(x=>x.Name=="Name").First().InstanceAnnotations.Count);
+        }
+
+        [Theory]
         [InlineData(true, 4)]
         [InlineData(false, 3)]
         public void CreateResource_Works_ToAppendNullDynamicProperties_ForOpenEntityType(bool enableNullDynamicProperty, int count)
@@ -920,6 +1639,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             model.SetAnnotationValue(addressType, new DynamicPropertyDictionaryAnnotation(
                 simpleOpenAddress.GetProperty("Properties")));
 
+            model.SetAnnotationValue(customerType, new ODataInstanceAnnotationContainerAnnotation(
+              simpleOpenCustomer.GetProperty("InstanceAnnotations")));
+
             ODataResourceSerializer serializer = new ODataResourceSerializer(_serializerProvider);
 
             var config = RoutingConfigurationFactory.CreateWithRootContainer("Route");
@@ -933,6 +1655,16 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
                 Request = request
             };
 
+            var in1 = new Dictionary<string, object>();
+            in1.Add("NS.test1", 123);
+
+            var in2 = new Dictionary<string, object>();
+            in2.Add("NS.test2", 345);
+            var instAnn = new ODataInstanceAnnotationContainer();
+            AddInstanceAnnotations(instAnn, in1, string.Empty);
+            AddInstanceAnnotations(instAnn, in2, "Name");
+
+
             SimpleOpenCustomer customer = new SimpleOpenCustomer()
             {
                 CustomerId = 991,
@@ -943,7 +1675,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
                     Street = "a street",
                     Properties = new Dictionary<string, object> { { "ArrayProperty", new[] { "15", "14", "13" } } }
                 },
-                CustomerProperties = new Dictionary<string, object>()
+                CustomerProperties = new Dictionary<string, object>(),
+                InstanceAnnotations = instAnn
             };
 
             customer.CustomerProperties.Add("GuidProperty", new Guid("181D3A20-B41A-489F-9F15-F91F0F6C9ECA"));
@@ -2003,12 +2736,15 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             public Customer()
             {
                 this.Orders = new List<Order>();
+                InstanceAnnotations = new ODataInstanceAnnotationContainer();
             }
             public int ID { get; set; }
             public string FirstName { get; set; }
             public string LastName { get; set; }
             public string City { get; set; }
             public IList<Order> Orders { get; private set; }
+            public IODataInstanceAnnotationContainer InstanceAnnotations { get;  }
+
         }
 
         private class SpecialCustomer
@@ -2087,6 +2823,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             {
                 return new Tuple<IEdmElement, string, string>(element, namespaceName, localName);
             }
+
         }
 
     }

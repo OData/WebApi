@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
@@ -54,6 +55,19 @@ namespace Microsoft.AspNet.OData.Test.Builder
             ExceptionAssert.ThrowsArgument(() => configuration.AddDynamicPropertyDictionary(property),
                 "propertyInfo",
                 string.Format("The argument must be of type '{0}'.", "IDictionary<string, object>"));
+        }
+
+        [Fact]
+        public void AddInstanceAnnotationDictionary_ThrowsIfTypeIsNotDictionary()
+        {
+            // Arrange
+            MockPropertyInfo property = new MockPropertyInfo(typeof(Int32), "Test");
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationContainer(property),
+                "propertyInfo", string.Format(SRResources.PropertyTypeShouldBeOfType, "IODataInstanceAnnotationContainer"));
         }
 
         /// <summary>

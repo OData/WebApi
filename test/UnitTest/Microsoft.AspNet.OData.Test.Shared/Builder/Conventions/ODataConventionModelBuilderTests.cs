@@ -3014,6 +3014,58 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
         }
 
         [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForEntityType_InstanceAnnotation()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntityType<EntityTypeWithAnnotation>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType entityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "EntityTypeWithAnnotation"));
+            Assert.Single(entityType.Properties());
+
+            ODataInstanceAnnotationContainerAnnotation instanceAnnoteDict =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(entityType);
+
+            Assert.Equal("InstanceAnnotations", instanceAnnoteDict.PropertyInfo.Name);
+        }
+
+
+        [Fact]
+        public void GetEdmModel_WorksOnConventionModelBuilder_ForDerivedEntityType()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntityType<EntityTypeWithAnnotation>();
+
+            // Act
+            IEdmModel model = builder.GetEdmModel();
+
+            // Assert
+            Assert.NotNull(model);
+            IEdmEntityType baseEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "EntityTypeWithAnnotation"));
+            Assert.Single(baseEntityType.Properties());
+
+            IEdmEntityType derivedEntityType =
+                Assert.Single(model.SchemaElements.OfType<IEdmEntityType>().Where(c => c.Name == "DerivedEntityTypeWithAnnotation"));
+            Assert.Equal(2, derivedEntityType.Properties().Count());
+
+            ODataInstanceAnnotationContainerAnnotation basePropertyAnnotation =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(baseEntityType);
+
+            ODataInstanceAnnotationContainerAnnotation derivedPropertyAnnotation =
+                model.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(derivedEntityType);
+
+            Assert.Equal(basePropertyAnnotation.PropertyInfo.Name, derivedPropertyAnnotation.PropertyInfo.Name);
+        }
+
+        [Fact]
         public void GetEdmModel_WorksOnConventionModelBuilder_ForBaseEntityType_DerivedOpenEntityType()
         {
             // Arrange
@@ -3618,6 +3670,17 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
     }
 
     public class DerivedOpenEntityType : BaseOpenEntityType
+    {
+        public string DerivedProperty { get; set; }
+    }
+
+    public class EntityTypeWithAnnotation
+    {
+        public int Id { get; set; }
+        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+    }
+
+    public class DerivedEntityTypeWithAnnotation : EntityTypeWithAnnotation
     {
         public string DerivedProperty { get; set; }
     }

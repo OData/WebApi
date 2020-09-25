@@ -10,47 +10,37 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.
     /// </summary>
     public sealed class ODataResourceWrapper : ODataItemBase
-    {
-        /// <summary>
-        /// To check delta
-        /// </summary>
-        public bool IsDeleted { get; private set; }
-
+    {       
         /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataResourceWrapper(ODataResource item)
+        public ODataResourceWrapper(ODataResourceBase item)
             : base(item)
         {
             NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
         }
 
+  
         /// <summary>
-        /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos., overloaded for delta.
+        /// Gets the wrapped <see cref="ODataResourceBase"/>.
         /// </summary>
-        /// <param name="item"></param>
-        /// <param name="isDeleted"></param>
-        public ODataResourceWrapper(ODataResourceBase item, bool isDeleted)
-           : base(item)
+        public ODataResourceBase ResourceBase
         {
-            NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
-            IsDeleted = isDeleted;
+            get
+            {
+                return Item as ODataResourceBase;             
+            }
         }
 
         /// <summary>
         /// Gets the wrapped <see cref="ODataResource"/>.
         /// </summary>
-        public ODataResourceBase Resource
+        public ODataResource Resource
         {
             get
             {
-                if (IsDeleted)
-                {
-                    return Item as ODataDeletedResource;
-                }
-
-                return Item as ODataResource;             
+                return Item as ODataResource;
             }
         }
 

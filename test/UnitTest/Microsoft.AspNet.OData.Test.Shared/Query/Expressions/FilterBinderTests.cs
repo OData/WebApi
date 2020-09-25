@@ -2316,7 +2316,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Theory]
         [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "$it => (($it As DerivedProduct).DerivedProductName == null)","$it => (IIF((($it As DerivedProduct) == null), null, ($it As DerivedProduct).DerivedProductName) == null)")]
-        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it As DerivedCategory) == null), null, ($it As DerivedCategory).DerivedCategoryName) == null)")]
+        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it.Category As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it.Category As DerivedCategory) == null), null, ($it.Category As DerivedCategory).DerivedCategoryName) == null)")]
         public void CastToQuotedEntityOrComplexType_DerivedProductName(string filter, string expectedExpression, string expectedExpressionWithNullCheck)
         {
             // Arrange, Act & Assert

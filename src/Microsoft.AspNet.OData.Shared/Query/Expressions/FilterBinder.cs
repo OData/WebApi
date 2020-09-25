@@ -329,16 +329,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 targetClrType = EdmLibHelpers.GetClrType(targetEdmType.ToEdmTypeReference(false), Model);
             }
 
+            Expression source = arguments[0];
+
             if (arguments[0].Type == targetClrType)
             {
                 // We only support to cast Entity type to the same type now.
-                return arguments[0];
+                return source;
             }
             else if (arguments[0].Type.IsAssignableFrom(targetClrType))
             {
                 // To support to cast Entity/Complex type to the sub type now.
-                Expression source = BindCastSourceNode(node.Source);
-
                 return Expression.TypeAs(source, targetClrType);
             }
             else

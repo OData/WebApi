@@ -12,11 +12,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     public sealed class ODataResourceSetWrapper : ODataItemBase
     {
         /// <summary>
-        /// To determine if its a delta resource set
-        /// </summary>
-        public bool IsDelta { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>

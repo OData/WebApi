@@ -691,6 +691,7 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         public Microsoft.OData.Edm.IEdmTypeReference GetEdmType()
         {
+            //implement if only required, not intended in draft pr
             throw new NotImplementedException();
         }
     }

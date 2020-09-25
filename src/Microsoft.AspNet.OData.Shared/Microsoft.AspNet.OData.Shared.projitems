@@ -55,12 +55,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)CustomAggregateMethodAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmChangedObjectCollectionOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaDeletedEntityObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ETagMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaResourceSetDeserializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaLinkWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataBinaryValueMediaTypeMapping.cs" />
@@ -77,6 +77,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEdmChangedObjectOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEdmDeltaDeletedEntityObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />

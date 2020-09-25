@@ -23,35 +23,30 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataResourceSetWrapper(ODataResourceSetBase item)
             : base(item)
         {
-            Resources = new List<ODataResourceWrapper>();            
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.Overloaded constructor for delta
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="isDelta"></param>
-        public ODataResourceSetWrapper(ODataResourceSetBase item, bool isDelta)
-        : base(item)
-        {
             Resources = new List<ODataResourceWrapper>();
             DeltaLinks = new List<ODataDeltaLinkWrapper>();
-            IsDelta = isDelta;
         }
 
+   
         /// <summary>
         /// Gets the wrapped <see cref="ODataResourceSet"/>.
         /// </summary>
-        public ODataResourceSetBase ResourceSet
+        public ODataResourceSet ResourceSet
         {
             get
             {
-                if (IsDelta)
-                {
-                    return Item as ODataDeltaResourceSet;
-                }                 
-
                 return Item as ODataResourceSet;
+            }
+        }
+
+        /// <summary>
+        /// Gets the wrapped <see cref="ODataResourceSetBase"/>.
+        /// </summary>
+        public ODataResourceSetBase ODataResourceSetBase
+        {
+            get
+            {
+                return Item as ODataResourceSetBase;             
             }
         }
 

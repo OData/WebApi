@@ -120,7 +120,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
-            if (!String.IsNullOrEmpty(resourceWrapper.Resource.TypeName) && structuredType.FullName() != resourceWrapper.Resource.TypeName)
+            if (!String.IsNullOrEmpty(resourceWrapper.ResourceBase.TypeName) && structuredType.FullName() != resourceWrapper.ResourceBase.TypeName)
             {
                 // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
                 IEdmModel model = readContext.Model;
@@ -130,15 +130,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
                 }
 
-                IEdmStructuredType actualType = model.FindType(resourceWrapper.Resource.TypeName) as IEdmStructuredType;
+                IEdmStructuredType actualType = model.FindType(resourceWrapper.ResourceBase.TypeName) as IEdmStructuredType;
                 if (actualType == null)
                 {
-                    throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.Resource.TypeName));
+                    throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, resourceWrapper.ResourceBase.TypeName));
                 }
 
                 if (actualType.IsAbstract)
                 {
-                    string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.Resource.TypeName);
+                    string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, resourceWrapper.ResourceBase.TypeName);
                     throw new ODataException(message);
                 }
 
@@ -371,7 +371,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("resourceWrapper");
             }
 
-            foreach (ODataProperty property in resourceWrapper.Resource.Properties)
+            foreach (ODataProperty property in resourceWrapper.ResourceBase.Properties)
             {
                 ApplyStructuralProperty(resource, property, structuredType, readContext);
             }
@@ -502,7 +502,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             object value = null;
             if (resourceWrapper != null)
             {
-                IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.Resource.TypeName);
+                IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.ResourceBase.TypeName);
                 IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
                 value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
@@ -595,7 +595,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             Contract.Assert(edmType != null);
             Contract.Assert(readContext != null);
 
-            ODataDeltaResourceSetDeserializer deserializer = new ODataDeltaResourceSetDeserializer(DeserializerProvider);
+            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(DeserializerProvider);
             if (deserializer == null)
             {
                 throw new SerializationException(Error.Format(SRResources.TypeCannotBeDeserialized, edmType.FullName()));

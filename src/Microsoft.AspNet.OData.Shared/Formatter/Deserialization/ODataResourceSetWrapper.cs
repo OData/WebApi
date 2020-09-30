@@ -1,7 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
@@ -9,7 +11,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
     /// </summary>
-    public sealed class ODataResourceSetWrapper : ODataItemBase
+    public sealed class ODataResourceSetWrapper : ODataResourceSetWrapperBase
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
@@ -18,8 +20,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataResourceSetWrapper(ODataResourceSetBase item)
             : base(item)
         {
-            Resources = new List<ODataResourceWrapper>();
-            DeltaLinks = new List<ODataDeltaLinkWrapper>();
+            
         }
 
    
@@ -35,24 +36,21 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Gets the wrapped <see cref="ODataResourceSetBase"/>.
+        /// Gets the nested resources of this ResourceSet.
         /// </summary>
-        public ODataResourceSetBase ODataResourceSetBase
+        public new IList<ODataResourceWrapper> Resources 
         {
             get
             {
-                return Item as ODataResourceSetBase;             
+                IList<ODataResourceWrapper> resources=  ResourceItems as IList<ODataResourceWrapper>;
+
+                if(resources == null)
+                {
+                    throw new ODataException("Right resources are not added to the Resources property");
+                }
+
+                return resources;
             }
-        }
-
-        /// <summary>
-        /// Gets the nested resources of this ResourceSet.
-        /// </summary>
-        public IList<ODataResourceWrapper> Resources { get; private set; }
-
-        /// <summary>
-        /// Delta Links and deleted links
-        /// </summary>
-        public IList<ODataDeltaLinkWrapper> DeltaLinks { get; private set; }
+        }    
     }
 }

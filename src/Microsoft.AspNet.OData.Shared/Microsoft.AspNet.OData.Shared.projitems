@@ -62,6 +62,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaLinkWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaResourceSetWrapper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataResourceSetWrapperBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ResourceSetType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataBinaryValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataCountMediaTypeMapping.cs" />

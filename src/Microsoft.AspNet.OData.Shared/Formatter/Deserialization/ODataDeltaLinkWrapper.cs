@@ -12,11 +12,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     public sealed class ODataDeltaLinkWrapper : ODataItemBase
     {
         /// <summary>
-        /// To check delta
-        /// </summary>
-        public bool IsDeleted { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of <see cref="ODataDeltaLinkWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
@@ -26,17 +21,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
            
         }
 
-        /// <summary>
-        /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos., overloaded for delta.
-        /// </summary>
-        /// <param name="item"></param>
-        /// <param name="isDeleted"></param>
-        public ODataDeltaLinkWrapper(ODataDeltaLinkBase item, bool isDeleted)
-           : base(item)
-        {
-            IsDeleted = isDeleted;
-        }
-
+   
         /// <summary>
         /// Gets the wrapped <see cref="ODataResource"/>.
         /// </summary>
@@ -44,12 +29,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             get
             {
-                if (IsDeleted)
-                {
-                    return Item as ODataDeltaDeletedLink;
-                }
-
-                return Item as ODataDeltaLink;             
+                return Item as ODataDeltaLinkBase;                        
             }
         }
           

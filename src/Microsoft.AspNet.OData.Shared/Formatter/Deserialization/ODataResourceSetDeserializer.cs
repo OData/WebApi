@@ -104,9 +104,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             IEdmStructuredTypeReference elementType = edmType.AsCollection().ElementType().AsStructured();
-            IEnumerable result;
             
-            result = ReadResourceSet(resourceSet, elementType, readContext);            
+            IEnumerable result = ReadResourceSet(resourceSet, elementType, readContext);            
              
             if (result != null && elementType.IsComplex())
             {                
@@ -141,7 +140,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The deserializer context.</param>
         /// <param name="elementType">The element type of the resource set being read.</param>
         /// <returns>The deserialized resource set object.</returns>
-        public virtual IEnumerable ReadResourceSet(ODataResourceSetWrapper resourceSet, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
+        public virtual IEnumerable ReadResourceSet(ODataResourceSetWrapperBase resourceSet, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
         {
             ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(elementType);
             if (deserializer == null)
@@ -152,24 +151,41 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             Collection<object> coll = new Collection<object>();
 
-            foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
+            if (resourceSet.ResourceSetType == ResourceSetType.ResourceSet)
             {
-                ODataDeletedResource deletedResource = resourceWrapper.ResourceBase as ODataDeletedResource;
-
-                if (deletedResource != null)
+                foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
                 {
-                    coll.Add(DeSerializeDeletedEntity(readContext, deletedResource));                    
-                }
-                else
-                {
-                    coll.Add(deserializer.ReadInline(resourceWrapper, elementType, readContext));                    
+                    coll.Add(deserializer.ReadInline(resourceWrapper, elementType, readContext));
                 }
             }
-
-            foreach (ODataDeltaLinkWrapper deltaLinkWrapper in resourceSet.DeltaLinks)
+            else
             {
-                IEdmDeltaLinkBase deltaLink = DeserializeDeltaLink(readContext, deltaLinkWrapper);
-                coll.Add(deltaLink);
+                foreach (ODataItemBase odataItemBase in resourceSet.Resources)
+                {
+                    ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
+
+                   if(resourceWrapper != null)
+                    {
+                        ODataDeletedResource deletedResource = resourceWrapper.ResourceBase as ODataDeletedResource;
+
+                        if (deletedResource != null)
+                        {
+                            coll.Add(DeSerializeDeletedEntity(readContext, deletedResource));
+                        }
+                        else
+                        {
+                            coll.Add(deserializer.ReadInline(resourceWrapper, elementType, readContext));
+                        }
+                    }
+                    else
+                    {
+                        ODataDeltaLinkWrapper deltaLinkWrapper = odataItemBase as ODataDeltaLinkWrapper;
+
+                        IEdmDeltaLinkBase deltaLink = DeserializeDeltaLink(readContext, deltaLinkWrapper);
+                        coll.Add(deltaLink);
+                    }
+                    
+                }
             }
 
             return coll;
@@ -207,7 +223,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IEdmEntityType actualEntityType = actualType as IEdmEntityType;
 
             IEdmDeltaLinkBase edmDeltaLink;
-            if (deltaLinkWrapper.IsDeleted)
+            ODataDeltaDeletedLink deletedLink = deltaLinkWrapper.DeltaLink as ODataDeltaDeletedLink;
+            if (deletedLink != null)
             {
                 edmDeltaLink = new EdmDeltaDeletedLink(actualEntityType);
             }

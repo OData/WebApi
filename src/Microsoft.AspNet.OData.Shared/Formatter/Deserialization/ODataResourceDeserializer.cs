@@ -323,7 +323,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     continue;
                 }
 
-                ODataResourceSetWrapper resourceSetWrapper = childItem as ODataResourceSetWrapper;
+                ODataResourceSetWrapperBase resourceSetWrapper = childItem as ODataResourceSetWrapperBase;
                 if (resourceSetWrapper != null)
                 {
                     if (edmProperty == null)
@@ -562,7 +562,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         private void ApplyResourceSetInNestedProperty(IEdmProperty nestedProperty, object resource,
-            ODataResourceSetWrapper resourceSetWrapper, ODataDeserializerContext readContext)
+            ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
             Contract.Assert(nestedProperty != null);
             Contract.Assert(resource != null);
@@ -588,7 +588,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName);
         }
 
-        private object ReadDeltaNestedResourceSetInline(ODataResourceSetWrapper resourceSetWrapper, IEdmTypeReference edmType,
+        private object ReadDeltaNestedResourceSetInline(ODataResourceSetWrapperBase resourceSetWrapper, IEdmTypeReference edmType,
             ODataDeserializerContext readContext)
         {
             Contract.Assert(resourceSetWrapper != null);
@@ -622,19 +622,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         private void ApplyDynamicResourceSetInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference structuredType,
-            ODataResourceSetWrapper resourceSetWrapper, ODataDeserializerContext readContext)
+            ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            if (String.IsNullOrEmpty(resourceSetWrapper.ResourceSet.TypeName))
+            if (String.IsNullOrEmpty(resourceSetWrapper.ResourceSetBase.TypeName))
             {
                 string message = Error.Format(SRResources.DynamicResourceSetTypeNameIsRequired, propertyName);
                 throw new ODataException(message);
             }
 
             string elementTypeName =
-                DeserializationHelpers.GetCollectionElementTypeName(resourceSetWrapper.ResourceSet.TypeName,
+                DeserializationHelpers.GetCollectionElementTypeName(resourceSetWrapper.ResourceSetBase.TypeName,
                     isNested: false);
             IEdmSchemaType elementType = readContext.Model.FindDeclaredType(elementTypeName);
 
@@ -661,7 +661,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 result, collectionType, readContext.Model);
         }
 
-        private object ReadNestedResourceSetInline(ODataResourceSetWrapper resourceSetWrapper, IEdmTypeReference edmType,
+        private object ReadNestedResourceSetInline(ODataResourceSetWrapperBase resourceSetWrapper, IEdmTypeReference edmType,
             ODataDeserializerContext readContext)
         {
             Contract.Assert(resourceSetWrapper != null);

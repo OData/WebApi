@@ -16,6 +16,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// A normal ResourceSet
         /// </summary>
         ResourceSet,
+		
         /// <summary>
         /// A Delta Resource Set
         /// </summary>

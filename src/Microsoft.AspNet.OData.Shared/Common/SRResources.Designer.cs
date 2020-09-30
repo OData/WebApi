@@ -322,6 +322,20 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to Missing the value of the parameter &apos;{0}&apos; in the function &apos;{1}&apos; calling..
+        /// </summary>
+        internal static string MissingConvertNode
+        {
+            get
+            {
+                return ResourceManager.GetString("MissingConvertNode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot Create an instance for the property &apos;{0}&apos;..
+        /// </summary>
         internal static string CannotCreateInstanceForProperty
         {
             get

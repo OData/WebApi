@@ -206,6 +206,36 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
+        public void FunctionCallingFails_WithParametersValueMissing()
+        {
+            // Arrange
+            string complexFunction = "ComplexFunction(address=@p)";
+            string requestUri = BaseAddress + "odata/FCustomers(2)/NS." + complexFunction;
+
+            // Act
+            AggregateException exception = Assert.Throws<AggregateException>(() => _client.GetAsync(requestUri).Result);
+
+            // Assert
+            Assert.Contains("Missing the value of the parameter 'address' in the function 'ComplexFunction' calling", exception.Message);
+        }
+
+        [Fact]
+        public async Task FunctionCallingSuccess_WithParametersValueAsNull()
+        {
+            // Arrange
+            string complexFunction = "ComplexFunction(address=null)";
+            string requestUri = BaseAddress + "odata/FCustomers(99)/NS." + complexFunction;
+
+            // Act
+            var response = await _client.GetAsync(requestUri);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.False((bool)result["value"]);
+        }
+
+        [Fact]
         public async Task Response_Includes_FunctionLinkForFeed_WithAcceptHeader()
         {
             // Arrange
@@ -265,7 +295,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             model.AddElement(container);
             container.AddEntitySet("FCustomers", customer);
 
-            EdmComplexTypeReference complexType = new EdmComplexTypeReference(address, isNullable: false);
+            EdmComplexTypeReference complexType = new EdmComplexTypeReference(address, isNullable: true);
             EdmCollectionTypeReference complexCollectionType = new EdmCollectionTypeReference(new EdmCollectionType(complexType));
 
             EdmEnumTypeReference enumType = new EdmEnumTypeReference(colorEnum, isNullable: false);
@@ -422,6 +452,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [ODataRoute("UnboundComplexFunction(key={key},address={address})")]
         public bool ComplexFunction(int key, [FromODataUri] EdmComplexObject address)
         {
+            if (key == 99)
+            {
+                Assert.Null(address);
+                return false;
+            }
+
             Assert.NotNull(address);
             dynamic result = address;
             Assert.Equal("NS.Address", address.GetEdmType().FullName());

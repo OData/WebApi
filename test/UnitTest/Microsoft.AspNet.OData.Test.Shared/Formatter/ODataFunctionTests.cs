@@ -212,11 +212,22 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             string complexFunction = "ComplexFunction(address=@p)";
             string requestUri = BaseAddress + "odata/FCustomers(2)/NS." + complexFunction;
 
+#if NETCORE
             // Act
             AggregateException exception = Assert.Throws<AggregateException>(() => _client.GetAsync(requestUri).Result);
 
             // Assert
             Assert.Contains("Missing the value of the parameter 'address' in the function 'ComplexFunction' calling", exception.Message);
+#else
+            // Act
+            var response = _client.GetAsync(requestUri).Result;
+
+            // Assert
+            Assert.Equal(System.Net.HttpStatusCode.InternalServerError, response.StatusCode);
+
+            string result = response.Content.ReadAsStringAsync().Result;
+            Assert.Contains("Missing the value of the parameter 'address' in the function 'ComplexFunction' calling", result);
+#endif
         }
 
         [Fact]

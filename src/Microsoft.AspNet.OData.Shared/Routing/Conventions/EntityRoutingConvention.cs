@@ -16,8 +16,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            if (odataPath.PathTemplate == "~/entityset/key" ||
-                odataPath.PathTemplate == "~/entityset/key/cast")
+            if (odataPath.PathTemplate == "~/entityset/key"
+                || odataPath.PathTemplate == "~/entityset/key/cast"
+                || odataPath.PathTemplate == "~/entityset/cast/key")
             {
                 string httpMethodName;
 
@@ -51,11 +52,20 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeySegment keySegment = (KeySegment)odataPath.Segments[1];
+                    KeySegment keySegment;
+                    if (odataPath.PathTemplate == "~/entityset/cast/key")
+                    {
+                        keySegment = (KeySegment)odataPath.Segments[2];
+                    }
+                    else
+                    {
+                        keySegment = (KeySegment)odataPath.Segments[1];
+                    }
                     controllerContext.AddKeyValueToRouteData(keySegment);
                     return actionName;
                 }
             }
+
             return null;
         }
     }

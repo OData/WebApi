@@ -60,29 +60,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
         }
 
-        [Fact]
-        public async Task RestrictEntityToDerivedTypeInstance_ForDerivedTypeNameAfterKey()
+        [Theory]
+        [InlineData("Customers(2)/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer")]
+        [InlineData("Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer(2)")]
+        public async Task RestrictEntityToDerivedTypeInstance(string path)
         {
             // Key preceeds name of the derived type
-            string requestUri = this.BaseAddress + "/odata/Customers(2)/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer";
-
-            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
-
-            var response = await this.Client.SendAsync(request);
-            Assert.True(response.IsSuccessStatusCode);
-
-            var expectedContent = string.Format("{{\"@odata.context\":\"{0}/odata/$metadata" +
-                "#Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer/$entity\"," +
-                "\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"}}", this.BaseAddress);
-
-            Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
-        }
-
-        [Fact]
-        public async Task RestrictEntityToDerivedTypeInstance_ForDerivedTypeNameBeforeKey()
-        {
-            // Name of the derived type preceeds key
-            string requestUri = this.BaseAddress + "/odata/Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer(2)";
+            string requestUri = this.BaseAddress + "/odata/" + path;
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 
@@ -127,11 +111,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
         }
 
-        [Fact]
-        public async Task RestrictEntityToDerivedTypeInstance_ThenExpandNavProperty()
+        [Theory]
+        [InlineData("Customers(2)/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer?$expand=Orders")]
+        [InlineData("Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer(2)?$expand=Orders")]
+        public async Task RestrictEntityToDerivedTypeInstance_ThenExpandNavProperty(string pathAndQuery)
         {
             // Key preceeds name of the derived type
-            string requestUri = this.BaseAddress + "/odata/Customers(2)/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer?$expand=Orders";
+            string requestUri = this.BaseAddress + "/odata/" + pathAndQuery;
 
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
 

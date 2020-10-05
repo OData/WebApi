@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -52,15 +53,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeySegment keySegment;
-                    if (odataPath.PathTemplate == "~/entityset/cast/key")
-                    {
-                        keySegment = (KeySegment)odataPath.Segments[2];
-                    }
-                    else
-                    {
-                        keySegment = (KeySegment)odataPath.Segments[1];
-                    }
+                    KeySegment keySegment = (KeySegment)odataPath.Segments.First(d => d is KeySegment);
                     controllerContext.AddKeyValueToRouteData(keySegment);
                     return actionName;
                 }

@@ -161,6 +161,26 @@ namespace Microsoft.AspNet.OData.Test.Extensions
             // Assert
             Assert.Equal(expect, actual);
         }
+
+        [Theory]
+        [InlineData("api/v1/tenants/{tid:guid}", "api/v1/tenants/003890b9972e4092aef80e882f1e0999")]
+        public void BindPrefixTemplateWithGuidParameterWorksAsExpected(string prefix, string expect)
+        {
+            // Arrange
+            RouteValueDictionary values = new RouteValueDictionary
+            (
+                new
+                {
+                    tid = "003890b9972e4092aef80e882f1e0999"
+                }
+            );
+
+            // Act
+            string actual = ODataEndpointLinkGenerator.BindPrefixTemplate(prefix, values, null);
+
+            // Assert
+            Assert.Equal(expect, actual);
+        }
     }
 }
 #endif

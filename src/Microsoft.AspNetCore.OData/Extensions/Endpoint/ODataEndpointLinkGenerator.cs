@@ -107,12 +107,18 @@ namespace Microsoft.AspNet.OData.Extensions
                 startIndex = end + 1;
 
                 string subStr = prefix.Substring(start, end - start + 1);
+
                 templates.Add(subStr);
             }
 
             foreach (var item in templates)
             {
                 string variable = item.Substring(1, item.Length - 2); // remove { and }
+                var colonIndex = variable.IndexOf(":");
+                if (colonIndex != -1)
+                {
+                    variable = variable.Substring(0, colonIndex);
+                }
 
                 if (values != null && values.TryGetValue(variable, out object valueFromValues))
                 {

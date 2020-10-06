@@ -53,11 +53,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var expectedContent = string.Format("{{\"@odata.context\":\"{0}/odata/$metadata" +
-                "#Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer\"," +
-                "\"value\":[{{\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"}}]}}", this.BaseAddress);
+            var expectedContent = "\"value\":[{\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"}]";
 
-            Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
+            Assert.Contains(expectedContent, await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
@@ -73,11 +71,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var expectedContent = string.Format("{{\"@odata.context\":\"{0}/odata/$metadata" +
-                "#Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer/$entity\"," +
-                "\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"}}", this.BaseAddress);
+            var expectedContent = "\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"";
 
-            Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
+            Assert.Contains(expectedContent, await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -103,12 +99,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var expectedContent = string.Format("{{\"@odata.context\":\"{0}/odata/$metadata" +
-                "#Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer(Orders())\"," +
-                "\"value\":[{{\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"," +
-                "\"Orders\":[{{\"Id\":2,\"Amount\":230}},{{\"Id\":3,\"Amount\":150}}]}}]}}", this.BaseAddress);
+            var expectedContent = "\"value\":[{\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"," +
+                "\"Orders\":[{\"Id\":2,\"Amount\":230},{\"Id\":3,\"Amount\":150}]}]";
 
-            Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
+            Assert.Contains(expectedContent, await response.Content.ReadAsStringAsync());
         }
 
         [Theory]
@@ -124,12 +118,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.DerivedTypes
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var expectedContent = string.Format("{{\"@odata.context\":\"{0}/odata/$metadata" +
-                "#Customers/Microsoft.Test.E2E.AspNet.OData.DerivedTypes.VipCustomer(Orders())/$entity\"," +
-                "\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"," +
-                "\"Orders\":[{{\"Id\":2,\"Amount\":230}},{{\"Id\":3,\"Amount\":150}}]}}", this.BaseAddress);
+            var expectedContent = "\"Id\":2,\"Name\":\"Customer 2\",\"LoyaltyCardNo\":\"9876543210\"," +
+                "\"Orders\":[{\"Id\":2,\"Amount\":230},{\"Id\":3,\"Amount\":150}]";
 
-            Assert.Equal(expectedContent, await response.Content.ReadAsStringAsync());
+            Assert.Contains(expectedContent, await response.Content.ReadAsStringAsync());
         }
     }
 }

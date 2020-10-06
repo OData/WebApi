@@ -1,7 +1,6 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -119,8 +118,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var contentAsString = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
+            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -138,8 +136,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var contentAsString = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains("\"value\":[{\"Id\":9,\"Name\":\"Customer Name 9\"},{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
+            Assert.Contains("\"value\":[{\"Id\":9,\"Name\":\"Customer Name 9\"},{\"Id\":1,\"Name\":\"Customer Name 1\"}]",
+                await response.Content.ReadAsStringAsync());
         }
 
         [Fact]
@@ -333,8 +331,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarQuery
             var response = await this.Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
 
-            var contentAsString = response.Content.ReadAsStringAsync().Result;
-            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]", contentAsString);
+            Assert.Contains("\"value\":[{\"Id\":1,\"Name\":\"Customer Name 1\"}]",
+                await response.Content.ReadAsStringAsync());
         }
     }
 }

@@ -934,6 +934,15 @@
     <Compile Include="..\DependencyInjection\DependencyInjectionEdmModel.cs">
       <Link>DependencyInjection\DependencyInjectionEdmModel.cs</Link>
     </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesControllers.cs">
+      <Link>DerivedTypes\DerivedTypesControllers.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesDataModel.cs">
+      <Link>DerivedTypes\DerivedTypesDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesTests.cs">
+      <Link>DerivedTypes\DerivedTypesTests.cs</Link>
+    </Compile>
     <Compile Include="..\DollarFormat\DollarFormatController.cs">
       <Link>DollarFormat\DollarFormatController.cs</Link>
     </Compile>

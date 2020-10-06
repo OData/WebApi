@@ -293,6 +293,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                                 };
                             }
                         }
+
                         properties.Add(property);
                     }
                 }

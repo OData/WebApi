@@ -79,7 +79,7 @@ namespace Microsoft.AspNet.OData.Query
                     return DataSourceProviderKind.EFCore;
 
                 default:
-                    return DataSourceProviderKind.None;
+                    return DataSourceProviderKind.InMemory;
             }
         }
     }

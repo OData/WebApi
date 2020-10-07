@@ -109,7 +109,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         ("PATCH", "{}"),
                         (typeof(ExtraParametersWithOwnModelBindersController), "Patch",
                         new [] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
-                    },         
+                    },
                     {
                         new Dictionary<string, object>() { { "key", 1 } },
                         ("GET", null),

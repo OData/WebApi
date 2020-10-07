@@ -141,7 +141,7 @@ namespace Microsoft.AspNet.OData.Routing
                         id: c.Id,
                         parameterCount: c.Parameters.Count,
                         filteredParameters: c.Parameters.Where(p => p.ParameterType != typeof(ODataPath) &&
-                        
+                            !IsParameterFromQuery(c as ControllerActionDescriptor, p.Name) &&
                             !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType)),
                         descriptor: c));
 
@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => TryMatch(c, context, c.FilteredParameters, availableKeys,
+                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys,
                         optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount)
@@ -202,7 +202,6 @@ namespace Microsoft.AspNet.OData.Routing
         /// Checks whether the a controller action matches the current route by comparing the parameters
         /// of the action with the data in the route.
         /// </summary>
-        /// <param name="candidate"></param>
         /// <param name="context">The current <see cref="RouteContext"/></param>
         /// <param name="parameters">Parameters of the action. This excludes the <see cref="ODataPath"/> and <see cref="Query.ODataQueryOptions"/> parameters</param>
         /// <param name="availableKeys">The names of the keys found in the uri (entity set keys, related keys, operation parameters)</param>
@@ -212,7 +211,6 @@ namespace Microsoft.AspNet.OData.Routing
         /// This might be less than the size of <paramref name="availableKeys"/> because some keys might have alias names</param>
         /// <returns></returns>
         private bool TryMatch(
-            ActionIdAndParameters candidate,
             RouteContext context,
             IList<ParameterDescriptor> parameters,
             IList<string> availableKeys,
@@ -264,15 +262,6 @@ namespace Microsoft.AspNet.OData.Routing
                 if (cP != null && optionalWrapper != null)
                 {
                     if (cP.ParameterInfo.IsOptional && optionalWrapper.OptionalParameters.Any(o => o.Name.ToLowerInvariant() == parameterName))
-                    {
-                        continue;
-                    }
-                }
-
-                var cad = candidate.ActionDescriptor as ControllerActionDescriptor;
-                if (cad != null)
-                {
-                    if (IsParameterFromQuery(cad, p.Name))
                     {
                         continue;
                     }

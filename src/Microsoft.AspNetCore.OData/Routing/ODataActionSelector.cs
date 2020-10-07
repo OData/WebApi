@@ -141,8 +141,8 @@ namespace Microsoft.AspNet.OData.Routing
                         id: c.Id,
                         parameterCount: c.Parameters.Count,
                         filteredParameters: c.Parameters.Where(p => p.ParameterType != typeof(ODataPath) &&
-                            !IsParameterFromQuery(c as ControllerActionDescriptor, p.Name) &&
-                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType)),
+                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType) &&
+                            !IsParameterFromQuery(c as ControllerActionDescriptor, p.Name)),
                         descriptor: c));
 
                 // retrieve the optional parameters

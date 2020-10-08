@@ -60,6 +60,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
 
         [Fact]
+        public async Task CanGroupByDatePropertyForDateTimePropertyOnEf()
+        {
+            string requestUri = string.Format("{0}/odata/EfPeople?$apply=groupby((Birthday), aggregate($count as Cnt))", BaseAddress);
+
+            HttpResponseMessage response = await Client.GetAsync(requestUri);
+
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        }
+
+        [Fact]
         public async Task CanQuerySingleEntityFromTaskReturnTypeInControllerOnEf()
         {
             string requestUri = string.Format("{0}/odata/EfPeople(1)", BaseAddress);

@@ -253,11 +253,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 foreach (var prop in dynamicObject.Values)
                 {
+                    IEdmProperty edmProperty = entityType?.Properties()
+                            .FirstOrDefault(p => p.Name.Equals(prop.Key));
                     if (prop.Value != null
                         && (prop.Value is DynamicTypeWrapper || (prop.Value is IEnumerable<DynamicTypeWrapper>)))
-                    {
-                        IEdmProperty edmProperty = entityType.Properties()
-                            .FirstOrDefault(p => p.Name.Equals(prop.Key));
+                    {                
                         if (edmProperty != null)
                         {
                             dynamicTypeProperties.Add(edmProperty, prop.Value);
@@ -265,17 +265,39 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
                     else
                     {
-                        var property = new ODataProperty
+                        ODataProperty property;
+                        if (prop.Value == null)
                         {
-                            Name = prop.Key,
-                            Value = prop.Value
-                        };
+                            property = new ODataProperty
+                            {
+                                Name = prop.Key,
+                                Value = new ODataNullValue()
+                            };
+                        }
+                        else 
+                        {
+                            if (edmProperty != null)
+                            {
+                                property = new ODataProperty
+                                {
+                                    Name = prop.Key,
+                                    Value = ODataPrimitiveSerializer.ConvertPrimitiveValue(prop.Value, edmProperty.Type.AsPrimitive())
+                                };
+                            }
+                            else
+                            {
+                                property = new ODataProperty
+                                {
+                                    Name = prop.Key,
+                                    Value = prop.Value
+                                };
+                            }
+                        }
 
                         properties.Add(property);
                     }
                 }
             }
-
             return properties;
         }
 

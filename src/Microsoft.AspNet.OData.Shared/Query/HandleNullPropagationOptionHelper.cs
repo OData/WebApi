@@ -78,8 +78,11 @@ namespace Microsoft.AspNet.OData.Query
                 case ObjectContextQueryProviderNamespaceEFCore2:
                     return DataSourceProviderKind.EFCore;
 
-                default:
+                case Linq2ObjectsQueryProviderNamespace:
                     return DataSourceProviderKind.InMemory;
+
+                default:
+                    return DataSourceProviderKind.Unknown;
             }
         }
     }
@@ -87,9 +90,9 @@ namespace Microsoft.AspNet.OData.Query
     internal enum DataSourceProviderKind
     {
         /// <summary>
-        /// None Data source provider
+        /// Unknown data source provider
         /// </summary>
-        None,
+        Unknown,
 
         /// <summary>
         /// In memory data source provider
@@ -104,6 +107,6 @@ namespace Microsoft.AspNet.OData.Query
         /// <summary>
         /// EF Core Data source provider
         /// </summary>
-        EFCore
+        EFCore,
     }
 }

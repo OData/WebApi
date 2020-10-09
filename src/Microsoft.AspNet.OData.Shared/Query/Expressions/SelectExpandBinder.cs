@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
-            _dataSourceProviderKind = DataSourceProviderKind.None;
+            _dataSourceProviderKind = DataSourceProviderKind.Unknown;
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
@@ -792,9 +792,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return;
             }
 
+            // EF5 and EF6 doesn't support to compare the complex with null.
+            // With the following null check, EF5 and EF6 will throw except similar to:
+            // "Cannot compare elements of type 'xxxx'.Only primitive types, enumeration types and entity types are supported.
+            // EF Core has imporvement so the following null won't throw error.
             Expression nullCheck = null;
-            if (_dataSourceProviderKind == DataSourceProviderKind.EFCore ||
-                _dataSourceProviderKind == DataSourceProviderKind.InMemory)
+            if (_dataSourceProviderKind != DataSourceProviderKind.EFClassic)
             {
                 nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
             }
@@ -821,15 +824,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 if (!structuralProperty.Type.IsCollection())
                 {
-                    // EF5 and EF6 doesn't support to compare the complex with null.
-                    // With the following null check, EF5 and EF6 will throw except similar to:
-                    // "Cannot compare elements of type 'xxxx'.Only primitive types, enumeration types and entity types are supported.
-                    // EF Core has imporvement so the following null won't throw error.
-                    if (_dataSourceProviderKind == DataSourceProviderKind.EFCore ||
-                        _dataSourceProviderKind == DataSourceProviderKind.InMemory)
-                    {
-                        propertyExpression.NullCheck = nullCheck;
-                    }
+                    propertyExpression.NullCheck = nullCheck;
                 }
                 else if (_settings.PageSize.HasValue)
                 {

@@ -792,10 +792,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return;
             }
 
-            // EF5 and EF6 doesn't support to compare the complex with null.
-            // With the following null check, EF5 and EF6 will throw except similar to:
-            // "Cannot compare elements of type 'xxxx'.Only primitive types, enumeration types and entity types are supported.
-            // EF Core has imporvement so the following null won't throw error.
+            // EF5 and EF6 don't support comparing complex objects to null, and will throw an exception similar to following if it is
+            // attempted:
+            //    "Cannot compare elements of type 'xxxx'. Only primitive types, enumeration types and entity types are supported."
+            // EFCore has changed its implementation so the null check executes as expected.
             Expression nullCheck = null;
             if (_dataSourceProviderKind != DataSourceProviderKind.EFClassic)
             {

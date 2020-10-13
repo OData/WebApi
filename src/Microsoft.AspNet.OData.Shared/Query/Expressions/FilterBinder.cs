@@ -512,14 +512,17 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression singleValue = Bind(inNode.Left);
             Expression collection = Bind(inNode.Right);
 
+            Type collectionItemType = collection.Type.GetElementType() ?? (typeof(IEnumerable).IsAssignableFrom(collection.Type) ? collection.Type.GetGenericArguments()[0] : null);
+            Contract.Assert(collectionItemType != null); // Not expected
+
             if (IsIQueryable(collection.Type))
             {
-                Expression containsExpression = singleValue.Type != collection.Type.GetGenericArguments()[0] ? Expression.Call(null, ExpressionHelperMethods.QueryableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
+                Expression containsExpression = singleValue.Type != collectionItemType ? Expression.Call(null, ExpressionHelperMethods.QueryableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
                 return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), containsExpression, singleValue);
             }
             else
             {
-                Expression containsExpression = singleValue.Type != collection.Type.GetGenericArguments()[0] ? Expression.Call(null, ExpressionHelperMethods.EnumerableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
+                Expression containsExpression = singleValue.Type != collectionItemType ? Expression.Call(null, ExpressionHelperMethods.EnumerableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
                 return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), containsExpression, singleValue);
             }
         }

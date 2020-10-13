@@ -1936,7 +1936,38 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 Contract.Assert(strValue != null);
 
                 constantType = Nullable.GetUnderlyingType(constantType) ?? constantType;
-                value = Enum.Parse(constantType, strValue);
+
+                IEdmEnumType enumType = edmTypeReference.AsEnum().EnumDefinition();
+                ClrEnumMemberAnnotation memberMapAnnotation = Model.GetClrEnumMemberAnnotation(enumType);
+                if (memberMapAnnotation != null)
+                {
+                    IEdmEnumMember enumMember = enumType.Members.FirstOrDefault(m => m.Name == strValue);
+                    if (enumMember == null)
+                    {
+                        enumMember = enumType.Members.FirstOrDefault(m => m.Value.ToString() == strValue);
+                    }
+
+                    if (enumMember != null)
+                    {
+                        Enum clrMember = memberMapAnnotation.GetClrEnumMember(enumMember);
+                        if (clrMember != null)
+                        {
+                            value = clrMember;
+                        }
+                        else
+                        {
+                            throw new ODataException(Error.Format(SRResources.CannotGetEnumClrMember, enumMember.Name));
+                        }
+                    }
+                    else
+                    {
+                        value = Enum.Parse(constantType, strValue);
+                    }
+                }
+                else
+                {
+                    value = Enum.Parse(constantType, strValue);
+                }
             }
 
             if (edmTypeReference != null &&

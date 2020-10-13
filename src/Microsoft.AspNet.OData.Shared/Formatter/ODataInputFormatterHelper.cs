@@ -71,6 +71,20 @@ namespace Microsoft.AspNet.OData.Formatter
                 oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
 
                 IODataRequestMessage oDataRequestMessage = getODataRequestMessage();
+
+                string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(internalRequest.Headers);
+                string annotationFilter = null;
+                if (!String.IsNullOrEmpty(preferHeader))
+                {
+                    oDataRequestMessage.SetHeader(RequestPreferenceHelpers.PreferHeaderName, preferHeader);
+                    annotationFilter = oDataRequestMessage.PreferHeader().AnnotationFilter;
+                }
+
+                if (annotationFilter != null)
+                {
+                    oDataReaderSettings.ShouldIncludeAnnotation = ODataUtils.CreateAnnotationFilter(annotationFilter);
+                }
+
                 ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, oDataReaderSettings, model);
                 registerForDisposeAction(oDataMessageReader);
 

@@ -27,7 +27,7 @@
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.OData.Client" Version="7.6.1" />
+    <PackageReference Include="Microsoft.OData.Client" Version="7.7.1" />
     <PackageReference Include="System.Reflection" Version="4.3.0" />
     <PackageReference Include="System.Runtime.Extensions" Version="4.3.1" />
     <PackageReference Include="System.Diagnostics.EventLog" Version="4.7.0" />
@@ -39,6 +39,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="2.2.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.1" />
   </ItemGroup>
 
   <ItemGroup>
@@ -188,6 +189,9 @@
     </Compile>
     <Compile Include="..\BoundOperation\BoundOperationTest.cs">
       <Link>BoundOperation\BoundOperationTest.cs</Link>
+    </Compile>
+    <Compile Include="..\BoundOperation\BoundOperationContextUriTest.cs">
+      <Link>BoundOperation\BoundOperationContextUriTest.cs</Link>
     </Compile>
     <Compile Include="..\Cast\CastContext.cs">
       <Link>Cast\CastContext.cs</Link>
@@ -945,6 +949,15 @@
     <Compile Include="..\DependencyInjection\DependencyInjectionEdmModel.cs">
       <Link>DependencyInjection\DependencyInjectionEdmModel.cs</Link>
     </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesControllers.cs">
+      <Link>DerivedTypes\DerivedTypesControllers.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesDataModel.cs">
+      <Link>DerivedTypes\DerivedTypesDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesTests.cs">
+      <Link>DerivedTypes\DerivedTypesTests.cs</Link>
+    </Compile>
     <Compile Include="..\DollarFormat\DollarFormatController.cs">
       <Link>DollarFormat\DollarFormatController.cs</Link>
     </Compile>
@@ -984,6 +997,15 @@
     <Compile Include="..\DollarLevels\DollarLevelsTest.cs">
       <Link>DollarLevels\DollarLevelsTest.cs</Link>
     </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryCustomersController.cs">
+      <Link>DollarQuery\DollarQueryCustomersController.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryModels.cs">
+      <Link>DollarQuery\DollarQueryModels.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryTests.cs">
+      <Link>DollarQuery\DollarQueryTests.cs</Link>
+    </Compile>
     <Compile Include="..\Enums\EnumsController.cs">
       <Link>Enums\EnumsController.cs</Link>
     </Compile>
@@ -995,6 +1017,9 @@
     </Compile>
     <Compile Include="..\Enums\EnumsTest.cs">
       <Link>Enums\EnumsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Enums\EnumsAliasTest.cs">
+      <Link>Enums\EnumsAliasTest.cs</Link>
     </Compile>
     <Compile Include="..\ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs">
       <Link>ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs</Link>

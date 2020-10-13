@@ -333,11 +333,13 @@ namespace Microsoft.AspNet.OData.Test
             const string Payload = "{" +
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
-              "\"Address\":{" +
+              "\"Address\":{" +                
                 "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Place\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
-                "\"Number\":990" +
+                 "\"@NS1.abc\": \"Test\"," +
+                "\"Number\":990" +                
               "}," +
+              "\"Website@NS.Street\": \"Test\"," +
               "\"Website\": \"WebSite #6\"," +
               "\"Place@odata.type\":\"#String\",\"Place\":\"My Dynamic Place\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
               "\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +

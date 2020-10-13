@@ -11,6 +11,7 @@ using Microsoft.AspNet.OData.Routing.Template;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
@@ -151,28 +152,39 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
         }
 
         [Theory]
-        [InlineData(typeof(TestODataController), "Customers", "GetCustomers")]
-        [InlineData(typeof(TestODataController), "Customers({key})/Orders", "GetOrdersOfACustomer")]
-        [InlineData(typeof(TestODataController), "Customers({key})", "GetCustomer")]
-        [InlineData(typeof(TestODataController), "VipCustomer", "GetVipCustomer")] // Singleton
-        [InlineData(typeof(TestODataController), "VipCustomer/Orders", "GetOrdersOfVipCustomer")] // Singleton/Navigation
-        [InlineData(typeof(TestODataControllerWithPrefix), "Customers", "GetCustomers")]
-        [InlineData(typeof(TestODataControllerWithPrefix), "Customers({key})/Orders", "GetOrdersOfACustomer")]
-        [InlineData(typeof(TestODataControllerWithPrefix), "Customers({key})", "GetCustomer")]
-        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer", "GetVipCustomerWithPrefix")] // Singleton
-        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer/Name", "GetVipCustomerNameWithPrefix")] // Singleton/property
-        [InlineData(typeof(SingletonTestControllerWithPrefix), "VipCustomer/Orders", "GetVipCustomerOrdersWithPrefix")] // Singleton/Navigation
-        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Customers({key})", "GetCustomer")]
-        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Customers({key})/Orders", "GetOrdersOfACustomer")]
-        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "VipCustomer", "GetCustomer")]
-        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "VipCustomer/Orders", "GetOrdersOfACustomer")]
-        public void AttributeMappingsIsInitialized_WithRightActionAndTemplate(Type controllerType,
-            string expectedPathTemplate, string expectedActionName)
+        [InlineData(typeof(TestODataController), "Get", "Customers", "GetCustomers")]
+        [InlineData(typeof(TestODataController), "Get", "Customers({key})/Orders", "GetOrdersOfACustomer")]
+        [InlineData(typeof(TestODataController), "Get", "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(TestODataController), "Head", "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(TestODataController), "Get", "VipCustomer", "GetVipCustomer")] // Singleton
+        [InlineData(typeof(TestODataController), "Get", "VipCustomer/Orders", "GetOrdersOfVipCustomer")] // Singleton/Navigation
+        [InlineData(typeof(TestODataControllerWithPrefix), "Get", "Customers", "GetCustomers")]
+        [InlineData(typeof(TestODataControllerWithPrefix), "Get", "Customers({key})/Orders", "GetOrdersOfACustomer")]
+        [InlineData(typeof(TestODataControllerWithPrefix), "Get", "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "Get", "VipCustomer", "GetVipCustomerWithPrefix")] // Singleton
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "Get", "VipCustomer/Name", "GetVipCustomerNameWithPrefix")] // Singleton/property
+        [InlineData(typeof(SingletonTestControllerWithPrefix), "Get", "VipCustomer/Orders", "GetVipCustomerOrdersWithPrefix")] // Singleton/Navigation
+        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Get", "Customers({key})", "GetCustomer")]
+        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Get", "Customers({key})/Orders", "GetOrdersOfACustomer")]
+        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Get", "VipCustomer", "GetCustomer")]
+        [InlineData(typeof(TestODataControllerWithMultiplePrefixes), "Get", "VipCustomer/Orders", "GetOrdersOfACustomer")]
+        public void AttributeMappingsIsInitialized_WithRightActionAndTemplate(
+            Type controllerType,
+            string method,
+            string expectedPathTemplate,
+            string expectedActionName)
         {
             // Arrange
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer(RouteName);
             var serviceProvider = GetServiceProvider(configuration, RouteName);
             var request = RequestFactory.Create(configuration, RouteName);
+#if NETCORE
+            request.ODataFeature().Path = new ODataPath();
+            request.Method = method;
+#else
+            request.Method = new HttpMethod(method);
+#endif
+
             var descriptors = ControllerDescriptorFactory.Create(configuration, "TestController", 
                 controllerType);
 
@@ -243,7 +255,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             ExceptionAssert.Throws<InvalidOperationException>(
                 () => EnsureAttributeMapping(convention, configuration),
                 "The path template 'Customers' on the action 'GetCustomers' in controller 'TestOData' is not a valid OData path template. " +
-                "The operation import overloads matching 'Customers' are invalid. This is most likely an error in the IEdmModel.");
+                "Resource not found for the segment 'Customers'.");
         }
 
         [Fact]
@@ -274,6 +286,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             {
             }
 
+            [HttpGet,HttpHead]
             [ODataRoute("Customers({key})")]
             public void GetCustomer()
             {

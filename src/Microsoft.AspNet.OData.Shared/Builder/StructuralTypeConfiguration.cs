@@ -21,6 +21,7 @@ namespace Microsoft.AspNet.OData.Builder
         private string _namespace;
         private string _name;
         private PropertyInfo _dynamicPropertyDictionary;
+        private PropertyInfo _instanceAnnotationContainer;
         private StructuralTypeConfiguration _baseType;
         private bool _baseTypeConfigured;
 
@@ -141,6 +142,22 @@ namespace Microsoft.AspNet.OData.Builder
         public PropertyInfo DynamicPropertyDictionary
         {
             get { return _dynamicPropertyDictionary; }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether this type has instance annotations or not.
+        /// </summary>
+        public bool SupportsInstanceAnnotations
+        {
+            get { return _instanceAnnotationContainer != null; }
+        }
+
+        /// <summary>
+        /// Gets the CLR property info of the instance annotations dictionary on this structural type.
+        /// </summary>
+        public PropertyInfo InstanceAnnotationsContainer
+        {
+            get { return _instanceAnnotationContainer; }
         }
 
         /// <summary>
@@ -489,6 +506,39 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             _dynamicPropertyDictionary = propertyInfo;
+        }
+
+
+        /// <summary>
+        /// Adds the property info of the instanceannotation to this structural type.
+        /// </summary>
+        /// <param name="propertyInfo">The property being added.</param>
+        public virtual void AddInstanceAnnotationContainer(PropertyInfo propertyInfo)
+        {
+            if (propertyInfo == null)
+            {
+                throw Error.ArgumentNull("propertyInfo");
+            }
+
+            TypeHelper.ValidateAssignableFromForArgument(typeof(IODataInstanceAnnotationContainer), propertyInfo.PropertyType, "IODataInstanceAnnotationContainer");
+
+            if (!propertyInfo.DeclaringType.IsAssignableFrom(ClrType))
+            {
+                throw Error.Argument("propertyInfo", SRResources.PropertyDoesNotBelongToType);
+            }
+
+            // Remove from the ignored properties
+            if (IgnoredProperties.Contains(propertyInfo))
+            {
+                RemovedProperties.Remove(propertyInfo);
+            }
+
+            if (_instanceAnnotationContainer != null)
+            {
+                throw Error.Argument("propertyInfo", SRResources.MoreThanOneAnnotationPropertyContainerFound, ClrType.Name);
+            }
+
+            _instanceAnnotationContainer = propertyInfo;
         }
 
         /// <summary>

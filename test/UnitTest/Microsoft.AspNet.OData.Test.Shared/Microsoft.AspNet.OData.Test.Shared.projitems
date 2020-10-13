@@ -240,6 +240,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ODataQueryValidatorTest.cs" />
@@ -404,6 +406,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelperTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnicodeCharactersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ArrayOfBoolean.json" />

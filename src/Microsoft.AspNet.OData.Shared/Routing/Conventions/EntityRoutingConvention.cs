@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -16,12 +17,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            if (odataPath.PathTemplate == "~/entityset/key" ||
-                odataPath.PathTemplate == "~/entityset/key/cast")
+            if (odataPath.PathTemplate == "~/entityset/key"
+                || odataPath.PathTemplate == "~/entityset/key/cast"
+                || odataPath.PathTemplate == "~/entityset/cast/key")
             {
                 string httpMethodName;
 
-                switch (controllerContext.Request.Method)
+                switch (controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     case ODataRequestMethod.Get:
                         httpMethodName = "Get";
@@ -51,11 +53,12 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
                 if (actionName != null)
                 {
-                    KeySegment keySegment = (KeySegment)odataPath.Segments[1];
+                    KeySegment keySegment = (KeySegment)odataPath.Segments.First(d => d is KeySegment);
                     controllerContext.AddKeyValueToRouteData(keySegment);
                     return actionName;
                 }
             }
+
             return null;
         }
     }

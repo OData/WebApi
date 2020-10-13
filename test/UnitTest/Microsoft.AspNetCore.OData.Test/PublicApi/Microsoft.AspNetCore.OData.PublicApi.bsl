@@ -426,6 +426,7 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	AllowedQueryOptions AllowedQueryOptions  { public get; public set; }
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
+	bool EnableDeterministicSelectExpandWrapperInstance  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }
@@ -2516,7 +2517,9 @@ public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
 	string MapProperty (string propertyName)
 }
 
-public interface Microsoft.AspNet.OData.Query.ISelectExpandWrapper {
+public interface Microsoft.AspNet.OData.Query.ISelectExpandWrapper : IEdmEntityObject, IEdmObject, IEdmStructuredObject {
+	object Instance  { public abstract get; }
+
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ToDictionary ()
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] ToDictionary (System.Func`3[[Microsoft.OData.Edm.IEdmModel],[Microsoft.OData.Edm.IEdmStructuredType],[Microsoft.AspNet.OData.Query.IPropertyMapper]] propertyMapperProvider)
 }
@@ -2685,6 +2688,7 @@ public class Microsoft.AspNet.OData.Query.ODataQuerySettings {
 
 	bool EnableConstantParameterization  { public get; public set; }
 	bool EnableCorrelatedSubqueryBuffering  { public get; public set; }
+	bool EnableDeterministicSelectExpandWrapperInstance  { public get; public set; }
 	bool EnsureStableOrdering  { public get; public set; }
 	HandleNullPropagationOption HandleNullPropagation  { public get; public set; }
 	bool HandleReferenceNavigationPropertyExpandFilter  { public get; public set; }

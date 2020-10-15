@@ -2743,7 +2743,6 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
 
-
         /// <summary>
         ///   Looks up a localized string similar to Cannot find the resource wrapper type &apos;{0}&apos; in the model..
         /// </summary>
@@ -2755,7 +2754,6 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
         
-
         /// <summary>
         ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
         /// </summary>

@@ -691,6 +691,9 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         public Microsoft.OData.Edm.IEdmTypeReference GetEdmType()
         {
+
+           // EdmLibHelpers.GetEdmTypeReference() 
+            //return _edmTypeReference;
             //implement if only required, not intended in draft pr
             throw new NotImplementedException();
         }

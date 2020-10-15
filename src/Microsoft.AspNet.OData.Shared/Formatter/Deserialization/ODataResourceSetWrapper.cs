@@ -16,10 +16,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
         /// </summary>
-        /// <param name="item">The wrapped item.</param>
+        /// <param name="item">The wrapped item.</param>        
         public ODataResourceSetWrapper(ODataResourceSetBase item)
             : base(item)
         {
+            ResourceSetType = ResourceSetType.ResourceSet;
             
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if(resources == null)
                 {
-                    throw new ODataException("Right resources are not added to the Resources property");
+                    throw new ODataException(Error.Format(SRResources.ResourcesShouldbePresent));
                 }
 
                 return resources;

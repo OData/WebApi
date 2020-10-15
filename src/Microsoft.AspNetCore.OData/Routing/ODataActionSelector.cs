@@ -267,7 +267,6 @@ namespace Microsoft.AspNet.OData.Routing
                     }
                 }
 
-
                 // if we can't find the parameter in the request, check whether
                 // there's a special model binder registered to handle it
                 if (ParameterHasRegisteredModelBinder(p))

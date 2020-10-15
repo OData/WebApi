@@ -2724,6 +2724,17 @@ namespace Microsoft.AspNet.OData.Common
         /// <summary>
         ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
         /// </summary>
+        internal static string ResourcesShouldbePresent
+        {
+            get
+            {
+                return ResourceManager.GetString("ResourcesShouldbePresent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
+        /// </summary>
         internal static string ResourceTypeNotInModel
         {
             get

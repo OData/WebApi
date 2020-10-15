@@ -331,7 +331,7 @@ namespace Microsoft.AspNet.OData.Formatter
             if (edmTypeReference.IsEntity())
             {
                 IEdmEntityTypeReference entityType = edmTypeReference.AsEntity();
-                return CovertResourceId(value, topLevelResource.ResourceBase as ODataResource, entityType, readContext);
+                return CovertResourceId(value, topLevelResource.ResourceBase, entityType, readContext);
             }
 
             return value;
@@ -344,14 +344,14 @@ namespace Microsoft.AspNet.OData.Formatter
             int i = 0;
             foreach (object item in sources)
             {
-                object newItem = CovertResourceId(item, resourceSet.Resources[i].ResourceBase as ODataResource, entityTypeReference,
+                object newItem = CovertResourceId(item, resourceSet.Resources[i].ResourceBase, entityTypeReference,
                     readContext);
                 i++;
                 yield return newItem;
             }
         }
 
-        private static object CovertResourceId(object source, ODataResource resource,
+        private static object CovertResourceId(object source, ODataResourceBase resource,
             IEdmEntityTypeReference entityTypeReference, ODataDeserializerContext readContext)
         {
             Contract.Assert(resource != null);

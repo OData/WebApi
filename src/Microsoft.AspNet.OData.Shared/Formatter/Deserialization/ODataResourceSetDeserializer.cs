@@ -148,14 +148,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw new SerializationException(
                     Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName()));
             }
-
-            Collection<object> coll = new Collection<object>();
-
+                       
             if (resourceSet.ResourceSetType == ResourceSetType.ResourceSet)
             {
                 foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
                 {
-                    coll.Add(deserializer.ReadInline(resourceWrapper, elementType, readContext));
+                    yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
                 }
             }
             else
@@ -170,36 +168,35 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                         if (deletedResource != null)
                         {
-                            coll.Add(DeSerializeDeletedEntity(readContext, deletedResource));
+                            yield return DeSerializeDeletedEntity(readContext, deletedResource);
                         }
                         else
                         {
-                            coll.Add(deserializer.ReadInline(resourceWrapper, elementType, readContext));
+                            yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
                         }
                     }
                     else
                     {
                         ODataDeltaLinkWrapper deltaLinkWrapper = odataItemBase as ODataDeltaLinkWrapper;
 
-                        IEdmDeltaLinkBase deltaLink = DeserializeDeltaLink(readContext, deltaLinkWrapper);
-                        coll.Add(deltaLink);
+                        Contract.Assert(deltaLinkWrapper != null, "ODataDeltaLinkWrapper should not be null");
+
+                        yield return DeserializeDeltaLink(readContext, deltaLinkWrapper, resourceSet.ResourceSetBase.TypeName);                      
                     }
                     
                 }
-            }
-
-            return coll;
+            }            
         }
 
 
-        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeserializerContext readContext, ODataDeltaLinkWrapper deltaLinkWrapper)
+        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeserializerContext readContext, ODataDeltaLinkWrapper deltaLinkWrapper, string typeName)
         {
             ODataDeltaLinkBase deltalink = deltaLinkWrapper.DeltaLink;
 
             if (deltalink == null)
             {
                 throw new ODataException("Deleted link not present");
-            }
+            }            
 
             IEdmModel model = readContext.Model;
 
@@ -208,10 +205,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
             }
 
-            IEdmStructuredType actualType = model.FindType(deltalink.TypeAnnotation.TypeName) as IEdmStructuredType;
+            IEdmStructuredType actualType = model.FindType(typeName) as IEdmStructuredType;
             if (actualType == null)
             {
-                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, deltalink.TypeAnnotation.TypeName));
+                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
             }
 
             if (actualType.IsAbstract)

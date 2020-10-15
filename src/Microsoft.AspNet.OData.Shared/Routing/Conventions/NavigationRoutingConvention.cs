@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     return null;
                 }
 
-                // It is not valid to *Put/Patch" to any collection-valued navigation property.
+                // It is not valid to *Put" to any collection-valued navigation property.
                 if (navigationProperty.TargetMultiplicity() == EdmMultiplicity.Many &&
                     ODataRequestMethod.Put == method)
                 {

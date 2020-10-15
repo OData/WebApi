@@ -13,20 +13,22 @@ namespace Microsoft.AspNet.OData
     /// Represents an <see cref="IEdmObject"/> that is a collection of <see cref="IEdmChangedObject"/>s.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class EdmChangedObjectCollection<TStructuralType> : Collection<IEdmChangedObject<TStructuralType>>, IEdmObject
+    public class EdmChangedObjectCollection<TStructuralType> : EdmChangedObjectCollection, ICollection<IEdmChangedObject<TStructuralType>>, IEdmObject
     {
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
- 
+        ICollection<IEdmChangedObject<TStructuralType>> _items;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
         /// </summary>
         /// <param name="entityType">The Edm entity type of the collection.</param>
         public EdmChangedObjectCollection(IEdmEntityType entityType)
-            : base(Enumerable.Empty<IEdmChangedObject<TStructuralType>>().ToList<IEdmChangedObject<TStructuralType>>())
+            : base(entityType)
         {
             Initialize(entityType);
+            _items = new Collection<IEdmChangedObject<TStructuralType>>();
         }
 
         /// <summary>
@@ -36,15 +38,48 @@ namespace Microsoft.AspNet.OData
         /// <param name="changedObjectList">The list that is wrapped by the new collection.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public EdmChangedObjectCollection(IEdmEntityType entityType, IList<IEdmChangedObject<TStructuralType>> changedObjectList)
-            : base(changedObjectList)
+            : base(entityType, changedObjectList as IList<IEdmChangedObject>)
         {
             Initialize(entityType);
+            _items = changedObjectList;
         }
+
  
         /// <inheritdoc/>
-        public IEdmTypeReference GetEdmType()
+        public void Add(IEdmChangedObject<TStructuralType> item)
         {
-            return _edmTypeReference;
+            _items.Add(item);
+        }
+
+       
+        /// <inheritdoc/>
+        public bool Contains(IEdmChangedObject<TStructuralType> item)
+        {
+            return _items.Contains(item);
+        }
+
+        /// <inheritdoc/>
+        public void CopyTo(IEdmChangedObject<TStructuralType>[] array, int arrayIndex)
+        {
+            _items.CopyTo(array, arrayIndex);
+        }
+
+        /// <inheritdoc/>
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
+
+        /// <inheritdoc/>
+        public bool Remove(IEdmChangedObject<TStructuralType> item)
+        {
+            return _items.Remove(item);
+        }
+
+        /// <inheritdoc/>
+        IEnumerator<IEdmChangedObject<TStructuralType>> IEnumerable<IEdmChangedObject<TStructuralType>>.GetEnumerator()
+        {
+            return _items.GetEnumerator();
         }
 
         private void Initialize(IEdmEntityType entityType)

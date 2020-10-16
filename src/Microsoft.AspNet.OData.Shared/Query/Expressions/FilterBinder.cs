@@ -512,8 +512,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression singleValue = Bind(inNode.Left);
             Expression collection = Bind(inNode.Right);
 
-            Type collectionItemType = collection.Type.GetElementType() ?? (typeof(IEnumerable).IsAssignableFrom(collection.Type) ? collection.Type.GetGenericArguments()[0] : null);
-            Contract.Assert(collectionItemType != null); // Not expected
+            Type collectionItemType = collection.Type.GetElementType();
+            if (collectionItemType == null)
+            {
+                Type[] genericArgs = collection.Type.GetGenericArguments();
+                // The model builder does not support non-generic collections like ArrayList
+                // or generic collections with generic arguments > 1 like IDictionary<,>
+                Contract.Assert(genericArgs.Length == 1);
+                collectionItemType = genericArgs[0];
+            }
 
             if (IsIQueryable(collection.Type))
             {

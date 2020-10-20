@@ -7,6 +7,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.AspNetCore.Mvc;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Routing
@@ -43,6 +44,18 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         ("GET", null),
                         (typeof(KeyAndQueryController), "Get",
                         new [] { typeof(int), typeof(ODataQueryOptions)})
+                    },
+                    {
+                        new Dictionary<string, object>(),
+                        ("GET", null),
+                        (typeof(FromQueryController), "Get",
+                        new [] { typeof(string), typeof(ODataQueryOptions)})
+                    },
+                    {
+                        new Dictionary<string, object>() { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(FromQueryController), "Get",
+                        new [] { typeof(int), typeof(string) })
                     },
                     {
                         new Dictionary<string, object>() { { "key", 1 }, { "relatedKey", 2 } },
@@ -96,6 +109,65 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         ("PATCH", "{}"),
                         (typeof(ExtraParametersWithOwnModelBindersController), "Patch",
                         new [] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
+                    },
+                    {
+                        new Dictionary<string, object>() { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(FromQueryController), "Get",
+                        new [] { typeof(int), typeof(string) })
+                    },
+                    {
+                    new Dictionary<string, object>() { { "key", 1 }, { "relatedKey", 2 } },
+                        ("GET", null),
+                        (typeof(KeyAndRelatedKeyController), "Get",
+                        new[] { typeof(int), typeof(int) })
+                    },
+                    {
+                    new Dictionary<string, object>() { { "key", 1 }, { "relatedKey", 2 } },
+                        ("GET", null),
+                        (typeof(KeyAndRelatedKeyAndPathController), "Get",
+                        new[] { typeof(int), typeof(int), typeof(ODataPath) })
+                    },
+                    {
+                    new Dictionary<string, object>()
+                        {
+                            { "key", 1 }, { "relatedKey", 2 }, { "navigationProperty", 3 }
+                        },
+                        ("GET", null),
+                        (typeof(KeyAndRelatedKeyAndPathController), "Get",
+                        new[] { typeof(int), typeof(int), typeof(int) })
+                    },
+                    {
+                    new Dictionary<string, object>() { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(KeyAndRelatedKeyAndPathController), "Get",
+                        new[] { typeof(int), typeof(ODataPath) })
+                    },
+                    // actions that expect request body
+                    {
+                    new Dictionary<string, object>(),
+                        ("POST", "{}"),
+                        (typeof(BodyOnlyController), "Post",
+                        new[] { typeof(int) })
+                    },
+                    {
+                    new Dictionary<string, object> { { "key", 1 } },
+                        ("PATCH", "{}"),
+                        (typeof(KeyBodyController), "Patch",
+                        new[] { typeof(int), typeof(Delta<object>) })
+                    },
+                    // actions that declare extra parameters with registered model binders
+                    {
+                    new Dictionary<string, object> { { "key", 1 } },
+                        ("GET", null),
+                        (typeof(ExtraParametersWithOwnModelBindersController), "Get",
+                        new[] { typeof(int), typeof(System.Threading.CancellationToken) })
+                    },
+                    {
+                    new Dictionary<string, object> { { "key", 1 } },
+                        ("PATCH", "{}"),
+                        (typeof(ExtraParametersWithOwnModelBindersController), "Patch",
+                        new[] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
                     }
                 };
             }
@@ -195,6 +267,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public void Get(int key, ODataQueryOptions queryOptions) { }
 
         public void Get(int key) { }
+    }
+
+    public class FromQueryController : TestODataController
+    {
+        public void Get([FromQuery] string option, ODataQueryOptions queryOptions) { }
+        public void Get(int key, [FromQuery] string option) { }
     }
 
     public class KeyAndRelatedKeyController : TestODataController

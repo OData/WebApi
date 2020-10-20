@@ -9,6 +9,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -140,7 +141,8 @@ namespace Microsoft.AspNet.OData.Routing
                         id: c.Id,
                         parameterCount: c.Parameters.Count,
                         filteredParameters: c.Parameters.Where(p => p.ParameterType != typeof(ODataPath) &&
-                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType)),
+                            !ODataQueryParameterBindingAttribute.ODataQueryParameterBinding.IsODataQueryOptions(p.ParameterType) &&
+                            !IsParameterFromQuery(c as ControllerActionDescriptor, p.Name)),
                         descriptor: c));
 
                 // retrieve the optional parameters
@@ -303,6 +305,19 @@ namespace Microsoft.AspNet.OData.Routing
             return action.MethodInfo.GetCustomAttributes(false)
                 .OfType<IActionHttpMethodProvider>()
                 .Any(methodProvider => methodProvider.HttpMethods.Contains(method.ToUpperInvariant()));
+        }
+
+        private bool IsParameterFromQuery(ControllerActionDescriptor action, string paramName)
+        {
+            Contract.Assert(action != null);
+
+            var param = action.MethodInfo.GetParameters().FirstOrDefault(p => p.Name == paramName);
+            if (param == null)
+            {
+                return false;
+            }
+
+            return param.GetCustomAttributes(false).OfType<FromQueryAttribute>().Any();
         }
 
         private bool ParameterHasRegisteredModelBinder(ParameterDescriptor param)

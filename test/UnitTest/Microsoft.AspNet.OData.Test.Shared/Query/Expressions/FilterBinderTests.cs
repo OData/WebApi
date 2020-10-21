@@ -2956,8 +2956,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => (Convert(IIF((($it.ProductProperties != null) AndAlso $it.ProductProperties.ContainsKey(Token)), $it.ProductPropertiesToken, null)) == \"1\")");
         }
 
-        [Fact]
-        public void InOnPrimitiveCollectionPropertyOnRHS()
+        [Theory]
+        [InlineData(new[] { 1, 2, 42 }, true)]
+        [InlineData(new[] { 1, 2 }, false)]
+        public void InOnPrimitiveCollectionPropertyOnRHS(int[] alternateIds, bool withNullPropagation)
         {
             var filters = VerifyQueryDeserialization(
                "42 in AlternateIDs",
@@ -2966,13 +2968,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             RunFilters(
                 filters,
-                new Product { AlternateIDs = new[] { 1, 2, 42 } },
-                new { WithNullPropagation = true, WithoutNullPropagation = true });
-
-            RunFilters(
-                filters,
-                new Product { AlternateIDs = new[] { 1, 2 } },
-                new { WithNullPropagation = false, WithoutNullPropagation = false });
+                new Product { AlternateIDs = alternateIds },
+                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withNullPropagation });
         }
 
 #region Negative Tests

@@ -2956,6 +2956,22 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => (Convert(IIF((($it.ProductProperties != null) AndAlso $it.ProductProperties.ContainsKey(Token)), $it.ProductPropertiesToken, null)) == \"1\")");
         }
 
+        [Theory]
+        [InlineData(new[] { 1, 2, 42 }, true)]
+        [InlineData(new[] { 1, 2 }, false)]
+        public void InOnPrimitiveCollectionPropertyOnRHS(int[] alternateIds, bool withNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               "42 in AlternateIDs",
+               "$it => $it.AlternateIDs.Contains(42)",
+               NotTesting);
+
+            RunFilters(
+                filters,
+                new Product { AlternateIDs = alternateIds },
+                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withNullPropagation });
+        }
+
 #region Negative Tests
 
         [Fact]

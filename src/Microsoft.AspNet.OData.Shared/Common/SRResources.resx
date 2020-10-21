@@ -222,6 +222,9 @@
   <data name="CannotRecognizeNodeType" xml:space="preserve">
     <value>'{0}' does not recognize the node with type '{1}'.</value>
   </data>
+  <data name="MissingConvertNode" xml:space="preserve">
+    <value>Missing the value of the parameter '{0}' in the function '{1}' calling.</value>
+  </data>
   <data name="TargetKindNotImplemented" xml:space="preserve">
     <value>'{0}' of kind '{1}' is not implemented.</value>
   </data>

@@ -337,8 +337,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else if (arguments[0].Type.IsAssignableFrom(targetClrType))
             {
                 // To support to cast Entity/Complex type to the sub type now.
-                Expression source = BindCastSourceNode(node.Source);
-
+                Expression source;
+                if(node.Source != null)
+                {
+                    source = BindCastSourceNode(node.Source);
+                }
+                else
+                {
+                    // if the cast is on the root i.e $it (~/Products?$filter=NS.PopularProducts/.....),
+                    // node.Source would be null. Calling BindCastSourceNode will always return '$it'.
+                    // In scenarios where we are casting a navigation property to return an expression that queries against the parent property,
+                    // we need to have a memberAccess expression e.g '$it.Category'. We can get this from arguments[0].
+                    source = arguments[0];
+                }
                 return Expression.TypeAs(source, targetClrType);
             }
             else

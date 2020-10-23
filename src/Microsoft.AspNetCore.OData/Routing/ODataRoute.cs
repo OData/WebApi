@@ -69,7 +69,6 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     // Try to generate an optimized direct link
                     // Otherwise, fall back to the base implementation
-                    VirtualPathData path;
                     if (CanGenerateDirectLink)
                     {
                         return GenerateLinkDirectly(odataPath);
@@ -96,7 +95,7 @@ namespace Microsoft.AspNet.OData.Routing
                         // Q. Are there scenarios when we'd be happy with having the path separator escaped for us?
                         string token = System.Guid.NewGuid().ToString().Replace("-", "");
                         context.Values[ODataRouteConstants.ODataPath] = odataPath.Replace("/", token);
-                        path = base.GetVirtualPath(context);
+                        VirtualPathData path = base.GetVirtualPath(context);
                         path.VirtualPath = path.VirtualPath.Replace(token, "/");
                         return path;
                     }

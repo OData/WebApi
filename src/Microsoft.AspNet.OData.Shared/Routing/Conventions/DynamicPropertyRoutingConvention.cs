@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         return null;
                     }
 
-                    if (ODataRequestMethod.Get == controllerContext.Request.Method)
+                    if (ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                     {
                         string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", ActionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix);
@@ -69,7 +69,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         return null;
                     }
 
-                    if (ODataRequestMethod.Get == controllerContext.Request.Method)
+                    if (ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                     {
                         string actionNamePrefix = String.Format(CultureInfo.InvariantCulture, "Get{0}", ActionName);
                         actionName = actionMap.FindMatchingAction(actionNamePrefix + "From" + propertyAccessSegment.Property.Name);

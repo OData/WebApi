@@ -135,7 +135,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
         }
     }
 
-    public class EfCustomersController : TestODataController, IDisposable
+    public class EfCustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly DateAndTimeOfDayContext _db = new DateAndTimeOfDayContext();
 
@@ -185,14 +188,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
             return Ok();
         }
 
+#if NETCORE
         public void Dispose()
         {
-            // _db.Dispose();
+           // _db.Dispose();
         }
-
+#endif
     }
 
-    public class EfPeopleController : TestODataController, IDisposable
+    public class EfPeopleController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private static readonly EdmDateWithEfContext _db = new EdmDateWithEfContext();
 
@@ -229,9 +236,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
             return await Task.FromResult(TestSingleResult.Create(_db.People.Where(c => c.Id == key)));
         }
 
+#if NETCORE
         public void Dispose()
         {
-          //  _db.Dispose();
+            //_db.Dispose();
         }
+#endif
     }
 }

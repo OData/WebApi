@@ -29,6 +29,9 @@ namespace Microsoft.AspNet.OData.Test.Routing
             builder.Singleton<Product>("MyProduct");
             builder.EntitySet<DateTimeOffsetKeyCustomer>("DateTimeOffsetKeyCustomers");
             builder.EntitySet<Destination>("Destinations");
+            builder.EntitySet<Incident>("Incidents");
+            builder.EntitySet<NotFoundCustomer>("NotFoundCustomers");
+            builder.EntitySet<NotFoundWithIdCustomer>("NotFoundWithIdCustomers");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
             builder.EntityType<SpecialProduct>();
@@ -367,6 +370,22 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public class DestinationGroup : Destination
         {
             public int GroupLocation { get; set; }
+        }
+
+        public class Incident
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+        }
+
+        public class NotFoundCustomer
+        {
+            public int ID { get; set; }
+        }
+
+        public class NotFoundWithIdCustomer
+        {
+            public int ID { get; set; }
         }
     }
 }

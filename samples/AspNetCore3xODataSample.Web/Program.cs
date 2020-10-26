@@ -17,10 +17,6 @@ namespace AspNetCore3xODataSample.Web
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.ConfigureKestrel(options =>
-                    {
-                        options.AllowSynchronousIO = true;
-                    });
                     webBuilder.UseStartup<Startup>();
                 });
     }

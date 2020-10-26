@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal("Customer", customerType.Name);
             Assert.Equal(typeof(Customer).Namespace, customerType.Namespace);
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
-            Assert.Equal(5, customerType.DeclaredProperties.Count());
+            Assert.Equal(6, customerType.DeclaredProperties.Count());
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal("Customer", customerType.Name);
             Assert.Equal(typeof(Customer).Namespace, customerType.Namespace);
             Assert.Equal("CustomerId", customerType.DeclaredKey.Single().Name);
-            Assert.Equal(5, customerType.DeclaredProperties.Count());
+            Assert.Equal(6, customerType.DeclaredProperties.Count());
         }
 
         [Fact]
@@ -692,6 +692,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.True(entityType.Properties().Where(c => c.Name == "Name").Any());
         }
 
+
         [Fact]
         public void GetEdmModel_WorksOnModelBuilder_WithDateTime()
         {
@@ -726,6 +727,12 @@ namespace Microsoft.AspNet.OData.Test.Builder
             public IDictionary<string, object> DynamicProperties { get; set; }
         }
 
+        public class SimpleAnnotationEntityType
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        }
         public class EntityTypeWithDateAndTimeOfDay
         {
             public Date Date { get; set; }

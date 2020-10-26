@@ -35,14 +35,14 @@
       <HintPath>..\..\..\..\sln\packages\Microsoft.Data.OData.5.8.4\lib\net40\Microsoft.Data.OData.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.OData.Client, Version=7.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.6.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
+    <Reference Include="Microsoft.OData.Client, Version=7.7.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.7.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Core, Version=7.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.6.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Core.dll</HintPath>
+    <Reference Include="Microsoft.OData.Core, Version=7.7.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.7.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.OData.Edm, Version=7.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.6.1\lib\portable-net45+win8+wpa81\Microsoft.OData.Edm.dll</HintPath>
+    <Reference Include="Microsoft.OData.Edm, Version=7.7.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.7.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=2.0.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.2.0.2\lib\net45\Microsoft.Owin.dll</HintPath>
@@ -56,8 +56,8 @@
       <HintPath>..\..\..\..\sln\packages\Microsoft.Owin.Hosting.2.0.2\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=7.6.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.6.1\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
+    <Reference Include="Microsoft.Spatial, Version=7.7.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.7.1\lib\net45\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -216,6 +216,9 @@
     </Compile>
     <Compile Include="..\BoundOperation\BoundOperationTest.cs">
       <Link>BoundOperation\BoundOperationTest.cs</Link>
+    </Compile>
+    <Compile Include="..\BoundOperation\BoundOperationContextUriTest.cs">
+      <Link>BoundOperation\BoundOperationContextUriTest.cs</Link>
     </Compile>
     <Compile Include="..\Cast\CastContext.cs">
       <Link>Cast\CastContext.cs</Link>
@@ -1042,6 +1045,15 @@
     <Compile Include="..\DependencyInjection\DependencyInjectionEdmModel.cs">
       <Link>DependencyInjection\DependencyInjectionEdmModel.cs</Link>
     </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesControllers.cs">
+      <Link>DerivedTypes\DerivedTypesControllers.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesDataModel.cs">
+      <Link>DerivedTypes\DerivedTypesDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\DerivedTypes\DerivedTypesTests.cs">
+      <Link>DerivedTypes\DerivedTypesTests.cs</Link>
+    </Compile>
     <Compile Include="..\DollarFormat\DollarFormatController.cs">
       <Link>DollarFormat\DollarFormatController.cs</Link>
     </Compile>
@@ -1081,6 +1093,15 @@
     <Compile Include="..\DollarLevels\DollarLevelsTest.cs">
       <Link>DollarLevels\DollarLevelsTest.cs</Link>
     </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryCustomersController.cs">
+      <Link>DollarQuery\DollarQueryCustomersController.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryModels.cs">
+      <Link>DollarQuery\DollarQueryModels.cs</Link>
+    </Compile>
+    <Compile Include="..\DollarQuery\DollarQueryTests.cs">
+      <Link>DollarQuery\DollarQueryTests.cs</Link>
+    </Compile>
     <Compile Include="..\Enums\EnumsController.cs">
       <Link>Enums\EnumsController.cs</Link>
     </Compile>
@@ -1092,6 +1113,9 @@
     </Compile>
     <Compile Include="..\Enums\EnumsTest.cs">
       <Link>Enums\EnumsTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Enums\EnumsAliasTest.cs">
+      <Link>Enums\EnumsAliasTest.cs</Link>
     </Compile>
     <Compile Include="..\ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs">
       <Link>ETags\DeleteUpdatedEntryWithIfMatchETagsTest.cs</Link>
@@ -1461,6 +1485,9 @@
     </Compile>
     <Compile Include="..\NavigationPropertyOnComplexType\PeopleRepository.cs">
       <Link>NavigationPropertyOnComplexType\PeopleRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs">
+      <Link>NavigationPropertyOnComplexType\SelectImprovementOnComplexTypeTests.cs</Link>
     </Compile>
     <Compile Include="..\ODataCountTest\CountController.cs">
       <Link>ODataCountTest\CountController.cs</Link>
@@ -1844,6 +1871,10 @@
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationController.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationDataModel.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationEdmModel.cs" />
+    <Compile Include="InstanceAnnotations\AnnotationTest.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -1901,6 +1932,7 @@
   <ItemGroup>
     <Analyzer Include="..\..\..\..\sln\packages\xunit.analyzers.0.8.0\analyzers\dotnet\cs\xunit.analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp3.0;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1;netstandard2.0</TargetFrameworks>
   </PropertyGroup>
   <Import Project="..\..\tools\WebStack.settings.targets" />
   
@@ -15,8 +15,8 @@
   
   <Import Project="..\Microsoft.AspNet.OData.Shared\Microsoft.AspNet.OData.Shared.projitems" Label="Shared" />
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.0' ">
-    <!-- Define the Items for .NET CORE 3.0 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+    <!-- Define the Items for .NET CORE 3.x -->
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
@@ -41,9 +41,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.OData.Core" Version="7.6.1" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.6.1" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.6.1" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.7.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.7.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.7.1" />
   </ItemGroup>
 
   <ItemGroup>

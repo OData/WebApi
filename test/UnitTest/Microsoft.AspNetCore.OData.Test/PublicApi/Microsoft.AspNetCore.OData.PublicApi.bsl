@@ -64,8 +64,10 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
 
+	void AddRoute (string routeName, string routePrefix)
 	System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	System.IServiceProvider GetODataRootContainer (string routeName)
+	string GetRoutePrefix (string routeName)
 	bool HasODataRootContainer (string routeName)
 }
 
@@ -141,11 +143,13 @@ public abstract class Microsoft.AspNet.OData.PerRouteContainerBase : IPerRouteCo
 
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public virtual get; public virtual set; }
 
+	public virtual void AddRoute (string routeName, string routePrefix)
 	protected Microsoft.OData.IContainerBuilder CreateContainerBuilderWithCoreServices ()
 	public System.IServiceProvider CreateODataRootContainer (System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	public virtual System.IServiceProvider CreateODataRootContainer (string routeName, System.Action`1[[Microsoft.OData.IContainerBuilder]] configureAction)
 	protected abstract System.IServiceProvider GetContainer (string routeName)
 	public virtual System.IServiceProvider GetODataRootContainer (string routeName)
+	public virtual string GetRoutePrefix (string routeName)
 	public virtual bool HasODataRootContainer (string routeName)
 	protected abstract void SetContainer (string routeName, System.IServiceProvider rootContainer)
 }
@@ -495,14 +499,17 @@ public class Microsoft.AspNet.OData.ODataBuilder : IODataBuilder {
 public class Microsoft.AspNet.OData.ODataFeature : IDisposable, IODataFeature {
 	public ODataFeature ()
 
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public virtual get; public virtual set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public virtual get; public virtual set; }
 	System.Uri DeltaLink  { public virtual get; public virtual set; }
+	bool IsEndpointRouting  { public virtual get; public virtual set; }
 	System.Uri NextLink  { public virtual get; public virtual set; }
 	ODataPath Path  { public virtual get; public virtual set; }
 	System.IServiceProvider RequestContainer  { public virtual get; public virtual set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public virtual get; public virtual set; }
 	string RouteName  { public virtual get; public virtual set; }
+	string RoutePrefix  { public virtual get; public virtual set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public virtual get; public virtual set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public virtual get; public virtual set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public virtual get; public virtual set; }
@@ -731,7 +738,13 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchResponseItem {
 	]
 	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context)
 
-	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public static System.Threading.Tasks.Task WriteMessageAsync (Microsoft.OData.ODataBatchWriter writer, Microsoft.AspNetCore.Http.HttpContext context, bool asyncWriter)
+
+	public System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public abstract System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 [
@@ -853,7 +866,7 @@ public class Microsoft.AspNet.OData.Batch.ChangeSetResponseItem : ODataBatchResp
 	[
 	AsyncStateMachineAttribute(),
 	]
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 public class Microsoft.AspNet.OData.Batch.DefaultODataBatchHandler : ODataBatchHandler {
@@ -918,7 +931,7 @@ public class Microsoft.AspNet.OData.Batch.OperationResponseItem : ODataBatchResp
 	Microsoft.AspNetCore.Http.HttpContext Context  { public get; }
 
 	internal virtual bool IsResponseSuccessful ()
-	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer)
+	public virtual System.Threading.Tasks.Task WriteResponseAsync (Microsoft.OData.ODataBatchWriter writer, bool asyncWriter)
 }
 
 public class Microsoft.AspNet.OData.Batch.UnbufferedODataBatchHandler : ODataBatchHandler {
@@ -965,6 +978,7 @@ public enum Microsoft.AspNet.OData.Builder.PropertyKind : int {
 	Complex = 1
 	Dynamic = 5
 	Enum = 4
+	InstanceAnnotations = 6
 	Navigation = 3
 	Primitive = 0
 }
@@ -978,6 +992,15 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 	string Namespace  { public abstract get; }
 }
 
+public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
+	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	void AddResourceAnnotation (string annotationName, object value)
+	object GetPropertyAnnotation (string propertyName, string annotationName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
+	object GetResourceAnnotation (string annotationName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
+}
+
 public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfiguration {
 	protected NavigationSourceConfiguration ()
 	protected NavigationSourceConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
@@ -985,6 +1008,7 @@ public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfigurati
 
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.NavigationPropertyBindingConfiguration]] Bindings  { public get; }
 	System.Type ClrType  { public get; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	EntityTypeConfiguration EntityType  { public virtual get; }
 	string Name  { public get; }
 
@@ -1055,6 +1079,7 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.ParameterConfiguration]] Parameters  { public virtual get; }
 	bool ReturnNullable  { public get; public set; }
 	IEdmTypeConfiguration ReturnType  { public get; public set; }
+	DerivedTypeConstraintConfiguration ReturnTypeConstraints  { public get; protected set; }
 	string Title  { public get; public set; }
 
 	public ParameterConfiguration AddParameter (string name, IEdmTypeConfiguration parameterType)
@@ -1069,12 +1094,15 @@ public abstract class Microsoft.AspNet.OData.Builder.ParameterConfiguration {
 	protected ParameterConfiguration (string name, IEdmTypeConfiguration parameterType)
 
 	string DefaultValue  { public get; protected set; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	bool IsOptional  { public get; protected set; }
 	string Name  { public get; protected set; }
 	bool Nullable  { public get; public set; }
 	IEdmTypeConfiguration TypeConfiguration  { public get; protected set; }
 
 	public ParameterConfiguration HasDefaultValue (string defaultValue)
+	public ParameterConfiguration HasDerivedTypeConstraint ()
+	public ParameterConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 	public ParameterConfiguration Optional ()
 	public ParameterConfiguration Required ()
 }
@@ -1085,6 +1113,7 @@ public abstract class Microsoft.AspNet.OData.Builder.PropertyConfiguration {
 	bool AddedExplicitly  { public get; public set; }
 	bool AutoExpand  { public get; public set; }
 	StructuralTypeConfiguration DeclaringType  { public get; }
+	DerivedTypeConstraintConfiguration DerivedTypeConstraints  { public get; }
 	bool DisableAutoExpandWhenSelectIsPresent  { public get; public set; }
 	bool IsRestricted  { public get; }
 	PropertyKind Kind  { public abstract get; }
@@ -1158,6 +1187,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Reflection.PropertyInfo]] IgnoredProperties  { public get; }
+	System.Reflection.PropertyInfo InstanceAnnotationsContainer  { public get; }
 	System.Nullable`1[[System.Boolean]] IsAbstract  { public virtual get; public virtual set; }
 	bool IsOpen  { public get; }
 	Microsoft.OData.Edm.EdmTypeKind Kind  { public abstract get; }
@@ -1168,6 +1198,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] Properties  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] RemovedProperties  { protected get; }
+	bool SupportsInstanceAnnotations  { public get; }
 
 	internal virtual void AbstractImpl ()
 	public virtual CollectionPropertyConfiguration AddCollectionProperty (System.Reflection.PropertyInfo propertyInfo)
@@ -1175,6 +1206,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual void AddInstanceAnnotationContainer (System.Reflection.PropertyInfo propertyInfo)
 	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
@@ -1213,6 +1245,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
+	public void HasInstanceAnnotations (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
@@ -1233,13 +1266,13 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
@@ -1322,6 +1355,8 @@ public class Microsoft.AspNet.OData.Builder.ActionConfiguration : OperationConfi
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetActionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedActionLink ()
 	public ActionConfiguration HasActionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] actionLinkFactory, bool followsConventions)
+	public ActionConfiguration HasDerivedTypeConstraintForReturnType ()
+	public ActionConfiguration HasDerivedTypeConstraintsForReturnType (System.Type[] subtypes)
 	public ActionConfiguration HasFeedActionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] actionLinkFactory, bool followsConventions)
 	public ActionConfiguration Returns ()
 	public ActionConfiguration Returns (System.Type clrReturnType)
@@ -1373,6 +1408,8 @@ public class Microsoft.AspNet.OData.Builder.CollectionPropertyConfiguration : St
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 
+	public CollectionPropertyConfiguration HasDerivedTypeConstraint ()
+	public CollectionPropertyConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 	public CollectionPropertyConfiguration IsOptional ()
 	public CollectionPropertyConfiguration IsRequired ()
 }
@@ -1395,6 +1432,8 @@ public class Microsoft.AspNet.OData.Builder.ComplexPropertyConfiguration : Struc
 	PropertyKind Kind  { public virtual get; }
 	System.Type RelatedClrType  { public virtual get; }
 
+	public ComplexPropertyConfiguration HasDerivedTypeConstraint ()
+	public ComplexPropertyConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 	public ComplexPropertyConfiguration IsOptional ()
 	public ComplexPropertyConfiguration IsRequired ()
 }
@@ -1425,6 +1464,16 @@ public class Microsoft.AspNet.OData.Builder.DecimalPropertyConfiguration : Preci
 	System.Nullable`1[[System.Int32]] Scale  { public get; public set; }
 }
 
+public class Microsoft.AspNet.OData.Builder.DerivedTypeConstraintConfiguration {
+	public DerivedTypeConstraintConfiguration ()
+	public DerivedTypeConstraintConfiguration (Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation location)
+
+	Microsoft.OData.Edm.Csdl.EdmVocabularyAnnotationSerializationLocation Location  { public get; public set; }
+
+	public DerivedTypeConstraintConfiguration AddConstraint ()
+	public void AddConstraints (System.Collections.Generic.IEnumerable`1[[System.Type]] derivedTypes)
+}
+
 public class Microsoft.AspNet.OData.Builder.DynamicPropertyDictionaryAnnotation {
 	public DynamicPropertyDictionaryAnnotation (System.Reflection.PropertyInfo propertyInfo)
 
@@ -1442,10 +1491,14 @@ public class Microsoft.AspNet.OData.Builder.EntitySetConfiguration : NavigationS
 	public EntitySetConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
 
 	public virtual System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedSelfLink ()
+	public EntitySetConfiguration HasDerivedTypeConstraint ()
+	public EntitySetConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 	public virtual NavigationSourceConfiguration HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
 
 public class Microsoft.AspNet.OData.Builder.EntitySetConfiguration`1 : NavigationSourceConfiguration`1 {
+	public EntitySetConfiguration`1 HasDerivedTypeConstraint ()
+	public EntitySetConfiguration`1 HasDerivedTypeConstraints (System.Type[] subtypes)
 	public virtual void HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.String]] feedSelfLinkFactory)
 	public virtual void HasFeedSelfLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] feedSelfLinkFactory)
 }
@@ -1546,6 +1599,8 @@ public class Microsoft.AspNet.OData.Builder.FunctionConfiguration : OperationCon
 
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] GetFeedFunctionLink ()
 	public System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] GetFunctionLink ()
+	public FunctionConfiguration HasDerivedTypeConstraintForReturnType ()
+	public FunctionConfiguration HasDerivedTypeConstraintsForReturnType (System.Type[] subtypes)
 	public FunctionConfiguration HasFeedFunctionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceSetContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration HasFunctionLink (System.Func`2[[Microsoft.AspNet.OData.ResourceContext],[System.Uri]] functionLinkFactory, bool followsConventions)
 	public FunctionConfiguration Returns ()
@@ -1609,6 +1664,8 @@ public class Microsoft.AspNet.OData.Builder.NavigationPropertyConfiguration : Pr
 	public NavigationPropertyConfiguration Contained ()
 	public NavigationPropertyConfiguration HasConstraint (System.Collections.Generic.KeyValuePair`2[[System.Reflection.PropertyInfo],[System.Reflection.PropertyInfo]] constraint)
 	public NavigationPropertyConfiguration HasConstraint (System.Reflection.PropertyInfo dependentPropertyInfo, System.Reflection.PropertyInfo principalPropertyInfo)
+	public NavigationPropertyConfiguration HasDerivedTypeConstraint ()
+	public NavigationPropertyConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 	public NavigationPropertyConfiguration NonContained ()
 	public NavigationPropertyConfiguration Optional ()
 	public NavigationPropertyConfiguration Required ()
@@ -1757,9 +1814,14 @@ public class Microsoft.AspNet.OData.Builder.SingletonConfiguration : NavigationS
 	public SingletonConfiguration ()
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, EntityTypeConfiguration entityType, string name)
 	public SingletonConfiguration (ODataModelBuilder modelBuilder, System.Type entityClrType, string name)
+
+	public SingletonConfiguration HasDerivedTypeConstraint ()
+	public SingletonConfiguration HasDerivedTypeConstraints (System.Type[] subtypes)
 }
 
 public class Microsoft.AspNet.OData.Builder.SingletonConfiguration`1 : NavigationSourceConfiguration`1 {
+	public SingletonConfiguration`1 HasDerivedTypeConstraints ()
+	public SingletonConfiguration`1 HasDerivedTypeConstraints (System.Type[] subtypes)
 }
 
 [
@@ -1790,8 +1852,29 @@ public sealed class Microsoft.AspNet.OData.Builder.ContainedAttribute : System.A
 [
 AttributeUsageAttribute(),
 ]
+public sealed class Microsoft.AspNet.OData.Builder.DerivedTypeConstraintAttribute : System.Attribute {
+	public DerivedTypeConstraintAttribute ()
+	public DerivedTypeConstraintAttribute (System.Type[] types)
+
+	System.Collections.Generic.ISet`1[[System.Type]] DerivedTypeConstraints  { public get; }
+}
+
+[
+AttributeUsageAttribute(),
+]
 public sealed class Microsoft.AspNet.OData.Builder.MediaTypeAttribute : System.Attribute {
 	public MediaTypeAttribute ()
+}
+
+public sealed class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
+	public ODataInstanceAnnotationContainer ()
+
+	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	public virtual void AddResourceAnnotation (string annotationName, object value)
+	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
+	public virtual object GetResourceAnnotation (string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
 }
 
 [
@@ -1869,11 +1952,6 @@ public sealed class Microsoft.AspNet.OData.Extensions.HttpRequestExtensions {
 	ExtensionAttribute(),
 	]
 	public static System.Uri GetNextPageLink (Microsoft.AspNetCore.Http.HttpRequest request, int pageSize, object instance, System.Func`2[[System.Object],[System.String]] objectToSkipTokenValue)
-
-	[
-	ExtensionAttribute(),
-	]
-	public static System.Collections.Generic.IDictionary`2[[System.String],[System.String]] GetODataContentIdMapping (Microsoft.AspNetCore.Http.HttpRequest request)
 
 	[
 	ExtensionAttribute(),
@@ -2306,14 +2384,17 @@ public interface Microsoft.AspNet.OData.Interfaces.IODataBuilder {
 }
 
 public interface Microsoft.AspNet.OData.Interfaces.IODataFeature {
+	Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor ActionDescriptor  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.Aggregation.ApplyClause ApplyClause  { public abstract get; public abstract set; }
 	Microsoft.AspNetCore.Routing.RouteValueDictionary BatchRouteData  { public abstract get; public abstract set; }
 	System.Uri DeltaLink  { public abstract get; public abstract set; }
+	bool IsEndpointRouting  { public abstract get; public abstract set; }
 	System.Uri NextLink  { public abstract get; public abstract set; }
 	ODataPath Path  { public abstract get; public abstract set; }
 	System.IServiceProvider RequestContainer  { public abstract get; public abstract set; }
 	Microsoft.Extensions.DependencyInjection.IServiceScope RequestScope  { public abstract get; public abstract set; }
 	string RouteName  { public abstract get; public abstract set; }
+	string RoutePrefix  { public abstract get; public abstract set; }
 	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] RoutingConventionsStore  { public abstract get; public abstract set; }
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public abstract get; public abstract set; }
 	System.Nullable`1[[System.Int64]] TotalCount  { public abstract get; public abstract set; }
@@ -2426,6 +2507,11 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 	Disabled = 2
 }
 
+public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
+	bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
+	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
+}
+
 public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
 	string MapProperty (string propertyName)
 }
@@ -2455,6 +2541,11 @@ public abstract class Microsoft.AspNet.OData.Query.SkipTokenHandler {
 	public abstract IQueryable`1 ApplyTo (IQueryable`1 query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Uri GenerateNextPageLink (System.Uri baseUri, int pageSize, object instance, ODataSerializerContext context)
+}
+
+public sealed class Microsoft.AspNet.OData.Query.ODataQueryOptionsParserFactory {
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.IODataQueryOptionsParser]] Create ()
+	public static IODataQueryOptionsParser GetQueryOptionsParser (Microsoft.AspNetCore.Http.HttpRequest request)
 }
 
 public class Microsoft.AspNet.OData.Query.ApplyQueryOption {
@@ -2704,6 +2795,16 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValuePropertyAccessNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.UnaryOperatorNode nodeIn)
+}
+
+public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IODataQueryOptionsParser {
+	public PlainTextODataQueryOptionsParser ()
+
+	public virtual bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
 public class Microsoft.AspNet.OData.Query.QueryFilterProvider : IFilterProvider {
@@ -2962,10 +3063,12 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string Controller = "controller"
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
+	public static readonly string KeyCount = "ODataRouteKeyCount"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
 	public static readonly string OptionalParameters = "Microsoft.AspNet.OData.Routing.ODataOptionalParameter"
+	public static readonly string QuerySegment = "$query"
 	public static readonly string RelatedKey = "relatedKey"
 	public static readonly string VersionConstraintName = "ODataVersionConstraint"
 }
@@ -3024,7 +3127,7 @@ public class Microsoft.AspNet.OData.Routing.DefaultODataPathValidator : Microsof
 }
 
 public class Microsoft.AspNet.OData.Routing.ODataActionSelector : IActionSelector {
-	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, Microsoft.AspNetCore.Mvc.Internal.ActionConstraintCache actionConstraintProviders, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory)
+	public ODataActionSelector (Microsoft.AspNetCore.Mvc.Infrastructure.IActionDescriptorCollectionProvider actionDescriptorCollectionProvider, Microsoft.AspNetCore.Mvc.Internal.ActionConstraintCache actionConstraintProviders, Microsoft.Extensions.Logging.ILoggerFactory loggerFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelBinderFactory modelBinderFactory, Microsoft.AspNetCore.Mvc.ModelBinding.IModelMetadataProvider modelMetadataProvider)
 
 	public virtual Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor SelectBestCandidate (Microsoft.AspNetCore.Routing.RouteContext context, System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] candidates)
 	public virtual System.Collections.Generic.IReadOnlyList`1[[Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor]] SelectCandidates (Microsoft.AspNetCore.Routing.RouteContext context)
@@ -3263,6 +3366,7 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataPrimitiveDese
 public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceDeserializer : ODataEdmTypeDeserializer {
 	public ODataResourceDeserializer (ODataDeserializerProvider deserializerProvider)
 
+	public virtual void ApplyInstanceAnnotations (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperty (object resource, ODataNestedResourceInfoWrapper resourceInfoWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyStructuralProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
@@ -3345,6 +3449,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.EntitySelfLinks {
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataCollectionSerializer : ODataEdmTypeSerializer {
 	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider)
+	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider, bool isForAnnotations)
 
 	protected static void AddTypeNameAnnotationAsNeeded (Microsoft.OData.ODataCollectionValue value, ODataMetadataLevel metadataLevel)
 	public virtual Microsoft.OData.ODataCollectionValue CreateODataCollectionValue (System.Collections.IEnumerable enumerable, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataSerializerContext writeContext)
@@ -3415,6 +3520,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public ODataResourceSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual void AppendDynamicProperties (Microsoft.OData.ODataResource resource, SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+	public virtual void AppendInstanceAnnotations (Microsoft.OData.ODataResource resource, ResourceContext resourceContext)
 	public virtual string CreateETag (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, ResourceContext resourceContext)
@@ -3434,6 +3540,14 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSeri
 	public virtual Microsoft.OData.ODataResourceSet CreateResourceSet (System.Collections.IEnumerable resourceSetInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference resourceSetType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+}
+
+public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceValueSerializer : ODataEdmTypeSerializer {
+	public ODataResourceValueSerializer (ODataSerializerProvider serializerProvider)
+	protected ODataResourceValueSerializer (Microsoft.OData.ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext {
@@ -3469,21 +3583,29 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
 	public SelectExpandNode (Microsoft.OData.Edm.IEdmStructuredType structuredType, ODataSerializerContext writeContext)
 	public SelectExpandNode (Microsoft.OData.UriParser.SelectExpandClause selectExpandClause, Microsoft.OData.Edm.IEdmStructuredType structuredType, Microsoft.OData.Edm.IEdmModel model)
 
+	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedNavigationSelectItem]] ExpandedProperties  { public get; }
 	[
 	ObsoleteAttribute(),
 	]
-	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.SelectExpandClause]] ExpandedNavigationProperties  { public get; }
-
-	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedNavigationSelectItem]] ExpandedProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] ReferencedNavigationProperties  { public get; }
+
+	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmNavigationProperty],[Microsoft.OData.UriParser.ExpandedReferenceSelectItem]] ReferencedProperties  { public get; }
 	bool SelectAllDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmAction]] SelectedActions  { public get; }
+	[
+	ObsoleteAttribute(),
+	]
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedComplexProperties  { public get; }
+
+	System.Collections.Generic.IDictionary`2[[Microsoft.OData.Edm.IEdmStructuralProperty],[Microsoft.OData.UriParser.PathSelectItem]] SelectedComplexTypeProperties  { public get; }
 	System.Collections.Generic.ISet`1[[System.String]] SelectedDynamicProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmFunction]] SelectedFunctions  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmNavigationProperty]] SelectedNavigationProperties  { public get; }
 	System.Collections.Generic.ISet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] SelectedStructuralProperties  { public get; }
 
+	[
+	ObsoleteAttribute(),
+	]
 	public static void GetStructuralProperties (Microsoft.OData.Edm.IEdmStructuredType structuredType, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] structuralProperties, System.Collections.Generic.HashSet`1[[Microsoft.OData.Edm.IEdmStructuralProperty]] nestedStructuralProperties)
 }
 
@@ -3492,12 +3614,19 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.DynamicTypeWrappe
 
 	System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] Values  { public abstract get; }
 
-	public bool TryGetPropertyValue (string propertyName, out System.Object& value)
+	public virtual bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
 public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderBase {
 	protected ExpressionBinderBase (System.IServiceProvider requestContainer)
 
+	System.Linq.Expressions.ParameterExpression Parameter  { protected abstract get; }
+
+	public abstract System.Linq.Expressions.Expression Bind (Microsoft.OData.UriParser.QueryNode node)
+	protected System.Linq.Expressions.Expression[] BindArguments (System.Collections.Generic.IEnumerable`1[[Microsoft.OData.UriParser.QueryNode]] nodes)
+	public virtual System.Linq.Expressions.Expression BindCollectionConstantNode (Microsoft.OData.UriParser.CollectionConstantNode node)
+	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
+	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
@@ -3507,15 +3636,15 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
 	public FilterBinder (System.IServiceProvider requestContainer)
 
+	System.Linq.Expressions.ParameterExpression Parameter  { protected virtual get; }
+
 	public virtual System.Linq.Expressions.Expression Bind (Microsoft.OData.UriParser.QueryNode node)
 	public virtual System.Linq.Expressions.Expression BindAllNode (Microsoft.OData.UriParser.AllNode allNode)
 	public virtual System.Linq.Expressions.Expression BindAnyNode (Microsoft.OData.UriParser.AnyNode anyNode)
 	public virtual System.Linq.Expressions.Expression BindBinaryOperatorNode (Microsoft.OData.UriParser.BinaryOperatorNode binaryOperatorNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionComplexNode (Microsoft.OData.UriParser.CollectionComplexNode collectionComplexNode)
-	public virtual System.Linq.Expressions.Expression BindCollectionConstantNode (Microsoft.OData.UriParser.CollectionConstantNode node)
 	public virtual System.Linq.Expressions.Expression BindCollectionPropertyAccessNode (Microsoft.OData.UriParser.CollectionPropertyAccessNode propertyAccessNode)
 	public virtual System.Linq.Expressions.Expression BindCollectionResourceCastNode (Microsoft.OData.UriParser.CollectionResourceCastNode node)
-	public virtual System.Linq.Expressions.Expression BindConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode)
 	public virtual System.Linq.Expressions.Expression BindConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode)
 	public virtual System.Linq.Expressions.Expression BindDynamicPropertyAccessQueryNode (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	public virtual System.Linq.Expressions.Expression BindInNode (Microsoft.OData.UriParser.InNode inNode)
@@ -3526,7 +3655,6 @@ public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionB
 	public virtual System.Linq.Expressions.Expression BindSingleComplexNode (Microsoft.OData.UriParser.SingleComplexNode singleComplexNode)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceCastNode (Microsoft.OData.UriParser.SingleResourceCastNode node)
 	public virtual System.Linq.Expressions.Expression BindSingleResourceFunctionCallNode (Microsoft.OData.UriParser.SingleResourceFunctionCallNode node)
-	public virtual System.Linq.Expressions.Expression BindSingleValueFunctionCallNode (Microsoft.OData.UriParser.SingleValueFunctionCallNode node)
 	public virtual System.Linq.Expressions.Expression BindUnaryOperatorNode (Microsoft.OData.UriParser.UnaryOperatorNode unaryOperatorNode)
 }
 
@@ -3613,6 +3741,7 @@ public abstract class Microsoft.AspNet.OData.Routing.Conventions.NavigationSourc
 public sealed class Microsoft.AspNet.OData.Routing.Conventions.ODataRoutingConventions {
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefault ()
 	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, Microsoft.AspNetCore.Routing.IRouteBuilder builder)
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Routing.Conventions.IODataRoutingConvention]] CreateDefaultWithAttributeRouting (string routeName, System.IServiceProvider serviceProvider)
 }
 
 public class Microsoft.AspNet.OData.Routing.Conventions.ActionRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
@@ -3662,6 +3791,12 @@ public class Microsoft.AspNet.OData.Routing.Conventions.MetadataRoutingConventio
 
 public class Microsoft.AspNet.OData.Routing.Conventions.NavigationRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public NavigationRoutingConvention ()
+
+	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
+}
+
+public class Microsoft.AspNet.OData.Routing.Conventions.OperationImportRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
+	public OperationImportRoutingConvention ()
 
 	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
 }

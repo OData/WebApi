@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         {
             string prefix;
             TypeSegment cast;
-            IEdmProperty property = GetProperty(odataPath, controllerContext.Request.Method, out prefix, out cast);
+            IEdmProperty property = GetProperty(odataPath, controllerContext.Request.GetRequestMethodOrPreflightMethod(), out prefix, out cast);
             IEdmEntityType declaringType = property == null ? null : property.DeclaringType as IEdmEntityType;
 
             if (declaringType != null)

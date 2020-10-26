@@ -116,6 +116,29 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw Error.ArgumentNull("name");
+            }
+
+            if (_dynamicDictionaryPropertyinfo != null)
+            {
+                // Dynamic property can have the same name as the dynamic property dictionary.
+                if (name == _dynamicDictionaryPropertyinfo.Name ||
+                    !_allProperties.ContainsKey(name))
+                {
+                    if (_dynamicDictionaryCache == null)
+                    {
+                        _dynamicDictionaryCache =
+                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
+                    }
+
+                    _dynamicDictionaryCache[name] = value;
+                    _changedDynamicProperties.Add(name);
+                    return true;
+                }
+            }
+
             if (value is IDelta)
             {
                 return TrySetNestedResourceInternal(name, value);
@@ -534,7 +557,18 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    if (dynamicPropertyValue is IDelta)
+                    {
+                        dynamic deltaObject = dynamicPropertyValue;
+                        dynamic instance = deltaObject.GetInstance();
+
+                        deltaObject.CopyChangedValues(instance);
+                        tempDictionary[dynamicPropertyName] = instance;
+                    }
+                    else
+                    {
+                        tempDictionary[dynamicPropertyName] = dynamicPropertyValue;
+                    }
                 }
             }
 
@@ -591,24 +625,6 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (_dynamicDictionaryPropertyinfo != null)
-            {
-                // Dynamic property can have the same name as the dynamic property dictionary.
-                if (name == _dynamicDictionaryPropertyinfo.Name ||
-                    !_allProperties.ContainsKey(name))
-                {
-                    if (_dynamicDictionaryCache == null)
-                    {
-                        _dynamicDictionaryCache =
-                            GetDynamicPropertyDictionary(_dynamicDictionaryPropertyinfo, _instance, create: true);
-                    }
-
-                    _dynamicDictionaryCache[name] = value;
-                    _changedDynamicProperties.Add(name);
-                    return true;
-                }
-            }
-
             if (!_updatableProperties.Contains(name))
             {
                 return false;
@@ -649,6 +665,12 @@ namespace Microsoft.AspNet.OData
                 // Ignore duplicated nested resource.
                 return false;
             }
+
+            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
+            // Get the Delta<{NestedResourceType}>._instance using Reflection.
+            FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+            Contract.Assert(field != null, "field != null");
+            cacheHit.SetValue(_instance, field.GetValue(deltaNestedResource));
 
             // Add the nested resource in the hierarchy.
             // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which

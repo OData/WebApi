@@ -51,12 +51,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             return Todoes.AsQueryable();
         }
 
-        protected SpecialCharactersLinkGenerationTestsModel GetEntityByKey(string key)
+        public SpecialCharactersLinkGenerationTestsModel Get(string key)
         {
             return Todoes.FirstOrDefault(t => t.Name == key);
         }
 
-        protected SpecialCharactersLinkGenerationTestsModel PatchEntity(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
+        public SpecialCharactersLinkGenerationTestsModel Patch(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
         {
             var todo = Todoes.FirstOrDefault(t => t.Name == key);
             return todo;
@@ -70,8 +70,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             var todoes = new List<SpecialCharactersLinkGenerationTestsModel>();
             foreach (var c in "$&+,/:;=?@ <>#%{}|\\^~[]` ")
             {
-                // Skip: it blocked by IIS settings
-                if ("<>*%:+/\\&:?#=".Contains(c))//TODO: '=' is added when migration from odata v3 to v4. and the originally the test fails.
+                // Skip: it's blocked by IIS settings
+                // The whitespace (' ') is skipped because it was not supported but the test had bug which
+                // erroneously reported a successful response
+                // if a single whitespace should be allowed as a key parameter, then support for it should
+                // be implemented and it should be omitted from this string of skipped chars
+                if (" <>*%:+/\\&:?#=".Contains(c))//TODO: '=' is added when migration from odata v3 to v4. and the originally the test fails.
                 {
                     continue;
                 }
@@ -91,12 +95,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
             return Todoes.AsQueryable();
         }
 
-        protected SpecialCharactersLinkGenerationTestsModel GetEntityByKey(string key)
+        public SpecialCharactersLinkGenerationTestsModel Get(string key)
         {
             return Todoes.FirstOrDefault(t => t.Name == key);
         }
 
-        protected SpecialCharactersLinkGenerationTestsModel PatchEntity(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
+        public SpecialCharactersLinkGenerationTestsModel Patch(string key, Delta<SpecialCharactersLinkGenerationTestsModel> patch)
         {
             var todo = Todoes.FirstOrDefault(t => t.Name == key);
             return todo;
@@ -145,7 +149,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                     Assert.True(context.TryGetUri(todo, out selfLink));
                     Console.WriteLine(selfLink);
 
-                    await context.ExecuteAsync<SpecialCharactersLinkGenerationTestsModel>(selfLink, "GET", true);
+                    var result = await context.ExecuteAsync<SpecialCharactersLinkGenerationTestsModel>(selfLink, "GET", true);
+                    var fetchedTodo = result.FirstOrDefault();
+                    Assert.NotNull(fetchedTodo);
+                    Assert.Equal(todo.Name, fetchedTodo.Name);
                 }
                 catch (Exception ex)
                 {
@@ -198,7 +205,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.ModelBuilder
                     Uri selfLink;
                     Assert.True(client.TryGetUri(todo, out selfLink));
 
-                    await client.ExecuteAsync<SpecialCharactersLinkGenerationTestsModel>(selfLink, "GET", true);
+                    var result = await client.ExecuteAsync<SpecialCharactersLinkGenerationTestsModel>(selfLink, "GET", true);
+                    var fetchedTodo = result.FirstOrDefault();
+                    Assert.NotNull(fetchedTodo);
+                    Assert.Equal(todo.Name, fetchedTodo.Name);
                 }
                 catch (Exception ex)
                 {

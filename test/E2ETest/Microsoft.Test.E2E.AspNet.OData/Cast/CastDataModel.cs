@@ -29,4 +29,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Cast
     {
         public int Speed { get; set; }
     }
+
+    public class JetPlane : AirPlane
+    {
+        public string Company { get; set; }
+    }
+
 }

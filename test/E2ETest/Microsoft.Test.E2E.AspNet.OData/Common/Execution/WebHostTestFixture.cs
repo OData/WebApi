@@ -219,10 +219,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 {
                     options.Filters.Add(typeof(WebHostLogExceptionFilter));
                     options.Filters.Add(new DelayLoadFilterFactory<ETagMessageHandler>());
+#if !NETCORE2x
                     options.EnableEndpointRouting = false;
+#endif
                 });
 
-#if NETCOREAPP2_0
+#if NETCORE2x
                 coreBuilder.AddJsonFormatters();
 #else
                 coreBuilder.AddNewtonsoftJson();
@@ -231,7 +233,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                 services.AddOData();
             }
 
-#if NETCOREAPP2_0
+#if NETCORE2x
             public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 #else
             public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -299,7 +301,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 
                     // Apply Json options.
 #if NETCORE
-#if NETCOREAPP2_0
+#if NETCORE2x
                     IOptions<MvcJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcJsonOptions>>();
 #else
                     IOptions<MvcNewtonsoftJsonOptions> jsonOptions = routeBuilder.ServiceProvider.GetService<IOptions<MvcNewtonsoftJsonOptions>>();

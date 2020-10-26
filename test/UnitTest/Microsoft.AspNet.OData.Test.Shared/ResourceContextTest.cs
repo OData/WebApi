@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
@@ -16,6 +17,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
@@ -281,6 +283,43 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void Property_ResourceInstance_CanBeBuiltWithSelectExpandWrapperProperties()
+        {
+            // Arrange
+            EdmComplexType edmType = new EdmComplexType("NS", "Name");
+            var edmTypeRef = new EdmComplexTypeReference(edmType, isNullable: false);
+            edmType.AddStructuralProperty("Property", EdmPrimitiveTypeKind.Int32);
+            edmType.AddStructuralProperty("SubEntity1", edmTypeRef);
+            edmType.AddStructuralProperty("SubEntity2", edmTypeRef);
+            EdmModel model = new EdmModel();
+            model.AddElement(edmType);
+            model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestSubEntity)));
+            Mock<IEdmComplexObject> edmObject = new Mock<IEdmComplexObject>();
+            object propertyValue = 42;
+            object selectExpandWrapper = new SelectExpandWrapper<TestEntity>();
+            object subEntity2 = new TestSubEntity
+            {
+                Property = 33
+            };
+            edmObject.Setup(e => e.TryGetPropertyValue("Property", out propertyValue)).Returns(true);
+            edmObject.Setup(e => e.TryGetPropertyValue("SubEntity1", out selectExpandWrapper)).Returns(true);
+            edmObject.Setup(e => e.TryGetPropertyValue("SubEntity2", out subEntity2)).Returns(true);
+            edmObject.Setup(e => e.GetEdmType()).Returns(edmTypeRef);
+
+            ResourceContext entityContext = new ResourceContext { EdmModel = model, EdmObject = edmObject.Object, StructuredType = edmType };
+
+            // Act
+            object resource = entityContext.ResourceInstance;
+
+            // Assert
+            TestSubEntity testEntity = Assert.IsType<TestSubEntity>(resource);
+            Assert.Equal(42, testEntity.Property);
+            Assert.Null(testEntity.SubEntity1);
+            Assert.NotNull(testEntity.SubEntity2);
+            Assert.Equal(33, testEntity.SubEntity2.Property);
+        }
+
+        [Fact]
         public void Property_ResourceInstance_ReturnsNullWhenEdmObjectIsNull()
         {
             // Arrange
@@ -312,6 +351,15 @@ namespace Microsoft.AspNet.OData.Test
             public int Property { get; set; }
 
             public int[] CollectionProperty { get; set; }
+        }
+
+        private class TestSubEntity
+        {
+            public int Property { get; set; }
+
+            public TestSubEntity SubEntity1 { get; set; }
+
+            public TestSubEntity SubEntity2 { get; set; }
         }
 
         /// <summary>

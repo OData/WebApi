@@ -14,7 +14,6 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
-using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Nop.Core.Domain.Blogs;
 using Xunit;
 
@@ -60,7 +59,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
     }
 
-    public class MixScenarioTests_ODataController : InMemoryODataController<Vehicle, int>
+    [Key("Id")]
+    public class MixVehicle
+    {
+        public int Id { get; set; }
+
+        public string Model { get; set; }
+
+        public string Name { get; set; }
+
+        public virtual int WheelCount { get; set; }
+    }
+
+    public class MixScenarioTests_ODataController : InMemoryODataController<MixVehicle, int>
     {
         public MixScenarioTests_ODataController()
             : base("Id")
@@ -85,7 +96,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
             var mb = configuration.CreateConventionModelBuilder();
-            mb.EntitySet<Vehicle>("MixScenarioTests_OData");
+            mb.EntitySet<MixVehicle>("MixScenarioTests_OData");
             return mb.GetEdmModel();
         }
 
@@ -128,7 +139,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         protected static IEdmModel GetEdmModel(WebRouteConfiguration configuration)
         {
             var mb = configuration.CreateConventionModelBuilder();
-            mb.EntitySet<Vehicle>("MixScenarioTests_OData");
+            mb.EntitySet<MixVehicle>("MixScenarioTests_OData");
             return mb.GetEdmModel();
         }
 
@@ -143,7 +154,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             await this.ClearRepositoryAsync(entitySetName);
 
             // post new entity to repository
-            var baseline = InstanceCreator.CreateInstanceOf<Vehicle>(rand);
+            var baseline = InstanceCreator.CreateInstanceOf<MixVehicle>(rand);
             await PostNewEntityAsync(uri, baseline, entitySetName);
 
             // get collection of entities from repository
@@ -178,7 +189,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Null(thirdVersion);
         }
 
-        private async Task<DataServiceResponse> PostNewEntityAsync(Uri baseAddress, Vehicle entity, string entitySetName)
+        private async Task<DataServiceResponse> PostNewEntityAsync(Uri baseAddress, MixVehicle entity, string entitySetName)
         {
             var context = WriterClient(baseAddress, ODataProtocolVersion.V4);
             context.AddObject(entitySetName, entity);
@@ -186,15 +197,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return await context.SaveChangesAsync();
         }
 
-        private async Task<IEnumerable<Vehicle>> GetEntitiesAsync(Uri baseAddress, string entitySetName)
+        private async Task<IEnumerable<MixVehicle>> GetEntitiesAsync(Uri baseAddress, string entitySetName)
         {
             var context = ReaderClient(baseAddress, ODataProtocolVersion.V4);
-            var query = context.CreateQuery<Vehicle>(entitySetName);
+            var query = context.CreateQuery<MixVehicle>(entitySetName);
 
             return await query.ExecuteAsync();
         }
 
-        private async Task<DataServiceResponse> UpdateEntityAsync(Uri baseAddress, Vehicle from, Func<Vehicle, Vehicle> update, string entitySetName)
+        private async Task<DataServiceResponse> UpdateEntityAsync(Uri baseAddress, MixVehicle from, Func<MixVehicle, MixVehicle> update, string entitySetName)
         {
             var context = WriterClient(baseAddress, ODataProtocolVersion.V4);
 
@@ -205,7 +216,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             return await context.SaveChangesAsync();
         }
 
-        private async Task<DataServiceResponse> DeleteEntityAsync(Uri baseAddress, Vehicle entity, string entitySetName)
+        private async Task<DataServiceResponse> DeleteEntityAsync(Uri baseAddress, MixVehicle entity, string entitySetName)
         {
             var context = WriterClient(baseAddress, ODataProtocolVersion.V4);
             context.AttachTo(entitySetName, entity);

@@ -125,10 +125,17 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             IQueryable query = Enumerable.Empty<int>().AsQueryable();
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.Throws<ArgumentException>(
+                () => etagCustomer.ApplyTo(query),
+                "Cannot apply ETag of 'Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.Customer' to IQueryable of " +
+                "'System.Int32'. (Parameter 'query')");
+#else
             ExceptionAssert.Throws<ArgumentException>(
                 () => etagCustomer.ApplyTo(query),
                 "Cannot apply ETag of 'Microsoft.AspNet.OData.Test.Formatter.Serialization.Models.Customer' to IQueryable of " +
                 "'System.Int32'.\r\nParameter name: query");
+#endif
         }
     }
 }

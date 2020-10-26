@@ -8,7 +8,10 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 
 namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
 {
-    public class CustomersController : TestODataController, IDisposable
+    public class CustomersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandCustomerContext _db = new AutoExpandCustomerContext();
 
@@ -110,13 +113,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             }
         }
 
+#if NETCORE
         public void Dispose()
         {
-          //  _db.Dispose();
+            //_db.Dispose();
         }
+#endif
     }
 
-    public class PeopleController : TestODataController, IDisposable
+    public class PeopleController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandPeopleContext _db = new AutoExpandPeopleContext();
 
@@ -167,13 +175,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             };
         }
 
+#if NETCORE
         public void Dispose()
         {
             // _db.Dispose();
         }
+#endif
     }
 
-    public class NormalOrdersController : TestODataController, IDisposable
+    public class NormalOrdersController : TestODataController
+#if NETCORE
+        , IDisposable
+#endif
     {
         private readonly AutoExpandOrdersContext _db = new AutoExpandOrdersContext();
 
@@ -249,9 +262,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
             };
         }
 
+#if NETCORE
         public void Dispose()
         {
-           // _db.Dispose();
+            //_db.Dispose();
         }
+#endif
     }
 }

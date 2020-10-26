@@ -376,6 +376,24 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>
+        /// Deserializes the instance annotations from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.
+        /// </summary>
+        /// <param name="resource">The object into which the annotations should be read.</param>
+        /// <param name="resourceWrapper">The resource object containing the annotations.</param>
+        /// <param name="structuredType">The type of the resource.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyInstanceAnnotations(object resource, ODataResourceWrapper resourceWrapper,
+            IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+        {
+            if (resourceWrapper == null)
+            {
+                throw Error.ArgumentNull("resourceWrapper");
+            }
+
+            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.Resource,DeserializerProvider, readContext);
+        }
+
+        /// <summary>
         /// Deserializes the given <paramref name="structuralProperty"/> into <paramref name="resource"/>.
         /// </summary>
         /// <param name="resource">The object into which the structural property should be read.</param>
@@ -384,7 +402,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The deserializer context.</param>
         public virtual void ApplyStructuralProperty(object resource, ODataProperty structuralProperty,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
-        {
+        { 
             if (resource == null)
             {
                 throw Error.ArgumentNull("resource");
@@ -403,6 +421,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
+            ApplyInstanceAnnotations(resource, resourceWrapper, structuredType, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,

@@ -236,8 +236,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\ModelContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\PropertyContainerTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandBinderTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandIncludedPropertyTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ODataQueryValidatorTest.cs" />
@@ -284,6 +288,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntityRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntitySetRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\FunctionRoutingConventionTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\OperationImportRoutingConventionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationSourceRoutingConventionTest.cs" />
@@ -319,9 +324,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataValueProviderFactoryTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\ODataVersionConstraintTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CustomersModelWithInheritance.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\CaseInsensitiveResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\TestControllerBase.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TestCommon\UnqualifiedCaseInsensitiveResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenAddress.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\ODataModelBuilderMocks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TestCommon\SimpleOpenCustomer.cs" />
@@ -403,6 +406,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelperTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnicodeCharactersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ArrayOfBoolean.json" />

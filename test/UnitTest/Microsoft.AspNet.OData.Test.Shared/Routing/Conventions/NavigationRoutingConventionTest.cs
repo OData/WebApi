@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -52,8 +53,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
+                Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
             }
         }
 
@@ -122,8 +125,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
+                Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
             }
         }
 
@@ -229,6 +234,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
             Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(1, SelectActionHelper.GetRouteData(request).Values["keyID"]);
         }
 
         [Theory]
@@ -253,8 +259,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
+            Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
 
         [Theory]
@@ -283,8 +291,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(expectedSelectedAction, selectedAction);
-            Assert.Single(SelectActionHelper.GetRouteData(request).Values);
+            Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
+            Assert.Equal(1, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
         }
 
         [Theory]

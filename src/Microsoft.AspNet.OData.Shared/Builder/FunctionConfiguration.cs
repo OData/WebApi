@@ -203,6 +203,47 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Adds subtypes to the list of derived type constraints for the return type.
+        /// </summary>
+        /// <param name="subtypes">The subtypes for which the constraint needs to be added.</param>
+        /// <returns>Updated configuration object.</returns>
+        public FunctionConfiguration HasDerivedTypeConstraintsForReturnType(params Type[] subtypes)
+        {
+            if (ReturnType == null)
+            {
+               throw Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
+            }
+
+            if (ReturnTypeConstraints == null)
+            {
+                ReturnTypeConstraints = new DerivedTypeConstraintConfiguration();
+            }
+
+            ReturnTypeConstraints.AddConstraints(subtypes);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds TDerived to the list of derived type constraints for the return type. 
+        /// </summary>
+        /// <returns>Updated configuration object.</returns>
+        public FunctionConfiguration HasDerivedTypeConstraintForReturnType<TDerivedType>()
+        {
+            if (ReturnType == null)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnTypeOfOperationNotSpecified);
+            }
+
+            if (ReturnTypeConstraints == null)
+            {
+                ReturnTypeConstraints = new DerivedTypeConstraintConfiguration();
+            }
+
+            ReturnTypeConstraints.AddConstraint<TDerivedType>();
+            return this;
+        }
+
+        /// <summary>
         /// Sets the return type to a single EntityType instance.
         /// </summary>
         /// <typeparam name="TEntityType">The type that is an EntityType</typeparam>
@@ -213,7 +254,8 @@ namespace Microsoft.AspNet.OData.Builder
             if (String.IsNullOrEmpty(entitySetPath))
             {
                 throw Error.ArgumentNull("entitySetPath");
-                }
+            }
+
             ReturnsEntityViaEntitySetPathImplementation<TEntityType>(entitySetPath.Split('/'));
             return this;
         }

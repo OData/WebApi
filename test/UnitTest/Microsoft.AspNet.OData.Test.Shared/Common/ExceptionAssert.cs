@@ -288,7 +288,11 @@ namespace Microsoft.AspNet.OData.Test.Common
         {
             if (exceptionMessage != null)
             {
+#if NETCOREAPP3_1
+                exceptionMessage = exceptionMessage + " (Parameter '" + paramName + "')";
+#else
                 exceptionMessage = exceptionMessage + "\r\nParameter name: " + paramName;
+#endif
                 if (actualValue != null)
                 {
                     exceptionMessage += String.Format(CultureReplacer.DefaultCulture, "\r\nActual value was {0}.", actualValue);
@@ -388,9 +392,15 @@ namespace Microsoft.AspNet.OData.Test.Common
         /// <exception cref="ThrowsException">Thrown when an exception was not thrown, or when an exception of the incorrect type is thrown</exception>
         public static InvalidEnumArgumentException ThrowsInvalidEnumArgument(Action testCode, string paramName, int invalidValue, Type enumType, bool allowDerivedExceptions = false)
         {
+#if NETCOREAPP3_1
+            string message = String.Format(CultureReplacer.DefaultCulture,
+                                           "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'. (Parameter '{0}')",
+                                           paramName, invalidValue, enumType.Name);
+#else
             string message = String.Format(CultureReplacer.DefaultCulture,
                                            "The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.{3}Parameter name: {0}",
                                            paramName, invalidValue, enumType.Name, Environment.NewLine);
+#endif
             return Throws<InvalidEnumArgumentException>(testCode, message, allowDerivedExceptions);
         }
 

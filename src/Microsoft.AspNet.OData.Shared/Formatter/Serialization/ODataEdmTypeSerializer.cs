@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Diagnostics.Contracts;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -55,6 +56,20 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.WriteObjectInlineNotSupported, GetType().Name);
+        }
+
+        /// <summary>
+        /// Writes the given object specified by the parameter graph as a part of an existing OData message using the given
+        /// messageWriter and the writeContext.
+        /// </summary>
+        /// <param name="graph">The object to be written.</param>
+        /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
+        /// <param name="writer">The <see cref="ODataWriter" /> to be used for writing.</param>
+        /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
+        public virtual async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+            ODataSerializerContext writeContext)
+        {
+            await Task.Run(() => WriteObjectInline(graph, expectedType, writer, writeContext));
         }
 
         /// <summary>

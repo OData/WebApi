@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             string contentId = (context.Request != null) ? context.Request.GetODataContentId() : String.Empty;
 
-            ODataBatchOperationResponseMessage batchResponse = writer.CreateOperationResponseMessage(contentId);
+            ODataBatchOperationResponseMessage batchResponse = await writer.CreateOperationResponseMessageAsync(contentId);
 
             batchResponse.StatusCode = context.Response.StatusCode;
 
@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             if (context.Response.Body != null && context.Response.Body.Length != 0)
             {
-                using (Stream stream = batchResponse.GetStream())
+                using (Stream stream = await batchResponse.GetStreamAsync())
                 {
                     context.RequestAborted.ThrowIfCancellationRequested();
                     context.Response.Body.Seek(0L, SeekOrigin.Begin);

@@ -3,7 +3,9 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNetCore.Routing.Internal;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
@@ -33,6 +35,30 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw Error.ArgumentNull("messageWriter");
             }
 
+            ODataError oDataError = GetError(graph);
+            bool includeDebugInformation = oDataError.InnerError != null;
+            messageWriter.WriteError(oDataError, includeDebugInformation);
+        }
+
+        /// <inheritdoc/>
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        {
+            if (graph == null)
+            {
+                throw Error.ArgumentNull("graph");
+            }
+            if (messageWriter == null)
+            {
+                throw Error.ArgumentNull("messageWriter");
+            }
+
+            ODataError oDataError = GetError(graph);
+            bool includeDebugInformation = oDataError.InnerError != null;
+            await messageWriter.WriteErrorAsync(oDataError, includeDebugInformation);
+        }
+
+        private static ODataError GetError(object graph)
+        {
             ODataError oDataError = graph as ODataError;
             if (oDataError == null)
             {
@@ -47,8 +73,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
             }
 
-            bool includeDebugInformation = oDataError.InnerError != null;
-            messageWriter.WriteError(oDataError, includeDebugInformation);
+            return oDataError;
         }
     }
 }

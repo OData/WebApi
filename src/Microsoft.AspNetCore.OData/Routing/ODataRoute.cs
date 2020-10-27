@@ -99,10 +99,8 @@ namespace Microsoft.AspNet.OData.Routing
 
                         return path;
                     }
-                    else
-                    {
-                        return base.GetVirtualPath(context);
-                    }
+
+                    return base.GetVirtualPath(context);
                 }
             }
 

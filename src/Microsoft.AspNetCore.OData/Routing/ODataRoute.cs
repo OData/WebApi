@@ -73,11 +73,8 @@ namespace Microsoft.AspNet.OData.Routing
                     {
                         return GenerateLinkDirectly(odataPath);
                     }
-                    else if (!odataPath.Contains("/"))
-                    {
-                        return base.GetVirtualPath(context);
-                    }
-                    else
+
+                    if (odataPath.Contains("/"))
                     {
                         // During link generation using `RouteCollection`'s `GetVirtualPath` method, 
                         // the catch-all parameter escapes the appropriate characters when the route 
@@ -94,10 +91,17 @@ namespace Microsoft.AspNet.OData.Routing
                         // after the call to `GetVirtualPath`.
                         // Q. Are there scenarios when we'd be happy with having the path separator escaped for us?
                         string token = System.Guid.NewGuid().ToString().Replace("-", "");
+
                         context.Values[ODataRouteConstants.ODataPath] = odataPath.Replace("/", token);
                         VirtualPathData path = base.GetVirtualPath(context);
                         path.VirtualPath = path.VirtualPath.Replace(token, "/");
+                        context.Values[ODataRouteConstants.ODataPath] = odataPath;
+
                         return path;
+                    }
+                    else
+                    {
+                        return base.GetVirtualPath(context);
                     }
                 }
             }

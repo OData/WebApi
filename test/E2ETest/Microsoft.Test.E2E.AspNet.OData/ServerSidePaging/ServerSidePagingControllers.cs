@@ -14,25 +14,25 @@ namespace Microsoft.Test.E2E.AspNet.OData.ServerSidePaging
 
         public ServerSidePagingCustomersController()
         {
-            _serverSidePagingCustomers = new List<ServerSidePagingCustomer>(
-                Enumerable.Range(1, 7).Select(i => new ServerSidePagingCustomer
+            _serverSidePagingCustomers = Enumerable.Range(1, 7)
+                .Select(i => new ServerSidePagingCustomer
                 {
                     Id = i,
                     Name = "Customer Name " + i
-                }));
+                }).ToList();
 
             for (int i = 0; i < _serverSidePagingCustomers.Count; i++)
             {
                 // Customer 1 => 6 Orders, Customer 2 => 5 Orders, Customer 3 => 4 Orders, ...
                 // NextPageLink will be expected on the Customers collection as well as
                 // the Orders child collection on Customer 1
-                _serverSidePagingCustomers[i].ServerSidePagingOrders = new List<ServerSidePagingOrder>(
-                    Enumerable.Range(1, 6 - i).Select(j => new ServerSidePagingOrder
+                _serverSidePagingCustomers[i].ServerSidePagingOrders = Enumerable.Range(1, 6 - i)
+                    .Select(j => new ServerSidePagingOrder
                     {
                         Id = j,
                         Amount = (i + j) * 10,
                         ServerSidePagingCustomer = _serverSidePagingCustomers[i]
-                    }));
+                    }).ToList();
             }
         }
 

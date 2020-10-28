@@ -5,7 +5,6 @@ using System;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNetCore.Routing.Internal;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization

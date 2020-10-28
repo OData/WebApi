@@ -192,9 +192,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             Contract.Assert(writeContext != null);
 
-            IEdmStructuredTypeReference structuredType = GetResourceType(graph, writeContext);
             ResourceContext resourceContext = GetResourceContext(graph, writeContext);
-
             SelectExpandNode selectExpandNode = CreateSelectExpandNode(resourceContext);
             if (selectExpandNode != null)
             {
@@ -1459,7 +1457,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     // it may just be empty.
                     // If a collection of complex or entities can be related, it is represented as a JSON array. An empty
                     // collection of resources (one that contains no resource) is represented as an empty JSON array.
-                    writer.WriteStart(new ODataResourceSet
+                    await writer.WriteStartAsync(new ODataResourceSet
                     {
                         TypeName = edmProperty.Type.FullName()
                     });

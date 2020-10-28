@@ -247,7 +247,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 ODataDeserializerProvider deserializerProvider = Request.GetRequestContainer()
                     .GetRequiredService<ODataDeserializerProvider>();
 
-                return Task.FromResult(ODataInputFormatterHelper.ReadFromStream(
+                return ODataInputFormatterHelper.ReadFromStreamAsync(
                     type,
                     defaultValue,
                     Request.GetModel(),
@@ -258,7 +258,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     (objectType) => deserializerProvider.GetODataDeserializer(objectType, Request),
                     getODataDeserializerContext,
                     (disposable) => Request.RegisterForDispose(disposable),
-                    logErrorAction));
+                    logErrorAction);
             }
             catch (Exception ex)
             {
@@ -289,50 +289,41 @@ namespace Microsoft.AspNet.OData.Formatter
                 return TaskHelpers.Canceled();
             }
 
-            try
+            HttpConfiguration configuration = Request.GetConfiguration();
+            if (configuration == null)
             {
-                HttpConfiguration configuration = Request.GetConfiguration();
-                if (configuration == null)
-                {
-                    throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
-                }
+                throw Error.InvalidOperation(SRResources.RequestMustContainConfiguration);
+            }
 
-                HttpContentHeaders contentHeaders = (content == null) ? null : content.Headers;
-                UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
+            HttpContentHeaders contentHeaders = (content == null) ? null : content.Headers;
+            UrlHelper urlHelper = Request.GetUrlHelper() ?? new UrlHelper(Request);
 
-                Func<ODataSerializerContext> getODataSerializerContext = () =>
+            Func<ODataSerializerContext> getODataSerializerContext = () =>
+            {
+                return new ODataSerializerContext()
                 {
-                    return new ODataSerializerContext()
-                    {
-                        Request = Request,
-                        Url = urlHelper,
-                    };
+                    Request = Request,
+                    Url = urlHelper,
                 };
+            };
 
-                ODataSerializerProvider serializerProvider = Request.GetRequestContainer()
-                    .GetRequiredService<ODataSerializerProvider>();
+            ODataSerializerProvider serializerProvider = Request.GetRequestContainer()
+                .GetRequiredService<ODataSerializerProvider>();
 
-                ODataOutputFormatterHelper.WriteToStream(
-                    type,
-                    value,
-                    Request.GetModel(),
-                    ResultHelpers.GetODataResponseVersion(Request),
-                    GetBaseAddressInternal(Request),
-                    contentHeaders == null ? null : contentHeaders.ContentType,
-                    new WebApiUrlHelper(urlHelper),
-                    new WebApiRequestMessage(Request),
-                    new WebApiRequestHeaders(Request.Headers),
-                    (services) => ODataMessageWrapperHelper.Create(writeStream, contentHeaders, services),
-                    (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
-                    (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, Request),
-                    getODataSerializerContext);
-
-                return TaskHelpers.Completed();
-            }
-            catch (Exception ex)
-            {
-                return TaskHelpers.FromError(ex);
-            }
+            return ODataOutputFormatterHelper.WriteToStreamAsync(
+                type,
+                value,
+                Request.GetModel(),
+                ResultHelpers.GetODataResponseVersion(Request),
+                GetBaseAddressInternal(Request),
+                contentHeaders == null ? null : contentHeaders.ContentType,
+                new WebApiUrlHelper(urlHelper),
+                new WebApiRequestMessage(Request),
+                new WebApiRequestHeaders(Request.Headers),
+                (services) => ODataMessageWrapperHelper.Create(writeStream, contentHeaders, services),
+                (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
+                (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, Request),
+                getODataSerializerContext);
         }
 
         // To factor out request, just pass in a function to get base address. We'd get rid of

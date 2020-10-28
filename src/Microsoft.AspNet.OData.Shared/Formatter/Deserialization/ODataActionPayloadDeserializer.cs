@@ -180,7 +180,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return action;
         }
 
-        private Dictionary<string, object> GetPayload(Type type, IEdmAction action)
+        private static Dictionary<string, object> GetPayload(Type type, IEdmAction action)
         {
             // Create the correct resource type;
             if (type == typeof(ODataActionParameters))

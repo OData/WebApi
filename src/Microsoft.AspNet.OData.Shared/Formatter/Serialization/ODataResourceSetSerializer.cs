@@ -77,8 +77,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceSetType != null);
             IEdmStructuredTypeReference resourceType = GetResourceType(resourceSetType);
 
-            // todo (mikep): should fix CreateODataResourceSetWriterAsync to take an IEdmStructuredType and remove the cast
-            ODataWriter writer = await messageWriter.CreateODataResourceSetWriterAsync(entitySet, resourceType as IEdmEntityType);
+            ODataWriter writer = await messageWriter.CreateODataResourceSetWriterAsync(entitySet, resourceType.StructuredDefinition());
             await WriteObjectInlineAsync(graph, resourceSetType, writer, writeContext);
         }
 
@@ -153,24 +152,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(resourceSetType != null);
 
             IEdmStructuredTypeReference elementType = GetResourceType(resourceSetType);
-            ODataResourceSet resourceSet = CreateResourceSet(enumerable, resourceSetType.AsCollection(), writeContext);
-
-            if (resourceSet == null)
-            {
-                throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, ResourceSet));
-            }
-
-            IEdmEntitySetBase entitySet = writeContext.NavigationSource as IEdmEntitySetBase;
-            if (entitySet == null)
-            {
-                resourceSet.SetSerializationInfo(new ODataResourceSerializationInfo
-                {
-                    IsFromCollection = true,
-                    NavigationSourceEntityTypeName = elementType.FullName(),
-                    NavigationSourceKind = EdmNavigationSourceKind.UnknownEntitySet,
-                    NavigationSourceName = null
-                });
-            }
 
             ODataEdmTypeSerializer resourceSerializer = SerializerProvider.GetEdmTypeSerializer(elementType);
             if (resourceSerializer == null)
@@ -178,6 +159,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw new SerializationException(
                     Error.Format(SRResources.TypeCannotBeSerialized, elementType.FullName()));
             }
+
+            ODataResourceSet resourceSet = GetResourceSet(enumerable, resourceSetType, elementType, writeContext);
+
+            // create the nextLinkGenerator for the current resourceSet and then set the nextpagelink to null to support JSON odata.streaming.
+            Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(resourceSet, enumerable, writeContext);
+            resourceSet.NextPageLink = null;
 
             writer.WriteStart(resourceSet);
             object lastResource = null;
@@ -206,8 +193,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // the next page link is not set when calling WriteStart(resourceSet) but is instead set later on that resourceSet
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
             // odata.streaming=true support.
-
-            Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(resourceSet, enumerable, writeContext);
             resourceSet.NextPageLink = nextLinkGenerator(lastResource);
 
             writer.WriteEnd();
@@ -230,6 +215,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             ODataResourceSet resourceSet = GetResourceSet(enumerable, resourceSetType, elementType, writeContext);
+
+            // create the nextLinkGenerator for the current resourceSet and then set the nextpagelink to null to support JSON odata.streaming.
+            Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(resourceSet, enumerable, writeContext);
+            resourceSet.NextPageLink = null;
+
             await writer.WriteStartAsync(resourceSet);
             object lastResource = null;
             foreach (object item in enumerable)
@@ -257,8 +247,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // the next page link is not set when calling WriteStart(resourceSet) but is instead set later on that resourceSet
             // object before calling WriteEnd(), the next page link will be written at the end, as required for
             // odata.streaming=true support.
-
-            Func<object, Uri> nextLinkGenerator = GetNextLinkGenerator(resourceSet, enumerable, writeContext);
             resourceSet.NextPageLink = nextLinkGenerator(lastResource);
 
             await writer.WriteEndAsync();
@@ -465,9 +453,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     NavigationSourceName = null
                 });
             }
-
-            // set the nextpagelink to null to support JSON odata.streaming.
-            resourceSet.NextPageLink = null;
 
             return resourceSet;
         }

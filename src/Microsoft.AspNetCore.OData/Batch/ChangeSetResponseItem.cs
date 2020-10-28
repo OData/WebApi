@@ -46,6 +46,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("writer");
             }
+
             if (asyncWriter)
             {
                 await writer.WriteStartChangesetAsync();

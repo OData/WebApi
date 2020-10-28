@@ -172,7 +172,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return new ODataCollectionValue { Items = items.Cast<object>(), TypeName = typeName };
         }
 
-        private IEdmTypeReference GetElementType(Type type, ODataDeserializerContext readContext)
+        private static IEdmTypeReference GetElementType(Type type, ODataDeserializerContext readContext)
         {
             IEdmTypeReference edmType = readContext.GetEdmType(type);
             Contract.Assert(edmType != null);

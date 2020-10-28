@@ -39,11 +39,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (graph != null)
             {
-                if (graph != null)
-                {
-                    ODataEntityReferenceLinks entityReferenceLinks = GetEntityReferenceLinks(graph, writeContext);
-                    messageWriter.WriteEntityReferenceLinks(entityReferenceLinks);
-                }
+                ODataEntityReferenceLinks entityReferenceLinks = GetEntityReferenceLinks(graph, writeContext);
+                messageWriter.WriteEntityReferenceLinks(entityReferenceLinks);
             }
         }
 

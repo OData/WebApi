@@ -120,14 +120,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
-#if !NETSTANDARD2_0
-                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
-                if (body != null)
-                {
-                    body.AllowSynchronousIO = true;
-                }
-#endif
-
                 Func<ODataDeserializerContext> getODataDeserializerContext = () =>
                 {
                     return new ODataDeserializerContext

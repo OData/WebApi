@@ -120,14 +120,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
-#if !NETSTANDARD2_0
-                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
-                if (body != null)
-                {
-                    body.AllowSynchronousIO = true;
-                }
-#endif
-
                 Func<ODataDeserializerContext> getODataDeserializerContext = () =>
                 {
                     return new ODataDeserializerContext
@@ -151,7 +143,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
-                object result = ODataInputFormatterHelper.ReadFromStream(
+                Task<object> resultTask = ODataInputFormatterHelper.ReadFromStreamAsync(
                     type,
                     defaultValue,
                     request.GetModel(),
@@ -164,12 +156,14 @@ namespace Microsoft.AspNet.OData.Formatter
                     (disposable) => toDispose.Add(disposable),
                     logErrorAction);
 
+                resultTask.Wait();
+                
                 foreach (IDisposable obj in toDispose)
                 {
                     obj.Dispose();
                 }
 
-                return Task.FromResult(InputFormatterResult.Success(result));
+                return Task.FromResult(InputFormatterResult.Success(resultTask.Result));
             }
             catch (Exception ex)
             {

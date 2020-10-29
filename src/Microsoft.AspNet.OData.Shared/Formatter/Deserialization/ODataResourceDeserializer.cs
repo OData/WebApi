@@ -9,7 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -37,38 +39,27 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            if (readContext == null)
-            {
-                throw Error.ArgumentNull("readContext");
-            }
-
-            IEdmTypeReference edmType = readContext.GetEdmType(type);
-            Contract.Assert(edmType != null);
-
-            if (!edmType.IsStructured())
-            {
-                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, "Structured");
-            }
-
-            IEdmStructuredTypeReference structuredType = edmType.AsStructured();
-
-            IEdmNavigationSource navigationSource = null;
-            if (structuredType.IsEntity())
-            {
-                if (readContext.Path == null)
-                {
-                    throw Error.Argument("readContext", SRResources.ODataPathMissing);
-                }
-
-                navigationSource = readContext.Path.NavigationSource;
-                if (navigationSource == null)
-                {
-                    throw new SerializationException(SRResources.NavigationSourceMissingDuringDeserialization);
-                }
-            }
-
+            IEdmStructuredTypeReference structuredType = GetStructuredType(type, readContext);
+            IEdmNavigationSource navigationSource = GetNavigationSource(structuredType, readContext);
             ODataReader odataReader = messageReader.CreateODataResourceReader(navigationSource, structuredType.StructuredDefinition());
             ODataResourceWrapper topLevelResource = odataReader.ReadResourceOrResourceSet() as ODataResourceWrapper;
+            Contract.Assert(topLevelResource != null);
+
+            return ReadInline(topLevelResource, structuredType, readContext);
+        }
+
+        /// <inheritdoc />
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            IEdmStructuredTypeReference structuredType = GetStructuredType(type, readContext);
+            IEdmNavigationSource navigationSource = GetNavigationSource(structuredType, readContext);
+            ODataReader odataReader = await messageReader.CreateODataResourceReaderAsync(navigationSource, structuredType.StructuredDefinition());
+            ODataResourceWrapper topLevelResource = await odataReader.ReadResourceOrResourceSetAsync() as ODataResourceWrapper;
             Contract.Assert(topLevelResource != null);
 
             return ReadInline(topLevelResource, structuredType, readContext);
@@ -636,6 +627,44 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             return deserializer.ReadInline(resourceSetWrapper, edmType, nestedReadContext);
+        }
+
+        private static IEdmStructuredTypeReference GetStructuredType(Type type, ODataDeserializerContext readContext)
+        {
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsStructured())
+            {
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, "Structured");
+            }
+
+            return edmType.AsStructured();
+        }
+
+        private static IEdmNavigationSource GetNavigationSource(IEdmStructuredTypeReference edmType, ODataDeserializerContext readContext)
+        {
+            IEdmNavigationSource navigationSource = null;
+            if (edmType.IsEntity())
+            {
+                if (readContext.Path == null)
+                {
+                    throw Error.Argument("readContext", SRResources.ODataPathMissing);
+                }
+
+                navigationSource = readContext.Path.NavigationSource;
+                if (navigationSource == null)
+                {
+                    throw new SerializationException(SRResources.NavigationSourceMissingDuringDeserialization);
+                }
+            }
+
+            return navigationSource;
         }
     }
 }

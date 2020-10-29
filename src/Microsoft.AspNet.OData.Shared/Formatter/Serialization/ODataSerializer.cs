@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
@@ -43,6 +44,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public virtual void WriteObject(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             throw Error.NotSupported(SRResources.WriteObjectNotSupported, GetType().Name);
+        }
+
+        /// <summary>
+        /// Writes the given object specified by the parameter graph as a whole using the given messageWriter and writeContext.
+        /// </summary>
+        /// <param name="graph">The object to be written</param>
+        /// <param name="type">The type of the object to be written.</param>
+        /// <param name="messageWriter">The <see cref="ODataMessageWriter"/> to be used for writing.</param>
+        /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
+        public virtual async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        {
+            // This should always be overwritten in the derived class. It is virtual in 7.x only for backward compatability.
+            await Task.Run(() => WriteObject(graph, type, messageWriter, writeContext));
         }
     }
 }

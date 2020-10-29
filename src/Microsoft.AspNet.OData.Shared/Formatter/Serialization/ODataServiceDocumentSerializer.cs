@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
@@ -28,6 +29,25 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 throw Error.ArgumentNull("messageWriter");
             }
+
+            ODataServiceDocument serviceDocument = GetServiceDocument(graph, type);
+            messageWriter.WriteServiceDocument(serviceDocument);
+        }
+
+        /// <inheritdoc/>
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        {
+            if (messageWriter == null)
+            {
+                throw Error.ArgumentNull("messageWriter");
+            }
+
+            ODataServiceDocument serviceDocument = GetServiceDocument(graph, type);
+            await messageWriter.WriteServiceDocumentAsync(serviceDocument);
+        }
+
+        private ODataServiceDocument GetServiceDocument(object graph, Type type)
+        {
             if (graph == null)
             {
                 throw Error.ArgumentNull("graph");
@@ -39,7 +59,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, type.Name));
             }
 
-            messageWriter.WriteServiceDocument(serviceDocument);
+            return serviceDocument;
         }
     }
 }

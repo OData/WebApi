@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
@@ -203,14 +205,6 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
-#if !NETSTANDARD2_0
-                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
-                if (body != null)
-                {
-                    body.AllowSynchronousIO = true;
-                }
-#endif
-
                 HttpResponse response = context.HttpContext.Response;
                 Uri baseAddress = GetBaseAddressInternal(request);
                 MediaTypeHeaderValue contentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
@@ -225,7 +219,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
-                ODataOutputFormatterHelper.WriteToStream(
+                return ODataOutputFormatterHelper.WriteToStreamAsync(
                     type,
                     context.Object,
                     request.GetModel(),
@@ -235,12 +229,11 @@ namespace Microsoft.AspNet.OData.Formatter
                     new WebApiUrlHelper(request.GetUrlHelper()),
                     new WebApiRequestMessage(request),
                     new WebApiRequestHeaders(request.Headers),
-                    (services) => ODataMessageWrapperHelper.Create(response.Body, response.Headers, services),
+                    (services) => ODataMessageWrapperHelper.Create(new StreamWrapper(response.Body), response.Headers, services),
                     (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
                     (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
                     getODataSerializerContext);
 
-                return TaskHelpers.Completed();
             }
             catch (Exception ex)
             {
@@ -297,6 +290,55 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return contentType;
+        }
+
+        private class StreamWrapper : Stream
+        {
+            private Stream stream;
+            public StreamWrapper(Stream stream)
+            {
+                this.stream = stream;
+            }
+
+            public override bool CanRead => this.stream.CanRead;
+
+            public override bool CanSeek => this.stream.CanSeek;
+
+            public override bool CanWrite => this.stream.CanWrite;
+
+            public override long Length => this.stream.Length;
+
+            public override long Position { get => this.stream.Position; set => this.stream.Position = value; }
+
+            public override void Flush()
+            {
+                this.stream.FlushAsync().Wait();
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                return this.stream.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                return this.stream.Seek(offset, origin);
+            }
+
+            public override void SetLength(long value)
+            {
+                this.stream.SetLength(value);
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                Task.Run(() => this.stream.WriteAsync(buffer, offset, count)).Wait();
+            }
+
+            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+            {
+                return this.stream.WriteAsync(buffer, offset, count, cancellationToken);
+            }
         }
     }
 }

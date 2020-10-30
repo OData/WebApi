@@ -382,21 +382,22 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         [InlineData('\f', "\\f")]
         public void ApplyProperty_UntypedValueOfTypeStringUnescaped(char token, string tokenEscaped)
         {
+            // Arrange
             var escapedValue = "\"Update of memo" + tokenEscaped + "4" + tokenEscaped + "40\"";
             var propertyValue = new ODataUntypedValue { RawValue = escapedValue };
             var property = new ODataProperty { Name = "Memo", Value = propertyValue };
+
             EdmEntityType openType = new EdmEntityType("NS", "OpenType", null, false, true);
             openType.AddKeys(openType.AddStructuralProperty("Id",
                 EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int))));
-
             EdmEntityTypeReference openTypeReference = new EdmEntityTypeReference(openType, isNullable: false);
             ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
 
-            var resource = new OpenType_TestClass();
+            var resource = new OpenTypeTestClass();
             var model = new EdmModel();
             model.AddElement(openType);
             model.SetAnnotationValue(openType, new DynamicPropertyDictionaryAnnotation(
-                typeof(OpenType_TestClass).GetProperty("DynamicProperties")));
+                typeof(OpenTypeTestClass).GetProperty("DynamicProperties")));
 
             // Act
             DeserializationHelpers.ApplyProperty(property, openTypeReference, resource, provider,
@@ -519,9 +520,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             }
         }
 
-        private class OpenType_TestClass
+        private class OpenTypeTestClass
         {
-            public OpenType_TestClass()
+            public OpenTypeTestClass()
             {
                 DynamicProperties = new Dictionary<string, object>();
             }

@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        public override Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)
+        public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)
         {
             if (context == null)
             {
@@ -115,7 +115,7 @@ namespace Microsoft.AspNet.OData.Formatter
             object defaultValue = GetDefaultValueForType(type);
             if (contentHeaders == null || contentHeaders.ContentLength == 0)
             {
-                return Task.FromResult(InputFormatterResult.Success(defaultValue));
+                return InputFormatterResult.Success(defaultValue);
             }
 
             try
@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
-                Task<object> resultTask = ODataInputFormatterHelper.ReadFromStreamAsync(
+                object result = await ODataInputFormatterHelper.ReadFromStreamAsync(
                     type,
                     defaultValue,
                     request.GetModel(),
@@ -156,19 +156,17 @@ namespace Microsoft.AspNet.OData.Formatter
                     (disposable) => toDispose.Add(disposable),
                     logErrorAction);
 
-                resultTask.Wait();
-                
                 foreach (IDisposable obj in toDispose)
                 {
                     obj.Dispose();
                 }
 
-                return Task.FromResult(InputFormatterResult.Success(resultTask.Result));
+                return InputFormatterResult.Success(result);
             }
             catch (Exception ex)
             {
                 context.ModelState.AddModelError(context.ModelName, ex, context.Metadata);
-                return Task.FromResult(InputFormatterResult.Failure());
+                return InputFormatterResult.Failure();
             }
         }
 

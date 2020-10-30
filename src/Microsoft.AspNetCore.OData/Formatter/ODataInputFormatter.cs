@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     request.GetModel(),
                     GetBaseAddressInternal(request),
                     new WebApiRequestMessage(request),
-                    () => ODataMessageWrapperHelper.Create(request.Body, request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),
+                    () => ODataMessageWrapperHelper.Create(new StreamWrapper(request.Body), request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),
                     (objectType) => deserializerProvider.GetEdmTypeDeserializer(objectType),
                     (objectType) => deserializerProvider.GetODataDeserializer(objectType, request),
                     getODataDeserializerContext,

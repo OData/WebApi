@@ -291,54 +291,54 @@ namespace Microsoft.AspNet.OData.Formatter
 
             return contentType;
         }
+    }
 
-        private class StreamWrapper : Stream
+    internal class StreamWrapper : Stream
+    {
+        private Stream stream;
+        public StreamWrapper(Stream stream)
         {
-            private Stream stream;
-            public StreamWrapper(Stream stream)
-            {
-                this.stream = stream;
-            }
+            this.stream = stream;
+        }
 
-            public override bool CanRead => this.stream.CanRead;
+        public override bool CanRead => this.stream.CanRead;
 
-            public override bool CanSeek => this.stream.CanSeek;
+        public override bool CanSeek => this.stream.CanSeek;
 
-            public override bool CanWrite => this.stream.CanWrite;
+        public override bool CanWrite => this.stream.CanWrite;
 
-            public override long Length => this.stream.Length;
+        public override long Length => this.stream.Length;
 
-            public override long Position { get => this.stream.Position; set => this.stream.Position = value; }
+        public override long Position { get => this.stream.Position; set => this.stream.Position = value; }
 
-            public override void Flush()
-            {
-                this.stream.FlushAsync().Wait();
-            }
+        public override void Flush()
+        {
+            this.stream.FlushAsync().Wait();
+        }
 
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                return this.stream.Read(buffer, offset, count);
-            }
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return this.stream.ReadAsync(buffer, offset, count).Result;
+        }
 
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                return this.stream.Seek(offset, origin);
-            }
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return this.stream.Seek(offset, origin);
+        }
 
-            public override void SetLength(long value)
-            {
-                this.stream.SetLength(value);
-            }
+        public override void SetLength(long value)
+        {
+            this.stream.SetLength(value);
+        }
 
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                Task.Run(() => this.stream.WriteAsync(buffer, offset, count)).Wait();
-            }
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            this.stream.WriteAsync(buffer, offset, count).Wait();
+        }
 
-            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                return this.stream.WriteAsync(buffer, offset, count, cancellationToken);
-            }
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return this.stream.WriteAsync(buffer, offset, count, cancellationToken);
         }
     }
 }

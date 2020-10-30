@@ -372,6 +372,41 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(HelpfulErrorMessage, exception.Message);
         }
 
+        [Theory]
+        [InlineData('\n', "\\n")]
+        [InlineData('\r', "\\r")]
+        [InlineData('\t', "\\t")]
+        [InlineData('\"', "\"")]
+        [InlineData('\\', "\\\\")]
+        [InlineData('\b', "\\b")]
+        [InlineData('\f', "\\f")]
+        public void ApplyProperty_UntypedValueOfTypeStringUnescaped(char token, string tokenEscaped)
+        {
+            var escapedValue = "\"Update of memo" + tokenEscaped + "4" + tokenEscaped + "40\"";
+            var propertyValue = new ODataUntypedValue { RawValue = escapedValue };
+            var property = new ODataProperty { Name = "Memo", Value = propertyValue };
+            EdmEntityType openType = new EdmEntityType("NS", "OpenType", null, false, true);
+            openType.AddKeys(openType.AddStructuralProperty("Id",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int))));
+
+            EdmEntityTypeReference openTypeReference = new EdmEntityTypeReference(openType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new OpenType_TestClass();
+            var model = new EdmModel();
+            model.AddElement(openType);
+            model.SetAnnotationValue(openType, new DynamicPropertyDictionaryAnnotation(
+                typeof(OpenType_TestClass).GetProperty("DynamicProperties")));
+
+            // Act
+            DeserializationHelpers.ApplyProperty(property, openTypeReference, resource, provider,
+                new ODataDeserializerContext { Model = model });
+
+            // Assert
+            Assert.True(resource.DynamicProperties.ContainsKey("Memo"));
+            Assert.Equal("Update of memo" + token + "4" + token + "40", resource.DynamicProperties["Memo"]);
+        }
+
         private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)
         {
             Mock<IEdmProperty> property = new Mock<IEdmProperty>();
@@ -482,6 +517,17 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private class OpenType_TestClass
+        {
+            public OpenType_TestClass()
+            {
+                DynamicProperties = new Dictionary<string, object>();
+            }
+
+            public int Id { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
         }
     }
 }

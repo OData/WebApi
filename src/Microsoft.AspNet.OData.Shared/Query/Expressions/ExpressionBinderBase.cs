@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public abstract class ExpressionBinderBase
     {
         internal static readonly MethodInfo StringCompareMethodInfo = typeof(string).GetMethod("Compare", new[] { typeof(string), typeof(string) });
-        internal static readonly MethodInfo GuidCompareMethodInfo = typeof(ExpressionBinderBase).GetMethod("GuidCompare", new[] { typeof(Guid), typeof(Guid) });
+        internal static readonly MethodInfo GuidCompareMethodInfo = typeof(Guid).GetMethod("CompareTo", new[] { typeof(Guid) });
         internal static readonly string DictionaryStringObjectIndexerName = typeof(Dictionary<string, object>).GetDefaultMembers()[0].Name;
 
         internal static readonly Expression NullConstant = Expression.Constant(null);
@@ -166,16 +166,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (left.Type == typeof(Guid) || right.Type == typeof(Guid))
             {
-                left = ConvertNull(left, typeof(Guid));
-                right = ConvertNull(right, typeof(Guid));
-
                 switch (binaryOperator)
                 {
                     case BinaryOperatorKind.GreaterThan:
                     case BinaryOperatorKind.GreaterThanOrEqual:
                     case BinaryOperatorKind.LessThan:
                     case BinaryOperatorKind.LessThanOrEqual:
-                        left = Expression.Call(GuidCompareMethodInfo, left, right);
+                        left = Expression.Call(left, GuidCompareMethodInfo, right);
                         right = ZeroConstant;
                         break;
                     default:
@@ -1101,27 +1098,6 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 return expression;
             }
-        }
-
-        /// <summary>
-        /// Compares two guids
-        /// </summary>
-        /// <param name="firstValue"></param>
-        /// <param name="secondValue"></param>
-        /// <returns>An integer value based on the Guid's CompareTo method</returns>
-        public static int GuidCompare(Guid firstValue, Guid secondValue)
-        {
-            if (firstValue != null)
-            {
-                return firstValue.CompareTo(secondValue);
-            }
-
-            if (secondValue != null)
-            {
-                return (-1) * secondValue.CompareTo(firstValue);
-            }
-
-            return 0;
         }
 
         /// <summary>

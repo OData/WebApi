@@ -3493,7 +3493,6 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
-	public static int GuidCompare (System.Guid firstValue, System.Guid secondValue)
 }
 
 public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {

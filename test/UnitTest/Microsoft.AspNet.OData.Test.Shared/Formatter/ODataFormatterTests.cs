@@ -403,6 +403,76 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
+        [Fact]
+        public async Task BadRequestResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+            const string expectedResponse = "{\"error\":{\"code\":\"400\",\"message\":\"Update failed\"}}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "http://localhost/Customers/1"))
+            {
+                request.Content = new StringContent(
+                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':1,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+
+        [Fact]
+        public async Task NotFoundResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+            const string expectedResponse = "{\"error\":{\"code\":\"404\",\"message\":\"Customer not found\"}}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/1"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+
         [Theory]
         [InlineData("*", "PeopleWithAllAnnotations.json")]
         [InlineData("-*", "PeopleWithoutAnnotations.json")]
@@ -712,6 +782,27 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 IList<Color> colors = new[] { Color.Blue, Color.Green, Color.Red };
                 return Ok(colors);
+            }
+        }
+
+        public class Customer
+        {
+            public int ID { get; set; }
+            public Color Color { get; set; }
+            public List<Color> Colors { get; set; }
+        }
+
+        public class CustomersController : ODataController
+        {
+            public IActionResult Put([FromODataUri] int key, [FromBody] Customer customer)
+            {
+                return BadRequest("Update failed");
+            }
+
+            [EnableQuery]
+            public IActionResult Get(int key)
+            {
+                return NotFound ("Customer not found");
             }
         }
 

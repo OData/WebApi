@@ -407,7 +407,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         public async Task BadRequestResponseFromODataControllerIsSerializedAsODataError()
         {
             // Arrange
+#if NETCORE
             const string expectedResponse = "{\"error\":{\"code\":\"400\",\"message\":\"Update failed\"}}";
+#else
+            const string expectedResponse = "{\"error\":{\"code\":\"\",\"message\":\"Update failed\"}}";
+#endif
 
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
@@ -444,7 +448,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         public async Task NotFoundResponseFromODataControllerIsSerializedAsODataError()
         {
             // Arrange
+#if NETCORE
             const string expectedResponse = "{\"error\":{\"code\":\"404\",\"message\":\"Customer not found\"}}";
+#else
+            const string expectedResponse = "{\"error\":{\"code\":\"\",\"message\":\"Customer not found\"}}";
+#endif
 
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<Customer>("Customers");
@@ -794,6 +802,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
         public class CustomersController : ODataController
         {
+#if NETCORE
             public IActionResult Put([FromODataUri] int key, [FromBody] Customer customer)
             {
                 return BadRequest("Update failed");
@@ -804,6 +813,18 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 return NotFound ("Customer not found");
             }
+#else
+            public IHttpActionResult Put([FromODataUri] int key, [FromBody] Customer customer)
+            {
+                return BadRequest("Update failed");
+            }
+
+            [EnableQuery]
+            public IHttpActionResult Get(int key)
+            {
+                return NotFound();
+            }
+#endif
         }
 
         public class EnumKeyCustomersController : TestODataController

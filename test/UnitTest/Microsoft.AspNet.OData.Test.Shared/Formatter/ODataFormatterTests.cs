@@ -450,8 +450,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             // Arrange
 #if NETCORE
             const string expectedResponse = "{\"error\":{\"code\":\"404\",\"message\":\"Customer not found\"}}";
-#else
-            const string expectedResponse = "{\"error\":{\"code\":\"\",\"message\":\"Customer not found\"}}";
 #endif
 
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
@@ -474,8 +472,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                     // Assert
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+#if NETCORE
                     String actualResponse = await response.Content.ReadAsStringAsync();
                     Assert.Equal(expectedResponse, actualResponse.Trim());
+#endif
 
                 }
             }

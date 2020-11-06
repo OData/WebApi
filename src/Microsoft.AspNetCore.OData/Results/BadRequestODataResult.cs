@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Results
     /// Represents a result that when executed will produce a Bad Request (400) response.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 400.</remarks>
-    public class ODataBadRequestResult : BadRequestResult
+    public class BadRequestODataResult : BadRequestResult
     {
         private string _message;
 
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Results
         /// Instantiate the Class.
         /// </summary>
         /// <param name="message">Error Message</param>
-        public ODataBadRequestResult(string message)
+        public BadRequestODataResult(string message)
         {
             _message = message;
         }

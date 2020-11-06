@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Results
     /// Represents a result that when executed will produce a Not Found(404) response.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 404.</remarks>
-    public class ODataNotFoundResult : NotFoundResult
+    public class NotFoundODataResult : NotFoundResult
     {
         private string _message;
 
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Results
         /// Instantiate the Class.
         /// </summary>
         /// <param name="message">Error Message</param>
-        public ODataNotFoundResult(string message)
+        public NotFoundODataResult(string message)
         {
             _message = message;
         }

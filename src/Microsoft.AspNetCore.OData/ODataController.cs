@@ -57,9 +57,9 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <returns></returns>
-        protected virtual ODataBadRequestResult BadRequest(string message)
+        protected virtual BadRequestODataResult BadRequest(string message)
         {
-            return new ODataBadRequestResult(message);
+            return new BadRequestODataResult(message);
         }
 
         /// <summary>
@@ -67,9 +67,9 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="message">Error Message</param>
         /// <returns></returns>
-        protected virtual ODataNotFoundResult NotFound(string message)
+        protected virtual NotFoundODataResult NotFound(string message)
         {
-            return new ODataNotFoundResult(message);
+            return new NotFoundODataResult(message);
         }
     }
 }

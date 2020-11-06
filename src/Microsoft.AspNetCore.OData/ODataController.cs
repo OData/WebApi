@@ -51,5 +51,25 @@ namespace Microsoft.AspNet.OData
 
             return new UpdatedODataResult<TEntity>(entity);
         }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
+        /// </summary>
+        /// <param name="message">Error Message</param>
+        /// <returns></returns>
+        protected virtual ODataBadRequestResult BadRequest(string message)
+        {
+            return new ODataBadRequestResult(message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
+        /// </summary>
+        /// <param name="message">Error Message</param>
+        /// <returns></returns>
+        protected virtual ODataNotFoundResult NotFound(string message)
+        {
+            return new ODataNotFoundResult(message);
+        }
     }
 }

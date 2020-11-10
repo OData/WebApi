@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test
             _client = TestServerFactory.CreateClient(server);
         }
 
-        [Fact(Skip = "ToDo: (mikep) The non-OData JSON Serializer appears not to be async, so this hangs the build pipeline if AllowSynchronousIO=true is not set.")]
+        [Fact]
         public async Task Apply_Works_WithODataJson()
         {
             // Arrange
@@ -56,7 +56,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal(3, result[0]["Cnt"]);
         }
 
-        [Fact(Skip = "ToDo: (mikep) The non-OData JSON Serializer appears not to be async, so this hangs the build pipeline if AllowSynchronousIO=true is not set.")]
+        [Fact]
         public async Task Apply_Works_WithNonODataJson()
         {
             // Arrange

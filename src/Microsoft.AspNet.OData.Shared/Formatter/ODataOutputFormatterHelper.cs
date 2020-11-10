@@ -105,7 +105,11 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
+#if NETCORE
         internal static async Task WriteToStreamAsync(
+#else
+        internal static void WriteToStream(
+#endif
             Type type,
             object value,
             IEdmModel model,
@@ -205,8 +209,11 @@ namespace Microsoft.AspNet.OData.Formatter
                 {
                     writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;
                 }
-
+#if NETCORE
                 await serializer.WriteObjectAsync(value, type, messageWriter, writeContext);
+#else
+                serializer.WriteObject(value, type, messageWriter, writeContext);
+#endif
             }
         }
 

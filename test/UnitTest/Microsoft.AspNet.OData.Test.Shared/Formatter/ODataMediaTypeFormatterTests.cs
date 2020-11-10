@@ -128,11 +128,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             var formatter = CreateInputFormatter();
 #if NETCORE
- // TODO: (mikep) re-enable
- //           ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadRequestBodyAsync(null, Encoding.UTF8); }, "context");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadRequestBodyAsync(null, Encoding.UTF8).Wait(); }, "context");
 #else
-            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null).Wait(); }, "type");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null).Wait(); }, "readStream");
 #endif
         }
 
@@ -740,7 +739,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             serializerProvider.Setup(p => p.GetODataPayloadSerializer(typeof(int), request)).Returns(serializer.Object);
             serializer
-                .Setup(s => s.WriteObjectAsync(42, typeof(int), It.IsAny<ODataMessageWriter>(),
+                .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
                     It.Is<ODataSerializerContext>(c => c.MetadataLevel == ODataMetadataLevel.FullMetadata)))
                 .Verifiable();
 
@@ -772,7 +771,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             serializerProvider.Setup(p => p.GetODataPayloadSerializer(typeof(int), request)).Returns(serializer.Object);
             serializer
-                .Setup(s => s.WriteObjectAsync(42, typeof(int), It.IsAny<ODataMessageWriter>(),
+                .Setup(s => s.WriteObject(42, typeof(int), It.IsAny<ODataMessageWriter>(),
                     It.Is<ODataSerializerContext>(c => c.SelectExpandClause == selectExpandClause)))
                 .Verifiable();
 
@@ -842,7 +841,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.Equal(Int64.MaxValue, messageReaderQuotas.MaxReceivedMessageSize);
         }
 
-        [Fact(Skip = "ToDo: (mikep) ReadPropertyAsync in ODL is raising the error as an AggregateException. Probably needs to be fixed in ODL.") ]
+        [Fact]
         public async Task MessageReaderQuotas_Is_Passed_To_ODataLib()
         {
             ODataMediaTypeFormatter formatter = CreateFormatter();
@@ -859,7 +858,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void Request_IsPassedThroughDeserializerContext()
+        public async void Request_IsPassedThroughDeserializerContext()
         {
             // Arrange
             var model = CreateModel();
@@ -869,7 +868,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(It.IsAny<IEdmTypeReference>())).Returns(deserializer.Object);
             deserializer
-                .Setup(d => d.ReadAsync(It.IsAny<ODataMessageReader>(), typeof(int), It.Is<ODataDeserializerContext>(c => c.Request == request)))
+                .Setup(d => d.Read(It.IsAny<ODataMessageReader>(), typeof(int), It.Is<ODataDeserializerContext>(c => c.Request == request)))
                 .Verifiable();
 
             var formatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>());
@@ -877,8 +876,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpContent content = new StringContent("42");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
             // Act
-            formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, formatterLogger: null);
+            await formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, mockFormatterLogger);
 
             // Assert
             deserializer.Verify();
@@ -1023,8 +1024,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             Mock<ODataEdmTypeSerializer> serializer = new Mock<ODataEdmTypeSerializer>(ODataPayloadKind.Resource);
             serializer
-                .Setup(s => s.WriteObjectAsync(instance.Object, instance.GetType(), It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>()))
-                .Returns(Task.FromResult(false))
+                .Setup(s => s.WriteObject(instance.Object, instance.GetType(), It.IsAny<ODataMessageWriter>(), It.IsAny<ODataSerializerContext>()))
                 .Verifiable();
 
             Mock<ODataSerializerProvider> serializerProvider = new Mock<ODataSerializerProvider>();
@@ -1090,7 +1090,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void ReadFromStreamAsync_UsesRightDeserializerFrom_ODataDeserializerProvider()
+        public async void ReadFromStreamAsync_UsesRightDeserializerFrom_ODataDeserializerProvider()
         {
             // Arrange
             MemoryStream stream = new MemoryStream();
@@ -1099,7 +1099,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             IEdmModel model = CreateModel();
             Mock<ODataDeserializer> deserializer = new Mock<ODataDeserializer>(ODataPayloadKind.Property);
-            deserializer.Setup(d => d.ReadAsync(It.IsAny<ODataMessageReader>(), typeof(int), It.IsAny<ODataDeserializerContext>()))
+            deserializer.Setup(d => d.Read(It.IsAny<ODataMessageReader>(), typeof(int), It.IsAny<ODataDeserializerContext>()))
                 .Verifiable();
 
             Mock<ODataDeserializerProvider> provider = new Mock<ODataDeserializerProvider>();
@@ -1110,7 +1110,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
 
-            formatter.ReadFromStreamAsync(typeof(int), stream, content, null);
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
+            await formatter.ReadFromStreamAsync(typeof(int), stream, content, mockFormatterLogger);
 
             // Assert
             deserializer.Verify();

@@ -2526,7 +2526,11 @@ public class Microsoft.AspNet.OData.Formatter.ODataOutputFormatter : Microsoft.A
 
 	public virtual bool CanWriteResult (Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterCanWriteContext context)
 	public static System.Uri GetDefaultBaseAddress (Microsoft.AspNetCore.Http.HttpRequest request)
+	[
+	AsyncStateMachineAttribute(),
+	]
 	public virtual System.Threading.Tasks.Task WriteResponseBodyAsync (Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext context, System.Text.Encoding selectedEncoding)
+
 	public virtual void WriteResponseHeaders (Microsoft.AspNetCore.Mvc.Formatters.OutputFormatterWriteContext context)
 }
 

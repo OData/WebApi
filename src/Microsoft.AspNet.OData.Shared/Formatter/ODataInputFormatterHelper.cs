@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Interfaces;
@@ -42,7 +43,11 @@ namespace Microsoft.AspNet.OData.Formatter
 
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is sent to the logger, which may throw it.")]
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "oDataMessageReader mis registered for disposal.")]
+#if NETCORE
+        internal static async Task<object> ReadFromStreamAsync(
+#else
         internal static object ReadFromStream(
+#endif
             Type type,
             object defaultValue,
             IEdmModel model,
@@ -95,7 +100,11 @@ namespace Microsoft.AspNet.OData.Formatter
                 readContext.ResourceType = type;
                 readContext.ResourceEdmType = expectedPayloadType;
 
+#if NETCORE
+                result = await deserializer.ReadAsync(oDataMessageReader, type, readContext);
+#else
                 result = deserializer.Read(oDataMessageReader, type, readContext);
+#endif
             }
             catch (Exception e)
             {

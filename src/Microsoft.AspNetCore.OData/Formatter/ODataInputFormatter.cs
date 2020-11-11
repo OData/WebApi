@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         /// <inheritdoc/>
         [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        public override Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)
+        public override async Task<InputFormatterResult> ReadRequestBodyAsync(InputFormatterContext context, Encoding encoding)
         {
             if (context == null)
             {
@@ -115,19 +115,11 @@ namespace Microsoft.AspNet.OData.Formatter
             object defaultValue = GetDefaultValueForType(type);
             if (contentHeaders == null || contentHeaders.ContentLength == 0)
             {
-                return Task.FromResult(InputFormatterResult.Success(defaultValue));
+                return InputFormatterResult.Success(defaultValue);
             }
 
             try
             {
-#if !NETSTANDARD2_0
-                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
-                if (body != null)
-                {
-                    body.AllowSynchronousIO = true;
-                }
-#endif
-
                 Func<ODataDeserializerContext> getODataDeserializerContext = () =>
                 {
                     return new ODataDeserializerContext
@@ -151,13 +143,13 @@ namespace Microsoft.AspNet.OData.Formatter
 
                 ODataDeserializerProvider deserializerProvider = request.GetRequestContainer().GetRequiredService<ODataDeserializerProvider>();
 
-                object result = ODataInputFormatterHelper.ReadFromStream(
+                object result = await ODataInputFormatterHelper.ReadFromStreamAsync(
                     type,
                     defaultValue,
                     request.GetModel(),
                     GetBaseAddressInternal(request),
                     new WebApiRequestMessage(request),
-                    () => ODataMessageWrapperHelper.Create(request.Body, request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),
+                    () => ODataMessageWrapperHelper.Create(new StreamWrapper(request.Body), request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),
                     (objectType) => deserializerProvider.GetEdmTypeDeserializer(objectType),
                     (objectType) => deserializerProvider.GetODataDeserializer(objectType, request),
                     getODataDeserializerContext,
@@ -169,12 +161,12 @@ namespace Microsoft.AspNet.OData.Formatter
                     obj.Dispose();
                 }
 
-                return Task.FromResult(InputFormatterResult.Success(result));
+                return InputFormatterResult.Success(result);
             }
             catch (Exception ex)
             {
                 context.ModelState.AddModelError(context.ModelName, ex, context.Metadata);
-                return Task.FromResult(InputFormatterResult.Failure());
+                return InputFormatterResult.Failure();
             }
         }
 

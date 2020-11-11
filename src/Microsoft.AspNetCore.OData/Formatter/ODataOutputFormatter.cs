@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
+using System.IO;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
@@ -185,7 +187,6 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
         public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             Type type = context.ObjectType;
@@ -201,51 +202,34 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.InvalidOperation(SRResources.WriteToStreamAsyncMustHaveRequest);
             }
 
-            try
+            HttpResponse response = context.HttpContext.Response;
+            Uri baseAddress = GetBaseAddressInternal(request);
+            MediaTypeHeaderValue contentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
+
+            Func<ODataSerializerContext> getODataSerializerContext = () =>
             {
-#if !NETSTANDARD2_0
-                var body = request.HttpContext.Features.Get<AspNetCore.Http.Features.IHttpBodyControlFeature>();
-                if (body != null)
+                return new ODataSerializerContext()
                 {
-                    body.AllowSynchronousIO = true;
-                }
-#endif
-
-                HttpResponse response = context.HttpContext.Response;
-                Uri baseAddress = GetBaseAddressInternal(request);
-                MediaTypeHeaderValue contentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
-
-                Func<ODataSerializerContext> getODataSerializerContext = () =>
-                {
-                    return new ODataSerializerContext()
-                    {
-                        Request = request,
-                    };
+                    Request = request,
                 };
+            };
 
-                ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
+            ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
-                ODataOutputFormatterHelper.WriteToStream(
-                    type,
-                    context.Object,
-                    request.GetModel(),
-                    ResultHelpers.GetODataResponseVersion(request),
-                    baseAddress,
-                    contentType,
-                    new WebApiUrlHelper(request.GetUrlHelper()),
-                    new WebApiRequestMessage(request),
-                    new WebApiRequestHeaders(request.Headers),
-                    (services) => ODataMessageWrapperHelper.Create(response.Body, response.Headers, services),
-                    (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
-                    (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
-                    getODataSerializerContext);
-
-                return TaskHelpers.Completed();
-            }
-            catch (Exception ex)
-            {
-                return TaskHelpers.FromError(ex);
-            }
+            return ODataOutputFormatterHelper.WriteToStreamAsync(
+                type,
+                context.Object,
+                request.GetModel(),
+                ResultHelpers.GetODataResponseVersion(request),
+                baseAddress,
+                contentType,
+                new WebApiUrlHelper(request.GetUrlHelper()),
+                new WebApiRequestMessage(request),
+                new WebApiRequestHeaders(request.Headers),
+                (services) => ODataMessageWrapperHelper.Create(new StreamWrapper(response.Body), response.Headers, services),
+                (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
+                (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
+                getODataSerializerContext);
         }
 
         /// <summary>
@@ -297,6 +281,148 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return contentType;
+        }
+    }
+
+    internal class StreamWrapper : Stream
+    {
+        private Stream stream;
+        public StreamWrapper(Stream stream)
+        {
+            this.stream = stream;
+        }
+
+        public override bool CanRead => this.stream.CanRead;
+
+        public override bool CanSeek => this.stream.CanSeek;
+
+        public override bool CanWrite => this.stream.CanWrite;
+
+        public override long Length => this.stream.Length;
+
+        public override int ReadTimeout { get => this.stream.ReadTimeout; set => this.stream.ReadTimeout = value; }
+
+        public override int WriteTimeout { get => this.stream.WriteTimeout; set => this.stream.WriteTimeout = value; }
+
+        public override bool CanTimeout => this.stream.CanTimeout;
+
+        public override void Close()
+        {
+            this.stream.Close();
+        }
+
+        public override long Position { get => this.stream.Position; set => this.stream.Position = value; }
+
+        public override void Flush()
+        {
+            this.stream.FlushAsync().Wait();
+        }
+
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            return stream.FlushAsync(cancellationToken);
+        }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return this.stream.ReadAsync(buffer, offset, count).Result;
+        }
+
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return this.stream.ReadAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override int ReadByte()
+        {
+            return this.stream.ReadByte();
+        }
+
+        public override void WriteByte(byte value)
+        {
+            this.stream.WriteByte(value);
+        }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
+        {
+            return this.stream.CopyToAsync(destination, bufferSize, cancellationToken);
+        }
+
+        public override long Seek(long offset, SeekOrigin origin)
+        {
+            return this.stream.Seek(offset, origin);
+        }
+
+        public override void SetLength(long value)
+        {
+            this.stream.SetLength(value);
+        }
+
+        public override void Write(byte[] buffer, int offset, int count)
+        {
+            this.stream.WriteAsync(buffer, offset, count).Wait();
+        }
+
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            return this.stream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+#if !NETSTANDARD2_0
+        public override void CopyTo(Stream destination, int bufferSize)
+        {
+            this.stream.CopyToAsync(destination, bufferSize).Wait();
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            return this.stream.WriteAsync(buffer, cancellationToken);
+        }
+
+        public override int Read(Span<byte> buffer)
+        {
+            return this.stream.Read(buffer);
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            return this.stream.ReadAsync(buffer, cancellationToken);
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            this.stream.Write(buffer);
+        }
+
+        public override ValueTask DisposeAsync()
+        {
+            return stream.DisposeAsync();
+        }
+#endif
+
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            return this.stream.BeginRead(buffer, offset, count, callback, state);
+        }
+
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            return this.stream.BeginWrite(buffer, offset, count, callback, state);
+        }
+
+        public override int EndRead(IAsyncResult asyncResult)
+        {
+            return this.stream.EndRead(asyncResult);
+        }
+
+        public override void EndWrite(IAsyncResult asyncResult)
+        {
+            this.stream.EndWrite(asyncResult);
+        }
+
+        public override string ToString()
+        {
+            return this.stream.ToString();
         }
     }
 }

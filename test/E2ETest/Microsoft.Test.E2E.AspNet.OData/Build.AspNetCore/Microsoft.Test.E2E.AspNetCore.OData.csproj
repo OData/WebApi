@@ -1537,6 +1537,15 @@
     <Compile Include="..\Routing\UnqualifiedNameCallRoutingTests.cs">
       <Link>Routing\UnqualifiedNameCallRoutingTests.cs</Link>
     </Compile>
+    <Compile Include="..\ServerSidePaging\ServerSidePagingControllers.cs">
+      <Link>ServerSidePaging\ServerSidePagingControllers.cs</Link>
+    </Compile>
+    <Compile Include="..\ServerSidePaging\ServerSidePagingDataModel.cs">
+      <Link>ServerSidePaging\ServerSidePagingDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\ServerSidePaging\ServerSidePagingTests.cs">
+      <Link>ServerSidePaging\ServerSidePagingTests.cs</Link>
+    </Compile>
     <Compile Include="..\SingleResult\SingleResultController.cs">
       <Link>SingleResult\SingleResultController.cs</Link>
     </Compile>

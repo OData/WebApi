@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -58,11 +58,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (TypeHelper.IsEnum(graph.GetType()))
             {
-                await messageWriter.WriteValueAsync(graph.ToString());
+                return messageWriter.WriteValueAsync(graph.ToString());
             }
             else
             {
-                await messageWriter.WriteValueAsync(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
+                return messageWriter.WriteValueAsync(ODataPrimitiveSerializer.ConvertUnsupportedPrimitives(graph));
             }
         }
     }

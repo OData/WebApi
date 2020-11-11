@@ -39,7 +39,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <inheritdoc/>
         /// <remarks>The metadata written is from the model set on the <paramref name="messageWriter"/>. The <paramref name="graph" />
         /// is not used.</remarks>
-        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // the model received by this method and the model passed(from configuration) while building ODataMessageWriter is the same (clr object).
 
             // Note: MessageWriter doesn't have a WriteMetadataDocumentAsync method. We should fix that by providing a default implementation in the base class.
-            await Task.Run(() => messageWriter.WriteMetadataDocument());
+            return Task.Run(() => messageWriter.WriteMetadataDocument());
         }
     }
 }

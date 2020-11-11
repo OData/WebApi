@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+        public override Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -120,10 +120,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Resource));
             }
-            else
-            {
-                await WriteResourceAsync(graph, writer, writeContext, expectedType);
-            }
+
+            return WriteResourceAsync(graph, writer, writeContext, expectedType);
         }
 
         /// <summary>
@@ -165,7 +163,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="expectedType">The expected EDM type of the object represented by <paramref name="graph"/>.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual async Task WriteDeltaObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+        public virtual Task WriteDeltaObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
            ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -182,10 +180,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 throw new SerializationException(Error.Format(SRResources.CannotSerializerNull, Resource));
             }
-            else
-            {
-                await WriteDeltaResourceAsync(graph, writer, writeContext);
-            }
+            
+            return WriteDeltaResourceAsync(graph, writer, writeContext);
         }
 
         private void WriteDeltaResource(object graph, ODataWriter writer, ODataSerializerContext writeContext)
@@ -1203,7 +1199,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             serializer.WriteObjectInline(propertyValue, edmType, writer, nestedWriteContext);
         }
 
-        private async Task WriteDynamicComplexPropertyAsync(object propertyValue, IEdmTypeReference edmType, ResourceContext resourceContext, ODataWriter writer)
+        private Task WriteDynamicComplexPropertyAsync(object propertyValue, IEdmTypeReference edmType, ResourceContext resourceContext, ODataWriter writer)
         {
             Contract.Assert(resourceContext != null);
             Contract.Assert(writer != null);
@@ -1222,7 +1218,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     Error.Format(SRResources.TypeCannotBeSerialized, edmType.ToTraceString()));
             }
 
-            await serializer.WriteObjectInlineAsync(propertyValue, edmType, writer, nestedWriteContext);
+            return serializer.WriteObjectInlineAsync(propertyValue, edmType, writer, nestedWriteContext);
         }
 
         private void WriteComplexProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)

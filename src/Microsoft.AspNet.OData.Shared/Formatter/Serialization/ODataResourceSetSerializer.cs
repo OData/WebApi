@@ -113,7 +113,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc />
-        public override async Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
+        public override Task WriteObjectInlineAsync(object graph, IEdmTypeReference expectedType, ODataWriter writer,
             ODataSerializerContext writeContext)
         {
             if (writer == null)
@@ -140,7 +140,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
             }
 
-            await WriteResourceSetAsync(enumerable, expectedType, writer, writeContext);
+            return WriteResourceSetAsync(enumerable, expectedType, writer, writeContext);
         }
 
         private void WriteResourceSet(IEnumerable enumerable, IEdmTypeReference resourceSetType, ODataWriter writer,

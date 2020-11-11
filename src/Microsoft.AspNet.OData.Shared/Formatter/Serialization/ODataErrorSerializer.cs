@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
-        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (graph == null)
             {
@@ -53,7 +53,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ODataError oDataError = GetError(graph);
             bool includeDebugInformation = oDataError.InnerError != null;
-            await messageWriter.WriteErrorAsync(oDataError, includeDebugInformation);
+            return messageWriter.WriteErrorAsync(oDataError, includeDebugInformation);
         }
 
         private static ODataError GetError(object graph)

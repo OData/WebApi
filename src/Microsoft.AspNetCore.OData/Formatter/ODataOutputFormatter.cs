@@ -187,8 +187,7 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <inheritdoc/>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "The caught exception type is reflected into a faulted task.")]
-        public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
+        public override Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
             Type type = context.ObjectType;
             if (type == null)
@@ -217,7 +216,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
             ODataSerializerProvider serializerProvider = request.GetRequestContainer().GetRequiredService<ODataSerializerProvider>();
 
-            await ODataOutputFormatterHelper.WriteToStreamAsync(
+            return ODataOutputFormatterHelper.WriteToStreamAsync(
                 type,
                 context.Object,
                 request.GetModel(),

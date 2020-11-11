@@ -45,7 +45,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheridoc />
-        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
         {
             if (messageWriter == null)
             {
@@ -60,8 +60,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (graph != null)
             {
                 ODataEntityReferenceLinks entityReferenceLinks = GetEntityReferenceLinks(graph, writeContext);
-                await messageWriter.WriteEntityReferenceLinksAsync(entityReferenceLinks);
+                return messageWriter.WriteEntityReferenceLinksAsync(entityReferenceLinks);
             }
+
+            return TaskHelpers.Completed();
         }
 
         private ODataEntityReferenceLinks GetEntityReferenceLinks(object graph, ODataSerializerContext writeContext)

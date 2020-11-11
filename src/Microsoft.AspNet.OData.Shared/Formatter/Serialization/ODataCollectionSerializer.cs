@@ -6,6 +6,7 @@ using System.Collections;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
@@ -63,6 +64,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <inheritdoc/>
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter,
+            ODataSerializerContext writeContext)
+        {
+            if (messageWriter == null)
+            {
+                throw Error.ArgumentNull("messageWriter");
+            }
+
+            if (writeContext == null)
+            {
+                throw Error.ArgumentNull("writeContext");
+            }
+
+            IEdmTypeReference collectionType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(collectionType != null);
+
+            IEdmTypeReference elementType = GetElementType(collectionType);
+            ODataCollectionWriter writer = await messageWriter.CreateODataCollectionWriterAsync(elementType);
+            await WriteCollectionAsync(writer, graph, collectionType.AsCollection(), writeContext);
+        }
+
+        /// <inheritdoc/>
         public sealed override ODataValue CreateODataValue(object graph, IEdmTypeReference expectedType,
             ODataSerializerContext writeContext)
         {
@@ -96,26 +119,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 throw Error.ArgumentNull("writer");
             }
 
-            ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
-
-            if (writeContext.Request != null)
-            {
-                if (writeContext.InternalRequest.Context.NextLink != null)
-                {
-                    collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLink;
-                }
-                else if (writeContext.InternalRequest.Context.QueryOptions != null)
-                {
-                    // Collection serializer is called only for collection of primitive values - A null object will be supplied since it is a non-entity value
-                    SkipTokenHandler skipTokenHandler = writeContext.QueryOptions.Context.GetSkipTokenHandler();
-                    collectionStart.NextPageLink = skipTokenHandler.GenerateNextPageLink(writeContext.InternalRequest.RequestUri, writeContext.InternalRequest.Context.PageSize, null, writeContext);
-                }
-
-                if (writeContext.InternalRequest.Context.TotalCount != null)
-                {
-                    collectionStart.Count = writeContext.InternalRequest.Context.TotalCount;
-                }
-            }
+            ODataCollectionStart collectionStart = GetCollectionStart(writeContext);
 
             writer.WriteStart(collectionStart);
 
@@ -132,6 +136,41 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             writer.WriteEnd();
+        }
+
+
+        /// <summary>
+        /// Writes the given <paramref name="graph"/> using the given <paramref name="writer"/>.
+        /// </summary>
+        /// <param name="writer">The <see cref="ODataCollectionWriter"/> to use.</param>
+        /// <param name="graph">The collection to write.</param>
+        /// <param name="collectionType">The EDM type of the collection.</param>
+        /// <param name="writeContext">The serializer context.</param>
+        public async Task WriteCollectionAsync(ODataCollectionWriter writer, object graph, IEdmTypeReference collectionType,
+            ODataSerializerContext writeContext)
+        {
+            if (writer == null)
+            {
+                throw Error.ArgumentNull("writer");
+            }
+
+            ODataCollectionStart collectionStart = GetCollectionStart(writeContext);
+
+            await writer.WriteStartAsync(collectionStart);
+
+            if (graph != null)
+            {
+                ODataCollectionValue collectionValue = CreateODataValue(graph, collectionType, writeContext) as ODataCollectionValue;
+                if (collectionValue != null)
+                {
+                    foreach (object item in collectionValue.Items)
+                    {
+                        await writer.WriteItemAsync(item);
+                    }
+                }
+            }
+
+            await writer.WriteEndAsync();
         }
 
         /// <summary>
@@ -308,6 +347,32 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             string message = Error.Format(SRResources.CannotWriteType, typeof(ODataResourceSetSerializer).Name, feedType.FullName());
             throw new SerializationException(message);
+        }
+
+        private static ODataCollectionStart GetCollectionStart(ODataSerializerContext writeContext)
+        {
+
+            ODataCollectionStart collectionStart = new ODataCollectionStart { Name = writeContext.RootElementName };
+
+            if (writeContext.Request != null)
+            {
+                if (writeContext.InternalRequest.Context.NextLink != null)
+                {
+                    collectionStart.NextPageLink = writeContext.InternalRequest.Context.NextLink;
+                }
+                else if (writeContext.InternalRequest.Context.QueryOptions != null)
+                {
+                    // Collection serializer is called only for collection of primitive values - A null object will be supplied since it is a non-entity value
+                    SkipTokenHandler skipTokenHandler = writeContext.QueryOptions.Context.GetSkipTokenHandler();
+                    collectionStart.NextPageLink = skipTokenHandler.GenerateNextPageLink(writeContext.InternalRequest.RequestUri, writeContext.InternalRequest.Context.PageSize, null, writeContext);
+                }
+
+                if (writeContext.InternalRequest.Context.TotalCount != null)
+                {
+                    collectionStart.Count = writeContext.InternalRequest.Context.TotalCount;
+                }
+            }
+            return collectionStart;
         }
     }
 }

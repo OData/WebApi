@@ -8,6 +8,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.AspNet.OData.Interfaces;
@@ -104,7 +105,11 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
+#if NETCORE
+        internal static async Task WriteToStreamAsync(
+#else
         internal static void WriteToStream(
+#endif
             Type type,
             object value,
             IEdmModel model,
@@ -204,8 +209,11 @@ namespace Microsoft.AspNet.OData.Formatter
                 {
                     writeContext.SelectExpandClause = selectExpandDifferentFromQueryOptions;
                 }
-
+#if NETCORE
+                await serializer.WriteObjectAsync(value, type, messageWriter, writeContext);
+#else
                 serializer.WriteObject(value, type, messageWriter, writeContext);
+#endif
             }
         }
 

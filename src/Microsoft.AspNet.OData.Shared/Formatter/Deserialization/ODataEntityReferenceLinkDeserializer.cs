@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 
@@ -35,6 +36,29 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             ODataEntityReferenceLink entityReferenceLink = messageReader.ReadEntityReferenceLink();
+
+            if (entityReferenceLink != null)
+            {
+                return ResolveContentId(entityReferenceLink.Url, readContext);
+            }
+
+            return null;
+        }
+
+        /// <inheritdoc />
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            ODataEntityReferenceLink entityReferenceLink = await messageReader.ReadEntityReferenceLinkAsync();
 
             if (entityReferenceLink != null)
             {

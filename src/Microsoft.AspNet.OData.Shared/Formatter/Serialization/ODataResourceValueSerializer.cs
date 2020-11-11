@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
@@ -64,6 +65,28 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(edmType != null);
 
             messageWriter.WriteProperty(CreateProperty(graph, edmType, writeContext.RootElementName, writeContext));
+        }
+
+        /// <inheritdoc/>
+        public override Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        {
+            if (messageWriter == null)
+            {
+                throw Error.ArgumentNull("messageWriter");
+            }
+            if (writeContext == null)
+            {
+                throw Error.ArgumentNull("writeContext");
+            }
+            if (writeContext.RootElementName == null)
+            {
+                throw Error.Argument("writeContext", SRResources.RootElementNameMissing, typeof(ODataSerializerContext).Name);
+            }
+
+            IEdmTypeReference edmType = writeContext.GetEdmType(graph, type);
+            Contract.Assert(edmType != null);
+
+            return messageWriter.WritePropertyAsync(CreateProperty(graph, edmType, writeContext.RootElementName, writeContext));
         }
 
         /// <inheritdoc/>

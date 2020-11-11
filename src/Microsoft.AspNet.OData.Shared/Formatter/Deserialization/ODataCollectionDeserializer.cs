@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -38,18 +39,24 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            IEdmTypeReference edmType = readContext.GetEdmType(type);
-            Contract.Assert(edmType != null);
-
-            if (!edmType.IsCollection())
-            {
-                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, EdmTypeKind.Collection);
-            }
-
-            IEdmCollectionTypeReference collectionType = edmType.AsCollection();
-            IEdmTypeReference elementType = collectionType.ElementType();
+            IEdmTypeReference edmType = GetElementType(type, readContext);
+            IEdmTypeReference elementType = edmType.AsCollection().ElementType();
             ODataCollectionReader reader = messageReader.CreateODataCollectionReader(elementType);
             return ReadInline(ReadCollection(reader), edmType, readContext);
+        }
+
+        /// <inheritdoc />
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            IEdmTypeReference edmType = GetElementType(type, readContext);
+            IEdmTypeReference elementType = edmType.AsCollection().ElementType();
+            ODataCollectionReader reader = await messageReader.CreateODataCollectionReaderAsync(elementType);
+            return ReadInline(await ReadCollectionAsync(reader), edmType, readContext);
         }
 
         /// <inheritdoc />
@@ -146,17 +153,50 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             while (reader.Read())
             {
-                if (ODataCollectionReaderState.Value == reader.State)
-                {
-                    items.Add(reader.Item);
-                }
-                else if (ODataCollectionReaderState.CollectionStart == reader.State)
-                {
-                    typeName = reader.Item.ToString();
-                }
+                typeName = AddCollectionItem(items, reader, typeName);
             }
 
             return new ODataCollectionValue { Items = items.Cast<object>(), TypeName = typeName };
+        }
+
+        internal static async Task<ODataCollectionValue> ReadCollectionAsync(ODataCollectionReader reader)
+        {
+            ArrayList items = new ArrayList();
+            string typeName = null;
+
+            while (await reader.ReadAsync())
+            {
+                typeName = AddCollectionItem(items, reader, typeName);
+            }
+
+            return new ODataCollectionValue { Items = items.Cast<object>(), TypeName = typeName };
+        }
+
+        private static IEdmTypeReference GetElementType(Type type, ODataDeserializerContext readContext)
+        {
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsCollection())
+            {
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, EdmTypeKind.Collection);
+            }
+
+            return edmType;
+        }
+
+        private static string AddCollectionItem(ArrayList items, ODataCollectionReader reader, string typeName)
+        {
+            if (ODataCollectionReaderState.Value == reader.State)
+            {
+                items.Add(reader.Item);
+            }
+            else if (ODataCollectionReaderState.CollectionStart == reader.State)
+            {
+                typeName = reader.Item.ToString();
+            }
+
+            return typeName;
         }
     }
 }

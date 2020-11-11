@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
@@ -27,7 +26,7 @@ namespace Microsoft.AspNet.OData.Batch
         {
             await WriteMessageAsync(writer, context, false);
         }
-
+        
         /// <summary>
         /// Writes a single OData batch response.
         /// </summary>
@@ -47,7 +46,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             string contentId = (context.Request != null) ? context.Request.GetODataContentId() : String.Empty;
 
-            ODataBatchOperationResponseMessage batchResponse = asyncWriter ? 
+            ODataBatchOperationResponseMessage batchResponse = asyncWriter ?
                 await writer.CreateOperationResponseMessageAsync(contentId) :
                 writer.CreateOperationResponseMessage(contentId);
 

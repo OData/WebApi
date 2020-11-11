@@ -128,10 +128,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             var formatter = CreateInputFormatter();
 #if NETCORE
-            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadRequestBodyAsync(null, Encoding.UTF8); }, "context");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadRequestBodyAsync(null, Encoding.UTF8).Wait(); }, "context");
 #else
-            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null); }, "type");
-            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null); }, "readStream");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(null, Stream.Null, null, null).Wait(); }, "type");
+            ExceptionAssert.ThrowsArgumentNull(() => { formatter.ReadFromStreamAsync(typeof(object), null, null, null).Wait(); }, "readStream");
 #endif
         }
 
@@ -858,7 +858,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void Request_IsPassedThroughDeserializerContext()
+        public async void Request_IsPassedThroughDeserializerContext()
         {
             // Arrange
             var model = CreateModel();
@@ -876,8 +876,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             HttpContent content = new StringContent("42");
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json;odata.metadata=full");
 
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
             // Act
-            formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, formatterLogger: null);
+            await formatter.ReadFromStreamAsync(typeof(int), new MemoryStream(), content, mockFormatterLogger);
 
             // Assert
             deserializer.Verify();
@@ -1088,7 +1090,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
-        public void ReadFromStreamAsync_UsesRightDeserializerFrom_ODataDeserializerProvider()
+        public async void ReadFromStreamAsync_UsesRightDeserializerFrom_ODataDeserializerProvider()
         {
             // Arrange
             MemoryStream stream = new MemoryStream();
@@ -1108,7 +1110,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             ODataMediaTypeFormatter formatter = new ODataMediaTypeFormatter(Enumerable.Empty<ODataPayloadKind>());
             formatter.Request = request;
 
-            formatter.ReadFromStreamAsync(typeof(int), stream, content, null);
+            IFormatterLogger mockFormatterLogger = new Mock<IFormatterLogger>().Object;
+
+            await formatter.ReadFromStreamAsync(typeof(int), stream, content, mockFormatterLogger);
 
             // Assert
             deserializer.Verify();

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -49,6 +50,28 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             ODataReader resourceSetReader = messageReader.CreateODataResourceSetReader();
             object resourceSet = resourceSetReader.ReadResourceOrResourceSet();
+            return ReadInline(resourceSet, edmType, readContext);
+        }
+        
+        /// <inheritdoc />
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            // TODO: is it ok to read the top level collection of entity?
+            if (!(edmType.IsCollection() && edmType.AsCollection().ElementType().IsStructured()))
+            {
+                throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
+            }
+
+            ODataReader resourceSetReader = await messageReader.CreateODataResourceSetReaderAsync();
+            object resourceSet = await resourceSetReader.ReadResourceOrResourceSetAsync();
             return ReadInline(resourceSet, edmType, readContext);
         }
 

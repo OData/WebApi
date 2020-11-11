@@ -9,8 +9,11 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
@@ -59,98 +62,71 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             Contract.Assert(action != null);
 
             // Create the correct resource type;
-            Dictionary<string, object> payload;
-            if (type == typeof(ODataActionParameters))
-            {
-                payload = new ODataActionParameters();
-            }
-            else
-            {
-                payload = new ODataUntypedActionParameters(action);
-            }
+            Dictionary<string, object> payload = GetPayload(type, action);
 
             ODataParameterReader reader = messageReader.CreateODataParameterReader(action);
 
             while (reader.Read())
             {
-                string parameterName = null;
-                IEdmOperationParameter parameter = null;
-
                 switch (reader.State)
                 {
                     case ODataParameterReaderState.Value:
-                        parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
-                        // ODataLib protects against this but asserting just in case.
-                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
-                        if (parameter.Type.IsPrimitive())
-                        {
-                            payload[parameterName] = reader.Value;
-                        }
-                        else
-                        {
-                            ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(parameter.Type);
-                            payload[parameterName] = deserializer.ReadInline(reader.Value, parameter.Type, readContext);
-                        }
+                        ReadValue(action, reader, readContext, DeserializerProvider, payload);
                         break;
 
                     case ODataParameterReaderState.Collection:
-                        parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
-                        // ODataLib protects against this but asserting just in case.
-                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
-                        IEdmCollectionTypeReference collectionType = parameter.Type as IEdmCollectionTypeReference;
-                        Contract.Assert(collectionType != null);
-                        ODataCollectionValue value = ODataCollectionDeserializer.ReadCollection(reader.CreateCollectionReader());
-                        ODataCollectionDeserializer collectionDeserializer = (ODataCollectionDeserializer)DeserializerProvider.GetEdmTypeDeserializer(collectionType);
-                        payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
+                        ReadCollection(action, reader, readContext, DeserializerProvider, payload);
                         break;
 
                     case ODataParameterReaderState.Resource:
-                        parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
-                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
-                        Contract.Assert(parameter.Type.IsStructured());
-
-                        ODataReader resourceReader = reader.CreateResourceReader();
-                        object item = resourceReader.ReadResourceOrResourceSet();
-                        ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)DeserializerProvider.GetEdmTypeDeserializer(parameter.Type);
-                        payload[parameterName] = resourceDeserializer.ReadInline(item, parameter.Type, readContext);
+                        ReadResource(action, reader, readContext, DeserializerProvider, payload);
                         break;
 
                     case ODataParameterReaderState.ResourceSet:
-                        parameterName = reader.Name;
-                        parameter = action.Parameters.SingleOrDefault(p => p.Name == parameterName);
-                        Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
+                        ReadResourceSet(action, reader, readContext, DeserializerProvider, payload);
+                        break;
+                }
+            }
 
-                        IEdmCollectionTypeReference resourceSetType = parameter.Type as IEdmCollectionTypeReference;
-                        Contract.Assert(resourceSetType != null);
+            return payload;
+        }
 
-                        ODataReader resourceSetReader = reader.CreateResourceSetReader();
-                        object feed = resourceSetReader.ReadResourceOrResourceSet();
-                        ODataResourceSetDeserializer resourceSetDeserializer = (ODataResourceSetDeserializer)DeserializerProvider.GetEdmTypeDeserializer(resourceSetType);
+        /// <inheritdoc />
+        [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling",
+            Justification = "The majority of types referenced by this method are EdmLib types this method needs to know about to operate correctly")]
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
 
-                        object result = resourceSetDeserializer.ReadInline(feed, resourceSetType, readContext);
+            IEdmAction action = GetAction(readContext);
+            Contract.Assert(action != null);
 
-                        IEdmTypeReference elementTypeReference = resourceSetType.ElementType();
-                        Contract.Assert(elementTypeReference.IsStructured());
+            // Create the correct resource type;
+            Dictionary<string, object> payload = GetPayload(type, action);
 
-                        IEnumerable enumerable = result as IEnumerable;
-                        if (enumerable != null)
-                        {
-                            if (readContext.IsUntyped)
-                            {
-                                payload[parameterName] = enumerable.ConvertToEdmObject(resourceSetType);
-                            }
-                            else
-                            {
-                                Type elementClrType = EdmLibHelpers.GetClrType(elementTypeReference, readContext.Model);
-                                IEnumerable castedResult =
-                                    _castMethodInfo.MakeGenericMethod(elementClrType)
-                                        .Invoke(null, new[] { result }) as IEnumerable;
-                                payload[parameterName] = castedResult;
-                            }
-                        }
+            ODataParameterReader reader = await messageReader.CreateODataParameterReaderAsync(action);
+
+            while (await reader.ReadAsync())
+            {
+                switch (reader.State)
+                {
+                    case ODataParameterReaderState.Value:
+                        ReadValue(action, reader, readContext, DeserializerProvider, payload);
+                        break;
+
+                    case ODataParameterReaderState.Collection:
+                        await ReadCollectionAsync(action, reader, readContext, DeserializerProvider, payload);
+                        break;
+
+                    case ODataParameterReaderState.Resource:
+                        await ReadResourceAsync(action, reader, readContext, DeserializerProvider, payload);
+                        break;
+
+                    case ODataParameterReaderState.ResourceSet:
+                        await ReadResourceSetAsync(action, reader, readContext, DeserializerProvider, payload);
                         break;
                 }
             }
@@ -202,6 +178,136 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             return action;
+        }
+
+        private static Dictionary<string, object> GetPayload(Type type, IEdmAction action)
+        {
+            // Create the correct resource type;
+            if (type == typeof(ODataActionParameters))
+            {
+                return new ODataActionParameters();
+            }
+            else
+            {
+                return new ODataUntypedActionParameters(action);
+            }
+        }
+
+        private static IEdmOperationParameter GetParameter(IEdmAction action, ODataParameterReader reader, out string parameterName)
+        {
+            string paramName = parameterName = reader.Name;
+            IEdmOperationParameter parameter = action.Parameters.SingleOrDefault(p => p.Name == paramName);
+            // ODataLib protects against this but asserting just in case.
+            Contract.Assert(parameter != null, String.Format(CultureInfo.InvariantCulture, "Parameter '{0}' not found.", parameterName));
+            return parameter;
+        }
+
+        private static IEdmCollectionTypeReference GetCollectionParameterType(IEdmAction action, ODataParameterReader reader, out string parameterName)
+        {
+            IEdmOperationParameter parameter = GetParameter(action, reader, out parameterName);
+            IEdmCollectionTypeReference collectionType = parameter.Type as IEdmCollectionTypeReference;
+            Contract.Assert(collectionType != null);
+            return collectionType;
+        }
+
+        private static void ReadValue(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmOperationParameter parameter = GetParameter(action, reader, out parameterName);
+            if (parameter.Type.IsPrimitive())
+            {
+                payload[parameterName] = reader.Value;
+            }
+            else
+            {
+                ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(parameter.Type);
+                payload[parameterName] = deserializer.ReadInline(reader.Value, parameter.Type, readContext);
+            }
+        }
+
+        private static void ReadCollection(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmCollectionTypeReference collectionType = GetCollectionParameterType(action, reader, out parameterName);
+            ODataCollectionValue value = ODataCollectionDeserializer.ReadCollection(reader.CreateCollectionReader());
+            ODataCollectionDeserializer collectionDeserializer = (ODataCollectionDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
+            payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
+        }
+
+        private static async Task ReadCollectionAsync(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmCollectionTypeReference collectionType = GetCollectionParameterType(action, reader, out parameterName);
+            ODataCollectionValue value = await ODataCollectionDeserializer.ReadCollectionAsync(reader.CreateCollectionReader());
+            ODataCollectionDeserializer collectionDeserializer = (ODataCollectionDeserializer)deserializerProvider.GetEdmTypeDeserializer(collectionType);
+            payload[parameterName] = collectionDeserializer.ReadInline(value, collectionType, readContext);
+        }
+
+        private static void ReadResource(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmOperationParameter parameter = GetParameter(action, reader, out parameterName);
+            Contract.Assert(parameter.Type.IsStructured());
+
+            object item = reader.CreateResourceReader().ReadResourceOrResourceSet();
+            ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)deserializerProvider.GetEdmTypeDeserializer(parameter.Type);
+            payload[parameterName] = resourceDeserializer.ReadInline(item, parameter.Type, readContext);
+        }
+
+        private static async Task ReadResourceAsync(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmOperationParameter parameter = GetParameter(action, reader, out parameterName);
+            Contract.Assert(parameter.Type.IsStructured());
+
+            object item = await reader.CreateResourceReader().ReadResourceOrResourceSetAsync();
+            ODataResourceDeserializer resourceDeserializer = (ODataResourceDeserializer)deserializerProvider.GetEdmTypeDeserializer(parameter.Type);
+            payload[parameterName] = resourceDeserializer.ReadInline(item, parameter.Type, readContext);
+        }
+
+        private static void ReadResourceSet(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmCollectionTypeReference resourceSetType = GetCollectionParameterType(action, reader, out parameterName);
+
+            object feed = reader.CreateResourceSetReader().ReadResourceOrResourceSet();
+            ProcessResourceSet(feed, resourceSetType, readContext, deserializerProvider, payload, parameterName);
+        }
+
+        private static async Task ReadResourceSetAsync(IEdmAction action, ODataParameterReader reader, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload)
+        {
+            string parameterName;
+            IEdmCollectionTypeReference resourceSetType = GetCollectionParameterType(action, reader, out parameterName);
+
+            object feed = await reader.CreateResourceSetReader().ReadResourceOrResourceSetAsync();
+            ProcessResourceSet(feed, resourceSetType, readContext, deserializerProvider, payload, parameterName);
+        }
+
+        private static void ProcessResourceSet(object feed, IEdmCollectionTypeReference resourceSetType, ODataDeserializerContext readContext, ODataDeserializerProvider deserializerProvider, Dictionary<string, object> payload, string parameterName)
+        {
+            ODataResourceSetDeserializer resourceSetDeserializer = (ODataResourceSetDeserializer)deserializerProvider.GetEdmTypeDeserializer(resourceSetType);
+
+            object result = resourceSetDeserializer.ReadInline(feed, resourceSetType, readContext);
+
+            IEdmTypeReference elementTypeReference = resourceSetType.ElementType();
+            Contract.Assert(elementTypeReference.IsStructured());
+
+            IEnumerable enumerable = result as IEnumerable;
+            if (enumerable != null)
+            {
+                if (readContext.IsUntyped)
+                {
+                    payload[parameterName] = enumerable.ConvertToEdmObject(resourceSetType);
+                }
+                else
+                {
+                    Type elementClrType = EdmLibHelpers.GetClrType(elementTypeReference, readContext.Model);
+                    IEnumerable castedResult =
+                        _castMethodInfo.MakeGenericMethod(elementClrType)
+                            .Invoke(null, new[] { result }) as IEnumerable;
+                    payload[parameterName] = castedResult;
+                }
+            }
         }
     }
 }

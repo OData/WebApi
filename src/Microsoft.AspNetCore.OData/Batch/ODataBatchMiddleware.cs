@@ -34,13 +34,21 @@ namespace Microsoft.AspNet.OData.Batch
         /// <returns>A task that can be awaited.</returns>
         public async Task Invoke(HttpContext context)
         {
+            var request = context.Request;
+            var isPreFlight = request.Method.Equals("Options", StringComparison.OrdinalIgnoreCase);
+            if (isPreFlight)
+            {
+                // if the request is a preflight request let the next handler be called as trying to handle the request will result in preflight requests failing.
+                await this.next(context);
+                return;
+            }
+
             // Attempt to match the path to a bach route.
             ODataBatchPathMapping batchMapping = context.RequestServices.GetRequiredService<ODataBatchPathMapping>();
 
-            string routeName;
-            if (batchMapping.TryGetRouteName(context, out routeName))
+            if (batchMapping.TryGetRouteName(context, out var routeName))
             {
-                // Get the per-route continer and retrieve the batch handler.
+                // Get the per-route container and retrieve the batch handler.
                 IPerRouteContainer perRouteContainer = context.RequestServices.GetRequiredService<IPerRouteContainer>();
                 if (perRouteContainer == null)
                 {

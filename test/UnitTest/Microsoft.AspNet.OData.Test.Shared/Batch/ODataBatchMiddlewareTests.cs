@@ -14,7 +14,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class ODataBatchMiddlewareTests
     {
-#if NETCOREAPP3_1
         [Fact]
         public async Task BatchMiddlewareShouldNotHandlePreflightRequests()
         {
@@ -28,8 +27,6 @@ namespace Microsoft.AspNet.OData.Test.Batch
             Assert.True(request.HttpContext.Items.ContainsKey("TestKey"));
         }
 
-
-#endif
         [Fact]
         public async Task BatchMiddlewareShouldWorkNormally()
         {

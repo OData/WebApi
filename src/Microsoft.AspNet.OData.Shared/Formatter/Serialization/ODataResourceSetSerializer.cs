@@ -21,6 +21,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// OData serializer for serializing a collection of <see cref="IEdmEntityType" /> or <see cref="IEdmComplexType"/>
     /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable.")]
     public class ODataResourceSetSerializer : ODataEdmTypeSerializer
     {
         private const string ResourceSet = "ResourceSet";

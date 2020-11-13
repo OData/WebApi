@@ -7,19 +7,21 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
+    /// Encapsulates an <see cref="ODataDeltaResourceSet"/> and the <see cref="ODataResourceBase"/>'s that are part of it.
     /// </summary>
     public sealed class ODataDeltaResourceSetWrapper : ODataResourceSetWrapperBase
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
+        /// Initializes a new instance of <see cref="ODataDeltaResourceSetWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>
-        public ODataDeltaResourceSetWrapper(ODataResourceSetBase item)
+        public ODataDeltaResourceSetWrapper(ODataDeltaResourceSet item)
             : base(item)
         {
-            ResourceSetType = ResourceSetType.DeltaResourceSet;
-        }  
-         
+           
+        }
+
+        internal override ResourceSetType ResourceSetType => ResourceSetType.DeltaResourceSet;
+
     }
 }

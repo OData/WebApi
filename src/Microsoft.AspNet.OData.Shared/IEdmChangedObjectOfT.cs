@@ -6,10 +6,9 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Base interface to be implemented by any Delta object required to be part of the DeltaFeed Payload.
     /// </summary>
-    /// <typeparam name="TStructuralType"></typeparam>
+    /// <typeparam name="TStructuralType">Generic Type for changed object</typeparam>
     public interface IEdmChangedObject<TStructuralType> : IEdmChangedObject
-    {
+    {        
         
-        //EdmDeltaEntityKind DeltaKind { get; }
     }
 }

@@ -15,10 +15,7 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class EdmChangedObjectCollection<TStructuralType> : EdmChangedObjectCollection, ICollection<IEdmChangedObject<TStructuralType>>, IEdmObject
     {
-        private IEdmEntityType _entityType;
-        private EdmDeltaCollectionType _edmType;
-        private IEdmCollectionTypeReference _edmTypeReference;
-        ICollection<IEdmChangedObject<TStructuralType>> _items;
+        private ICollection<IEdmChangedObject<TStructuralType>> _items;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
@@ -27,7 +24,6 @@ namespace Microsoft.AspNet.OData
         public EdmChangedObjectCollection(IEdmEntityType entityType)
             : base(entityType)
         {
-            Initialize(entityType);
             _items = new Collection<IEdmChangedObject<TStructuralType>>();
         }
 
@@ -39,8 +35,7 @@ namespace Microsoft.AspNet.OData
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
         public EdmChangedObjectCollection(IEdmEntityType entityType, IList<IEdmChangedObject<TStructuralType>> changedObjectList)
             : base(entityType, changedObjectList as IList<IEdmChangedObject>)
-        {
-            Initialize(entityType);
+        {            
             _items = changedObjectList;
         }
 
@@ -80,18 +75,6 @@ namespace Microsoft.AspNet.OData
         IEnumerator<IEdmChangedObject<TStructuralType>> IEnumerable<IEdmChangedObject<TStructuralType>>.GetEnumerator()
         {
             return _items.GetEnumerator();
-        }
-
-        private void Initialize(IEdmEntityType entityType)
-        {
-            if (entityType == null)
-            {
-                throw Error.ArgumentNull("entityType");
-            }
-
-            _entityType = entityType;
-            _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
-            _edmTypeReference = new EdmCollectionTypeReference(_edmType);
         }
     }
 }

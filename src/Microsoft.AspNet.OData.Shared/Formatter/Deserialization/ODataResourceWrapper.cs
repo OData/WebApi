@@ -21,19 +21,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             : base(item)
         {
             NestedResourceInfos = new List<ODataNestedResourceInfoWrapper>();
+            ResourceBase = item;
         }
-
   
         /// <summary>
         /// Gets the wrapped <see cref="ODataResourceBase"/>.
         /// </summary>
-        public ODataResourceBase ResourceBase
-        {
-            get
-            {
-                return Item as ODataResourceBase;             
-            }
-        }
+        public ODataResourceBase ResourceBase {get;}
 
         /// <summary>
         /// Gets the wrapped <see cref="ODataResource"/>.

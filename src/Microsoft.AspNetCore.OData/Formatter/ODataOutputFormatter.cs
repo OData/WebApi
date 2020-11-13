@@ -84,6 +84,14 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
+            // The following base.CanWriteResult(context) will change the context.ContentType
+            // If this formatter can't write the result, we should reset the context.ContentType to its original value.
+            // So that, the other formatter can make a descison based on the original content type.
+            // Be noted: in .NET 5, the context.ContentType is a new StringSegment everytime when goes into each formatter
+            // formatterContext.ContentType = new StringSegment();
+            // So, in .NET 5, we don't need to reset the contentType to backupContentType.
+            StringSegment backupContentType = context.ContentType;
+
             // Allow the base class to make its determination, which includes
             // checks for SupportedMediaTypes.
             bool suportedMediaTypeFound = false;
@@ -104,6 +112,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
             else if (!suportedMediaTypeFound)
             {
+                context.ContentType = backupContentType;
                 return false;
             }
 
@@ -111,6 +120,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Type type = context.ObjectType ?? context.Object?.GetType();
             if (type == null)
             {
+                context.ContentType = backupContentType;
                 return false;
             }
             type = TypeHelper.GetTaskInnerTypeOrSelf(type);
@@ -126,12 +136,19 @@ namespace Microsoft.AspNet.OData.Formatter
                 isSingleResult = (genericType == typeof(SingleResult<>) || baseType == typeof(SingleResult));
             }
 
-            return ODataOutputFormatterHelper.CanWriteType(
+            bool result = ODataOutputFormatterHelper.CanWriteType(
                 type,
                 _payloadKinds,
                 isSingleResult,
                 new WebApiRequestMessage(request),
                 (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request));
+
+            if (!result)
+            {
+                context.ContentType = backupContentType;
+            }
+
+            return result;
         }
 
         /// <inheritdoc/>

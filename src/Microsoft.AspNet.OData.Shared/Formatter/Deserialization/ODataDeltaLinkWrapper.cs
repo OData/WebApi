@@ -7,7 +7,7 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.
+    /// Encapsulates an <see cref="ODataDeltaLinkBase"/> .
     /// </summary>
     public sealed class ODataDeltaLinkWrapper : ODataItemBase
     {
@@ -21,9 +21,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
            
         }
 
-   
         /// <summary>
-        /// Gets the wrapped <see cref="ODataResource"/>.
+        /// Gets the wrapped <see cref="ODataDeltaLinkBase"/>.
         /// </summary>
         public ODataDeltaLinkBase DeltaLink
         {
@@ -31,7 +30,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 return Item as ODataDeltaLinkBase;                        
             }
-        }
-          
+        }          
     }
 }

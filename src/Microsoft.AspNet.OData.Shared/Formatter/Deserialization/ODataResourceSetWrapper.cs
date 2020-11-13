@@ -17,25 +17,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
         /// </summary>
         /// <param name="item">The wrapped item.</param>        
-        public ODataResourceSetWrapper(ODataResourceSetBase item)
+        public ODataResourceSetWrapper(ODataResourceSet item)
             : base(item)
         {
-            ResourceSetType = ResourceSetType.ResourceSet;
-            
+            ResourceSet = item;         
         }
 
-   
+        internal override ResourceSetType ResourceSetType => ResourceSetType.ResourceSet;
+
         /// <summary>
         /// Gets the wrapped <see cref="ODataResourceSet"/>.
         /// </summary>
-        public ODataResourceSet ResourceSet
-        {
-            get
-            {
-                return Item as ODataResourceSet;
-            }
-        }
-
+        public ODataResourceSet ResourceSet { get; }
+        
         /// <summary>
         /// Gets the nested resources of this ResourceSet.
         /// </summary>

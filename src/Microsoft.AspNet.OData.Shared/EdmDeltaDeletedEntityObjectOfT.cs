@@ -14,8 +14,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     [NonValidatingParameterBinding]
     public class EdmDeltaDeletedEntityObject<TStructuralType> : EdmDeltaDeletedEntityObject, IEdmDeltaDeletedEntityObject<TStructuralType>
-    {  
-        private EdmDeltaType _edmType;
+    {        
         
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
@@ -43,7 +42,7 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedEntry);
+            
         }
     }
 }

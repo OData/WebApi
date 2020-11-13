@@ -162,13 +162,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 {
                     ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
 
-                   if(resourceWrapper != null)
+                    if(resourceWrapper != null)
                     {
                         ODataDeletedResource deletedResource = resourceWrapper.ResourceBase as ODataDeletedResource;
 
                         if (deletedResource != null)
                         {
-                            yield return DeSerializeDeletedEntity(readContext, deletedResource);
+                            yield return DeSerializeDeletedEntity(deletedResource, readContext);
                         }
                         else
                         {
@@ -181,7 +181,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                         Contract.Assert(deltaLinkWrapper != null, "ODataDeltaLinkWrapper should not be null");
 
-                        yield return DeserializeDeltaLink(readContext, deltaLinkWrapper, resourceSet.ResourceSetBase.TypeName);                      
+                        yield return DeserializeDeltaLink(deltaLinkWrapper, resourceSet.ResourceSetBase.TypeName, readContext);
                     }
                     
                 }
@@ -189,23 +189,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
 
-        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeserializerContext readContext, ODataDeltaLinkWrapper deltaLinkWrapper, string typeName)
+        private static IEdmDeltaLinkBase DeserializeDeltaLink(ODataDeltaLinkWrapper deltaLinkWrapper, string typeName, ODataDeserializerContext readContext)
         {
             ODataDeltaLinkBase deltalink = deltaLinkWrapper.DeltaLink;
 
-            if (deltalink == null)
-            {
-                throw new ODataException("Deleted link not present");
-            }            
+            Contract.Assert(deltalink != null, "ODataDeltaLink should not be null");
 
             IEdmModel model = readContext.Model;
-
+                
             if (model == null)
             {
                 throw Error.Argument("readContext", SRResources.ModelMissingFromReadContext);
             }
 
-            IEdmStructuredType actualType = model.FindType(typeName) as IEdmStructuredType;
+            IEdmEntityType actualType = model.FindType(typeName) as IEdmEntityType;
             if (actualType == null)
             {
                 throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
@@ -216,18 +213,17 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, deltalink.TypeAnnotation.TypeName);
                 throw new ODataException(message);
             }
-
-            IEdmEntityType actualEntityType = actualType as IEdmEntityType;
+                        
 
             IEdmDeltaLinkBase edmDeltaLink;
             ODataDeltaDeletedLink deletedLink = deltaLinkWrapper.DeltaLink as ODataDeltaDeletedLink;
             if (deletedLink != null)
             {
-                edmDeltaLink = new EdmDeltaDeletedLink(actualEntityType);
+                edmDeltaLink = new EdmDeltaDeletedLink(actualType);
             }
             else
             {
-                edmDeltaLink = new EdmDeltaLink(actualEntityType);
+                edmDeltaLink = new EdmDeltaLink(actualType);
             }
 
             edmDeltaLink.Source = deltalink.Source;
@@ -237,12 +233,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return edmDeltaLink;
         }
 
-        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeserializerContext readContext, ODataDeletedResource deletedResource)
+        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, ODataDeserializerContext readContext)
         {
-            if (deletedResource == null)
-            {
-                throw new ODataException("Deleted resource not present");
-            }
+            Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
+            Contract.Assert(deletedResource.Id != null, "ODataDeletedResource Id should not be null");
 
             IEdmModel model = readContext.Model;
 
@@ -253,7 +247,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             string typeName = deletedResource.TypeName;
 
-            IEdmStructuredType actualType = model.FindType(typeName) as IEdmStructuredType;
+            IEdmEntityType actualType = model.FindType(typeName) as IEdmEntityType;
             if (actualType == null)
             {
                 throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
@@ -265,9 +259,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw new ODataException(message);
             }
 
-            IEdmEntityType actualEntityType = actualType as IEdmEntityType;
-
-            EdmDeltaDeletedEntityObject deletedEntity = new EdmDeltaDeletedEntityObject(actualEntityType);
+            EdmDeltaDeletedEntityObject deletedEntity = new EdmDeltaDeletedEntityObject(actualType);
 
             deletedEntity.Id = deletedResource.Id.ToString();
             deletedEntity.Reason = deletedResource.Reason.Value;

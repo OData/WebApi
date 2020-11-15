@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Primitives;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -62,7 +63,14 @@ namespace Microsoft.AspNet.OData
             // Create and validate the query options.
             ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
-            ValidateQuery(request, queryOptions);
+            try
+            {
+                ValidateQuery(request, queryOptions);
+            }
+            catch (ODataException odataException)
+            {
+                context.Result = CreateBadRequestResult(odataException.Message, odataException);
+            }
         }
 
         /// <summary>

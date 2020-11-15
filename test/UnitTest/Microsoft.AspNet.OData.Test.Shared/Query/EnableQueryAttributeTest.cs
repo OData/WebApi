@@ -8,6 +8,8 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.AspNet.OData.Test.Query.Controllers;
+using Microsoft.AspNetCore.Http;
+using Moq;
 using Xunit;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
@@ -254,6 +256,12 @@ namespace Microsoft.AspNet.OData.Test.Query
         public void OnActionExecuted_Throws_Null_Context()
         {
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
+        }
+
+        [Fact]
+        public void OnActionExecuting_Throws_Null_Context()
+        {
+            ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuting(null), "actionExecutedContext");
         }
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.

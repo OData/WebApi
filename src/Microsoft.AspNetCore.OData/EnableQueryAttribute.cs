@@ -12,6 +12,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -37,6 +38,32 @@ namespace Microsoft.AspNet.OData
         // and those of the v3 assembly.  Concern is reduced here due to addition of user type name but prefix
         // also clearly ties the property to code in this assembly.
         private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
+
+        /// <summary>
+        /// Performs query validations before action is executed.
+        /// </summary>
+        /// <param name="context">Action context.</param>
+        public override void OnActionExecuting(ActionExecutingContext context)
+        {
+            if (context == null)
+            {
+                throw Error.ArgumentNull("actionExecutedContext");
+            }
+
+            base.OnActionExecuting(context);
+
+            HttpRequest request = context.HttpContext.Request;
+            ODataPath path = request.ODataFeature().Path;
+
+            IEdmType edmType = path.EdmType;
+            IEdmType elementType = edmType.AsElementType();
+            ODataQueryContext queryContext = new ODataQueryContext(request.GetModel(), elementType);
+
+            // Create and validate the query options.
+            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+
+            ValidateQuery(request, queryOptions);
+        }
 
         /// <summary>
         /// Performs the query composition after action is executed. It first tries to retrieve the IQueryable from the
@@ -125,10 +152,7 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         private ODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
         {
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
-            ValidateQuery(request, queryOptions);
-
-            return queryOptions;
+            return new ODataQueryOptions(queryContext, request);
         }
 
         /// <summary>

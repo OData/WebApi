@@ -258,11 +258,13 @@ namespace Microsoft.AspNet.OData.Test.Query
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
         }
 
+#if NETCORE // Following functionality is only supported in NetCore.
         [Fact]
         public void OnActionExecuting_Throws_Null_Context()
         {
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuting(null), "context");
         }
+#endif
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
         [Fact]

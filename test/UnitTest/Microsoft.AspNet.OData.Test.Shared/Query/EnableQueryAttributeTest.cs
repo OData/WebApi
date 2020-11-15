@@ -261,7 +261,7 @@ namespace Microsoft.AspNet.OData.Test.Query
         [Fact]
         public void OnActionExecuting_Throws_Null_Context()
         {
-            ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuting(null), "actionExecutedContext");
+            ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuting(null), "context");
         }
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.

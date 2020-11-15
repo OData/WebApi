@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData
         {
             if (context == null)
             {
-                throw Error.ArgumentNull("actionExecutedContext");
+                throw Error.ArgumentNull(nameof(context));
             }
 
             base.OnActionExecuting(context);

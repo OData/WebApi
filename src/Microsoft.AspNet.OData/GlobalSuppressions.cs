@@ -60,3 +60,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.FunctionConfiguration.#HasDerivedTypeConstraintForReturnType`1()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetAllResourceAnnotations()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetResourceAnnotations()")]
+[assembly: SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Scope = "member", Target = "Microsoft.AspNet.OData.Delta`1.#Microsoft.AspNet.OData.IEdmObject.GetEdmType()")]
+

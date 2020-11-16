@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
@@ -41,6 +42,18 @@ namespace Microsoft.AspNet.OData
         private const string ModelKeyPrefix = "Microsoft.AspNet.OData.Model+";
 
         /// <summary>
+        /// Marks if the query validation was run before the action execution. This is not always possible.
+        /// For cases where the run failed before action execution. We will run validation on result.
+        /// </summary>
+        private bool _queryValidationRunBeforeActionExecution;
+
+        /// <summary>
+        /// Stores the processed query options to be used later if OnActionExecuting was able to verify the query.
+        /// This is because ValidateQuery internally modifies query options (expands are prime example of this).
+        /// </summary>
+        private ODataQueryOptions _processedQueryOptions;
+
+        /// <summary>
         /// Performs query validations before action is executed.
         /// </summary>
         /// <param name="context">Action context.</param>
@@ -56,20 +69,123 @@ namespace Microsoft.AspNet.OData
             HttpRequest request = context.HttpContext.Request;
             ODataPath path = request.ODataFeature().Path;
 
-            IEdmType edmType = path.EdmType;
-            IEdmType elementType = edmType.AsElementType();
-            ODataQueryContext queryContext = new ODataQueryContext(request.GetModel(), elementType);
+            ODataQueryContext queryContext = null;
+
+            // For OData based controllers.
+            if (path != null)
+            {
+                IEdmType edmType = path.EdmType;
+
+                if (path.Segments.Last().Identifier == "$count")
+                {
+                    edmType = path.Segments[path.Segments.Count - 2].EdmType;
+                }
+
+                IEdmType elementType = edmType.AsElementType();
+                IEdmModel edmModel = request.GetModel();
+
+                Type clrType = edmModel.GetTypeMappingCache().GetClrType(
+                    elementType.ToEdmTypeReference(false),
+                    edmModel);
+
+                // CLRType can be missing if untyped registrations were made.
+                if (clrType != null)
+                {
+                    queryContext = new ODataQueryContext(edmModel, clrType, path);
+                }
+                else
+                {
+                    // In case where CLRType is missing, $count, $expand verifications cannot be done.
+                    // More importantly $expand required ODataQueryContext with clrType which cannot be done
+                    // If the model is untyped. Hence for such cases, letting the validation run post action.
+                    _queryValidationRunBeforeActionExecution = false;
+                    return;
+                }
+
+                _queryValidationRunBeforeActionExecution = true;
+            }
+            else
+            {
+                // For non-OData Json based controllers.
+                // For these cases few options are supported like IEnumerable<T>, Task<IEnumerable<T>>, T, Task<T>
+                // Other cases where we cannot determine the return type upfront, are not supported
+                // Like IActionResult, SingleResult. For such cases, the validation is run in OnActionExecuted
+                // When we have the result.
+                ControllerActionDescriptor controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
+
+                Type returnType = controllerActionDescriptor.MethodInfo.ReturnType;
+                Type elementType;
+
+                if (TypeHelper.IsCollection(controllerActionDescriptor.MethodInfo.ReturnType))
+                {
+                    elementType = TypeHelper.GetImplementedIEnumerableType(returnType);
+                }
+                else if(TypeHelper.IsGenericType(returnType) && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    elementType = returnType.GetGenericArguments().First();
+                }
+                else
+                {
+                    _queryValidationRunBeforeActionExecution = false;
+                    return;
+                }
+
+                IEdmModel edmModel = this.GetModel(
+                    elementType,
+                    request,
+                    controllerActionDescriptor);
+
+                if (controllerActionDescriptor != null)
+                {
+                    queryContext = new ODataQueryContext(
+                        edmModel,
+                        elementType);
+                    _queryValidationRunBeforeActionExecution = true;
+                }
+                else
+                {
+                    _queryValidationRunBeforeActionExecution = false;
+                    return;
+                }
+            }
 
             // Create and validate the query options.
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            _processedQueryOptions = new ODataQueryOptions(queryContext, request);
 
             try
             {
-                ValidateQuery(request, queryOptions);
+                ValidateQuery(request, _processedQueryOptions);
             }
             catch (ODataException odataException)
             {
-                context.Result = CreateBadRequestResult(odataException.Message, odataException);
+                context.Result = CreateBadRequestResult(
+                    Error.Format(SRResources.UriQueryStringInvalid, odataException.Message),
+                    odataException);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                context.Result = CreateBadRequestResult(
+                    Error.Format(SRResources.QueryParameterNotSupported, e.Message),
+                    e);
+            }
+            catch (NotImplementedException e)
+            {
+                context.Result = CreateBadRequestResult(
+                    Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                    e);
+            }
+            catch (NotSupportedException e)
+            {
+                context.Result = CreateBadRequestResult(
+                    Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                    e);
+            }
+            catch (InvalidOperationException e)
+            {
+                // Will also catch ODataException here because ODataException derives from InvalidOperationException.
+                context.Result = CreateBadRequestResult(
+                    Error.Format(SRResources.UriQueryStringInvalid, e.Message),
+                    e);
             }
         }
 
@@ -160,7 +276,16 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         private ODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
         {
-            return new ODataQueryOptions(queryContext, request);
+            if (_queryValidationRunBeforeActionExecution)
+            {
+                return _processedQueryOptions;
+            }
+
+            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+
+            ValidateQuery(request, queryOptions);
+
+            return queryOptions;
         }
 
         /// <summary>

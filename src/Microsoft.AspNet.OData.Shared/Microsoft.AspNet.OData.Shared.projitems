@@ -75,6 +75,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataOutputFormatterHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataRawValueMediaTypeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataResourceSetItemBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataResourceValueSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />

@@ -8,14 +8,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
-    /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
-    public abstract class ODataResourceSetWrapperBase : ODataItemBase
+    /// </summary>    
+    public abstract class ODataResourceSetWrapperBase : ODataResourceSetItemBase
     {
         /// <summary>
         /// To determint the type of Resource Set
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields")]
+        /// </summary>        
         internal abstract ResourceSetType ResourceSetType { get; }
 
         /// <summary>

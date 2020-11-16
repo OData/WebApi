@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
@@ -686,10 +687,10 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// 
+        /// GetEdmType method in herited from IEdmObject , not implemented
         /// </summary>
         /// <returns></returns>
-        public Microsoft.OData.Edm.IEdmTypeReference GetEdmType()
+        Microsoft.OData.Edm.IEdmTypeReference IEdmObject.GetEdmType()
         {
 
            // EdmLibHelpers.GetEdmTypeReference() 

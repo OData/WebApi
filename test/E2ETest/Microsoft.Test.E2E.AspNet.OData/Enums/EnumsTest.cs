@@ -61,7 +61,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             VerifyEdmModel(edmModel);
         }
 
-#if NETCOREAPP3_1
+#if NETCORE && !NETCOREAPP2_1
         [Theory]
         [InlineData("convention")]
         [InlineData("explicit")]

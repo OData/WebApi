@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 // Place JSON formatter first so it gets used when the request doesn't ask for a specific content type
                 CreateApplicationJson(),
-                CreateApplicationXml(),
+                CreateMetadataFormatter(),
                 CreateRawValue()
             };
         }
@@ -47,7 +47,6 @@ namespace Microsoft.AspNet.OData.Formatter
             ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.Value);
             formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
-            formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataCountMediaTypeMapping());
             return formatter;
         }
@@ -87,16 +86,29 @@ namespace Microsoft.AspNet.OData.Formatter
             return formatter;
         }
 
-        private static ODataOutputFormatter CreateApplicationXml()
+        private static ODataOutputFormatter CreateMetadataFormatter()
         {
-            ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(
-                ODataPayloadKind.MetadataDocument);
+            ODataOutputFormatter formatter = CreateFormatterWithoutMediaTypes(ODataPayloadKind.MetadataDocument);
 
+            // put xml before json to make sure xml is the default.
             formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationXml);
+
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJson);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingTrue);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadataStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataMinimalMetadata);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingTrue);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadataStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataFullMetadata);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingTrue);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadataStreamingFalse);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonODataNoMetadata);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingTrue);
+            formatter.SupportedMediaTypes.Add(ODataMediaTypes.ApplicationJsonStreamingFalse);
 
             formatter.AddDollarFormatQueryStringMappings();
             formatter.AddQueryStringMapping(DollarFormat, XmlFormat, ODataMediaTypes.ApplicationXml);
-
+            formatter.AddQueryStringMapping(DollarFormat, JsonFormat, ODataMediaTypes.ApplicationJson);
             return formatter;
         }
 

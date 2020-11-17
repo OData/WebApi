@@ -47,6 +47,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// </summary>
         internal IWebApiUrlHelper InternalUrlHelper { get; private set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether to disable case-insensitive request property binding.
+        /// </summary>
+        internal bool DisableCaseInsensitiveRequestPropertyBinding { get; set; }
+
         internal bool IsDeltaOfT
         {
             get

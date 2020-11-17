@@ -4,6 +4,7 @@
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Adapters;
+using Microsoft.AspNet.OData.Extensions;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -25,8 +26,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             set
             {
                 _request = value;
-                InternalRequest = _request != null ? new WebApiRequestMessage(_request) : null;
+                WebApiRequestMessage webApiRequestMessage = _request != null ? new WebApiRequestMessage(_request) : null;
+                InternalRequest = webApiRequestMessage;
                 InternalUrlHelper = _request != null ? new WebApiUrlHelper(_request.GetUrlHelper()) : null;
+
+                // We add this setting via CompatibilityOptions
+                CompatibilityOptions options = webApiRequestMessage != null ? webApiRequestMessage.Configuration.GetCompatibilityOptions() : CompatibilityOptions.None;
+                DisableCaseInsensitiveRequestPropertyBinding = options.HasFlag(CompatibilityOptions.DisableCaseInsensitiveRequestPropertyBinding) ? true : false;
             }
         }
 

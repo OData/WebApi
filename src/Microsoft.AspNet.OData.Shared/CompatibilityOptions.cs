@@ -18,6 +18,11 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         ///  Generate nextlink even if the top value specified in request is less than page size when the request extension method is directly called.
         /// </summary>
-        AllowNextLinkWithNonPositiveTopValue = 0x1
+        AllowNextLinkWithNonPositiveTopValue = 0x1,
+
+        /// <summary>
+        /// Disable case-insensitive request property binding.
+        /// </summary>
+        DisableCaseInsensitiveRequestPropertyBinding = 0x2
     }
 }

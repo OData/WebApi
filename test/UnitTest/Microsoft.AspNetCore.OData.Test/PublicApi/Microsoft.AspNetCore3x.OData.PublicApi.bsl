@@ -3,6 +3,7 @@ FlagsAttribute(),
 ]
 public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
+	DisableCaseInsensitiveRequestPropertyBinding = 2
 	None = 0
 }
 

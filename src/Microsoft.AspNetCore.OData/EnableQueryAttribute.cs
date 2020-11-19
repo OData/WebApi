@@ -82,7 +82,15 @@ namespace Microsoft.AspNet.OData
                 }
 
                 IEdmType elementType = edmType.AsElementType();
+
                 IEdmModel edmModel = request.GetModel();
+
+                // For Swagger metadata request. elementType is null.
+                if (elementType == null || edmModel == null)
+                {
+                    _queryValidationRunBeforeActionExecution = false;
+                    return;
+                }
 
                 Type clrType = edmModel.GetTypeMappingCache().GetClrType(
                     elementType.ToEdmTypeReference(false),
@@ -116,7 +124,13 @@ namespace Microsoft.AspNet.OData
                 Type returnType = controllerActionDescriptor.MethodInfo.ReturnType;
                 Type elementType;
 
-                if (TypeHelper.IsCollection(controllerActionDescriptor.MethodInfo.ReturnType))
+                // For Task<> get the base object.
+                if (returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                {
+                    returnType = returnType.GetGenericArguments().First();
+                }
+
+                if (TypeHelper.IsCollection(returnType))
                 {
                     elementType = TypeHelper.GetImplementedIEnumerableType(returnType);
                 }

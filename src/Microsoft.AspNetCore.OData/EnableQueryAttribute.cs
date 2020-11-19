@@ -125,7 +125,7 @@ namespace Microsoft.AspNet.OData
                 Type elementType;
 
                 // For Task<> get the base object.
-                if (returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     returnType = returnType.GetGenericArguments().First();
                 }

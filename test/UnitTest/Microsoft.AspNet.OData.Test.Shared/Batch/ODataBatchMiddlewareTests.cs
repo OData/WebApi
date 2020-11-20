@@ -14,40 +14,52 @@ namespace Microsoft.AspNet.OData.Test.Batch
 {
     public class ODataBatchMiddlewareTests
     {
+        private const string URI = "http://localhost/$batch";
+
+        private readonly ODataBatchMiddleware _batchMiddleware;
+        private readonly IRouteBuilder _routeBuilder;
+
+        public ODataBatchMiddlewareTests()
+        {
+            _batchMiddleware = new ODataBatchMiddleware(CorsDelegate);
+            _routeBuilder = RoutingConfigurationFactory.CreateWithRootContainer("odata");
+            _routeBuilder.MapODataServiceRoute("odata", "odata", b =>
+            {
+                b.AddService<ODataBatchHandler>(ServiceLifetime.Singleton,
+                    implementationFactory => new TestODataBatchHandler());
+            });
+        }
+
+        private HttpRequest CreateRequest(HttpMethod method)
+        {
+            
+            HttpRequest request = RequestFactory.Create(HttpMethod.Post, URI, this._routeBuilder, "odata");
+            ODataBatchPathMapping batchMapping =
+                request.HttpContext.RequestServices.GetRequiredService<ODataBatchPathMapping>();
+            batchMapping.AddRoute("odata", "/$batch");
+            return request;
+        }
+
         [Fact]
         public async Task BatchMiddlewareShouldNotHandlePreflightRequests()
         {
-            string uri = "http://localhost/$batch";
-            var request = RequestFactory.Create(HttpMethod.Options, uri);
-            RequestDelegate next = CorsDelegate;
-            var sut = new ODataBatchMiddleware(next);
+            var request = CreateRequest(HttpMethod.Options);
 
-            await sut.Invoke(request.HttpContext);
+            await _batchMiddleware.Invoke(request.HttpContext);
 
             Assert.True(request.HttpContext.Items.ContainsKey("TestKey"));
         }
 
         [Fact]
-        public async Task BatchMiddlewareShouldWorkNormally()
+        public async Task BatchMiddlewareShouldWorkNormallyForNonPreflightRequests()
         {
-            string uri = "http://localhost/$batch";
-            IRouteBuilder routeBuilder = RoutingConfigurationFactory.CreateWithRootContainer("odata");
-            routeBuilder.MapODataServiceRoute("odata", "odata", b =>
-            {
-                b.AddService<ODataBatchHandler>(ServiceLifetime.Singleton,
-                    implementationFactory => new TestODataBatchHandler());
-            });
-            var request = RequestFactory.Create(HttpMethod.Post, uri, routeBuilder, "odata");
-            ODataBatchPathMapping batchMapping = request.HttpContext.RequestServices.GetRequiredService<ODataBatchPathMapping>();
-            batchMapping.AddRoute("odata", "/$batch");
-
-            RequestDelegate next = CorsDelegate;
-            var sut = new ODataBatchMiddleware(next);
-
-            await sut.Invoke(request.HttpContext);
+            var request = CreateRequest(HttpMethod.Post);
+            await _batchMiddleware.Invoke(request.HttpContext);
 
             Assert.False(request.HttpContext.Items.ContainsKey("TestKey"));
         }
+
+
 
         private Task CorsDelegate(HttpContext context)
         {
@@ -57,6 +69,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
             context.Items.Add("TestKey", "TestValue");
             return Task.CompletedTask;
         }
+
     }
 
     public class TestODataBatchHandler : DefaultODataBatchHandler

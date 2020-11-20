@@ -130,6 +130,15 @@ namespace Microsoft.AspNet.OData
                     returnType = returnType.GetGenericArguments().First();
                 }
 
+                // For NetCore2.2+ new type ActionResult<> was created which encapculates IActionResult and T result.
+                // However we don't exactly have a version specific to NetCore2.2 (also at the time of writing this code
+                // 2.2 is out of support), hence the code is made to work on NetCore3 only.
+#if NETCORE3
+                if (returnType.IsGenericType && returnType.GetGenericTypeDefinition() == typeof(ActionResult<>))
+                {
+                    returnType = returnType.GetGenericArguments().First();
+                }
+#endif
                 if (TypeHelper.IsCollection(returnType))
                 {
                     elementType = TypeHelper.GetImplementedIEnumerableType(returnType);

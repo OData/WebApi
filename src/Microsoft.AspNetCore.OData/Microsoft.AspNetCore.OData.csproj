@@ -21,6 +21,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>
 
+  <!-- Should be done for .NET 5 and above as well. Then usage of NetCore3 and above should be fixed to support Net5 as well.-->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
+    <DefineConstants>$(DefineConstants);NETCORE3</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' ">
     <!-- Define the Items for .NET Standard 2.0 -->
     <PackageReference Include="Desktop.Analyzers" Version="1.1.0" />

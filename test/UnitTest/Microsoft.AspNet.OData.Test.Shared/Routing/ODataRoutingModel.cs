@@ -32,6 +32,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             builder.EntitySet<Incident>("Incidents");
             builder.EntitySet<NotFoundCustomer>("NotFoundCustomers");
             builder.EntitySet<NotFoundWithIdCustomer>("NotFoundWithIdCustomers");
+            builder.EntitySet<AttributeCustomer>("AttributeCustomers");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
             builder.EntityType<SpecialProduct>();
@@ -386,6 +387,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public class NotFoundWithIdCustomer
         {
             public int ID { get; set; }
+        }
+
+        public class AttributeCustomer
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
         }
     }
 }

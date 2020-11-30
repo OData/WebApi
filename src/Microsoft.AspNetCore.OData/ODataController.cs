@@ -55,8 +55,17 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
         /// </summary>
+        /// <returns>A <see cref="BadRequestResult"/> with the specified values.</returns>
+        public override BadRequestResult BadRequest()
+        {
+            return new BadRequestODataResult("Bad request");
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
+        /// </summary>
         /// <param name="message">Error Message</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="BadRequestODataResult"/> with the specified values.</returns>
         protected virtual BadRequestODataResult BadRequest(string message)
         {
             return new BadRequestODataResult(message);
@@ -65,11 +74,39 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
         /// </summary>
+        /// <returns>A <see cref="NotFoundResult"/> with the specified values.</returns>
+        public override NotFoundResult NotFound()
+        {
+            return new NotFoundODataResult("Not found");
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
+        /// </summary>
         /// <param name="message">Error Message</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="NotFoundODataResult"/> with the specified values.</returns>
         protected virtual NotFoundODataResult NotFound(string message)
         {
             return new NotFoundODataResult(message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
+        /// </summary>
+        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        public override UnauthorizedResult Unauthorized()
+        {
+            return new UnauthorizedODataResult("Unauthorized");
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
+        /// </summary>
+        /// <param name="message">Error Message</param>
+        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        protected virtual UnauthorizedODataResult Unauthorized(string message)
+        {
+            return new UnauthorizedODataResult(message);
         }
     }
 }

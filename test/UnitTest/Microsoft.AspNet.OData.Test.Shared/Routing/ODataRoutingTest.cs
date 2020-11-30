@@ -59,7 +59,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(DestinationsController),
                 typeof(IncidentsController),
                 typeof(NotFoundWithIdCustomersController),
-                typeof(NotFoundCustomersController)
+                typeof(NotFoundCustomersController),
+                typeof(AttributeCustomersController)
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -300,7 +301,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     // test optional parameter routing (white space is intentional.)
                     { "GET", "Products/Default.GetCount(minSalary=1.1)",                               "GetCount(1.1, 0, 1200.99)" },
                     { "GET", "Products/Default.GetCount(minSalary=1.2, maxSalary=2.9)",                "GetCount(1.2, 2.9, 1200.99)" },
-                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" }
+                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" },
+                    // test [ODataRoute] works correctly for overloaded actions
+                    { "GET", "AttributeCustomers", "Get()" },
+                    { "GET", "AttributeCustomers(10)", "Get(10)" }
                 };
             }
         }
@@ -945,6 +949,21 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public string Delete()
         {
             return "Delete()";
+        }
+    }
+
+    public class AttributeCustomersController: TestODataController
+    {
+        [ODataRoute("AttributeCustomers")]
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        [ODataRoute("AttributeCustomers({key})")]
+        public string Get(int key)
+        {
+            return $"Get({key})";
         }
     }
 }

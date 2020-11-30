@@ -1,6 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Query;
@@ -11,11 +12,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.ActionResult
     public class CustomersController : Controller
     {
         [EnableQuery(AllowedQueryOptions = AllowedQueryOptions.Expand)]
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously - Intended for testing.
         public async Task<ActionResult<IEnumerable<Customer>>> GetCustomers()
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously - Intended for testing.
         {
-            return new List<Customer>
+            return await Task.FromResult(new List<Customer>
             { 
                 new Customer
                 {
@@ -28,7 +27,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ActionResult
                         },
                     },
                 },
-            };
+            });
         }
     }
 }

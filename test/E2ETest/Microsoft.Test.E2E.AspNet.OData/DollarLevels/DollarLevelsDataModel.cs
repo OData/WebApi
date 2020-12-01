@@ -24,7 +24,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
         public DLEmployee Friend { get; set; }
     }
 
-    public class Test
+    public class TestQueryOptions
     {
         [Key]
         public string Id { get; set; }

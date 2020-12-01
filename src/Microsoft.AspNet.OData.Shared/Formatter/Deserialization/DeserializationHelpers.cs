@@ -135,15 +135,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName)
+        internal static void SetCollectionProperty(object resource, IEdmProperty edmProperty, object value, string propertyName, bool isDelta = false)
         {
             Contract.Assert(edmProperty != null);
 
-            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, clearCollection: false);
+            SetCollectionProperty(resource, propertyName, edmProperty.Type.AsCollection(), value, clearCollection: false, isDelta);
         }
 
         internal static void SetCollectionProperty(object resource, string propertyName,
-            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection)
+            IEdmCollectionTypeReference edmPropertyType, object value, bool clearCollection, bool isDelta = false)
         {
             if (value != null)
             {
@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 IEnumerable newCollection;
                 if (CanSetProperty(resource, propertyName) &&
-                    CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType, out newCollection))
+                    CollectionDeserializationHelpers.TryCreateInstance(propertyType, edmPropertyType, elementType, out newCollection, isDelta))
                 {
                     // settable collections
                     collection.AddToCollection(newCollection, elementType, resourceType, propertyName, propertyType);

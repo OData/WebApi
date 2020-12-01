@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (!_isUntyped.HasValue)
                 {
-                    _isUntyped = TypeHelper.IsTypeAssignableFrom(typeof(IEdmObject), ResourceType) ||
+                    _isUntyped = (TypeHelper.IsTypeAssignableFrom(typeof(IEdmObject), ResourceType) && !IsDeltaOfT) ||
                         typeof(ODataUntypedActionParameters) == ResourceType;
                 }
 

@@ -1163,9 +1163,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "SomeProperty" });
 
             // Act & Assert
-            ExceptionAssert.Throws<ODataException>(
-                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext),
-                "Cannot find nested property 'SomeProperty' on the resource type 'ODataDemo.Product'.");
+
+            ExceptionAssert.DoesNotThrow(
+                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext));
+
         }
 
        

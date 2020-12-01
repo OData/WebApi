@@ -1884,6 +1884,10 @@
     <Compile Include="InstanceAnnotations\AnnotationDataModel.cs" />
     <Compile Include="InstanceAnnotations\AnnotationEdmModel.cs" />
     <Compile Include="InstanceAnnotations\AnnotationTest.cs" />
+    <Compile Include="BulkOperation\BulkInsertController.cs" />
+    <Compile Include="BulkOperation\BulkInsertDataModel.cs" />
+    <Compile Include="BulkOperation\BulkInsertEdmModel.cs" />
+    <Compile Include="BulkOperation\BulkInsertTest.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

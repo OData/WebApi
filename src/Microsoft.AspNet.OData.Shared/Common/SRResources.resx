@@ -988,4 +988,7 @@
   <data name="ResourcesShouldbePresent" xml:space="preserve">
     <value>ResourceSetWrapper should have ResourceWrappers in it</value>
   </data>
+  <data name="ResourceSetWrapperSupported" xml:space="preserve">
+    <value>Can only add ResourceWrapper to ResourceSetWrapper</value>
+  </data>
 </root>

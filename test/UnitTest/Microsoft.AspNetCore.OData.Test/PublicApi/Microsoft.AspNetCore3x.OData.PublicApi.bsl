@@ -28,12 +28,18 @@ public interface Microsoft.AspNet.OData.IEdmChangedObject : IEdmObject, IEdmStru
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
 }
 
+public interface Microsoft.AspNet.OData.IEdmChangedObject`1 : IEdmChangedObject, IEdmObject, IEdmStructuredObject {
+}
+
 public interface Microsoft.AspNet.OData.IEdmComplexObject : IEdmObject, IEdmStructuredObject {
 }
 
 public interface Microsoft.AspNet.OData.IEdmDeltaDeletedEntityObject : IEdmChangedObject, IEdmObject, IEdmStructuredObject {
 	string Id  { public abstract get; public abstract set; }
 	Microsoft.OData.DeltaDeletedEntryReason Reason  { public abstract get; public abstract set; }
+}
+
+public interface Microsoft.AspNet.OData.IEdmDeltaDeletedEntityObject`1 : IEdmChangedObject`1, IEdmChangedObject, IEdmDeltaDeletedEntityObject, IEdmObject, IEdmStructuredObject {
 }
 
 public interface Microsoft.AspNet.OData.IEdmDeltaDeletedLink : IEdmChangedObject, IEdmDeltaLinkBase, IEdmObject, IEdmStructuredObject {
@@ -269,12 +275,13 @@ public class Microsoft.AspNet.OData.DefaultContainerBuilder : IContainerBuilder 
 [
 NonValidatingParameterBindingAttribute(),
 ]
-public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProvider, IDelta {
+public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IEdmChangedObject`1, IDynamicMetaObjectProvider, IDelta, IEdmChangedObject, IEdmObject, IEdmStructuredObject {
 	public Delta`1 ()
 	public Delta`1 (System.Type structuralType)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
 
+	EdmDeltaEntityKind DeltaKind  { public virtual get; public set; }
 	System.Type ExpectedClrType  { public virtual get; }
 	System.Type StructuredType  { public virtual get; }
 
@@ -284,6 +291,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
+	Microsoft.OData.Edm.IEdmTypeReference Microsoft.AspNet.OData.IEdmObject.GetEdmType ()
 	public void Patch (TStructuralType original)
 	public void Put (TStructuralType original)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
@@ -299,6 +307,24 @@ public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collecti
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.IEdmChangedObject]] changedObjectList)
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
+}
+
+[
+NonValidatingParameterBindingAttribute(),
+]
+public class Microsoft.AspNet.OData.EdmChangedObjectCollection`1 : EdmChangedObjectCollection, ICollection`1, IEnumerable`1, ICollection, IEnumerable, IList, IEdmObject, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
+	public EdmChangedObjectCollection`1 (Microsoft.OData.Edm.IEdmEntityType entityType)
+	public EdmChangedObjectCollection`1 (Microsoft.OData.Edm.IEdmEntityType entityType, IList`1 changedObjectList)
+
+	bool IsReadOnly  { public virtual get; }
+
+	public virtual void Add (IEdmChangedObject`1 item)
+	public virtual bool Contains (IEdmChangedObject`1 item)
+	public void CopyChangedValues (ICollection`1 original, EdmChangedObjectCollection changedObjCollection)
+	public virtual void CopyTo (IEdmChangedObject`1[] array, int arrayIndex)
+	public void Patch (ICollection`1 original)
+	public virtual bool Remove (IEdmChangedObject`1 item)
+	IEnumerator`1 System.Collections.Generic.IEnumerable<Microsoft.AspNet.OData.IEdmChangedObject<TStructuralType>>.GetEnumerator ()
 }
 
 [
@@ -341,6 +367,15 @@ public class Microsoft.AspNet.OData.EdmDeltaDeletedEntityObject : EdmEntityObjec
 	string Id  { public virtual get; public virtual set; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public get; public set; }
 	Microsoft.OData.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
+}
+
+[
+NonValidatingParameterBindingAttribute(),
+]
+public class Microsoft.AspNet.OData.EdmDeltaDeletedEntityObject`1 : EdmDeltaDeletedEntityObject, IEdmChangedObject`1, IEdmDeltaDeletedEntityObject`1, IDynamicMetaObjectProvider, IDelta, IEdmChangedObject, IEdmDeltaDeletedEntityObject, IEdmEntityObject, IEdmObject, IEdmStructuredObject {
+	public EdmDeltaDeletedEntityObject`1 (Microsoft.OData.Edm.IEdmEntityType entityType)
+	public EdmDeltaDeletedEntityObject`1 (Microsoft.OData.Edm.IEdmEntityTypeReference entityTypeReference)
+	public EdmDeltaDeletedEntityObject`1 (Microsoft.OData.Edm.IEdmEntityType entityType, bool isNullable)
 }
 
 [
@@ -3570,6 +3605,17 @@ public abstract class Microsoft.AspNet.OData.Formatter.Deserialization.ODataItem
 	Microsoft.OData.ODataItem Item  { public get; }
 }
 
+public abstract class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetItemBase : ODataItemBase {
+	public ODataResourceSetItemBase (Microsoft.OData.ODataItem item)
+}
+
+public abstract class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetWrapperBase : ODataResourceSetItemBase {
+	public ODataResourceSetWrapperBase (Microsoft.OData.ODataResourceSetBase item)
+
+	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetItemBase]] Items  { public abstract get; }
+	Microsoft.OData.ODataResourceSetBase ResourceSetBase  { public get; }
+}
+
 [
 ExtensionAttribute(),
 ]
@@ -3698,7 +3744,31 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetDe
 	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
-	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapper resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
+	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapperBase resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
+}
+
+public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper : ODataResourceSetItemBase {
+	public ODataResourceWrapper (Microsoft.OData.ODataResourceBase item)
+
+	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper]] NestedResourceInfos  { public get; }
+	[
+	ObsoleteAttribute(),
+	]
+	Microsoft.OData.ODataResource Resource  { public get; }
+
+	Microsoft.OData.ODataResourceBase ResourceBase  { public get; }
+}
+
+public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataDeltaLinkWrapper : ODataResourceSetItemBase {
+	public ODataDeltaLinkWrapper (Microsoft.OData.ODataDeltaLinkBase item)
+
+	Microsoft.OData.ODataDeltaLinkBase DeltaLink  { public get; }
+}
+
+public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataDeltaResourceSetWrapper : ODataResourceSetWrapperBase {
+	public ODataDeltaResourceSetWrapper (Microsoft.OData.ODataDeltaResourceSet item)
+
+	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetItemBase]] Items  { public virtual get; }
 }
 
 public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper : ODataItemBase {
@@ -3708,18 +3778,12 @@ public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataNested
 	Microsoft.OData.ODataNestedResourceInfo NestedResourceInfo  { public get; }
 }
 
-public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetWrapper : ODataItemBase {
+public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetWrapper : ODataResourceSetWrapperBase {
 	public ODataResourceSetWrapper (Microsoft.OData.ODataResourceSet item)
 
+	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetItemBase]] Items  { public virtual get; }
 	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper]] Resources  { public get; }
 	Microsoft.OData.ODataResourceSet ResourceSet  { public get; }
-}
-
-public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper : ODataItemBase {
-	public ODataResourceWrapper (Microsoft.OData.ODataResource item)
-
-	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper]] NestedResourceInfos  { public get; }
-	Microsoft.OData.ODataResource Resource  { public get; }
 }
 
 public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataEdmTypeSerializer : ODataSerializer {

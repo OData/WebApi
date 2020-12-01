@@ -125,6 +125,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Type type = typeof(EdmChangedObjectCollection<>).MakeGenericType(elementType);
                 instance = Activator.CreateInstance(type, edmCollectionType.ElementType().Definition as IEdmEntityType) as EdmChangedObjectCollection;                
+
                 return true;
             }
 

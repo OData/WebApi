@@ -548,7 +548,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Orders = orders.ToList();
         }
         
-        //[JsonProperty]
+        [JsonProperty]
         public int Id { get; set; }
 
         private string _name = null;
@@ -560,7 +560,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
         public int Age { get; private set; }
 
-        //[JsonProperty]
+        [JsonProperty]
         public int FathersAge { get; set; }
         public ICollection<DeltaOrder> Orders { get; private set; }
 

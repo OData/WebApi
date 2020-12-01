@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
             }
         }
 
-        public ITestActionResult Get(ODataQueryOptions<Test> queryOptions)
+        public ITestActionResult Get(ODataQueryOptions<TestQueryOptions> queryOptions)
         {
             
             ODataQuerySettings settings1 = new ODataQuerySettings()
@@ -50,7 +50,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
                 PageSize = 1, EnsureStableOrdering =false
             };
 
-            var lst = new List<Test> { new Test { Id = "51" }, new Test { Id = "100" } };
+            var lst = new List<TestQueryOptions> { new TestQueryOptions { Id = "51" }, new TestQueryOptions { Id = "100" } };
             var p = lst.AsQueryable();
             var p1 = queryOptions.ApplyTo(p, settings1);
             var p2 = p1.AsQueryable();

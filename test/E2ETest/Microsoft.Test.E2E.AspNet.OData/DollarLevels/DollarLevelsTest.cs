@@ -112,8 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
         [InlineData("$expand=Manager($levels=max)", "$expand=Manager")]
         [InlineData("$expand=Manager($levels=1)", "$expand=Manager")]
         public async Task LevelsWithValidator(string originalQuery, string expandedQuery)
-        {
-            originalQuery = "";
+        {            
             string requestUri = this.BaseAddress + "/odata/DLManagers?" +originalQuery;
 
             HttpResponseMessage response = await this.Client.GetAsync(requestUri);

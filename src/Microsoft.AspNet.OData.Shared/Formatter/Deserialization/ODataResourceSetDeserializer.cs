@@ -109,14 +109,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             IEnumerable result = ReadResourceSet(resourceSet, elementType, readContext);
 
-            foreach(var a in result)
-            {
-                if(a != null)
-                {
-
-                }
-            }
-
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {                
                 EdmChangedObjectCollection changedObjCollection = new EdmChangedObjectCollection(actualType);
@@ -169,8 +161,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 throw new SerializationException(
                     Error.Format(SRResources.TypeCannotBeDeserialized, elementType.FullName()));
-            }                       
-            
+            }
+
+            //Ideally we don't need to special case ResourceSetType.ResourceSet, since the code that handles a deltaresourcesetwrapper will also handle a ResourceSetWrapper, 
+            //but it may be more efficient for the common case.
+
             if (resourceSet.ResourceSetType == ResourceSetType.ResourceSet)
             {
                 foreach (ODataResourceWrapper resourceWrapper in resourceSet.Items)

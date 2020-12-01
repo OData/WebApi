@@ -145,7 +145,7 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (value is IDelta)
+            if (value is IDelta || value is EdmChangedObjectCollection)
             {
                 return TrySetNestedResourceInternal(name, value);
             }
@@ -334,14 +334,23 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    // Recursively patch the subtree.
-                    bool isDeltaType = TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
-                    Contract.Assert(isDeltaType, nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
+                    EdmChangedObjectCollection changedObjColl = deltaNestedResource as EdmChangedObjectCollection;
+                    if (changedObjColl != null)
+                    {
+                        deltaNestedResource.CopyChangedValues(originalNestedResource, changedObjColl);
+                    }
+                    else
+                    {
+                        //Recursively patch the subtree.
+                        bool isDeltaType = TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
+                        Contract.Assert(isDeltaType, nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
 
-                    deltaNestedResource.CopyChangedValues(originalNestedResource);
+                        deltaNestedResource.CopyChangedValues(originalNestedResource);
+                    }
                 }
             }
         }
+
 
         /// <summary>
         /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />)

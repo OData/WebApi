@@ -9,6 +9,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Encapsulates an <see cref="ODataResourceSetItemBase"/> .
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
     public abstract class ODataResourceSetItemBase : ODataItemBase
     {
         /// <summary>

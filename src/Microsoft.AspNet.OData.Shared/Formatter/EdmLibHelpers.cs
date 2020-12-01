@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
@@ -908,7 +909,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 if (edmType != null)
                 {
                     expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
-                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
+                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection && !typeof(ICollection).IsAssignableFrom(type))
                     {
                         IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
                         if (elementType.IsEntity())

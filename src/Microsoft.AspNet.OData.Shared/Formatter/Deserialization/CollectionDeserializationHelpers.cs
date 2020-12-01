@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -115,9 +116,16 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             clearMethod.Invoke(collection, _emptyObjectArray);
         }
 
-        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance)
+        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance, bool isDelta = false)
         {
             Contract.Assert(collectionType != null);
+
+            if (isDelta)
+            {
+                Type type = typeof(EdmChangedObjectCollection<>).MakeGenericType(elementType);
+                instance = Activator.CreateInstance(type, edmCollectionType.ElementType().Definition as IEdmEntityType) as ICollection;                
+                return true;
+            }
 
             if (collectionType == typeof(EdmComplexObjectCollection))
             {

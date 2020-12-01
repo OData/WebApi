@@ -431,7 +431,47 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(3, query.Orders.Count);
         }
 
- 
+
+
+        [Fact]
+        public async Task PatchShouldSupportNonSettableCollectionProperties1()
+        {
+
+            var changedEntity = new EdmDeltaEntityObject(model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.Formatter.DeltaCustomer") as IEdmEntityType);
+            changedEntity.TrySetPropertyValue("Id", 1);
+            changedEntity.TrySetPropertyValue("FathersAge", 3);
+
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
+            var data = new ExpandoObject() as IDictionary<string, object>;
+
+            foreach (var prop in changedEntity.GetChangedPropertyNames())
+            {
+                object val;
+                if (changedEntity.TryGetPropertyValue(prop, out val))
+                {
+                    data.Add(prop, val);
+                }
+
+            }
+            //data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+            //data.Id = 1;
+            //data.FathersAge = 3;
+
+            string content = JsonConvert.SerializeObject(data);
+            patch.Content = new StringContent(content);
+            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await Client.SendAsync(patch);
+
+            Assert.True(response.IsSuccessStatusCode);
+
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            response = await Client.SendAsync(get);
+            Assert.True(response.IsSuccessStatusCode);
+            dynamic query = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(3, query.Addresses.Count);
+            Assert.Equal(3, query.Orders.Count);
+        }
+
     }
 
     public class DeltaCustomersController : TestODataController

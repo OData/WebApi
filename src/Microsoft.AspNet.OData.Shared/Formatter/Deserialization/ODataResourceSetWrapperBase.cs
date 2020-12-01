@@ -8,7 +8,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
     /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
-    /// </summary>    
+    /// </summary>        
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
     public abstract class ODataResourceSetWrapperBase : ODataResourceSetItemBase
     {
         /// <summary>
@@ -23,32 +24,23 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataResourceSetWrapperBase(ODataResourceSetBase item)
             : base(item)
         {
-            ResourceItems = new List<ODataItemBase>();            
+            
         }
 
-   
-         /// <summary>
+        /// <summary>
         /// Gets the wrapped <see cref="ResourceSetBase"/>.
         /// </summary>
         public ODataResourceSetBase ResourceSetBase
         {
             get
             {
-                return Item as ODataResourceSetBase;             
+                return Item as ODataResourceSetBase;
             }
         }
 
         /// <summary>
-        /// Gets the nested resources and deltalinks of this ResourceSet.
+        /// Gets the members of this ResourceSet.
         /// </summary>
-        protected IList<ODataItemBase> ResourceItems { get; private set; }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        public IList<ODataItemBase> Resources
-        {
-            get { return ResourceItems; }
-        }
+        public abstract IList<ODataResourceSetItemBase> Items { get; }
     }
 }

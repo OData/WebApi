@@ -226,17 +226,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     IEnumerable<string> structuralProperties = structuredType.StructuralProperties()
                         .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
 
+                    IEnumerable<string> updatableProperties= structuralProperties.Union(structuredType.NavigationProperties()
+                        .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model)));
+
                     if (structuredType.IsOpen())
                     {
                         PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
                             structuredType.StructuredDefinition(), model);
 
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, updatableProperties,
                             dynamicDictionaryPropertyInfo);
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, updatableProperties);
                     }
                 }
                 else
@@ -519,7 +522,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             object value = ReadNestedResourceSetInline(resourceSetWrapper, nestedProperty.Type, readContext);
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
-            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName);
+            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName, resourceSetWrapper.ResourceSetType== ResourceSetType.DeltaResourceSet);
         }
 
         private void ApplyDynamicResourceSetInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference structuredType,
@@ -604,7 +607,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
 
-                nestedReadContext.ResourceType = typeof(List<>).MakeGenericType(clrType);
+                nestedReadContext.ResourceType = (readContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)
+                ? typeof(Delta<>).MakeGenericType(clrType) : typeof(List<>).MakeGenericType(clrType);
             }
 
             return deserializer.ReadInline(resourceSetWrapper, edmType, nestedReadContext);

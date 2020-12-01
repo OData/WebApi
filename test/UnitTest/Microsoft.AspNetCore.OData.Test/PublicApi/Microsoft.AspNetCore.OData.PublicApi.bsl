@@ -3551,6 +3551,19 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetDe
 	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapperBase resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
 }
 
+
+public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper : ODataResourceSetItemBase {
+	public ODataResourceWrapper (Microsoft.OData.ODataResourceBase item)
+
+	System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataNestedResourceInfoWrapper]] NestedResourceInfos  { public get; }
+	[
+	ObsoleteAttribute(),
+	]
+	Microsoft.OData.ODataResource Resource  { public get; }
+
+	Microsoft.OData.ODataResourceBase ResourceBase  { public get; }
+}
+
 public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataDeltaLinkWrapper : ODataResourceSetItemBase {
 	public ODataDeltaLinkWrapper (Microsoft.OData.ODataDeltaLinkBase item)
 
@@ -3578,6 +3591,7 @@ public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResour
 	Microsoft.OData.ODataResourceSet ResourceSet  { public get; }
 }
 
+
 public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceWrapper : ODataResourceSetItemBase {
 	public ODataResourceWrapper (Microsoft.OData.ODataResourceBase item)
 
@@ -3589,6 +3603,7 @@ public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResour
 
 	Microsoft.OData.ODataResourceBase ResourceBase  { public get; }
 }
+
 
 public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataEdmTypeSerializer : ODataSerializer {
 	protected ODataEdmTypeSerializer (Microsoft.OData.ODataPayloadKind payloadKind)

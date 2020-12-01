@@ -100,7 +100,6 @@
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\..\sln\packages\System.Buffers.4.5.0\lib\netstandard2.0\System.Buffers.dll</HintPath>
     </Reference>
-    </Reference>
     <Reference Include="Microsoft.OData.Edm, Version=7.7.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\sln\packages\Microsoft.OData.Edm.7.7.3\lib\net45\Microsoft.OData.Edm.dll</HintPath>
     </Reference>

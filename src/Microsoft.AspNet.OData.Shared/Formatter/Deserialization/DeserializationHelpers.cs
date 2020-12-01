@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResource oDataResource,
+        internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResourceBase oDataResource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             PropertyInfo propertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType.StructuredDefinition(), readContext.Model);
@@ -274,7 +274,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        internal static void SetInstanceAnnotations(ODataResource oDataResource, IODataInstanceAnnotationContainer instanceAnnotationContainer, 
+        internal static void SetInstanceAnnotations(ODataResourceBase oDataResource, IODataInstanceAnnotationContainer instanceAnnotationContainer, 
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
             if(oDataResource.InstanceAnnotations != null)

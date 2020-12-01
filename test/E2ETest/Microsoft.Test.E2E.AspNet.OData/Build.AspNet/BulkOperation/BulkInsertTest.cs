@@ -82,16 +82,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         }
 
-
         [Fact]
-        public async Task PatchEmployee_WithUpdates_Friends()
+        public async Task PatchEmployee_WithUpdates_WithEmployees()
         {
             //Arrange
-            
-            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
-                    'value':[{ 'Id':1,'Name':'Friend1'},{ 'Id':2,'Name':'Friend2'}]
+
+            string requestUri = this.BaseAddress + "/convention/Employees(1)";
+
+            var content = @"{
+                    'Name':'Sql'  ,
+                    'Friends':[{'Id':345,'Name':'Test2'},{'Id':400,'Name':'Test3'},{'Id':900,'Name':'Test93'}]
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
@@ -114,11 +114,51 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
 
+                Assert.Equal(3, result.Count);
+                Assert.Contains("345", result.ToString());
+                Assert.Contains("400", result.ToString());
+                Assert.Contains("900", result.ToString());
+            }
+
+        }
+
+
+        [Fact]
+        public async Task PatchEmployee_WithUpdates_Friends()
+        {
+            //Arrange
+            
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+                    'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+
                 Assert.Equal(2, result.Count);
                 Assert.Contains("Friend1", result.ToString());
                 Assert.Contains("Friend2", result.ToString());
             }
-
         }
 
         [Fact]
@@ -158,6 +198,33 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         }
 
+
+        [Fact]
+        public async Task PatchEmployee_WithAdds_Friends_WithAnnotations()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+                    'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$deletedEntity");
+            }
+        }
+
         [Fact]
         public async Task PatchEmployee_WithFailedAdds_Friends()
         {
@@ -166,7 +233,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
-                    'value':[{ 'Id':3, 'Age':5, '@Core.ContentID':'1'}]
+                    'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
            
@@ -182,17 +249,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$deletedEntity");
             }
-
         }
 
         [Fact]
-        public async Task PatchEmployee_WithFaileDeletess_Friends()
+        public async Task PatchEmployee_WithFailedDeletes_Friends()
         {
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
-                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2}]
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
                      }";
 
 
@@ -206,7 +272,147 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$delta");
+                Assert.Contains("$delta", json.ToString());
+            }
+
+        }
+
+
+        [Fact]
+        public async Task PatchEmployee_WithFailedOperation_WithAnnotations()
+        {
+            //Arrange            
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/NewFriends/$delta',     
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var str = json.ToString();
+                Assert.Contains("$delta",str);                
+                Assert.Contains("NS.Test2", str);
+                Assert.Contains("Core.DataModificationException", str);
+            }
+
+        }
+
+
+
+        [Fact]
+        public async Task PatchEmployee_WithAdds_Friends_WithAnnotations_Untyped()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+                    'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$deletedEntity");
+            }
+        }
+
+        [Fact]
+        public async Task PatchEmployee_WithFailedAdds_Friends_Untyped()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+                    'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$deletedEntity");
+            }
+        }
+
+        [Fact]
+        public async Task PatchEmployee_WithFailedDeletes_Friends_Untyped()
+        {
+            //Arrange            
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/NewFriends/$delta',     
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains("$delta", json.ToString());
+            }
+
+        }
+
+
+        [Fact]
+        public async Task PatchEmployee_WithFailedOperation_WithAnnotations_Untyped()
+        {
+            //Arrange            
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var str = json.ToString();
+                Assert.Contains("$delta", str);                
+                Assert.Contains("NS.Test2", str);
+                Assert.Contains("Core.DataModificationException", str);
             }
 
         }

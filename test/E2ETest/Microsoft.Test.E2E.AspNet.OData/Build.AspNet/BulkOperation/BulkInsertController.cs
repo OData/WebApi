@@ -88,7 +88,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public ITestActionResult Get(int key)
         {
             var emp = Employees.SingleOrDefault(e => e.ID == key);
-            return Ok(Employees.SingleOrDefault(e => e.ID == key));
+            return Ok(emp);
         }
 
         [ODataRoute("Employees({key})/Friends")]
@@ -99,7 +99,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         }
 
         [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
-        public ITestActionResult PostToSkillSet(int key, [FromBody]Skill newSkill)
+        public ITestActionResult PostToSkillSet(int key, [FromBody] Skill newSkill)
         {
             Employee employee = Employees.FirstOrDefault(e => e.ID == key);
             if (employee == null)
@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         [ODataRoute("Employees")]
         [HttpPatch]
-        public ITestActionResult PatchEmployees( [FromBody] EdmChangedObjectCollection<Employee> coll)
+        public ITestActionResult PatchEmployees([FromBody] EdmChangedObjectCollection<Employee> coll)
         {
             InitEmployees();
 
@@ -130,7 +130,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
             Assert.NotNull(originalEmployee);
-                        
+
             var changedObjColl = friendColl.Patch(originalEmployee.Friends);
 
             return Ok(changedObjColl);
@@ -147,14 +147,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             Assert.NotNull(originalEmployee);
 
             var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
-            
+
             var changedObjColl = friendColl.Patch(friendCollection);
-            
+
+            return Ok(changedObjColl);
+        }
+
+        [ODataRoute("Employees({key})/UnTypedFriends")]
+        [HttpPatch]
+        public ITestActionResult PatchUnTypedFriends(int key, [FromBody] EdmChangedObjectCollection friendColl)
+        {
+            var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
+            entity.TrySetPropertyValue("Id", 2);
+
+            var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
+
+            var changedObjColl = friendColl.Patch(friendCollection);
+
             return Ok(changedObjColl);
         }
 
         [ODataRoute("Employees({key})")]
-        public ITestActionResult Patch(int key, [FromBody]Delta<Employee> delta)
+        public ITestActionResult Patch(int key, [FromBody] Delta<Employee> delta)
         {
             InitEmployees();
 
@@ -188,6 +202,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             this.InitEmployees();
             return this.StatusCode(HttpStatusCode.NoContent);
         }
-                
+
     }
 }

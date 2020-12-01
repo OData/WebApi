@@ -25,6 +25,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public List<Friend> Friends { get; set; }
 
         public List<NewFriend> NewFriends { get; set; }
+
+        public List<UnTypedFriend> UnTypedFriends { get; set; }
     }
 
     [Flags]
@@ -67,7 +69,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public int Id { get; set; }
         [Required]
         public string Name { get; set; }
-        [Range(10,20)]
+        [Range(10, 20)]
         public int Age { get; set; }
     }
 
@@ -79,13 +81,26 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public string Name { get; set; }
 
         public int Age { get; set; }
-        public ODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+
+        public FavoriteSports Sports { get; set; }
+    }
+
+    public class UnTypedFriend
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public int Age { get; set; }
+        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
     public class FriendColl<T> : ICollection<T>
     {
         public FriendColl() { _items = new List<T>(); }
-            
+
         private IList<T> _items;
 
         public int Count => _items.Count;
@@ -95,7 +110,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public void Add(T item)
         {
             var _item = item as NewFriend;
-            if (_item.Age< 10)
+            if (_item != null && _item.Age < 10)
             {
                 throw new NotImplementedException();
             }
@@ -126,6 +141,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public bool Remove(T item)
         {
             throw new NotImplementedException();
+
+            //return _items.Remove(item);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

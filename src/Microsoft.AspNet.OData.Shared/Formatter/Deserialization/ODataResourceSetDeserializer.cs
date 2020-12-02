@@ -109,6 +109,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             IEnumerable result = ReadResourceSet(resourceSet, elementType, readContext);
 
+            //Handle Delta requests to create EdmChangedObjectCollection
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {                
                 EdmChangedObjectCollection changedObjCollection = new EdmChangedObjectCollection(actualType);

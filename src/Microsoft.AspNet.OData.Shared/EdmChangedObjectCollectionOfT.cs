@@ -88,32 +88,41 @@ namespace Microsoft.AspNet.OData
         /// <param name="changedObjCollection"></param>        
         public void CopyChangedValues(ICollection<TStructuralType> original, EdmChangedObjectCollection changedObjCollection)
         {
-            foreach(dynamic changedObj in changedObjCollection)
+            //Here we need to Find the key of the Type, then only we will be able to find from the collection that which item in the collection
+            //corresponds to the item in delta list(Edmchangedobjectcoll). For this we use somewhat the same logic used in 
+            //the method private static PropertyConfiguration GetKeyProperty(EntityTypeConfiguration entityType) in EntityKeyConvention class
+            //Once we find the key we use that to pick the corresponding item from the original collection (by comparing the value of the key, eg: Id)
+            Type type = original.First().GetType();
+            string key = GetKeyProperty(type.GetProperties(), type.Name);
+
+            foreach (dynamic changedObj in changedObjCollection)
             {
                 object Id;
                 IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
 
                 if(deletedObj != null)
                 {
-                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty("Id").GetValue(x).ToString() == deletedObj.Id);
+                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty(key).GetValue(x).ToString() == deletedObj.Id);
 
                     if (originalObj != null)
                     {
+                        //This case handle deletions
                         original.Remove(originalObj);
                     }
                 }
                 else
-                {
-                    string key = GetKeyProperty(changedObj.ExpectedClrType.GetProperties(), changedObj.ExpectedClrType.Name);
+                {                 
                     changedObj.TryGetPropertyValue(key, out Id);
-                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty("Id").GetValue(x).ToString() == Id.ToString());
+                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty(key).GetValue(x).ToString() == Id.ToString());
 
                     if (originalObj == null)
                     {
+                        //This case handle additions
                         originalObj = Activator.CreateInstance(changedObj.ExpectedClrType);
                         original.Add(originalObj);
                     }
 
+                    //Patch for addition/update. This will call Delta<T> for each item in the collection
                     changedObj.Patch(originalObj);
                 }               
             }

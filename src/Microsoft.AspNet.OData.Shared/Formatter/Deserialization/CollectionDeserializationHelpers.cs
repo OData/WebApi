@@ -120,10 +120,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             Contract.Assert(collectionType != null);
 
+            //For Delta Collection requests
             if (isDelta)
             {
                 Type type = typeof(EdmChangedObjectCollection<>).MakeGenericType(elementType);
-                instance = Activator.CreateInstance(type, edmCollectionType.ElementType().Definition as IEdmEntityType) as ICollection;                
+                instance = Activator.CreateInstance(type, edmCollectionType.ElementType().Definition as IEdmEntityType) as EdmChangedObjectCollection;                
                 return true;
             }
 

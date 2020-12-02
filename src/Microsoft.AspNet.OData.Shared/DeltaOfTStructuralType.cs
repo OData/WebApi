@@ -334,8 +334,9 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
+                    //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta 
                     EdmChangedObjectCollection changedObjColl = deltaNestedResource as EdmChangedObjectCollection;
-                    if (changedObjColl != null)
+                    if (changedObjColl != null && changedObjColl.Count >0)
                     {
                         deltaNestedResource.CopyChangedValues(originalNestedResource, changedObjColl);
                     }

@@ -96,6 +96,90 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Generates a contained navigation link following the OData URL conventions for the entity represented by <paramref name="resourceContext"/> and the given
+        /// navigation property.
+        /// </summary>
+        /// <param name="resourceContext">The <see cref="ResourceContext"/> representing the entity for which the navigation link needs to be generated.</param>
+        /// <param name="navigationProperty">The EDM navigation property.</param>
+        /// <param name="includeCast">Represents whether the generated link should have a cast segment representing a type cast.</param>
+        /// <returns>The navigation link following the OData URL conventions.</returns>
+        public static Uri GenerateContainedNavigationPropertyLink(this ResourceContext resourceContext,
+            IEdmNavigationProperty navigationProperty, bool includeCast)
+        {
+            if (resourceContext == null)
+            {
+                throw Error.ArgumentNull("resourceContext");
+            }
+            if (resourceContext.InternalUrlHelper == null)
+            {
+                throw Error.Argument("resourceContext", SRResources.UrlHelperNull, typeof(ResourceContext).Name);
+            }
+
+            IList<ODataPathSegment> navigationPathSegments = GenerateODataPathSegmentsForContainedEntity(resourceContext);
+
+            if (includeCast)
+            {
+                navigationPathSegments.Add(new TypeSegment(resourceContext.StructuredType, navigationSource: null));
+            }
+
+            navigationPathSegments.Add(new NavigationPropertySegment(navigationProperty, navigationSource: null));
+
+            string link = resourceContext.InternalUrlHelper.CreateODataLink(navigationPathSegments);
+            if (link == null)
+            {
+                return null;
+            }
+
+            return new Uri(link);
+        }
+
+        private static IList<ODataPathSegment> GenerateODataPathSegmentsForContainedEntity(
+            ResourceContext resourceContext)
+        {
+            IList<ODataPathSegment> odataPathSegments = new List<ODataPathSegment>();
+            ODataPath path = resourceContext.SerializerContext.Path;
+
+            // We first add segments in the Path.
+            var segments = path.Segments;
+            int length = segments.Count;
+
+            for (int i = 0; i < length; i++)
+            {
+                ODataPathSegment pathSegment = segments[i];
+                EntitySetSegment entitySetPathSegment = pathSegment as EntitySetSegment;
+                IEdmEntityType entityType = entitySetPathSegment.EntitySet.EntityType();
+
+                odataPathSegments.Add(entitySetPathSegment);
+                odataPathSegments.Add(new KeySegment(ConventionsHelpers.GetEntityKey(resourceContext), entityType, null));
+
+            }
+
+            Stack<ODataPathSegment> internalOdataPath = new Stack<ODataPathSegment>();
+            IEdmNavigationSource currentNavigationSource = resourceContext.NavigationSource;
+
+            while (currentNavigationSource != null)
+            {
+                IEdmContainedEntitySet containedEntitySet = currentNavigationSource as IEdmContainedEntitySet;
+                if (containedEntitySet == null)
+                {
+                    break;
+                }
+                NavigationPropertySegment navigationPropertySegment = new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource);                
+                internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(resourceContext), resourceContext.StructuredType as IEdmEntityType, null));
+                internalOdataPath.Push(navigationPropertySegment);
+
+                currentNavigationSource = containedEntitySet.ParentNavigationSource;
+
+            }
+            foreach (var i in internalOdataPath)
+            {
+                odataPathSegments.Add(i);
+            }
+
+            return odataPathSegments;
+        }
+
+        /// <summary>
         /// Generates an action link following the OData URL conventions for the action <paramref name="action"/> and bound to the
         /// collection of entity represented by <paramref name="resourceSetContext"/>.
         /// </summary>

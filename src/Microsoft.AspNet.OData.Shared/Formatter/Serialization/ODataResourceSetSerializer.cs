@@ -486,10 +486,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (writeContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
             {
                 // Contained navigation.
-                Uri idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
-
-                var link = idlink.ToString() + "/" + writeContext.NavigationProperty.Name;
-                navigationLink = new Uri(link);
+                navigationLink = writeContext.ExpandedResource.GenerateContainedNavigationPropertyLink(writeContext.NavigationProperty, false);
             }
             else
             {

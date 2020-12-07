@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Test.Batch
         private HttpRequest CreateRequest(HttpMethod method)
         {
             
-            HttpRequest request = RequestFactory.Create(HttpMethod.Post, URI, this._routeBuilder, "odata");
+            HttpRequest request = RequestFactory.Create(method, URI, this._routeBuilder, "odata");
             ODataBatchPathMapping batchMapping =
                 request.HttpContext.RequestServices.GetRequiredService<ODataBatchPathMapping>();
             batchMapping.AddRoute("odata", "/$batch");

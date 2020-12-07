@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿#if NETCORE
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
@@ -80,3 +81,4 @@ namespace Microsoft.AspNet.OData.Test.Batch
         }
     }
 }
+#endif

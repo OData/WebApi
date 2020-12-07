@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.OData.Batch
         public async Task Invoke(HttpContext context)
         {
             HttpRequest request = context.Request;
-            bool isPreFlight = request.Method.Equals("Options", StringComparison.OrdinalIgnoreCase);
+            bool isPreFlight = HttpMethods.IsOptions(request.Method);
            
             // Attempt to match the path to a batch route.
             ODataBatchPathMapping batchMapping = context.RequestServices.GetRequiredService<ODataBatchPathMapping>();

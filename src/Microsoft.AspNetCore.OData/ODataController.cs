@@ -4,6 +4,7 @@
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData
 {
@@ -58,7 +59,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>A <see cref="BadRequestResult"/> with the specified values.</returns>
         public override BadRequestResult BadRequest()
         {
-            return new BadRequestODataResult("Bad request");
+            return new BadRequestODataResult();
         }
 
         /// <summary>
@@ -72,12 +73,22 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
+        /// </summary>
+        /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
+        /// <returns>A <see cref="BadRequestODataResult"/> with the specified values.</returns>
+        protected virtual BadRequestODataResult BadRequest(ODataError odataError)
+        {
+            return new BadRequestODataResult(odataError);
+        }
+
+        /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
         /// </summary>
         /// <returns>A <see cref="NotFoundResult"/> with the specified values.</returns>
         public override NotFoundResult NotFound()
         {
-            return new NotFoundODataResult("Not found");
+            return new NotFoundODataResult();
         }
 
         /// <summary>
@@ -91,12 +102,22 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
+        /// </summary>
+        /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
+        /// <returns>A <see cref="NotFoundODataResult"/> with the specified values.</returns>
+        protected virtual NotFoundODataResult NotFound(ODataError odataError)
+        {
+            return new NotFoundODataResult(odataError);
+        }
+
+        /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
         /// </summary>
         /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
         public override UnauthorizedResult Unauthorized()
         {
-            return new UnauthorizedODataResult("Unauthorized");
+            return new UnauthorizedODataResult();
         }
 
         /// <summary>
@@ -107,6 +128,16 @@ namespace Microsoft.AspNet.OData
         protected virtual UnauthorizedODataResult Unauthorized(string message)
         {
             return new UnauthorizedODataResult(message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
+        /// </summary>
+        /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
+        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        protected virtual UnauthorizedODataResult Unauthorized(ODataError odataError)
+        {
+            return new UnauthorizedODataResult(odataError);
         }
     }
 }

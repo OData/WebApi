@@ -14,25 +14,63 @@ namespace Microsoft.AspNet.OData.Results
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 400.</remarks>
     public class BadRequestODataResult : BadRequestResult
     {
-        private string _message;
+        /// <summary>
+        /// OData Error Message.
+        /// </summary>
+        public string Message { get; set; }
 
         /// <summary>
-        /// Instantiate the Class.
+        /// OData Error.
+        /// </summary>
+        public ODataError ODataError { get; set; }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        public BadRequestODataResult()
+        {
+            ODataError oDataError = new ODataError
+            {
+                ErrorCode = "400",
+                Message = "Bad Request"
+            };
+            ODataError = oDataError;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="message">Error Message</param>
         public BadRequestODataResult(string message)
         {
-            _message = message;
+            Message = message;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        /// <param name="odataError">OData Error.</param>
+        public BadRequestODataResult(ODataError odataError)
+        {
+            ODataError = odataError;
         }
 
         /// <inheritdoc/>
         public async override Task ExecuteResultAsync(ActionContext context)
         {
-            ODataError oDataError = new ODataError
+            ODataError oDataError;
+            if(ODataError != null)
             {
-                ErrorCode = "400",
-                Message = _message
-            };
+                oDataError = ODataError;
+            }
+            else
+            {
+                oDataError = new ODataError
+                {
+                    ErrorCode = "400",
+                    Message = Message != null ? Message : "Bad Request"
+                };
+            }
 
             ObjectResult objectResult = new ObjectResult(oDataError)
             {

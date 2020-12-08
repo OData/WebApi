@@ -76,6 +76,7 @@ namespace Microsoft.AspNet.OData
             {
                 IEdmType edmType = path.EdmType;
 
+                // When $count is at the end, the return type is always int. Trying to instead fetch the return type of the actual type being counted on.
                 if (path.Segments.Last().Identifier == "$count")
                 {
                     edmType = path.Segments[path.Segments.Count - 2].EdmType;
@@ -121,6 +122,12 @@ namespace Microsoft.AspNet.OData
                 // When we have the result.
                 ControllerActionDescriptor controllerActionDescriptor = context.ActionDescriptor as ControllerActionDescriptor;
 
+                if (controllerActionDescriptor == null)
+                {
+                    _queryValidationRunBeforeActionExecution = false;
+                    return;
+                }
+
                 Type returnType = controllerActionDescriptor.MethodInfo.ReturnType;
                 Type elementType;
 
@@ -158,18 +165,10 @@ namespace Microsoft.AspNet.OData
                     request,
                     controllerActionDescriptor);
 
-                if (controllerActionDescriptor != null)
-                {
-                    queryContext = new ODataQueryContext(
-                        edmModel,
-                        elementType);
-                    _queryValidationRunBeforeActionExecution = true;
-                }
-                else
-                {
-                    _queryValidationRunBeforeActionExecution = false;
-                    return;
-                }
+                queryContext = new ODataQueryContext(
+                    edmModel,
+                    elementType);
+                _queryValidationRunBeforeActionExecution = true;
             }
 
             // Create and validate the query options.
@@ -178,12 +177,6 @@ namespace Microsoft.AspNet.OData
             try
             {
                 ValidateQuery(request, _processedQueryOptions);
-            }
-            catch (ODataException odataException)
-            {
-                context.Result = CreateBadRequestResult(
-                    Error.Format(SRResources.UriQueryStringInvalid, odataException.Message),
-                    odataException);
             }
             catch (ArgumentOutOfRangeException e)
             {

@@ -8,10 +8,7 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.AspNet.OData.Test.Query.Controllers;
-using Microsoft.AspNetCore.Http;
-using Moq;
 using Xunit;
-using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 #else
 using System;
 using System.Collections;

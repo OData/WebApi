@@ -139,5 +139,16 @@ namespace Microsoft.AspNet.OData
         {
             return new UnauthorizedODataResult(odataError);
         }
+
+        /// <summary>
+        /// Creates a <see cref="ActionResult"/> that when executed will produce an <see cref="ODataError"/> response.
+        /// </summary>
+        /// <param name="errorCode">Http Error code.</param>
+        /// <param name="message">Http Error Message.</param>
+        /// <returns></returns>
+        protected virtual ODataErrorResult ODataErrorRequest(string errorCode, string message)
+        {
+            return new ODataErrorResult(errorCode, message);
+        }
     }
 }

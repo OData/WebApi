@@ -227,9 +227,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
-                ODataNestedResourceInfoWrapper parentNestedResource = (ODataNestedResourceInfoWrapper)parentItem;
-                Contract.Assert(parentNestedResource.NestedResourceInfo.IsCollection == false, "Only singleton nested properties can contain resource as their child.");
-                Contract.Assert(parentNestedResource.NestedItems.Count == 0, "Each nested property can contain only one resource as its direct child.");
+                ODataNestedResourceInfoWrapper parentNestedResource = (ODataNestedResourceInfoWrapper)parentItem;                
                 parentNestedResource.NestedItems.Add(resourceWrapper);
             }
         }

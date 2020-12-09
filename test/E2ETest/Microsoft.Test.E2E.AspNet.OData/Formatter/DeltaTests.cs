@@ -352,7 +352,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         [Fact]
-        public async Task PutShouldntOverrideNavigationProperties()
+        //Changing the test from shouldnt to should as it override navigation properties with bulk operations
+        public async Task PutShouldOverrideNavigationProperties()
         {
             string putUri = BaseAddress + "/odata/DeltaCustomers(5)";
             ExpandoObject data = new ExpandoObject();
@@ -363,7 +364,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(3, query.Orders.Count);
+            Assert.Equal(0, query.Orders.Count);
         }
     }
 
@@ -412,10 +413,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 }
                 
             }
-            //data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
-            //data.Id = 1;
-            //data.FathersAge = 3;
- 
+             
             string content = JsonConvert.SerializeObject(data);
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
@@ -423,52 +421,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
             Assert.True(response.IsSuccessStatusCode);
 
-            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(1)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(3, query.Addresses.Count);
-            Assert.Equal(3, query.Orders.Count);
-        }
-
-
-
-        [Fact]
-        public async Task PatchShouldSupportNonSettableCollectionProperties1()
-        {
-
-            var changedEntity = new EdmDeltaEntityObject(model.FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.Formatter.DeltaCustomer") as IEdmEntityType);
-            changedEntity.TrySetPropertyValue("Id", 1);
-            changedEntity.TrySetPropertyValue("FathersAge", 3);
-
-            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
-            var data = new ExpandoObject() as IDictionary<string, object>;
-
-            foreach (var prop in changedEntity.GetChangedPropertyNames())
-            {
-                object val;
-                if (changedEntity.TryGetPropertyValue(prop, out val))
-                {
-                    data.Add(prop, val);
-                }
-
-            }
-            //data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
-            //data.Id = 1;
-            //data.FathersAge = 3;
-
-            string content = JsonConvert.SerializeObject(data);
-            patch.Content = new StringContent(content);
-            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
-            HttpResponseMessage response = await Client.SendAsync(patch);
-
-            Assert.True(response.IsSuccessStatusCode);
-
-            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
-            response = await Client.SendAsync(get);
-            Assert.True(response.IsSuccessStatusCode);
-            dynamic query = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(3, query.Addresses.Count);
+            Assert.Equal(2, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
 
@@ -547,8 +504,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             _addresses = addresses.ToList();
             Orders = orders.ToList();
         }
-        
-        [JsonProperty]
+                
         public int Id { get; set; }
 
         private string _name = null;
@@ -559,8 +515,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         }
 
         public int Age { get; private set; }
-
-        [JsonProperty]
+                
         public int FathersAge { get; set; }
         public ICollection<DeltaOrder> Orders { get; private set; }
 

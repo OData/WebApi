@@ -99,6 +99,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     addMethod.Invoke(collection, new object[] { element });
                 }
             }
+
+            EdmChangedObjectCollection edmchangedObjectCollection = list as EdmChangedObjectCollection;
+
+            if(edmchangedObjectCollection != null)
+            {
+                collection = edmchangedObjectCollection.ChangedObjectCollection;
+            }
         }
 
         public static void Clear(this IEnumerable collection, string propertyName, Type resourceType)

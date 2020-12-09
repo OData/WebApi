@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.OData
                 }
 
                 Type clrType = edmModel.GetTypeMappingCache().GetClrType(
-                    elementType.ToEdmTypeReference(false),
+                    elementType.ToEdmTypeReference(isNullable: false),
                     edmModel);
 
                 // CLRType can be missing if untyped registrations were made.

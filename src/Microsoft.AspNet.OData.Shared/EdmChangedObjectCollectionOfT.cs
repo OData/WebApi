@@ -2,8 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -20,7 +22,7 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class EdmChangedObjectCollection<TStructuralType> : EdmChangedObjectCollection, ICollection<IEdmChangedObject<TStructuralType>>, IEdmObject
     {
-        private ICollection<IEdmChangedObject<TStructuralType>> _items;
+        private Collection<IEdmChangedObject<TStructuralType>> _items;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
@@ -38,11 +40,14 @@ namespace Microsoft.AspNet.OData
         /// <param name="entityType">The Edm type of the collection.</param>
         /// <param name="changedObjectList">The list that is wrapped by the new collection.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public EdmChangedObjectCollection(IEdmEntityType entityType, IList<IEdmChangedObject<TStructuralType>> changedObjectList)
+        public EdmChangedObjectCollection(IEdmEntityType entityType, Collection<IEdmChangedObject<TStructuralType>> changedObjectList)
             : base(entityType, changedObjectList as IList<IEdmChangedObject>)
         {            
             _items = changedObjectList;
         }
+
+        /// <inheritdoc/>
+        public override IEnumerable ChangedObjectCollection { get { return _items; } }
 
         /// <inheritdoc/>
         public void Add(IEdmChangedObject<TStructuralType> item)
@@ -81,12 +86,43 @@ namespace Microsoft.AspNet.OData
             return _items.GetEnumerator();
         }
 
+        /// <inheritdoc/>
+        protected override void InsertItem(int index, IEdmChangedObject item)
+        {
+            IEdmChangedObject<TStructuralType> _item = item as IEdmChangedObject<TStructuralType>;
+            Contract.Assert(_item != null);
+
+            _items.Add(_item);
+        }
+
+        /// <inheritdoc/>
+        protected override void ClearItems()
+        {
+            _items.Clear();
+        }
+
+        /// <inheritdoc/>
+        protected override void RemoveItem(int index)
+        {
+            Contract.Assert(_items.Count > index);
+            
+            _items.RemoveAt(index);
+        }
+
+        /// <inheritdoc/>
+        protected override void SetItem(int index, IEdmChangedObject item)
+        {
+            IEdmChangedObject<TStructuralType> _item = item as IEdmChangedObject<TStructuralType>;
+            Contract.Assert(_item != null);
+
+            _items[index] = _item;
+        }
+
         /// <summary>
         /// Copy changed values is an implementation of Patch
         /// </summary>
-        /// <param name="original"></param>
-        /// <param name="changedObjCollection"></param>        
-        public void CopyChangedValues(ICollection<TStructuralType> original, EdmChangedObjectCollection changedObjCollection)
+        /// <param name="original"></param>              
+        public void CopyChangedValues(ICollection<TStructuralType> original)
         {
             //Here we need to Find the key of the Type, then only we will be able to find from the collection that which item in the collection
             //corresponds to the item in delta list(Edmchangedobjectcoll). For this we use somewhat the same logic used in 
@@ -95,7 +131,7 @@ namespace Microsoft.AspNet.OData
             Type type = original.First().GetType();
             string key = GetKeyProperty(type.GetProperties(), type.Name);
 
-            foreach (dynamic changedObj in changedObjCollection)
+            foreach (dynamic changedObj in _items)
             {
                 object Id;
                 IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
@@ -134,7 +170,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="original"></param>        
         public void Patch(ICollection<TStructuralType> original)
         {
-            CopyChangedValues(original, this);
+            CopyChangedValues(original);
         }
 
         private static string GetKeyProperty(PropertyInfo[] allProperties, string entityName)

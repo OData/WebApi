@@ -95,6 +95,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
         private ODataResourceWrapper ValidateResourceWrapper(ODataResourceSetItemBase item)
         {
+            if(item == null)
+            {
+                return null;
+            }
+
             ODataResourceWrapper resourceWrapper = item as ODataResourceWrapper;
             if (item == null)
             {

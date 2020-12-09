@@ -326,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
 
             JArray windows = contentOfJObject["OptionalShapes"] as JArray;
-            Assert.True(0 == windows.Count,
+            Assert.True(1 == windows.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}", 1, windows.Count, requestUri, contentOfString));
         }
 

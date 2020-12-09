@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -57,5 +58,10 @@ namespace Microsoft.AspNet.OData
             _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
             _edmTypeReference = new EdmCollectionTypeReference(_edmType);
         }
+                
+        /// <summary>
+        /// Get the Change Object collection
+        /// </summary>
+        public virtual IEnumerable ChangedObjectCollection { get; }        
     }
 }

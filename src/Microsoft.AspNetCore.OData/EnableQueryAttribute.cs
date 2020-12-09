@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData
                 IEdmType edmType = path.EdmType;
 
                 // When $count is at the end, the return type is always int. Trying to instead fetch the return type of the actual type being counted on.
-                if (path.Segments.Last().Identifier == "$count")
+                if (request.IsCountRequest())
                 {
                     edmType = path.Segments[path.Segments.Count - 2].EdmType;
                 }

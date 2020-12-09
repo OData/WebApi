@@ -182,6 +182,13 @@ namespace Microsoft.AspNet.OData
                 // If this is a nested resource, get the value from the dictionary of nested resources.
                 object deltaNestedResource = _deltaNestedResources[name];
 
+                //If Edmchangedobject collection, we are handling delta collections so the value will be that itself and no need to get instance value
+                if(deltaNestedResource is EdmChangedObjectCollection)
+                {
+                    value = deltaNestedResource;
+                    return true;
+                }
+
                 Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
                 Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
 
@@ -334,11 +341,10 @@ namespace Microsoft.AspNet.OData
                 }
                 else
                 {
-                    //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta 
-                    EdmChangedObjectCollection changedObjColl = deltaNestedResource as EdmChangedObjectCollection;
-                    if (changedObjColl != null && changedObjColl.Count >0)
+                    //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta                     
+                    if (deltaNestedResource is EdmChangedObjectCollection)
                     {
-                        deltaNestedResource.CopyChangedValues(originalNestedResource, changedObjColl);
+                        deltaNestedResource.CopyChangedValues(originalNestedResource);
                     }
                     else
                     {
@@ -682,11 +688,16 @@ namespace Microsoft.AspNet.OData
                 return false;
             }
 
-            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
-            // Get the Delta<{NestedResourceType}>._instance using Reflection.
-            FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
-            Contract.Assert(field != null, "field != null");
-            cacheHit.SetValue(_instance, field.GetValue(deltaNestedResource));
+            //If Edmchangedobject collection, we are handling delta collections so the instance value need not be set,
+            //as we consider the value as collection of Delta itself and not instance value of the field
+            if (!(deltaNestedResource is EdmChangedObjectCollection))
+            {
+                PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
+                // Get the Delta<{NestedResourceType}>._instance using Reflection.
+                FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+                Contract.Assert(field != null, "field != null");
+                cacheHit.SetValue(_instance, field.GetValue(deltaNestedResource));
+            }
 
             // Add the nested resource in the hierarchy.
             // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which
@@ -699,13 +710,9 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// GetEdmType method in herited from IEdmObject , not implemented
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Returns the EdmType of the Type</returns>
         Microsoft.OData.Edm.IEdmTypeReference IEdmObject.GetEdmType()
         {
-
-           // EdmLibHelpers.GetEdmTypeReference() 
-            //return _edmTypeReference;
-            //implement if only required, not intended in draft pr
             throw new NotImplementedException();
         }
     }

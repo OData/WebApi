@@ -137,8 +137,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
         public TestBadRequestObjectResult<T> BadRequest<T>(T obj) { return new TestBadRequestObjectResult<T>(base.Content(HttpStatusCode.BadRequest, obj)); }
 #endif
 
+#if NETCORE
         [NonAction]
         public new TestUnauthorizedResult Unauthorized() { return new TestUnauthorizedResult(base.Unauthorized()); }
+#endif
 
 #if NETCORE
         [NonAction]

@@ -115,7 +115,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 
         [NonAction]
 #if NETCORE
-        public TestBadRequestObjectResult BadRequest(string message) { return new TestBadRequestObjectResult(base.BadRequest(message)); }
+        public new TestBadRequestResult BadRequest(string message) { return new TestBadRequestResult(base.BadRequest(message)); }
 #else
         public new TestBadRequestObjectResult BadRequest(string message) { return new TestBadRequestObjectResult(base.BadRequest(message)); }
 

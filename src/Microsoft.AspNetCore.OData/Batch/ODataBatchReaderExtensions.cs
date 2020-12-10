@@ -331,6 +331,11 @@ namespace Microsoft.AspNet.OData.Batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
             string filteredBatchPreferences = string.Join(",", filteredBatchList);
 
+            if (string.IsNullOrEmpty(filteredBatchPreferences))
+            {
+                return individualPreferences;
+            }
+
             return string.Join(",", individualPreferences, filteredBatchPreferences);
         }
 

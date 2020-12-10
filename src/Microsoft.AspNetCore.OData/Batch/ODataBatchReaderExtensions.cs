@@ -269,7 +269,8 @@ namespace Microsoft.AspNet.OData.Batch
                             context.Request.Headers.Add(header.Key, preferencesToInherit);
                         }
                     }
-                    else
+                    // do not copy already existing headers, such as Cookie
+                    else if (!context.Request.Headers.ContainsKey(header.Key))
                     {
                         context.Request.Headers.Add(header);
                     }

@@ -709,6 +709,72 @@ Accept-Charset: UTF-8
             Assert.Contains(deleteRequest, responseContent);
             Assert.Contains(postRequest, responseContent);
         }
+
+        [Fact]
+        public async Task SendAsync_CorrectlyHandlesCookieHeader()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                var builder = ODataConventionModelBuilderFactory.Create(config);
+                builder.EntitySet<BatchTestOrder>("BatchTestOrders");
+
+                config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new DefaultODataBatchHandler());
+                config.Expand();
+                config.EnableDependencyInjection();
+            });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var orderId = 2;
+            var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("text/plain"));
+
+            // Add cookie (for example IdentityServer adds antiforgery after login)
+            batchRequest.Headers.TryAddWithoutValidation("Cookie", ".AspNetCore.Antiforgery.9TtSrW0hzOs=" + Guid.NewGuid());
+
+            var batchContent = $@"
+--{batchRef}
+Content-Type: multipart/mixed;boundary={changesetRef}
+
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 1
+
+POST {endpoint}/BatchTestOrders HTTP/1.1
+Content-Type: application/json;type=entry
+Prefer: return=representation
+
+{createOrderPayload}
+--{changesetRef}--
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestOrders({orderId}) HTTP/1.1
+Content-Type: application/json;type=entry
+Prefer: return=representation
+
+--{batchRef}--
+";
+
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            httpContent.Headers.ContentLength = batchContent.Length;
+            batchRequest.Content = httpContent;
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            // TODO: assert somehow?
+        }
 #endif
     }
 
@@ -808,6 +874,12 @@ Accept-Charset: UTF-8
         public IEnumerable<BatchTestOrder> Get()
         {
             return BatchTestOrder.Orders;
+        }
+
+        [EnableQuery]
+        public SingleResult<BatchTestOrder> Get([FromODataUri]int key)
+        {
+            return SingleResult.Create(BatchTestOrder.Orders.Where(d => d.Id.Equals(key)).AsQueryable());
         }
 
         public ITestActionResult Post([FromBody]BatchTestOrder order)

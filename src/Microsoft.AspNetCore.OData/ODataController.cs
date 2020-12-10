@@ -56,15 +56,6 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
         /// </summary>
-        /// <returns>A <see cref="BadRequestResult"/> with the specified values.</returns>
-        public override BadRequestResult BadRequest()
-        {
-            return new BadRequestODataResult();
-        }
-
-        /// <summary>
-        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Bad Request (400) response.
-        /// </summary>
         /// <param name="message">Error Message</param>
         /// <returns>A <see cref="BadRequestODataResult"/> with the specified values.</returns>
         protected virtual BadRequestODataResult BadRequest(string message)
@@ -80,15 +71,6 @@ namespace Microsoft.AspNet.OData
         protected virtual BadRequestODataResult BadRequest(ODataError odataError)
         {
             return new BadRequestODataResult(odataError);
-        }
-
-        /// <summary>
-        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Not Found (404) response.
-        /// </summary>
-        /// <returns>A <see cref="NotFoundResult"/> with the specified values.</returns>
-        public override NotFoundResult NotFound()
-        {
-            return new NotFoundODataResult();
         }
 
         /// <summary>
@@ -114,15 +96,6 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
         /// </summary>
-        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
-        public override UnauthorizedResult Unauthorized()
-        {
-            return new UnauthorizedODataResult();
-        }
-
-        /// <summary>
-        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
-        /// </summary>
         /// <param name="message">Error Message</param>
         /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
         protected virtual UnauthorizedODataResult Unauthorized(string message)
@@ -140,6 +113,28 @@ namespace Microsoft.AspNet.OData
             return new UnauthorizedODataResult(odataError);
         }
 
+#if NETCOREAPP3_1 || NETCOREAPP2_1 || NETSTANDARD2_1
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Conflict (409) response.
+        /// </summary>
+        /// <param name="message">Error Message</param>
+        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        protected virtual ConflictODataResult Conflict(string message)
+        {
+            return new ConflictODataResult(message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Conflict (409) response.
+        /// </summary>
+        /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
+        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        protected virtual ConflictODataResult Conflict(ODataError odataError)
+        {
+            return new ConflictODataResult(odataError);
+        }
+#endif
+
         /// <summary>
         /// Creates a <see cref="ActionResult"/> that when executed will produce an <see cref="ODataError"/> response.
         /// </summary>
@@ -149,6 +144,16 @@ namespace Microsoft.AspNet.OData
         protected virtual ODataErrorResult ODataErrorRequest(string errorCode, string message)
         {
             return new ODataErrorResult(errorCode, message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ActionResult"/> that when executed will produce an <see cref="ODataError"/> response.
+        /// </summary>
+        /// <param name="odataError"><see cref="ODataError"/>.</param>
+        /// <returns></returns>
+        protected virtual ODataErrorResult ODataErrorResponse(ODataError odataError)
+        {
+            return new ODataErrorResult(odataError);
         }
     }
 }

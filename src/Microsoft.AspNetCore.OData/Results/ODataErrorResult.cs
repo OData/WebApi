@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,32 +13,39 @@ namespace Microsoft.AspNet.OData.Results
     /// Represents a result that when executed will produce an <see cref="ActionResult"/>.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> response.</remarks>
-    public class ODataErrorResult : ActionResult
+    public class ODataErrorResult : ActionResult, IODataErrorResult
     {
         /// <summary>
         /// OData Error.
         /// </summary>
-        public ODataError ODataError { get; set; }
+        public ODataError Error { get; }
 
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ODataErrorResult(string errorCode, string message)
         {
-            ODataError oDataError = new ODataError
+            Error = new ODataError
             {
                 ErrorCode = errorCode,
                 Message = message
             };
-            ODataError = oDataError;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        public ODataErrorResult(ODataError odataError)
+        {
+            Error = odataError;
         }
 
         /// <inheritdoc/>
         public async override Task ExecuteResultAsync(ActionContext context)
         {
-            ObjectResult objectResult = new ObjectResult(ODataError)
+            ObjectResult objectResult = new ObjectResult(Error)
             {
-                StatusCode = StatusCodes.Status400BadRequest
+                StatusCode = Convert.ToInt32(Error.ErrorCode)
             };
 
             await objectResult.ExecuteResultAsync(context).ConfigureAwait(false);

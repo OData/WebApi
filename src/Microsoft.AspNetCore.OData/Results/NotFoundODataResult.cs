@@ -12,30 +12,12 @@ namespace Microsoft.AspNet.OData.Results
     /// Represents a result that when executed will produce a Not Found(404) response.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 404.</remarks>
-    public class NotFoundODataResult : NotFoundResult
+    public class NotFoundODataResult : NotFoundResult, IODataErrorResult
     {
-        /// <summary>
-        /// OData Error Message.
-        /// </summary>
-        public string Message { get; set; }
-
         /// <summary>
         /// OData Error.
         /// </summary>
-        public ODataError ODataError { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the class.
-        /// </summary>
-        public NotFoundODataResult()
-        {
-            ODataError oDataError = new ODataError
-            {
-                ErrorCode = "404",
-                Message = "Not found"
-            };
-            ODataError = oDataError;
-        }
+        public ODataError Error { get; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -43,7 +25,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="message">Error Message</param>
         public NotFoundODataResult(string message)
         {
-            Message = message;
+            Error = new ODataError
+            {
+                Message = message,
+                ErrorCode = "404"
+            };
         }
 
         /// <summary>
@@ -52,27 +38,13 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="odataError">OData Error.</param>
         public NotFoundODataResult(ODataError odataError)
         {
-            ODataError = odataError;
+            Error = odataError;
         }
 
         /// <inheritdoc/>
         public async override Task ExecuteResultAsync(ActionContext context)
         {
-            ODataError oDataError;
-            if (ODataError != null)
-            {
-                oDataError = ODataError;
-            }
-            else
-            {
-                oDataError = new ODataError
-                {
-                    ErrorCode = "404",
-                    Message = Message != null ? Message : "Not found"
-                };
-            }
-
-            ObjectResult objectResult = new ObjectResult(oDataError)
+            ObjectResult objectResult = new ObjectResult(Error)
             {
                 StatusCode = StatusCodes.Status404NotFound
             };

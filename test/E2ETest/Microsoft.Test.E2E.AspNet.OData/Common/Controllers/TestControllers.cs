@@ -373,7 +373,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for BadRequestResult
     /// </summary>
 #if NETCORE
-    public class TestBadRequestResult : TestStatusCodeResult
+    public class TestBadRequestResult : TestActionResult
     {
         public TestBadRequestResult(BadRequestResult innerResult)
             : base(innerResult)
@@ -431,7 +431,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for UnauthorizedResult
     /// </summary>
 #if NETCORE
-    public class TestUnauthorizedResult : TestStatusCodeResult
+    public class TestUnauthorizedResult : TestActionResult
     {
         public TestUnauthorizedResult(UnauthorizedResult innerResult)
             : base(innerResult)
@@ -444,7 +444,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for ConflictResult
     /// </summary>
 #if NETCOREAPP3_1
-    public class TestConflictResult : TestStatusCodeResult
+    public class TestConflictResult : TestActionResult
     {
         public TestConflictResult(ConflictResult innerResult)
             : base(innerResult)

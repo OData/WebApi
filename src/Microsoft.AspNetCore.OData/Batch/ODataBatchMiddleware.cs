@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData.Batch
             // Attempt to match the path to a batch route.
             ODataBatchPathMapping batchMapping = context.RequestServices.GetRequiredService<ODataBatchPathMapping>();
 
-            if (!isPreFlight && batchMapping.TryGetRouteName(context, out var routeName))
+            if (!isPreFlight && batchMapping.TryGetRouteName(context, out string routeName))
             {
                 // Get the per-route container and retrieve the batch handler.
                 IPerRouteContainer perRouteContainer = context.RequestServices.GetRequiredService<IPerRouteContainer>();

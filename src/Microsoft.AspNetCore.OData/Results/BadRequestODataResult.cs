@@ -38,6 +38,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="odataError">OData Error.</param>
         public BadRequestODataResult(ODataError odataError)
         {
+            if (odataError == null)
+            {
+                throw Common.Error.ArgumentNull("odataError");
+            }
+
             Error = odataError;
         }
 

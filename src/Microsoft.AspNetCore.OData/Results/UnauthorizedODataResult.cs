@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Results
     /// <summary>
     /// Represents a result that when executed will produce a Unauthorized(401) response.
     /// </summary>
-    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 404.</remarks>
+    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 401.</remarks>
     public class UnauthorizedODataResult : UnauthorizedResult, IODataErrorResult
     {
         /// <summary>
@@ -38,6 +38,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="odataError">OData Error.</param>
         public UnauthorizedODataResult(ODataError odataError)
         {
+            if (odataError == null)
+            {
+                throw Common.Error.ArgumentNull("odataError");
+            }
+
             Error = odataError;
         }
 

@@ -38,6 +38,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="odataError">OData Error.</param>
         public NotFoundODataResult(ODataError odataError)
         {
+            if (odataError == null)
+            {
+                throw Common.Error.ArgumentNull("odataError");
+            }
+
             Error = odataError;
         }
 

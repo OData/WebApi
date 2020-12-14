@@ -113,7 +113,9 @@ namespace Microsoft.AspNet.OData
             return new UnauthorizedODataResult(odataError);
         }
 
-#if NETCOREAPP3_1 || NETCOREAPP2_1 || NETSTANDARD2_1
+        // ConflictResult was introduced in AspNet core 2.1, which is implemented from .Net standard 2.1
+        // https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase.conflict?view=aspnetcore-2.1
+#if !NETSTANDARD2_0
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Conflict (409) response.
         /// </summary>
@@ -141,7 +143,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="errorCode">Http Error code.</param>
         /// <param name="message">Http Error Message.</param>
         /// <returns></returns>
-        protected virtual ODataErrorResult ODataErrorRequest(string errorCode, string message)
+        protected virtual ODataErrorResult ODataErrorResult(string errorCode, string message)
         {
             return new ODataErrorResult(errorCode, message);
         }
@@ -151,7 +153,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="odataError"><see cref="ODataError"/>.</param>
         /// <returns></returns>
-        protected virtual ODataErrorResult ODataErrorResponse(ODataError odataError)
+        protected virtual ODataErrorResult ODataErrorResult(ODataError odataError)
         {
             return new ODataErrorResult(odataError);
         }

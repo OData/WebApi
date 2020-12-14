@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.OData;
 
@@ -37,6 +36,11 @@ namespace Microsoft.AspNet.OData.Results
         /// </summary>
         public ODataErrorResult(ODataError odataError)
         {
+            if (odataError == null)
+            {
+                throw Common.Error.ArgumentNull("odataError");
+            }
+
             Error = odataError;
         }
 

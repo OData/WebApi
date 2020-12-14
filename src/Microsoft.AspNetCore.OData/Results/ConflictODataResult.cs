@@ -26,6 +26,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="message">Error Message</param>
         public ConflictODataResult(string message)
         {
+            if (message == null)
+            {
+                throw Common.Error.ArgumentNull("message");
+            }
+
             Error = new ODataError
             {
                 Message = message,

@@ -25,6 +25,11 @@ namespace Microsoft.AspNet.OData.Results
         /// <param name="message">Error Message</param>
         public BadRequestODataResult(string message)
         {
+            if (message == null)
+            {
+                throw Common.Error.ArgumentNull("message");
+            }
+
             Error = new ODataError
             {
                 Message = message,

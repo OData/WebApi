@@ -24,6 +24,16 @@ namespace Microsoft.AspNet.OData.Results
         /// </summary>
         public ODataErrorResult(string errorCode, string message)
         {
+            if (errorCode == null)
+            {
+                throw Common.Error.ArgumentNull("errorCode");
+            }
+
+            if (message == null)
+            {
+                throw Common.Error.ArgumentNull("message");
+            }
+
             Error = new ODataError
             {
                 ErrorCode = errorCode,

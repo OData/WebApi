@@ -9,7 +9,7 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Results
 {
     /// <summary>
-    /// Represents a result that when executed will produce a Not Found(404) response.
+    /// Represents a result that when executed will produce a Not Found (404) response.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 404.</remarks>
     public class NotFoundODataResult : NotFoundResult, IODataErrorResult

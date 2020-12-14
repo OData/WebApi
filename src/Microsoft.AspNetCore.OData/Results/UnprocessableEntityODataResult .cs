@@ -10,10 +10,10 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Results
 {
     /// <summary>
-    /// Represents a result that when executed will produce a Conflict (409) response.
+    /// Represents a result that when executed will produce a UnprocessableEntity (422) response.
     /// </summary>
-    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 409.</remarks>
-    public class ConflictODataResult : ConflictResult, IODataErrorResult
+    /// <remarks>This result creates an <see cref="ODataError"/> with status code: 422.</remarks>
+    public class UnprocessableEntityODataResult : UnprocessableEntityResult, IODataErrorResult
     {
         /// <summary>
         /// OData Error.
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Results
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="message">Error Message</param>
-        public ConflictODataResult(string message)
+        public UnprocessableEntityODataResult(string message)
         {
             if (message == null)
             {
@@ -34,7 +34,7 @@ namespace Microsoft.AspNet.OData.Results
             Error = new ODataError
             {
                 Message = message,
-                ErrorCode = "409"
+                ErrorCode = "422"
             };
         }
 
@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Results
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="odataError">OData Error.</param>
-        public ConflictODataResult(ODataError odataError)
+        public UnprocessableEntityODataResult(ODataError odataError)
         {
             if (odataError == null)
             {
@@ -57,7 +57,7 @@ namespace Microsoft.AspNet.OData.Results
         {
             ObjectResult objectResult = new ObjectResult(Error)
             {
-                StatusCode = StatusCodes.Status409Conflict
+                StatusCode = StatusCodes.Status422UnprocessableEntity
             };
 
             await objectResult.ExecuteResultAsync(context).ConfigureAwait(false);

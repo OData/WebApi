@@ -9,7 +9,7 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Results
 {
     /// <summary>
-    /// Represents a result that when executed will produce a Unauthorized(401) response.
+    /// Represents a result that when executed will produce a Unauthorized (401) response.
     /// </summary>
     /// <remarks>This result creates an <see cref="ODataError"/> with status code: 401.</remarks>
     public class UnauthorizedODataResult : UnauthorizedResult, IODataErrorResult

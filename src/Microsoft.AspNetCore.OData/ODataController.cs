@@ -113,14 +113,15 @@ namespace Microsoft.AspNet.OData
             return new UnauthorizedODataResult(odataError);
         }
 
-        // ConflictResult was introduced in AspNet core 2.1, which is implemented from .Net standard 2.1
+        // ConflictResult and UnprocessableEntityResult were introduced in AspNet core 2.1, which is implemented from .Net standard 2.1
         // https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.controllerbase.conflict?view=aspnetcore-2.1
+        // https://docs.microsoft.com/en-us/dotnet/api/microsoft.aspnetcore.mvc.unprocessableentityresult?view=aspnetcore-2.1
 #if !NETSTANDARD2_0
         /// <summary>
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Conflict (409) response.
         /// </summary>
         /// <param name="message">Error Message</param>
-        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        /// <returns>A <see cref="ConflictODataResult"/> with the specified values.</returns>
         protected virtual ConflictODataResult Conflict(string message)
         {
             return new ConflictODataResult(message);
@@ -130,10 +131,30 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Conflict (409) response.
         /// </summary>
         /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
-        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        /// <returns>A <see cref="ConflictODataResult"/> with the specified values.</returns>
         protected virtual ConflictODataResult Conflict(ODataError odataError)
         {
             return new ConflictODataResult(odataError);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce an UnprocessableEntity (422) response.
+        /// </summary>
+        /// <param name="message">Error Message</param>
+        /// <returns>A <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
+        protected virtual UnprocessableEntityODataResult UnprocessableEntity(string message)
+        {
+            return new UnprocessableEntityODataResult(message);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StatusCodeResult"/> that when executed will produce an UnprocessableEntity (422) response.
+        /// </summary>
+        /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
+        /// <returns>A <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
+        protected virtual UnprocessableEntityODataResult UnprocessableEntity(ODataError odataError)
+        {
+            return new UnprocessableEntityODataResult(odataError);
         }
 #endif
 

@@ -518,7 +518,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
-#if NETCOREAPP3_1
+#if !NETCOREAPP2_0 && !NETFRAMEWORK
         [Fact]
         public async Task ConflictResponseFromODataControllerIsSerializedAsODataError()
         {
@@ -549,6 +549,39 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                     // Assert
                     Assert.NotNull(response);
                     Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+
+        [Fact]
+        public async Task UnProcessableEntityResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+            const string expectedResponse = "{\"error\":{\"code\":\"422\",\"message\":\"Cannot process entity.\"}}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "http://localhost/Customers/1"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
                     String actualResponse = await response.Content.ReadAsStringAsync();
                     Assert.Equal(expectedResponse, actualResponse.Trim());
 
@@ -893,10 +926,15 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 return Unauthorized("Not authorized to access this resource.");
             }
-#if NETCOREAPP3_1 || NETCOREAPP2_1
+#if !NETFRAMEWORK && !NETCOREAPP2_0
             public IActionResult Patch([FromODataUri] int key, [FromBody] Customer customer)
             {
                 return Conflict("Conflict during update.");
+            }
+
+            public IActionResult Delete([FromODataUri] int key)
+            {
+                return UnprocessableEntity("Cannot process entity.");
             }
 #endif
 #else

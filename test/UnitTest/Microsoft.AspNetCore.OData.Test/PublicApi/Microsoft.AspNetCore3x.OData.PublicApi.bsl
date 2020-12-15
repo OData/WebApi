@@ -129,6 +129,8 @@ public abstract class Microsoft.AspNet.OData.ODataController : Microsoft.AspNetC
 	protected virtual ODataErrorResult ODataErrorResult (string errorCode, string message)
 	protected virtual UnauthorizedODataResult Unauthorized (Microsoft.OData.ODataError odataError)
 	protected virtual UnauthorizedODataResult Unauthorized (string message)
+	protected virtual UnprocessableEntityODataResult UnprocessableEntity (Microsoft.OData.ODataError odataError)
+	protected virtual UnprocessableEntityODataResult UnprocessableEntity (string message)
 	protected virtual UpdatedODataResult`1 Updated (TEntity entity)
 }
 
@@ -3250,6 +3252,18 @@ public class Microsoft.AspNet.OData.Results.ODataErrorResult : Microsoft.AspNetC
 public class Microsoft.AspNet.OData.Results.UnauthorizedODataResult : Microsoft.AspNetCore.Mvc.UnauthorizedResult, IActionResult, IODataErrorResult, IClientErrorActionResult, IStatusCodeActionResult {
 	public UnauthorizedODataResult (Microsoft.OData.ODataError odataError)
 	public UnauthorizedODataResult (string message)
+
+	Microsoft.OData.ODataError Error  { public virtual get; }
+
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task ExecuteResultAsync (Microsoft.AspNetCore.Mvc.ActionContext context)
+}
+
+public class Microsoft.AspNet.OData.Results.UnprocessableEntityODataResult : Microsoft.AspNetCore.Mvc.UnprocessableEntityResult, IActionResult, IODataErrorResult, IClientErrorActionResult, IStatusCodeActionResult {
+	public UnprocessableEntityODataResult (Microsoft.OData.ODataError odataError)
+	public UnprocessableEntityODataResult (string message)
 
 	Microsoft.OData.ODataError Error  { public virtual get; }
 

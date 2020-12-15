@@ -155,16 +155,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 #if NETCOREAPP3_1
         [NonAction]
         public new TestConflictResult Conflict() { return new TestConflictResult(base.Conflict()); }
-#endif
 
-#if NETCOREAPP3_1
         [NonAction]
         public new TestConflictResult Conflict(string message) { return new TestConflictResult(base.Conflict(message)); }
-#endif
 
-#if NETCOREAPP3_1
         [NonAction]
         public new TestConflictResult Conflict(ODataError error) { return new TestConflictResult(base.Conflict(error)); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity() { return new TestUnprocessableEntityResult(base.UnprocessableEntity()); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity(string message) { return new TestUnprocessableEntityResult(base.UnprocessableEntity(message)); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity(ODataError error) { return new TestUnprocessableEntityResult(base.UnprocessableEntity(error)); }
 #endif
 
         [NonAction]
@@ -447,6 +452,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     public class TestConflictResult : TestActionResult
     {
         public TestConflictResult(ConflictResult innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Wrapper for UnprocessableEntityResult
+    /// </summary>
+#if NETCOREAPP3_1
+    public class TestUnprocessableEntityResult : TestActionResult
+    {
+        public TestUnprocessableEntityResult(UnprocessableEntityResult innerResult)
             : base(innerResult)
         {
         }

@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.OData;
 using Xunit;
 #else
 using System;
@@ -103,6 +104,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
         public TestNotFoundObjectResult NotFound(object value) { return new TestNotFoundObjectResult(base.NotFound()); }
 #endif
 
+#if NETCORE
+        public new TestNotFoundResult NotFound(ODataError error) { return new TestNotFoundResult(base.NotFound(error)); }
+#endif
+
         [NonAction]
         public new TestBadRequestResult BadRequest() { return new TestBadRequestResult(base.BadRequest()); }
 
@@ -115,16 +120,56 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
 
         [NonAction]
 #if NETCORE
-        public TestBadRequestObjectResult BadRequest(string message) { return new TestBadRequestObjectResult(base.BadRequest(message)); }
+        public new TestBadRequestResult BadRequest(string message) { return new TestBadRequestResult(base.BadRequest(message)); }
 #else
         public new TestBadRequestObjectResult BadRequest(string message) { return new TestBadRequestObjectResult(base.BadRequest(message)); }
 
+#endif
+
+        [NonAction]
+#if NETCORE
+        public new TestBadRequestResult BadRequest(ODataError error) { return new TestBadRequestResult(base.BadRequest(error)); }
 #endif
 
 #if NETCORE
         public new TestBadRequestObjectResult BadRequest(object obj) { return new TestBadRequestObjectResult(base.BadRequest(obj)); }
 #else
         public TestBadRequestObjectResult<T> BadRequest<T>(T obj) { return new TestBadRequestObjectResult<T>(base.Content(HttpStatusCode.BadRequest, obj)); }
+#endif
+
+#if NETCORE
+        [NonAction]
+        public new TestUnauthorizedResult Unauthorized() { return new TestUnauthorizedResult(base.Unauthorized()); }
+#endif
+
+#if NETCORE
+        [NonAction]
+        public new TestUnauthorizedResult Unauthorized(string message) { return new TestUnauthorizedResult(base.Unauthorized(message)); }
+#endif
+
+#if NETCORE
+        [NonAction]
+        public new TestUnauthorizedResult Unauthorized(ODataError error) { return new TestUnauthorizedResult(base.Unauthorized(error)); }
+#endif
+
+#if NETCOREAPP3_1
+        [NonAction]
+        public new TestConflictResult Conflict() { return new TestConflictResult(base.Conflict()); }
+
+        [NonAction]
+        public new TestConflictResult Conflict(string message) { return new TestConflictResult(base.Conflict(message)); }
+
+        [NonAction]
+        public new TestConflictResult Conflict(ODataError error) { return new TestConflictResult(base.Conflict(error)); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity() { return new TestUnprocessableEntityResult(base.UnprocessableEntity()); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity(string message) { return new TestUnprocessableEntityResult(base.UnprocessableEntity(message)); }
+
+        [NonAction]
+        public new TestUnprocessableEntityResult UnprocessableEntity(ODataError error) { return new TestUnprocessableEntityResult(base.UnprocessableEntity(error)); }
 #endif
 
         [NonAction]
@@ -333,7 +378,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     /// Wrapper for BadRequestResult
     /// </summary>
 #if NETCORE
-    public class TestBadRequestResult : TestStatusCodeResult
+    public class TestBadRequestResult : TestActionResult
     {
         public TestBadRequestResult(BadRequestResult innerResult)
             : base(innerResult)
@@ -381,6 +426,45 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Controllers
     public class TestBadRequestObjectResult<T> : TestActionResult
     {
         public TestBadRequestObjectResult(NegotiatedContentResult<T> innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Wrapper for UnauthorizedResult
+    /// </summary>
+#if NETCORE
+    public class TestUnauthorizedResult : TestActionResult
+    {
+        public TestUnauthorizedResult(UnauthorizedResult innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Wrapper for ConflictResult
+    /// </summary>
+#if NETCOREAPP3_1
+    public class TestConflictResult : TestActionResult
+    {
+        public TestConflictResult(ConflictResult innerResult)
+            : base(innerResult)
+        {
+        }
+    }
+#endif
+
+    /// <summary>
+    /// Wrapper for UnprocessableEntityResult
+    /// </summary>
+#if NETCOREAPP3_1
+    public class TestUnprocessableEntityResult : TestActionResult
+    {
+        public TestUnprocessableEntityResult(UnprocessableEntityResult innerResult)
             : base(innerResult)
         {
         }

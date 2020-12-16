@@ -403,6 +403,192 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
+        [Fact]
+        public async Task BadRequestResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+#if NETCORE
+            const string expectedResponse = "{\"error\":{\"code\":\"400\",\"message\":\"Update failed.\"}}";
+#else
+            const string expectedResponse = "{\"error\":{\"code\":\"\",\"message\":\"Update failed.\"}}";
+#endif
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Put, "http://localhost/Customers/1"))
+            {
+                request.Content = new StringContent(
+                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':1,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+
+        [Fact]
+        public async Task NotFoundResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+#if NETCORE
+            const string expectedResponse = "{\"error\":{\"code\":\"404\",\"message\":\"Customer not found.\"}}";
+#endif
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers/1"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+#if NETCORE
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+#endif
+
+                }
+            }
+        }
+
+        [Fact]
+        public async Task UnauthorizedResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+#if NETCORE
+            const string expectedResponse = "{\"error\":{\"code\":\"401\",\"message\":\"Not authorized to access this resource.\"}}";
+#endif
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "http://localhost/Customers"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+#if NETCORE
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+#endif
+
+                }
+            }
+        }
+
+#if !NETCOREAPP2_0 && NETCORE
+        [Fact]
+        public async Task ConflictResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+            const string expectedResponse = "{\"error\":{\"code\":\"409\",\"message\":\"Conflict during update.\"}}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Patch, "http://localhost/Customers/1"))
+            {
+                request.Content = new StringContent(
+                    string.Format(@"{{'@odata.type':'#Microsoft.AspNet.OData.Test.Formatter.EnumCustomer',
+                            'ID':1,'Color':'Green, Blue','Colors':['Red','Red, Blue']}}"));
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+
+        [Fact]
+        public async Task UnProcessableEntityResponseFromODataControllerIsSerializedAsODataError()
+        {
+            // Arrange
+            const string expectedResponse = "{\"error\":{\"code\":\"422\",\"message\":\"Cannot process entity.\"}}";
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<Customer>("Customers");
+            IEdmModel model = builder.GetEdmModel();
+            var controllers = new[] { typeof(CustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", null, model);
+            });
+
+            using (HttpClient client = TestServerFactory.CreateClient(server))
+            using (HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, "http://localhost/Customers/1"))
+            {
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                // Act
+                using (HttpResponseMessage response = await client.SendAsync(request))
+                {
+                    // Assert
+                    Assert.NotNull(response);
+                    Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+                    String actualResponse = await response.Content.ReadAsStringAsync();
+                    Assert.Equal(expectedResponse, actualResponse.Trim());
+
+                }
+            }
+        }
+#endif
         [Theory]
         [InlineData("*", "PeopleWithAllAnnotations.json")]
         [InlineData("-*", "PeopleWithoutAnnotations.json")]
@@ -713,6 +899,61 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 IList<Color> colors = new[] { Color.Blue, Color.Green, Color.Red };
                 return Ok(colors);
             }
+        }
+
+        public class Customer
+        {
+            public int ID { get; set; }
+            public Color Color { get; set; }
+            public List<Color> Colors { get; set; }
+        }
+
+        public class CustomersController : ODataController
+        {
+#if NETCORE
+            public IActionResult Put([FromODataUri] int key, [FromBody] Customer customer)
+            {
+                return BadRequest("Update failed.");
+            }
+
+            [EnableQuery]
+            public IActionResult Get(int key)
+            {
+                return NotFound ("Customer not found.");
+            }
+
+            public IActionResult Get()
+            {
+                return Unauthorized("Not authorized to access this resource.");
+            }
+#if !NETCOREAPP2_0
+            public IActionResult Patch([FromODataUri] int key, [FromBody] Customer customer)
+            {
+                return Conflict("Conflict during update.");
+            }
+
+            public IActionResult Delete([FromODataUri] int key)
+            {
+                return UnprocessableEntity("Cannot process entity.");
+            }
+#endif
+#else
+            public IHttpActionResult Put([FromODataUri] int key, [FromBody] Customer customer)
+            {
+                return BadRequest("Update failed.");
+            }
+
+            [EnableQuery]
+            public IHttpActionResult Get(int key)
+            {
+                return NotFound();
+            }
+
+            public IHttpActionResult Get()
+            {
+                return Unauthorized();
+            }
+#endif
         }
 
         public class EnumKeyCustomersController : TestODataController

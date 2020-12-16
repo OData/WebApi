@@ -97,7 +97,7 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
         /// </summary>
         /// <param name="message">Error Message</param>
-        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        /// <returns>An <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
         protected virtual UnauthorizedODataResult Unauthorized(string message)
         {
             return new UnauthorizedODataResult(message);
@@ -107,7 +107,7 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce a Unauthorized (401) response.
         /// </summary>
         /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
-        /// <returns>A <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
+        /// <returns>An <see cref="UnauthorizedODataResult"/> with the specified values.</returns>
         protected virtual UnauthorizedODataResult Unauthorized(ODataError odataError)
         {
             return new UnauthorizedODataResult(odataError);
@@ -141,7 +141,7 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce an UnprocessableEntity (422) response.
         /// </summary>
         /// <param name="message">Error Message</param>
-        /// <returns>A <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
+        /// <returns>An <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
         protected virtual UnprocessableEntityODataResult UnprocessableEntity(string message)
         {
             return new UnprocessableEntityODataResult(message);
@@ -151,7 +151,7 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="StatusCodeResult"/> that when executed will produce an UnprocessableEntity (422) response.
         /// </summary>
         /// <param name="odataError">Parameter of type <see cref="ODataError"/>.</param>
-        /// <returns>A <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
+        /// <returns>An <see cref="UnprocessableEntityODataResult"/> with the specified values.</returns>
         protected virtual UnprocessableEntityODataResult UnprocessableEntity(ODataError odataError)
         {
             return new UnprocessableEntityODataResult(odataError);
@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="errorCode">Http Error code.</param>
         /// <param name="message">Http Error Message.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="Microsoft.AspNet.OData.Results.ODataErrorResult"/> with the specified values.</returns>
         protected virtual ODataErrorResult ODataErrorResult(string errorCode, string message)
         {
             return new ODataErrorResult(errorCode, message);
@@ -173,7 +173,7 @@ namespace Microsoft.AspNet.OData
         /// Creates a <see cref="ActionResult"/> that when executed will produce an <see cref="ODataError"/> response.
         /// </summary>
         /// <param name="odataError"><see cref="ODataError"/>.</param>
-        /// <returns></returns>
+        /// <returns>An <see cref="Microsoft.AspNet.OData.Results.ODataErrorResult"/> with the specified values.</returns>
         protected virtual ODataErrorResult ODataErrorResult(ODataError odataError)
         {
             return new ODataErrorResult(odataError);

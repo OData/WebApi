@@ -14,7 +14,6 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
 
@@ -239,17 +238,9 @@ namespace Microsoft.AspNet.OData.Batch
 
             features[typeof(IHttpResponseFeature)] = new HttpResponseFeature();
 
-            // Create a context from the factory or use the default context.
-            HttpContext context = null;
-            IHttpContextFactory httpContextFactory = originalContext.RequestServices.GetRequiredService<IHttpContextFactory>();
-            if (httpContextFactory != null)
-            {
-                context = httpContextFactory.Create(features);
-            }
-            else
-            {
-                context = new DefaultHttpContext(features);
-            }
+            // Create a context.
+            // IHttpContextFactory should not be used, because it resets IHttpContextAccessor.HttpContext;
+            HttpContext context = new DefaultHttpContext(features);
 
             // Clone parts of the request. All other parts of the request will be 
             // populated during batch processing.

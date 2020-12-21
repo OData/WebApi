@@ -269,6 +269,7 @@ namespace Microsoft.AspNet.OData.Test
 
         }
 
+
         [Fact]
         public void EdmChangedObjectCollection_Patch()
         {
@@ -376,6 +377,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("NewFriend3", friends[1].NewFriends[0].Name);
             Assert.Equal("NewFriend4", friends[1].NewFriends[1].Name);
         }
+
     }
 
     public class Friend
@@ -388,9 +390,7 @@ namespace Microsoft.AspNet.OData.Test
 
     public class NewFriend
     {
-        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
-
     }
 }

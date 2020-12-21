@@ -41,6 +41,11 @@ namespace Microsoft.AspNet.OData
             Initialize(entityType);
         }
  
+        /// <summary>
+        /// Represents EntityType of the changedobject
+        /// </summary>
+        protected IEdmEntityType EntityType { get { return _entityType; } }
+
         /// <inheritdoc/>
         public IEdmTypeReference GetEdmType()
         {
@@ -57,11 +62,6 @@ namespace Microsoft.AspNet.OData
             _entityType = entityType;
             _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
             _edmTypeReference = new EdmCollectionTypeReference(_edmType);
-        }
-                
-        /// <summary>
-        /// Get the Change Object collection
-        /// </summary>
-        public virtual IEnumerable ChangedObjectCollection { get; }        
+        }       
     }
 }

@@ -103,15 +103,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
-            IEdmStructuredTypeReference elementType = edmType.AsCollection().ElementType().AsStructured();
-
-            IEdmEntityType actualType = edmType.AsCollection().ElementType().Definition as IEdmEntityType;
+            IEdmStructuredTypeReference elementType = edmType.AsCollection().ElementType().AsStructured();           
 
             IEnumerable result = ReadResourceSet(resourceSet, elementType, readContext);
 
             //Handle Delta requests to create EdmChangedObjectCollection
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
-            {                
+            {
+                IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;
                 EdmChangedObjectCollection changedObjCollection = new EdmChangedObjectCollection(actualType);
 
                 foreach (IEdmChangedObject changedObject in result)
@@ -253,7 +252,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
         {
             Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
-            
+
             IEdmModel model = readContext.Model;
 
             if (model == null)
@@ -268,24 +267,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
             }
-            string deletedResourceId = null;
-
-            if (deletedResource.Id != null)
-            {
-                deletedResourceId = deletedResource.Id.ToString();
-            }
-            else 
-            { 
-                ODataProperty key = deletedResource.Properties.FirstOrDefault(x => x.Name == actualType.Key().First().Name);
-
-                if(key != null)
-                {
-                    deletedResourceId = key.Value.ToString();
-                }
-            }
-
-            Contract.Assert(deletedResourceId != null, "ODataDeletedResource Id should not be null");
-
+          
             if (actualType.IsAbstract)
             {
                 string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, typeName);
@@ -293,13 +275,23 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(EdmLibHelpers.GetClrType(elementType, model));
-            
+
             EdmDeltaDeletedEntityObject deletedEntity = Activator.CreateInstance(type, actualType) as EdmDeltaDeletedEntityObject;
 
-            deletedEntity.Id = deletedResourceId;
+            deletedEntity.Id = deletedResource.Id == null? null : deletedResource.Id.ToString();
             deletedEntity.Reason = deletedResource.Reason.Value;
 
+            SetProperties(deletedResource, deletedEntity);
+
             return deletedEntity;
+        }
+
+        private static void SetProperties(ODataDeletedResource deletedResource, EdmDeltaDeletedEntityObject deletedEntity)
+        {
+            foreach (ODataProperty property in deletedResource.Properties)
+            {
+                deletedEntity.TrySetPropertyValue(property.Name, property.Value);
+            }
         }
     }
 }

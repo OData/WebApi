@@ -909,6 +909,9 @@ namespace Microsoft.AspNet.OData.Formatter
                 if (edmType != null)
                 {
                     expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
+
+                    //This loop should execute only if its not a type of edmchangedobjectcollection, In case of edmchangedobjectcollection,
+                    //Expectedpayloadtype should not be of elementytype, but of collection.
                     if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection && !typeof(ICollection).IsAssignableFrom(type))
                     {
                         IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();

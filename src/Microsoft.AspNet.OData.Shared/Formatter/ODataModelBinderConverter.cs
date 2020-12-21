@@ -344,7 +344,7 @@ namespace Microsoft.AspNet.OData.Formatter
             int i = 0;
             foreach (object item in sources)
             {
-                object newItem = CovertResourceId(item, ( (ODataResourceWrapper)resourceSet.Resources[i]).ResourceBase, entityTypeReference,
+                object newItem = CovertResourceId(item, resourceSet.Resources[i].ResourceBase, entityTypeReference,
                     readContext);
                 i++;
                 yield return newItem;

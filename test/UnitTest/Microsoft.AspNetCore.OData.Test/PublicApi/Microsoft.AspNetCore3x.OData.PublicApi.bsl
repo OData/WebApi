@@ -306,7 +306,7 @@ public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collecti
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType)
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.IEdmChangedObject]] changedObjectList)
 
-	System.Collections.IEnumerable ChangedObjectCollection  { public virtual get; }
+	Microsoft.OData.Edm.IEdmEntityType EntityType  { protected get; }
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 }
@@ -316,9 +316,8 @@ NonValidatingParameterBindingAttribute(),
 ]
 public class Microsoft.AspNet.OData.EdmChangedObjectCollection`1 : EdmChangedObjectCollection, ICollection`1, IEnumerable`1, ICollection, IEnumerable, IList, IEdmObject, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
 	public EdmChangedObjectCollection`1 (Microsoft.OData.Edm.IEdmEntityType entityType)
-	public EdmChangedObjectCollection`1 (Microsoft.OData.Edm.IEdmEntityType entityType, Collection`1 changedObjectList)
+	public EdmChangedObjectCollection`1 (Microsoft.OData.Edm.IEdmEntityType entityType, IList`1 changedObjectList)
 
-	System.Collections.IEnumerable ChangedObjectCollection  { public virtual get; }
 	bool IsReadOnly  { public virtual get; }
 
 	public virtual void Add (IEdmChangedObject`1 item)

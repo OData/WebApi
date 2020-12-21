@@ -991,4 +991,7 @@
   <data name="ResourceSetWrapperSupported" xml:space="preserve">
     <value>Can only add ResourceWrapper to ResourceSetWrapper</value>
   </data>
+  <data name="ChangedObjectTypeMismatch" xml:space="preserve">
+    <value>Cannot use Changed Object of type '{0}' on an entity of type '{1}'.</value>
+  </data>
 </root>

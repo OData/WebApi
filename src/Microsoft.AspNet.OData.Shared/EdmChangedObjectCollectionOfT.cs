@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNet.OData.Builder;
@@ -22,7 +23,7 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class EdmChangedObjectCollection<TStructuralType> : EdmChangedObjectCollection, ICollection<IEdmChangedObject<TStructuralType>>, IEdmObject
     {
-        private Collection<IEdmChangedObject<TStructuralType>> _items;
+        private IList<IEdmChangedObject<TStructuralType>> _items;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
@@ -40,21 +41,17 @@ namespace Microsoft.AspNet.OData
         /// <param name="entityType">The Edm type of the collection.</param>
         /// <param name="changedObjectList">The list that is wrapped by the new collection.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures")]
-        public EdmChangedObjectCollection(IEdmEntityType entityType, Collection<IEdmChangedObject<TStructuralType>> changedObjectList)
+        public EdmChangedObjectCollection(IEdmEntityType entityType, IList<IEdmChangedObject<TStructuralType>> changedObjectList)
             : base(entityType, changedObjectList as IList<IEdmChangedObject>)
         {            
             _items = changedObjectList;
         }
 
         /// <inheritdoc/>
-        public override IEnumerable ChangedObjectCollection { get { return _items; } }
-
-        /// <inheritdoc/>
         public void Add(IEdmChangedObject<TStructuralType> item)
         {
-            _items.Add(item);
+            InsertItem(_items.Count, item);
         }
-
        
         /// <inheritdoc/>
         public bool Contains(IEdmChangedObject<TStructuralType> item)
@@ -77,7 +74,10 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public bool Remove(IEdmChangedObject<TStructuralType> item)
         {
-            return _items.Remove(item);
+            int count = _items.Count;
+            RemoveItem(_items.IndexOf(item));
+
+            return count == _items.Count + 1;
         }
 
         /// <inheritdoc/>
@@ -90,9 +90,13 @@ namespace Microsoft.AspNet.OData
         protected override void InsertItem(int index, IEdmChangedObject item)
         {
             IEdmChangedObject<TStructuralType> _item = item as IEdmChangedObject<TStructuralType>;
-            Contract.Assert(_item != null);
+            if (_item == null)
+            {
+                throw Error.Argument("item", SRResources.ChangedObjectTypeMismatch, typeof(TStructuralType), item.GetType());
+            }
 
             _items.Add(_item);
+            base.InsertItem(index, item);
         }
 
         /// <inheritdoc/>
@@ -107,6 +111,7 @@ namespace Microsoft.AspNet.OData
             Contract.Assert(_items.Count > index);
             
             _items.RemoveAt(index);
+            base.RemoveItem(index);
         }
 
         /// <inheritdoc/>
@@ -121,25 +126,23 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Copy changed values is an implementation of Patch
         /// </summary>
-        /// <param name="original"></param>              
+        /// <param name="original">Original collection of the Type which needs to be updated</param>              
         public void CopyChangedValues(ICollection<TStructuralType> original)
         {
             //Here we need to Find the key of the Type, then only we will be able to find from the collection that which item in the collection
-            //corresponds to the item in delta list(Edmchangedobjectcoll). For this we use somewhat the same logic used in 
-            //the method private static PropertyConfiguration GetKeyProperty(EntityTypeConfiguration entityType) in EntityKeyConvention class
-            //Once we find the key we use that to pick the corresponding item from the original collection (by comparing the value of the key, eg: Id)
-            Type type = original.First().GetType();
-            string key = GetKeyProperty(type.GetProperties(), type.Name);
+            //corresponds to the item in delta list(Edmchangedobjectcoll).
+            Type type = typeof(TStructuralType);
+            IEnumerable<IEdmStructuralProperty> keys = EntityType.Key();
 
             foreach (dynamic changedObj in _items)
             {
-                object Id;
+                //Get filtered item based on keys
+                TStructuralType originalObj = GetFilteredItem(type, keys, original as IEnumerable<TStructuralType>, changedObj);
+                                                
                 IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
 
-                if(deletedObj != null)
+                if (deletedObj != null)
                 {
-                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty(key).GetValue(x).ToString() == deletedObj.Id);
-
                     if (originalObj != null)
                     {
                         //This case handle deletions
@@ -147,10 +150,7 @@ namespace Microsoft.AspNet.OData
                     }
                 }
                 else
-                {                 
-                    changedObj.TryGetPropertyValue(key, out Id);
-                    TStructuralType originalObj = original.FirstOrDefault(x => x.GetType().GetProperty(key).GetValue(x).ToString() == Id.ToString());
-
+                {
                     if (originalObj == null)
                     {
                         //This case handle additions
@@ -164,28 +164,29 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        private static TStructuralType GetFilteredItem(Type type, IEnumerable<IEdmStructuralProperty> keys, IEnumerable<TStructuralType> originalList, IEdmChangedObject changedObject)
+        {   
+            //This logic is for filtering the object based on the set of keys,
+            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
+            foreach(IEdmStructuralProperty key in keys)
+            {
+                object obj;
+                if (changedObject.TryGetPropertyValue(key.Name, out obj))
+                {
+                    originalList = originalList.Where(x => type.GetProperty(key.Name).GetValue(x).ToString() == obj.ToString());
+                }
+            }
+
+            return originalList.SingleOrDefault();
+        }
+
         /// <summary>
         /// Patch for EdmChangedobjectCollection, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>
-        /// <param name="original"></param>        
+        /// <param name="original">Original collection of the Type which needs to be updated</param>        
         public void Patch(ICollection<TStructuralType> original)
         {
             CopyChangedValues(original);
-        }
-
-        private static string GetKeyProperty(PropertyInfo[] allProperties, string entityName)
-        {
-            var keys =
-               allProperties
-               .Where(p => (p.Name.Equals(entityName + "Id", StringComparison.OrdinalIgnoreCase) || p.Name.Equals("Id", StringComparison.OrdinalIgnoreCase))
-               && (EdmLibHelpers.GetEdmPrimitiveTypeOrNull(p.PropertyType) != null || TypeHelper.IsEnum(p.PropertyType)));
-
-            if (keys.Count() == 1)
-            {
-                return keys.Single().Name;
-            }
-
-            return null;
         }
     }
 }

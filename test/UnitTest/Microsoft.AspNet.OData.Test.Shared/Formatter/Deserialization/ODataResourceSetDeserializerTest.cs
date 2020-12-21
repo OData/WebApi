@@ -161,7 +161,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataDeltaResourceSetWrapper resourceSetWrapper = new ODataDeltaResourceSetWrapper(new ODataDeltaResourceSet());
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a1/") }));
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a2/") }));
-            resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataDeletedResource {TypeName=typeof(Customer).FullName, Reason= DeltaDeletedEntryReason.Deleted, Id = new Uri("http://a2/") }));
+            resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataDeletedResource {TypeName=typeof(Customer).FullName, Reason= DeltaDeletedEntryReason.Deleted, Id = new Uri("http://a2/"), Properties = new List<ODataProperty>() }));
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = _model };
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
@@ -217,7 +217,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataDeltaResourceSetWrapper resourceSetWrapper = new ODataDeltaResourceSetWrapper(new ODataDeltaResourceSet { TypeName = typeof(Customer).FullName });
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a1/") }));
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a2/") }));
-            resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataDeletedResource { TypeName = typeof(Customer).FullName, Reason = DeltaDeletedEntryReason.Deleted, Id = new Uri("http://a2/") }));
+            resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataDeletedResource { TypeName = typeof(Customer).FullName, Reason = DeltaDeletedEntryReason.Deleted, Id = new Uri("http://a2/"), Properties = new List<ODataProperty>() }));
             resourceSetWrapper.Items.Add(new ODataDeltaLinkWrapper(new ODataDeltaLink(new Uri("http://a1/"), new Uri("http://a2/"), "TestRelation")));
             resourceSetWrapper.Items.Add(new ODataDeltaLinkWrapper(new ODataDeltaDeletedLink(new Uri("http://a1/"), new Uri("http://a2/"), "TestDeletedRel")));
             ODataDeserializerContext readContext = new ODataDeserializerContext { Model = _model };

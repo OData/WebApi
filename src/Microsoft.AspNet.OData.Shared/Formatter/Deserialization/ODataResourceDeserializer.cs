@@ -223,23 +223,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if (readContext.IsDeltaOfT)
                 {
-                    IEnumerable<string> structuralProperties = structuredType.StructuralProperties()
+                    IEnumerable<string> structuralProperties = structuredType.StructuredDefinition().Properties()
                         .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
-
-                    IEnumerable<string> updatableProperties= structuralProperties.Union(structuredType.NavigationProperties()
-                        .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model)));
 
                     if (structuredType.IsOpen())
                     {
                         PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
                             structuredType.StructuredDefinition(), model);
 
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, updatableProperties,
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
                             dynamicDictionaryPropertyInfo);
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, updatableProperties);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
                     }
                 }
                 else
@@ -522,7 +519,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             object value = ReadNestedResourceSetInline(resourceSetWrapper, nestedProperty.Type, readContext);
 
             string propertyName = EdmLibHelpers.GetClrPropertyName(nestedProperty, readContext.Model);
-            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName, resourceSetWrapper.ResourceSetType== ResourceSetType.DeltaResourceSet);
+            DeserializationHelpers.SetCollectionProperty(resource, nestedProperty, value, propertyName, resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet);
         }
 
         private void ApplyDynamicResourceSetInNestedProperty(string propertyName, object resource, IEdmStructuredTypeReference structuredType,

@@ -499,6 +499,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Cannot use Changed Object of type &apos;{0}&apos; on an entity of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string ChangedObjectTypeMismatch
+        {
+            get
+            {
+                return ResourceManager.GetString("ChangedObjectTypeMismatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The given model does not contain the type &apos;{0}&apos;..
         /// </summary>
         internal static string ClrTypeNotInModel

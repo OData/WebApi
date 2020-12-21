@@ -4,11 +4,13 @@
 using Microsoft.AspNet.OData.Builder;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 {
     public class Employee
     {
+        [Key]
         public int ID { get; set; }
         public String Name { get; set; }
         public List<Skill> SkillSet { get; set; }

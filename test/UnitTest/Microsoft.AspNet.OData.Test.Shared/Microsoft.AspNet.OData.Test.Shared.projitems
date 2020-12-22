@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batch\MockHttpServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContentTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchMiddlewareTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchReaderExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchRequestHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchRequestItemTest.cs" />

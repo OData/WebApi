@@ -562,6 +562,16 @@ Accept-Charset: UTF-8
                 "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
             },
             {
+                // should not concatenate preferences that should not be inherited
+                new []
+                {
+                    "wait=100,handling=lenient"
+                },
+                "GET,ContentType=,ContentLength=,Prefer=",
+                "DELETE,ContentType=,ContentLength=,Prefer=wait=100,handling=lenient",
+                "POST,ContentType=text/plain; charset=utf-8,ContentLength=3,Prefer="
+            },
+            {
                 // inheritable preferences should be copied over
                 // and combined with the individual request's own preferences if any
                 new []

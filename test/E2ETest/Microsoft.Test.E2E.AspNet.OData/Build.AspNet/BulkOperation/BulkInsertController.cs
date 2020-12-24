@@ -14,6 +14,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 {
@@ -150,16 +151,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         [ODataRoute("Employees")]
         [HttpPatch]
-        public EdmChangedObjectCollection PatchEmployees( [FromBody] EdmChangedObjectCollection<Employee> coll)
+        public ITestActionResult PatchEmployees( [FromBody] EdmChangedObjectCollection<Employee> coll)
         {
+            Assert.NotNull(coll);
             coll.Patch(Employees);
-            return coll;
+
+            return Ok(Employees);
         }
 
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
-        public void PatchFriends(int key, [FromBody] EdmChangedObjectCollection<Friend> ts)
+        public ITestActionResult PatchFriends(int key, [FromBody] EdmChangedObjectCollection<Friend> friendColl)
         {
+            Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
+            Assert.NotNull(originalEmployee);
+
+            friendColl.Patch(originalEmployee.Friends);
+
+            return Ok(originalEmployee.Friends);
         }
 
 

@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
 
-            ODataReader resourceSetReader = messageReader.CreateODataResourceSetReader();
+            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? messageReader.CreateODataDeltaResourceSetReader() : messageReader.CreateODataResourceSetReader();
             object resourceSet = resourceSetReader.ReadResourceOrResourceSet();
             return ReadInline(resourceSet, edmType, readContext);
         }
@@ -111,7 +111,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {
                 IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;
-                EdmChangedObjectCollection changedObjCollection = new EdmChangedObjectCollection(actualType);
+                
+                Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+                Type changedObjCollType = typeof(EdmChangedObjectCollection<>).MakeGenericType(type);
+
+                EdmChangedObjectCollection changedObjCollection = Activator.CreateInstance(changedObjCollType, actualType) as EdmChangedObjectCollection;
 
                 foreach (IEdmChangedObject changedObject in result)
                 {                
@@ -175,6 +179,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
+                Type clrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+
+                if (readContext.IsChangedObjectCollection)
+                {
+                    readContext.ResourceType = typeof(Delta<>).MakeGenericType(clrType);
+                }
+
                 foreach (ODataItemBase odataItemBase in resourceSet.Items)
                 {
                     ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
@@ -185,7 +196,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                         if (deletedResource != null)
                         {
-                            yield return DeSerializeDeletedEntity(deletedResource, elementType, readContext);
+                            yield return DeSerializeDeletedEntity(deletedResource, readContext, clrType);
                         }
                         else
                         {
@@ -249,7 +260,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return edmDeltaLink;
         }
 
-        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
+        private static EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, ODataDeserializerContext readContext, Type clrType)
         {
             Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
 
@@ -274,7 +285,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw new ODataException(message);
             }
 
-            Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(EdmLibHelpers.GetClrType(elementType, model));
+            Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(clrType);
 
             EdmDeltaDeletedEntityObject deletedEntity = Activator.CreateInstance(type, actualType) as EdmDeltaDeletedEntityObject;
 

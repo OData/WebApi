@@ -1,10 +1,15 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Test.Builder;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -263,17 +268,127 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Empty(edmChangedObjectcollection);
 
         }
+
+        [Fact]
+        public void EdmChangedObjectCollection_Patch()
+        {
+            //Assign
+            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+
+            var edmChangedObjectcollection = new EdmChangedObjectCollection<Friend>(_entityType);
+
+
+            var edmChangedObj1 = new Delta<Friend>();
+            edmChangedObj1.TrySetPropertyValue("Id", 1);
+            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+
+            var edmChangedObj2 = new Delta<Friend>();
+            edmChangedObj2.TrySetPropertyValue("Id", 2);
+            edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
+                        
+            edmChangedObjectcollection.Add(edmChangedObj1);
+            edmChangedObjectcollection.Add(edmChangedObj2);
+
+            var friends = new List<Friend>();
+            friends.Add(new Friend { Id = 1, Name = "Test1" });
+            friends.Add(new Friend { Id = 2, Name = "Test2" });
+
+            //Act
+            edmChangedObjectcollection.Patch(friends);
+
+            //Assert
+            Assert.Equal(2, friends.Count);
+            Assert.Equal("Friend1", friends[0].Name);
+            Assert.Equal("Friend2", friends[1].Name);
+
+        }
+
+
+        [Fact]
+        public void EdmChangedObjectCollection_Patch_WithNestedDelta()
+        {
+            //Assign
+            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+
+            EdmEntityType _entityType1 = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "NewFriend");
+            _entityType1.AddKeys(_entityType1.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+
+            var edmChangedObjectcollection = new EdmChangedObjectCollection<Friend>(_entityType);
+
+            var edmChangedObjectcollection1 = new EdmChangedObjectCollection<NewFriend>(_entityType1);
+
+            var edmNewObj1 = new Delta<NewFriend>();
+            edmNewObj1.TrySetPropertyValue("Id", 1);
+            edmNewObj1.TrySetPropertyValue("Name", "NewFriend1");
+
+            var edmNewObj2 = new Delta<NewFriend>();
+            edmNewObj2.TrySetPropertyValue("Id", 2);
+            edmNewObj2.TrySetPropertyValue("Name", "NewFriend2");
+
+            edmChangedObjectcollection1.Add(edmNewObj1);
+            edmChangedObjectcollection1.Add(edmNewObj2);
+
+            var edmChangedObjectcollection2 = new EdmChangedObjectCollection<NewFriend>(_entityType1);
+
+            var edmNewObj21 = new Delta<NewFriend>();
+            edmNewObj21.TrySetPropertyValue("Id", 3);
+            edmNewObj21.TrySetPropertyValue("Name", "NewFriend3");
+
+            var edmNewObj22 = new Delta<NewFriend>();
+            edmNewObj22.TrySetPropertyValue("Id", 4);
+            edmNewObj22.TrySetPropertyValue("Name", "NewFriend4");
+
+            edmChangedObjectcollection2.Add(edmNewObj21);
+            edmChangedObjectcollection2.Add(edmNewObj22);
+
+            var edmChangedObj1 = new Delta<Friend>();
+            edmChangedObj1.TrySetPropertyValue("Id", 1);
+            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+            edmChangedObj1.TrySetPropertyValue("NewFriends", edmChangedObjectcollection1);
+
+            var edmChangedObj2 = new Delta<Friend>();
+            edmChangedObj2.TrySetPropertyValue("Id", 2);
+            edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
+            edmChangedObj2.TrySetPropertyValue("NewFriends", edmChangedObjectcollection2);
+
+            edmChangedObjectcollection.Add(edmChangedObj1);
+            edmChangedObjectcollection.Add(edmChangedObj2);
+
+            var friends = new List<Friend>();
+            friends.Add(new Friend { Id = 1, Name = "Test1" });
+            friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
+
+            //Act
+            edmChangedObjectcollection.Patch(friends);
+
+            //Assert
+            Assert.Equal(2, friends.Count);
+            Assert.Equal("Friend1", friends[0].Name);
+            Assert.Equal("Friend2", friends[1].Name);
+
+            Assert.Equal(2, friends[0].NewFriends.Count);
+            Assert.Equal(2, friends[1].NewFriends.Count);
+
+            Assert.Equal("NewFriend1", friends[0].NewFriends[0].Name);
+            Assert.Equal("NewFriend2", friends[0].NewFriends[1].Name);
+            Assert.Equal("NewFriend3", friends[1].NewFriends[0].Name);
+            Assert.Equal("NewFriend4", friends[1].NewFriends[1].Name);
+        }
     }
 
     public class Friend
     {
+        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
-
+        public List<NewFriend> NewFriends { get; set; }
     }
 
     public class NewFriend
     {
+        [Key]
         public int Id { get; set; }
         public string Name { get; set; }
 

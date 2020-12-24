@@ -135,7 +135,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataDeltaResourceSetWrapper resourceSetWrapper = new ODataDeltaResourceSetWrapper(new ODataDeltaResourceSet());
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a1/") }));
             resourceSetWrapper.Items.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a2/") }));
-            ODataDeserializerContext readContext = new ODataDeserializerContext();
+            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = _model };
 
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
             entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Items[0], _customerType, readContext)).Returns("entry1").Verifiable();

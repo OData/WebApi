@@ -198,6 +198,136 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         }
 
+
+        [Fact]
+        public async Task PatchEmployee_WithUpdates_Friends()
+        {
+            //Arrange
+            await ResetDatasource();
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+                    'value':[{ 'Id':1,'Name':'Friend1'},{ 'Id':2,'Name':'Friend2'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+
+                Assert.Equal(2, result.Count);
+                Assert.Contains("Friend1", result.ToString());
+                Assert.Contains("Friend2", result.ToString());
+            }
+
+        }
+
+        [Fact]
+        public async Task PatchEmployee_WithDeletes_Friends()
+        {
+            //Arrange
+            await ResetDatasource();
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ 'Id':2,'Name':'Friend2'}]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                var result = json.GetValue("value") as JArray;
+
+                Assert.Single(result);                
+                Assert.Contains("Friend2", result.ToString());
+            }
+
+        }
+
+
+        [Fact]
+        public async Task PatchEmployee_WithUpdates_Employees()
+        {
+            //Arrange
+            await ResetDatasource();
+            string requestUri = this.BaseAddress + "/convention/Employees";
+
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees/$delta',     
+                    'value':[{ 'ID':1,'Name':'Employee1',
+                            'Friends@odata.delta':[{'Id':1,'Name':'Friend1'},{'Id':2,'Name':'Friend2'}]
+                                },
+                            { 'ID':2,'Name':'Employee2',
+                            'Friends@odata.delta':[{'Id':3,'Name':'Friend3'},{'Id':4,'Name':'Friend4'}]
+                                }
+]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            //Assert
+            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+                
+                Assert.Contains("Friend1", json.ToString());
+                Assert.Contains("Friend2", json.ToString());
+            }
+
+            requestUri = this.BaseAddress + "/convention/Employees(2)/Friends";
+            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
+            {
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsObject<JObject>();
+
+                Assert.Contains("Friend3", json.ToString());
+                Assert.Contains("Friend4", json.ToString());
+            }
+        }
+
+
         [Fact]
         public async Task PatchEmployee_WithDelete()
         {

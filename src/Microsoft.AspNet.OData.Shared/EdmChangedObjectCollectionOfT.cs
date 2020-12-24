@@ -188,5 +188,17 @@ namespace Microsoft.AspNet.OData
         {
             CopyChangedValues(original);
         }
+
+        internal ICollection<TStructuralType> GetInstance()
+        {
+            ICollection<TStructuralType> collection = new List<TStructuralType>();
+
+            foreach(dynamic item in Items)
+            {
+                collection.Add(item.GetInstance());
+            }
+
+            return collection;
+        }
     }
 }

@@ -15,6 +15,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     {
         private bool? _isDeltaOfT;
         private bool? _isUntyped;
+        private bool? _isChangedObjectCollection;
 
         /// <summary>
         /// Gets or sets the type of the top-level object the request needs to be deserialized into.
@@ -62,6 +63,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
 
                 return _isDeltaOfT.Value;
+            }
+        }
+
+        internal bool IsChangedObjectCollection
+        {
+            get
+            {
+                if (!_isChangedObjectCollection.HasValue)
+                {
+                    _isChangedObjectCollection = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && 
+                        (ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection<>) || ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection));
+                }
+
+                return _isChangedObjectCollection.Value;
             }
         }
 

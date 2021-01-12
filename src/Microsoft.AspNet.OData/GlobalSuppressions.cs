@@ -61,4 +61,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetAllResourceAnnotations()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Scope = "member", Target = "Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer.#GetResourceAnnotations()")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Scope = "member", Target = "Microsoft.AspNet.OData.Delta`1.#Microsoft.AspNet.OData.IEdmObject.GetEdmType()")]
-
+[assembly: SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Upsert", Scope = "member", Target = "Microsoft.AspNet.OData.DataModificationOperationKind.#Upsert")]

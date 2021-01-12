@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Builder;
+
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
@@ -14,5 +16,15 @@ namespace Microsoft.AspNet.OData
         /// Used to determine which Delta object to create during serialization.
         /// </summary>
         EdmDeltaEntityKind DeltaKind { get; }
+
+        /// <summary>
+        /// To hold Data Modification Exception
+        /// </summary>
+        DataModificationException DataModificationException { get; set; }
+
+        /// <summary>
+        /// To hold Instance Annotations
+        /// </summary>
+        IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 }

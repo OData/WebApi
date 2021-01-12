@@ -94,6 +94,18 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IODataInstanceAnnotationContainer instanceAnnotationContainer = GetAnnotationContainer(propertyInfo, resource);
 
             SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, deserializerProvider, readContext);
+
+            SetInstanceAnnotationsForEdmChangedObject(resource, instanceAnnotationContainer);
+        }
+
+        private static void SetInstanceAnnotationsForEdmChangedObject(object resource, IODataInstanceAnnotationContainer instanceAnnotationContainer)
+        {
+            IEdmChangedObject delta = resource as IEdmChangedObject;
+
+            if(delta != null)
+            {
+                delta.InstanceAnnotations = instanceAnnotationContainer;
+            }
         }
 
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,

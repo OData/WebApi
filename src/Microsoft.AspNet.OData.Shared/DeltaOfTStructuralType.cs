@@ -10,6 +10,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
@@ -42,6 +43,7 @@ namespace Microsoft.AspNet.OData
         private PropertyInfo _dynamicDictionaryPropertyinfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
+        private IEdmTypeReference _edmType;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
@@ -83,14 +85,46 @@ namespace Microsoft.AspNet.OData
         /// </param>
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="edmType">Edm type of the TStructuralType</param>
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties, IEdmTypeReference edmType)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null, edmType)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
         /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
         /// properties. <c>null</c> means this entity type is not open.</param>
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, edmType: null)
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        /// <param name="edmType">Edm type of the TStructuralType</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
-            PropertyInfo dynamicDictionaryPropertyInfo)
+            PropertyInfo dynamicDictionaryPropertyInfo, IEdmTypeReference edmType)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(structuralType);
             InitializeProperties(updatableProperties);
+            _edmType = edmType;
         }
 
         /// <inheritdoc/>
@@ -112,6 +146,13 @@ namespace Microsoft.AspNet.OData
         /// Gets the enum type of <see cref="EdmDeltaEntityKind"/>.
         /// </summary>
         public EdmDeltaEntityKind DeltaKind { get; set; }
+
+
+        /// <inheritdoc />
+        public DataModificationException DataModificationException { get; set; }
+
+        /// <inheritdoc />
+        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
 
         /// <inheritdoc/>
         public override void Clear()
@@ -524,11 +565,12 @@ namespace Microsoft.AspNet.OData
                     .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
-
+            
             if (updatableProperties != null)
             {
                 _updatableProperties = new HashSet<string>(updatableProperties);
                 _updatableProperties.IntersectWith(_allProperties.Keys);
+                _updatableProperties.Add("InstanceAnnotations");
             }
             else
             {
@@ -713,7 +755,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>Returns the EdmType of the Type</returns>
         Microsoft.OData.Edm.IEdmTypeReference IEdmObject.GetEdmType()
         {
-            throw new NotImplementedException();
+            return _edmType;
         }
     }
 }

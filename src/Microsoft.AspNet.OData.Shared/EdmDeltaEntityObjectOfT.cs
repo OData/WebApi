@@ -13,11 +13,8 @@ namespace Microsoft.AspNet.OData
     /// Used to hold the Entry object in the Delta Feed Payload.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class EdmDeltaEntityObject : EdmEntityObject, IEdmChangedObject
+    public class EdmDeltaEntityObject<TStructuralType> : EdmDeltaEntityObject, IEdmChangedObject<TStructuralType>
     {
-        private EdmDeltaType _edmType;
-        private IEdmNavigationSource _navigationSource;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaEntityObject"/> class.
         /// </summary>
@@ -44,39 +41,7 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaEntityObject(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.Entry);
-        }
 
-        /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
-        {
-            get
-            {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
-            }
-        }
-
-
-        /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
-
-        /// <summary>
-        /// The navigation source of the entity. If null, then the entity is from the current feed.
-        /// </summary>
-        public IEdmNavigationSource NavigationSource
-        {
-            get
-            {
-                return _navigationSource;
-            }
-            set
-            {
-                _navigationSource = value;
-            }
-        }
+        }       
     }
 }

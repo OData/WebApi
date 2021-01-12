@@ -53,9 +53,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\BindingPathHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConcurrencyPropertiesAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CustomAggregateMethodAnnotation.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModificationException.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModificationExceptionType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmChangedObjectCollectionOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaDeletedEntityObjectOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaEntityObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ETagMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />

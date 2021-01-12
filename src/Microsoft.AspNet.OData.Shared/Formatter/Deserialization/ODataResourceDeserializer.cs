@@ -232,11 +232,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                             structuredType.StructuredDefinition(), model);
 
                         return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
-                            dynamicDictionaryPropertyInfo);
+                            dynamicDictionaryPropertyInfo, structuredType);
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, structuredType);
                     }
                 }
                 else

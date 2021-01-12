@@ -19,6 +19,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             employee.EnumProperty<Gender>(c => c.Gender);
             employee.EnumProperty<AccessLevel>(c => c.AccessLevel);
             employee.ComplexProperty<FavoriteSports>(c => c.FavoriteSports);
+            employee.CollectionProperty<Friend>(c => c.Friends);
+            employee.CollectionProperty<NewFriend>(c => c.NewFriends);
 
 
             var skill = builder.EnumType<Skill>();
@@ -56,6 +58,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
             EntitySetConfiguration<Employee> employees = builder.EntitySet<Employee>("Employees");
             EntityTypeConfiguration<Employee> employee = employees.EntityType;
+
+            EntitySetConfiguration<Friend> friends = builder.EntitySet<Friend>("Friends");
+            EntitySetConfiguration<NewFriend> fnewriends = builder.EntitySet<NewFriend>("NewFriends");
 
             // maybe following lines are not required once bug #1587 is fixed.
             // 1587: It's better to support automatically adding actions and functions in ODataConventionModelBuilder.

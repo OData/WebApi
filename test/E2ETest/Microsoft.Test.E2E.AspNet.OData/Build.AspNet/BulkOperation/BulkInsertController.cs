@@ -98,45 +98,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             return Ok(emp.Friends);
         }
 
-        public ITestActionResult GetAccessLevelFromEmployee(int key)
-        {
-            return Ok(Employees.SingleOrDefault(e => e.ID == key).AccessLevel);
-        }
-
-        public ITestActionResult GetNameFromEmployee(int key)
-        {
-            return Ok(Employees.SingleOrDefault(e => e.ID == key).Name);
-        }
-
-        [EnableQuery]
-        public ITestActionResult GetSkillSetFromEmployee(int key)
-        {
-            return Ok(Employees.SingleOrDefault(e => e.ID == key).SkillSet);
-        }
-
-        [EnableQuery]
-        public ITestActionResult GetFavoriteSportsFromEmployee(int key)
-        {
-            var employee = Employees.SingleOrDefault(e => e.ID == key);
-            return Ok(employee.FavoriteSports);
-        }
-
-        [HttpGet]
-        [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
-        public ITestActionResult GetFavoriteSportLikeMost(int key)
-        {
-            var firstOrDefault = Employees.FirstOrDefault(e => e.ID == key);
-            return Ok(firstOrDefault.FavoriteSports.LikeMost);
-        }
-
-        public ITestActionResult Post([FromBody]Employee employee)
-        {
-            employee.ID = Employees.Count + 1;
-            Employees.Add(employee);
-
-            return Created(employee);
-        }
-
         [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
         public ITestActionResult PostToSkillSet(int key, [FromBody]Skill newSkill)
         {
@@ -153,45 +114,49 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         [HttpPatch]
         public ITestActionResult PatchEmployees( [FromBody] EdmChangedObjectCollection<Employee> coll)
         {
-            Assert.NotNull(coll);
-            coll.Patch(Employees);
+            InitEmployees();
 
-            return Ok(Employees);
+            Assert.NotNull(coll);
+            var returncoll = coll.Patch(Employees);
+
+            return Ok(returncoll);
         }
 
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
         public ITestActionResult PatchFriends(int key, [FromBody] EdmChangedObjectCollection<Friend> friendColl)
         {
+            InitEmployees();
+
             Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
             Assert.NotNull(originalEmployee);
+                        
+            var changedObjColl = friendColl.Patch(originalEmployee.Friends);
 
-            friendColl.Patch(originalEmployee.Friends);
-
-            return Ok(originalEmployee.Friends);
+            return Ok(changedObjColl);
         }
 
 
-        public ITestActionResult Put(int key, [FromBody]Employee employee)
+        [ODataRoute("Employees({key})/NewFriends")]
+        [HttpPatch]
+        public ITestActionResult PatchNewFriends(int key, [FromBody] EdmChangedObjectCollection<NewFriend> friendColl)
         {
-            employee.ID = key;
+            InitEmployees();
+
             Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
+            Assert.NotNull(originalEmployee);
 
-            if (originalEmployee == null)
-            {
-                Employees.Add(employee);
-
-                return Created(employee);
-            }
-
-            Employees.Remove(originalEmployee);
-            Employees.Add(employee);
-            return Ok(employee);
+            var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
+            
+            var changedObjColl = friendColl.Patch(friendCollection);
+            
+            return Ok(changedObjColl);
         }
 
         [ODataRoute("Employees({key})")]
         public ITestActionResult Patch(int key, [FromBody]Delta<Employee> delta)
         {
+            InitEmployees();
 
             delta.TrySetPropertyValue("ID", key); // It is the key property, and should not be updated.
 
@@ -215,38 +180,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             return Ok(employee);
         }
 
-        public ITestActionResult Delete(int key)
-        {
-            IEnumerable<Employee> appliedEmployees = Employees.Where(c => c.ID == key);
-
-            if (appliedEmployees.Count() == 0)
-            {
-                return BadRequest(string.Format("The entry with ID {0} doesn't exist", key));
-            }
-
-            Employee employee = appliedEmployees.Single();
-            Employees.Remove(employee);
-            return this.StatusCode(HttpStatusCode.NoContent);
-        }
-
-        [HttpPost]
-        public ITestActionResult AddSkill([FromODataUri] int key, [FromBody]ODataActionParameters parameters)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            Skill skill = (Skill)parameters["skill"];
-
-            Employee employee = Employees.FirstOrDefault(e => e.ID == key);
-            if (!employee.SkillSet.Contains(skill))
-            {
-                employee.SkillSet.Add(skill);
-            }
-
-            return Ok(employee.SkillSet);
-        }
 
         [HttpPost]
         [ODataRoute("ResetDataSource")]
@@ -255,46 +188,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             this.InitEmployees();
             return this.StatusCode(HttpStatusCode.NoContent);
         }
-
-        [HttpPost]
-        [ODataRoute("SetAccessLevel")]
-        public ITestActionResult SetAccessLevel([FromBody]ODataActionParameters parameters)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            int ID = (int)parameters["ID"];
-            AccessLevel accessLevel = (AccessLevel)parameters["accessLevel"];
-            Employee employee = Employees.FirstOrDefault(e => e.ID == ID);
-            employee.AccessLevel = accessLevel;
-            return Ok(employee.AccessLevel);
-        }
-
-        [HttpGet]
-        public ITestActionResult GetAccessLevel([FromODataUri] int key)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-
-            Employee employee = Employees.FirstOrDefault(e => e.ID == key);
-
-            return Ok(employee.AccessLevel);
-        }
-
-        [HttpGet]
-        [ODataRoute("HasAccessLevel(ID={id},AccessLevel={accessLevel})")]
-        public ITestActionResult HasAccessLevel([FromODataUri] int id, [FromODataUri] AccessLevel accessLevel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            Employee employee = Employees.FirstOrDefault(e => e.ID == id);
-            var result = employee.AccessLevel.HasFlag(accessLevel);
-            return Ok(result);
-        }
+                
     }
 }

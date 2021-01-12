@@ -13,6 +13,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
@@ -127,41 +128,127 @@ namespace Microsoft.AspNet.OData
         /// Copy changed values is an implementation of Patch
         /// </summary>
         /// <param name="original">Original collection of the Type which needs to be updated</param>              
-        public void CopyChangedValues(ICollection<TStructuralType> original)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        public EdmChangedObjectCollection<TStructuralType> CopyChangedValues(ICollection<TStructuralType> original)
         {
             //Here we need to Find the key of the Type, then only we will be able to find from the collection that which item in the collection
             //corresponds to the item in delta list(Edmchangedobjectcoll).
             Type type = typeof(TStructuralType);
             IEnumerable<IEdmStructuralProperty> keys = EntityType.Key();
 
+            EdmChangedObjectCollection<TStructuralType> edmChangedObjectCollection = new EdmChangedObjectCollection<TStructuralType>(EntityType);
+
             foreach (dynamic changedObj in _items)
             {
+                DataModificationOperationKind operation = DataModificationOperationKind.Update;
+                IEdmChangedObject edmChangedObject = null;
+               
                 //Get filtered item based on keys
-                TStructuralType originalObj = GetFilteredItem(type, keys, original as IEnumerable<TStructuralType>, changedObj);
-                                                
-                IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
+                TStructuralType originalObj = GetFilteredItem(type, keys, original as IEnumerable<TStructuralType>, changedObj); ;
 
-                if (deletedObj != null)
+                try
                 {
-                    if (originalObj != null)
+                    IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
+
+                    if (deletedObj != null)
                     {
-                        //This case handle deletions
-                        original.Remove(originalObj);
+                        if (deletedObj.Reason == DeltaDeletedEntryReason.Deleted)
+                        {
+                            operation = DataModificationOperationKind.Delete;
+                        }
+                        else
+                        {
+                            operation = DataModificationOperationKind.Unlink;
+                        }
+
+                        if (originalObj != null)
+                        {
+                            //This case handle deletions
+                            original.Remove(originalObj);
+                        }
+                    }
+                    else
+                    {
+                        if (originalObj == null)
+                        {
+                            operation = DataModificationOperationKind.Insert;
+                            //This case handle additions
+                            originalObj = Activator.CreateInstance(changedObj.ExpectedClrType);
+                            original.Add(originalObj);
+                        }
+
+                        //Patch for addition/update. This will call Delta<T> for each item in the collection
+                        changedObj.Patch(originalObj);
+                    }
+
+                    edmChangedObject = changedObj;
+                }
+                catch
+                {
+                    HandleFailedOperation(changedObj, operation, ref edmChangedObject, originalObj);
+                }
+
+                CopyInstanceAnnotations(changedObj, edmChangedObject);
+
+                edmChangedObjectCollection.Add(edmChangedObject);
+            }
+
+            return edmChangedObjectCollection;
+        }
+
+        private static void CopyInstanceAnnotations(dynamic changedObj, IEdmChangedObject edmChangedObject)
+        {
+            if (changedObj.InstanceAnnotations != null)
+            {
+                if (edmChangedObject.InstanceAnnotations == null)
+                {
+                    edmChangedObject.InstanceAnnotations = new ODataInstanceAnnotationContainer();
+                }
+
+                Dictionary<string, object> instanceAnnotations = changedObj.InstanceAnnotations.GetResourceAnnotations();
+
+                if (instanceAnnotations != null)
+                {
+                    foreach (KeyValuePair<string, object> annotation in instanceAnnotations)
+                    {
+                        edmChangedObject.InstanceAnnotations.AddResourceAnnotation(annotation.Key, annotation.Value);
                     }
                 }
-                else
-                {
-                    if (originalObj == null)
-                    {
-                        //This case handle additions
-                        originalObj = Activator.CreateInstance(changedObj.ExpectedClrType);
-                        original.Add(originalObj);
-                    }
-
-                    //Patch for addition/update. This will call Delta<T> for each item in the collection
-                    changedObj.Patch(originalObj);
-                }               
             }
+        }
+
+        private void HandleFailedOperation(dynamic changedObj, DataModificationOperationKind operation, ref IEdmChangedObject edmChangedObject, TStructuralType originalObj)
+        {
+            switch (operation)
+            {
+                case DataModificationOperationKind.Update:
+                    edmChangedObject = changedObj;
+                    break;
+                case DataModificationOperationKind.Insert:
+                    {
+                        Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(changedObj.ExpectedClrType);
+                        EdmDeltaDeletedEntityObject edmDeletedObject  = Activator.CreateInstance(type, EntityType) as EdmDeltaDeletedEntityObject;
+                        edmDeletedObject.Id = changedObj.InstanceAnnotations.GetResourceAnnotation("Core.ContentID") ?? string.Empty;
+                        edmChangedObject = edmDeletedObject;
+                        break;
+                    }
+                case DataModificationOperationKind.Delete:
+                case DataModificationOperationKind.Unlink:
+                    {
+                        Type type = typeof(EdmDeltaEntityObject<>).MakeGenericType(typeof(TStructuralType));
+                        EdmDeltaEntityObject edmDeltaEntityObject = Activator.CreateInstance(type, EntityType) as EdmDeltaEntityObject;
+                        foreach(PropertyInfo property in typeof(TStructuralType).GetProperties())
+                        {
+                            edmDeltaEntityObject.TrySetPropertyValue(property.Name, property.GetValue(originalObj));
+                        }
+                        edmChangedObject = edmDeltaEntityObject;
+                        break;
+                    }
+            }
+
+            DataModificationExceptionType dataModificationException = new DataModificationExceptionType(operation);
+            edmChangedObject.DataModificationException = new DataModificationException();
+            edmChangedObject.DataModificationException.InstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationException);            
         }
 
         private static TStructuralType GetFilteredItem(Type type, IEnumerable<IEdmStructuralProperty> keys, IEnumerable<TStructuralType> originalList, IEdmChangedObject changedObject)
@@ -184,9 +271,9 @@ namespace Microsoft.AspNet.OData
         /// Patch for EdmChangedobjectCollection, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>
         /// <param name="original">Original collection of the Type which needs to be updated</param>        
-        public void Patch(ICollection<TStructuralType> original)
+        public EdmChangedObjectCollection<TStructuralType> Patch(ICollection<TStructuralType> original)
         {
-            CopyChangedValues(original);
+            return CopyChangedValues(original);
         }
 
         internal ICollection<TStructuralType> GetInstance()

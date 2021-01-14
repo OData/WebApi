@@ -54,7 +54,11 @@ namespace Microsoft.AspNet.OData
 
             base.OnActionExecuting(context);
 
-            RequestQueryData requestQueryData = new RequestQueryData();
+            RequestQueryData requestQueryData = new RequestQueryData()
+            {
+                QueryValidationRunBeforeActionExecution = false,
+            };
+
             context.HttpContext.Items.Add(nameof(RequestQueryData), requestQueryData);
 
             HttpRequest request = context.HttpContext.Request;

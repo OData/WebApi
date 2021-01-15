@@ -7,11 +7,19 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Types;
+#if NETCORE
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
+#else
+using System.Net.Http;
+using System.Web.Http;
+#endif
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
@@ -288,6 +296,34 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
+        public void ApplyProperty_DoesNotIgnoreKeyProperty_WithInstanceAnnotation()
+        {
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "Key1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new Mock<IDelta>(MockBehavior.Strict);
+            Type propertyType = typeof(string);
+            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true).Verifiable();
+            resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
+
+            // Act
+            DeserializationHelpers.ApplyInstanceAnnotations(resource.Object, entityTypeReference, null,provider,
+    new ODataDeserializerContext { Model = new EdmModel() });
+
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
+                new ODataDeserializerContext { Model = new EdmModel() });
+
+            // Assert
+            resource.Verify();
+        }
+
+        [Fact]
         public void ApplyProperty_FailsWithUsefulErrorMessageOnUnknownProperty()
         {
             // Arrange
@@ -312,6 +348,163 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             // Assert
             Assert.Equal(HelpfulErrorMessage, exception.Message);
+        }
+
+
+        [Fact]
+        public void ApplyAnnotations_FailsWithUsefulErrorMessageOnUnknownProperty()
+        {
+            // Arrange
+            const string HelpfulErrorMessage =
+                "The property 'Unknown' does not exist on type 'namespace.name'. Make sure to only use property names " +
+                "that are defined by the type.";
+
+            var property = new ODataProperty { Name = "Unknown", Value = "Value" };
+            var entityType = new EdmComplexType("namespace", "name");
+            entityType.AddStructuralProperty("Known", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+
+            var entityTypeReference = new EdmComplexTypeReference(entityType, isNullable: false);
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() =>
+                DeserializationHelpers.ApplyProperty(
+                    property,
+                    entityTypeReference,
+                    resource: null,
+                    deserializerProvider: null,
+                    readContext: null));
+
+            // Assert
+            Assert.Equal(HelpfulErrorMessage, exception.Message);
+        }
+        
+        [Fact]
+        public void ApplyProperty_PassesWithCaseInsensitivePropertyName()
+        {
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "keY1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new Mock<IDelta>(MockBehavior.Strict);
+            Type propertyType = typeof(string);
+            resource.Setup(r => r.TryGetPropertyType("Key1", out propertyType)).Returns(true).Verifiable();
+            resource.Setup(r => r.TrySetPropertyValue("Key1", "Value1")).Returns(true).Verifiable();
+
+#if NETCORE
+
+            IRouteBuilder builder = RoutingConfigurationFactory.Create();
+
+            HttpRequest request = RequestFactory.Create(builder);
+#else
+            HttpConfiguration configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            HttpRequestMessage request = RequestFactory.Create(configuration);
+#endif
+
+            ODataDeserializerContext context = new ODataDeserializerContext
+            {
+                Model = new EdmModel(),
+                Request = request
+            };
+
+            // Act
+            DeserializationHelpers.ApplyProperty(property, entityTypeReference, resource.Object, provider,
+                context);
+
+            // Assert
+            resource.Verify();
+        }
+
+        [Fact]
+        public void ApplyProperty_FailWithTwoCaseInsensitiveMatchesAndCaseSensitiveMatch()
+        {
+            const string expectedErrorMessage = "The property 'proPerty1' does not exist on type 'namespace.name'. Make sure to only use property names that are defined by the type.";
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "proPerty1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddStructuralProperty("Property1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+            entityType.AddStructuralProperty("property1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+#if NETCORE
+
+            IRouteBuilder builder = RoutingConfigurationFactory.Create();
+
+            HttpRequest request = RequestFactory.Create(builder);
+#else
+            HttpConfiguration configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            HttpRequestMessage request = RequestFactory.Create(configuration);
+#endif
+
+            ODataDeserializerContext context = new ODataDeserializerContext
+            {
+                Model = new EdmModel(),
+                Request = request
+            };
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() =>
+                DeserializationHelpers.ApplyProperty(
+                    property,
+                    entityTypeReference,
+                    resource: null,
+                    provider,
+                    context));
+
+            // Assert
+            Assert.Equal(expectedErrorMessage, exception.Message);
+        }
+
+        [Fact]
+        public void ApplyProperty_FailWithCaseInsensitiveMatchesAndDisabledCaseSensitiveRequestPropertyBinding()
+        {
+            const string expectedErrorMessage = "The property 'proPerty1' does not exist on type 'namespace.name'. Make sure to only use property names that are defined by the type.";
+            // Arrange
+            ODataProperty property = new ODataProperty { Name = "proPerty1", Value = "Value1" };
+            EdmEntityType entityType = new EdmEntityType("namespace", "name");
+            entityType.AddStructuralProperty("Property1", EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string)));
+            entityType.AddKeys(entityType.AddStructuralProperty("Key1",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(string))));
+
+            EdmEntityTypeReference entityTypeReference = new EdmEntityTypeReference(entityType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+#if NETCORE
+
+            IRouteBuilder builder = RoutingConfigurationFactory.CreateWithDisabledCaseInsensitiveRequestPropertyBinding();
+
+            HttpRequest request = RequestFactory.Create(builder);
+#else
+            HttpConfiguration configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            configuration.SetCompatibilityOptions(CompatibilityOptions.DisableCaseInsensitiveRequestPropertyBinding);
+            HttpRequestMessage request = RequestFactory.Create(configuration);
+#endif
+
+            ODataDeserializerContext context = new ODataDeserializerContext
+            {
+                Model = new EdmModel(),
+                Request = request
+            };
+
+            // Act
+            var exception = Assert.Throws<ODataException>(() =>
+                DeserializationHelpers.ApplyProperty(
+                    property,
+                    entityTypeReference,
+                    resource: null,
+                    provider,
+                    context));
+
+            // Assert
+            Assert.Equal(expectedErrorMessage, exception.Message);
         }
 
         private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)

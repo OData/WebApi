@@ -323,6 +323,28 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Missing the value of the parameter &apos;{0}&apos; in the function &apos;{1}&apos; calling..
+        /// </summary>
+        internal static string MissingConvertNode
+        {
+            get
+            {
+                return ResourceManager.GetString("MissingConvertNode", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot Create an instance for the property &apos;{0}&apos;..
+        /// </summary>
+        internal static string CannotCreateInstanceForProperty
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotCreateInstanceForProperty", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Cannot define keys on type &apos;{0}&apos; deriving from &apos;{1}&apos;. The base type in the entity inheritance hierarchy already contains keys..
         /// </summary>
         internal static string CannotDefineKeysOnDerivedTypes
@@ -341,6 +363,17 @@ namespace Microsoft.AspNet.OData.Common
             get
             {
                 return ResourceManager.GetString("CannotDeserializeUnknownProperty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot Get the Enum Clr member using &apos;{0}&apos;..
+        /// </summary>
+        internal static string CannotGetEnumClrMember
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotGetEnumClrMember", resourceCulture);
             }
         }
 
@@ -1511,6 +1544,127 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Found more than one Annotation property container in type &apos;{0}&apos;. Each open type must have at most one Annotation property container..
+        /// </summary>
+        internal static string MoreThanOneAnnotationPropertyContainerFound
+        {
+            get
+            {
+                return ResourceManager.GetString("MoreThanOneAnnotationPropertyContainerFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The name of Annotation property &apos;{0}&apos; was already used as the declared property name of open type &apos;{1}&apos;..
+        /// </summary>
+        internal static string AnnotationPropertyNameAlreadyUsedAsDeclaredPropertyName
+        {
+            get
+            {
+                return ResourceManager.GetString("AnnotationPropertyNameAlreadyUsedAsDeclaredPropertyName", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Duplicate Annotation property name &apos;{0}&apos; found in open type &apos;{1}&apos;. Each Annotation property name must be unique..
+        /// </summary>
+        internal static string DuplicateAnnotationPropertyNameFound
+        {
+            get
+            {
+                return ResourceManager.GetString("DuplicateAnnotationPropertyNameFound", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The Annotation dictionary property &apos;{0}&apos; of type &apos;{1}&apos; cannot be set. The Annotation property dictionary must have a setter..
+        /// </summary>
+        internal static string CannotSetAnnotationPropertyDictionary
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotSetAnnotationPropertyDictionary", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for &apos;{0}&apos; with Edm type &apos;{1}&apos; cannot be serialized..
+        /// </summary>
+        internal static string InstanceAnnotationCannotBeSerialized
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationCannotBeSerialized", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should not start with @ or #.
+        /// </summary>
+        internal static string InstanceAnnotationNotContain
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationNotContain", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should contain '.'.
+        /// </summary>
+        internal static string InstanceAnnotationShouldContain
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationShouldContain", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for should not be empty.
+        /// </summary>
+        internal static string InstanceAnnotationNotEmpty
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationNotEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The instance annotation for property should not be empty.
+        /// </summary>
+        internal static string InstanceAnnotationPropertyNotEmpty
+        {
+            get
+            {
+                return ResourceManager.GetString("InstanceAnnotationPropertyNotEmpty", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The type &apos;{0}&apos; of instance annotation &apos;{1}&apos; is not supported..
+        /// </summary>
+        internal static string TypeOfInstanceAnnotationNotSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("TypeOfInstanceAnnotationNotSupported", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Type &apos;{0}&apos; is not supported as Annotation property annotation. Referenced property must be of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string InvalidPropertyInfoForAnnotationPropertyAnnotation
+        {
+            get
+            {
+                return ResourceManager.GetString("InvalidPropertyInfoForAnnotationPropertyAnnotation", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to More than one Operation called &apos;{0}&apos; was found. Try using the other RemoveOperation override..
         /// </summary>
         internal static string MoreThanOneOperationFound
@@ -2336,6 +2490,18 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        /// Looks up a localized string similar to PropertyType ShouldBeOf Type
+        /// </summary>
+        internal static string PropertyTypeShouldBeOfType
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyTypeShouldBeOfType", resourceCulture);
+            }
+        }
+        
+
+        /// <summary>
         ///   Looks up a localized string similar to The EDM instance of type &apos;{0}&apos; is missing the property &apos;{1}&apos;..
         /// </summary>
         internal static string PropertyNotFound
@@ -3036,6 +3202,50 @@ namespace Microsoft.AspNet.OData.Common
             get
             {
                 return ResourceManager.GetString("WriteToStreamAsyncMustHaveRequest", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to parse query options payload..
+        /// </summary>
+        internal static string CannotParseQueryOptionsPayload
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotParseQueryOptionsPayload", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Could not find any parser able to process '{0}' payload in the request..
+        /// </summary>
+        internal static string CannotFindParserForRequestMediaType
+        {
+            get
+            {
+                return ResourceManager.GetString("CannotFindParserForRequestMediaType", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The same system query option, irrespective of casing or whether or not it is prefixed with a $, must not be specified more than once for any resource..
+        /// </summary>
+        internal static string QueryOptionsMustNotBeRepeated
+        {
+            get
+            {
+                return ResourceManager.GetString("QueryOptionMustNotBeRepeated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Query options in request body not in expected format: {0}. A series of field-value pairs that meet the defined syntax rules expected..
+        /// </summary>
+        internal static string QueryOptionsNotInExpectedFormat
+        {
+            get
+            {
+                return ResourceManager.GetString("QueryOptionsNotInExpectedFormat", resourceCulture);
             }
         }
     }

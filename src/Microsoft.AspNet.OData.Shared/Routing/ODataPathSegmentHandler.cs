@@ -157,7 +157,8 @@ namespace Microsoft.AspNet.OData.Routing
         {
             _navigationSource = segment.EntitySet;
 
-            IEdmActionImport actionImport = segment.OperationImports.Single() as IEdmActionImport;
+            IEdmOperationImport operationImport = segment.OperationImports.Single();
+            IEdmActionImport actionImport = operationImport as IEdmActionImport;
 
             if (actionImport != null)
             {
@@ -166,14 +167,14 @@ namespace Microsoft.AspNet.OData.Routing
             }
             else
             {
+                IEdmFunctionImport function = (IEdmFunctionImport)operationImport;
+
                 _pathTemplate.Add(ODataSegmentKinds.UnboundFunction); // unbound function
 
                 // Translate the nodes in ODL path to string literals as parameter of UnboundFunctionPathSegment.
                 Dictionary<string, string> parameterValues = segment.Parameters.ToDictionary(
                     parameterValue => parameterValue.Name,
-                    parameterValue => TranslateNode(parameterValue.Value));
-
-                 IEdmFunctionImport function = (IEdmFunctionImport)segment.OperationImports.Single();
+                    parameterValue => TranslateNode(parameterValue.Value, function.Name, parameterValue.Name));
 
                  IEnumerable<string> parameters = parameterValues.Select(v => String.Format(CultureInfo.InvariantCulture, "{0}={1}", v.Key, v.Value));
                  string literal = String.Format(CultureInfo.InvariantCulture, "{0}({1})", function.Name, String.Join(",", parameters));
@@ -190,7 +191,8 @@ namespace Microsoft.AspNet.OData.Routing
         {
             _navigationSource = segment.EntitySet;
 
-            IEdmAction action = segment.Operations.Single() as IEdmAction;
+            IEdmOperation edmOperation = segment.Operations.Single();
+            IEdmAction action = edmOperation as IEdmAction;
 
             if (action != null)
             {
@@ -199,16 +201,15 @@ namespace Microsoft.AspNet.OData.Routing
             }
             else
             {
+                IEdmFunction function = (IEdmFunction)edmOperation;
                 _pathTemplate.Add(ODataSegmentKinds.Function); // function
 
                 // Translate the nodes in ODL path to string literals as parameter of BoundFunctionPathSegment.
                 Dictionary<string, string> parameterValues = segment.Parameters.ToDictionary(
                     parameterValue => parameterValue.Name,
-                    parameterValue => TranslateNode(parameterValue.Value));
+                    parameterValue => TranslateNode(parameterValue.Value, function.Name, parameterValue.Name));
 
                 // TODO: refactor the function literal for parameter alias
-                IEdmFunction function = (IEdmFunction)segment.Operations.Single();
-
                 IEnumerable<string> parameters = parameterValues.Select(v => String.Format(CultureInfo.InvariantCulture, "{0}={1}", v.Key, v.Value));
                 string literal = String.Format(CultureInfo.InvariantCulture, "{0}({1})", function.FullName(), String.Join(",", parameters));
 
@@ -414,9 +415,17 @@ namespace Microsoft.AspNet.OData.Routing
             return ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V4);
         }
 
-        private static string TranslateNode(object node)
+        private static string TranslateNode(object node, string functionName, string parameterName)
         {
-            Contract.Assert(node != null);
+            // If the function parameter is null, for example myFunction(param=null),
+            // the input node here is not null, it is a contant node with a value as "null".
+            // However, if a function call (or key) using parameter alias but without providing the parameter alias value,
+            // the input node here is a null.
+            if (node == null)
+            {
+                // We can't throw ODataException here because ODataException will be caught and return 404 response with empty message.
+                throw new InvalidOperationException(Error.Format(SRResources.MissingConvertNode, parameterName, functionName));
+            }
 
             ConstantNode constantNode = node as ConstantNode;
             if (constantNode != null)
@@ -440,7 +449,7 @@ namespace Microsoft.AspNet.OData.Routing
             ConvertNode convertNode = node as ConvertNode;
             if (convertNode != null)
             {
-                return TranslateNode(convertNode.Source);
+                return TranslateNode(convertNode.Source, functionName, parameterName);
             }
 
             ParameterAliasNode parameterAliasNode = node as ParameterAliasNode;

@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
@@ -87,7 +88,7 @@ namespace Microsoft.AspNet.OData.Query
                 };
             }
 
-            return context.InternalRequest.GetNextPageLink(pageSize, instance, skipTokenGenerator);
+            return GetNextPageHelper.GetNextPageLink(baseUri, pageSize, instance, skipTokenGenerator);
         }
 
         /// <summary>
@@ -150,7 +151,9 @@ namespace Microsoft.AspNet.OData.Query
                     uriLiteral = ODataUriUtils.ConvertToUriLiteral(value, ODataVersion.V401, model);
                 }
 
-                skipTokenBuilder.Append(edmProperty.Name).Append(propertyDelimiter).Append(uriLiteral).Append(islast ? String.Empty : CommaDelimiter.ToString());
+                var encodedUriLiteral = WebUtility.UrlEncode(uriLiteral);
+
+                skipTokenBuilder.Append(edmProperty.Name).Append(propertyDelimiter).Append(encodedUriLiteral).Append(islast ? String.Empty : CommaDelimiter.ToString());
                 count++;
             }
 

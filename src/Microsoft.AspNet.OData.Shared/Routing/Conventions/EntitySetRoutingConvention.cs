@@ -28,14 +28,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
 
-                if (ODataRequestMethod.Get == controllerContext.Request.Method)
+                if (ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     // e.g. Try GetCustomers first, then fall back to Get action name
                     return actionMap.FindMatchingAction(
                         "Get" + entitySet.Name,
                         "Get");
                 }
-                else if (ODataRequestMethod.Post == controllerContext.Request.Method)
+                else if (ODataRequestMethod.Post == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     // e.g. Try PostCustomer first, then fall back to Post action name
                     return actionMap.FindMatchingAction(
@@ -44,7 +44,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
             }
             else if (odataPath.PathTemplate == "~/entityset/$count" &&
-                ODataRequestMethod.Get == controllerContext.Request.Method)
+                ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;
@@ -61,14 +61,14 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 IEdmCollectionType collectionType = (IEdmCollectionType)odataPath.EdmType;
                 IEdmEntityType entityType = (IEdmEntityType)collectionType.ElementType.Definition;
 
-                if (ODataRequestMethod.Get == controllerContext.Request.Method)
+                if (ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     // e.g. Try GetCustomersFromSpecialCustomer first, then fall back to GetFromSpecialCustomer
                     return actionMap.FindMatchingAction(
                         "Get" + entitySet.Name + "From" + entityType.Name,
                         "GetFrom" + entityType.Name);
                 }
-                else if (ODataRequestMethod.Post == controllerContext.Request.Method)
+                else if (ODataRequestMethod.Post == controllerContext.Request.GetRequestMethodOrPreflightMethod())
                 {
                     // e.g. Try PostCustomerFromSpecialCustomer first, then fall back to PostFromSpecialCustomer
                     return actionMap.FindMatchingAction(
@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
             }
             else if (odataPath.PathTemplate == "~/entityset/cast/$count" &&
-                ODataRequestMethod.Get == controllerContext.Request.Method)
+                ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())
             {
                 EntitySetSegment entitySetSegment = (EntitySetSegment)odataPath.Segments[0];
                 IEdmEntitySetBase entitySet = entitySetSegment.EntitySet;

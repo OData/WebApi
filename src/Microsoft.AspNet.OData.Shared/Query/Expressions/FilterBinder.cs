@@ -337,8 +337,19 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             else if (arguments[0].Type.IsAssignableFrom(targetClrType))
             {
                 // To support to cast Entity/Complex type to the sub type now.
-                Expression source = BindCastSourceNode(node.Source);
-
+                Expression source;
+                if(node.Source != null)
+                {
+                    source = BindCastSourceNode(node.Source);
+                }
+                else
+                {
+                    // if the cast is on the root i.e $it (~/Products?$filter=NS.PopularProducts/.....),
+                    // node.Source would be null. Calling BindCastSourceNode will always return '$it'.
+                    // In scenarios where we are casting a navigation property to return an expression that queries against the parent property,
+                    // we need to have a memberAccess expression e.g '$it.Category'. We can get this from arguments[0].
+                    source = arguments[0];
+                }
                 return Expression.TypeAs(source, targetClrType);
             }
             else
@@ -512,13 +523,25 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression singleValue = Bind(inNode.Left);
             Expression collection = Bind(inNode.Right);
 
+            Type collectionItemType = collection.Type.GetElementType();
+            if (collectionItemType == null)
+            {
+                Type[] genericArgs = collection.Type.GetGenericArguments();
+                // The model builder does not support non-generic collections like ArrayList
+                // or generic collections with generic arguments > 1 like IDictionary<,>
+                Contract.Assert(genericArgs.Length == 1);
+                collectionItemType = genericArgs[0];
+            }
+
             if (IsIQueryable(collection.Type))
             {
-                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+                Expression containsExpression = singleValue.Type != collectionItemType ? Expression.Call(null, ExpressionHelperMethods.QueryableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
+                return Expression.Call(null, ExpressionHelperMethods.QueryableContainsGeneric.MakeGenericMethod(singleValue.Type), containsExpression, singleValue);
             }
             else
             {
-                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), collection, singleValue);
+                Expression containsExpression = singleValue.Type != collectionItemType ? Expression.Call(null, ExpressionHelperMethods.EnumerableCastGeneric.MakeGenericMethod(singleValue.Type), collection) : collection;
+                return Expression.Call(null, ExpressionHelperMethods.EnumerableContainsGeneric.MakeGenericMethod(singleValue.Type), containsExpression, singleValue);
             }
         }
 

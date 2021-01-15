@@ -269,7 +269,8 @@ namespace Microsoft.AspNet.OData.Batch
                             context.Request.Headers.Add(header.Key, preferencesToInherit);
                         }
                     }
-                    else
+                    // do not copy already existing headers, such as Cookie
+                    else if (!context.Request.Headers.ContainsKey(header.Key))
                     {
                         context.Request.Headers.Add(header);
                     }
@@ -330,6 +331,11 @@ namespace Microsoft.AspNet.OData.Batch
                 // do not add duplicate preferences from batch
                 .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
             string filteredBatchPreferences = string.Join(",", filteredBatchList);
+
+            if (string.IsNullOrEmpty(filteredBatchPreferences))
+            {
+                return individualPreferences;
+            }
 
             return string.Join(",", individualPreferences, filteredBatchPreferences);
         }

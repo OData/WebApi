@@ -83,7 +83,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
 
             return Ok(PARENT_ENTITY.Children.Select(x => Url.CreateODataLink(
                     new EntitySetSegment(childEntity),
-                    new KeySegment(new[] { new KeyValuePair<string, object>("Id", x.Id)}, childEntity.EntityType(), null)
+                    new KeySegment(new[] { new KeyValuePair<string, object>("Id", x.Id) }, childEntity.EntityType(), null)
                 )).ToArray());
         }
     }
@@ -102,24 +102,44 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
             {
                 throw new ArgumentNullException("messageWriter");
             }
-            if (writeContext == null)
-            {
-                throw new ArgumentNullException("writeContext");
-            }
 
             if (graph != null)
             {
-                Uri[] uris = graph as Uri[];
-                if (uris == null)
-                {
-                    throw new SerializationException("Cannot write the type");
-                }
+                Uri[] uris = GetUris(graph);
 
                 messageWriter.WriteEntityReferenceLinks(new ODataEntityReferenceLinks
                 {
                     Links = uris.Select(uri => new ODataEntityReferenceLink { Url = uri })
                 });
             }
+        }
+
+        public override async Task WriteObjectAsync(object graph, Type type, ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+        {
+            if (messageWriter == null)
+            {
+                throw new ArgumentNullException("messageWriter");
+            }
+
+            if (graph != null)
+            {
+                Uri[] uris = GetUris(graph);
+                await messageWriter.WriteEntityReferenceLinksAsync(new ODataEntityReferenceLinks
+                {
+                    Links = uris.Select(uri => new ODataEntityReferenceLink { Url = uri })
+                });
+            }
+        }
+
+        private static Uri[] GetUris(object graph)
+        {
+            Uri[] uris = graph as Uri[];
+            if (uris == null)
+            {
+                throw new SerializationException("Cannot write the type");
+            }
+
+            return uris;
         }
     }
 
@@ -193,7 +213,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Extensibility
     public class SerializeEntityReferenceLinksTest : WebHostTestBase
     {
         public SerializeEntityReferenceLinksTest(WebHostTestFixture fixture)
-            :base(fixture)
+            : base(fixture)
         {
         }
 

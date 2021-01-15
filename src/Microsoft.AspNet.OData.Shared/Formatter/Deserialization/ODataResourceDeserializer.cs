@@ -9,7 +9,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter.Serialization;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -37,38 +39,27 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("messageReader");
             }
 
-            if (readContext == null)
-            {
-                throw Error.ArgumentNull("readContext");
-            }
-
-            IEdmTypeReference edmType = readContext.GetEdmType(type);
-            Contract.Assert(edmType != null);
-
-            if (!edmType.IsStructured())
-            {
-                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, "Structured");
-            }
-
-            IEdmStructuredTypeReference structuredType = edmType.AsStructured();
-
-            IEdmNavigationSource navigationSource = null;
-            if (structuredType.IsEntity())
-            {
-                if (readContext.Path == null)
-                {
-                    throw Error.Argument("readContext", SRResources.ODataPathMissing);
-                }
-
-                navigationSource = readContext.Path.NavigationSource;
-                if (navigationSource == null)
-                {
-                    throw new SerializationException(SRResources.NavigationSourceMissingDuringDeserialization);
-                }
-            }
-
+            IEdmStructuredTypeReference structuredType = GetStructuredType(type, readContext);
+            IEdmNavigationSource navigationSource = GetNavigationSource(structuredType, readContext);
             ODataReader odataReader = messageReader.CreateODataResourceReader(navigationSource, structuredType.StructuredDefinition());
             ODataResourceWrapper topLevelResource = odataReader.ReadResourceOrResourceSet() as ODataResourceWrapper;
+            Contract.Assert(topLevelResource != null);
+
+            return ReadInline(topLevelResource, structuredType, readContext);
+        }
+
+        /// <inheritdoc />
+        public override async Task<object> ReadAsync(ODataMessageReader messageReader, Type type, ODataDeserializerContext readContext)
+        {
+            if (messageReader == null)
+            {
+                throw Error.ArgumentNull("messageReader");
+            }
+
+            IEdmStructuredTypeReference structuredType = GetStructuredType(type, readContext);
+            IEdmNavigationSource navigationSource = GetNavigationSource(structuredType, readContext);
+            ODataReader odataReader = await messageReader.CreateODataResourceReaderAsync(navigationSource, structuredType.StructuredDefinition());
+            ODataResourceWrapper topLevelResource = await odataReader.ReadResourceOrResourceSetAsync() as ODataResourceWrapper;
             Contract.Assert(topLevelResource != null);
 
             return ReadInline(topLevelResource, structuredType, readContext);
@@ -385,6 +376,24 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>
+        /// Deserializes the instance annotations from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.
+        /// </summary>
+        /// <param name="resource">The object into which the annotations should be read.</param>
+        /// <param name="resourceWrapper">The resource object containing the annotations.</param>
+        /// <param name="structuredType">The type of the resource.</param>
+        /// <param name="readContext">The deserializer context.</param>
+        public virtual void ApplyInstanceAnnotations(object resource, ODataResourceWrapper resourceWrapper,
+            IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+        {
+            if (resourceWrapper == null)
+            {
+                throw Error.ArgumentNull("resourceWrapper");
+            }
+
+            DeserializationHelpers.ApplyInstanceAnnotations(resource, structuredType, resourceWrapper.Resource,DeserializerProvider, readContext);
+        }
+
+        /// <summary>
         /// Deserializes the given <paramref name="structuralProperty"/> into <paramref name="resource"/>.
         /// </summary>
         /// <param name="resource">The object into which the structural property should be read.</param>
@@ -393,7 +402,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The deserializer context.</param>
         public virtual void ApplyStructuralProperty(object resource, ODataProperty structuralProperty,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
-        {
+        { 
             if (resource == null)
             {
                 throw Error.ArgumentNull("resource");
@@ -412,6 +421,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
+            ApplyInstanceAnnotations(resource, resourceWrapper, structuredType, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,
@@ -617,6 +627,44 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             return deserializer.ReadInline(resourceSetWrapper, edmType, nestedReadContext);
+        }
+
+        private static IEdmStructuredTypeReference GetStructuredType(Type type, ODataDeserializerContext readContext)
+        {
+            if (readContext == null)
+            {
+                throw Error.ArgumentNull("readContext");
+            }
+
+            IEdmTypeReference edmType = readContext.GetEdmType(type);
+            Contract.Assert(edmType != null);
+
+            if (!edmType.IsStructured())
+            {
+                throw Error.Argument("type", SRResources.ArgumentMustBeOfType, "Structured");
+            }
+
+            return edmType.AsStructured();
+        }
+
+        private static IEdmNavigationSource GetNavigationSource(IEdmStructuredTypeReference edmType, ODataDeserializerContext readContext)
+        {
+            IEdmNavigationSource navigationSource = null;
+            if (edmType.IsEntity())
+            {
+                if (readContext.Path == null)
+                {
+                    throw Error.Argument("readContext", SRResources.ODataPathMissing);
+                }
+
+                navigationSource = readContext.Path.NavigationSource;
+                if (navigationSource == null)
+                {
+                    throw new SerializationException(SRResources.NavigationSourceMissingDuringDeserialization);
+                }
+            }
+
+            return navigationSource;
         }
     }
 }

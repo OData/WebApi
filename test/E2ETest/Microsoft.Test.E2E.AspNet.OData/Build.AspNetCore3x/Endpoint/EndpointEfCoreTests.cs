@@ -168,7 +168,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
         }
 
         [Fact]
-        public async Task QueryOptoinsOnEntityUsingEndpointRoutingWorks()
+        public async Task QueryOptionsOnEntityUsingEndpointRoutingWorks()
         {
             // Arrange : GET ~/odata/EpCustomers(1)?$options
             string requestUri = string.Format(CustomersBaseUrl, BaseAddress);
@@ -185,7 +185,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
 
             Assert.Equal(new[] { "@odata.context", "HomeAddress", "FavoriteAddresses", "Order" }, result.Properties().Select(p => p.Name));
 
-            Assert.Contains("$metadata#EpCustomers(HomeAddress,FavoriteAddresses,Order())/$entity", result["@odata.context"].ToString());
+            Assert.Contains("$metadata#EpCustomers(HomeAddress/City,FavoriteAddresses,Order())/$entity", result["@odata.context"].ToString());
             
             JObject homeAddress = result["HomeAddress"] as JObject;
             Assert.Equal("Redmond", homeAddress["City"].ToString());

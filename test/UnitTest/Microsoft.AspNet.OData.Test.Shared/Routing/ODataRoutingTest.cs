@@ -58,6 +58,9 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(EnumCustomersController),
                 typeof(DestinationsController),
                 typeof(IncidentsController),
+                typeof(NotFoundWithIdCustomersController),
+                typeof(NotFoundCustomersController),
+                typeof(AttributeCustomersController)
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -298,7 +301,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     // test optional parameter routing (white space is intentional.)
                     { "GET", "Products/Default.GetCount(minSalary=1.1)",                               "GetCount(1.1, 0, 1200.99)" },
                     { "GET", "Products/Default.GetCount(minSalary=1.2, maxSalary=2.9)",                "GetCount(1.2, 2.9, 1200.99)" },
-                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" }
+                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" },
+                    // test [ODataRoute] works correctly for overloaded actions
+                    { "GET", "AttributeCustomers", "Get()" },
+                    { "GET", "AttributeCustomers(10)", "Get(10)" }
                 };
             }
         }
@@ -490,6 +496,22 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             string responseString = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectedError, responseString);
+        }
+
+        [Theory]
+        [InlineData("NotFoundWithIdCustomers", "GET")]
+        [InlineData("NotFoundCustomers(10)", "GET")]
+        [InlineData("NotFoundCustomers(10)", "DELETE")]
+        [InlineData("NotFoundCustomers(10)", "PUT")]
+        [InlineData("NotFoundCustomers(10)", "PATCH")]
+        public async Task ActionsDoNotMatch_ReturnsNotFound(string uri, string httpMethod)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/" + uri));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 
@@ -891,6 +913,57 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public string GetName(int keyID)
         {
             return String.Format(CultureInfo.InvariantCulture, "GetName({0}) with keyID", keyID);
+        }
+    }
+
+    public class NotFoundWithIdCustomersController: TestODataController
+    {
+        public string Get(int key)
+        {
+            return $"Get({key})";
+        }
+    }
+
+    public class NotFoundCustomersController: TestODataController
+    {
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        public string Put()
+        {
+            return "Put()";
+        }
+
+        public string Patch()
+        {
+            return "Patch()";
+        }
+
+        public string Post()
+        {
+            return "Post()";
+        }
+
+        public string Delete()
+        {
+            return "Delete()";
+        }
+    }
+
+    public class AttributeCustomersController: TestODataController
+    {
+        [ODataRoute("AttributeCustomers")]
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        [ODataRoute("AttributeCustomers({key})")]
+        public string Get(int key)
+        {
+            return $"Get({key})";
         }
     }
 }

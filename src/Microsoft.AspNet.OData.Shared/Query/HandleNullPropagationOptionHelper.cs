@@ -55,7 +55,7 @@ namespace Microsoft.AspNet.OData.Query
                     break;
 
                 case Linq2ObjectsQueryProviderNamespace:
-                
+
                 default:
                     options = HandleNullPropagationOption.True;
                     break;
@@ -63,5 +63,50 @@ namespace Microsoft.AspNet.OData.Query
 
             return options;
         }
+
+        public static DataSourceProviderKind GetDataSourceProviderKind(this IQueryable query)
+        {
+            string queryProviderNamespace = query.Provider.GetType().Namespace;
+            switch (queryProviderNamespace)
+            {
+                case EntityFrameworkQueryProviderNamespace:
+                case Linq2SqlQueryProviderNamespace:
+                case ObjectContextQueryProviderNamespaceEF5:
+                case ObjectContextQueryProviderNamespaceEF6:
+                    return DataSourceProviderKind.EFClassic;
+
+                case ObjectContextQueryProviderNamespaceEFCore2:
+                    return DataSourceProviderKind.EFCore;
+
+                case Linq2ObjectsQueryProviderNamespace:
+                    return DataSourceProviderKind.InMemory;
+
+                default:
+                    return DataSourceProviderKind.Unknown;
+            }
+        }
+    }
+
+    internal enum DataSourceProviderKind
+    {
+        /// <summary>
+        /// Unknown data source provider
+        /// </summary>
+        Unknown,
+
+        /// <summary>
+        /// In memory data source provider
+        /// </summary>
+        InMemory,
+
+        /// <summary>
+        /// EF classic Data source provider
+        /// </summary>
+        EFClassic,
+
+        /// <summary>
+        /// EF Core Data source provider
+        /// </summary>
+        EFCore,
     }
 }

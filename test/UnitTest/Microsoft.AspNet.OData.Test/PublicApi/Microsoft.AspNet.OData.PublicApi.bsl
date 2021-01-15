@@ -3,6 +3,7 @@ FlagsAttribute(),
 ]
 public enum Microsoft.AspNet.OData.CompatibilityOptions : int {
 	AllowNextLinkWithNonPositiveTopValue = 1
+	DisableCaseInsensitiveRequestPropertyBinding = 2
 	None = 0
 }
 
@@ -926,6 +927,7 @@ public enum Microsoft.AspNet.OData.Builder.PropertyKind : int {
 	Complex = 1
 	Dynamic = 5
 	Enum = 4
+	InstanceAnnotations = 6
 	Navigation = 3
 	Primitive = 0
 }
@@ -937,6 +939,15 @@ public interface Microsoft.AspNet.OData.Builder.IEdmTypeConfiguration {
 	ODataModelBuilder ModelBuilder  { public abstract get; }
 	string Name  { public abstract get; }
 	string Namespace  { public abstract get; }
+}
+
+public interface Microsoft.AspNet.OData.Builder.IODataInstanceAnnotationContainer {
+	void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	void AddResourceAnnotation (string annotationName, object value)
+	object GetPropertyAnnotation (string propertyName, string annotationName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
+	object GetResourceAnnotation (string annotationName)
+	System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
 }
 
 public abstract class Microsoft.AspNet.OData.Builder.NavigationSourceConfiguration {
@@ -1125,6 +1136,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IDictionary`2[[System.Reflection.PropertyInfo],[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] ExplicitProperties  { protected get; }
 	string FullName  { public virtual get; }
 	System.Collections.ObjectModel.ReadOnlyCollection`1[[System.Reflection.PropertyInfo]] IgnoredProperties  { public get; }
+	System.Reflection.PropertyInfo InstanceAnnotationsContainer  { public get; }
 	System.Nullable`1[[System.Boolean]] IsAbstract  { public virtual get; public virtual set; }
 	bool IsOpen  { public get; }
 	Microsoft.OData.Edm.EdmTypeKind Kind  { public abstract get; }
@@ -1135,6 +1147,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	System.Collections.Generic.IEnumerable`1[[Microsoft.AspNet.OData.Builder.PropertyConfiguration]] Properties  { public get; }
 	QueryConfiguration QueryConfiguration  { public get; public set; }
 	System.Collections.Generic.IList`1[[System.Reflection.PropertyInfo]] RemovedProperties  { protected get; }
+	bool SupportsInstanceAnnotations  { public get; }
 
 	internal virtual void AbstractImpl ()
 	public virtual CollectionPropertyConfiguration AddCollectionProperty (System.Reflection.PropertyInfo propertyInfo)
@@ -1142,6 +1155,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public virtual NavigationPropertyConfiguration AddContainedNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual void AddDynamicPropertyDictionary (System.Reflection.PropertyInfo propertyInfo)
 	public virtual EnumPropertyConfiguration AddEnumProperty (System.Reflection.PropertyInfo propertyInfo)
+	public virtual void AddInstanceAnnotationContainer (System.Reflection.PropertyInfo propertyInfo)
 	public virtual NavigationPropertyConfiguration AddNavigationProperty (System.Reflection.PropertyInfo navigationProperty, Microsoft.OData.Edm.EdmMultiplicity multiplicity)
 	public virtual PrimitivePropertyConfiguration AddProperty (System.Reflection.PropertyInfo propertyInfo)
 	internal virtual void DerivesFromImpl (StructuralTypeConfiguration baseType)
@@ -1180,6 +1194,7 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public StructuralTypeConfiguration`1 Filter (string[] properties)
 	public StructuralTypeConfiguration`1 Filter (QueryOptionSetting setting, string[] properties)
 	public void HasDynamicProperties (Expression`1 propertyExpression)
+	public void HasInstanceAnnotations (Expression`1 propertyExpression)
 	public NavigationPropertyConfiguration HasMany (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression)
 	public NavigationPropertyConfiguration HasOptional (Expression`1 navigationPropertyExpression, Expression`1 referentialConstraintExpression)
@@ -1200,13 +1215,13 @@ public abstract class Microsoft.AspNet.OData.Builder.StructuralTypeConfiguration
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
-	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public DecimalPropertyConfiguration Property (Expression`1 propertyExpression)
-	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
+	public PrecisionPropertyConfiguration Property (Expression`1 propertyExpression)
+	public LengthPropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public PrimitivePropertyConfiguration Property (Expression`1 propertyExpression)
 	public StructuralTypeConfiguration`1 Select ()
@@ -1799,6 +1814,17 @@ public sealed class Microsoft.AspNet.OData.Builder.MediaTypeAttribute : System.A
 	public MediaTypeAttribute ()
 }
 
+public sealed class Microsoft.AspNet.OData.Builder.ODataInstanceAnnotationContainer : IODataInstanceAnnotationContainer {
+	public ODataInstanceAnnotationContainer ()
+
+	public virtual void AddPropertyAnnotation (string propertyName, string annotationName, object value)
+	public virtual void AddResourceAnnotation (string annotationName, object value)
+	public virtual object GetPropertyAnnotation (string propertyName, string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetPropertyAnnotations (string propertyName)
+	public virtual object GetResourceAnnotation (string annotationName)
+	public virtual System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] GetResourceAnnotations ()
+}
+
 [
 AttributeUsageAttribute(),
 ]
@@ -2328,6 +2354,7 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 	Disabled = 2
 }
 
+<<<<<<< HEAD
 [
 NonValidatingParameterBindingAttribute(),
 ODataQueryParameterBindingAttribute(),
@@ -2364,6 +2391,11 @@ ODataQueryParameterBindingAttribute(),
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptions`1 : IODataQueryOptions {
 	ETag`1 IfMatch  { public abstract get; }
 	ETag`1 IfNoneMatch  { public abstract get; }
+=======
+public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
+	bool CanParse (System.Net.Http.HttpRequestMessage request)
+	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
+>>>>>>> 5a5c585c139cddc3c63488f03daeb97a4b1ba868
 }
 
 public interface Microsoft.AspNet.OData.Query.IPropertyMapper {
@@ -2395,6 +2427,11 @@ public abstract class Microsoft.AspNet.OData.Query.SkipTokenHandler {
 	public abstract IQueryable`1 ApplyTo (IQueryable`1 query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Linq.IQueryable ApplyTo (System.Linq.IQueryable query, SkipTokenQueryOption skipTokenQueryOption)
 	public abstract System.Uri GenerateNextPageLink (System.Uri baseUri, int pageSize, object instance, ODataSerializerContext context)
+}
+
+public sealed class Microsoft.AspNet.OData.Query.ODataQueryOptionsParserFactory {
+	public static System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Query.IODataQueryOptionsParser]] Create ()
+	public static IODataQueryOptionsParser GetQueryOptionsParser (System.Net.Http.HttpRequestMessage request)
 }
 
 public class Microsoft.AspNet.OData.Query.ApplyQueryOption {
@@ -2643,6 +2680,16 @@ public class Microsoft.AspNet.OData.Query.ParameterAliasNodeTranslator : Microso
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.SingleValuePropertyAccessNode nodeIn)
 	public virtual Microsoft.OData.UriParser.QueryNode Visit (Microsoft.OData.UriParser.UnaryOperatorNode nodeIn)
+}
+
+public class Microsoft.AspNet.OData.Query.PlainTextODataQueryOptionsParser : IODataQueryOptionsParser {
+	public PlainTextODataQueryOptionsParser ()
+
+	public virtual bool CanParse (System.Net.Http.HttpRequestMessage request)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
 }
 
 public class Microsoft.AspNet.OData.Query.QueryFilterProvider : IFilterProvider {
@@ -2908,10 +2955,12 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string Controller = "controller"
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
+	public static readonly string KeyCount = "ODataRouteKeyCount"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
 	public static readonly string OptionalParameters = "Microsoft.AspNet.OData.Routing.ODataOptionalParameter"
+	public static readonly string QuerySegment = "$query"
 	public static readonly string RelatedKey = "relatedKey"
 	public static readonly string VersionConstraintName = "ODataVersionConstraint"
 }
@@ -3121,6 +3170,10 @@ public abstract class Microsoft.AspNet.OData.Formatter.Deserialization.ODataDese
 	Microsoft.OData.ODataPayloadKind ODataPayloadKind  { public get; }
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public abstract class Microsoft.AspNet.OData.Formatter.Deserialization.ODataDeserializerProvider {
@@ -3153,6 +3206,12 @@ public sealed class Microsoft.AspNet.OData.Formatter.Deserialization.ODataReader
 	ExtensionAttribute(),
 	]
 	public static ODataItemBase ReadResourceOrResourceSet (Microsoft.OData.ODataReader reader)
+
+	[
+	AsyncStateMachineAttribute(),
+	ExtensionAttribute(),
+	]
+	public static System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Formatter.Deserialization.ODataItemBase]] ReadResourceOrResourceSetAsync (Microsoft.OData.ODataReader reader)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Deserialization.DefaultODataDeserializerProvider : ODataDeserializerProvider {
@@ -3168,12 +3227,21 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataActionPayload
 	ODataDeserializerProvider DeserializerProvider  { public get; }
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataCollectionDeserializer : ODataEdmTypeDeserializer {
 	public ODataCollectionDeserializer (ODataDeserializerProvider deserializerProvider)
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+
 	public virtual System.Collections.IEnumerable ReadCollectionValue (Microsoft.OData.ODataCollectionValue collectionValue, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataDeserializerContext readContext)
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
@@ -3199,12 +3267,21 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataEntityReferen
 	public ODataEntityReferenceLinkDeserializer ()
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataEnumDeserializer : ODataEdmTypeDeserializer {
 	public ODataEnumDeserializer ()
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 }
 
@@ -3212,6 +3289,11 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataPrimitiveDese
 	public ODataPrimitiveDeserializer ()
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 	public virtual object ReadPrimitive (Microsoft.OData.ODataProperty primitiveProperty, ODataDeserializerContext readContext)
 }
@@ -3219,12 +3301,18 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataPrimitiveDese
 public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceDeserializer : ODataEdmTypeDeserializer {
 	public ODataResourceDeserializer (ODataDeserializerProvider deserializerProvider)
 
+	public virtual void ApplyInstanceAnnotations (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyNestedProperty (object resource, ODataNestedResourceInfoWrapper resourceInfoWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyStructuralProperties (object resource, ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual void ApplyStructuralProperty (object resource, Microsoft.OData.ODataProperty structuralProperty, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual object CreateResourceInstance (Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 	public virtual object ReadResource (ODataResourceWrapper resourceWrapper, Microsoft.OData.Edm.IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
 }
@@ -3233,6 +3321,11 @@ public class Microsoft.AspNet.OData.Formatter.Deserialization.ODataResourceSetDe
 	public ODataResourceSetDeserializer (ODataDeserializerProvider deserializerProvider)
 
 	public virtual object Read (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task`1[[System.Object]] ReadAsync (Microsoft.OData.ODataMessageReader messageReader, System.Type type, ODataDeserializerContext readContext)
+
 	public virtual object ReadInline (object item, Microsoft.OData.Edm.IEdmTypeReference edmType, ODataDeserializerContext readContext)
 	public virtual System.Collections.IEnumerable ReadResourceSet (ODataResourceSetWrapper resourceSet, Microsoft.OData.Edm.IEdmStructuredTypeReference elementType, ODataDeserializerContext readContext)
 }
@@ -3267,6 +3360,10 @@ public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataEdmTyp
 	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	internal virtual Microsoft.OData.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializer {
@@ -3275,6 +3372,7 @@ public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerial
 	Microsoft.OData.ODataPayloadKind ODataPayloadKind  { public get; }
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public abstract class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerProvider {
@@ -3301,13 +3399,23 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.EntitySelfLinks {
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataCollectionSerializer : ODataEdmTypeSerializer {
 	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider)
+	public ODataCollectionSerializer (ODataSerializerProvider serializerProvider, bool isForAnnotations)
 
 	protected static void AddTypeNameAnnotationAsNeeded (Microsoft.OData.ODataCollectionValue value, ODataMetadataLevel metadataLevel)
 	public virtual Microsoft.OData.ODataCollectionValue CreateODataCollectionValue (System.Collections.IEnumerable enumerable, Microsoft.OData.Edm.IEdmTypeReference elementType, ODataSerializerContext writeContext)
 	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	internal virtual Microsoft.OData.ODataProperty CreateProperty (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, string elementName, ODataSerializerContext writeContext)
 	public void WriteCollection (Microsoft.OData.ODataCollectionWriter writer, object graph, Microsoft.OData.Edm.IEdmTypeReference collectionType, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public System.Threading.Tasks.Task WriteCollectionAsync (Microsoft.OData.ODataCollectionWriter writer, object graph, Microsoft.OData.Edm.IEdmTypeReference collectionType, ODataSerializerContext writeContext)
+
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataDeltaFeedSerializer : ODataEdmTypeSerializer {
@@ -3315,22 +3423,48 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataDeltaFeedSerial
 
 	public virtual Microsoft.OData.ODataDeltaResourceSet CreateODataDeltaFeed (System.Collections.IEnumerable feedInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference feedType, ODataSerializerContext writeContext)
 	public virtual void WriteDeltaDeletedEntry (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteDeltaDeletedEntryAsync (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+
 	public virtual void WriteDeltaDeletedLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteDeltaDeletedLinkAsync (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+
 	public virtual void WriteDeltaFeedInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteDeltaFeedInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+
 	public virtual void WriteDeltaLink (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public System.Threading.Tasks.Task WriteDeltaLinkAsync (object graph, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataEntityReferenceLinkSerializer : ODataSerializer {
 	public ODataEntityReferenceLinkSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataEntityReferenceLinksSerializer : ODataSerializer {
 	public ODataEntityReferenceLinksSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataEnumSerializer : ODataEdmTypeSerializer {
@@ -3339,18 +3473,21 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataEnumSerializer 
 	public virtual Microsoft.OData.ODataEnumValue CreateODataEnumValue (object graph, Microsoft.OData.Edm.IEdmEnumTypeReference enumType, ODataSerializerContext writeContext)
 	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataErrorSerializer : ODataSerializer {
 	public ODataErrorSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataMetadataSerializer : ODataSerializer {
 	public ODataMetadataSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataPrimitiveSerializer : ODataEdmTypeSerializer {
@@ -3359,18 +3496,21 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataPrimitiveSerial
 	public virtual Microsoft.OData.ODataPrimitiveValue CreateODataPrimitiveValue (object graph, Microsoft.OData.Edm.IEdmPrimitiveTypeReference primitiveType, ODataSerializerContext writeContext)
 	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataRawValueSerializer : ODataSerializer {
 	public ODataRawValueSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSerializer : ODataEdmTypeSerializer {
 	public ODataResourceSerializer (ODataSerializerProvider serializerProvider)
 
 	public virtual void AppendDynamicProperties (Microsoft.OData.ODataResource resource, SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+	public virtual void AppendInstanceAnnotations (Microsoft.OData.ODataResource resource, ResourceContext resourceContext)
 	public virtual string CreateETag (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataNestedResourceInfo CreateNavigationLink (Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataAction CreateODataAction (Microsoft.OData.Edm.IEdmAction action, ResourceContext resourceContext)
@@ -3379,8 +3519,15 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
 	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteDeltaObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSerializer : ODataEdmTypeSerializer {
@@ -3389,7 +3536,22 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSetSeri
 	public virtual Microsoft.OData.ODataOperation CreateODataOperation (Microsoft.OData.Edm.IEdmOperation operation, ResourceSetContext resourceSetContext, ODataSerializerContext writeContext)
 	public virtual Microsoft.OData.ODataResourceSet CreateResourceSet (System.Collections.IEnumerable resourceSetInstance, Microsoft.OData.Edm.IEdmCollectionTypeReference resourceSetType, ODataSerializerContext writeContext)
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	[
+	AsyncStateMachineAttribute(),
+	]
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+
 	public virtual void WriteObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
+}
+
+public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceValueSerializer : ODataEdmTypeSerializer {
+	public ODataResourceValueSerializer (ODataSerializerProvider serializerProvider)
+	protected ODataResourceValueSerializer (Microsoft.OData.ODataPayloadKind payloadKind, ODataSerializerProvider serializerProvider)
+
+	public virtual Microsoft.OData.ODataValue CreateODataValue (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, ODataSerializerContext writeContext)
+	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerContext {
@@ -3418,6 +3580,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataServiceDocument
 	public ODataServiceDocumentSerializer ()
 
 	public virtual void WriteObject (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
+	public virtual System.Threading.Tasks.Task WriteObjectAsync (object graph, System.Type type, Microsoft.OData.ODataMessageWriter messageWriter, ODataSerializerContext writeContext)
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.SelectExpandNode {
@@ -3473,7 +3636,6 @@ public abstract class Microsoft.AspNet.OData.Query.Expressions.ExpressionBinderB
 	protected void EnsureFlattenedPropertyContainer (System.Linq.Expressions.ParameterExpression source)
 	protected System.Reflection.PropertyInfo GetDynamicPropertyContainer (Microsoft.OData.UriParser.SingleValueOpenPropertyAccessNode openNode)
 	protected System.Linq.Expressions.Expression GetFlattenedPropertyExpression (string propertyPath)
-	public static int GuidCompare (System.Guid firstValue, System.Guid secondValue)
 }
 
 public class Microsoft.AspNet.OData.Query.Expressions.FilterBinder : ExpressionBinderBase {
@@ -3639,6 +3801,12 @@ public class Microsoft.AspNet.OData.Routing.Conventions.MetadataRoutingConventio
 
 public class Microsoft.AspNet.OData.Routing.Conventions.NavigationRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public NavigationRoutingConvention ()
+
+	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
+}
+
+public class Microsoft.AspNet.OData.Routing.Conventions.OperationImportRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
+	public OperationImportRoutingConvention ()
 
 	public virtual string SelectAction (ODataPath odataPath, System.Web.Http.Controllers.HttpControllerContext controllerContext, System.Linq.ILookup`2[[System.String],[System.Web.Http.Controllers.HttpActionDescriptor]] actionMap)
 }

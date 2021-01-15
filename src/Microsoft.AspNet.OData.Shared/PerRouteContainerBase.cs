@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData;
 using Microsoft.OData.UriParser;
 
@@ -166,6 +167,8 @@ namespace Microsoft.AspNet.OData
                 ServiceLifetime.Singleton,
                 typeof(ODataUriResolver),
                 sp => new UnqualifiedODataUriResolver { EnableCaseInsensitive = true });
+            // Add parsers for requests targeted at resource paths ending in $query
+            builder.AddService(ServiceLifetime.Singleton, typeof(IEnumerable<IODataQueryOptionsParser>), sp => ODataQueryOptionsParserFactory.Create());
 
             return builder;
         }

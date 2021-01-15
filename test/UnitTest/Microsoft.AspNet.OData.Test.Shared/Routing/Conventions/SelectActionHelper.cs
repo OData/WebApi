@@ -15,6 +15,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Moq;
@@ -76,6 +77,12 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // copied this from the route context after the request has been routed.
             return request.HttpContext.GetRouteData();
         }
+
+
+        internal static IDictionary<string, object> GetRoutingConventionsStore(HttpRequest request)
+        {
+            return request.HttpContext.ODataFeature().RoutingConventionsStore;
+        }
 #else
         internal static ILookup<string, HttpActionDescriptor> CreateActionMap()
         {
@@ -115,6 +122,11 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
         internal static IHttpRouteData GetRouteData(HttpRequestMessage request)
         {
             return request.GetRouteData();
+        }
+
+        internal static IDictionary<string, object> GetRoutingConventionsStore(HttpRequestMessage request)
+        {
+            return request.ODataProperties().RoutingConventionsStore;
         }
 #endif
     }

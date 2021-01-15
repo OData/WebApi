@@ -3,6 +3,7 @@
 
 #if !NETSTANDARD2_0
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -65,6 +66,18 @@ namespace Microsoft.AspNet.OData.Extensions
             if (routeName != null)
             {
                 HttpRequest request = httpContext.Request;
+                string oDataPath = oDataPathValue as string;
+                // Create request container
+                request.CreateRequestContainer(routeName);
+
+                // Check whether the request is a POST targeted at a resource path ending in /$query
+                if (request.IsQueryRequest(oDataPath))
+                {
+                    request.TransformQueryRequest();
+
+                    oDataPath = oDataPath.Substring(0, oDataPath.LastIndexOf('/' + ODataRouteConstants.QuerySegment, StringComparison.OrdinalIgnoreCase));
+                    values[ODataRouteConstants.ODataPath] = oDataPath;
+                }
 
                 // We need to call Uri.GetLeftPart(), which returns an encoded Url.
                 // The ODL parser does not like raw values.
@@ -73,7 +86,7 @@ namespace Microsoft.AspNet.OData.Extensions
                 string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
                 // Call ODL to parse the Request URI.
-                ODataPath path = ODataPathRouteConstraint.GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(routeName));
+                ODataPath path = ODataPathRouteConstraint.GetODataPath(oDataPath, requestLeftPart, queryString, () => request.GetRequestContainer());
                 if (path != null)
                 {
                     // Set all the properties we need for routing, querying, formatting
@@ -109,6 +122,18 @@ namespace Microsoft.AspNet.OData.Extensions
                         // For example, we have two "Get" methods in same controller, in order to help "EndpointSelector" 
                         // to select the correct Endpoint, we save the ActionDescriptor value into ODataFeature.
                         odataFeature.ActionDescriptor = controllerActionDescriptor;
+                        // Add handler to handle options calls. The routing criteria has been patched to allow endpoint discovery using the correct cors headers
+                        if (request.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var metadata = actionDescriptor.EndpointMetadata;
+                            // For option request can set this as the action will be handled by the cors middleware 
+                            var metadataCollection = metadata?.Any() == true
+                                ? new EndpointMetadataCollection(metadata)
+                                : EndpointMetadataCollection.Empty;
+                            // This workaround allows the default cors middleware to read the annotations if the user has them enabling fine-grained cors access control with endpoints
+                            var endpoint = new Endpoint(null, metadataCollection, controllerActionDescriptor.ActionName);
+                            httpContext.SetEndpoint(endpoint);
+                        }
 
                         return new ValueTask<RouteValueDictionary>(newValues);
                     }

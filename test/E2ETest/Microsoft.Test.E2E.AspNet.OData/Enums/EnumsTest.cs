@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -57,6 +58,38 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             var reader = new ODataMessageReader(message);
             var edmModel = reader.ReadMetadataDocument();
 
+            VerifyEdmModel(edmModel);
+        }
+
+#if NETCORE && !NETCOREAPP2_1
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        public async Task MetadataJsonCsdlTest(string modelMode)
+        {
+            string requestUri = string.Format("{0}/{1}/$metadata?$format=application/json", this.BaseAddress, modelMode);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            string jsonCsdl = await response.Content.ReadAsStringAsync();
+
+            Assert.Contains(@"{
+  ""$Version"": ""4.0"",
+  ""$EntityContainer"": ""Microsoft.Test.E2E.AspNet.OData.Enums.Container"",
+  ""Microsoft.Test.E2E.AspNet.OData.Enums"": {
+    ""Employee"": {
+      ""$Kind"": ""EntityTy", jsonCsdl);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+
+            IODataResponseMessage message = new ODataMessageWrapper(stream, response.Content.Headers);
+            var reader = new ODataMessageReader(message);
+            var edmModel = reader.ReadMetadataDocument();
+
+            VerifyEdmModel(edmModel);
+        }
+#endif
+        private static void VerifyEdmModel(IEdmModel edmModel)
+        {
             var container = edmModel.EntityContainer;
             Assert.Equal("Container", container.Name);
 
@@ -122,7 +155,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             Assert.Equal(EdmTypeKind.Enum, iEdmOperationParameterOfHasAccessLevel.Type.Definition.TypeKind);
         }
 
-        #endregion
+#endregion
 
         #region Query
 

@@ -26,6 +26,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         private IEdmModel _model;
         private ODataQuerySettings _settings;
         private string _modelID;
+        private DataSourceProviderKind _dataSourceProviderKind;
 
         public SelectExpandBinder(ODataQuerySettings settings, ODataQueryContext context)
         {
@@ -38,6 +39,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             _model = _context.Model;
             _modelID = ModelContainer.GetModelID(_model);
             _settings = settings;
+            _dataSourceProviderKind = DataSourceProviderKind.Unknown;
         }
 
         public static IQueryable Bind(IQueryable queryable, ODataQuerySettings settings, SelectExpandQueryOption selectExpandQuery)
@@ -60,6 +62,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private object Bind(object entity, SelectExpandQueryOption selectExpandQuery)
         {
+            _dataSourceProviderKind = DataSourceProviderKind.InMemory;
+
             // Needn't to verify the input, that's done at upper level.
             LambdaExpression projectionLambda = GetProjectionLambda(selectExpandQuery);
 
@@ -69,6 +73,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private IQueryable Bind(IQueryable queryable, SelectExpandQueryOption selectExpandQuery)
         {
+            _dataSourceProviderKind = queryable.GetDataSourceProviderKind();
+
             // Needn't to verify the input, that's done at upper level.
             Type elementType = selectExpandQuery.Context.ElementClrType;
 
@@ -786,7 +792,15 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return;
             }
 
-            Expression nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
+            // EF5 and EF6 don't support comparing complex objects to null, and will throw an exception similar to following if it is
+            // attempted:
+            //    "Cannot compare elements of type 'xxxx'. Only primitive types, enumeration types and entity types are supported."
+            // EFCore has changed its implementation so the null check executes as expected.
+            Expression nullCheck = null;
+            if (_dataSourceProviderKind != DataSourceProviderKind.EFClassic)
+            {
+                nullCheck = GetNullCheckExpression(structuralProperty, propertyValue, subSelectExpandClause);
+            }
 
             Expression countExpression = CreateTotalCountExpression(propertyValue, pathSelectItem.CountOption);
 
@@ -810,7 +824,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 if (!structuralProperty.Type.IsCollection())
                 {
-                     propertyExpression.NullCheck = nullCheck;
+                    propertyExpression.NullCheck = nullCheck;
                 }
                 else if (_settings.PageSize.HasValue)
                 {
@@ -914,7 +928,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (IsSelectAll(projection) && propertyToInclude.Type.IsComplex())
             {
-                // for Collections (Primitive, Enum, Complex collection), that's check above.
+                // for Collections (Primitive, Enum, Complex collection), that's check above.	
                 return Expression.Equal(propertyValue, Expression.Constant(null));
             }
 

@@ -17,6 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Batch\MockHttpServer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchContentTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchHttpRequestMessageExtensionsTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchMiddlewareTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchReaderExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchRequestHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Batch\ODataBatchRequestItemTest.cs" />
@@ -243,6 +244,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandPathExtensionsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ODataQueryValidatorTest.cs" />
@@ -289,6 +292,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntityRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntitySetRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\FunctionRoutingConventionTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\OperationImportRoutingConventionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationSourceRoutingConventionTest.cs" />
@@ -406,6 +410,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandNestedDollarCountTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)SelectExpandTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypeHelperTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UnicodeCharactersTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(MSBuildThisFileDirectory)Resources\ArrayOfBoolean.json" />

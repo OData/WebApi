@@ -1,7 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.30204.135
 VisualStudioVersion = 16.0.30225.117
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiPerformance.Service", "..\test\PerfTest\WebApiPerformance.Service\WebApiPerformance.Service.csproj", "{F7B5A5D5-0B2F-493B-94B2-039B881FD4D3}"

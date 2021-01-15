@@ -282,9 +282,7 @@ namespace Microsoft.AspNet.OData
         /// <returns></returns>
         private IODataQueryOptions CreateAndValidateQueryOptions(HttpRequest request, ODataQueryContext queryContext)
         {
-<<<<<<< HEAD
-            IODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
-=======
+
             RequestQueryData requestQueryData = request.HttpContext.Items[nameof(RequestQueryData)] as RequestQueryData;
 
             if (requestQueryData.QueryValidationRunBeforeActionExecution)
@@ -292,9 +290,8 @@ namespace Microsoft.AspNet.OData
                 return requestQueryData.ProcessedQueryOptions;
             }
 
-            ODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
+            IODataQueryOptions queryOptions = new ODataQueryOptions(queryContext, request);
 
->>>>>>> 5a5c585c139cddc3c63488f03daeb97a4b1ba868
             ValidateQuery(request, queryOptions);
 
             return queryOptions;
@@ -438,7 +435,7 @@ namespace Microsoft.AspNet.OData
             /// Stores the processed query options to be used later if OnActionExecuting was able to verify the query.
             /// This is because ValidateQuery internally modifies query options (expands are prime example of this).
             /// </remarks>
-            public ODataQueryOptions ProcessedQueryOptions { get; set; }
+            public IODataQueryOptions ProcessedQueryOptions { get; set; }
         }
     }
 }

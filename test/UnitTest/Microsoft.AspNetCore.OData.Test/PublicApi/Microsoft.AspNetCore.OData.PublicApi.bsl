@@ -451,12 +451,8 @@ public class Microsoft.AspNet.OData.EnableQueryAttribute : Microsoft.AspNetCore.
 	public static Microsoft.AspNetCore.Mvc.SerializableError CreateErrorResponse (string message, params System.Exception exception)
 	public virtual Microsoft.OData.Edm.IEdmModel GetModel (System.Type elementClrType, Microsoft.AspNetCore.Http.HttpRequest request, Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor actionDescriptor)
 	public virtual void OnActionExecuted (Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext actionExecutedContext)
-<<<<<<< HEAD
-	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, IODataQueryOptions queryOptions)
-=======
 	public virtual void OnActionExecuting (Microsoft.AspNetCore.Mvc.Filters.ActionExecutingContext context)
-	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, ODataQueryOptions queryOptions)
->>>>>>> 5a5c585c139cddc3c63488f03daeb97a4b1ba868
+	public virtual void ValidateQuery (Microsoft.AspNetCore.Http.HttpRequest request, IODataQueryOptions queryOptions)
 }
 
 [
@@ -2524,7 +2520,6 @@ public enum Microsoft.AspNet.OData.Query.SelectExpandType : int {
 	Disabled = 2
 }
 
-<<<<<<< HEAD
 [
 NonValidatingParameterBindingAttribute(),
 ODataQueryParameterBindingAttribute(),
@@ -2561,11 +2556,11 @@ ODataQueryParameterBindingAttribute(),
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptions`1 : IODataQueryOptions {
 	ETag`1 IfMatch  { public abstract get; }
 	ETag`1 IfNoneMatch  { public abstract get; }
-=======
+}
+
 public interface Microsoft.AspNet.OData.Query.IODataQueryOptionsParser {
 	bool CanParse (Microsoft.AspNetCore.Http.HttpRequest request)
 	System.Threading.Tasks.Task`1[[System.String]] ParseAsync (System.IO.Stream requestStream)
->>>>>>> 5a5c585c139cddc3c63488f03daeb97a4b1ba868
 }
 
 public interface Microsoft.AspNet.OData.Query.IPropertyMapper {

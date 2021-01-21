@@ -121,10 +121,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             Assert.Equal(EdmMultiplicity.ZeroOrOne, payoutPI.TargetMultiplicity());
 
             var paymentInstrumentType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "PaymentInstrument");
-            Assert.Equal(3, paymentInstrumentType.Properties().Count());
+            Assert.Equal(4, paymentInstrumentType.Properties().Count());
             var statement = paymentInstrumentType.NavigationProperties().Single(np => np.Name == "Statement");
             Assert.True(statement.ContainsTarget, "PaymentInstrumentType.ContainsTarget");
             Assert.Equal(EdmMultiplicity.ZeroOrOne, statement.TargetMultiplicity());
+            var signatories = paymentInstrumentType.NavigationProperties().Single(np => np.Name == "Signatories");
+            Assert.True(signatories.ContainsTarget);
+            Assert.Equal(EdmMultiplicity.Many, signatories.TargetMultiplicity());
 
             var premiumAccountType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "PremiumAccount");
             Assert.Single(premiumAccountType.DeclaredProperties);
@@ -494,6 +497,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 0,
                 FriendlyName = "Pi103",
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PostAsJsonAsync<PaymentInstrument>(requestUri, pi);
@@ -797,6 +808,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 101,
                 FriendlyName = newFriendlyName,
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);
@@ -822,6 +841,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 1000,
                 FriendlyName = newFriendlyName,
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);

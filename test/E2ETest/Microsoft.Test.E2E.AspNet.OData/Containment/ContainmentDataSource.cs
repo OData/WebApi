@@ -168,6 +168,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=1,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1001,
+                                    SignatoryName="Signatory 1"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1002,
+                                    SignatoryName="Signatory 2"
+                                }
+                            }
                         },
                         new PaymentInstrument()
                         {
@@ -179,6 +192,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=101,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1003,
+                                    SignatoryName="Signatory 3"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1004,
+                                    SignatoryName="Signatory 4"
+                                }
+                            }
                         },
                     },
                 },
@@ -203,6 +229,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=1,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1005,
+                                    SignatoryName="Signatory 5"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1006,
+                                    SignatoryName="Signatory 6"
+                                }
+                            }
                         },
                         new PaymentInstrument()
                         {
@@ -214,6 +253,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=201,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1007,
+                                    SignatoryName="Signatory 7"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1008,
+                                    SignatoryName="Signatory 8"
+                                }
+                            }
                         }
                     }
                 },

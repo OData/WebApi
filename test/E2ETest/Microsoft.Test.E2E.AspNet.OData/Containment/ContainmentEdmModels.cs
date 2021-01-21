@@ -32,11 +32,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             paymentInstrumentType.HasKey(pi => pi.PaymentInstrumentID);
             paymentInstrumentType.Property(pi => pi.FriendlyName);
             var statement = paymentInstrumentType.ContainsOptional(pi => pi.Statement);
+            var signatories = paymentInstrumentType.HasMany(p => p.Signatories).Contained();
 
             var statementType = builder.EntityType<Statement>();
             statementType.HasKey(s => s.StatementID);
             statementType.Property(s => s.TransactionDescription);
             statementType.Property(s => s.Amount);
+
+            var signatoryType = builder.EntityType<Signatory>();
+            signatoryType.HasKey(s => s.SignatoryID);
+            signatoryType.Property(s => s.SignatoryName);
 
             var accounts = builder.EntitySet<Account>("Accounts"); 
             accounts.HasIdLink(c => c.GenerateSelfLink(false), true);

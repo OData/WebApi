@@ -101,10 +101,9 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="resourceContext">The <see cref="ResourceContext"/> representing the entity for which the navigation link needs to be generated.</param>
         /// <param name="navigationProperty">The EDM navigation property.</param>
-        /// <param name="includeCast">Represents whether the generated link should have a cast segment representing a type cast.</param>
         /// <returns>The navigation link following the OData URL conventions.</returns>
         public static Uri GenerateContainedNavigationPropertyLink(this ResourceContext resourceContext,
-            IEdmNavigationProperty navigationProperty, bool includeCast)
+            IEdmNavigationProperty navigationProperty)
         {
             if (resourceContext == null)
             {
@@ -116,11 +115,6 @@ namespace Microsoft.AspNet.OData.Builder
             }
 
             IList<ODataPathSegment> navigationPathSegments = GenerateODataPathSegmentsForContainedEntity(resourceContext);
-
-            if (includeCast)
-            {
-                navigationPathSegments.Add(new TypeSegment(resourceContext.StructuredType, navigationSource: null));
-            }
 
             navigationPathSegments.Add(new NavigationPropertySegment(navigationProperty, navigationSource: null));
 
@@ -137,40 +131,39 @@ namespace Microsoft.AspNet.OData.Builder
             ResourceContext resourceContext)
         {
             IList<ODataPathSegment> odataPathSegments = new List<ODataPathSegment>();
-            ODataPath path = resourceContext.SerializerContext.Path;
-
-            // We first add segments in the Path.
-            var segments = path.Segments;
-            int length = segments.Count;
-
-            for (int i = 0; i < length; i++)
-            {
-                ODataPathSegment pathSegment = segments[i];
-                EntitySetSegment entitySetPathSegment = pathSegment as EntitySetSegment;
-                IEdmEntityType entityType = entitySetPathSegment.EntitySet.EntityType();
-
-                odataPathSegments.Add(entitySetPathSegment);
-                odataPathSegments.Add(new KeySegment(ConventionsHelpers.GetEntityKey(resourceContext), entityType, null));
-
-            }
-
             Stack<ODataPathSegment> internalOdataPath = new Stack<ODataPathSegment>();
-            IEdmNavigationSource currentNavigationSource = resourceContext.NavigationSource;
 
-            while (currentNavigationSource != null)
+            ResourceContext currentLevelResourceContext = resourceContext;
+
+            // Loop through the all ExpandedResource(s).
+            // We generate OData Path Segments for all levels.
+            while (currentLevelResourceContext != null)
             {
-                IEdmContainedEntitySet containedEntitySet = currentNavigationSource as IEdmContainedEntitySet;
-                if (containedEntitySet == null)
+                IEdmNavigationSource navigationSource = currentLevelResourceContext.NavigationSource;
+                IEdmEntitySet entitySet = navigationSource as IEdmEntitySet;
+                IEdmContainedEntitySet containedEntitySet = navigationSource as IEdmContainedEntitySet;
+
+                // For Contained entity sets
+                if(containedEntitySet != null)
                 {
-                    break;
+                    NavigationPropertySegment navigationPropertySegment = new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource);
+                    internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
+                    internalOdataPath.Push(navigationPropertySegment);
                 }
-                NavigationPropertySegment navigationPropertySegment = new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource);                
-                internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(resourceContext), resourceContext.StructuredType as IEdmEntityType, null));
-                internalOdataPath.Push(navigationPropertySegment);
 
-                currentNavigationSource = containedEntitySet.ParentNavigationSource;
+                // For Non-Contained entity sets
+                if(entitySet != null)
+                {
+                    EntitySetSegment entitySetSegment = new EntitySetSegment(entitySet);
+                    internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
+                    internalOdataPath.Push(entitySetSegment);
+                }
 
+                currentLevelResourceContext = currentLevelResourceContext.SerializerContext.ExpandedResource;
             }
+
+            // We have added the path segments from the last to the first
+            // We then need to order them from the first to the last.
             foreach (var i in internalOdataPath)
             {
                 odataPathSegments.Add(i);

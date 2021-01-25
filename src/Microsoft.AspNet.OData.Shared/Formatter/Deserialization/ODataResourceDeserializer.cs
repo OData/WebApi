@@ -225,6 +225,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 {
                     IEnumerable<string> structuralProperties = structuredType.StructuredDefinition().Properties()
                         .Select(edmProperty => EdmLibHelpers.GetClrPropertyName(edmProperty, model));
+                    
+                    PropertyInfo instanceAnnotationProperty = EdmLibHelpers.GetInstanceAnnotationsContainer(
+                           structuredType.StructuredDefinition(), model);
+
+                    if(instanceAnnotationProperty != null)
+                    {
+                        structuralProperties= structuralProperties.Union(new List<string>() { instanceAnnotationProperty.Name });
+                    }
 
                     if (structuredType.IsOpen())
                     {

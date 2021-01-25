@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
@@ -236,20 +237,22 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
                     }
 
+                    ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+                    ResourceContext resourceContext = new ResourceContext(writeContext, elementType, entry);
+
                     switch (edmChangedObject.DeltaKind)
                     {
                         case EdmDeltaEntityKind.DeletedEntry:
-                            WriteDeltaDeletedEntry(entry, writer, writeContext);
+                            WriteDeltaDeletedEntry(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.DeletedLinkEntry:
-                            WriteDeltaDeletedLink(entry, writer, writeContext);
+                            WriteDeltaDeletedLink(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.LinkEntry:
-                            WriteDeltaLink(entry, writer, writeContext);
+                            WriteDeltaLink(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.Entry:
-                            {
-                                ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+                            {                                
                                 if (entrySerializer == null)
                                 {
                                     throw new SerializationException(
@@ -339,16 +342,18 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
                     }
 
+                    ResourceContext resourceContext = new ResourceContext(writeContext, elementType, entry);
+
                     switch (edmChangedObject.DeltaKind)
                     {
                         case EdmDeltaEntityKind.DeletedEntry:
-                            await WriteDeltaDeletedEntryAsync(entry, writer, writeContext);
+                            await WriteDeltaDeletedEntryAsync(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.DeletedLinkEntry:
-                            await WriteDeltaDeletedLinkAsync(entry, writer, writeContext);
+                            await WriteDeltaDeletedLinkAsync(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.LinkEntry:
-                            await WriteDeltaLinkAsync(entry, writer, writeContext);
+                            await WriteDeltaLinkAsync(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.Entry:
                             {
@@ -435,10 +440,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaDeletedEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public virtual void WriteDeltaDeletedEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
-            ODataDeletedResource deletedResource = GetDeletedResource(graph);
-
+            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext);
+            
             if (deletedResource != null)
             {
                 writer.WriteStart(deletedResource);
@@ -453,9 +459,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual async Task WriteDeltaDeletedEntryAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public virtual async Task WriteDeltaDeletedEntryAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
-            ODataDeletedResource deletedResource = GetDeletedResource(graph);
+            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext);
             if (deletedResource != null)
             {
                 await writer.WriteStartAsync(deletedResource);
@@ -470,7 +477,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaDeletedLink(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public virtual void WriteDeltaDeletedLink(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
             ODataDeltaDeletedLink deltaDeletedLink = GetDeletedLink(graph);
             if (deltaDeletedLink != null)
@@ -486,7 +494,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual async Task WriteDeltaDeletedLinkAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public virtual async Task WriteDeltaDeletedLinkAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
             ODataDeltaDeletedLink deltaDeletedLink = GetDeletedLink(graph);
             if (deltaDeletedLink != null)
@@ -502,7 +511,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public virtual void WriteDeltaLink(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public virtual void WriteDeltaLink(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
             ODataDeltaLink deltaLink = GetDeltaLink(graph);
             if (deltaLink != null)
@@ -518,7 +528,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="graph">The object to be written.</param>
         /// <param name="writer">The <see cref="ODataDeltaWriter" /> to be used for writing.</param>
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>
-        public async Task WriteDeltaLinkAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext)
+        /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
+        public async Task WriteDeltaLinkAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
             ODataDeltaLink deltaLink = GetDeltaLink(graph);
             if (deltaLink != null)
@@ -527,7 +538,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private ODataDeletedResource GetDeletedResource(object graph)
+        private ODataDeletedResource GetDeletedResource(object graph, ResourceContext resourceContext)
         {
             EdmDeltaDeletedEntityObject edmDeltaDeletedEntity = graph as EdmDeltaDeletedEntityObject;
             if (edmDeltaDeletedEntity == null)
@@ -545,6 +556,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name
                 };
                 deletedResource.SetSerializationInfo(serializationInfo);
+            }
+
+            if (edmDeltaDeletedEntity.TransientInstanceAnnotationContainer != null) 
+            {
+                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, edmDeltaDeletedEntity.TransientInstanceAnnotationContainer, SerializerProvider);
+            }
+
+            if (edmDeltaDeletedEntity.PersistentInstanceAnnotationsContainer != null)
+            {
+                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, edmDeltaDeletedEntity.PersistentInstanceAnnotationsContainer, SerializerProvider);
             }
 
             return deletedResource;

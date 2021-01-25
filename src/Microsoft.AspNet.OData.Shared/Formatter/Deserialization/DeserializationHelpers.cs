@@ -85,26 +85,42 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResourceBase oDataResource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
-            PropertyInfo propertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType.StructuredDefinition(), readContext.Model);
-            if (propertyInfo == null)
+            IEntityObjectInstanceAnnotations entityObject = resource as IEntityObjectInstanceAnnotations;
+
+            if (entityObject != null)
             {
-                return;
+                SetInstanceAnnotationsForEdmChangedObject(entityObject, oDataResource, deserializerProvider, readContext);
             }
+            else
+            {
+                PropertyInfo propertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType.StructuredDefinition(), readContext.Model);
+                if (propertyInfo == null)
+                {
+                    return;
+                }
 
-            IODataInstanceAnnotationContainer instanceAnnotationContainer = GetAnnotationContainer(propertyInfo, resource);
+                IODataInstanceAnnotationContainer instanceAnnotationContainer = GetAnnotationContainer(propertyInfo, resource);
 
-            SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, deserializerProvider, readContext);
-
-            SetInstanceAnnotationsForEdmChangedObject(resource, instanceAnnotationContainer);
+                SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, deserializerProvider, readContext);
+            }            
         }
 
-        private static void SetInstanceAnnotationsForEdmChangedObject(object resource, IODataInstanceAnnotationContainer instanceAnnotationContainer)
+        private static void SetInstanceAnnotationsForEdmChangedObject(IEntityObjectInstanceAnnotations entityObject, ODataResourceBase oDataResource, ODataDeserializerProvider deserializerProvider, 
+            ODataDeserializerContext readContext)
         {
-            IEdmChangedObject delta = resource as IEdmChangedObject;
-
-            if(delta != null)
+            if (entityObject != null && oDataResource.InstanceAnnotations != null)
             {
-                delta.InstanceAnnotations = instanceAnnotationContainer;
+                foreach (ODataInstanceAnnotation annotation in oDataResource.InstanceAnnotations)
+                {
+                    if (TransientAnnotations.TransientAnnotationContainer.Contains(annotation.Name))
+                    {
+                        AddInstanceAnnotationToContainer(entityObject.TransientInstanceAnnotationContainer, deserializerProvider, readContext, annotation, string.Empty);
+                    }
+                    else
+                    {
+                        AddInstanceAnnotationToContainer(entityObject.PersistentInstanceAnnotationsContainer, deserializerProvider, readContext, annotation, string.Empty);
+                    }
+                }
             }
         }
 
@@ -293,7 +309,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 foreach (ODataInstanceAnnotation annotation in oDataResource.InstanceAnnotations)
                 {
-                    AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation,string.Empty);
+                    if (!TransientAnnotations.TransientAnnotationContainer.Contains(annotation.Name))
+                    {
+                        AddInstanceAnnotationToContainer(instanceAnnotationContainer, deserializerProvider, readContext, annotation, string.Empty);
+                    }
                 }
             }
 
@@ -327,9 +346,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         public static IODataInstanceAnnotationContainer GetAnnotationContainer(PropertyInfo propertyInfo, object resource)
-        {
-            IDelta delta = resource as IDelta;
+        {            
             object value;
+            IDelta delta = resource as IDelta;
+                            
             if (delta != null)
             {
                 delta.TryGetPropertyValue(propertyInfo.Name, out value);
@@ -354,7 +374,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         instanceAnnotationContainer = Activator.CreateInstance(propertyInfo.PropertyType) as IODataInstanceAnnotationContainer;
                     }
 
-                    if(delta != null)
+                    if (delta != null)
                     {
                         delta.TrySetPropertyValue(propertyInfo.Name, instanceAnnotationContainer);
                     }

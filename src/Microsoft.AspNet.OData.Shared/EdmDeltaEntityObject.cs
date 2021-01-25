@@ -57,13 +57,6 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-
-        /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
-
         /// <summary>
         /// The navigation source of the entity. If null, then the entity is from the current feed.
         /// </summary>

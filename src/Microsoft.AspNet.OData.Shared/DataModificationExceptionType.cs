@@ -6,12 +6,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData;
 using Microsoft.OData.Edm;
 
-namespace Microsoft.AspNet.OData
-{
-
+namespace Org.OData.Core.V1
+{   
     /// <summary>
     /// Represents a Message Type
     /// </summary>
@@ -26,9 +29,72 @@ namespace Microsoft.AspNet.OData
     public abstract class ExceptionType
     {
         /// <summary>
+        /// Instanciates a type of <see cref="ExceptionType"/>
+        /// </summary>
+        public ExceptionType()
+        {
+            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
+            builder.EntityType<DataModificationExceptionType>();
+      
+            builder.Namespace = typeof(DataModificationExceptionType).Namespace;
+
+            Model = builder.GetEdmModel();
+
+            //((EdmEnumObject)graph).Value;
+            //new ODataEnumValue(value, enumType.FullName());
+
+
+            //ODataModelBuilder builder = new ODataModelBuilder();
+            //ComplexTypeConfiguration<DataModificationExceptionType> dataException = builder.ComplexType<DataModificationExceptionType>();
+
+            //dataException.EnumProperty<DataModificationOperationKind>(c => c.FailedOperation);
+            //EnumTypeConfiguration<DataModificationOperationKind> operationKind = builder.EnumType<DataModificationOperationKind>();
+            //operationKind.Member(DataModificationOperationKind.Delete);
+            //operationKind.Member(DataModificationOperationKind.Insert);
+            //operationKind.Member(DataModificationOperationKind.Invoke);
+            //operationKind.Member(DataModificationOperationKind.Link);
+            //operationKind.Member(DataModificationOperationKind.Unlink);
+            //operationKind.Member(DataModificationOperationKind.Update);
+            //operationKind.Member(DataModificationOperationKind.Upsert);
+
+            //dataException.ComplexProperty<MessageType>(c => c.MessageType);
+            //dataException.Property(c => c.ResponseCode);
+
+            //builder.Namespace = typeof(DataModificationExceptionType).Namespace;
+            //Model = builder.GetEdmModel();
+        }
+
+        /// <summary>
         /// Represents a MessageType
         /// </summary>
         protected MessageType MessageType { get; set; }
+
+        /// <summary>
+        /// Stores the Model
+        /// </summary>
+        public static IEdmModel Model { get; set; }
+
+        ///// <summary>
+        ///// Get Edm Type
+        ///// </summary>
+        ///// <returns></returns>
+        //public IEdmTypeReference GetEdmType()
+        //{
+        //    return Model.GetEdmTypeReference(typeof(DataModificationExceptionType));
+        //}
+
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic")]
+        //internal ODataResourceValue AddAnno(DataModificationExceptionType value)
+        //{
+        //    ODataResourceValue resourceValue = new ODataResourceValue { TypeName = "Org.OData.Core.V1.DataModificationExceptionType" };
+
+        //    List<ODataProperty> properties = new List<ODataProperty>();
+        //    properties.Add(new ODataProperty {Name= "FailedOperation", Value = new ODataEnumValue(value.failedOperation.ToString(), "FailedOperation") });
+
+        //    resourceValue.Properties = properties;
+
+        //    return resourceValue;
+        //}
     }
 
     /// <summary>
@@ -41,18 +107,20 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public DataModificationExceptionType(DataModificationOperationKind failedOperation)
         {
-            this.FailedOperation = failedOperation;
+            this.failedOperation = failedOperation;
         }
 
         /// <summary>
         /// Represents king of <see cref="DataModificationOperationKind"/> type of operation 
         /// </summary>
-        public DataModificationOperationKind FailedOperation { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "failed")]
+        public DataModificationOperationKind failedOperation { get; set; }
 
         /// <summary>
         /// Represents response code
         /// </summary>
-        public Int16 ResponseCode { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "response")]
+        public Int16 responseCode { get; set; }
     }
 
     /// <summary>

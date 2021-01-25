@@ -927,102 +927,33 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         /// <param name="resource">The <see cref="ODataResource"/> describing the resource, which is being annotated.</param>
         /// <param name="resourceContext">The context for the resource instance, which is being annotated.</param>        
-        public virtual void AppendInstanceAnnotations(ODataResource resource, ResourceContext resourceContext)
+        public virtual void AppendInstanceAnnotations(ODataResourceBase resource, ResourceContext resourceContext)
         {
             IEdmStructuredType structuredType = resourceContext.StructuredType;
             IEdmStructuredObject structuredObject = resourceContext.EdmObject;
-            PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
-                resourceContext.EdmModel);
 
-            object value;
-            
-            if (instanceAnnotationInfo == null || structuredObject == null ||
-                !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
-            {
-                return;
-            }
+            IEntityObjectInstanceAnnotations entityObject = structuredObject as IEntityObjectInstanceAnnotations;
 
-            IODataInstanceAnnotationContainer instanceAnnotationContainer = value as IODataInstanceAnnotationContainer;
-
-            if (instanceAnnotationContainer != null)
-            {
-                IDictionary<string, object> clrAnnotations = instanceAnnotationContainer.GetResourceAnnotations();
-
-                if (clrAnnotations != null)
-                {
-                    foreach (KeyValuePair<string, object> annotation in clrAnnotations)
-                    {
-                        AddODataAnnotations(resource.InstanceAnnotations, resourceContext, annotation);
-                    }
-                }
-                                
-                foreach(ODataProperty property in resource.Properties)
-                {
-                    string propertyName = property.Name;
-
-                    if (property.InstanceAnnotations == null)
-                    {
-                        property.InstanceAnnotations = new List<ODataInstanceAnnotation>();
-                    }
-
-                    IDictionary<string, object> propertyAnnotations = instanceAnnotationContainer.GetPropertyAnnotations(propertyName);
-
-                    if (propertyAnnotations != null)
-                    {
-                        foreach (KeyValuePair<string, object> annotation in propertyAnnotations)
-                        {
-                            AddODataAnnotations(property.InstanceAnnotations, resourceContext, annotation);
-                        }
-                    }                    
-                } 
-            }
-        }
-
-        private void AddODataAnnotations(ICollection<ODataInstanceAnnotation> InstanceAnnotations, ResourceContext resourceContext, KeyValuePair<string, object> annotation)
-        {
-            ODataValue annotationValue = null;
-
-            if (annotation.Value != null)
-            {
-                IEdmTypeReference edmTypeReference = resourceContext.SerializerContext.GetEdmType(annotation.Value,
-                                            annotation.Value.GetType());
-
-                ODataEdmTypeSerializer edmTypeSerializer = GetEdmTypeSerializer(edmTypeReference);
-
-                if (edmTypeSerializer != null)
-                {
-                    annotationValue = edmTypeSerializer.CreateODataValue(annotation.Value, edmTypeReference, resourceContext.SerializerContext);
-                }
+            if (entityObject != null)
+            {               
+                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.PersistentInstanceAnnotationsContainer, SerializerProvider);
+                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.TransientInstanceAnnotationContainer, SerializerProvider);
             }
             else
             {
-                annotationValue = new ODataNullValue();
-            }
+                PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
+                    resourceContext.EdmModel);
 
-            if (annotationValue != null)
-            {
-                InstanceAnnotations.Add(new ODataInstanceAnnotation(annotation.Key, annotationValue));               
-            }            
-        }
+                object value;
 
-        private ODataEdmTypeSerializer GetEdmTypeSerializer(IEdmTypeReference edmTypeReference)
-        {
-            ODataEdmTypeSerializer edmTypeSerializer;
-           
-            if (edmTypeReference.IsCollection())
-            {
-                edmTypeSerializer = new ODataCollectionSerializer(SerializerProvider, true);
-            }
-            else if (edmTypeReference.IsStructured())
-            {
-                edmTypeSerializer = new ODataResourceValueSerializer(SerializerProvider);
-            }           
-            else
-            {
-                edmTypeSerializer = SerializerProvider.GetEdmTypeSerializer(edmTypeReference);
-            }
+                if (instanceAnnotationInfo == null || structuredObject == null ||
+                    !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
+                {
+                    return;
+                }
 
-            return edmTypeSerializer;
+                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, value, SerializerProvider);
+            }
         }
 
         /// <summary>

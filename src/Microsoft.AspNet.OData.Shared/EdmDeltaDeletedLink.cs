@@ -50,12 +50,6 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
-
-        /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
-
-        /// <inheritdoc />
         public Uri Source
         {
             get

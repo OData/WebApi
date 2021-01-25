@@ -99,12 +99,6 @@ namespace Microsoft.AspNet.OData
             {
                 _navigationSource = value;
             }
-        }
-
-        /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        } 
     }
 }

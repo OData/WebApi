@@ -16,15 +16,5 @@ namespace Microsoft.AspNet.OData
         /// Used to determine which Delta object to create during serialization.
         /// </summary>
         EdmDeltaEntityKind DeltaKind { get; }
-
-        /// <summary>
-        /// To hold Data Modification Exception
-        /// </summary>
-        DataModificationException DataModificationException { get; set; }
-
-        /// <summary>
-        /// To hold Instance Annotations
-        /// </summary>
-        IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 }

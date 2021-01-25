@@ -49,13 +49,6 @@ namespace Microsoft.AspNet.OData
             _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.LinkEntry);
         }
 
-
-        /// <inheritdoc />
-        public DataModificationException DataModificationException { get; set; }
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
-
         /// <inheritdoc />
         public Uri Source
         {

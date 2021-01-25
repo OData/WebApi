@@ -53,7 +53,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\BindingPathHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ConcurrencyPropertiesAnnotation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CustomAggregateMethodAnnotation.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataModificationException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModificationExceptionType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmChangedObjectCollectionOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
@@ -83,10 +82,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataResourceSetItemBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataResourceValueSerializer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEdmChangedObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEdmDeltaDeletedEntityObjectOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IEntityObjectInstanceAnnotations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />

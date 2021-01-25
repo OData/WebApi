@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Test.Builder;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData;
@@ -305,6 +306,91 @@ namespace Microsoft.AspNet.OData.Test
 
         }
 
+
+        [Fact]
+        public void EdmChangedObjectCollection_Patch_WithDeletes()
+        {
+            //Assign
+            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+
+            var edmChangedObjectcollection = new EdmChangedObjectCollection<Friend>(_entityType);
+
+
+            var edmChangedObj1 = new Delta<Friend>();
+            edmChangedObj1.TrySetPropertyValue("Id", 1);
+            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+
+            var edmChangedObj2 = new EdmDeltaDeletedEntityObject<Friend>(_entityType);
+            edmChangedObj2.TrySetPropertyValue("Id", 2);
+            
+
+            edmChangedObjectcollection.Add(edmChangedObj1);
+            edmChangedObjectcollection.Add(edmChangedObj2);
+
+            var friends = new List<Friend>();
+            friends.Add(new Friend { Id = 1, Name = "Test1" });
+            friends.Add(new Friend { Id = 2, Name = "Test2" });
+
+            //Act
+            edmChangedObjectcollection.Patch(friends);
+
+            //Assert
+            Assert.Single(friends);
+            Assert.Equal("Friend1", friends[0].Name);
+        }
+
+        [Fact]
+        public void EdmChangedObjectCollection_Patch_WithInstanceAnnotations()
+        {
+            //Assign
+            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+
+            var edmChangedObjectcollection = new EdmChangedObjectCollection<Friend>(_entityType);
+
+
+            var edmChangedObj1 = new Delta<Friend>();
+            edmChangedObj1.TrySetPropertyValue("Id", 1);
+            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+            edmChangedObj1.PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
+            edmChangedObj1.PersistentInstanceAnnotationsContainer.AddResourceAnnotation("NS.Test1", 1);
+
+            var edmChangedObj2 = new EdmDeltaDeletedEntityObject<Friend>(_entityType);
+            edmChangedObj2.TrySetPropertyValue("Id", 2);
+            edmChangedObj2.PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
+            edmChangedObj2.PersistentInstanceAnnotationsContainer.AddResourceAnnotation("NS.Test2", 2);
+            edmChangedObj2.TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
+            edmChangedObj2.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.ContentID", 3);
+
+            edmChangedObjectcollection.Add(edmChangedObj1);
+            edmChangedObjectcollection.Add(edmChangedObj2);
+
+            var friends = new List<Friend>();
+            friends.Add(new Friend { Id = 1, Name = "Test1" });
+            friends.Add(new Friend { Id = 2, Name = "Test2" });
+
+            //Act
+            var coll = edmChangedObjectcollection.Patch(friends);
+
+            //Assert
+            Assert.Single(friends);
+            Assert.Equal("Friend1", friends[0].Name);
+            var changedObj = coll[0] as Delta<Friend>;
+            Assert.NotNull(changedObj);
+            var annotations = changedObj.PersistentInstanceAnnotationsContainer.GetResourceAnnotations();
+            Assert.Equal("NS.Test1", annotations.First().Key);
+            Assert.Equal(1, annotations.First().Value);
+
+            EdmDeltaDeletedEntityObject<Friend> changedObj1 = coll[1] as EdmDeltaDeletedEntityObject<Friend>;
+            Assert.NotNull(changedObj1);
+            annotations = changedObj1.PersistentInstanceAnnotationsContainer.GetResourceAnnotations();
+            Assert.Equal("NS.Test2", annotations.First().Key);
+            Assert.Equal(2, annotations.First().Value);
+            annotations = changedObj1.TransientInstanceAnnotationContainer.GetResourceAnnotations();
+            Assert.Equal("Core.ContentID", annotations.First().Key);
+            Assert.Equal(3, annotations.First().Value);
+        }
 
         [Fact]
         public void EdmChangedObjectCollection_Patch_WithNestedDelta()

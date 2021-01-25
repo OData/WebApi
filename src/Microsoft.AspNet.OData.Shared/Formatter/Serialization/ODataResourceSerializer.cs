@@ -932,10 +932,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmStructuredType structuredType = resourceContext.StructuredType;
             IEdmStructuredObject structuredObject = resourceContext.EdmObject;
 
+            //For appending transient and persistent instance annotations for both enity object and normal resources
             IEntityObjectInstanceAnnotations entityObject = structuredObject as IEntityObjectInstanceAnnotations;
 
             if (entityObject != null)
-            {               
+            {
                 ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.PersistentInstanceAnnotationsContainer, SerializerProvider);
                 ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.TransientInstanceAnnotationContainer, SerializerProvider);
             }

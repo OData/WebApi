@@ -2,7 +2,9 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
 {
@@ -10,7 +12,7 @@ namespace Microsoft.AspNet.OData
     /// Represents an <see cref="IEdmEntityObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject
+    public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject, IEntityObjectInstanceAnnotations
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmEntityObject"/> class.
@@ -38,6 +40,31 @@ namespace Microsoft.AspNet.OData
         public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
             : base(edmType, isNullable)
         {
+            TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
+            PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
+        }
+
+        /// <inheritdoc />
+        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <inheritdoc />
+        public IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer { get; set; }
+
+        /// <summary>
+        /// Method to Add DAta Modification Exception
+        /// </summary>
+        public void AddDataException(DataModificationExceptionType dataModificationException)
+        {
+            TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationException);           
+        }
+
+        /// <summary>
+        /// Method to Add DAta Modification Exception
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        public object GetDataException()
+        {
+            return TransientInstanceAnnotationContainer.GetResourceAnnotation("Core.DataModificationException");
         }
     }
 }

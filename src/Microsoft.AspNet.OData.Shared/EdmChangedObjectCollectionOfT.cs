@@ -409,17 +409,5 @@ namespace Microsoft.AspNet.OData
 
             return collection;
         }
-
-        internal ICollection<TStructuralType> GetInstance()
-        {
-            ICollection<TStructuralType> collection = new List<TStructuralType>();
-
-            foreach(dynamic item in Items)
-            {
-                collection.Add(item.GetInstance());
-            }
-
-            return collection;
-        }
     }
 }

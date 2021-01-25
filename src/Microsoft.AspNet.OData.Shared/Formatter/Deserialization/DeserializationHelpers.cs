@@ -85,6 +85,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         internal static void ApplyInstanceAnnotations(object resource, IEdmStructuredTypeReference structuredType, ODataResourceBase oDataResource,
             ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
         {
+            //Apply instance annotations for both entityobject/changedobject/delta and normal resources
             IEntityObjectInstanceAnnotations entityObject = resource as IEntityObjectInstanceAnnotations;
 
             if (entityObject != null)
@@ -112,6 +113,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 foreach (ODataInstanceAnnotation annotation in oDataResource.InstanceAnnotations)
                 {
+                    //For determining transient and Persistent annotations and put it to the corresponding containers
                     if (TransientAnnotations.TransientAnnotationContainer.Contains(annotation.Name))
                     {
                         AddInstanceAnnotationToContainer(entityObject.TransientInstanceAnnotationContainer, deserializerProvider, readContext, annotation, string.Empty);

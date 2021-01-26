@@ -72,8 +72,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (!_isChangedObjectCollection.HasValue)
                 {
-                    _isChangedObjectCollection = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && 
-                        (ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection<>) || ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection));
+                    _isChangedObjectCollection = ResourceType != null && ((TypeHelper.IsGenericType(ResourceType) && 
+                        ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection<>) ) || ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection));
                 }
 
                 return _isChangedObjectCollection.Value;

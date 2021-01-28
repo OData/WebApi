@@ -220,6 +220,21 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             HttpResponse response = context.HttpContext.Response;
+            if (typeof(Stream).IsAssignableFrom(type))
+            {
+                // Ideally, it should go into the "ODataRawValueSerializer",
+                // However, OData lib doesn't provide the method to overwrite/copyto stream
+                // So, Here's the workaround
+                Stream objStream = context.Object as Stream;
+                if (objStream != null)
+                {
+                    objStream.CopyToAsync(response.Body);
+                    response.Body.FlushAsync();
+                }
+
+                return Task.CompletedTask;
+            }
+
             Uri baseAddress = GetBaseAddressInternal(request);
             MediaTypeHeaderValue contentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
 

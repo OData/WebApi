@@ -291,6 +291,21 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
+                if (typeof(Stream).IsAssignableFrom(type))
+                {
+                    // Ideally, it should go into the "ODataRawValueSerializer",
+                    // However, OData lib doesn't provide the method to overwrite/copyto stream
+                    // So, Here's the workaround
+                    Stream objStream = value as Stream;
+                    if (objStream != null)
+                    {
+                        objStream.CopyToAsync(writeStream);
+                        writeStream.FlushAsync();
+                    }
+
+                    return TaskHelpers.Completed();
+                }
+
                 HttpConfiguration configuration = Request.GetConfiguration();
                 if (configuration == null)
                 {

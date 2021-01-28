@@ -48,6 +48,7 @@ namespace Microsoft.AspNet.OData.Formatter
             formatter.MediaTypeMappings.Add(new ODataPrimitiveValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataCountMediaTypeMapping());
+            formatter.MediaTypeMappings.Add(new ODataStreamMediaTypeMapping());
             return formatter;
         }
 

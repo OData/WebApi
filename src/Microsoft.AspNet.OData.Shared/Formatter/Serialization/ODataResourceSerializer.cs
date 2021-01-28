@@ -1561,7 +1561,16 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
                 {
-                    ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
+                    ODataProperty property;
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        property = CreateStreamProperty(structuralProperty, resourceContext);
+                    }
+                    else
+                    {
+                        property = CreateStructuralProperty(structuralProperty, resourceContext);
+                    }
+
                     if (property != null)
                     {
                         properties.Add(property);
@@ -1570,6 +1579,43 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// Creates the <see cref="ODataProperty"/> to be written for the given stream property.
+        /// </summary>
+        /// <param name="structuralProperty">The EDM structural property being written.</param>
+        /// <param name="resourceContext">The context for the entity instance being written.</param>
+        /// <returns>The <see cref="ODataProperty"/> to write.</returns>
+        public virtual ODataProperty CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+        {
+            if (structuralProperty == null)
+            {
+                throw Error.ArgumentNull("structuralProperty");
+            }
+
+            if (resourceContext == null)
+            {
+                throw Error.ArgumentNull("resourceContext");
+            }
+
+            if (structuralProperty.Type == null || !structuralProperty.Type.IsStream())
+            {
+                return null;
+            }
+
+            if (resourceContext.SerializerContext.MetadataLevel != ODataMetadataLevel.FullMetadata)
+            {
+                return null;
+            }
+
+            // TODO: we need to return ODataStreamReferenceValue if
+            // 1) If we have the EditLink link builder
+            // 2) If we have the ReadLink link builder
+            // 3) If we have the Core.AcceptableMediaTypes annotation associated with the Stream property
+
+            // So far, let's return null and let OData.lib to calculate the ODataStreamReferenceValue by conventions.
+            return null;
         }
 
         /// <summary>

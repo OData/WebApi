@@ -405,13 +405,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
         }
 
-        [EnableQuery]
+        [EnableQuery(PageSize = 1)]
         public ITestActionResult Get()
         {
             return Ok(_dataSource.AnonymousAccount);
         }
 
-        [EnableQuery]
+        [EnableQuery(PageSize = 1)]
         public ITestActionResult GetPayinPIs()
         {
             var payinPIs = _dataSource.AnonymousAccount.PayinPIs;

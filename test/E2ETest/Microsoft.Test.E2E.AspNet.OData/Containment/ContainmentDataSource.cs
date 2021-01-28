@@ -28,10 +28,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                         },
                         PayinPIs = new List<PaymentInstrument>()
                         {
-                             new PaymentInstrument()
+                            new PaymentInstrument()
                             {
                                 PaymentInstrumentID = 0,
-                                FriendlyName = "Anonymous payin PI",
+                                FriendlyName = "Anonymous payin PI 0",
+                                Statement =
+                                    new Statement()
+                                    {
+                                        StatementID=0,
+                                        TransactionDescription="Physical Goods.",
+                                    },
+                            },
+                            new PaymentInstrument()
+                            {
+                                PaymentInstrumentID = 1,
+                                FriendlyName = "Anonymous payin PI 1",
+                                Statement =
+                                    new Statement()
+                                    {
+                                        StatementID=0,
+                                        TransactionDescription="Physical Goods.",
+                                    },
+                            },
+                             new PaymentInstrument()
+                            {
+                                PaymentInstrumentID = 2,
+                                FriendlyName = "Anonymous payin PI 2",
                                 Statement =
                                     new Statement()
                                     {

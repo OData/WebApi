@@ -607,6 +607,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
 
         [Theory]
         [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of a singleton when using $expand.
+        public async Task QueryExpandPaginatedPayinPIsFromAnonymousAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/AnonymousAccount?$expand=PayinPIs($filter=PaymentInstrumentID gt 0)&$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/AnonymousAccount/PayinPIs?$filter=PaymentInstrumentID%20gt%200", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
         // To test it is able to query ONE entity of a collectiona containment navigation property
         // GET ~/Accounts(1)/PayinPIs(1)
         public async Task QueryOnePayinPI(string mode, string mime)

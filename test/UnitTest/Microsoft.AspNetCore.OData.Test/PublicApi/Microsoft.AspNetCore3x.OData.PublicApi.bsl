@@ -1313,7 +1313,7 @@ public sealed class Microsoft.AspNet.OData.Builder.LinkGenerationHelpers {
 	[
 	ExtensionAttribute(),
 	]
-	public static System.Uri GenerateContainedNavigationPropertyLink (ResourceContext resourceContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty)
+	public static System.Uri GenerateContainedNavigationPropertyLink (ResourceContext resourceContext, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, bool includeCast)
 
 	[
 	ExtensionAttribute(),

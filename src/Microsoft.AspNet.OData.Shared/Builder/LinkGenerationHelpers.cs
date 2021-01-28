@@ -101,9 +101,10 @@ namespace Microsoft.AspNet.OData.Builder
         /// </summary>
         /// <param name="resourceContext">The <see cref="ResourceContext"/> representing the entity for which the navigation link needs to be generated.</param>
         /// <param name="navigationProperty">The EDM navigation property.</param>
+        /// <param name="includeCast">Represents whether the generated link should have a cast segment representing a type cast.</param>
         /// <returns>The navigation link following the OData URL conventions.</returns>
         public static Uri GenerateContainedNavigationPropertyLink(this ResourceContext resourceContext,
-            IEdmNavigationProperty navigationProperty)
+            IEdmNavigationProperty navigationProperty, bool includeCast)
         {
             if (resourceContext == null)
             {
@@ -114,7 +115,12 @@ namespace Microsoft.AspNet.OData.Builder
                 throw Error.Argument("resourceContext", SRResources.UrlHelperNull, typeof(ResourceContext).Name);
             }
 
-            IList<ODataPathSegment> navigationPathSegments = GenerateODataPathSegmentsForContainedEntity(resourceContext);
+            IList<ODataPathSegment> navigationPathSegments = GenerateODataPathSegmentsForContainedEntity(resourceContext, includeCast);
+
+            if (includeCast)
+            {
+                navigationPathSegments.Add(new TypeSegment(resourceContext.StructuredType, navigationSource: null));
+            }
 
             navigationPathSegments.Add(new NavigationPropertySegment(navigationProperty, navigationSource: null));
 
@@ -128,7 +134,7 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         private static IList<ODataPathSegment> GenerateODataPathSegmentsForContainedEntity(
-            ResourceContext resourceContext)
+            ResourceContext resourceContext, bool includeCast)
         {
             IList<ODataPathSegment> odataPathSegments = new List<ODataPathSegment>();
             Stack<ODataPathSegment> internalOdataPath = new Stack<ODataPathSegment>();
@@ -142,6 +148,7 @@ namespace Microsoft.AspNet.OData.Builder
                 IEdmNavigationSource navigationSource = currentLevelResourceContext.NavigationSource;
                 IEdmEntitySet entitySet = navigationSource as IEdmEntitySet;
                 IEdmContainedEntitySet containedEntitySet = navigationSource as IEdmContainedEntitySet;
+                IEdmSingleton singleton = navigationSource as IEdmSingleton;
 
                 // For Contained entity sets
                 if(containedEntitySet != null)
@@ -159,7 +166,19 @@ namespace Microsoft.AspNet.OData.Builder
                     internalOdataPath.Push(entitySetSegment);
                 }
 
+                // For Singletons
+                if(singleton != null)
+                {
+                    SingletonSegment singletonSegment = new SingletonSegment(singleton);
+                    internalOdataPath.Push(singletonSegment);
+                }
+
                 currentLevelResourceContext = currentLevelResourceContext.SerializerContext.ExpandedResource;
+
+                if (includeCast & currentLevelResourceContext != null)
+                {
+                    internalOdataPath.Push(new TypeSegment(currentLevelResourceContext.StructuredType, navigationSource: null));
+                }
             }
 
             // We have added the path segments from the last to the first

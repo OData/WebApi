@@ -355,11 +355,13 @@ namespace Microsoft.AspNet.OData.Test.Common
             Container = container;
             Customer = customer;
             Order = order;
+            MyOrder = myOrder;
             Address = address;
             Account = account;
             SpecialCustomer = specialCustomer;
             SpecialOrder = specialOrder;
             Orders = orders;
+            MyOrders = myOrders;
             Customers = customers;
             VipCustomer = vipCustomer;
             Mary = mary;
@@ -382,6 +384,7 @@ namespace Microsoft.AspNet.OData.Test.Common
         public EdmEntityType SpecialCustomer { get; private set; }
 
         public EdmEntityType Order { get; private set; }
+        public EdmEntityType MyOrder { get; private set; }
 
         public EdmEntityType SpecialOrder { get; private set; }
 
@@ -394,6 +397,7 @@ namespace Microsoft.AspNet.OData.Test.Common
         public EdmEntitySet Customers { get; private set; }
 
         public EdmEntitySet Orders { get; private set; }
+        public EdmEntitySet MyOrders { get; private set; }
 
         public EdmSingleton VipCustomer { get; private set; }
 

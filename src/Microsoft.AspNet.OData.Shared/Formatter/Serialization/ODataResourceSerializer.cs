@@ -592,6 +592,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     else
                     {
                         writer.WriteStart(resource);
+                        WriteStreamProperties(selectExpandNode, resourceContext, writer);
                         WriteComplexProperties(selectExpandNode, resourceContext, writer);
                         WriteDynamicComplexProperties(resourceContext, writer);
                         WriteNavigationLinks(selectExpandNode, resourceContext, writer);
@@ -633,6 +634,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     else
                     {
                         await writer.WriteStartAsync(resource);
+                        await WriteStreamPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteComplexPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteDynamicComplexPropertiesAsync(resourceContext, writer);
                         await WriteNavigationLinksAsync(selectExpandNode, resourceContext, writer);
@@ -1269,6 +1271,58 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
+        private void WriteStreamProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(selectExpandNode != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (selectExpandNode.SelectedStructuralProperties != null)
+            {
+                IEnumerable<IEdmStructuralProperty> structuralProperties = selectExpandNode.SelectedStructuralProperties;
+
+                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                {
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        ODataStreamPropertyInfo property = CreateStreamProperty(structuralProperty, resourceContext);
+
+                        if (property != null)
+                        {
+                            writer.WriteStart(property);
+                            writer.WriteEnd();
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task WriteStreamPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(selectExpandNode != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (selectExpandNode.SelectedStructuralProperties != null)
+            {
+                IEnumerable<IEdmStructuralProperty> structuralProperties = selectExpandNode.SelectedStructuralProperties;
+
+                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                {
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        ODataStreamPropertyInfo property = CreateStreamProperty(structuralProperty, resourceContext);
+
+                        if (property != null)
+                        {
+                            await writer.WriteStartAsync(property);
+                            await writer.WriteEndAsync();
+                        }
+                    }
+                }
+            }
+        }
+
         private IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = selectExpandNode.SelectedComplexTypeProperties;
@@ -1561,16 +1615,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
                 {
-                    ODataProperty property;
                     if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
                     {
-                        property = CreateStreamProperty(structuralProperty, resourceContext);
-                    }
-                    else
-                    {
-                        property = CreateStructuralProperty(structuralProperty, resourceContext);
+                        // skip the stream property, the stream property is written in its own logic
+                        continue;
                     }
 
+                    ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
                     if (property != null)
                     {
                         properties.Add(property);
@@ -1582,12 +1633,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         /// <summary>
-        /// Creates the <see cref="ODataProperty"/> to be written for the given stream property.
+        /// Creates the <see cref="ODataStreamPropertyInfo"/> to be written for the given stream property.
         /// </summary>
         /// <param name="structuralProperty">The EDM structural property being written.</param>
         /// <param name="resourceContext">The context for the entity instance being written.</param>
-        /// <returns>The <see cref="ODataProperty"/> to write.</returns>
-        public virtual ODataProperty CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+        /// <returns>The <see cref="ODataStreamPropertyInfo"/> to write.</returns>
+        public virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
         {
             if (structuralProperty == null)
             {

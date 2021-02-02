@@ -226,13 +226,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 // However, OData lib doesn't provide the method to overwrite/copyto stream
                 // So, Here's the workaround
                 Stream objStream = context.Object as Stream;
-                if (objStream != null)
-                {
-                    objStream.CopyToAsync(response.Body);
-                    response.Body.FlushAsync();
-                }
-
-                return Task.CompletedTask;
+                return CopyStreamAsync(objStream, response);
             }
 
             Uri baseAddress = GetBaseAddressInternal(request);
@@ -262,6 +256,16 @@ namespace Microsoft.AspNet.OData.Formatter
                 (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
                 (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
                 getODataSerializerContext);
+        }
+
+        private static async Task CopyStreamAsync(Stream source, HttpResponse response)
+        {
+            if (source != null)
+            {
+                await source.CopyToAsync(response.Body);
+            }
+
+            await response.Body.FlushAsync();
         }
 
         /// <summary>

@@ -486,7 +486,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (writeContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
             {
                 // Contained navigation.
-                navigationLink = writeContext.ExpandedResource.GenerateContainedNavigationPropertyLink(writeContext.NavigationProperty, false);
+                navigationLink = writeContext.ExpandedResource.GenerateContainedNavigationPropertyLink(writeContext.NavigationProperty, /*includeCast*/ false);
             }
             else
             {

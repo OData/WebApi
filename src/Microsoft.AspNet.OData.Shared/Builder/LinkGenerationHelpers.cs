@@ -146,12 +146,9 @@ namespace Microsoft.AspNet.OData.Builder
             while (currentLevelResourceContext != null)
             {
                 IEdmNavigationSource navigationSource = currentLevelResourceContext.NavigationSource;
-                IEdmEntitySet entitySet = navigationSource as IEdmEntitySet;
-                IEdmContainedEntitySet containedEntitySet = navigationSource as IEdmContainedEntitySet;
-                IEdmSingleton singleton = navigationSource as IEdmSingleton;
 
                 // For Contained entity sets
-                if(containedEntitySet != null)
+                if (navigationSource is IEdmContainedEntitySet containedEntitySet)
                 {
                     NavigationPropertySegment navigationPropertySegment = new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource);
                     internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
@@ -159,7 +156,7 @@ namespace Microsoft.AspNet.OData.Builder
                 }
 
                 // For Non-Contained entity sets
-                if(entitySet != null)
+                if(navigationSource is IEdmEntitySet entitySet)
                 {
                     EntitySetSegment entitySetSegment = new EntitySetSegment(entitySet);
                     internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
@@ -167,7 +164,7 @@ namespace Microsoft.AspNet.OData.Builder
                 }
 
                 // For Singletons
-                if(singleton != null)
+                if(navigationSource is IEdmSingleton singleton)
                 {
                     SingletonSegment singletonSegment = new SingletonSegment(singleton);
                     internalOdataPath.Push(singletonSegment);
@@ -175,7 +172,7 @@ namespace Microsoft.AspNet.OData.Builder
 
                 currentLevelResourceContext = currentLevelResourceContext.SerializerContext.ExpandedResource;
 
-                if (includeCast & currentLevelResourceContext != null)
+                if (includeCast && currentLevelResourceContext != null)
                 {
                     internalOdataPath.Push(new TypeSegment(currentLevelResourceContext.StructuredType, navigationSource: null));
                 }
@@ -183,9 +180,9 @@ namespace Microsoft.AspNet.OData.Builder
 
             // We have added the path segments from the last to the first
             // We then need to order them from the first to the last.
-            foreach (var i in internalOdataPath)
+            foreach (ODataPathSegment pathSegment in internalOdataPath)
             {
-                odataPathSegments.Add(i);
+                odataPathSegments.Add(pathSegment);
             }
 
             return odataPathSegments;

@@ -346,7 +346,7 @@ namespace Microsoft.AspNet.OData.Formatter
 
         private static async Task CopyStreamAsync(Stream source, Stream destination)
         {
-            if(source != null)
+            if (source != null)
             {
                 await source.CopyToAsync(destination);
             }

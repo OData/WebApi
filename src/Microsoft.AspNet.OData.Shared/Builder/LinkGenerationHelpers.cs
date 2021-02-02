@@ -137,7 +137,7 @@ namespace Microsoft.AspNet.OData.Builder
             ResourceContext resourceContext, bool includeCast)
         {
             IList<ODataPathSegment> odataPathSegments = new List<ODataPathSegment>();
-            Stack<ODataPathSegment> internalOdataPath = new Stack<ODataPathSegment>();
+            Stack<ODataPathSegment> reversedOdataPathSegments = new Stack<ODataPathSegment>();
 
             ResourceContext currentLevelResourceContext = resourceContext;
 
@@ -151,36 +151,36 @@ namespace Microsoft.AspNet.OData.Builder
                 if (navigationSource is IEdmContainedEntitySet containedEntitySet)
                 {
                     NavigationPropertySegment navigationPropertySegment = new NavigationPropertySegment(containedEntitySet.NavigationProperty, containedEntitySet.ParentNavigationSource);
-                    internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
-                    internalOdataPath.Push(navigationPropertySegment);
+                    reversedOdataPathSegments.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
+                    reversedOdataPathSegments.Push(navigationPropertySegment);
                 }
 
                 // For Non-Contained entity sets
                 if(navigationSource is IEdmEntitySet entitySet)
                 {
                     EntitySetSegment entitySetSegment = new EntitySetSegment(entitySet);
-                    internalOdataPath.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
-                    internalOdataPath.Push(entitySetSegment);
+                    reversedOdataPathSegments.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
+                    reversedOdataPathSegments.Push(entitySetSegment);
                 }
 
                 // For Singletons
                 if(navigationSource is IEdmSingleton singleton)
                 {
                     SingletonSegment singletonSegment = new SingletonSegment(singleton);
-                    internalOdataPath.Push(singletonSegment);
+                    reversedOdataPathSegments.Push(singletonSegment);
                 }
 
                 currentLevelResourceContext = currentLevelResourceContext.SerializerContext.ExpandedResource;
 
                 if (includeCast && currentLevelResourceContext != null)
                 {
-                    internalOdataPath.Push(new TypeSegment(currentLevelResourceContext.StructuredType, navigationSource: null));
+                    reversedOdataPathSegments.Push(new TypeSegment(currentLevelResourceContext.StructuredType, navigationSource: null));
                 }
             }
 
             // We have added the path segments from the last to the first
             // We then need to order them from the first to the last.
-            foreach (ODataPathSegment pathSegment in internalOdataPath)
+            foreach (ODataPathSegment pathSegment in reversedOdataPathSegments)
             {
                 odataPathSegments.Add(pathSegment);
             }

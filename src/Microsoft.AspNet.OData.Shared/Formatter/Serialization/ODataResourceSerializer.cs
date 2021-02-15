@@ -1638,7 +1638,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="structuralProperty">The EDM structural property being written.</param>
         /// <param name="resourceContext">The context for the entity instance being written.</param>
         /// <returns>The <see cref="ODataStreamPropertyInfo"/> to write.</returns>
-        public virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+        internal virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
         {
             if (structuralProperty == null)
             {
@@ -1664,6 +1664,17 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // 1) If we have the EditLink link builder
             // 2) If we have the ReadLink link builder
             // 3) If we have the Core.AcceptableMediaTypes annotation associated with the Stream property
+
+            // We need a way for the user to specify a mediatype for an instance of a stream property.
+            // If specified, we should explicitly write the streamreferencevalue and not let ODL fill it in.
+
+            // Although the mediatype is represented as an instance annotation in JSON, it's really control information.
+            // So we shouldn't use instance annotations to tell us the media type, but have a separate way to specify the media type.
+            // Perhaps we define an interface (and stream wrapper class that derives from stream and implements the interface) that exposes a MediaType property.
+            // If the stream property implements this interface, and it specifies a media-type other than application/octet-stream, we explicitly create and write a StreamReferenceValue with that media type.
+            // We could also use this type to expose properties for things like ReadLink and WriteLink(and even ETag)
+            // that the user could specify to something other than the default convention
+            // if they wanted to provide custom routes for reading/writing the stream values or custom ETag values for the stream.
 
             // So far, let's return null and let OData.lib to calculate the ODataStreamReferenceValue by conventions.
             return null;

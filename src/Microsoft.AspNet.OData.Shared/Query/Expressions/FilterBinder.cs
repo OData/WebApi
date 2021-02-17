@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public class FilterBinder : ExpressionBinderBase
     {
         private const string ODataItParameterName = "$it";
+        private const string ODataThisParameterName = "$this";
 
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
         private Dictionary<string, ParameterExpression> _lambdaParameters;

@@ -16,9 +16,9 @@
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' ">
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.0" />
-    <PackageReference Include="Microsoft.OData.Core" Version="7.8.2" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.8.2" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.8.2" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.8.2-Nightly202102172046" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.8.2-Nightly202102172046" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.8.2-Nightly202102172046" />
     <PackageReference Include="Moq" Version="4.7.137" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
     <PackageReference Include="xunit" Version="2.3.1" />

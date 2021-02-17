@@ -72,6 +72,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 throw Error.ArgumentNull("resourceContext");
             }
+
             if (resourceContext.InternalUrlHelper == null)
             {
                 throw Error.Argument("resourceContext", SRResources.UrlHelperNull, typeof(ResourceContext).Name);
@@ -110,6 +111,7 @@ namespace Microsoft.AspNet.OData.Builder
             {
                 throw Error.ArgumentNull("resourceContext");
             }
+
             if (resourceContext.InternalUrlHelper == null)
             {
                 throw Error.Argument("resourceContext", SRResources.UrlHelperNull, typeof(ResourceContext).Name);

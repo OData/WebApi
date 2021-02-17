@@ -62,6 +62,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataBinaryValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataCountMediaTypeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataStreamMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataEnumValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataInputFormatterHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataModelBinderConverter.cs" />

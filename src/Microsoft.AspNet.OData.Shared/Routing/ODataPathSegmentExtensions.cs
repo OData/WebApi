@@ -18,6 +18,41 @@ namespace Microsoft.AspNet.OData.Routing
     /// </summary>
     internal static class ODataPathSegmentExtensions
     {
+        /// <summary>
+        /// Gets a value indicating whether the given path is a stream property path.
+        /// </summary>
+        /// <param name="path">The given odata path.</param>
+        /// <returns>true/false</returns>
+        public static bool IsStreamPropertyPath(this ODataPath path)
+        {
+            if (path == null)
+            {
+                return false;
+            }
+
+            PropertySegment propertySegment = path.Segments.LastOrDefault() as PropertySegment;
+            if (propertySegment == null)
+            {
+                return false;
+            }
+
+            IEdmTypeReference propertyType = propertySegment.Property.Type;
+            if (propertyType == null)
+            {
+                return false;
+            }
+
+            // Edm.Stream, or a type definition whose underlying type is Edm.Stream,
+            // cannot be used in collections or for non-binding parameters to functions or actions.
+            // So, we don't need to test it but leave the codes here for awareness.
+            //if (propertyType.IsCollection())
+            //{
+            //    propertyType = propertyType.AsCollection().ElementType();
+            //}
+
+            return propertyType.IsStream();
+        }
+
         public static string TranslatePathTemplateSegment(this PathTemplateSegment pathTemplatesegment, out string value)
         {
             if (pathTemplatesegment == null)

@@ -2550,6 +2550,12 @@ public class Microsoft.AspNet.OData.Formatter.ODataPrimitiveValueMediaTypeMappin
 	protected virtual bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 }
 
+public class Microsoft.AspNet.OData.Formatter.ODataStreamMediaTypeMapping : MediaTypeMapping {
+	public ODataStreamMediaTypeMapping ()
+
+	public virtual double TryMatchMediaType (Microsoft.AspNetCore.Http.HttpRequest request)
+}
+
 public class Microsoft.AspNet.OData.Formatter.QueryStringMediaTypeMapping : MediaTypeMapping {
 	public QueryStringMediaTypeMapping (string queryStringParameterName, string mediaType)
 	public QueryStringMediaTypeMapping (string queryStringParameterName, string queryStringParameterValue, string mediaType)
@@ -3879,6 +3885,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public virtual Microsoft.OData.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataResource CreateResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
+	internal virtual Microsoft.OData.ODataStreamPropertyInfo CreateStreamProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
 	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual System.Threading.Tasks.Task WriteDeltaObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)

@@ -291,6 +291,15 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
+                if (typeof(Stream).IsAssignableFrom(type))
+                {
+                    // Ideally, it should go into the "ODataRawValueSerializer",
+                    // However, OData lib doesn't provide the method to overwrite/copyto stream
+                    // So, Here's the workaround
+                    Stream objStream = value as Stream;
+                    return CopyStreamAsync(objStream, writeStream);
+                }
+
                 HttpConfiguration configuration = Request.GetConfiguration();
                 if (configuration == null)
                 {
@@ -333,6 +342,16 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 return TaskHelpers.FromError(ex);
             }
+        }
+
+        private static async Task CopyStreamAsync(Stream source, Stream destination)
+        {
+            if (source != null)
+            {
+                await source.CopyToAsync(destination);
+            }
+
+            await destination.FlushAsync();
         }
 
         // To factor out request, just pass in a function to get base address. We'd get rid of

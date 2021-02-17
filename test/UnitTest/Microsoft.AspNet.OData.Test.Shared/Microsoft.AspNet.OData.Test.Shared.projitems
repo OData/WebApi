@@ -397,6 +397,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ODataUriResolverExtensionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpenComplexTypeTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)OpenEntityTypeTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataStreamPropertyTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PageResultOfTTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRequestActionValueBinderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRequestContentNegotiatorTest.cs" />

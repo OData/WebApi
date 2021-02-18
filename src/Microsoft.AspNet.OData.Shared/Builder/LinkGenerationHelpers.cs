@@ -143,9 +143,11 @@ namespace Microsoft.AspNet.OData.Builder
 
             ResourceContext currentLevelResourceContext = resourceContext;
 
+            bool topLevelEntityEncountered = false;
+
             // Loop through the all ExpandedResource(s).
             // We generate OData Path Segments for all levels.
-            while (currentLevelResourceContext != null)
+            while (currentLevelResourceContext != null && !topLevelEntityEncountered)
             {
                 IEdmNavigationSource navigationSource = currentLevelResourceContext.NavigationSource;
 
@@ -163,6 +165,9 @@ namespace Microsoft.AspNet.OData.Builder
                     EntitySetSegment entitySetSegment = new EntitySetSegment(entitySet);
                     reversedOdataPathSegments.Push(new KeySegment(ConventionsHelpers.GetEntityKey(currentLevelResourceContext), currentLevelResourceContext.StructuredType as IEdmEntityType, null));
                     reversedOdataPathSegments.Push(entitySetSegment);
+
+                    // When we encounter a top-level entity, we stop the loop so as to generate a canonical url.
+                    topLevelEntityEncountered = true;
                 }
 
                 // For Singletons
@@ -170,6 +175,9 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     SingletonSegment singletonSegment = new SingletonSegment(singleton);
                     reversedOdataPathSegments.Push(singletonSegment);
+
+                    // When we encounter a top-level entity, we stop the loop so as to generate a canonical url.
+                    topLevelEntityEncountered = true;
                 }
 
                 currentLevelResourceContext = currentLevelResourceContext.SerializerContext.ExpandedResource;

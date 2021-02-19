@@ -178,6 +178,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                        PaymentInstrumentID = 100,
                        FriendlyName = "Payout PI: Paypal",
                    },
+                   MostRecentPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 199,
+                       FriendlyName = "Most Recent PI: Paypal",
+                       Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=10001,
+                                    SignatoryName="Signatory 10001"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=10002,
+                                    SignatoryName="Signatory 10002"
+                                }
+                            }
+                   },
                     PayinPIs = new List<PaymentInstrument>()
                     {
                         new PaymentInstrument()
@@ -238,6 +256,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                    {
                        PaymentInstrumentID = 200,
                        FriendlyName = "Payout PI: Paypal",
+                   },
+                   MostRecentPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 299,
+                       FriendlyName = "Most Recent PI: Paypal",
+                       Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=10003,
+                                    SignatoryName="Signatory 10003"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=10004,
+                                    SignatoryName="Signatory 10004"
+                                }
+                            }
                    },
                     PayinPIs = new List<PaymentInstrument>()
                     {

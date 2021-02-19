@@ -449,8 +449,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [ODataRoute("PaginatedAccounts({key})/PayinPIs")]
         public ITestActionResult GetPayinPIsFromAccountImport(int key)
         {
-            var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
+            var payinPIs = _dataSource.PaginatedAccounts.Single(a => a.AccountID == key).PayinPIs;
             return Ok(payinPIs);
+        }
+
+        [EnableQuery(PageSize = 1)]
+        [ODataRoute("PaginatedAccounts({key})/MostRecentPI")]
+        public ITestActionResult GetPayoutPIFromAccount(int key)
+        {
+            var payoutPI = _dataSource.PaginatedAccounts.Single(a => a.AccountID == key).MostRecentPI;
+            return Ok(payoutPI);
         }
 
     }

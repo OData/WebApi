@@ -15,6 +15,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public List<PaymentInstrument> PayinPIs { get; set; }
         [Contained]
         public PaymentInstrument PayoutPI { get; set; }
+        public PaymentInstrument MostRecentPI { get; set; }
     }
 
     public class PremiumAccount : Account

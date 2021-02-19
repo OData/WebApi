@@ -188,11 +188,26 @@ namespace Microsoft.AspNet.OData.Builder
                 }
             }
 
+            // If we don't have a top level entity within the resource context, we add the segments in the Path.
+            if (!topLevelEntityEncountered)
+            {
+                ODataPath path = resourceContext.SerializerContext.Path;
+                var segments = path.Segments;
+
+                foreach(ODataPathSegment segment in segments)
+                {
+                    odataPathSegments.Add(segment);
+                }
+            }
+
             // We have added the path segments from the last to the first
             // We then need to order them from the first to the last.
             foreach (ODataPathSegment pathSegment in reversedOdataPathSegments)
             {
-                odataPathSegments.Add(pathSegment);
+                if (!odataPathSegments.Contains(pathSegment))
+                {
+                    odataPathSegments.Add(pathSegment);
+                }
             }
 
             return odataPathSegments;

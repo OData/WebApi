@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var edmModel = reader.ReadMetadataDocument();
 
             var accountType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "Account");
-            Assert.Equal(4, accountType.Properties().Count());
+            Assert.Equal(5, accountType.Properties().Count());
             var payinPIs = accountType.NavigationProperties().Single(np => np.Name == "PayinPIs");
             Assert.True(payinPIs.ContainsTarget, "The navigation property 'PayinPIs' should be a containment navigation property.");
             Assert.Equal(string.Format("Collection({0})", typeof(PaymentInstrument).FullName), payinPIs.Type.Definition.FullTypeName());
@@ -603,6 +603,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
             Assert.Contains(string.Format("\"Signatories@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs(101)/Signatories?$skip=1", BaseAddress, mode).ToLower(), payload);
             Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs?$expand=Signatories&$skip=1", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of collection type when using $expand.
+        public async Task QueryExpandPaginatedSignatoriesFromMostRecentPIInAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/MostRecentPI?$expand=Signatories&$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"Signatories@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/MostRecentPI/Signatories?$skip=1", BaseAddress, mode).ToLower(), payload);
         }
 
         [Theory]

@@ -18,6 +18,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var payoutPI = accountType.ContainsOptional(a => a.PayoutPI);
             var payinPIs = accountType.HasMany(a => a.PayinPIs)
                 .Contained();
+            var mostRecentPI = accountType.ContainsOptional(a => a.MostRecentPI).NonContained();
 
             var premiumAccountType = builder.EntityType<PremiumAccount>()
                 .DerivesFrom<Account>();

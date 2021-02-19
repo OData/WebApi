@@ -461,5 +461,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             return Ok(payoutPI);
         }
 
+        // GET ~/PaginatedAccounts(100)/PayinPIs/Namespace.GetCount)
+        [HttpGet]
+        [ODataRoute("PaginatedAccounts({accountId})/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains={name})")]
+        public ITestActionResult GetPayinPIsCountWhoseNameContainsGivenValue(int accountId, [FromODataUri] string name)
+        {
+            var account = _dataSource.PaginatedAccounts.Single(a => a.AccountID == accountId);
+            var count = account.PayinPIs.Where(pi => pi.FriendlyName.Contains(name)).Count();
+
+            return Ok(count);
+        }
+
     }
 }

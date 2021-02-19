@@ -638,6 +638,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         }
 
         [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // Function bound to a single contained entity.
+        public async Task GetPaginatedPayinPIsCountWhoseNameContainsGivenString(string mode)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains='10')", BaseAddress, mode);
+            var response = await Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var json = await response.Content.ReadAsObject<JObject>();
+            var count = (int)json["value"];
+
+            Assert.Equal(2, count);
+        }
+
+        [Theory]
         [MemberData(nameof(MediaTypes))]
         // To test it is able to query ONE entity of a collectiona containment navigation property
         // GET ~/Accounts(1)/PayinPIs(1)

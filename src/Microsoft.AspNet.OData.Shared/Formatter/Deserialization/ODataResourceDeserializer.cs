@@ -293,10 +293,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(clrType);
 
-                deletedEntity = Activator.CreateInstance(type, actualType, instanceAnnotationProperty) as EdmDeltaDeletedEntityObject;
+                deletedEntity = Activator.CreateInstance(type, actualType, false, instanceAnnotationProperty) as EdmDeltaDeletedEntityObject;
             }
 
-            deletedEntity.Id = deletedResource.Id.ToString();
+            deletedEntity.Id = deletedResource.Id== null? "": deletedResource.Id.ToString();
             deletedEntity.Reason = deletedResource.Reason.Value;
 
             SetProperties(deletedResource, deletedEntity);

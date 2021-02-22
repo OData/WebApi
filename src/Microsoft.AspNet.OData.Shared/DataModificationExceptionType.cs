@@ -2,19 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter;
-using Microsoft.OData;
-using Microsoft.OData.Edm;
 
 namespace Org.OData.Core.V1
-{   
+{
     /// <summary>
     /// Represents a Message Type
     /// </summary>
@@ -60,19 +51,12 @@ namespace Org.OData.Core.V1
             builder.EntityType<DataModificationExceptionType>();
       
             builder.Namespace = typeof(DataModificationExceptionType).Namespace;
-
-            Model = builder.GetEdmModel();     
         }
 
         /// <summary>
         /// Represents a MessageType
         /// </summary>
         public MessageType MessageType { get; set; }
-
-        /// <summary>
-        /// Stores the Model
-        /// </summary>
-        public static IEdmModel Model { get; set; }
     }
 
     /// <summary>

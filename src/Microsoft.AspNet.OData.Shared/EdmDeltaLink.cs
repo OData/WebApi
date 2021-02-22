@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics.Contracts;
-using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData

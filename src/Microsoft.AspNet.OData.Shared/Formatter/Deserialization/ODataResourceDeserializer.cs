@@ -120,6 +120,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("readContext");
             }
 
+            ODataDeletedResource deletedResource = resourceWrapper.ResourceBase as ODataDeletedResource;
+
+            if (deletedResource != null)
+            {
+                Type clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
+                return DeSerializeDeletedEntity(deletedResource, structuredType, readContext, clrType);
+            }
+
             if (!String.IsNullOrEmpty(resourceWrapper.ResourceBase.TypeName) && structuredType.FullName() != resourceWrapper.ResourceBase.TypeName)
             {
                 // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
@@ -179,6 +187,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
+
         /// <summary>
         /// Creates a new instance of the backing CLR object for the given resource type.
         /// </summary>
@@ -229,28 +238,79 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     PropertyInfo instanceAnnotationProperty = EdmLibHelpers.GetInstanceAnnotationsContainer(
                            structuredType.StructuredDefinition(), model);
 
-                    if(instanceAnnotationProperty != null)
-                    {
-                        structuralProperties= structuralProperties.Union(new List<string>() { instanceAnnotationProperty.Name });
-                    }
-
                     if (structuredType.IsOpen())
                     {
                         PropertyInfo dynamicDictionaryPropertyInfo = EdmLibHelpers.GetDynamicPropertyDictionary(
                             structuredType.StructuredDefinition(), model);
 
                         return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
-                            dynamicDictionaryPropertyInfo, structuredType);
+                            dynamicDictionaryPropertyInfo, structuredType, instanceAnnotationProperty);
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, structuredType);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, null, structuredType, instanceAnnotationProperty);
                     }
                 }
                 else
                 {
                     return Activator.CreateInstance(clrType);
                 }
+            }
+        }
+
+        private EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext, Type clrType)
+        {
+            Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
+
+            IEdmModel model = readContext.Model;
+
+            Contract.Assert(model != null);
+
+            string typeName = deletedResource.TypeName;
+
+            IEdmEntityType actualType = model.FindType(typeName) as IEdmEntityType;
+            if (actualType == null)
+            {
+                throw new ODataException(Error.Format(SRResources.ResourceTypeNotInModel, typeName));
+            }
+
+            if (actualType.IsAbstract)
+            {
+                string message = Error.Format(SRResources.CannotInstantiateAbstractResourceType, typeName);
+                throw new ODataException(message);
+            }
+
+            PropertyInfo instanceAnnotationProperty = EdmLibHelpers.GetInstanceAnnotationsContainer(
+                        structuredType.StructuredDefinition(), model);
+
+            EdmDeltaDeletedEntityObject deletedEntity;
+
+            if (readContext.IsUntyped)
+            {
+                deletedEntity = new EdmDeltaDeletedEntityObject(actualType);
+            }
+            else
+            {
+                Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(clrType);
+
+                deletedEntity = Activator.CreateInstance(type, actualType, instanceAnnotationProperty) as EdmDeltaDeletedEntityObject;
+            }
+
+            deletedEntity.Id = deletedResource.Id.ToString();
+            deletedEntity.Reason = deletedResource.Reason.Value;
+
+            SetProperties(deletedResource, deletedEntity);
+
+            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, actualType.ToEdmTypeReference(false).AsStructured(), deletedResource, DeserializerProvider, readContext);
+
+            return deletedEntity;
+        }
+
+        private static void SetProperties(ODataDeletedResource deletedResource, EdmDeltaDeletedEntityObject deletedEntity)
+        {
+            foreach (ODataProperty property in deletedResource.Properties)
+            {
+                deletedEntity.TrySetPropertyValue(property.Name, property.Value);
             }
         }
 

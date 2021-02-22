@@ -933,27 +933,35 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmStructuredObject structuredObject = resourceContext.EdmObject;
 
             //For appending transient and persistent instance annotations for both enity object and normal resources
-            IEntityObjectInstanceAnnotations entityObject = structuredObject as IEntityObjectInstanceAnnotations;
+            //var entityObject = structuredObject;
 
-            if (entityObject != null)
+            PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
+                resourceContext.EdmModel);
+
+            object value;
+
+            if (instanceAnnotationInfo == null || structuredObject == null ||
+                !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
             {
-                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.PersistentInstanceAnnotationsContainer, SerializerProvider);
-                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, entityObject.TransientInstanceAnnotationContainer, SerializerProvider);
-            }
-            else
-            {
-                PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
-                    resourceContext.EdmModel);
+                EdmEntityObject edmEntityObject = structuredObject as EdmEntityObject;
 
-                object value;
-
-                if (instanceAnnotationInfo == null || structuredObject == null ||
-                    !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
+                if (edmEntityObject != null && edmEntityObject.PersistentInstanceAnnotationsContainer != null)
+                {
+                    value = edmEntityObject.PersistentInstanceAnnotationsContainer;
+                }
+                else
                 {
                     return;
                 }
+            }
 
-                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, value, SerializerProvider);
+            ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, value, SerializerProvider);
+
+            if(structuredObject is IDelta)
+            {
+                dynamic delta = structuredObject;
+
+                ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, delta.TransientInstanceAnnotationContainer, SerializerProvider);
             }
         }
 

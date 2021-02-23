@@ -216,6 +216,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (structuredType.IsEntity())
                 {
+                    if (readContext.IsDeltaOfT)
+                    {
+                        return new EdmDeltaEntityObject(structuredType.AsEntity());
+                    }
+
                     return new EdmEntityObject(structuredType.AsEntity());
                 }
 
@@ -487,6 +492,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
         private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+        
         {
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
@@ -556,7 +562,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (readContext.IsUntyped)
             {
                 clrType = structuredType.IsEntity()
-                    ? typeof(EdmEntityObject)
+                    ? (readContext.IsDeltaOfT ? typeof(EdmDeltaEntityObject) : typeof(EdmEntityObject))
                     : typeof(EdmComplexObject);
             }
             else

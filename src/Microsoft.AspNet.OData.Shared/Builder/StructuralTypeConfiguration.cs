@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                return Namespace + "." + Name;
+                return string.Join(".", new[] { Namespace, Name }.Where(s => !string.IsNullOrEmpty(s)));
             }
         }
 

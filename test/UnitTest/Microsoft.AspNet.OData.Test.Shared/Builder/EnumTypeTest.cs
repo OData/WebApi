@@ -1168,6 +1168,19 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal("Test", modelBuilder.EnumType<Life>().Namespace);
         }
 
+        /// <summary>
+        /// Tests the full name property getter logic with an empty namespace to ensure the full name doesn't begin with a period.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_WithEmptyNamespace_FullNameDoesNotBeginWithPeriod()
+        {
+            // Arrange and Act.
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            // Assert
+            Assert.Equal("EnumWithEmptyNamespace", modelBuilder.EnumType<EnumWithEmptyNamespace>().FullName);
+        }
+
         private IEdmStructuredType AddComplexTypeWithODataConventionModelBuilder()
         {
             var builder = ODataConventionModelBuilderFactory.Create();
@@ -1244,5 +1257,10 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
         [EnumMember(Value = "soso")]
         NotTooBad
+    }
+
+    [DataContract(Namespace = "")]
+    public enum EnumWithEmptyNamespace
+    {
     }
 }

@@ -188,5 +188,21 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
             Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
         }
+
+        /// <summary>
+        /// Tests the full name property getter logic with an empty namespace to ensure the full name doesn't begin with a period.
+        /// </summary>
+        [Fact]
+        public void NamespaceAssignment_WithEmptyNamespace_FullNameDoesNotBeginWithPeriod()
+        {
+            // Arrange & Act.
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
+            entityTypeConfiguration.Namespace = string.Empty;
+
+            // Assert
+            Assert.Equal("MyOrder", entityTypeConfiguration.FullName);
+        }
     }
 }

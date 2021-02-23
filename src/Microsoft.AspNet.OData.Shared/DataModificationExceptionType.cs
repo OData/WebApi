@@ -40,6 +40,7 @@ namespace Org.OData.Core.V1
     /// <summary>
     /// Represents an Exception Type
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
     public abstract class ExceptionType
     {
         /// <summary>

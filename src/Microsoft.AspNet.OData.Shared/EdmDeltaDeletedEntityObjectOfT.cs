@@ -3,6 +3,10 @@
 
 using System;
 using System.Diagnostics.Contracts;
+using System.Reflection;
+using System.Threading;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 
@@ -13,12 +17,12 @@ namespace Microsoft.AspNet.OData
     /// Used to hold the Deleted Entry object in the Delta Feed Payload.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class EdmDeltaDeletedEntityObject<TStructuralType> : EdmDeltaDeletedEntityObject, IEdmDeltaDeletedEntityObject<TStructuralType>
-    {        
-        private string _id;
-        private DeltaDeletedEntryReason _reason;
-        private EdmDeltaType _edmType;
-        private IEdmNavigationSource _navigationSource;
+    public class EdmDeltaDeletedEntityObject<TStructuralType> : EdmDeltaDeletedEntityObject, IEdmDeltaDeletedEntityObject<TStructuralType> where TStructuralType : class
+    {
+
+        private TStructuralType _instance;
+        private PropertyInfo _instanceAnnotationsPropertyInfo;
+        private IODataInstanceAnnotationContainer _instanceAnnotationCache;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
@@ -44,61 +48,107 @@ namespace Microsoft.AspNet.OData
         /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
         public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, bool isNullable)
-            : base(entityType, isNullable)
+            : this(entityType, isNullable, null)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedEntry);
-        }
 
-        /// <inheritdoc />
-        public string Id
-        {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
-        }
-
-        /// <inheritdoc />
-        public DeltaDeletedEntryReason Reason
-        {
-            get
-            {
-                return _reason;
-            }
-            set
-            {
-                _reason = (DeltaDeletedEntryReason)value;
-            }
-        }
-
-        /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
-        {
-            get
-            {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
-            }
         }
 
         /// <summary>
-        /// The navigation source of the deleted entity. If null, then the deleted entity is from the current feed.
+        /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
         /// </summary>
-        public IEdmNavigationSource NavigationSource
+        /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>        
+        /// <param name="instanceAnnotationsPropertyInfo">Propertyinfo denoting Instanceannotaitoncontainer.</param>
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, PropertyInfo instanceAnnotationsPropertyInfo)
+            : this(entityType, false, instanceAnnotationsPropertyInfo)
         {
-            get
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EdmDeltaDeletedEntityObject"/> class.
+        /// </summary>
+        /// <param name="entityType">The <see cref="IEdmEntityType"/> of this DeltaDeletedEntityObject.</param>
+        /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
+        /// <param name="instanceAnnotationsPropertyInfo">Propertyinfo denoting Instanceannotaitoncontainer.</param>
+        public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, bool isNullable, PropertyInfo instanceAnnotationsPropertyInfo)
+            : base(entityType, isNullable)
+        {
+            _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
+            Reset();
+        }
+
+        internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
+
+        private void Reset()
+        {
+            Type type = typeof(TStructuralType);
+            _instance = Activator.CreateInstance(type) as TStructuralType;
+        }
+
+        ///<inheritdoc/>
+        public override bool TrySetInstanceAnnotations(IODataInstanceAnnotationContainer value)
+        {
+            if (_instanceAnnotationsPropertyInfo != null)
             {
-                return _navigationSource;
-            }
-            set
-            {
-                _navigationSource = value;
+                if (_instanceAnnotationCache == null)
+                {
+                    _instanceAnnotationCache =
+                        GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, value, create: true);
+                }
+
+                return true;
             }
 
+            return false;
+        }
+
+        ///<inheritdoc/>      
+        public override IODataInstanceAnnotationContainer TryGetInstanceAnnotations()
+        {
+            if (_instanceAnnotationsPropertyInfo != null)
+            {
+                if (_instanceAnnotationCache == null)
+                {
+                    _instanceAnnotationCache =
+                        GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, null, create: true);
+                }
+
+                if (_instanceAnnotationCache != null)
+                {
+                    return _instanceAnnotationCache;
+                }
+            }
+
+            return null;
+        }
+
+        private static IODataInstanceAnnotationContainer GetInstanceannotationContainer(PropertyInfo propertyInfo,
+          TStructuralType entity, IODataInstanceAnnotationContainer value, bool create)
+        {
+            if (entity == null)
+            {
+                throw Error.ArgumentNull("entity");
+            }
+
+            object propertyValue = propertyInfo.GetValue(entity);
+            if (propertyValue != null)
+            {
+                return (IODataInstanceAnnotationContainer)propertyValue;
+            }
+
+            if (create)
+            {
+                if (!propertyInfo.CanWrite)
+                {
+                    throw Error.InvalidOperation(SRResources.CannotSetAnnotationPropertyDictionary, propertyInfo.Name,
+                            entity.GetType().FullName);
+                }
+
+                propertyInfo.SetValue(entity, value);
+                return value;
+            }
+
+            return null;
         }
     }
 }

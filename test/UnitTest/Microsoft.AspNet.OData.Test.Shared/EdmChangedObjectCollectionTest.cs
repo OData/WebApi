@@ -353,13 +353,14 @@ namespace Microsoft.AspNet.OData.Test
             var edmChangedObj1 = new Delta<Friend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);
             edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
-            edmChangedObj1.PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
-            edmChangedObj1.PersistentInstanceAnnotationsContainer.AddResourceAnnotation("NS.Test1", 1);
+
+            var annotation = new ODataInstanceAnnotationContainer();
+            annotation.AddResourceAnnotation("NS.Test1", 1);
+            edmChangedObj1.TrySetPropertyValue("InstanceAnnotations", annotation);
 
             var edmChangedObj2 = new EdmDeltaDeletedEntityObject<Friend>(_entityType);
             edmChangedObj2.TrySetPropertyValue("Id", 2);
-            edmChangedObj2.PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
-            edmChangedObj2.PersistentInstanceAnnotationsContainer.AddResourceAnnotation("NS.Test2", 2);
+        
             edmChangedObj2.TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
             edmChangedObj2.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.ContentID", 3);
 
@@ -378,15 +379,16 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("Friend1", friends[0].Name);
             var changedObj = coll[0] as Delta<Friend>;
             Assert.NotNull(changedObj);
-            var annotations = changedObj.PersistentInstanceAnnotationsContainer.GetResourceAnnotations();
+            
+            object obj;
+            changedObj.TryGetPropertyValue("InstanceAnnotations",out obj);
+            var annotations = (obj as IODataInstanceAnnotationContainer).GetResourceAnnotations();
             Assert.Equal("NS.Test1", annotations.First().Key);
             Assert.Equal(1, annotations.First().Value);
 
             EdmDeltaDeletedEntityObject<Friend> changedObj1 = coll[1] as EdmDeltaDeletedEntityObject<Friend>;
             Assert.NotNull(changedObj1);
-            annotations = changedObj1.PersistentInstanceAnnotationsContainer.GetResourceAnnotations();
-            Assert.Equal("NS.Test2", annotations.First().Key);
-            Assert.Equal(2, annotations.First().Value);
+
             annotations = changedObj1.TransientInstanceAnnotationContainer.GetResourceAnnotations();
             Assert.Equal("Core.ContentID", annotations.First().Key);
             Assert.Equal(3, annotations.First().Value);
@@ -472,6 +474,8 @@ namespace Microsoft.AspNet.OData.Test
         public int Id { get; set; }
         public string Name { get; set; }
         public List<NewFriend> NewFriends { get; set; }
+
+        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
     public class NewFriend

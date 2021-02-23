@@ -14,6 +14,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// <summary>
     /// Helper class for OData Serialization
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
     public class ODataSerializerHelper
     {
         internal static void AppendInstanceAnnotations(ODataResourceBase resource, ResourceContext resourceContext, object value, ODataSerializerProvider SerializerProvider)

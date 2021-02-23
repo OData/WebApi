@@ -340,9 +340,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
@@ -365,9 +365,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public async Task PatchEmployee_WithFailedDeletes_Friends_Untyped()
         {
             //Arrange            
-            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
                      }";
 

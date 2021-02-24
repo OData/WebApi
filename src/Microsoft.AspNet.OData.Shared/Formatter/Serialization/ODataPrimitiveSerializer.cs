@@ -6,6 +6,7 @@ using System;
 using System.Data.Linq;
 #endif
 using System.Diagnostics.Contracts;
+using System.Globalization;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Microsoft.AspNet.OData.Common;
@@ -151,19 +152,38 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             Type type = value.GetType();
-            if (primitiveType != null && primitiveType.IsDate() && TypeHelper.IsDateTime(type))
-            {
-                Date dt = (DateTime)value;
-                return dt;
-            }
 
-            if (primitiveType != null && primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
+            if (primitiveType != null)
             {
-                TimeOfDay tod = (TimeSpan)value;
-                return tod;
+                if (primitiveType.IsDate() && TypeHelper.IsDateTime(type))
+                {
+                    Date dt = (DateTime)value;
+                    return dt;
+                }
+
+                if (primitiveType.IsTimeOfDay() && TypeHelper.IsTimeSpan(type))
+                {
+                    TimeOfDay tod = (TimeSpan)value;
+                    return tod;
+                }
+
+                if (primitiveType is EdmDecimalTypeReference decimalTypeReference && decimalTypeReference.Scale.HasValue && value is decimal decimalValue)
+                {
+                    return CalculateDecimalScale(decimalValue, decimalTypeReference.Scale.Value);
+                }
             }
 
             return ConvertUnsupportedPrimitives(value);
+        }
+
+        static decimal CalculateDecimalScale(decimal value, int scale)
+        {
+            string scaleForConverting = "0.";
+            for (int i = 0; i < scale; i++)
+            {
+                scaleForConverting += "0";
+            }
+            return decimal.Parse(value.ToString(scaleForConverting, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
         }
 
         internal static object ConvertUnsupportedPrimitives(object value)

@@ -82,7 +82,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                return string.Join(".", new[] { Namespace, Name }.Where(s => !string.IsNullOrEmpty(s)));
+                return Namespace + "." + Name;
             }
         }
 
@@ -97,9 +97,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _namespace = value;
@@ -118,9 +118,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _name = value;

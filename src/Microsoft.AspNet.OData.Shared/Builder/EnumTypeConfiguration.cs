@@ -90,7 +90,7 @@ namespace Microsoft.AspNet.OData.Builder
         {
             get
             {
-                return string.Join(".", new[] { Namespace, Name }.Where(s => !string.IsNullOrEmpty(s)));
+                return Namespace + "." + Name;
             }
         }
 

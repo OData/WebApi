@@ -113,7 +113,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             IEdmModel model = modelBuilder.GetEdmModel();
 
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData", c => c.AddService(ServiceLifetime.Singleton, b => model));
-            HttpRequestMessage request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData");
 
             var formatter = FormatterTestHelper.GetInputFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
 

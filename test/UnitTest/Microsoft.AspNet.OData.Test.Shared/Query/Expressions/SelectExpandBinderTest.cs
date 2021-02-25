@@ -513,11 +513,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Theory]
         [InlineData("Emails", new[] { "E1", "E3", "E2" })]
-        // [InlineData("Emails($orderby=$it)", new[] { "E1", "E2", "E3" })] TODO: enable it when ODL supports $this
-        // [InlineData("Emails($orderby=$it desc)", new[] { "E3", "E2", "E1" })] TODO: enable it when ODL supports $this
+        [InlineData("Emails($orderby=$this)", new[] { "E1", "E2", "E3" })]
+        [InlineData("Emails($orderby=$this desc)", new[] { "E3", "E2", "E1" })]
         [InlineData("Emails($top=1)", new[] { "E1" })]
         [InlineData("Emails($top=1;$skip=1)", new[] { "E3" })]
-        // [InlineData("Emails($filter=$it le 'E2')", new[] { "E1", "E2" })] TODO: enable it when ODL supports $this
+        [InlineData("Emails($filter=$this le 'E2')", new[] { "E1", "E2" })]
         public void ProjectAsWrapper_Element_ProjectedValueContains_SelectedCollectStructuralProperties(string select, object expect)
         {
             // Arrange

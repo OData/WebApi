@@ -192,8 +192,11 @@ namespace Microsoft.AspNet.OData.Test.Builder
         /// <summary>
         /// Tests the Namespace property setter logic with a null or white space value throws an argument exception.
         /// </summary>
-        [Fact]
-        public void NamespaceAssignment_WithNullOrWhiteSpace_ThrowsArgumentException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NamespaceAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string @namespace)
         {
             // Arrange
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -201,16 +204,17 @@ namespace Microsoft.AspNet.OData.Test.Builder
             EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
 
             // Act and Assert
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = null, "value");
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = string.Empty, "value");
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = " ", "value");
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = @namespace, "value");
         }
 
         /// <summary>
         /// Tests the Name property setter logic with a null or white space value throws an argument exception.
         /// </summary>
-        [Fact]
-        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException()
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string @namespace)
         {
             // Arrange
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -218,9 +222,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
 
             // Act and Assert
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = null, "value");
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = string.Empty, "value");
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = " ", "value");
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = @namespace, "value");
         }
     }
 }

@@ -28,13 +28,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void Property_Name_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
+            ReflectionAssert.Property<StructuralTypeConfiguration, string, ArgumentException>(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
         }
 
         [Fact]
         public void Property_Namespace_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
+            ReflectionAssert.Property<StructuralTypeConfiguration, string, ArgumentException>(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
         }
 
         [Fact]
@@ -187,6 +187,42 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
             Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
             Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the Namespace property setter logic with a null or white space value throws an argument exception.
+        /// </summary>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NamespaceAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string @namespace)
+        {
+            // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = @namespace, "value");
+        }
+
+        /// <summary>
+        /// Tests the Name property setter logic with a null or white space value throws an argument exception.
+        /// </summary>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string name)
+        {
+            // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = name, "value");
         }
     }
 }

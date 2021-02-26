@@ -214,7 +214,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
-        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string @namespace)
+        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string name)
         {
             // Arrange
             ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
@@ -222,7 +222,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
 
             // Act and Assert
-            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = @namespace, "value");
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = name, "value");
         }
     }
 }

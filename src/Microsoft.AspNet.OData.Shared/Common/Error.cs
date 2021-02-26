@@ -96,6 +96,15 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        /// Creates an <see cref="ArgumentException"/> with a default message.
+        /// </summary>
+        /// <returns>The logged <see cref="Exception"/>.</returns>
+        internal static ArgumentException PropertyNullOrWhiteSpace()
+        {
+            return new ArgumentException(CommonWebApiResources.PropertyNullOrWhiteSpace, "value");
+        }
+
+        /// <summary>
         /// Creates an <see cref="ArgumentNullException"/> with the provided properties.
         /// </summary>
         /// <param name="parameterName">The name of the parameter that caused the current exception.</param>

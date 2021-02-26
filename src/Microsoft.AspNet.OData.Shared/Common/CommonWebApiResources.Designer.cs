@@ -116,7 +116,18 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("ArgumentNullOrEmpty", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to The property is null, empty, or consists only of white-space characters..
+        /// </summary>
+        internal static string PropertyNullOrWhiteSpace
+        {
+            get
+            {
+                return ResourceManager.GetString("PropertyNullOrWhiteSpace", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to URI must not contain a query component or a fragment identifier..
         /// </summary>

@@ -97,9 +97,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _namespace = value;
@@ -118,9 +118,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _name = value;

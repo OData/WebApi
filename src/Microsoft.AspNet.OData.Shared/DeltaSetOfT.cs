@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData
     /// Represents an <see cref="IDeltaSet"/> that is a collection of <see cref="IDeltaSetItem"/>s.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class DeltaSet<TStructuralType> : ICollection<IDeltaSetItem>, IDeltaSet, IDeltaSetItem where TStructuralType : class
+    public class DeltaSet<TStructuralType> : ICollection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
     {
         private IList<IDeltaSetItem> _items;
         private Type _clrType;
@@ -69,12 +69,6 @@ namespace Microsoft.AspNet.OData
 
         /// <inheritdoc/>
         public int Count => _items.Count;
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
-
-        /// <inheritdoc />
-        public PropertyInfo InstanceAnnotationsPropertyInfo { get; }
 
         /// <inheritdoc/>
         public bool Remove(IDeltaSetItem item)

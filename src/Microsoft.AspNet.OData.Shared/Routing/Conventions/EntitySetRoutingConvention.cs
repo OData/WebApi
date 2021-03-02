@@ -46,7 +46,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 {
                     // e.g. Try PatchCustomer first, then fall back to Patch action name
                     return actionMap.FindMatchingAction(
-                        "Patch" + entitySet.EntityType().Name,
+                        "Patch" + entitySet.Name,
                         "Patch");
                 }
             }

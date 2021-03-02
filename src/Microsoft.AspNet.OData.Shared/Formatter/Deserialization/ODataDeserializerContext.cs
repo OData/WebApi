@@ -73,7 +73,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 if (!_isChangedObjectCollection.HasValue)
                 {
                     _isChangedObjectCollection = ResourceType != null && (ResourceType == typeof(EdmChangedObjectCollection) || (TypeHelper.IsGenericType(ResourceType) && 
-                        ResourceType.GetGenericTypeDefinition() == typeof(EdmChangedObjectCollection<>) ));
+                        ResourceType.GetGenericTypeDefinition() == typeof(DeltaSet<>) ));
                 }
 
                 return _isChangedObjectCollection.Value;

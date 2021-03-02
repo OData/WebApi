@@ -23,7 +23,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     /// <typeparam name="TStructuralType">TStructuralType is the type of the instance this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
-    public class Delta<TStructuralType> : TypedDelta, IDelta, IEdmChangedObject<TStructuralType> where TStructuralType : class
+    public class Delta<TStructuralType> : TypedDelta, IDelta, IDeltaSetItem where TStructuralType : class
     {
         // cache property accessors for this type and all its derived types.
         private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
@@ -45,8 +45,7 @@ namespace Microsoft.AspNet.OData
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
         private IODataInstanceAnnotationContainer _instanceAnnotationCache;
-        private IEdmTypeReference _edmType;
-
+        
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -75,21 +74,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties)
-            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
-        /// </summary>
-        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
-        /// </param>
-        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
-        /// names, including those of dynamic properties, are ignored.</param>
-        /// <param name="edmType">Edm type of the TStructuralType</param>
-        public Delta(Type structuralType, IEnumerable<string> updatableProperties, IEdmTypeReference edmType)
-            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null, edmType)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo: null, instanceAnnotationsPropertyInfo:null)
         {
         }
 
@@ -102,50 +87,14 @@ namespace Microsoft.AspNet.OData
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
         /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
-        /// properties. <c>null</c> means this entity type is not open.</param>
-        public Delta(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo)
-            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, edmType: null)
-        {
-
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
-        /// </summary>
-        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
-        /// </param>
-        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
-        /// names, including those of dynamic properties, are ignored.</param>
-        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
-        /// properties. <c>null</c> means this entity type is not open.</param>
-        /// <param name="edmType">Edm type of the TStructuralType</param>
-        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
-            PropertyInfo dynamicDictionaryPropertyInfo, IEdmTypeReference edmType)
-            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, edmType, instanceAnnotationsPropertyInfo: null)
-        {
-         
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
-        /// </summary>
-        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
-        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
-        /// </param>
-        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
-        /// names, including those of dynamic properties, are ignored.</param>
-        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
-        /// properties. <c>null</c> means this entity type is not open.</param>
-        /// <param name="edmType">Edm type of the TStructuralType</param>
+        /// properties. <c>null</c> means this entity type is not open.</param>        
         /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
-            PropertyInfo dynamicDictionaryPropertyInfo, IEdmTypeReference edmType, PropertyInfo instanceAnnotationsPropertyInfo)
+            PropertyInfo dynamicDictionaryPropertyInfo, PropertyInfo instanceAnnotationsPropertyInfo)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(structuralType);
-            InitializeProperties(updatableProperties);
-            _edmType = edmType;
+            InitializeProperties(updatableProperties);            
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
             _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
         }
@@ -173,8 +122,10 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc />
         public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
 
-        internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
+        /// <inheritdoc />
+        public PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
 
+       
         /// <inheritdoc/>
         public override void Clear()
         {
@@ -222,7 +173,7 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (value is IDelta || value is EdmChangedObjectCollection)
+            if (value is IDelta || value is IDeltaSet)
             {
                 return TrySetNestedResourceInternal(name, value);
             }
@@ -278,7 +229,7 @@ namespace Microsoft.AspNet.OData
                 object deltaNestedResource = _deltaNestedResources[name];
 
                 //If Edmchangedobject collection, we are handling delta collections so the value will be that itself and no need to get instance value
-                if(deltaNestedResource is EdmChangedObjectCollection)
+                if(deltaNestedResource is IDeltaSet)
                 {
                     value = deltaNestedResource;
                     return true;
@@ -439,8 +390,8 @@ namespace Microsoft.AspNet.OData
                     //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta                     
                        
                     //Recursively patch the subtree.
-                    bool isDeltaType = deltaNestedResource is EdmChangedObjectCollection || TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
-                    Contract.Assert(isDeltaType, nestedResourceName + "should be EdmChangedObjectCollection, or Delta<T> with a corresponding type <T>, but is not.");
+                    bool isDeltaType = deltaNestedResource is IDeltaSet || TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
+                    Contract.Assert(isDeltaType, nestedResourceName + "should be DeltaSet<T>, or Delta<T> with a corresponding type <T>, but is not.");
 
                     deltaNestedResource.CopyChangedValues(originalNestedResource);                    
                 }
@@ -809,7 +760,7 @@ namespace Microsoft.AspNet.OData
 
             //If Edmchangedobject collection, we are handling delta collections so the instance value need not be set,
             //as we consider the value as collection of Delta itself and not instance value of the field
-            if (!(deltaNestedResource is EdmChangedObjectCollection))
+            if (!(deltaNestedResource is IDeltaSet))
             {
                 PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
                 // Get the Delta<{NestedResourceType}>._instance using Reflection.
@@ -826,13 +777,5 @@ namespace Microsoft.AspNet.OData
             return true;
         }
 
-        /// <summary>
-        /// GetEdmType method in herited from IEdmObject
-        /// </summary>
-        /// <returns>Returns the EdmType of the Type, which could be null as well</returns>
-        Microsoft.OData.Edm.IEdmTypeReference IEdmObject.GetEdmType()
-        {
-            return _edmType;
-        }
     }
 }

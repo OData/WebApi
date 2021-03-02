@@ -123,8 +123,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             //For Delta Collection requests
             if (isDelta)
             {
-                Type type = typeof(EdmChangedObjectCollection<>).MakeGenericType(elementType);
-                instance = Activator.CreateInstance(type, edmCollectionType.ElementType().Definition as IEdmEntityType) as EdmChangedObjectCollection;                
+                Type type = typeof(DeltaSet<>).MakeGenericType(elementType);
+                instance = Activator.CreateInstance(type, edmCollectionType.AsEntity().Key()) as ICollection<IDeltaSetItem>;                
 
                 return true;
             }

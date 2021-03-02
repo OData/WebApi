@@ -910,9 +910,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     HandleNullPropagation = HandleNullPropagationOption.True,
                 };
 
-                LambdaExpression orderByExpression =
-                    FilterBinder.Bind(null, orderbyClause, elementType, _context, querySettings);
+                LambdaExpression orderByExpression = FilterBinder.Bind(null, orderbyClause, elementType, _context, querySettings);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
+
+                OrderByClause thenBy = orderbyClause.ThenBy;
+                while (thenBy != null)
+                {
+                    orderByExpression = FilterBinder.Bind(null, thenBy, elementType, _context, querySettings);
+                    source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction, true);
+                    thenBy = thenBy.ThenBy;
+                }
             }
 
             return source;
@@ -1021,8 +1028,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         bool alreadyOrdered = false;
                         foreach (var prop in properties)
                         {
-                            source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType,
-                                alreadyOrdered);
+                            source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType, alreadyOrdered);
                             if (!alreadyOrdered)
                             {
                                 alreadyOrdered = true;

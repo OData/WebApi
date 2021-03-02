@@ -1,0 +1,376 @@
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.Contracts;
+using System.Linq;
+using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
+using Org.OData.Core.V1;
+
+
+namespace Microsoft.AspNet.OData
+{
+    /// <summary>
+    /// Represents an <see cref="IDeltaSet"/> that is a collection of <see cref="IDeltaSetItem"/>s.
+    /// </summary>
+    [NonValidatingParameterBinding]
+    public class DeltaSet<TStructuralType> : ICollection<IDeltaSetItem>, IDeltaSet, IDeltaSetItem where TStructuralType : class
+    {
+        private IList<IDeltaSetItem> _items;
+        private Type _clrType;
+        IList<string> _keys;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
+        /// </summary>
+        public DeltaSet()            
+        {
+            _items = new List<IDeltaSetItem>();
+            _clrType = typeof(TStructuralType);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
+        /// </summary>
+        /// <param name="keys">List of key names for the type</param>
+        public DeltaSet(IList<string> keys)           
+        {
+            _keys = keys;
+            _items = new List<IDeltaSetItem>();
+            _clrType = typeof(TStructuralType);
+        }
+
+        /// <inheritdoc/>
+        public void Add(IDeltaSetItem item)
+        {
+            _items.Add(item);
+        }
+       
+        /// <inheritdoc/>
+        public bool Contains(IDeltaSetItem item)
+        {
+            return _items.Contains(item);
+        }
+
+        /// <inheritdoc/>
+        public void CopyTo(IDeltaSetItem[] array, int arrayIndex)
+        {
+            _items.CopyTo(array, arrayIndex);
+        }
+
+        /// <inheritdoc/>
+        public bool IsReadOnly
+        {
+            get { return false; }
+        }
+
+        /// <inheritdoc/>
+        public int Count => _items.Count;
+
+        /// <inheritdoc />
+        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <inheritdoc />
+        public PropertyInfo InstanceAnnotationsPropertyInfo { get; }
+
+        /// <inheritdoc/>
+        public bool Remove(IDeltaSetItem item)
+        {
+            int count = _items.Count;
+            _items.Remove(item);
+
+            return count == _items.Count + 1;
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            _items.Clear();
+        }
+
+        /// <inheritdoc/>
+        public IEnumerator GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
+        /// <inheritdoc/>
+        IEnumerator<IDeltaSetItem> IEnumerable<IDeltaSetItem>.GetEnumerator()
+        {
+            return _items.GetEnumerator();
+        }
+
+
+        /// <summary>
+        /// Copy changed values is an implementation of Patch
+        /// </summary>
+        /// <param name="original">Original collection of the Type which needs to be updated</param>              
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        internal DeltaSet<TStructuralType> CopyChangedValues(ICollection<TStructuralType> original)
+        {
+            //Here we are getting the keys and using the keys to find the original object 
+            //to patch from the list of collection
+
+            Type type = typeof(DeltaSet<>).MakeGenericType(_clrType);
+
+            DeltaSet<TStructuralType> deltaSet = Activator.CreateInstance(type, _keys) as DeltaSet<TStructuralType>;
+           
+            foreach (Delta<TStructuralType> changedObj in _items)
+            {
+                DataModificationOperationKind operation = DataModificationOperationKind.Update;                
+
+                //Get filtered item based on keys
+                TStructuralType originalObj = GetFilteredItem(_clrType, _keys, original, changedObj );
+
+                try
+                {
+                    DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
+
+                    if (deletedObj != null)
+                    {
+                        operation = DataModificationOperationKind.Delete;
+                     
+                        if (originalObj != null)
+                        {
+                            //This case handle deletions
+                            original.Remove(originalObj);
+                        }
+
+                        deltaSet.Add(deletedObj);
+                    }
+                    else
+                    {
+                        if (originalObj == null)
+                        {
+                            operation = DataModificationOperationKind.Insert;
+                            //This case handle additions
+                            originalObj = Activator.CreateInstance(_clrType) as TStructuralType;
+                            changedObj.Patch(originalObj);
+                            original.Add(originalObj);
+                        }
+                        else
+                        {
+                            //Patch for addition/update. This will call Delta<T> for each item in the collection
+                            changedObj.Patch(originalObj);
+                        }
+
+                        deltaSet.Add(changedObj);
+                    }                    
+                }
+                catch
+                {
+                    //For handling the failed operations.
+                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj);
+
+                    Contract.Assert(changedObject != null);
+                    deltaSet.Add(changedObject);
+                }                
+            }
+
+            return deltaSet;
+        }
+
+       
+        private IDeltaSetItem HandleFailedOperation(Delta<TStructuralType> changedObj, DataModificationOperationKind operation, TStructuralType originalObj)
+        {
+            IDeltaSetItem deltaSetItem = null;
+            DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+
+            // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
+            //The failed operation will be based on the protocol
+            switch (operation)
+            {
+                case DataModificationOperationKind.Update:
+                    deltaSetItem = changedObj;
+                    break;
+                case DataModificationOperationKind.Insert:
+                    {
+                        deltaSetItem = CreateDeletedEntityForFailedOperation(changedObj);
+
+                        break;
+                    }
+                case DataModificationOperationKind.Delete:
+                    {
+                        deltaSetItem = CreateEntityObjectforFailedOperation(changedObj, originalObj);                        
+                        break;
+                    }
+            }
+
+
+            deltaSetItem.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
+            deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationExceptionType);
+
+            return deltaSetItem;
+        }
+
+        private IDeltaSetItem CreateEntityObjectforFailedOperation(Delta<TStructuralType> changedObj, TStructuralType originalObj)
+        {
+            Type type = typeof(Delta<>).MakeGenericType(_clrType);
+
+            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, _clrType.GetProperties().Select(x=>x.Name), null,
+                changedObj.InstanceAnnotationsPropertyInfo) as Delta<TStructuralType>;
+
+            SetProperties(originalObj, deltaObject);
+
+            if (deltaObject.InstanceAnnotationsPropertyInfo != null) {
+
+                object instAnnValue;
+                changedObj.TryGetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, out instAnnValue);
+                IODataInstanceAnnotationContainer instanceAnnotations = instAnnValue as IODataInstanceAnnotationContainer;
+
+                if (instanceAnnotations != null)
+                {
+                    deltaObject.TrySetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                }
+            }
+
+            return deltaObject;
+        }
+
+        private void SetProperties(TStructuralType originalObj, Delta<TStructuralType> edmDeltaEntityObject)
+        {
+            foreach (string property in edmDeltaEntityObject.GetChangedPropertyNames())
+            {
+                edmDeltaEntityObject.TrySetPropertyValue(property, _clrType.GetProperty(property).GetValue(originalObj));
+            }
+
+            foreach (string property in edmDeltaEntityObject.GetUnchangedPropertyNames())
+            {
+                edmDeltaEntityObject.TrySetPropertyValue(property, _clrType.GetProperty(property).GetValue(originalObj));
+            }
+        }
+
+        private DeltaDeletedEntityObject<TStructuralType> CreateDeletedEntityForFailedOperation(Delta<TStructuralType> changedObj)
+        {
+            Type type = typeof(DeltaDeletedEntityObject<>).MakeGenericType(changedObj.ExpectedClrType);
+
+            DeltaDeletedEntityObject<TStructuralType> deletedObject = Activator.CreateInstance(type, true, changedObj.InstanceAnnotationsPropertyInfo) as DeltaDeletedEntityObject<TStructuralType>;
+
+            foreach (string property in changedObj.GetChangedPropertyNames())
+            {
+                SetPropertyValues(changedObj, deletedObject, property);
+            }
+
+            foreach (string property in changedObj.GetUnchangedPropertyNames())
+            {
+                SetPropertyValues(changedObj, deletedObject, property);
+            }
+
+            object annValue;
+            changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annValue);
+
+            IODataInstanceAnnotationContainer instanceAnnotations = annValue as IODataInstanceAnnotationContainer;
+
+            if (instanceAnnotations != null)
+            {
+                deletedObject.TrySetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+            }
+
+            deletedObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
+
+            TryGetContentId(changedObj, _keys, deletedObject);
+            
+            return deletedObject;
+        }
+
+        private static void TryGetContentId(Delta<TStructuralType> changedObj, IList<string> keys, DeltaDeletedEntityObject<TStructuralType> edmDeletedObject)
+        {
+            bool takeContentId = false;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                object value;
+                edmDeletedObject.TryGetPropertyValue(keys[i], out value);
+
+                if (value == null)
+                {
+                    takeContentId = true;
+                    break;
+                }
+            }
+
+            if (takeContentId)
+            {
+                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation("Core.ContentID");
+                if (contentId != null)
+                {
+                    edmDeletedObject.Id = contentId.ToString();
+                }
+                else
+                {
+                    edmDeletedObject.Id = string.Empty;
+                }
+            }
+        }
+
+        private static void SetPropertyValues(Delta<TStructuralType> changedObj, DeltaDeletedEntityObject<TStructuralType> edmDeletedObject, string property)
+        {
+            object objectVal;
+            if (changedObj.TryGetPropertyValue(property, out objectVal))
+            {
+                edmDeletedObject.TrySetPropertyValue(property, objectVal);
+            }
+        }
+
+        private static TStructuralType GetFilteredItem(Type type, IList<string> keys, IEnumerable<TStructuralType> originalList, Delta<TStructuralType> changedObject)
+        {
+            //This logic is for filtering the object based on the set of keys,
+            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
+
+            object keyValue;
+            object[] keyValues = new object[keys.Count];
+            PropertyInfo[] propertyInfos = new PropertyInfo[keys.Count];
+            for (int i = 0; i < keys.Count; i++)
+            {                
+                changedObject.TryGetPropertyValue(keys[i], out keyValue);
+                keyValues[i] = keyValue;
+                propertyInfos[i] = type.GetProperty(keys[i]);
+            }
+                        
+            foreach (TStructuralType item in originalList)
+            {
+                bool isMatch = true;
+
+                for (int i = 0; i < keyValues.Length; i++)
+                {
+                    if (!Equals(propertyInfos[i].GetValue(item), keyValues[i]))
+                    {
+                        // Not a match, so try the next one
+                        isMatch = false;
+                        break;
+                    }
+                }
+
+                if (isMatch)
+                {
+                    return item;
+                }                
+            }
+
+            return default(TStructuralType);
+        }
+
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
+        /// </summary>
+        /// <param name="original">Original collection of the Type which needs to be updated</param>        
+        public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> original)
+        {
+            return CopyChangedValues(original);
+        }
+
+        internal ICollection<TStructuralType> GetInstance()
+        {
+            ICollection<TStructuralType> collection = new List<TStructuralType>();
+
+            foreach(Delta<TStructuralType> item in _items)
+            {
+                collection.Add(item.GetInstance());
+            }
+
+            return collection;
+        }
+    }
+}

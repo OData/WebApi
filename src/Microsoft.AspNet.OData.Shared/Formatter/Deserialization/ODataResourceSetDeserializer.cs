@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -110,27 +111,35 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             //Handle Delta requests to create EdmChangedObjectCollection
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {
-                IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;
-                EdmChangedObjectCollection changedObjCollection;
+                IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;                
 
                 if (readContext.IsUntyped)
                 {
-                    changedObjCollection = new EdmChangedObjectCollection(actualType);
+                    EdmChangedObjectCollection edmCollection = new EdmChangedObjectCollection(actualType);
+
+                    foreach (IEdmChangedObject changedObject in result)
+                    {
+                        edmCollection.Add(changedObject);
+                    }
+
+                    return edmCollection;
                 }
                 else
                 {
+                    ICollection<IDeltaSetItem> deltaSet;
+
                     Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
-                    Type changedObjCollType = typeof(EdmChangedObjectCollection<>).MakeGenericType(type);
+                    Type changedObjCollType = typeof(DeltaSet<>).MakeGenericType(type);
 
-                    changedObjCollection = Activator.CreateInstance(changedObjCollType, actualType) as EdmChangedObjectCollection;
+                    deltaSet = Activator.CreateInstance(changedObjCollType, actualType) as ICollection<IDeltaSetItem>;
+
+                    foreach (IDeltaSetItem changedObject in result)
+                    {
+                        deltaSet.Add(changedObject);
+                    }
+
+                    return deltaSet;
                 }
-
-                foreach (IEdmChangedObject changedObject in result)
-                {                
-                    changedObjCollection.Add(changedObject);                    
-                }
-
-                return changedObjCollection;
             }
 
             if (result != null && elementType.IsComplex())

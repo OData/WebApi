@@ -296,7 +296,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
-                Type type = typeof(EdmDeltaDeletedEntityObject<>).MakeGenericType(clrType);
+                Type type = typeof(DeltaDeletedEntityObject<>).MakeGenericType(clrType);
 
                 deletedEntity = Activator.CreateInstance(type, actualType, false, instanceAnnotationProperty) as EdmDeltaDeletedEntityObject;
             }

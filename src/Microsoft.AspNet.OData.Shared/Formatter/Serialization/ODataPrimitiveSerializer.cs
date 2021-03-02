@@ -190,7 +190,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 scaleForConverting += "0";
             }
-            return decimal.Parse(value.ToString(scaleForConverting, CultureInfo.CurrentCulture), CultureInfo.CurrentCulture);
+            return decimal.Parse(value.ToString(scaleForConverting, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         }
 
         internal static object ConvertUnsupportedPrimitives(object value)

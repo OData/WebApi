@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         [ODataRoute("Employees")]
         [HttpPatch]
-        public ITestActionResult PatchEmployees([FromBody] EdmChangedObjectCollection<Employee> coll)
+        public ITestActionResult PatchEmployees([FromBody] DeltaSet<Employee> coll)
         {
             InitEmployees();
 
@@ -124,7 +124,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
-        public ITestActionResult PatchFriends(int key, [FromBody] EdmChangedObjectCollection<Friend> friendColl)
+        public ITestActionResult PatchFriends(int key, [FromBody] DeltaSet<Friend> friendColl)
         {
             InitEmployees();
 
@@ -139,7 +139,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         [ODataRoute("Employees({key})/NewFriends")]
         [HttpPatch]
-        public ITestActionResult PatchNewFriends(int key, [FromBody] EdmChangedObjectCollection<NewFriend> friendColl)
+        public ITestActionResult PatchNewFriends(int key, [FromBody] DeltaSet<NewFriend> friendColl)
         {
             InitEmployees();
 
@@ -148,9 +148,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
 
-            var changedObjColl = friendColl.Patch(friendCollection);
+            // var changedObjColl = friendColl.Patch(friendCollection);
 
-            return Ok(changedObjColl);
+            //return Ok(changedObjColl);
+
+            return Ok();
         }
 
         [ODataRoute("Employees({key})/UnTypedFriends")]

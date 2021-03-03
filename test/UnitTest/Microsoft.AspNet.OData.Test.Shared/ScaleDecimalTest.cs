@@ -9,13 +9,14 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
+using System.Globalization;
 
 namespace Microsoft.AspNet.OData.Test
 {
     public class ScaleDecimalTest
     {
         [Fact]
-        public async Task PrecitionOfDecimalProperty_ShouldBeCalculated_BasedOnScale()
+        public async Task ScaleOfDecimalProperty_ShouldBeCalculated_BasedOnScale()
         {
             const string Uri = "http://localhost/odata/Orders";
             HttpClient client = GetClient();
@@ -30,7 +31,7 @@ namespace Microsoft.AspNet.OData.Test
             IEnumerable<Order> orders = await ReadEntitiesFromResponse<Order>(response);
             foreach (Order order in orders)
             {
-                Assert.Equal("10.00", order.TotalPrice.ToString());
+                Assert.Equal("10.00", order.TotalPrice.ToString(CultureInfo.InvariantCulture));
             }
         }
 

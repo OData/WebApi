@@ -12,6 +12,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Org.OData.Core.V1;
+using static Microsoft.AspNet.OData.PatchDelegates;
 
 namespace Microsoft.AspNet.OData
 {
@@ -72,18 +73,27 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Patch for Types without underlying CLR types
         /// </summary>
-        /// <param name="original"></param>        
+        /// <param name="original"></param>
+        /// <returns>ChangedObjectCollection response</returns>
         public EdmChangedObjectCollection Patch(ICollection<EdmStructuredObject> original)
         {
             return CopyChangedValues(original);
         }
 
         /// <summary>
-        /// Patch for Types without underlying CLR types
+        /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
-        /// <param name="original"></param>        
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal EdmChangedObjectCollection CopyChangedValues(ICollection<EdmStructuredObject> original)
+        /// <param name="createDelegate">Delegate for using users GetOrCreate nmethod</param>
+        /// <param name="deleteDelegate">Delegate for using users Delete method</param>
+        /// <returns>ChangedObjectCollection response</returns>
+        public EdmChangedObjectCollection Patch(GetOrCreateDelegate createDelegate, DeleteDelegate deleteDelegate)
+        {
+            return CopyChangedValues(null, createDelegate, deleteDelegate, true);
+        }
+
+   
+        internal EdmChangedObjectCollection CopyChangedValues(ICollection<EdmStructuredObject> original,
+            GetOrCreateDelegate createDelegate = null, DeleteDelegate deleteDelegate = null, bool useOriginalList = false)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             List<IEdmStructuralProperty> keys = _entityType.Key().ToList();
@@ -91,7 +101,32 @@ namespace Microsoft.AspNet.OData
             foreach (dynamic changedObj in Items)
             {                
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
-                EdmStructuredObject originalObj = GetFilteredItem(keys, original, changedObj);
+                EdmStructuredObject originalObj = null;
+
+                if (useOriginalList)
+                {
+                    Dictionary<string, object> keyValues = new Dictionary<string, object>();
+
+                    foreach (string key in EntityType.Key().Select(x=>x.Name))
+                    {
+                        object value;
+                        changedObj.TryGetPropertyValue(key, out value);
+
+                        if (value != null)
+                        {
+                            keyValues.Add(key, value);
+                        }
+                    }
+
+                    originalObj = createDelegate(keyValues) as EdmStructuredObject;
+
+                    Contract.Assert(originalObj != null);
+
+                }
+                else
+                {
+                    originalObj = GetFilteredItem(keys, original, changedObj);
+                }
 
                 try
                 {
@@ -100,11 +135,18 @@ namespace Microsoft.AspNet.OData
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
- 
-                        if (originalObj != null)
+
+                        if (useOriginalList)
                         {
-                            //This case handle deletions
-                            original.Remove(originalObj);
+                            deleteDelegate(originalObj);
+                        }
+                        else
+                        {
+                            if (originalObj != null)
+                            {
+                                //This case handle deletions
+                                original.Remove(originalObj);
+                            }
                         }
 
                         changedObjectCollection.Add(deletedObj);

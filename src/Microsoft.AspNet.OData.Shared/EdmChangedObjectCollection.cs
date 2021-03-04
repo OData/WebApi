@@ -12,7 +12,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Org.OData.Core.V1;
-using static Microsoft.AspNet.OData.PatchDelegates;
+using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.AspNet.OData
 {
@@ -86,14 +86,16 @@ namespace Microsoft.AspNet.OData
         /// <param name="createDelegate">Delegate for using users GetOrCreate nmethod</param>
         /// <param name="deleteDelegate">Delegate for using users Delete method</param>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(GetOrCreateDelegate createDelegate, DeleteDelegate deleteDelegate)
+        public EdmChangedObjectCollection Patch(GetOrCreate createDelegate, Delete deleteDelegate)
         {
             return CopyChangedValues(null, createDelegate, deleteDelegate, true);
         }
 
-   
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         internal EdmChangedObjectCollection CopyChangedValues(ICollection<EdmStructuredObject> original,
-            GetOrCreateDelegate createDelegate = null, DeleteDelegate deleteDelegate = null, bool useOriginalList = false)
+            GetOrCreate createDelegate = null, Delete deleteDelegate = null, bool useOriginalList = false)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             List<IEdmStructuralProperty> keys = _entityType.Key().ToList();
@@ -105,18 +107,7 @@ namespace Microsoft.AspNet.OData
 
                 if (useOriginalList)
                 {
-                    Dictionary<string, object> keyValues = new Dictionary<string, object>();
-
-                    foreach (string key in EntityType.Key().Select(x=>x.Name))
-                    {
-                        object value;
-                        changedObj.TryGetPropertyValue(key, out value);
-
-                        if (value != null)
-                        {
-                            keyValues.Add(key, value);
-                        }
-                    }
+                    Dictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
 
                     originalObj = createDelegate(keyValues) as EdmStructuredObject;
 
@@ -170,10 +161,10 @@ namespace Microsoft.AspNet.OData
                         changedObjectCollection.Add(changedObj);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     //Handle Failed Operation
-                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, originalObj, keys);
+                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, originalObj, keys, ex.Message);
                     
                     Contract.Assert(changedObject != null);
                     changedObjectCollection.Add(changedObject);
@@ -181,6 +172,24 @@ namespace Microsoft.AspNet.OData
             }
 
             return changedObjectCollection;
+        }
+
+        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, dynamic changedObj)
+        {
+            IDictionary<string, object> keyValues = new Dictionary<string, object>();
+
+            foreach (IEdmStructuralProperty key in keys)
+            {
+                object value;
+                changedObj.TryGetPropertyValue(key.Name, out value);
+
+                if (value != null)
+                {
+                    keyValues.Add(key.Name, value);
+                }
+            }
+
+            return keyValues;
         }
 
         private static void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj)
@@ -247,10 +256,12 @@ namespace Microsoft.AspNet.OData
         }
 
         private IEdmChangedObject HandleFailedOperation(dynamic changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
-            List<IEdmStructuralProperty> keys)
+            List<IEdmStructuralProperty> keys, string errorMessage)
         {
             IEdmChangedObject edmChangedObject = null;
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+            dataModificationExceptionType.MessageType = new MessageType();
+            dataModificationExceptionType.MessageType.Message = errorMessage;
 
             // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
             //The failed operation will be based on the protocol

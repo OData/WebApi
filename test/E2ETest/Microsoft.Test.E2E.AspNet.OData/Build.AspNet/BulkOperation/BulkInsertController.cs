@@ -15,7 +15,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
-using static Microsoft.AspNet.OData.PatchDelegates;
+using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 {
@@ -33,6 +33,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         /// static so that the data is shared among requests.
         /// </summary>
         private static IList<Employee> Employees = null;
+
+        private IEdmTypeReference edmType;
 
         private void InitEmployees()
         {
@@ -84,8 +86,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
 
-            DeleteDelegate _deleteDelegate = new DeleteDelegate(DeleteMethod);
-            GetOrCreateDelegate _createDelegate = new GetOrCreateDelegate(GetOrCreateMethod);
+            Delete _deleteDelegate = new Delete(DeleteMethod);
+            GetOrCreate _createDelegate = new GetOrCreate(GetOrCreateMethod);
 
             var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
 
@@ -94,13 +96,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(EdmChangedObjectCollection friendColl)
         {
-            var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
+            edmType = friendColl[0].GetEdmType();
+            var entity = new EdmEntityObject(edmType.AsEntity());
             entity.TrySetPropertyValue("Id", 2);
 
             var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
 
-            DeleteDelegate _deleteDelegate = new DeleteDelegate(DeleteMethod);
-            GetOrCreateDelegate _createDelegate = new GetOrCreateDelegate(GetOrCreateMethod);
+            Delete _deleteDelegate = new Delete(DeleteMethod);
+            GetOrCreate _createDelegate = new GetOrCreate(GetOrCreateMethodTypeless);
 
             var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
 
@@ -116,6 +119,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public object GetOrCreateMethod(IDictionary<string, object> keys)
         {
             return new NewFriend();
+        }
+
+        public object GetOrCreateMethodTypeless(IDictionary<string, object> keys)
+        {
+            return new EdmEntityObject(edmType.AsEntity());
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]

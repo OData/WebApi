@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
+using System.Web.Http.Results;
 using Microsoft.AspNet.OData.Builder;
 using Org.OData.Core.V1;
-using static Microsoft.AspNet.OData.PatchDelegates;
+using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.AspNet.OData
 {    
@@ -97,9 +98,10 @@ namespace Microsoft.AspNet.OData
             return _items.GetEnumerator();
         }
 
- 
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         internal DeltaSet<TStructuralType> CopyChangedValues(ICollection<TStructuralType> original, 
-                GetOrCreateDelegate createDelegate = null, DeleteDelegate deleteDelegate = null, bool useOriginalList = false)
+                GetOrCreate createDelegate = null, Delete deleteDelegate = null, bool useOriginalList = false)
         {
             //Here we are getting the keys and using the keys to find the original object 
             //to patch from the list of collection
@@ -179,10 +181,10 @@ namespace Microsoft.AspNet.OData
                         deltaSet.Add(changedObj);
                     }
                 }
-                catch
+                catch(Exception ex)
                 {
                     //For handling the failed operations.
-                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj);
+                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj, ex.Message);
 
                     Contract.Assert(changedObject != null);
                     deltaSet.Add(changedObject);
@@ -200,10 +202,12 @@ namespace Microsoft.AspNet.OData
             return deltaSet;
         }
 
-        private IDeltaSetItem HandleFailedOperation(Delta<TStructuralType> changedObj, DataModificationOperationKind operation, TStructuralType originalObj)
+        private IDeltaSetItem HandleFailedOperation(Delta<TStructuralType> changedObj, DataModificationOperationKind operation, TStructuralType originalObj, string errorMessage)
         {
             IDeltaSetItem deltaSetItem = null;
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+            dataModificationExceptionType.MessageType = new MessageType();
+            dataModificationExceptionType.MessageType.Message = errorMessage;
 
             // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
             //The failed operation will be based on the protocol
@@ -394,7 +398,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="createDelegate">Delegate for using users GetOrCreate nmethod</param>
         /// <param name="deleteDelegate">Delegate for using users Delete method</param>
         /// <returns>DeltaSet response</returns>
-        public DeltaSet<TStructuralType> Patch(GetOrCreateDelegate createDelegate, DeleteDelegate deleteDelegate)
+        public DeltaSet<TStructuralType> Patch(GetOrCreate createDelegate, Delete deleteDelegate)
         {
             return CopyChangedValues(null, createDelegate, deleteDelegate, true);
         }

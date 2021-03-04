@@ -15,6 +15,7 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
+using static Microsoft.AspNet.OData.PatchDelegates;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 {
@@ -77,6 +78,44 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                     Friends = new List<Friend>{new Friend { Id=1,Name="Test0"} ,new Friend { Id=2,Name="Test1"} }
                 },
             };
+        }
+
+        public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl)
+        {
+            var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
+
+            DeleteDelegate _deleteDelegate = new DeleteDelegate(DeleteMethod);
+            GetOrCreateDelegate _createDelegate = new GetOrCreateDelegate(GetOrCreateMethod);
+
+            var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
+
+            return changedObjColl;
+        }
+
+        public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(EdmChangedObjectCollection friendColl)
+        {
+            var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
+            entity.TrySetPropertyValue("Id", 2);
+
+            var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
+
+            DeleteDelegate _deleteDelegate = new DeleteDelegate(DeleteMethod);
+            GetOrCreateDelegate _createDelegate = new GetOrCreateDelegate(GetOrCreateMethod);
+
+            var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
+
+            return changedObjColl;
+        }
+
+        public void DeleteMethod(object original)
+        {
+            //Delete Logic
+
+        }
+
+        public object GetOrCreateMethod(IDictionary<string, object> keys)
+        {
+            return new NewFriend();
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -143,30 +182,46 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             InitEmployees();
 
-            Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
-            Assert.NotNull(originalEmployee);
+            if(key == 1)
+            {
+                var deltaSet = PatchWithUsersMethod(friendColl);
+                
+                return Ok(deltaSet);
+            }
+            {
+                Employee originalEmployee = Employees.SingleOrDefault(c => c.ID == key);
+                Assert.NotNull(originalEmployee);
 
-            var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
+                var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
 
-            // var changedObjColl = friendColl.Patch(friendCollection);
+                var changedObjColl = friendColl.Patch(friendCollection);
 
-            //return Ok(changedObjColl);
-
-            return Ok();
+                return Ok(changedObjColl);
+            }
+            
         }
 
         [ODataRoute("Employees({key})/UnTypedFriends")]
         [HttpPatch]
         public ITestActionResult PatchUnTypedFriends(int key, [FromBody] EdmChangedObjectCollection friendColl)
         {
-            var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
-            entity.TrySetPropertyValue("Id", 2);
+            if (key == 1)
+            {
+                var changedObjColl = PatchWithUsersMethodTypeLess(friendColl);
 
-            var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
+                return Ok(changedObjColl);
+            }
+            else
+            {
+                var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
+                entity.TrySetPropertyValue("Id", 2);
 
-            var changedObjColl = friendColl.Patch(friendCollection);
+                var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
 
-            return Ok(changedObjColl);
+                var changedObjColl = friendColl.Patch(friendCollection);
+
+                return Ok(changedObjColl);
+            }
         }
 
         [ODataRoute("Employees({key})")]

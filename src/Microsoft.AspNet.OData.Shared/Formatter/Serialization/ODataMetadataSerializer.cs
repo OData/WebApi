@@ -49,8 +49,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // NOTE: ODataMessageWriter doesn't have a way to set the IEdmModel. So, there is an underlying assumption here that
             // the model received by this method and the model passed(from configuration) while building ODataMessageWriter is the same (clr object).
 
-            // Note: MessageWriter doesn't have a WriteMetadataDocumentAsync method. We should fix that by providing a default implementation in the base class.
-            return Task.Run(() => messageWriter.WriteMetadataDocument());
+            return messageWriter.WriteMetadataDocumentAsync();
         }
     }
 }

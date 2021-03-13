@@ -416,11 +416,9 @@ namespace Microsoft.AspNet.OData
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
         internal static IEnumerable<Type> GetLoadedTypes(IWebApiAssembliesResolver assembliesResolver)
         {
-            List<Type> result = new List<Type>();
-
             if (assembliesResolver == null)
             {
-                return result;
+                yield return null;
             }
 
             // Go through all assemblies referenced by the application and search for types matching a predicate
@@ -449,11 +447,15 @@ namespace Microsoft.AspNet.OData
 
                 if (exportedTypes != null)
                 {
-                    result.AddRange(exportedTypes.Where(t => t != null && TypeHelper.IsVisible(t)));
+                    foreach (var t in exportedTypes)
+                    {
+                        if ((t != null) && (TypeHelper.IsVisible(t)))
+                        {
+                            yield return t;
+                        }
+                    }
                 }
             }
-
-            return result;
         }
 
         internal static Type GetTaskInnerTypeOrSelf(Type type)

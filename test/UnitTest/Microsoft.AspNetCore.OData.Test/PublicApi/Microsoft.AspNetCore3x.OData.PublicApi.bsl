@@ -1098,8 +1098,11 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 
 	public ParameterConfiguration AddParameter (string name, IEdmTypeConfiguration parameterType)
 	public ParameterConfiguration CollectionEntityParameter (string name)
+	public ParameterConfiguration CollectionEntityParameter (System.Type clrElementEntityType, string name)
 	public ParameterConfiguration CollectionParameter (string name)
+	public ParameterConfiguration CollectionParameter (System.Type clrElementType, string name)
 	public ParameterConfiguration EntityParameter (string name)
+	public ParameterConfiguration EntityParameter (System.Type clrEntityType, string name)
 	public ParameterConfiguration Parameter (string name)
 	public ParameterConfiguration Parameter (System.Type clrParameterType, string name)
 }

@@ -843,7 +843,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var functionBuilder = movie.Function("FunctionName").Returns<int>();
             functionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", new Type[] { typeof(string) });
             method.MakeGenericMethod(paramType).Invoke(functionBuilder, new[] { "p2" });
 
             // Act

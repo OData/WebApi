@@ -492,6 +492,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
+                Request = readContext.Request,
+                RequestContext = readContext.RequestContext,
             };
 
             Type clrType = null;
@@ -600,6 +602,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
+                Request = readContext.Request,
+                RequestContext = readContext.RequestContext,
             };
 
             if (readContext.IsUntyped)

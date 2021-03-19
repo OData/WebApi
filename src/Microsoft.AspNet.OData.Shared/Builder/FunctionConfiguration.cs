@@ -189,6 +189,14 @@ namespace Microsoft.AspNet.OData.Builder
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public FunctionConfiguration ReturnsCollection<TReturnElementType>()
         {
+            Type clrElementType = typeof(TReturnElementType);
+            IEdmTypeConfiguration edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
+
+            if (edmElementType is EntityTypeConfiguration)
+            {
+                throw Error.InvalidOperation(SRResources.ReturnEntityCollectionWithoutEntitySet, edmElementType.FullName);
+            }
+
             ReturnsCollectionImplementation<TReturnElementType>();
             return this;
         }

@@ -447,7 +447,7 @@ namespace Microsoft.AspNet.OData
 
                 if (exportedTypes != null)
                 {
-                    foreach (var t in exportedTypes)
+                    foreach (Type t in exportedTypes)
                     {
                         if ((t != null) && (TypeHelper.IsVisible(t)))
                         {

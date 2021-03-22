@@ -1256,6 +1256,56 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
+        public void ApplyNestedProperties_Preserves_ReadContextRequest()
+        {
+            // Arrange
+            IServiceProvider container = new MockContainer(builder =>
+            {
+                builder.AddService(ServiceLifetime.Singleton, prov => new Mock<ODataResourceSetDeserializer>(prov.GetService(typeof(ODataDeserializerProvider))));
+                builder.AddService(ServiceLifetime.Singleton, prov => new Mock<ODataResourceDeserializer>(prov.GetService(typeof(ODataDeserializerProvider))));
+                builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceDeserializer>)prov.GetService(typeof(Mock<ODataResourceDeserializer>))).Object);
+                builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceSetDeserializer>)prov.GetService(typeof(Mock<ODataResourceSetDeserializer>))).Object);
+            });
+
+            HttpRequestMessage originalReq = new HttpRequestMessage(HttpMethod.Post, "http://localhost/OData/OData.svc/Products");
+            originalReq.SetRequestContext(new System.Web.Http.Controllers.HttpRequestContext() { Configuration = new System.Web.Http.HttpConfiguration(), Url = new System.Web.Http.Routing.UrlHelper(originalReq) });
+
+            var readContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                Request = originalReq
+            };
+
+            ODataNestedResourceInfoWrapper nestedResourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo() { Name = "Address" });
+            nestedResourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(new ODataResource { Properties = new List<ODataProperty>() }));
+
+            ODataNestedResourceInfoWrapper nestedResourceSetWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo() { Name = "Products" });
+            nestedResourceSetWrapper.NestedItems.Add(new ODataResourceSetWrapper(new ODataResourceSet()));
+
+            ODataResourceWrapper resourceWrapper = new ODataResourceWrapper(new ODataResource());
+            resourceWrapper.NestedResourceInfos.Add(nestedResourceInfoWrapper);
+            resourceWrapper.NestedResourceInfos.Add(nestedResourceSetWrapper);
+
+            Mock<ODataResourceDeserializer> resourceDeserializer = (Mock<ODataResourceDeserializer>)container.GetService(typeof(Mock<ODataResourceDeserializer>));
+            Mock<ODataResourceSetDeserializer> resourceSetDeserializer = (Mock<ODataResourceSetDeserializer>)container.GetService(typeof(Mock<ODataResourceSetDeserializer>));
+
+            resourceSetDeserializer.CallBase = resourceDeserializer.CallBase = true;
+
+            resourceDeserializer.Setup(d => d.ReadResource(It.IsAny<ODataResourceWrapper>(), It.IsAny<IEdmStructuredTypeReference>(),
+               It.Is<ODataDeserializerContext>(context => context.Request == originalReq))).Verifiable();
+
+            resourceSetDeserializer.Setup(d => d.ReadResourceSet(It.IsAny<ODataResourceSetWrapper>(), It.IsAny<IEdmStructuredTypeReference>(),
+               It.Is<ODataDeserializerContext>(context => context.Request == originalReq))).Verifiable();
+
+            // Act
+            new ODataResourceDeserializer(resourceDeserializer.Object.DeserializerProvider).ApplyNestedProperties(new Supplier(), resourceWrapper, _supplierEdmType, readContext);
+
+            // Assert
+            resourceDeserializer.Verify();
+            resourceSetDeserializer.Verify();
+        }
+
+        [Fact]
         public void ApplyStructuralProperties_ThrowsArgumentNull_resourceWrapper()
         {
             // Arrange

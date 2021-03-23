@@ -1267,8 +1267,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceSetDeserializer>)prov.GetService(typeof(Mock<ODataResourceSetDeserializer>))).Object);
             });
 
-            HttpRequestMessage originalReq = new HttpRequestMessage(HttpMethod.Post, "http://localhost/OData/OData.svc/Products");
-            originalReq.SetRequestContext(new System.Web.Http.Controllers.HttpRequestContext() { Configuration = new System.Web.Http.HttpConfiguration(), Url = new System.Web.Http.Routing.UrlHelper(originalReq) });
+            HttpRequestMessage originalReq = RequestFactory.Create();
 
             var readContext = new ODataDeserializerContext
             {

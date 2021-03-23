@@ -1267,12 +1267,17 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 builder.AddService(ServiceLifetime.Singleton, prov => ((Mock<ODataResourceSetDeserializer>)prov.GetService(typeof(Mock<ODataResourceSetDeserializer>))).Object);
             });
 
-            HttpRequestMessage originalReq = RequestFactory.Create();
+
+            var originalContext = new ODataDeserializerContext
+            {
+                Model = _edmModel,
+                Request = RequestFactory.Create()
+            };
 
             var readContext = new ODataDeserializerContext
             {
-                Model = _edmModel,
-                Request = originalReq
+                Model = originalContext.Model,
+                Request = originalContext.Request
             };
 
             ODataNestedResourceInfoWrapper nestedResourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo() { Name = "Address" });
@@ -1291,10 +1296,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             resourceSetDeserializer.CallBase = resourceDeserializer.CallBase = true;
 
             resourceDeserializer.Setup(d => d.ReadResource(It.IsAny<ODataResourceWrapper>(), It.IsAny<IEdmStructuredTypeReference>(),
-               It.Is<ODataDeserializerContext>(context => context.Request == originalReq))).Verifiable();
+               It.Is<ODataDeserializerContext>(context => context.Request == originalContext.Request))).Verifiable();
 
             resourceSetDeserializer.Setup(d => d.ReadResourceSet(It.IsAny<ODataResourceSetWrapper>(), It.IsAny<IEdmStructuredTypeReference>(),
-               It.Is<ODataDeserializerContext>(context => context.Request == originalReq))).Verifiable();
+               It.Is<ODataDeserializerContext>(context => context.Request == originalContext.Request))).Verifiable();
 
             // Act
             new ODataResourceDeserializer(resourceDeserializer.Object.DeserializerProvider).ApplyNestedProperties(new Supplier(), resourceWrapper, _supplierEdmType, readContext);

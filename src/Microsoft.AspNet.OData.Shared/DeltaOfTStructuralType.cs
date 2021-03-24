@@ -452,11 +452,7 @@ namespace Microsoft.AspNet.OData
                         if(patchHandler != null)
                         {
                             deltaNestedResource.Patch(patchHandler);
-                        }
-                        else
-                        {
-                           // deltaNestedResource.Patch(originalCollection: originalNestedResource);//List<Friends>
-                        }
+                        }                        
                     }
                     else
                     {

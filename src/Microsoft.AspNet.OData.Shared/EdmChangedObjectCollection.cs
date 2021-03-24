@@ -185,70 +185,7 @@ namespace Microsoft.AspNet.OData
             return changedObjectCollection;
         }
 
-        private PatchStatus TryGetObject(IDictionary<string, object> keyValues, out object originalObject, out string errorMessage)
-        {
-            PatchStatus status = PatchStatus.Success;
-            errorMessage = string.Empty;
-            originalObject = null;
-
-            try
-            {
-                originalObject = GetFilteredItem(keyValues, originalList);
-
-                if (originalObject == null)
-                {
-                    status = PatchStatus.NotFound;
-                }
-            }
-            catch (Exception ex)
-            {
-                status = PatchStatus.Failure;
-                errorMessage = ex.Message;
-            }
-
-            return status;
-        }
-
-        private bool TryCreateObject(out object createdObject, out string errorMessage)
-        {
-            createdObject = null;
-            errorMessage = string.Empty;
-
-            try
-            {
-                createdObject = new EdmEntityObject(EntityType);
-                originalList.Add(createdObject as EdmStructuredObject);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return false;
-            }
-        }
-
-        private bool TryDeleteObject(IDictionary<string, object> keyValues, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-
-            try
-            {
-                EdmStructuredObject originalObject = GetFilteredItem(keyValues, originalList);
-                originalList.Remove(originalObject);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                errorMessage = ex.Message;
-
-                return false;
-            }
-        }
-
-
+    
         private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, EdmDeltaEntityObject changedObj)
         {
             IDictionary<string, object> keyValues = new Dictionary<string, object>();
@@ -309,38 +246,6 @@ namespace Microsoft.AspNet.OData
                     originalObj.TrySetPropertyValue(propertyName, value);
                 }
             }
-        }
-
-        private static EdmStructuredObject GetFilteredItem(IDictionary<string, object> keyValues, IEnumerable<EdmStructuredObject> originalList)
-        {
-            //This logic is for filtering the object based on the set of keys,
-            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
-
-            foreach (EdmStructuredObject item in originalList)
-            {
-                bool isMatch = true;
-
-                foreach (KeyValuePair<string, object> keyValue in keyValues)
-                {
-                    object value;
-                    if (item.TryGetPropertyValue(keyValue.Key, out value))
-                    {
-                        if(!Equals(value,keyValue.Value))
-                        {
-                            // Not a match, so try the next one
-                            isMatch = false;
-                            break;
-                        }                       
-                    }
-                }
-
-                if (isMatch)
-                {
-                    return item;
-                }
-            }
-
-            return default(EdmStructuredObject);
         }
 
         private IEdmChangedObject HandleFailedOperation(EdmDeltaEntityObject changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 

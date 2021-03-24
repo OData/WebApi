@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Data.Entity;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
@@ -15,12 +16,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
     {
         [Key]
         public int ID { get; set; }
-        public String Name { get; set; }
+        public String Name { get; set; }        
         public List<Skill> SkillSet { get; set; }
         public Gender Gender { get; set; }
         public AccessLevel AccessLevel { get; set; }
-        public FavoriteSports FavoriteSports { get; set; }
-
+        
         [AutoExpand]
         public List<Friend> Friends { get; set; }
 
@@ -56,13 +56,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         Basketball
     }
 
-    public class FavoriteSports
-    {
-        public int Num { get; set; }
-        public Sport LikeMost { get; set; }
-        public List<Sport> Like { get; set; }
-    }
-
     public class Friend
     {
         [Key]
@@ -71,6 +64,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public string Name { get; set; }
         [Range(10, 20)]
         public int Age { get; set; }
+
+        public List<Order> Orders { get; set; }
+    }
+
+    public class Order
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public int Price { get; set; }
     }
 
     public class NewFriend
@@ -83,7 +86,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public int Age { get; set; }
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
 
-        public FavoriteSports Sports { get; set; }
+    }
+
+    public class UnTypedEmployee
+    {
+        [Key]
+        public int ID { get; set; }
+        public String Name { get; set; }
+       
+        public List<UnTypedFriend> UnTypedFriends { get; set; }
     }
 
     public class UnTypedFriend

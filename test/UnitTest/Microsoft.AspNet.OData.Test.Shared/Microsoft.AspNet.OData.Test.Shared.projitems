@@ -146,6 +146,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UIntEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UShortEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\VersionTestHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DeltaSetTest.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DeltaSetOfTTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />

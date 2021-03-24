@@ -18,7 +18,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             employee.CollectionProperty<Skill>(c => c.SkillSet);
             employee.EnumProperty<Gender>(c => c.Gender);
             employee.EnumProperty<AccessLevel>(c => c.AccessLevel);
-            employee.ComplexProperty<FavoriteSports>(c => c.FavoriteSports);
+            
             employee.CollectionProperty<Friend>(c => c.Friends);
             employee.CollectionProperty<NewFriend>(c => c.NewFriends);
             employee.CollectionProperty<UnTypedFriend>(c => c.UnTypedFriends);
@@ -37,10 +37,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             accessLevel.Member(AccessLevel.Execute);
             accessLevel.Member(AccessLevel.Read);
             accessLevel.Member(AccessLevel.Write);
-
-            var favoriteSports = builder.ComplexType<FavoriteSports>();
-            favoriteSports.EnumProperty<Sport>(f => f.LikeMost);
-            favoriteSports.CollectionProperty<Sport>(f => f.Like);
 
             var sport = builder.EnumType<Sport>();
             sport.Member(Sport.Basketball);
@@ -61,8 +57,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             EntityTypeConfiguration<Employee> employee = employees.EntityType;
 
             EntitySetConfiguration<Friend> friends = builder.EntitySet<Friend>("Friends");
+            EntitySetConfiguration<Order> orders = builder.EntitySet<Order>("Orders");
             EntitySetConfiguration<NewFriend> fnewriends = builder.EntitySet<NewFriend>("NewFriends");
             EntitySetConfiguration<UnTypedFriend> funtypenewriends = builder.EntitySet<UnTypedFriend>("UnTypedFriends");
+
+            EntitySetConfiguration<UnTypedEmployee> unemployees = builder.EntitySet<UnTypedEmployee>("UnTypedEmployees");
+            EntityTypeConfiguration<UnTypedEmployee> unemployee = unemployees.EntityType;
 
             // maybe following lines are not required once bug #1587 is fixed.
             // 1587: It's better to support automatically adding actions and functions in ODataConventionModelBuilder.

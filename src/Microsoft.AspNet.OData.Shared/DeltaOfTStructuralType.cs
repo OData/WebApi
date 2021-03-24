@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -45,7 +46,7 @@ namespace Microsoft.AspNet.OData
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
         private IODataInstanceAnnotationContainer _instanceAnnotationCache;
-        
+
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -87,6 +88,22 @@ namespace Microsoft.AspNet.OData
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
         /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>                
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, instanceAnnotationsPropertyInfo: null)
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
         /// properties. <c>null</c> means this entity type is not open.</param>        
         /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
@@ -99,6 +116,12 @@ namespace Microsoft.AspNet.OData
             _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
         }
 
+
+        /// <summary>
+        /// Handler for users Create, Get and Delete Methods
+        /// </summary>
+        internal PatchMethodHandler<TStructuralType> PatchHandler { get; set; }
+
         /// <inheritdoc/>
         public override Type StructuredType
         {
@@ -106,6 +129,11 @@ namespace Microsoft.AspNet.OData
             {
                 return _structuredType;
             }
+        }
+
+        internal IDictionary<string, object> DeltaNestedResources
+        {
+            get {return _deltaNestedResources; }
         }
 
         /// <inheritdoc/>
@@ -130,6 +158,28 @@ namespace Microsoft.AspNet.OData
         public override void Clear()
         {
             Reset(_structuredType);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        public IDictionary<string, object> GetKeyValues(IList<string> keys)
+        {
+            IDictionary<string, object> dictKeyValues = new Dictionary<string, object>();
+           
+            for (int i = 0; i < keys.Count; i++)
+            {
+                object obj;
+
+                if (TryGetPropertyValue(keys[i], out obj))
+                {
+                    dictKeyValues.Add(keys[i], obj);
+                }
+            }
+
+            return dictKeyValues;
         }
 
         /// <inheritdoc/>
@@ -336,6 +386,8 @@ namespace Microsoft.AspNet.OData
         /// to the <paramref name="original"/> entity recursively.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         public void CopyChangedValues(TStructuralType original)
         {
             if (original == null)
@@ -374,14 +426,14 @@ namespace Microsoft.AspNet.OData
                         nestedResourceName, original.GetType());
                 }
 
-                if (originalNestedResource == null)
+                if (originalNestedResource == null && !(deltaNestedResource is IDeltaSet))
                 {
                     // When patching original target of null value, directly set nested resource.
                     dynamic deltaObject = _deltaNestedResources[nestedResourceName];
                     dynamic instance = deltaObject.GetInstance();
 
                     // Recursively patch up the instance with the nested resources.
-                    deltaObject.CopyChangedValues(instance);
+                    deltaObject.CopyChangedValues();
 
                     _allProperties[nestedResourceName].SetValue(original, instance);
                 }
@@ -393,7 +445,23 @@ namespace Microsoft.AspNet.OData
                     bool isDeltaType = deltaNestedResource is IDeltaSet || TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
                     Contract.Assert(isDeltaType, nestedResourceName + "should be DeltaSet<T>, or Delta<T> with a corresponding type <T>, but is not.");
 
-                    deltaNestedResource.CopyChangedValues(originalNestedResource);                    
+                    if (deltaNestedResource is IDeltaSet)
+                    {
+                        IPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(original, nestedResourceName);
+
+                        if(patchHandler != null)
+                        {
+                            deltaNestedResource.Patch(patchHandler);
+                        }
+                        else
+                        {
+                           // deltaNestedResource.Patch(originalCollection: originalNestedResource);//List<Friends>
+                        }
+                    }
+                    else
+                    {
+                        deltaNestedResource.CopyChangedValues(originalNestedResource);
+                    }
                 }
             }
         }
@@ -431,6 +499,18 @@ namespace Microsoft.AspNet.OData
         /// <param name="original">The entity to be updated.</param>
         public void Patch(TStructuralType original)
         {
+            CopyChangedValues(original);
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
+        /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        /// <param name="patchHandler">Patch Handler</param>
+        public void Patch(TStructuralType original, IPatchMethodHandler patchHandler)
+        {
+            PatchHandler = patchHandler as PatchMethodHandler<TStructuralType>;
             CopyChangedValues(original);
         }
 

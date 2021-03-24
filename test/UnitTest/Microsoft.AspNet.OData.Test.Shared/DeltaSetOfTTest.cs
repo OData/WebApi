@@ -13,51 +13,12 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
 {
-    public class EdmChangedObjectCollectionTest
+    public class DeltaSetOfTTest
     {
-         [Fact]
-         public void Ctor_ThrowsArgumentNull_EdmType()
-         {
-             ExceptionAssert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType: null), "entityType");
-         }
+       public static List<Friend> friends;
 
-         [Fact]
-         public void Ctor_ThrowsArgumentNull_List()
-         {
-             IEdmEntityType entityType = new Mock<IEdmEntityType>().Object;
-             ExceptionAssert.ThrowsArgumentNull(() => new EdmChangedObjectCollection(entityType, changedObjectList: null), "list");
-         }
-
-         [Fact]
-         public void GetEdmType_Returns_EdmTypeInitializedByCtor()
-         {
-             IEdmEntityType _entityType = new EdmEntityType("NS", "Entity");
-             var edmObject = new EdmChangedObjectCollection(_entityType);
-             IEdmCollectionTypeReference collectionTypeReference = (IEdmCollectionTypeReference)edmObject.GetEdmType();
-
-             Assert.Same(_entityType, collectionTypeReference.ElementType().Definition);
-         }
-
-
-        [Fact]
-        public void EdmChangedObjectCollection_Add_WrongItem_ThrowsError()
-        {
-            //Assign
-            IEdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            var edmChangedObjectcollection = new DeltaSet<Friend>();
-
-            var edmChangedObj1 = new Delta<NewFriend>();
-            edmChangedObj1.TrySetPropertyValue("Id", 1);
-            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
-
-            //Act & Assert
-            Assert.Throws<ArgumentException>(() => edmChangedObjectcollection.Add(edmChangedObj1));
-        }
-
-            
-
-        [Fact]
-        public void EdmChangedObjectCollection_Patch()
+       [Fact]
+        public void DeltaSet_Patch()
         {
             //Assign
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
@@ -94,13 +55,13 @@ namespace Microsoft.AspNet.OData.Test
 
 
         [Fact]
-        public void EdmChangedObjectCollection_Patch_WithDeletes()
+        public void DeltaSet_Patch_WithDeletes()
         {
             //Assign
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
 
-            var deltaSet = new DeltaSet<Friend>();
+            var deltaSet = new DeltaSet<Friend>(new List<string>() { "Id" });
 
 
             var edmChangedObj1 = new Delta<Friend>();
@@ -114,12 +75,12 @@ namespace Microsoft.AspNet.OData.Test
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
-            var friends = new List<Friend>();
+            friends = new List<Friend>();
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            deltaSet.Patch(friends);
+            deltaSet.Patch(new FriendPatchHandler());
 
             //Assert
             Assert.Single(friends);
@@ -127,13 +88,13 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
-        public void EdmChangedObjectCollection_Patch_WithInstanceAnnotations()
+        public void DeltaSet_Patch_WithInstanceAnnotations()
         {
             //Assign
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
 
-            var deltaSet = new DeltaSet<Friend>();
+            var deltaSet = new DeltaSet<Friend>((new List<string>() { "Id" }));
 
 
             var edmChangedObj1 = new Delta<Friend>();
@@ -153,12 +114,12 @@ namespace Microsoft.AspNet.OData.Test
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
-            var friends = new List<Friend>();
+            friends = new List<Friend>();
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            var coll = deltaSet.Patch(friends).ToArray();
+            var coll = deltaSet.Patch(new FriendPatchHandler()).ToArray();
 
             //Assert
             Assert.Single(friends);
@@ -181,7 +142,7 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
-        public void EdmChangedObjectCollection_Patch_WithNestedDelta()
+        public void DeltaSet_Patch_WithNestedDelta()
         {
             //Assign
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
@@ -234,12 +195,12 @@ namespace Microsoft.AspNet.OData.Test
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
-            var friends = new List<Friend>();
+            friends = new List<Friend>();
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
             //Act
-            deltaSet.Patch(friends);
+            deltaSet.Patch(new FriendPatchHandler());
 
             //Assert
             Assert.Equal(2, friends.Count);
@@ -257,19 +218,92 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class Friend
+    public class FriendPatchHandler : PatchMethodHandler<Friend>
     {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<NewFriend> NewFriends { get; set; }
+        public override IPatchMethodHandler GetNestedPatchHandler(Friend parent, string navigationPropertyName)
+        {
+            return new NewFriendPatchHandler(parent);
+        }
 
-        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+        public override PatchStatus TryCreate(out Friend createdObject, out string errorMessage)
+        {
+            createdObject = new Friend();
+            DeltaSetOfTTest.friends.Add(createdObject);
+            errorMessage = string.Empty;
+            return PatchStatus.Success;
+        }
+
+        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            int id = Int32.Parse( keyValues.First().Value.ToString());
+
+            DeltaSetOfTTest.friends.Remove(DeltaSetOfTTest.friends.First(x => x.Id == id));
+            errorMessage = string.Empty;
+
+            return PatchStatus.Success;
+        }
+
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+        {
+            int id = Int32.Parse(keyValues.First().Value.ToString());
+            originalObject = DeltaSetOfTTest.friends.First(x => x.Id == id);
+            errorMessage = string.Empty;
+
+            return PatchStatus.Success;
+        }
     }
 
-    public class NewFriend
+    public class NewFriendPatchHandler : PatchMethodHandler<NewFriend>
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
+        Friend parent;
+        public NewFriendPatchHandler(Friend parent)
+        {
+            this.parent = parent;
+        }
+
+        public override IPatchMethodHandler GetNestedPatchHandler(NewFriend parent, string navigationPropertyName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override PatchStatus TryCreate(out NewFriend createdObject, out string errorMessage)
+        {
+            createdObject = new NewFriend();
+            if(parent.NewFriends == null)
+            {
+                parent.NewFriends = new List<NewFriend>();
+            }
+
+            parent.NewFriends.Add(createdObject);
+            errorMessage = string.Empty;
+            return PatchStatus.Success;
+        }
+
+        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            int id = Int32.Parse(keyValues.First().Value.ToString());
+
+            parent.NewFriends.Remove(parent.NewFriends.First(x => x.Id == id));
+            errorMessage = string.Empty;
+
+            return PatchStatus.Success;
+        }
+
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            if(parent.NewFriends == null)
+            {
+                return PatchStatus.NotFound;
+            }
+
+            int id = Int32.Parse(keyValues.First().Value.ToString());
+            originalObject = parent.NewFriends.FirstOrDefault(x => x.Id == id);
+            errorMessage = string.Empty;
+
+            return originalObject!=null? PatchStatus.Success : PatchStatus.NotFound;
+        }
     }
 }

@@ -13,8 +13,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// </summary>
     public sealed class ODataResourceSetWrapper : ODataResourceSetWrapperBase
     {
-        private IList<ODataResourceWrapper> resources;
-
         /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceSetWrapper"/>.
         /// </summary>
@@ -22,9 +20,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataResourceSetWrapper(ODataResourceSet item)
             : base(item)
         {
-            ResourceSet = item;
-            resources = new List<ODataResourceWrapper>();
-            Items = new ODataResourceSetItemList(this.resources);
+            ResourceSet = item;                                
         }
 
         internal override ResourceSetType ResourceSetType => ResourceSetType.ResourceSet;
@@ -33,19 +29,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Gets the wrapped <see cref="ODataResourceSet"/>.
         /// </summary>
         public ODataResourceSet ResourceSet { get; }
-        
-        /// <summary>
-        /// Gets the nested resources of this ResourceSet.
-        /// </summary>
-        public IList<ODataResourceWrapper> Resources 
-        {
-            get { return resources; }
-        }
-
-        /// <summary>
-        /// Gets the list of resources of this ResourceSet
-        /// </summary>
-        public override IList<ODataResourceSetItemBase> Items { get; }
 
     }
 }

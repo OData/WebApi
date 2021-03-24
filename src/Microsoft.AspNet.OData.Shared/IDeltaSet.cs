@@ -12,5 +12,6 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     public interface IDeltaSet
     {
+     
     }
 }

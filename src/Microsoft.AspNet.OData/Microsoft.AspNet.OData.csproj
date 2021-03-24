@@ -102,7 +102,6 @@
     <Compile Include="Formatter\Serialization\ODataSerializerContext.cs" />
     <Compile Include="Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="HttpRequestScope.cs" />
-    <Compile Include="PatchMethodHandler.cs" />
     <Compile Include="PerRouteContainer.cs" />
     <Compile Include="GetNextPageHelper.cs" />
     <Compile Include="Batch\UnbufferedODataBatchHandler.cs" />

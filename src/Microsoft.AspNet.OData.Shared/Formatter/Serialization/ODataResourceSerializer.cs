@@ -939,11 +939,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 resourceContext.EdmModel);
 
             object value;
+            EdmEntityObject edmEntityObject = null;
 
             if (instanceAnnotationInfo == null || structuredObject == null ||
                 !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
             {
-                EdmEntityObject edmEntityObject = structuredObject as EdmEntityObject;
+                edmEntityObject = structuredObject as EdmEntityObject;
 
                 if (edmEntityObject != null && edmEntityObject.PersistentInstanceAnnotationsContainer != null)
                 {
@@ -957,7 +958,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, value, SerializerProvider);
 
-            if(structuredObject is IDelta)
+            if(structuredObject is IDelta || edmEntityObject != null)
             {
                 dynamic delta = structuredObject;
 

@@ -43,7 +43,7 @@
     </Reference>
     <Reference Include="Microsoft.OData.Edm, Version=7.8.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.8.2\lib\net45\Microsoft.OData.Edm.dll</HintPath>
-	</Reference>
+    </Reference>
     <Reference Include="Microsoft.OData.Client, Version=7.8.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.8.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
     </Reference>
@@ -67,7 +67,7 @@
     </Reference>
     <Reference Include="Microsoft.Spatial, Version=7.8.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.8.2\lib\net45\Microsoft.Spatial.dll</HintPath>
-	</Reference>
+    </Reference>
     <Reference Include="Microsoft.Spatial, Version=7.8.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.8.1\lib\net45\Microsoft.Spatial.dll</HintPath>
     </Reference>
@@ -162,6 +162,18 @@
     </Compile>
     <Compile Include="..\Aggregation\AggregationTests.cs">
       <Link>Aggregation\AggregationTests.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkInsertDataModel.cs">
+      <Link>BulkOperation\BulkInsertDataModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
+      <Link>BulkOperation\BulkInsertEdmModel.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkInsertTest.cs">
+      <Link>BulkOperation\BulkInsertTest.cs</Link>
+    </Compile>
+    <Compile Include="..\BulkOperation\BulkInsertController.cs">
+      <Link>BulkOperation\BulkInsertController.cs</Link>
     </Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
@@ -1892,14 +1904,11 @@
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
     <Compile Include="Aggregation\LinqToSqlDatabaseContext.cs" />
+    <Compile Include="BulkOperation\BulkOperationPatchHandlers.cs" />
     <Compile Include="InstanceAnnotations\AnnotationController.cs" />
     <Compile Include="InstanceAnnotations\AnnotationDataModel.cs" />
     <Compile Include="InstanceAnnotations\AnnotationEdmModel.cs" />
     <Compile Include="InstanceAnnotations\AnnotationTest.cs" />
-    <Compile Include="BulkOperation\BulkInsertController.cs" />
-    <Compile Include="BulkOperation\BulkInsertDataModel.cs" />
-    <Compile Include="BulkOperation\BulkInsertEdmModel.cs" />
-    <Compile Include="BulkOperation\BulkInsertTest.cs" />
     <Compile Include="Formatter\JsonLight\Metadata\Extensions\HttpRequestMessageExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

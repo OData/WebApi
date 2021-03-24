@@ -13,9 +13,10 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
+using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
+using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Xunit;
-using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 {
@@ -32,12 +33,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         /// <summary>
         /// static so that the data is shared among requests.
         /// </summary>
-        private static IList<Employee> Employees = null;
+        public static IList<Employee> Employees = null;
+
+        public static IList<EdmStructuredObject> EmployeesTypeless = null;
+
+        private  List<Friend> Friends = null;
 
         private IEdmTypeReference edmType;
 
         private void InitEmployees()
         {
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1" } }; 
+
             Employees = new List<Employee>
             {
                 new Employee()
@@ -47,12 +54,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                     SkillSet=new List<Skill>{Skill.CSharp,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
-                    FavoriteSports=new FavoriteSports()
-                    {
-                        LikeMost=Sport.Pingpong,
-                        Like=new List<Sport>{Sport.Pingpong,Sport.Basketball}
-                    },
-                    Friends = new List<Friend>{new Friend { Id=1,Name="Test0"} ,new Friend { Id=2,Name="Test1"} }
+                    
+                    Friends = this.Friends
                 },
                 new Employee()
                 {
@@ -60,70 +63,92 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                     SkillSet=new List<Skill>(),
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
-                    FavoriteSports=new FavoriteSports()
-                    {
-                        LikeMost=Sport.Pingpong,
-                        Like=new List<Sport>{Sport.Pingpong,Sport.Basketball}
-                    },
-                    Friends = new List<Friend>{new Friend { Id=1,Name="Test0"} ,new Friend { Id=2,Name="Test1"} }
+                  
+                    Friends = this.Friends
                 },
                 new Employee(){
                     ID=3,Name="Name3",
                     SkillSet=new List<Skill>{Skill.Web,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read|AccessLevel.Write,
-                    FavoriteSports=new FavoriteSports()
-                    {
-                        LikeMost=Sport.Pingpong|Sport.Basketball,
-                        Like=new List<Sport>{Sport.Pingpong,Sport.Basketball}
-                    },
-                    Friends = new List<Friend>{new Friend { Id=1,Name="Test0"} ,new Friend { Id=2,Name="Test1"} }
+                   
+                    Friends = this.Friends
                 },
             };
         }
 
-        public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl)
+        private void InitTypeLessEmployees(IEdmEntityTypeReference entityType)
         {
-            var friendCollection = new FriendColl<NewFriend>() { new NewFriend { Id = 2, Age = 15 } };
+            EmployeesTypeless = new List<EdmStructuredObject>();
+            var emp1 = new EdmEntityObject(entityType);
+            emp1.TrySetPropertyValue("ID", 1);
+            emp1.TrySetPropertyValue("Name", "Test1");
 
-            Delete _deleteDelegate = new Delete(DeleteMethod);
-            GetOrCreate _createDelegate = new GetOrCreate(GetOrCreateMethod);
+            var friendType = entityType.DeclaredNavigationProperties().First().Type.Definition.AsElementType() as IEdmEntityType;
 
-            var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
+            var friends = new List<EdmStructuredObject>();
+            var friend1 = new EdmEntityObject(friendType);
+            friend1.TrySetPropertyValue("Id", 1);
+            friend1.TrySetPropertyValue("Name", "Test1");
+
+            var friend2 = new EdmEntityObject(friendType);
+            friend2.TrySetPropertyValue("Id", 2);
+            friend2.TrySetPropertyValue("Name", "Test2");
+
+            friends.Add(friend1);
+            friends.Add(friend2);
+
+            emp1.TrySetPropertyValue("UnTypedFriends", friends);
+
+            var emp2 = new EdmEntityObject(entityType);
+            emp2.TrySetPropertyValue("ID", 2);
+            emp2.TrySetPropertyValue("Name", "Test2");
+
+            var friends2 = new List<EdmStructuredObject>();
+            var friend3 = new EdmEntityObject(friendType);
+            friend3.TrySetPropertyValue("Id", 3);
+            friend3.TrySetPropertyValue("Name", "Test3");
+
+            var friend4 = new EdmEntityObject(friendType);
+            friend4.TrySetPropertyValue("Id", 4);
+            friend4.TrySetPropertyValue("Name", "Test4");
+
+            friends2.Add(friend3);
+            friends2.Add(friend4);
+
+            emp2.TrySetPropertyValue("UnTypedFriends", friends2);
+
+            EmployeesTypeless.Add(emp1);
+            EmployeesTypeless.Add(emp2);
+        }
+
+        public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl, Employee employee)
+        {
+            var changedObjColl = friendColl.Patch(new NewFriendPatchHandler(employee));
 
             return changedObjColl;
         }
-
         public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(EdmChangedObjectCollection friendColl)
         {
             edmType = friendColl[0].GetEdmType();
-            var entity = new EdmEntityObject(edmType.AsEntity());
-            entity.TrySetPropertyValue("Id", 2);
+            var entity = edmType.AsEntity();
+            InitTypeLessEmployees(entity);
 
-            var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
-
-            Delete _deleteDelegate = new Delete(DeleteMethod);
-            GetOrCreate _createDelegate = new GetOrCreate(GetOrCreateMethodTypeless);
-
-            var changedObjColl = friendColl.Patch(_createDelegate, _deleteDelegate);
+            var changedObjColl = friendColl.Patch(new EmployeeTypelessPatchHandler(entity));
 
             return changedObjColl;
         }
 
-        public void DeleteMethod(object original)
+        public EdmChangedObjectCollection EmployeePatchWithUsersMethodTypeLess(EdmChangedObjectCollection empColl)
         {
-            //Delete Logic
+            edmType = empColl[0].GetEdmType();
+            var entity = edmType.AsEntity();
+            InitTypeLessEmployees(entity);
 
-        }
+            var changedObjColl = empColl.Patch(EmployeesTypeless);
+            // var changedObjColl = empColl.Patch(new EmployeeTypelessPatchHandler(entity));
 
-        public object GetOrCreateMethod(IDictionary<string, object> keys)
-        {
-            return new NewFriend();
-        }
-
-        public object GetOrCreateMethodTypeless(IDictionary<string, object> keys)
-        {
-            return new EdmEntityObject(edmType.AsEntity());
+            return changedObjColl;
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -145,17 +170,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             return Ok(emp.Friends);
         }
 
-        [ODataRoute("Employees({key})/FavoriteSports/LikeMost")]
-        public ITestActionResult PostToSkillSet(int key, [FromBody] Skill newSkill)
-        {
-            Employee employee = Employees.FirstOrDefault(e => e.ID == key);
-            if (employee == null)
-            {
-                return NotFound();
-            }
-            employee.SkillSet.Add(newSkill);
-            return Updated(employee.SkillSet);
-        }
 
         [ODataRoute("Employees")]
         [HttpPatch]
@@ -164,11 +178,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             InitEmployees();
 
             Assert.NotNull(coll);
+
             var returncoll = coll.Patch(Employees);
+            //var returncoll = coll.Patch(new EmployeePatchHandler());
 
             return Ok(returncoll);
         }
 
+      
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
         public ITestActionResult PatchFriends(int key, [FromBody] DeltaSet<Friend> friendColl)
@@ -190,10 +207,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             InitEmployees();
 
-            if(key == 1)
+            if (key == 1)
             {
-                var deltaSet = PatchWithUsersMethod(friendColl);
-                
+                var deltaSet = PatchWithUsersMethod(friendColl, Employees.First(x=>x.ID ==key));
+
                 return Ok(deltaSet);
             }
             {
@@ -231,6 +248,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 return Ok(changedObjColl);
             }
         }
+
+
+        [ODataRoute("UnTypedEmployees")]
+        [HttpPatch]
+        public ITestActionResult PatchUnTypedEmployees([FromBody] EdmChangedObjectCollection empColl)
+        {
+         
+            var changedObjColl = EmployeePatchWithUsersMethodTypeLess(empColl);
+
+            return Ok(changedObjColl);
+           
+        }
+
+
 
         [ODataRoute("Employees({key})")]
         public ITestActionResult Patch(int key, [FromBody] Delta<Employee> delta)

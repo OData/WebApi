@@ -12,7 +12,6 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Org.OData.Core.V1;
-using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.AspNet.OData
 {
@@ -25,7 +24,8 @@ namespace Microsoft.AspNet.OData
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
- 
+        private ICollection<EdmStructuredObject> originalList;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
         /// </summary>
@@ -46,7 +46,8 @@ namespace Microsoft.AspNet.OData
         {
             Initialize(entityType);
         }
- 
+
+
         /// <summary>
         /// Represents EntityType of the changedobject
         /// </summary>
@@ -73,90 +74,100 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Patch for Types without underlying CLR types
         /// </summary>
-        /// <param name="original"></param>
+        /// <param name="originalCollection"></param>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(ICollection<EdmStructuredObject> original)
+        public EdmChangedObjectCollection Patch(ICollection<EdmStructuredObject> originalCollection)
         {
-            return CopyChangedValues(original);
+            this.originalList = originalCollection;
+            PatchHandler = new DefaultTypelessPatchHandler(originalCollection, _entityType);
+
+            return CopyChangedValues();
         }
+
+        /// <summary>
+        /// Handler for users Create, Get and Delete Methods
+        /// </summary>
+        internal TypelessPatchMethodHandler PatchHandler { get; set; }
 
         /// <summary>
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
-        /// <param name="createDelegate">Delegate for using users GetOrCreate nmethod</param>
-        /// <param name="deleteDelegate">Delegate for using users Delete method</param>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(GetOrCreate createDelegate, Delete deleteDelegate)
+        public EdmChangedObjectCollection Patch(TypelessPatchMethodHandler patchHandler)
         {
-            return CopyChangedValues(null, createDelegate, deleteDelegate, true);
+            PatchHandler = patchHandler;
+            return CopyChangedValues();
         }
 
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        internal EdmChangedObjectCollection CopyChangedValues(ICollection<EdmStructuredObject> original,
-            GetOrCreate createDelegate = null, Delete deleteDelegate = null, bool useOriginalList = false)
+        internal EdmChangedObjectCollection CopyChangedValues()
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             List<IEdmStructuralProperty> keys = _entityType.Key().ToList();
 
-            foreach (dynamic changedObj in Items)
+            foreach (EdmDeltaEntityObject changedObj in Items)
             {                
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
                 EdmStructuredObject originalObj = null;
-
-                if (useOriginalList)
-                {
-                    Dictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
-
-                    originalObj = createDelegate(keyValues) as EdmStructuredObject;
-
-                    Contract.Assert(originalObj != null);
-
-                }
-                else
-                {
-                    originalObj = GetFilteredItem(keys, original, changedObj);
-                }
+                string errorMessage = string.Empty;
+                IDictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
 
                 try
                 {
+                    EdmStructuredObject original = null;
                     IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
 
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
 
-                        if (useOriginalList)
+                        if (PatchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
                         {
-                            deleteDelegate(originalObj);
-                        }
-                        else
-                        {
-                            if (originalObj != null)
+                            //Handle Failed Operation - Delete                            
+                            PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+                            if (status == PatchStatus.Success)
                             {
-                                //This case handle deletions
-                                original.Remove(originalObj);
+                                IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, original, keys, errorMessage);
+                                changedObjectCollection.Add(changedObject);
+                                continue;
                             }
                         }
 
                         changedObjectCollection.Add(deletedObj);
                     }
                     else
-                    {
-                        if (originalObj == null)
+                    {                        
+                        PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+
+                        if (status == PatchStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
-                            //This case handle additions
-                            originalObj = new EdmEntityObject(changedObj.ActualEdmType as IEdmEntityType);
-                            PatchItem(changedObj, originalObj);
-                            original.Add(originalObj);
+
+                            if (PatchHandler.TryCreate(out original, out errorMessage) != PatchStatus.Success)
+                            {
+                                //Handle failed Opreataion - create
+                                IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, original, keys, errorMessage);
+                                changedObjectCollection.Add(changedObject);
+                                continue;
+                            }
+                        }
+                        else if (status == PatchStatus.Success)
+                        {
+                            operation = DataModificationOperationKind.Update;
                         }
                         else
                         {
-                            //Patch for addition/update. This will call Delta<T> for each item in the collection
-                            PatchItem(changedObj, originalObj);
-                        }
+                            //Handle failed operation 
+                            IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, null, keys, errorMessage);
+                            changedObjectCollection.Add(changedObject);
+                            continue;
+                        }                                              
+
+                        //Patch for addition/update. 
+                        PatchItem(changedObj, original);
 
                         changedObjectCollection.Add(changedObj);
                     }
@@ -174,7 +185,71 @@ namespace Microsoft.AspNet.OData
             return changedObjectCollection;
         }
 
-        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, dynamic changedObj)
+        private PatchStatus TryGetObject(IDictionary<string, object> keyValues, out object originalObject, out string errorMessage)
+        {
+            PatchStatus status = PatchStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                originalObject = GetFilteredItem(keyValues, originalList);
+
+                if (originalObject == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+            }
+            catch (Exception ex)
+            {
+                status = PatchStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        private bool TryCreateObject(out object createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new EdmEntityObject(EntityType);
+                originalList.Add(createdObject as EdmStructuredObject);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return false;
+            }
+        }
+
+        private bool TryDeleteObject(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                EdmStructuredObject originalObject = GetFilteredItem(keyValues, originalList);
+                originalList.Remove(originalObject);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return false;
+            }
+        }
+
+
+        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, EdmDeltaEntityObject changedObj)
         {
             IDictionary<string, object> keyValues = new Dictionary<string, object>();
 
@@ -192,14 +267,37 @@ namespace Microsoft.AspNet.OData
             return keyValues;
         }
 
-        private static void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj)
+        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj)
         {
             foreach (string propertyName in changedObj.GetChangedPropertyNames())
             {
                 object value;
                 if (changedObj.TryGetPropertyValue(propertyName, out value))
                 {
-                    originalObj.TrySetPropertyValue(propertyName, value);
+                    EdmChangedObjectCollection changedColl = value as EdmChangedObjectCollection;
+                    if (changedColl != null)
+                    {
+                        TypelessPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(originalObj, propertyName);
+                        if (patchHandler != null) 
+                        {
+                            changedColl.Patch(patchHandler);
+                        }
+                        else
+                        {
+                            object obj;
+                            originalObj.TryGetPropertyValue(propertyName, out obj);
+
+                            ICollection<EdmStructuredObject> edmColl = obj as ICollection<EdmStructuredObject>;
+
+                            changedColl.Patch(edmColl);
+                        }
+
+                        
+                    }
+                    else
+                    {
+                        originalObj.TrySetPropertyValue(propertyName, value);
+                    }
                 }
             }
 
@@ -213,36 +311,26 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private static EdmStructuredObject GetFilteredItem(List<IEdmStructuralProperty> keys, IEnumerable<EdmStructuredObject> originalList, dynamic changedObject)
+        private static EdmStructuredObject GetFilteredItem(IDictionary<string, object> keyValues, IEnumerable<EdmStructuredObject> originalList)
         {
             //This logic is for filtering the object based on the set of keys,
             //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
-
-            object keyValue;
-            object[] keyValues = new object[keys.Count];
-            
-            for (int i = 0; i < keys.Count; i++)
-            {
-                string keyName = keys[i].Name;
-                changedObject.TryGetPropertyValue(keyName, out keyValue);
-                keyValues[i] = keyValue;                
-            }
 
             foreach (EdmStructuredObject item in originalList)
             {
                 bool isMatch = true;
 
-                for (int i = 0; i < keyValues.Length; i++)
+                foreach (KeyValuePair<string, object> keyValue in keyValues)
                 {
-                    object itemValue;
-                    if (item.TryGetPropertyValue(keys[i].Name, out itemValue))
+                    object value;
+                    if (item.TryGetPropertyValue(keyValue.Key, out value))
                     {
-                        if (!Equals(itemValue, keyValues[i]))
+                        if(!Equals(value,keyValue.Value))
                         {
                             // Not a match, so try the next one
                             isMatch = false;
                             break;
-                        }
+                        }                       
                     }
                 }
 
@@ -255,7 +343,7 @@ namespace Microsoft.AspNet.OData
             return default(EdmStructuredObject);
         }
 
-        private IEdmChangedObject HandleFailedOperation(dynamic changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
+        private IEdmChangedObject HandleFailedOperation(EdmDeltaEntityObject changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
             List<IEdmStructuralProperty> keys, string errorMessage)
         {
             IEdmChangedObject edmChangedObject = null;

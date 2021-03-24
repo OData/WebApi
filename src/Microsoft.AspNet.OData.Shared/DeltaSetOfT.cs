@@ -4,32 +4,33 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Web.Http.Results;
 using Microsoft.AspNet.OData.Builder;
 using Org.OData.Core.V1;
-using static Microsoft.AspNet.OData.PatchMethodHandler;
 
 namespace Microsoft.AspNet.OData
-{    
-    /// <summary>
+{   
+     /// <summary>
     /// Represents an <see cref="IDeltaSet"/> that is a collection of <see cref="IDeltaSetItem"/>s.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class DeltaSet<TStructuralType> : ICollection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
-    {
-        private IList<IDeltaSetItem> _items;
+    public class DeltaSet<TStructuralType> : Collection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
+    {        
         private Type _clrType;
         IList<string> _keys;
+               
+        internal IDictionary<string, IDictionary<string, object>> dictKeyValues;
+        internal string currentPathValue;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
         /// </summary>
         public DeltaSet()            
-        {
-            _items = new List<IDeltaSetItem>();
+        {            
             _clrType = typeof(TStructuralType);
         }
 
@@ -39,144 +40,127 @@ namespace Microsoft.AspNet.OData
         /// <param name="keys">List of key names for the type</param>
         public DeltaSet(IList<string> keys)           
         {
-            _keys = keys;
-            _items = new List<IDeltaSetItem>();
-            _clrType = typeof(TStructuralType);
+            _keys = keys;            
+            _clrType = typeof(TStructuralType);            
         }
 
-        /// <inheritdoc/>
-        public void Add(IDeltaSetItem item)
-        {
-            _items.Add(item);
-        }
-       
-        /// <inheritdoc/>
-        public bool Contains(IDeltaSetItem item)
-        {
-            return _items.Contains(item);
-        }
 
-        /// <inheritdoc/>
-        public void CopyTo(IDeltaSetItem[] array, int arrayIndex)
-        {
-            _items.CopyTo(array, arrayIndex);
-        }
 
-        /// <inheritdoc/>
-        public bool IsReadOnly
+        /// <summary>
+        /// Handler for users Create, Get and Delete Methods
+        /// </summary>
+        internal PatchMethodHandler<TStructuralType> PatchHandler { get; set; }
+
+
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
+        /// </summary>
+        /// <param name="originalCollection">Original collection of the Type which needs to be updated</param>
+        /// /// <returns>DeltaSet response</returns>
+        public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> originalCollection)
         {
-            get { return false; }
+            PatchHandler = new DefaultPatchHandler<TStructuralType>(originalCollection);
+
+            return CopyChangedValues();
         }
 
-        /// <inheritdoc/>
-        public int Count => _items.Count;
-
-        /// <inheritdoc/>
-        public bool Remove(IDeltaSetItem item)
+        /// <summary>
+        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
+        /// </summary>     
+        /// <returns>DeltaSet response</returns>
+        public DeltaSet<TStructuralType> Patch(IPatchMethodHandler patchHandler)
         {
-            int count = _items.Count;
-            _items.Remove(item);
-
-            return count == _items.Count + 1;
-        }
-
-        /// <inheritdoc/>
-        public void Clear()
-        {
-            _items.Clear();
-        }
-
-        /// <inheritdoc/>
-        public IEnumerator GetEnumerator()
-        {
-            return _items.GetEnumerator();
-        }
-
-        /// <inheritdoc/>
-        IEnumerator<IDeltaSetItem> IEnumerable<IDeltaSetItem>.GetEnumerator()
-        {
-            return _items.GetEnumerator();
+            this.PatchHandler = patchHandler as PatchMethodHandler<TStructuralType>;
+            return CopyChangedValues();
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal DeltaSet<TStructuralType> CopyChangedValues(ICollection<TStructuralType> original, 
-                GetOrCreate createDelegate = null, Delete deleteDelegate = null, bool useOriginalList = false)
+        internal DeltaSet<TStructuralType> CopyChangedValues()
         {
             //Here we are getting the keys and using the keys to find the original object 
             //to patch from the list of collection
 
             DeltaSet<TStructuralType> deltaSet = CreateDetlaSet();
 
-            foreach (Delta<TStructuralType> changedObj in _items)
+            foreach (Delta<TStructuralType> changedObj in Items)
             {
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
 
                 //Get filtered item based on keys
                 TStructuralType originalObj = null;
-                if (useOriginalList)
-                {                    
-                    Dictionary<string, object> keyValues = new Dictionary<string, object>();
+                string errorMessage = string.Empty;
 
-                    foreach (string key in _keys)
-                    {
-                        object value;
-                        changedObj.TryGetPropertyValue(key, out value);
+                Dictionary<string, object> keyValues = new Dictionary<string, object>();
 
-                        if (value != null)
-                        {
-                            keyValues.Add(key, value);
-                        }
-                    }
-
-                    originalObj = createDelegate(keyValues) as TStructuralType;
-
-                    Contract.Assert(originalObj != null);
-
-                }
-                else
+                foreach (string key in _keys)
                 {
-                    originalObj = GetFilteredItem(_clrType, _keys, original, changedObj);
+                    object value;
+                    changedObj.TryGetPropertyValue(key, out value);
+
+                    if (value != null)
+                    {
+                        keyValues.Add(key, value);
+                    }
                 }
 
                 try
                 {
+                    TStructuralType original = null;                    
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
-
-                        if (useOriginalList)
+                        
+                        if(PatchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
                         {
-                            deleteDelegate(originalObj);
-                        }
-                        else
-                        {
-                            if (originalObj != null)
+                            //Handle Failed Operation - Delete
+                           
+                            PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+                            if(status == PatchStatus.Success)
                             {
-                                //This case handle deletions
-                                original.Remove(originalObj);
-                            }
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original as TStructuralType, errorMessage);
+                                deltaSet.Add(changedObject);
+                                continue;
+                            }                            
                         }
+                                               
                         deltaSet.Add(deletedObj);
                     }
                     else
-                    {
-                        if (originalObj == null)
+                    {                        
+                        PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+
+                        if (status == PatchStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
-                            //This case handle additions
-                            originalObj = Activator.CreateInstance(_clrType) as TStructuralType;
-                            changedObj.Patch(originalObj);
-                            original.Add(originalObj);
+
+                            if(PatchHandler.TryCreate(out original, out errorMessage) != PatchStatus.Success)
+                            {
+                                //Handle failed Opreataion - create
+                                IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj, errorMessage);
+                                deltaSet.Add(changedObject);
+                                continue;
+                            }                            
+                        }
+                        else if(status == PatchStatus.Success)
+                        {
+                            operation = DataModificationOperationKind.Update;
                         }
                         else
                         {
-                            //Patch for addition/update. This will call Delta<T> for each item in the collection
-                            // This will work in case we use delegates for using users method to create an object
-                            changedObj.Patch(originalObj);
-                        }                        
+                            //Handle failed operation 
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj, errorMessage);;
+                            deltaSet.Add(changedObject);
+                            continue;
+                        }
+
+                        originalObj = original as TStructuralType;
+
+                        //Patch for addition/update. This will call Delta<T> for each item in the collection
+                        // This will work in case we use delegates for using users method to create an object
+                        changedObj.Patch(originalObj, PatchHandler);                                                
 
                         deltaSet.Add(changedObj);
                     }
@@ -184,15 +168,15 @@ namespace Microsoft.AspNet.OData
                 catch(Exception ex)
                 {
                     //For handling the failed operations.
-                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj, ex.Message);
-
-                    Contract.Assert(changedObject != null);
+                    IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, originalObj, ex.Message);                    
                     deltaSet.Add(changedObject);
                 }
             }
 
             return deltaSet;
         }
+
+
 
         private DeltaSet<TStructuralType> CreateDetlaSet()
         {
@@ -232,6 +216,8 @@ namespace Microsoft.AspNet.OData
 
             deltaSetItem.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
             deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationExceptionType);
+
+            Contract.Assert(deltaSetItem != null);
 
             return deltaSetItem;
         }
@@ -344,70 +330,11 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private static TStructuralType GetFilteredItem(Type type, IList<string> keys, IEnumerable<TStructuralType> originalList, Delta<TStructuralType> changedObject)
-        {
-            //This logic is for filtering the object based on the set of keys,
-            //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
-
-            object keyValue;
-            object[] keyValues = new object[keys.Count];
-            PropertyInfo[] propertyInfos = new PropertyInfo[keys.Count];
-            for (int i = 0; i < keys.Count; i++)
-            {                
-                changedObject.TryGetPropertyValue(keys[i], out keyValue);
-                keyValues[i] = keyValue;
-                propertyInfos[i] = type.GetProperty(keys[i]);
-            }
-                        
-            foreach (TStructuralType item in originalList)
-            {
-                bool isMatch = true;
-
-                for (int i = 0; i < keyValues.Length; i++)
-                {
-                    if (!Equals(propertyInfos[i].GetValue(item), keyValues[i]))
-                    {
-                        // Not a match, so try the next one
-                        isMatch = false;
-                        break;
-                    }
-                }
-
-                if (isMatch)
-                {
-                    return item;
-                }                
-            }
-
-            return default(TStructuralType);
-        }
-
-        /// <summary>
-        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
-        /// </summary>
-        /// <param name="original">Original collection of the Type which needs to be updated</param>
-        /// /// <returns>DeltaSet response</returns>
-        public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> original)
-        {
-            return CopyChangedValues(original);
-        }
-
-        /// <summary>
-        /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
-        /// </summary>
-        /// <param name="createDelegate">Delegate for using users GetOrCreate nmethod</param>
-        /// <param name="deleteDelegate">Delegate for using users Delete method</param>
-        /// <returns>DeltaSet response</returns>
-        public DeltaSet<TStructuralType> Patch(GetOrCreate createDelegate, Delete deleteDelegate)
-        {
-            return CopyChangedValues(null, createDelegate, deleteDelegate, true);
-        }
-
         internal ICollection<TStructuralType> GetInstance()
         {
             ICollection<TStructuralType> collection = new List<TStructuralType>();
 
-            foreach(Delta<TStructuralType> item in _items)
+            foreach(Delta<TStructuralType> item in Items)
             {
                 collection.Add(item.GetInstance());
             }

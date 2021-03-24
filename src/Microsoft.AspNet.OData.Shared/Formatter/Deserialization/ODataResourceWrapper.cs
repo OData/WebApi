@@ -11,7 +11,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Encapsulates an <see cref="ODataResource"/> and the inner nested resource infos.
     /// </summary>
-    public sealed class ODataResourceWrapper : ODataResourceSetItemBase
+    public sealed class ODataResourceWrapper : ODataItemBase
     {       
         /// <summary>
         /// Initializes a new instance of <see cref="ODataResourceWrapper"/>.
@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Gets the wrapped <see cref="ODataResourceBase"/>.
         /// </summary>
         public ODataResourceBase ResourceBase {get;}
-
+                
         /// <summary>
         /// Gets the wrapped <see cref="ODataResource"/>.
         /// </summary>

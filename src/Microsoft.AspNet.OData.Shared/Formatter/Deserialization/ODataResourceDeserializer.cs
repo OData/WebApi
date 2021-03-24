@@ -216,7 +216,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (structuredType.IsEntity())
                 {
-                    if (readContext.IsDeltaOfT)
+                    if (readContext.IsDeltaOfT || readContext.IsChangedObjectCollection)
                     {
                         return new EdmDeltaEntityObject(structuredType.AsEntity());
                     }
@@ -253,7 +253,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, null, structuredType, instanceAnnotationProperty);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, null, instanceAnnotationProperty);
                     }
                 }
                 else
@@ -263,7 +263,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        private EdmDeltaDeletedEntityObject DeSerializeDeletedEntity(ODataDeletedResource deletedResource, IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext, Type clrType)
+        private object DeSerializeDeletedEntity(ODataDeletedResource deletedResource, IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext, Type clrType)
         {
             Contract.Assert(deletedResource != null, "ODataDeletedResource should not be null");
 
@@ -288,8 +288,18 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             PropertyInfo instanceAnnotationProperty = EdmLibHelpers.GetInstanceAnnotationsContainer(
                         structuredType.StructuredDefinition(), model);
 
-            EdmDeltaDeletedEntityObject deletedEntity;
+            dynamic deletedEntity;
 
+            deletedEntity = SetDeletedEntity(deletedResource, readContext, clrType, actualType, instanceAnnotationProperty);
+
+            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, actualType.ToEdmTypeReference(false).AsStructured(), deletedResource, DeserializerProvider, readContext);
+
+            return deletedEntity;
+        }
+
+        private dynamic SetDeletedEntity(ODataDeletedResource deletedResource, ODataDeserializerContext readContext, Type clrType, IEdmEntityType actualType, PropertyInfo instanceAnnotationProperty)
+        {
+            dynamic deletedEntity;
             if (readContext.IsUntyped)
             {
                 deletedEntity = new EdmDeltaDeletedEntityObject(actualType);
@@ -298,20 +308,24 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Type type = typeof(DeltaDeletedEntityObject<>).MakeGenericType(clrType);
 
-                deletedEntity = Activator.CreateInstance(type, actualType, false, instanceAnnotationProperty) as EdmDeltaDeletedEntityObject;
+                if (instanceAnnotationProperty == null)
+                {
+                    deletedEntity = Activator.CreateInstance(type, clrType);
+                }
+                else
+                {
+                    deletedEntity = Activator.CreateInstance(type, clrType, instanceAnnotationProperty);
+                }
             }
 
-            deletedEntity.Id = deletedResource.Id== null? "": deletedResource.Id.ToString();
+            deletedEntity.Id = deletedResource.Id == null ? "" : deletedResource.Id.ToString();
             deletedEntity.Reason = deletedResource.Reason.Value;
 
             SetProperties(deletedResource, deletedEntity);
-
-            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, actualType.ToEdmTypeReference(false).AsStructured(), deletedResource, DeserializerProvider, readContext);
-
             return deletedEntity;
         }
 
-        private static void SetProperties(ODataDeletedResource deletedResource, EdmDeltaDeletedEntityObject deletedEntity)
+        private static void SetProperties(ODataDeletedResource deletedResource, dynamic deletedEntity)
         {
             foreach (ODataProperty property in deletedResource.Properties)
             {
@@ -661,7 +675,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (structuredType.IsEntity())
                 {
-                    nestedReadContext.ResourceType = typeof(EdmEntityObjectCollection);
+                    nestedReadContext.ResourceType = (readContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)? 
+                        typeof(EdmChangedObjectCollection): typeof(EdmEntityObjectCollection);
                 }
                 else
                 {

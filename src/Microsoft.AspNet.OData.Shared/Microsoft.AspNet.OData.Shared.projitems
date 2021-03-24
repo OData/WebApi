@@ -63,9 +63,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\DefaultODataETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeserializerContext.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaLinkWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataDeltaResourceSetWrapper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataResourceSetItemList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ODataResourceSetWrapperBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Deserialization\ResourceSetType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
@@ -78,7 +76,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataOutputFormatterHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataPrimitiveValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataRawValueMediaTypeMapping.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataResourceSetItemBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\QueryStringMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataResourceValueSerializer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerHelper.cs" />
@@ -89,6 +86,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEdmChangedObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IEdmDeltaDeletedEntityObjectOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)TypelessPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransientAnnotations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />

@@ -187,21 +187,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 case ODataReaderState.DeltaLink:
                 case ODataReaderState.DeltaDeletedLink:
-                    ODataDeltaLinkBase deltaLink = (ODataDeltaLinkBase)reader.Item;
-                    Contract.Assert(deltaLink != null, "Delta link should never be null.");
 
-                    ODataDeltaLinkWrapper deltaLinkWrapper = new ODataDeltaLinkWrapper(deltaLink);
-
-                    Contract.Assert(itemsStack.Count > 0, "Delta link should never be reported as top-level item.");
-
-                    ODataDeltaResourceSetWrapper linkResourceSetWrapper = (ODataDeltaResourceSetWrapper)itemsStack.Peek();
-
-                    Contract.Assert(linkResourceSetWrapper != null, "ODataDeltaResourceSetWrapper for delta link should not be null.");
-
-                    linkResourceSetWrapper.Items.Add(deltaLinkWrapper);
-
-                    break;
-
+                    //Throw error if Delta Link appears
+                    throw Error.NotSupported("DeltaLinks are not supported");
+                    
                 default:
                     Contract.Assert(false, "We should never get here, it means the ODataReader reported a wrong state.");
                     break;
@@ -223,7 +212,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ODataResourceSetWrapperBase parentResourceSet = parentItem as ODataResourceSetWrapperBase;
             if (parentResourceSet != null)
             {
-                parentResourceSet.Items.Add(resourceWrapper);
+                parentResourceSet.Resources.Add(resourceWrapper);
             }
             else
             {

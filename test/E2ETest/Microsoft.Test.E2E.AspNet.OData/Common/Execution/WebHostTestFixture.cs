@@ -153,6 +153,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 
                                 _selfHostServer.Start();
 #else
+                                this.BaseAddress = "http://localhost:1652";
                                 _selfHostServer = WebApp.Start(this.BaseAddress, DefaultKatanaConfigure);
 #endif
                             }

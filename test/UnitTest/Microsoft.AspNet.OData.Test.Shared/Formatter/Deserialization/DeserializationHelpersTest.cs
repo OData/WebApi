@@ -362,7 +362,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             };
 
             ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
-            EdmDeltaDeletedEntityObject deletedEntity = new EdmDeltaDeletedEntityObject<SimpleOpenCustomer>(customerTypeReference);
+            var deletedEntity = new DeltaDeletedEntityObject<SimpleOpenCustomer>();
 
             // Act
             DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, customerTypeReference, odataResource, _deserializerProvider, readContext);
@@ -370,7 +370,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             // Assert
 
             //Verify Instance Annotations
-            var persistentAnnotations = deletedEntity.PersistentInstanceAnnotationsContainer.GetResourceAnnotations();
+            object value;
+             deletedEntity.TryGetPropertyValue("InstanceAnnotations", out value);
+            var persistentAnnotations = (value as IODataInstanceAnnotationContainer).GetResourceAnnotations();
             var transientAnnotations = deletedEntity.TransientInstanceAnnotationContainer.GetResourceAnnotations();
 
             Assert.Single(persistentAnnotations);

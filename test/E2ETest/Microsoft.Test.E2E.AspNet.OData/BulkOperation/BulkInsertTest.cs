@@ -213,8 +213,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
-            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
-            requestForPost.Content = stringContent;
+            requestForPost.Content = new StringContent(content);
+
+            requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
+           // StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            //requestForPost.Content = stringContent;
+            
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
@@ -308,8 +312,42 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         }
 
 
-
         [Fact]
+        public async Task PatchUntypedEmployee_WithAdds_Friends_Untyped()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/UnTypedEmployees";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+                    'value':[{ 'Id':3, 'Age':35,}]
+                     }";
+
+            content = @"{'@odata.context':'http://host/service/$metadata#UnTypedEmployees/$delta',     
+                    'value':[{ 'ID':1,'Name':'Employee1',
+                            'UnTypedFriends@odata.delta':[{'Id':1,'Name':'Friend1'},{'Id':2,'Name':'Friend2'}]
+                                },
+                            { 'ID':2,'Name':'Employee2',
+                            'UnTypedFriends@odata.delta':[{'Id':3,'Name':'Friend3'},{'Id':4,'Name':'Friend4'}]
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$deletedEntity");
+            }
+        }
+
+
+            [Fact]
         public async Task PatchEmployee_WithAdds_Friends_WithAnnotations_Untyped()
         {
             //Arrange
@@ -425,13 +463,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees/$delta',     
-                    'value':[{ 'ID':1,'Name':'Employee1',
-                            'Friends@odata.delta':[{'Id':1,'Name':'Friend1'},{'Id':2,'Name':'Friend2'}]
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert1.Employee', 'ID':1,'Name':'Employee1',
+                            'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
+                            'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
                                 },
-                            { 'ID':2,'Name':'Employee2',
-                            'Friends@odata.delta':[{'Id':3,'Name':'Friend3'},{'Id':4,'Name':'Friend4'}]
-                                }
-]
+                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert1.Employee', 'ID':2,'Name':'Employee2',
+                            'Friends@odata.delta':[{'Id':3,'Name':'Friend3',
+                            'Orders@odata.delta' :[{'Id':3,'Price': 30}, {'Id':4,'Price': 40} ]},{'Id':4,'Name':'Friend4'}]
+                                }]
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);

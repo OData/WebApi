@@ -10,7 +10,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
     /// </summary>        
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
-    public abstract class ODataResourceSetWrapperBase : ODataResourceSetItemBase
+    public abstract class ODataResourceSetWrapperBase : ODataItemBase
     {
         /// <summary>
         /// To determint the type of Resource Set
@@ -24,7 +24,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         public ODataResourceSetWrapperBase(ODataResourceSetBase item)
             : base(item)
         {
-            
+            Resources = new List<ODataResourceWrapper>();
         }
 
         /// <summary>
@@ -41,6 +41,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <summary>
         /// Gets the members of this ResourceSet.
         /// </summary>
-        public abstract IList<ODataResourceSetItemBase> Items { get; }
+        public IList<ODataResourceWrapper> Resources { get; }
     }
 }

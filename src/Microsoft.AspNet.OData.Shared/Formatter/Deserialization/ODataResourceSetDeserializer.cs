@@ -72,12 +72,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, EdmTypeKind.Complex + " or " + EdmTypeKind.Entity);
             }
 
-            ODataReader resourceSetReader = await messageReader.CreateODataResourceSetReaderAsync();
+            ODataReader resourceSetReader = readContext.IsChangedObjectCollection ? await messageReader.CreateODataDeltaResourceSetReaderAsync() : await messageReader.CreateODataResourceSetReaderAsync();
             object resourceSet = await resourceSetReader.ReadResourceOrResourceSetAsync();
             return ReadInline(resourceSet, edmType, readContext);
         }
 
         /// <inheritdoc />
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
         public sealed override object ReadInline(object item, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             if (item == null)
@@ -112,7 +113,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (resourceSet.ResourceSetType == ResourceSetType.DeltaResourceSet)
             {
                 IEdmEntityType actualType = elementType.AsEntity().Definition as IEdmEntityType;                
-
+                
                 if (readContext.IsUntyped)
                 {
                     EdmChangedObjectCollection edmCollection = new EdmChangedObjectCollection(actualType);
@@ -127,16 +128,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 else
                 {
                     ICollection<IDeltaSetItem> deltaSet;
-
-                    Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
-                    Type changedObjCollType = typeof(DeltaSet<>).MakeGenericType(type);
-
-                    deltaSet = Activator.CreateInstance(changedObjCollType, actualType) as ICollection<IDeltaSetItem>;
-
-                    foreach (IDeltaSetItem changedObject in result)
-                    {
-                        deltaSet.Add(changedObject);
-                    }
+                    deltaSet = CreateDeltaSet(actualType.Key().Select(x=>x.Name).ToList(), readContext, elementType, result);
 
                     return deltaSet;
                 }
@@ -168,6 +160,22 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
+        private static ICollection<IDeltaSetItem> CreateDeltaSet(IList<string> keys, ODataDeserializerContext readContext, IEdmStructuredTypeReference elementType, IEnumerable result)
+        {
+            ICollection<IDeltaSetItem> deltaSet;
+            Type type = EdmLibHelpers.GetClrType(elementType, readContext.Model);
+            Type changedObjCollType = typeof(DeltaSet<>).MakeGenericType(type);
+                        
+            deltaSet = Activator.CreateInstance(changedObjCollType, keys) as ICollection<IDeltaSetItem>;
+
+            foreach (IDeltaSetItem changedObject in result)
+            {
+                deltaSet.Add(changedObject);
+            }
+
+            return deltaSet;
+        }
+
         /// <summary>
         /// Deserializes the given <paramref name="resourceSet"/> under the given <paramref name="readContext"/>.
         /// </summary>
@@ -189,7 +197,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             if (resourceSet.ResourceSetType == ResourceSetType.ResourceSet)
             {
-                foreach (ODataResourceWrapper resourceWrapper in resourceSet.Items)
+                foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
                 {
                     yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);
                 }
@@ -203,20 +211,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     readContext.ResourceType = typeof(Delta<>).MakeGenericType(clrType);
                 }
 
-                foreach (ODataItemBase odataItemBase in resourceSet.Items)
+                foreach (ODataItemBase odataItemBase in resourceSet.Resources)
                 {
                     ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
 
                     if(resourceWrapper != null)
                     {
                         yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);                     
-                    }
-                    else
-                    {
-                        ODataDeltaLinkWrapper deltaLinkWrapper = odataItemBase as ODataDeltaLinkWrapper;
-
-                        throw Error.NotSupported("DeltaLink not supported");
-                    }                    
+                    }                   
                 }
             }
         }

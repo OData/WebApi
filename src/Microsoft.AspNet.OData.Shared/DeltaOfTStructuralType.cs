@@ -420,27 +420,30 @@ namespace Microsoft.AspNet.OData
                 // Patch for each nested resource changed under this TStructuralType.
                 dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
                 dynamic originalNestedResource = null;
-                if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
+                if (!(deltaNestedResource is IDeltaSet))
                 {
-                    throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
-                        nestedResourceName, original.GetType());
-                }
+                    if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
+                    {
+                        throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
+                            nestedResourceName, original.GetType());
+                    }
 
-                if (originalNestedResource == null && !(deltaNestedResource is IDeltaSet))
-                {
-                    // When patching original target of null value, directly set nested resource.
-                    dynamic deltaObject = _deltaNestedResources[nestedResourceName];
-                    dynamic instance = deltaObject.GetInstance();
+                    if (originalNestedResource == null)
+                    {
+                        // When patching original target of null value, directly set nested resource.
+                        dynamic deltaObject = _deltaNestedResources[nestedResourceName];
+                        dynamic instance = deltaObject.GetInstance();
 
-                    // Recursively patch up the instance with the nested resources.
-                    deltaObject.CopyChangedValues();
+                        // Recursively patch up the instance with the nested resources.
+                        deltaObject.CopyChangedValues();
 
-                    _allProperties[nestedResourceName].SetValue(original, instance);
+                        _allProperties[nestedResourceName].SetValue(original, instance);
+                    }
                 }
                 else
                 {
                     //For Delta collection (Edmchangedobjectcoll), these will get called for each nested collection in delta                     
-                       
+
                     //Recursively patch the subtree.
                     bool isDeltaType = deltaNestedResource is IDeltaSet || TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
                     Contract.Assert(isDeltaType, nestedResourceName + "should be DeltaSet<T>, or Delta<T> with a corresponding type <T>, but is not.");
@@ -449,10 +452,10 @@ namespace Microsoft.AspNet.OData
                     {
                         IPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(original, nestedResourceName);
 
-                        if(patchHandler != null)
+                        if (patchHandler != null)
                         {
                             deltaNestedResource.Patch(patchHandler);
-                        }                        
+                        }
                     }
                     else
                     {

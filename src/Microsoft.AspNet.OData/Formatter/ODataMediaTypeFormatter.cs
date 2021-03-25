@@ -251,6 +251,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     type,
                     defaultValue,
                     Request.GetModel(),
+                    ResultHelpers.GetODataResponseVersion(Request),
                     GetBaseAddressInternal(Request),
                     new WebApiRequestMessage(Request),
                     () => ODataMessageWrapperHelper.Create(readStream, contentHeaders, Request.GetODataContentIdMapping(), Request.GetRequestContainer()),

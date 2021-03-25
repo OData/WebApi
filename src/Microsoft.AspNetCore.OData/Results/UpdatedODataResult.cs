@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Results
             HttpRequest request = context.HttpContext.Request;
             IActionResult result = GetInnerActionResult(request);
             await result.ExecuteResultAsync(context);
-            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request)));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request)));
         }
 
         internal IActionResult GetInnerActionResult(HttpRequest request)

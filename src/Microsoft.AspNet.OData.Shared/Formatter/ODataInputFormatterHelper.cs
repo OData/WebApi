@@ -51,6 +51,7 @@ namespace Microsoft.AspNet.OData.Formatter
             Type type,
             object defaultValue,
             IEdmModel model,
+            ODataVersion version,
             Uri baseAddress,
             IWebApiRequestMessage internalRequest,
             Func<IODataRequestMessage> getODataRequestMessage,
@@ -74,6 +75,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 ODataMessageReaderSettings oDataReaderSettings = internalRequest.ReaderSettings;
                 oDataReaderSettings.BaseUri = baseAddress;
                 oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
+                oDataReaderSettings.Version = version;
 
                 IODataRequestMessage oDataRequestMessage = getODataRequestMessage();
 

@@ -61,7 +61,7 @@ namespace Microsoft.AspNet.OData.Results
             // before calling AddEntityId() to ensure the response code is set correctly.
             await result.ExecuteResultAsync(context);
             ResultHelpers.AddEntityId(response, () => GenerateEntityId(request));
-            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request)));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request)));
         }
 
         // internal just for unit test.

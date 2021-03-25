@@ -12,6 +12,7 @@ using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
@@ -147,6 +148,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     type,
                     defaultValue,
                     request.GetModel(),
+                    ResultHelpers.GetODataVersion(request),
                     GetBaseAddressInternal(request),
                     new WebApiRequestMessage(request),
                     () => ODataMessageWrapperHelper.Create(new StreamWrapper(request.Body), request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),

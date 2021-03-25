@@ -200,7 +200,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             // Add version header.
-            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request));
+            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request));
         }
 
         /// <inheritdoc/>
@@ -246,7 +246,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 type,
                 context.Object,
                 request.GetModel(),
-                ResultHelpers.GetODataResponseVersion(request),
+                ResultHelpers.GetODataVersion(request),
                 baseAddress,
                 contentType,
                 new WebApiUrlHelper(request.GetUrlHelper()),

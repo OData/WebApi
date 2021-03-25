@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData.Results
             }
         }
 
-        internal static ODataVersion GetODataResponseVersion(HttpRequest request)
+        internal static ODataVersion GetODataVersion(HttpRequest request)
         {
             Contract.Assert(request != null, "GetODataResponseVersion called with a null request");
             return request.ODataMaxServiceVersion() ??

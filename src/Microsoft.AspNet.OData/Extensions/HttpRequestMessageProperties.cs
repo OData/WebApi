@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -90,7 +91,7 @@ namespace Microsoft.AspNet.OData.Extensions
         /// <see cref="ODataResourceSet "/> will use this information (if any) while writing the response for
         /// this request.
         /// </summary>
-        internal ODataQueryOptions QueryOptions
+        internal IODataQueryOptions QueryOptions
         {
             get
             {

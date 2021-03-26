@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Query.Expressions;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -1268,7 +1269,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + filter, configuration, "OData");
 
-            var options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
 
             IEnumerable<Customer> customers = CustomerApplyTestData;
             // Act
@@ -1312,7 +1313,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + clause, configuration, "OData");
 
-            var options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
 
             IEnumerable<Customer> customers = CustomerApplyTestData;
 
@@ -1344,7 +1345,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
             var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/?" + filter, configuration, "OData");
 
-            var options = new ODataQueryOptions(context, request);
+            IODataQueryOptions options = new ODataQueryOptions(context, request);
 
             IEnumerable<Customer> customers = CustomerApplyTestData;
             // Act

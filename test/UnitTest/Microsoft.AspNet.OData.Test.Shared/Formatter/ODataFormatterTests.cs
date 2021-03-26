@@ -12,9 +12,11 @@ using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -813,14 +815,17 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
-        [Fact]
-        public async Task ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject()
+
+        [Theory]
+        [InlineData(typeof(Class.CollectionSerializerCustomersController))]
+        [InlineData(typeof(Interface.CollectionSerializerCustomersController))]
+        public async Task ODataCollectionSerializer_SerializeIQueryableOfIEdmEntityObject(Type controller)
         {
             // Arrange
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<CollectionSerializerCustomer>("CollectionSerializerCustomers");
             IEdmModel model = builder.GetEdmModel();
-            var controllers = new[] { typeof(CollectionSerializerCustomersController) };
+            var controllers = new[] { controller };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 config.MapODataServiceRoute("odata", null, model);
@@ -1224,29 +1229,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.Equal(new Guid("46538EC2-E497-4DFE-A039-1C22F0999D6C"), key3);
         }
 
-        public class CollectionSerializerCustomer
-        {
-            public int ID { get; set; }
-            public string Name { get; set; }
-        }
-
-        public class CollectionSerializerCustomersController : TestODataController
-        {
-            public ITestActionResult Get(ODataQueryOptions<CollectionSerializerCustomer> options)
-            {
-                IQueryable<CollectionSerializerCustomer> customers = new[]
-                {
-                    new CollectionSerializerCustomer{ID = 1, Name = "Name 1"},
-                    new CollectionSerializerCustomer{ID = 2, Name = "Name 2"},
-                    new CollectionSerializerCustomer{ID = 3, Name = "Name 3"},
-                }.AsQueryable();
-
-                IQueryable<IEdmEntityObject> appliedCustomers = options.ApplyTo(customers) as IQueryable<IEdmEntityObject>;
-
-                return Ok(appliedCustomers);
-            }
-        }
-
         private static void AddDataServiceVersionHeaders(HttpRequestMessage request)
         {
             request.Headers.Add("OData-Version", "4.0");
@@ -1279,7 +1261,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var controllers = new[]
             {
                 typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
-                typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+                typeof(Class.CollectionSerializerCustomersController), typeof(PresidentController)
             };
 
             var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>
@@ -1325,7 +1307,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var controllers = new[]
             {
                 typeof(MainEntityController), typeof(PeopleController), typeof(EnumCustomersController),
-                typeof(CollectionSerializerCustomersController), typeof(PresidentController)
+                typeof(Class.CollectionSerializerCustomersController), typeof(PresidentController)
             };
 
             var server = TestServerFactory.CreateWithFormatters(controllers, null, (config) =>

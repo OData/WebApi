@@ -229,9 +229,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         internal SelectItem CurrentSelectItem { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ODataQueryOptions"/>.
+        /// Gets or sets the <see cref="IODataQueryOptions"/>.
         /// </summary>
-        public ODataQueryOptions QueryOptions { get; internal set; }
+        public IODataQueryOptions QueryOptions { get; internal set; }
 
         /// <summary>
         /// Gets or sets the relative path to the resouce being serialized

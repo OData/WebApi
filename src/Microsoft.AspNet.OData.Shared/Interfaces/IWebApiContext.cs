@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.OData.UriParser;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.OData.UriParser.Aggregation;
+using Microsoft.OData.UriParser;
 using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Interfaces
@@ -63,9 +63,9 @@ namespace Microsoft.AspNet.OData.Interfaces
         SelectExpandClause ProcessedSelectExpandClause { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ODataQueryOptions"/> of the request.
+        /// Gets or sets the <see cref="IODataQueryOptions"/> of the request.
         /// </summary>
-        ODataQueryOptions QueryOptions { get; set; }
+        IODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Gets or sets the total count for the OData response.

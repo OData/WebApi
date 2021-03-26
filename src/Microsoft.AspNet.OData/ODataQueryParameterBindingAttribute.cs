@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// A <see cref="ParameterBindingAttribute"/> to bind parameters of type <see cref="ODataQueryOptions"/> to the OData query from the incoming request.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Interface | AttributeTargets.Parameter, Inherited = true, AllowMultiple = false)]
     public sealed partial class ODataQueryParameterBindingAttribute : ParameterBindingAttribute
     {
         /// <inheritdoc />

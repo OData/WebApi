@@ -17,7 +17,8 @@ namespace Microsoft.AspNet.OData.Adapters
     /// <summary>
     /// Adapter class to convert Asp.Net WebApi OData properties to OData WebApi.
     /// </summary>
-    internal class WebApiContext : IWebApiContext
+    internal class WebApiContext 
+        : IWebApiContext
     {
         /// <summary>
         /// The inner context wrapped by this instance.
@@ -100,9 +101,9 @@ namespace Microsoft.AspNet.OData.Adapters
         }
 
         /// <summary>
-        /// Gets or sets the parsed OData <see cref="ODataQueryOptions"/> of the request.
+        /// Gets or sets the parsed OData <see cref="IODataQueryOptions"/> of the request.
         /// </summary>
-        public ODataQueryOptions QueryOptions
+        public IODataQueryOptions QueryOptions 
         {
             get { return this.innerContext.QueryOptions; }
             set { this.innerContext.QueryOptions = value; }
@@ -134,5 +135,7 @@ namespace Microsoft.AspNet.OData.Adapters
             get { return this.innerContext.TotalCountFunc; }
             set { this.innerContext.TotalCountFunc = value; }
         }
+
+        
     }
 }

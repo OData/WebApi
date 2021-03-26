@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData
         /// </param>
         [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope",
             Justification = "Response disposed after being sent.")]
-        public virtual void ValidateQuery(HttpRequestMessage request, ODataQueryOptions queryOptions)
+        public virtual void ValidateQuery(HttpRequestMessage request, IODataQueryOptions queryOptions)
         {
             if (request == null)
             {

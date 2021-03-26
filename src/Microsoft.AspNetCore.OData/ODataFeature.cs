@@ -145,9 +145,9 @@ namespace Microsoft.AspNet.OData
         public IDictionary<string, object> RoutingConventionsStore { get; set; } = new Dictionary<string, object>();
 
         /// <summary>
-        /// Gets or sets the parsed <see cref="ODataQueryOptions"/> of the request.
+        /// Gets or sets the parsed <see cref="IODataQueryOptions"/> of the request.
         /// </summary>
-        internal ODataQueryOptions QueryOptions { get; set; }
+        internal IODataQueryOptions QueryOptions { get; set; }
 
         /// <summary>
         /// Page size to be used by skiptoken implementation for the top-level resource for the request. 

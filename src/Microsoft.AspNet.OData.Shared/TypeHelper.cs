@@ -416,44 +416,44 @@ namespace Microsoft.AspNet.OData
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
         internal static IEnumerable<Type> GetLoadedTypes(IWebApiAssembliesResolver assembliesResolver)
         {
-            List<Type> result = new List<Type>();
-
-            if (assembliesResolver == null)
+            if (assembliesResolver != null)
             {
-                return result;
+                // Go through all assemblies referenced by the application and search for types matching a predicate
+                IEnumerable<Assembly> assemblies = assembliesResolver.Assemblies;
+                foreach (Assembly assembly in assemblies)
+                {
+                    Type[] exportedTypes = null;
+                    if (assembly == null || assembly.IsDynamic)
+                    {
+                        // can't call GetTypes on a null (or dynamic?) assembly
+                        continue;
+                    }
+
+                    try
+                    {
+                        exportedTypes = assembly.GetTypes();
+                    }
+                    catch (ReflectionTypeLoadException ex)
+                    {
+                        exportedTypes = ex.Types;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    if (exportedTypes != null)
+                    {
+                        foreach (Type t in exportedTypes)
+                        {
+                            if ((t != null) && (TypeHelper.IsVisible(t)))
+                            {
+                                yield return t;
+                            }
+                        }
+                    }
+                }
             }
-
-            // Go through all assemblies referenced by the application and search for types matching a predicate
-            IEnumerable<Assembly> assemblies = assembliesResolver.Assemblies;
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] exportedTypes = null;
-                if (assembly == null || assembly.IsDynamic)
-                {
-                    // can't call GetTypes on a null (or dynamic?) assembly
-                    continue;
-                }
-
-                try
-                {
-                    exportedTypes = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    exportedTypes = ex.Types;
-                }
-                catch
-                {
-                    continue;
-                }
-
-                if (exportedTypes != null)
-                {
-                    result.AddRange(exportedTypes.Where(t => t != null && TypeHelper.IsVisible(t)));
-                }
-            }
-
-            return result;
         }
 
         internal static Type GetTaskInnerTypeOrSelf(Type type)

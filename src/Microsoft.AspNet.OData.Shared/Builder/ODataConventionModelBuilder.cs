@@ -86,7 +86,7 @@ namespace Microsoft.AspNet.OData.Builder
         private bool _isQueryCompositionMode;
 
         // build the mapping between type and its derived types to be used later.
-        private Lazy<IDictionary<Type, List<Type>>> _allTypesWithDerivedTypeMapping;
+        private Lazy<IDictionary<Type, Type[]>> _allTypesWithDerivedTypeMapping;
 
         /// <summary>
         /// Initializes a new <see cref="ODataConventionModelBuilder"/>.
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.OData.Builder
             _mappedTypes = new HashSet<StructuralTypeConfiguration>();
             _ignoredTypes = new HashSet<Type>();
             ModelAliasingEnabled = true;
-            _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, List<Type>>>(
+            _allTypesWithDerivedTypeMapping = new Lazy<IDictionary<Type, Type[]>>(
                 () => BuildDerivedTypesMapping(assembliesResolver),
                 isThreadSafe: false);
         }
@@ -603,7 +603,7 @@ namespace Microsoft.AspNet.OData.Builder
                 StructuralTypeConfiguration baseType = typeToBeVisited.Dequeue();
                 visitedTypes.Add(baseType.ClrType);
 
-                List<Type> derivedTypes;
+                Type[] derivedTypes;
                 if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(baseType.ClrType, out derivedTypes))
                 {
                     foreach (Type derivedType in derivedTypes)
@@ -825,7 +825,7 @@ namespace Microsoft.AspNet.OData.Builder
                 Type currentType = typeToBeVisited.Dequeue();
                 visitedTypes.Add(currentType);
 
-                List<Type> derivedTypes;
+                Type[] derivedTypes;
                 if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
                 {
                     foreach (Type derivedType in derivedTypes)
@@ -865,7 +865,7 @@ namespace Microsoft.AspNet.OData.Builder
                 Type currentType = typeToBeVisited.Dequeue();
                 visitedTypes.Add(currentType);
 
-                List<Type> derivedTypes;
+                Type[] derivedTypes;
                 if (_allTypesWithDerivedTypeMapping.Value.TryGetValue(currentType, out derivedTypes))
                 {
                     foreach (Type derivedType in derivedTypes)
@@ -1080,21 +1080,48 @@ namespace Microsoft.AspNet.OData.Builder
             }
         }
 
-        private static Dictionary<Type, List<Type>> BuildDerivedTypesMapping(IWebApiAssembliesResolver assemblyResolver)
+        private static Dictionary<Type, Type[]> BuildDerivedTypesMapping(IWebApiAssembliesResolver assemblyResolver)
         {
-            IEnumerable<Type> allTypes = TypeHelper.GetLoadedTypes(assemblyResolver).Where(t => TypeHelper.IsVisible(t) && TypeHelper.IsClass(t) && t != typeof(object));
-            Dictionary<Type, List<Type>> allTypeMapping = allTypes.Distinct().ToDictionary(k => k, k => new List<Type>());
+            Predicate<Type> verifyType = t => TypeHelper.IsVisible(t) && TypeHelper.IsClass(t) && t != typeof(object);
 
-            foreach (Type type in allTypes)
+            // The dictionary is allocated to contain all visible reference types which is not system.Object, each with an List<Type> allocated.
+            // The list is used to keep derived types.
+            // In a common scenario, there are about 10% types with derived types.
+            // So, we don't need to keep a large number of empty list in the dictionary.
+            Dictionary<Type, List<Type>> temp = new Dictionary<Type, List<Type>>();
+            foreach (Type type in TypeHelper.GetLoadedTypes(assemblyResolver))
             {
-                List<Type> derivedTypes;
-                if (TypeHelper.GetBaseType(type) != null && allTypeMapping.TryGetValue(TypeHelper.GetBaseType(type), out derivedTypes))
+                if (type != null && verifyType(type))
                 {
-                    derivedTypes.Add(type);
+                    Type baseType = TypeHelper.GetBaseType(type);
+                    if (baseType != null)
+                    {
+                        List<Type> list;
+                        if (!temp.TryGetValue(baseType, out list))
+                        {
+                            if (verifyType(baseType))
+                            {
+                                list = new List<Type>(1);
+                                temp[baseType] = list;
+                            }
+                        }
+
+                        if (list != null)
+                        {
+                            list.Add(type);
+                        }
+                    }
                 }
             }
 
-            return allTypeMapping;
+            // We can throw away all lists and keep the dictionary as small as possible
+            Dictionary<Type, Type[]> map = new Dictionary<Type, Type[]>(temp.Count);
+            foreach (var kv in temp)
+            {
+                map[kv.Key] = kv.Value.ToArray();
+            }
+
+            return map;
         }
 
         /// <inheritdoc />

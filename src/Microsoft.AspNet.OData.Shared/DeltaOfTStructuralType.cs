@@ -114,6 +114,7 @@ namespace Microsoft.AspNet.OData
             InitializeProperties(updatableProperties);            
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
             _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
+            DeltaKind = EdmDeltaEntityKind.Entry;
         }
 
 
@@ -153,7 +154,7 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc />
         public PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
 
-       
+
         /// <inheritdoc/>
         public override void Clear()
         {

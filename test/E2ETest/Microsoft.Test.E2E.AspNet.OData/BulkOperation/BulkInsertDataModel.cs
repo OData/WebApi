@@ -27,6 +27,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public List<NewFriend> NewFriends { get; set; }
 
         public List<UnTypedFriend> UnTypedFriends { get; set; }
+
+        public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
     [Flags]

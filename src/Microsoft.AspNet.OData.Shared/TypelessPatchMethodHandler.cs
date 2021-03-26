@@ -160,6 +160,11 @@ namespace Microsoft.AspNet.OData
             //This logic is for filtering the object based on the set of keys,
             //There will only be very few key elements usually, mostly 1, so performance wont be impacted.
 
+            if(originalList == null)
+            {
+                return null;
+            }
+
             foreach (EdmStructuredObject item in originalList)
             {
                 bool isMatch = true;

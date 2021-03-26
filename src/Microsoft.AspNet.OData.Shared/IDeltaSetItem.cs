@@ -15,6 +15,11 @@ namespace Microsoft.AspNet.OData
     public interface IDeltaSetItem
     {
         /// <summary>
+        /// Entry or Deleted Entry for Delta Set Item
+        /// </summary>
+        EdmDeltaEntityKind DeltaKind { get; set; }
+
+        /// <summary>
         /// Annotation container to hold Transient Instance Annotations
         /// </summary>
         IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }

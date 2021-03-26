@@ -39,11 +39,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         private  List<Friend> Friends = null;
 
-        private IEdmTypeReference edmType;
 
         private void InitEmployees()
         {
-            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1" } }; 
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1" }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } }; 
 
             Employees = new List<Employee>
             {
@@ -55,7 +54,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
                     
-                    Friends = this.Friends
+                    Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
                 },
                 new Employee()
                 {
@@ -64,20 +63,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
                   
-                    Friends = this.Friends
+                    Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
                 },
                 new Employee(){
                     ID=3,Name="Name3",
                     SkillSet=new List<Skill>{Skill.Web,Skill.Sql},
                     Gender=Gender.Female,
-                    AccessLevel=AccessLevel.Read|AccessLevel.Write,
+                    AccessLevel=AccessLevel.Read|AccessLevel.Write
                    
-                    Friends = this.Friends
                 },
             };
         }
 
-        private void InitTypeLessEmployees(IEdmEntityTypeReference entityType)
+        private void InitTypeLessEmployees(IEdmEntityType entityType)
         {
             EmployeesTypeless = new List<EdmStructuredObject>();
             var emp1 = new EdmEntityObject(entityType);
@@ -118,8 +116,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             emp2.TrySetPropertyValue("UnTypedFriends", friends2);
 
+            var emp3 = new EdmEntityObject(entityType);
+            emp3.TrySetPropertyValue("ID", 3);
+            emp3.TrySetPropertyValue("Name", "Test3");
+
+            var friends35 = new List<EdmStructuredObject>();
+            var friend5 = new EdmEntityObject(friendType);
+            friend5.TrySetPropertyValue("Id", 5);
+            friend5.TrySetPropertyValue("Name", "Test5");
+
+            friends35.Add(friend5);
+
+            emp3.TrySetPropertyValue("UnTypedFriends", friends35);
+
             EmployeesTypeless.Add(emp1);
             EmployeesTypeless.Add(emp2);
+            EmployeesTypeless.Add(emp3);
         }
 
         public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl, Employee employee)
@@ -128,27 +140,47 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             return changedObjColl;
         }
-        public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(EdmChangedObjectCollection friendColl)
+        public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(int key, EdmChangedObjectCollection friendColl)
         {
-            edmType = friendColl[0].GetEdmType();
-            var entity = edmType.AsEntity();
+             
+            var entity =   Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = friendColl.Patch(new EmployeeTypelessPatchHandler(entity));
+            var changedObjColl = friendColl.Patch(new FriendTypelessPatchHandler(EmployeesTypeless[key-1], entity));
 
             return changedObjColl;
         }
 
-        public EdmChangedObjectCollection EmployeePatchWithUsersMethodTypeLess(EdmChangedObjectCollection empColl)
-        {
-            edmType = empColl[0].GetEdmType();
-            var entity = edmType.AsEntity();
+        public EdmChangedObjectCollection EmployeePatchMethodTypeLess(EdmChangedObjectCollection empColl)
+        {            
+            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
             var changedObjColl = empColl.Patch(EmployeesTypeless);
-            // var changedObjColl = empColl.Patch(new EmployeeTypelessPatchHandler(entity));
+
+            ValidateSuccessfulTypeless();
+            InitTypeLessEmployees(entity);
+
+            changedObjColl = empColl.Patch(new EmployeeTypelessPatchHandler(entity));
+            ValidateSuccessfulTypeless();
 
             return changedObjColl;
+        }
+
+        private void ValidateSuccessfulTypeless()
+        {
+            object obj;
+            Assert.True(EmployeesTypeless.First().TryGetPropertyValue("UnTypedFriends", out obj));
+
+            var friends = obj as ICollection<EdmStructuredObject>;
+            Assert.NotNull(friends);
+
+            object obj1;
+
+            friends.First().TryGetPropertyValue("Name", out obj1);
+
+            Assert.Equal("Friend1", obj1.ToString());
+           
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -178,9 +210,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             InitEmployees();
 
             Assert.NotNull(coll);
-
-            var returncoll = coll.Patch(Employees);
-            //var returncoll = coll.Patch(new EmployeePatchHandler());
+                        
+            var returncoll = coll.Patch(new EmployeePatchHandler());
 
             return Ok(returncoll);
         }
@@ -232,11 +263,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             if (key == 1)
             {
-                var changedObjColl = PatchWithUsersMethodTypeLess(friendColl);
+                var changedObjColl = PatchWithUsersMethodTypeLess(key, friendColl);
 
                 return Ok(changedObjColl);
             }
-            else
+            else if(key ==2)
             {
                 var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
                 entity.TrySetPropertyValue("Id", 2);
@@ -244,6 +275,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
 
                 var changedObjColl = friendColl.Patch(friendCollection);
+
+                object obj;
+                Assert.Single(friendCollection);
+
+                friendCollection.First().TryGetPropertyValue("Age", out obj);
+                Assert.Equal(35, obj);
+
+                return Ok(changedObjColl);
+            }
+            else
+            {
+                var changedObjColl = PatchWithUsersMethodTypeLess(key, friendColl);
 
                 return Ok(changedObjColl);
             }
@@ -255,7 +298,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public ITestActionResult PatchUnTypedEmployees([FromBody] EdmChangedObjectCollection empColl)
         {
          
-            var changedObjColl = EmployeePatchWithUsersMethodTypeLess(empColl);
+            var changedObjColl = EmployeePatchMethodTypeLess(empColl);
 
             return Ok(changedObjColl);
            
@@ -271,16 +314,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             delta.TrySetPropertyValue("ID", key); // It is the key property, and should not be updated.
 
             Employee employee = Employees.FirstOrDefault(e => e.ID == key);
+            
             if (employee == null)
             {
                 employee = new Employee();
-                delta.Patch(employee);
+                delta.Patch(employee, new EmployeePatchHandler());
                 return Created(employee);
             }
 
             try
             {
-                delta.Patch(employee);
+                delta.Patch(employee, new EmployeePatchHandler());
             }
             catch (ArgumentException ae)
             {

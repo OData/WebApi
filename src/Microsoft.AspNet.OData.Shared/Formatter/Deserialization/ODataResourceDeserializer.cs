@@ -20,6 +20,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// <summary>
     /// Represents an <see cref="ODataDeserializer"/> for reading OData resource payloads.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
     public class ODataResourceDeserializer : ODataEdmTypeDeserializer
     {
         /// <summary>

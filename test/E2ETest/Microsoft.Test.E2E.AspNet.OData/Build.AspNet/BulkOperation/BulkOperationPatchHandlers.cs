@@ -255,8 +255,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     public class EmployeeTypelessPatchHandler : TypelessPatchMethodHandler
     {
-        IEdmEntityTypeReference entityType;
-        public EmployeeTypelessPatchHandler(IEdmEntityTypeReference entityType)
+        IEdmEntityType entityType;
+        public EmployeeTypelessPatchHandler(IEdmEntityType entityType)
         {
             this.entityType = entityType;
         }
@@ -291,7 +291,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 foreach (var emp in EmployeesController.EmployeesTypeless)
                 {
                     object id1;
-                    emp.TryGetPropertyValue("Id", out id1);
+                    emp.TryGetPropertyValue("ID", out id1);
 
                     if (id == id1.ToString())
                     {
@@ -373,11 +373,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
             try
             {
+                object empid;
+                if(employee.TryGetPropertyValue("ID" , out empid) && empid as int? == 3)
+                {
+                    throw new Exception("Testing Error");
+                }
+
                 createdObject = new EdmEntityObject(entityType);
                 object obj;
                 employee.TryGetPropertyValue("UnTypedFriends", out obj);
 
-                var friends = obj as IList<EdmStructuredObject>;
+                var friends = obj as ICollection<EdmStructuredObject>;
+
+                if(friends == null)
+                {
+                    friends = new List<EdmStructuredObject>();
+                }
 
                 friends.Add(createdObject);
 
@@ -400,10 +411,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
+                if(id == "5")
+                {
+                    throw new Exception("Testing Error");
+                }
                 foreach (var emp in EmployeesController.EmployeesTypeless)
                 {
                     object id1;
-                    emp.TryGetPropertyValue("Id", out id1);
+                    emp.TryGetPropertyValue("ID", out id1);
 
                     if (id == id1.ToString())
                     {
@@ -444,6 +459,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 employee.TryGetPropertyValue("UnTypedFriends", out obj);
 
                 var friends = obj as IList<EdmStructuredObject>;
+
+                if(friends == null)
+                {
+                    return PatchStatus.NotFound;
+                }
 
                 foreach (var friend in friends)
                 {

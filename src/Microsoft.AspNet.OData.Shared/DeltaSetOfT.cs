@@ -12,10 +12,11 @@ using Microsoft.AspNet.OData.Builder;
 using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
-{   
-     /// <summary>
+{
+    /// <summary>
     /// Represents an <see cref="IDeltaSet"/> that is a collection of <see cref="IDeltaSetItem"/>s.
     /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix")]
     [NonValidatingParameterBinding]
     public class DeltaSet<TStructuralType> : Collection<IDeltaSetItem>, IDeltaSet where TStructuralType : class
     {        

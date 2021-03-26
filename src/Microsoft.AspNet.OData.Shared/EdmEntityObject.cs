@@ -41,6 +41,7 @@ namespace Microsoft.AspNet.OData
         public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
             : base(edmType, isNullable)
         {
+            PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
         }
 

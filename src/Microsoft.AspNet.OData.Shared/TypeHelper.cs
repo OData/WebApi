@@ -416,42 +416,40 @@ namespace Microsoft.AspNet.OData
         // This code is copied from DefaultHttpControllerTypeResolver.GetControllerTypes.
         internal static IEnumerable<Type> GetLoadedTypes(IWebApiAssembliesResolver assembliesResolver)
         {
-            if (assembliesResolver == null)
+            if (assembliesResolver != null)
             {
-                yield return null;
-            }
-
-            // Go through all assemblies referenced by the application and search for types matching a predicate
-            IEnumerable<Assembly> assemblies = assembliesResolver.Assemblies;
-            foreach (Assembly assembly in assemblies)
-            {
-                Type[] exportedTypes = null;
-                if (assembly == null || assembly.IsDynamic)
+                // Go through all assemblies referenced by the application and search for types matching a predicate
+                IEnumerable<Assembly> assemblies = assembliesResolver.Assemblies;
+                foreach (Assembly assembly in assemblies)
                 {
-                    // can't call GetTypes on a null (or dynamic?) assembly
-                    continue;
-                }
-
-                try
-                {
-                    exportedTypes = assembly.GetTypes();
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    exportedTypes = ex.Types;
-                }
-                catch
-                {
-                    continue;
-                }
-
-                if (exportedTypes != null)
-                {
-                    foreach (Type t in exportedTypes)
+                    Type[] exportedTypes = null;
+                    if (assembly == null || assembly.IsDynamic)
                     {
-                        if ((t != null) && (TypeHelper.IsVisible(t)))
+                        // can't call GetTypes on a null (or dynamic?) assembly
+                        continue;
+                    }
+
+                    try
+                    {
+                        exportedTypes = assembly.GetTypes();
+                    }
+                    catch (ReflectionTypeLoadException ex)
+                    {
+                        exportedTypes = ex.Types;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+
+                    if (exportedTypes != null)
+                    {
+                        foreach (Type t in exportedTypes)
                         {
-                            yield return t;
+                            if ((t != null) && (TypeHelper.IsVisible(t)))
+                            {
+                                yield return t;
+                            }
                         }
                     }
                 }

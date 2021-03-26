@@ -355,7 +355,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
-                    'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
+                    'value':[{ 'Id':2, 'Age':35, '@NS.Test':1}]
                      }";
 
 
@@ -369,7 +369,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$deletedEntity");
+                json.ToString().Contains("$delta");
+                json.ToString().Contains("@NS.Test");
             }
         }
 
@@ -378,7 +379,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         {
             //Arrange
 
-            string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
@@ -403,10 +404,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public async Task PatchEmployee_WithFailedDeletes_Friends_Untyped()
         {
             //Arrange            
-            string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
-                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@NS.Test':1}]
                      }";
 
 
@@ -420,7 +421,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Contains("$delta", json.ToString());
+                Assert.Contains("@Core.DataModificationException", json.ToString());
+                Assert.Contains("@NS.Test", json.ToString());
             }
 
         }
@@ -430,10 +432,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public async Task PatchEmployee_WithFailedOperation_WithAnnotations_Untyped()
         {
             //Arrange            
-            string requestUri = this.BaseAddress + "/convention/Employees(2)/UntypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(3)/UntypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
-                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/NewFriends/$delta',     
+                    'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 
 
@@ -451,6 +453,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 Assert.Contains("$delta", str);                
                 Assert.Contains("NS.Test2", str);
                 Assert.Contains("Core.DataModificationException", str);
+                Assert.Contains("Core.ContentID", str);
             }
 
         }

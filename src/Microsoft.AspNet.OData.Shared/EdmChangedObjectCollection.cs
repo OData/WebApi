@@ -108,7 +108,7 @@ namespace Microsoft.AspNet.OData
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             List<IEdmStructuralProperty> keys = _entityType.Key().ToList();
 
-            foreach (EdmDeltaEntityObject changedObj in Items)
+            foreach (IEdmChangedObject changedObj in Items)
             {                
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
                 EdmStructuredObject originalObj = null;
@@ -118,7 +118,7 @@ namespace Microsoft.AspNet.OData
                 try
                 {
                     EdmStructuredObject original = null;
-                    IEdmDeltaDeletedEntityObject deletedObj = changedObj as IEdmDeltaDeletedEntityObject;
+                    EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
 
                     if (deletedObj != null)
                     {
@@ -130,7 +130,7 @@ namespace Microsoft.AspNet.OData
                             PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
                             if (status == PatchStatus.Success)
                             {
-                                IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, original, keys, errorMessage);
+                                IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage);
                                 changedObjectCollection.Add(changedObject);
                                 continue;
                             }
@@ -139,7 +139,9 @@ namespace Microsoft.AspNet.OData
                         changedObjectCollection.Add(deletedObj);
                     }
                     else
-                    {                        
+                    {
+                        EdmDeltaEntityObject deltaEntityObject = changedObj as EdmDeltaEntityObject;
+
                         PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
 
                         if (status == PatchStatus.NotFound)
@@ -149,7 +151,7 @@ namespace Microsoft.AspNet.OData
                             if (PatchHandler.TryCreate(out original, out errorMessage) != PatchStatus.Success)
                             {
                                 //Handle failed Opreataion - create
-                                IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, original, keys, errorMessage);
+                                IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, original, keys, errorMessage);
                                 changedObjectCollection.Add(changedObject);
                                 continue;
                             }
@@ -161,13 +163,13 @@ namespace Microsoft.AspNet.OData
                         else
                         {
                             //Handle failed operation 
-                            IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, null, keys, errorMessage);
+                            IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, null, keys, errorMessage);
                             changedObjectCollection.Add(changedObject);
                             continue;
                         }                                              
 
                         //Patch for addition/update. 
-                        PatchItem(changedObj, original);
+                        PatchItem(changedObj as EdmEntityObject, original);
 
                         changedObjectCollection.Add(changedObj);
                     }
@@ -175,7 +177,7 @@ namespace Microsoft.AspNet.OData
                 catch(Exception ex)
                 {
                     //Handle Failed Operation
-                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj, operation, originalObj, keys, ex.Message);
+                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj as EdmEntityObject, operation, originalObj, keys, ex.Message);
                     
                     Contract.Assert(changedObject != null);
                     changedObjectCollection.Add(changedObject);
@@ -186,7 +188,7 @@ namespace Microsoft.AspNet.OData
         }
 
     
-        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, EdmDeltaEntityObject changedObj)
+        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, IEdmChangedObject changedObj)
         {
             IDictionary<string, object> keyValues = new Dictionary<string, object>();
 
@@ -248,7 +250,7 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private IEdmChangedObject HandleFailedOperation(EdmDeltaEntityObject changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
+        private IEdmChangedObject HandleFailedOperation(EdmEntityObject changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
             List<IEdmStructuralProperty> keys, string errorMessage)
         {
             IEdmChangedObject edmChangedObject = null;
@@ -261,7 +263,7 @@ namespace Microsoft.AspNet.OData
             switch (operation)
             {
                 case DataModificationOperationKind.Update:
-                    edmChangedObject = changedObj;
+                    edmChangedObject = changedObj as IEdmChangedObject;
                     break;
                 case DataModificationOperationKind.Insert:
                     {

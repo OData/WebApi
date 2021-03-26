@@ -159,6 +159,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         public ODataPath Path { get; set; }
 
+        internal bool IsUntyped { get; set; }
+       
         /// <summary>
         /// Gets or sets the root element name which is used when writing primitive and enum types
         /// </summary>
@@ -287,6 +289,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
+                IsUntyped = true;
+
                 edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {
@@ -296,6 +300,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else
             {
+                if (typeof(IDeltaSet).IsAssignableFrom(type)) 
+                {
+                    IsUntyped = false;
+
+                    return EdmLibHelpers.ToEdmTypeReference(Path.EdmType, isNullable: false);
+                }
+                
                 if (Model == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -308,7 +319,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     if (instance != null)
                     {
-                        edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        TypedDelta delta = instance as TypedDelta;
+                        if (delta != null)
+                        {
+                            edmType = _typeMappingCache.GetEdmType(delta.ExpectedClrType, Model);
+                        }
+                        else
+                        {
+                            edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        }
                     }
 
                     if (edmType == null)

@@ -22,6 +22,7 @@ namespace Microsoft.AspNet.OData
     {
         private string _id;
         private DeltaDeletedEntryReason _reason;
+        private IEdmNavigationSource _navigationSource;
 
         /// <summary>
         /// Initializes a new instance of <see cref="DeltaDeletedEntityObject{TStructuralType}"/>.
@@ -97,9 +98,10 @@ namespace Microsoft.AspNet.OData
         public DeltaDeletedEntityObject(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo, PropertyInfo instanceAnnotationsPropertyInfo)
             : base(structuralType, updatableProperties, dynamicDictionaryPropertyInfo, instanceAnnotationsPropertyInfo)
         {
-
+            DeltaKind = EdmDeltaEntityKind.DeletedEntry;
         }
 
+     
         /// <inheritdoc />
         public string Id
         {
@@ -123,6 +125,19 @@ namespace Microsoft.AspNet.OData
             set
             {
                 _reason = (DeltaDeletedEntryReason)value;
+            }
+        }
+
+        /// <inheritdoc />
+        public IEdmNavigationSource NavigationSource
+        {
+            get
+            {
+                return _navigationSource;
+            }
+            set
+            {
+                _navigationSource = value;
             }
         }
     }

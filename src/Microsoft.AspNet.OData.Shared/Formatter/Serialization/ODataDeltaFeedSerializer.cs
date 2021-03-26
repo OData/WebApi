@@ -2,9 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Builder;
@@ -57,6 +59,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
+
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference entityType = GetResourceType(feedType).AsEntity();
@@ -90,6 +93,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             IEdmTypeReference feedType = writeContext.GetEdmType(graph, type);
+
             Contract.Assert(feedType != null);
 
             IEdmEntityTypeReference entityType = GetResourceType(feedType).AsEntity();
@@ -231,16 +235,34 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
 
                     lastResource = entry;
-                    IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
-                    if (edmChangedObject == null)
+
+                    EdmDeltaEntityKind deltaEntityKind;
+                    if (writeContext.IsUntyped)
                     {
-                        throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
+                        if (edmChangedObject == null)
+                        {
+                            throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        }
+
+                        deltaEntityKind = edmChangedObject.DeltaKind;
+                    }
+                    else
+                    {
+                        IDeltaSetItem deltaSetItem = entry as IDeltaSetItem;
+
+                        if (deltaSetItem == null)
+                        {
+                            throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        }
+
+                        deltaEntityKind = deltaSetItem.DeltaKind;
                     }
 
                     ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
                     ResourceContext resourceContext = new ResourceContext(writeContext, elementType, entry);
-
-                    switch (edmChangedObject.DeltaKind)
+                                       
+                    switch (deltaEntityKind)
                     {
                         case EdmDeltaEntityKind.DeletedEntry:
                             WriteDeltaDeletedEntry(entry, writer, writeContext, resourceContext);
@@ -252,7 +274,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                             WriteDeltaLink(entry, writer, writeContext, resourceContext);
                             break;
                         case EdmDeltaEntityKind.Entry:
-                            {                                
+                            {
                                 if (entrySerializer == null)
                                 {
                                     throw new SerializationException(
@@ -443,7 +465,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
         public virtual void WriteDeltaDeletedEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
-            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext);
+            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext, writeContext.IsUntyped);
             
             if (deletedResource != null)
             {
@@ -462,7 +484,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="resourceContext">The <see cref="ResourceContext"/>.</param>
         public virtual async Task WriteDeltaDeletedEntryAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext, ResourceContext resourceContext)
         {
-            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext);
+            ODataDeletedResource deletedResource = GetDeletedResource(graph, resourceContext, writeContext.IsUntyped);
             if (deletedResource != null)
             {
                 await writer.WriteStartAsync(deletedResource);
@@ -538,34 +560,79 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
-        private ODataDeletedResource GetDeletedResource(object graph, ResourceContext resourceContext)
+        private ODataDeletedResource GetDeletedResource(object graph, ResourceContext resourceContext, bool isUntyped)
         {
-            EdmDeltaDeletedEntityObject edmDeltaDeletedEntity = graph as EdmDeltaDeletedEntityObject;
-            if (edmDeltaDeletedEntity == null)
+            Uri id;
+            DeltaDeletedEntryReason deletedEntryReason;
+            IEdmNavigationSource navigationSource;
+
+            IEdmStructuredType structuredType = resourceContext.StructuredType;
+            IEdmStructuredObject structuredObject = resourceContext.EdmObject;
+
+            PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
+              resourceContext.EdmModel);
+
+            object instAnnoValue = null;
+            IODataInstanceAnnotationContainer transientAnnotations = null;
+
+            if (isUntyped)
             {
-                throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
+                EdmDeltaDeletedEntityObject edmDeltaDeletedEntity = graph as EdmDeltaDeletedEntityObject;
+                if (edmDeltaDeletedEntity == null)
+                {
+                    throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
+                }
+
+                id = StringToUri(edmDeltaDeletedEntity.Id);
+                deletedEntryReason = edmDeltaDeletedEntity.Reason;
+                navigationSource = edmDeltaDeletedEntity.NavigationSource;
+
+                instAnnoValue = edmDeltaDeletedEntity.PersistentInstanceAnnotationsContainer;
+                transientAnnotations = edmDeltaDeletedEntity.TransientInstanceAnnotationContainer;
+            }
+            else
+            {
+                IDeltaDeletedEntityObject deltaDeletedEntity = graph as IDeltaDeletedEntityObject;
+                if (deltaDeletedEntity == null)
+                {
+                    throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
+                }
+
+                id = StringToUri(deltaDeletedEntity.Id);
+                deletedEntryReason = deltaDeletedEntity.Reason;
+                navigationSource = deltaDeletedEntity.NavigationSource;
+
+                if (instanceAnnotationInfo != null)
+                {
+                    structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out instAnnoValue);
+                }
+
+                IDeltaSetItem deltaItem = graph as IDeltaSetItem;
+
+                Contract.Assert(deltaItem != null);
+
+                transientAnnotations = deltaItem.TransientInstanceAnnotationContainer;
             }
 
-            Uri id = StringToUri(edmDeltaDeletedEntity.Id);
-            ODataDeletedResource deletedResource = new ODataDeletedResource(id, edmDeltaDeletedEntity.Reason);
+            ODataDeletedResource deletedResource = new ODataDeletedResource(id, deletedEntryReason);
 
-            if (edmDeltaDeletedEntity.NavigationSource != null)
+            if (navigationSource != null)
             {
                 ODataResourceSerializationInfo serializationInfo = new ODataResourceSerializationInfo
                 {
-                    NavigationSourceName = edmDeltaDeletedEntity.NavigationSource.Name
+                    NavigationSourceName = navigationSource.Name
                 };
                 deletedResource.SetSerializationInfo(serializationInfo);
             }
 
-            if (edmDeltaDeletedEntity.TransientInstanceAnnotationContainer != null) 
+            if (instAnnoValue != null)
             {
-                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, edmDeltaDeletedEntity.TransientInstanceAnnotationContainer, SerializerProvider);
+                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, instAnnoValue, SerializerProvider);
             }
 
-            if (edmDeltaDeletedEntity.PersistentInstanceAnnotationsContainer != null)
+            if (transientAnnotations != null)
             {
-                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, edmDeltaDeletedEntity.PersistentInstanceAnnotationsContainer, SerializerProvider);
+                ODataSerializerHelper.AppendInstanceAnnotations(deletedResource, resourceContext, transientAnnotations, SerializerProvider);
             }
 
             return deletedResource;

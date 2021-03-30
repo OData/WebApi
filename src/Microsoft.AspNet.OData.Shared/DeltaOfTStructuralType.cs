@@ -436,7 +436,7 @@ namespace Microsoft.AspNet.OData
                         dynamic instance = deltaObject.GetInstance();
 
                         // Recursively patch up the instance with the nested resources.
-                        deltaObject.CopyChangedValues();
+                        deltaObject.CopyChangedValues(instance);
 
                         _allProperties[nestedResourceName].SetValue(original, instance);
                     }

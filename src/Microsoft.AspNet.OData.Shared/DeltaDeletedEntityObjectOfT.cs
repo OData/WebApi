@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class DeltaDeletedEntityObject<TStructuralType> : Delta<TStructuralType>, IDeltaDeletedEntityObject where TStructuralType : class
     {
-        private string _id;
+        private Uri _id;
         private DeltaDeletedEntryReason _reason;
         private IEdmNavigationSource _navigationSource;
 
@@ -103,7 +103,7 @@ namespace Microsoft.AspNet.OData
 
      
         /// <inheritdoc />
-        public string Id
+        public Uri Id
         {
             get
             {

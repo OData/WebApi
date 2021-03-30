@@ -1155,6 +1155,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 "resource");
         }
 
+        
         [Fact]
         public void ApplyNestedProperty_ThrowsODataException_NavigationPropertyNotfound()
         {
@@ -1163,13 +1164,12 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "SomeProperty" });
 
             // Act & Assert
-
-            ExceptionAssert.DoesNotThrow(
-                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext));
-
+            ExceptionAssert.Throws<ODataException>(
+                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext),
+                "Cannot find nested property 'SomeProperty' on the resource type 'ODataDemo.Product'.");
         }
 
-       
+
         [Fact]
         public void ApplyNestedProperty_UsesThePropertyAlias_ForResourceSet()
         {

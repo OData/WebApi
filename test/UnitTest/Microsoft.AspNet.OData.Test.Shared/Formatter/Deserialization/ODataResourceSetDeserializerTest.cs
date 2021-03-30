@@ -168,55 +168,13 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
             entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[0], _customerType, readContext)).Returns("entry1").Verifiable();
             entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[1], _customerType, readContext)).Returns("entry2").Verifiable();
+            entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[2], _customerType, readContext)).Returns("entry3").Verifiable();
 
             // Act
             var result = deserializer.ReadResourceSet(resourceSetWrapper, _customerType, readContext).Cast<object>().ToList();
 
             // Assert
-            Assert.Equal(new[] { "entry1", "entry2" }, result.OfType<String>());
-            var deleted = result[2] as EdmDeltaDeletedEntityObject;
-            Assert.NotNull(deleted);
-            Assert.Equal(typeof(Customer).FullName, deleted.ActualEdmType.FullTypeName());
-            entityDeserializer.Verify();
-        }
-
-        [Fact]
-        public void ReadFeed_Calls_ReadInlineForDeltaFeeds_WithMulipleDeltas()
-        {
-            // Arrange
-            Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
-            Mock<ODataEdmTypeDeserializer> entityDeserializer = new Mock<ODataEdmTypeDeserializer>(ODataPayloadKind.Resource);
-            ODataResourceSetDeserializer deserializer = new ODataResourceSetDeserializer(deserializerProvider.Object);
-            ODataDeltaResourceSetWrapper resourceSetWrapper = new ODataDeltaResourceSetWrapper(new ODataDeltaResourceSet { TypeName = typeof(Customer).FullName });
-            resourceSetWrapper.Resources.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a1/") }));
-            resourceSetWrapper.Resources.Add(new ODataResourceWrapper(new ODataResource { Id = new Uri("http://a2/") }));
-            resourceSetWrapper.Resources.Add(new ODataResourceWrapper(new ODataDeletedResource { TypeName = typeof(Customer).FullName, Reason = DeltaDeletedEntryReason.Deleted, Id = new Uri("http://a2/"), Properties = new List<ODataProperty>() }));
-
-            ODataDeserializerContext readContext = new ODataDeserializerContext { Model = _model };
-
-            deserializerProvider.Setup(p => p.GetEdmTypeDeserializer(_customerType)).Returns(entityDeserializer.Object);
-            entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[0], _customerType, readContext)).Returns("entry1").Verifiable();
-            entityDeserializer.Setup(d => d.ReadInline(resourceSetWrapper.Resources[1], _customerType, readContext)).Returns("entry2").Verifiable();
-
-            // Act
-            var result = deserializer.ReadResourceSet(resourceSetWrapper, _customerType, readContext).Cast<object>().ToList();
-
-            // Assert
-            Assert.Equal(new[] { "entry1", "entry2" }, result.OfType<String>());
-            var deleted = result[2] as EdmDeltaDeletedEntityObject;
-            Assert.NotNull(deleted);
-            Assert.Equal(typeof(Customer).FullName, deleted.ActualEdmType.FullTypeName());
-
-            var link = result[3] as EdmDeltaLink;
-            Assert.NotNull(link);
-            Assert.Equal(typeof(Customer).FullName, link.ActualEdmType.FullTypeName());
-            Assert.Equal("TestRelation", link.Relationship);
-
-            var dellink = result[4] as EdmDeltaDeletedLink;
-            Assert.NotNull(dellink);
-            Assert.Equal(typeof(Customer).FullName, dellink.ActualEdmType.FullTypeName());
-            Assert.Equal("TestDeletedRel", dellink.Relationship);
-
+            Assert.Equal(new[] { "entry1", "entry2", "entry3" }, result.OfType<String>());
             entityDeserializer.Verify();
         }
 

@@ -225,7 +225,7 @@ namespace Microsoft.AspNet.OData.Test
             return new NewFriendPatchHandler(parent);
         }
 
-        public override PatchStatus TryCreate(out Friend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Friend> deltaFriend, out Friend createdObject, out string errorMessage)
         {
             createdObject = new Friend();
             DeltaSetOfTTest.friends.Add(createdObject);
@@ -266,7 +266,7 @@ namespace Microsoft.AspNet.OData.Test
             throw new NotImplementedException();
         }
 
-        public override PatchStatus TryCreate(out NewFriend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<NewFriend> deltaFriend, out NewFriend createdObject, out string errorMessage)
         {
             createdObject = new NewFriend();
             if(parent.NewFriends == null)

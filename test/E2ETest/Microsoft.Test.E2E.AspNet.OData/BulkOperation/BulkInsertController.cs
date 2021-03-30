@@ -42,7 +42,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         private void InitEmployees()
         {
-            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1" }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } }; 
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } }; 
 
             Employees = new List<Employee>
             {

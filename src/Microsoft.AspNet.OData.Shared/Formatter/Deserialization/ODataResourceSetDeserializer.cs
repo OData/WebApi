@@ -204,19 +204,16 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);
-
-                if (readContext.IsChangedObjectCollection)
-                {
-                    readContext.ResourceType = typeof(Delta<>).MakeGenericType(clrType);
-                }
+                Type clrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);                           
 
                 foreach (ODataItemBase odataItemBase in resourceSet.Resources)
                 {
                     ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
 
-                    if(resourceWrapper != null)
-                    {
+                    readContext.ResourceType = resourceWrapper.ResourceBase is ODataDeletedResource ? typeof(DeltaDeletedEntityObject<>).MakeGenericType(clrType) : typeof(Delta<>).MakeGenericType(clrType);                    
+
+                    if (resourceWrapper != null)
+                    {                        
                         yield return deserializer.ReadInline(resourceWrapper, elementType, readContext);                     
                     }                   
                 }

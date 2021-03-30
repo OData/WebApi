@@ -191,19 +191,18 @@ namespace Microsoft.AspNet.OData
             }
 
             object value;
+            IDelta delta = ResourceInstance as IDelta;
+            if (delta != null && delta.TryGetPropertyValue(propertyName, out value))
+            {
+                return value;
+            }
+                        
             if (EdmObject.TryGetPropertyValue(propertyName, out value))
             {
                 return value;
             }
             else
-            {
-                IDelta delta = ResourceInstance as IDelta;
-
-                if(delta!= null && delta.TryGetPropertyValue(propertyName, out value))
-                {
-                    return value;
-                }
-
+            {              
                 IEdmTypeReference edmType = EdmObject.GetEdmType();
                 if (edmType == null)
                 {

@@ -113,6 +113,7 @@ namespace Microsoft.AspNet.OData
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
                 EdmStructuredObject originalObj = null;
                 string errorMessage = string.Empty;
+                string geterrorMessage = string.Empty;
                 IDictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
 
                 try
@@ -127,7 +128,7 @@ namespace Microsoft.AspNet.OData
                         if (PatchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
                         {
                             //Handle Failed Operation - Delete                            
-                            PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+                            PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
                             if (status == PatchStatus.Success)
                             {
                                 IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage);
@@ -142,7 +143,7 @@ namespace Microsoft.AspNet.OData
                     {
                         EdmDeltaEntityObject deltaEntityObject = changedObj as EdmDeltaEntityObject;
 
-                        PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+                        PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
 
                         if (status == PatchStatus.NotFound)
                         {
@@ -163,7 +164,7 @@ namespace Microsoft.AspNet.OData
                         else
                         {
                             //Handle failed operation 
-                            IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, null, keys, errorMessage);
+                            IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, null, keys, geterrorMessage);
                             changedObjectCollection.Add(changedObject);
                             continue;
                         }                                              

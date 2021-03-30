@@ -457,7 +457,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
@@ -482,7 +482,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@NS.Test':1}]
                      }";
 
@@ -508,9 +508,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public async Task PatchEmployee_WithFailedOperation_WithAnnotations_Untyped()
         {
             //Arrange            
-            string requestUri = this.BaseAddress + "/convention/Employees(3)/UntypedFriends";
+            string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 
@@ -529,7 +529,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 Assert.Contains("$delta", str);                
                 Assert.Contains("NS.Test2", str);
                 Assert.Contains("Core.DataModificationException", str);
-                Assert.Contains("Core.ContentID", str);
+                Assert.Contains("Core.ContentID", str);                
             }
 
         }

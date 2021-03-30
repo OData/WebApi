@@ -218,7 +218,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (structuredType.IsEntity())
                 {
-                    if (readContext.IsDeltaOfT || readContext.IsChangedObjectCollection)
+                    if (readContext.IsDeltaDeletedEntity)
+                    {
+                        return new EdmDeltaDeletedEntityObject(structuredType.AsEntity());
+                    }
+
+                    if (readContext.IsDeltaEntity)
                     {
                         return new EdmDeltaEntityObject(structuredType.AsEntity());
                     }
@@ -523,7 +528,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (readContext.IsUntyped)
             {
                 clrType = structuredType.IsEntity()
-                    ? (readContext.IsDeltaOfT ? typeof(EdmDeltaEntityObject) : typeof(EdmEntityObject))
+                    ? (readContext.IsDeltaEntity ? (readContext.IsDeltaDeletedEntity? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject) ) : typeof(EdmEntityObject))
                     : typeof(EdmComplexObject);
             }
             else

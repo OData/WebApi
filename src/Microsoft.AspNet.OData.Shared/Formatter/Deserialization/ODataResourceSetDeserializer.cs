@@ -210,7 +210,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 {
                     ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
 
-                    readContext.ResourceType = resourceWrapper.ResourceBase is ODataDeletedResource ? typeof(DeltaDeletedEntityObject<>).MakeGenericType(clrType) : typeof(Delta<>).MakeGenericType(clrType);                    
+                    if (readContext.IsUntyped)
+                    {
+                        readContext.ResourceType = resourceWrapper.ResourceBase is ODataDeletedResource ? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject);
+                    }
+                    else
+                    {
+                        readContext.ResourceType = resourceWrapper.ResourceBase is ODataDeletedResource ? typeof(DeltaDeletedEntityObject<>).MakeGenericType(clrType) : typeof(Delta<>).MakeGenericType(clrType);
+                    }                   
 
                     if (resourceWrapper != null)
                     {                        

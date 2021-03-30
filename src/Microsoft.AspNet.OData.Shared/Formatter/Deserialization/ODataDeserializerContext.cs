@@ -13,9 +13,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// </summary>
     public partial class ODataDeserializerContext
     {
-        private bool? _isDeltaOfT;        
+        private bool? _isDeltaOfT;
+        private bool? _isDeletedDeltaOfT;
         private bool? _isUntyped;
         private bool? _isChangedObjectCollection;
+        private bool? _isDeltaEntity;
+        private bool? _isDeltaDeletedEntity;
 
         /// <summary>
         /// Gets or sets the type of the top-level object the request needs to be deserialized into.
@@ -64,6 +67,46 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
 
                 return _isDeltaOfT.Value;
+            }
+        }
+
+        internal bool IsDeletedDeltaOfT
+        {
+            get
+            {
+                if (!_isDeletedDeltaOfT.HasValue)
+                {
+                    _isDeletedDeltaOfT = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && (ResourceType.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>) ||
+                        ResourceType.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>));
+                }
+
+                return _isDeletedDeltaOfT.Value;
+            }
+        }
+
+        internal bool IsDeltaEntity
+        {
+            get
+            {
+                if (!_isDeltaEntity.HasValue)
+                {
+                    _isDeltaEntity = ResourceType != null && (ResourceType == typeof(EdmDeltaEntityObject) || ResourceType == typeof(EdmDeltaDeletedEntityObject));
+                }
+
+                return _isDeltaEntity.Value;
+            }
+        }
+
+        internal bool IsDeltaDeletedEntity
+        {
+            get
+            {
+                if (!_isDeltaDeletedEntity.HasValue)
+                {
+                    _isDeltaDeletedEntity = ResourceType != null && ResourceType == typeof(EdmDeltaDeletedEntityObject);
+                }
+
+                return _isDeltaDeletedEntity.Value;
             }
         }
 

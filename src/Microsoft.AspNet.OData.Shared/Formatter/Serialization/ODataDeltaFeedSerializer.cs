@@ -581,7 +581,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, graph.GetType().FullName));
                 }
 
-                deletedResource.Id = StringToUri(edmDeltaDeletedEntity.Id);
+                deletedResource.Id = StringToUri(edmDeltaDeletedEntity.Id??string.Empty);
                 deletedResource.Reason = edmDeltaDeletedEntity.Reason;
                 navigationSource = edmDeltaDeletedEntity.NavigationSource;
             }

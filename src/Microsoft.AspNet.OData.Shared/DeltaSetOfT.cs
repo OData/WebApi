@@ -91,6 +91,7 @@ namespace Microsoft.AspNet.OData
                 //Get filtered item based on keys
                 TStructuralType original = null;
                 string errorMessage = string.Empty;
+                string geterrorMessage = string.Empty;
 
                 Dictionary<string, object> keyValues = new Dictionary<string, object>();
 
@@ -107,7 +108,7 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {                    
-                    PatchStatus status = PatchHandler.TryGet(keyValues, out original, out errorMessage);
+                    PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
@@ -152,7 +153,7 @@ namespace Microsoft.AspNet.OData
                         else
                         {
                             //Handle failed operation 
-                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, geterrorMessage);
                             deltaSet.Add(changedObject);
                             continue;
                         }

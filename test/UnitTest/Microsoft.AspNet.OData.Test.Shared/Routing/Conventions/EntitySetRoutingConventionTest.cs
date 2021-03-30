@@ -35,7 +35,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
         [Theory]
         [InlineData("POST", "PostCustomer")]
-        [InlineData("PATCH", "PatchCustomer")]
+        [InlineData("PATCH", "PatchCustomers")]
         public void SelectAction_Returns_ExpectedActionName(string method, string expected)
         {
             // Arrange

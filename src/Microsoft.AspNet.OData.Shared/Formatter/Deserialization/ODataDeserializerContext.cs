@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     /// </summary>
     public partial class ODataDeserializerContext
     {
-        private bool? _isDeltaOfT;
+        private bool? _isDeltaOfT;        
         private bool? _isUntyped;
         private bool? _isChangedObjectCollection;
 
@@ -59,7 +59,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 if (!_isDeltaOfT.HasValue)
                 {
-                    _isDeltaOfT = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && ResourceType.GetGenericTypeDefinition() == typeof(Delta<>);
+                    _isDeltaOfT = ResourceType != null && TypeHelper.IsGenericType(ResourceType) && (ResourceType.GetGenericTypeDefinition() == typeof(Delta<>) || 
+                        ResourceType.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>));
                 }
 
                 return _isDeltaOfT.Value;

@@ -19,15 +19,16 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Handler Class to handle users methods for create, delete and update
     /// </summary>
-    public abstract class PatchMethodHandler<TStructuralType>: IPatchMethodHandler
+    public abstract class PatchMethodHandler<TStructuralType>: IPatchMethodHandler where TStructuralType : class
     {
         /// <summary>
         /// TryCreate method to create a new object.
         /// </summary>        
+        /// <param name="patchObject">The Delta<typeparamref name="TStructuralType"/> object to be patched over original object. Optional to patch</param>
         /// <param name="createdObject">The created object (CLR or Typeless)</param>
         /// <param name="errorMessage">Any error message in case of an exception</param>
         /// <returns></returns>
-        public abstract PatchStatus TryCreate(out TStructuralType createdObject, out string errorMessage);
+        public abstract PatchStatus TryCreate(Delta<TStructuralType> patchObject, out TStructuralType createdObject, out string errorMessage);
 
         /// <summary>
         /// TryGet method to which pointer to TryGet method can be assigned to.  This tries to Get based on a keyvalues.
@@ -112,7 +113,7 @@ namespace Microsoft.AspNet.OData
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryCreate(out TStructuralType createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<TStructuralType> patchObject, out TStructuralType createdObject, out string errorMessage)
         {
             createdObject = default(TStructuralType);
             errorMessage = string.Empty;

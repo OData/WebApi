@@ -12,7 +12,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     public class EmployeePatchHandler : PatchMethodHandler<Employee>
     {
-        public override PatchStatus TryCreate(out Employee createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Employee> patchObject, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -82,7 +82,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override IPatchMethodHandler GetNestedPatchHandler(Employee parent, string navigationPropertyName)
         {
-            return new FriendPatchHandler(parent);
+            switch (navigationPropertyName)
+            {
+                case "Friends":
+                    return new FriendPatchHandler(parent);
+                case "NewFriends":
+                    return new NewFriendPatchHandler(parent);
+                default:
+                    return null;
+            }
+            
         }
     }
 
@@ -94,7 +103,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(out Friend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Friend> patchObject, out Friend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -121,7 +130,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
-                var friend = employee.Friends.First(x => x.Id == Int32.Parse(id));
+                var friend = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
                 employee.Friends.Remove(friend);
 
@@ -144,7 +153,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = employee.Friends.First(x => x.Id == Int32.Parse(id));
+                originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
 
                 if (originalObject == null)
@@ -164,10 +173,111 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override IPatchMethodHandler GetNestedPatchHandler(Friend parent, string navigationPropertyName)
         {
+            switch (navigationPropertyName)
+            {
+                case "Orders":
+                    return new OrderPatchHandler(parent);
+                default:
+                    return null;
+
+            }
+        }
+
+    }
+
+
+    public class OrderPatchHandler : PatchMethodHandler<Order>
+    {
+        Friend friend;
+        public OrderPatchHandler(Friend friend)
+        {
+            this.friend = friend;
+        }
+
+        public override PatchStatus TryCreate(Delta<Order> patchObject, out Order createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new Order();
+                
+                if(friend.Orders == null)
+                {
+                    friend.Orders = new List<Order>();
+                }
+
+                friend.Orders.Add(createdObject);
+
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                var id = keyValues.First().Value.ToString();
+                var friend = this.friend.Orders.FirstOrDefault(x => x.Id == int.Parse(id));
+
+                this.friend.Orders.Remove(friend);
+
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Order originalObject, out string errorMessage)
+        {
+            PatchStatus status = PatchStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                if (friend.Orders != null)
+                {
+                    var id = keyValues["Id"].ToString();
+                    originalObject = friend.Orders.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                }
+
+                if (originalObject == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                status = PatchStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override IPatchMethodHandler GetNestedPatchHandler(Order parent, string navigationPropertyName)
+        {
             throw new NotImplementedException();
         }
 
     }
+
+
 
     public class NewFriendPatchHandler : PatchMethodHandler<NewFriend>
     {
@@ -177,7 +287,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(out NewFriend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<NewFriend> patchObject, out NewFriend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -349,8 +459,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
 
         public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
-        {           
-              return new FriendTypelessPatchHandler(parent, entityType.DeclaredNavigationProperties().First().Type.Definition.AsElementType() as IEdmEntityType);
+        {
+            switch (navigationPropertyName)
+            {
+                case "UnTypedFriends":
+                    return new FriendTypelessPatchHandler(parent, entityType.DeclaredNavigationProperties().First().Type.Definition.AsElementType() as IEdmEntityType);
+                    
+                default:
+                    return null;
+            }
+              
         }
 
     }

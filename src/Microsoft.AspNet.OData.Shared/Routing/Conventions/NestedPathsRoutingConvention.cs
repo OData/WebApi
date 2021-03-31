@@ -41,14 +41,17 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 return null;
             }
 
-            if (odataPath.PathTemplate.EndsWith("$ref"))
+
+            // unsupported path segments
+            if (odataPath.PathTemplate.EndsWith("$ref")
+                || odataPath.PathTemplate.EndsWith("$value")) // TODO: check whether we support $value
             {
-                // [EnableNestedPaths] currently does not support $ref requests
                 return null;
             }
 
-            string sourceName = null;
             ODataPathSegment firstSegment = odataPath.Segments.FirstOrDefault();
+
+            string sourceName;
             if (firstSegment is EntitySetSegment entitySetSegment)
             {
                 sourceName = entitySetSegment.EntitySet.Name;
@@ -69,37 +72,18 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             // if we did no find a matching action amongst the conventional user-defined methods
             // then let's check if the controller has a Get method with [EnableNestedPaths] attribute
             // which should be used to catch any any nested GET request
-
-            // TODO figure out a better way of getting the action descriptors or controller methods
-            // this hack will only work on .net core
-            var actionCollectionProvider = (controllerContext as WebApiControllerContext)
-                .RouteContext.HttpContext.RequestServices.GetRequiredService<IActionDescriptorCollectionProvider>();
-
-            //IActionDescriptorCollectionProvider actionCollectionProvider =
-            //       controllerContext.Request.RequestContainer.GetRequiredService<IActionDescriptorCollectionProvider>();
-
-            // check if we have a Get() method in this controller with [EnableNestedPaths] attribute
-            if (actionCollectionProvider != null)
+            IWebApiActionDescriptor descriptor = actionMap.GetActionDescriptor($"Get{sourceName}") ?? actionMap.GetActionDescriptor("Get");
+            if (descriptor == null)
             {
-                var controllerResult = controllerContext.ControllerResult;
-                IEnumerable<ControllerActionDescriptor> actionDescriptors = actionCollectionProvider
-                    .ActionDescriptors.Items.OfType<ControllerActionDescriptor>()
-                    .Where(c => c.ControllerName == controllerResult.ControllerName);
-
-                var action =
-                    actionDescriptors.Where(a =>
-                        (a.MethodInfo.Name == "Get" || a.MethodInfo.Name == $"Get{sourceName}")
-                        && a.MethodInfo.GetCustomAttributes(true).OfType<EnableNestedPathsAttribute>().Any())
-                    .FirstOrDefault();
-
-                if (action != null)
-                {
-                    return action.ActionName;
-                }
+                return null;
             }
 
+            if (!descriptor.GetCustomAttributes<EnableNestedPathsAttribute>(/* inherit */ true).Any())
+            {
+                return null;
+            }
 
-            return null;
+            return descriptor.ActionName;
         }
     }
 }

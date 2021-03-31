@@ -202,11 +202,19 @@ namespace Microsoft.AspNet.OData.Test.Query.Validators
             var selectExpandQueryOption = new SelectExpandQueryOption(null, expand, context);
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.Throws<ArgumentOutOfRangeException>(
+                () => validator.Validate(
+                    selectExpandQueryOption,
+                    new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
+                "Value must be greater than or equal to 0. (Parameter 'value')\r\nActual value was -1.");
+#else
             ExceptionAssert.Throws<ArgumentOutOfRangeException>(
                 () => validator.Validate(
                     selectExpandQueryOption,
                     new ODataValidationSettings { MaxExpansionDepth = maxExpansionDepth }),
                 "Value must be greater than or equal to 0.\r\nParameter name: value\r\nActual value was -1.");
+#endif
         }
 
         [Theory]

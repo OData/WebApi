@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         /// <inheritdoc/>
         internal static string SelectActionImpl(ODataPath odataPath, IWebApiControllerContext controllerContext, IWebApiActionMap actionMap)
         {
-            ODataRequestMethod method = controllerContext.Request.Method;
+            ODataRequestMethod method = controllerContext.Request.GetRequestMethodOrPreflightMethod();
             string actionNamePrefix = GetActionMethodPrefix(method);
             if (actionNamePrefix == null)
             {
@@ -46,9 +46,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                     return null;
                 }
 
-                // It is not valid to *Put/Patch" to any collection-valued navigation property.
+                // It is not valid to *Put" to any collection-valued navigation property.
                 if (navigationProperty.TargetMultiplicity() == EdmMultiplicity.Many &&
-                    (ODataRequestMethod.Put == method || ODataRequestMethod.Patch == method))
+                    ODataRequestMethod.Put == method)
                 {
                     return null;
                 }

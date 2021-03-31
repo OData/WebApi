@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
@@ -107,6 +108,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 return _rootContainer.GetRequiredService<ODataMetadataSerializer>();
             }
+            else if(TypeHelper.IsTypeAssignableFrom(typeof(IDeltaSet), type))
+            {
+                return _rootContainer.GetRequiredService<ODataDeltaFeedSerializer>();
+            }
 
             // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
             // until after the above checks have passed.
@@ -120,8 +125,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 bool isCountRequest = path != null && path.Segments.LastOrDefault() is CountSegment;
                 bool isRawValueRequest = path != null && path.Segments.LastOrDefault() is ValueSegment;
+                bool isStreamRequest = path.IsStreamPropertyPath();
 
-                if (((edmType.IsPrimitive() || edmType.IsEnum()) && isRawValueRequest) || isCountRequest)
+                if (((edmType.IsPrimitive() || edmType.IsEnum()) && isRawValueRequest) || isCountRequest || isStreamRequest)
                 {
                     return _rootContainer.GetRequiredService<ODataRawValueSerializer>();
                 }

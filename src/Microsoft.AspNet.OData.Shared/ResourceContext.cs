@@ -191,12 +191,18 @@ namespace Microsoft.AspNet.OData
             }
 
             object value;
+            IDelta delta = ResourceInstance as IDelta;
+            if (delta != null && delta.TryGetPropertyValue(propertyName, out value))
+            {
+                return value;
+            }
+                        
             if (EdmObject.TryGetPropertyValue(propertyName, out value))
             {
                 return value;
             }
             else
-            {
+            {              
                 IEdmTypeReference edmType = EdmObject.GetEdmType();
                 if (edmType == null)
                 {
@@ -240,6 +246,12 @@ namespace Microsoft.AspNet.OData
                 object value;
                 if (EdmObject.TryGetPropertyValue(property.Name, out value) && value != null)
                 {
+                    if (value is SelectExpandWrapper)
+                    {
+                        // Skip the select expand property
+                        continue;
+                    }
+
                     string propertyName = EdmLibHelpers.GetClrPropertyName(property, EdmModel);
 
                     if (TypeHelper.IsCollection(value.GetType()))

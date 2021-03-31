@@ -69,9 +69,38 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     // Try to generate an optimized direct link
                     // Otherwise, fall back to the base implementation
-                    return CanGenerateDirectLink
-                        ? GenerateLinkDirectly(odataPath)
-                        : base.GetVirtualPath(context);
+                    if (CanGenerateDirectLink)
+                    {
+                        return GenerateLinkDirectly(odataPath);
+                    }
+
+                    if (odataPath.Contains("/"))
+                    {
+                        // During link generation using `RouteCollection`'s `GetVirtualPath` method, 
+                        // the catch-all parameter escapes the appropriate characters when the route 
+                        // is used to generate a URL, including path separator (/) characters. 
+                        // For example, the route prefix/{*odataPath} with 
+                        // route values { odataPath = "Customers(1)/Orders" } 
+                        // generates prefix/Customers(1)%2FOrders. The forward slash is escaped. 
+                        // https://docs.microsoft.com/en-us/aspnet/core/fundamentals/routing?view=aspnetcore-2.1#url-generation-with-linkgenerator
+                        // This causes a problem in some scenarios, e.g. when generating 
+                        // next page link for an expanded collection navigation property
+
+                        // HACK! We go round the problem by substituting the forward slash 
+                        // with a unique token and then substituting the forward slash back 
+                        // after the call to `GetVirtualPath`.
+                        // Q. Are there scenarios when we'd be happy with having the path separator escaped for us?
+                        string token = System.Guid.NewGuid().ToString().Replace("-", "");
+
+                        context.Values[ODataRouteConstants.ODataPath] = odataPath.Replace("/", token);
+                        VirtualPathData path = base.GetVirtualPath(context);
+                        path.VirtualPath = path.VirtualPath.Replace(token, "/");
+                        context.Values[ODataRouteConstants.ODataPath] = odataPath;
+
+                        return path;
+                    }
+
+                    return base.GetVirtualPath(context);
                 }
             }
 

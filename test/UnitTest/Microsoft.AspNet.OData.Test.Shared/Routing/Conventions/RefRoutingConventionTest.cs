@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Net.Http;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
 using Microsoft.AspNet.OData.Test.Abstraction;
@@ -57,9 +58,11 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+                Assert.Equal(3, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
                 Assert.Equal(ordersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
             }
         }
 
@@ -107,9 +110,11 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             }
             else
             {
-                Assert.Equal(2, SelectActionHelper.GetRouteData(request).Values.Count);
+                Assert.Equal(3, SelectActionHelper.GetRouteData(request).Values.Count);
                 Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+                Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
                 Assert.Equal(specialOrdersProperty.Name, SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
+                Assert.Equal(2, SelectActionHelper.GetRoutingConventionsStore(request)[ODataRouteConstants.KeyCount]);
             }
         }
 
@@ -137,8 +142,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal("SpecialOrders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
             Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKey"]);
+            Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKeyID"]);
         }
 
         [Theory]
@@ -158,8 +165,10 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             // Assert
             Assert.Equal("DeleteRef", selectedAction);
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal("Orders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
             Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKey"]);
+            Assert.Equal(24, SelectActionHelper.GetRouteData(request).Values["relatedKeyID"]);
         }
 
         [Theory]
@@ -210,6 +219,7 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
             // Assert
             Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["key"]);
+            Assert.Equal(42, SelectActionHelper.GetRouteData(request).Values["keyID"]);
             Assert.Equal("SpecialOrders", SelectActionHelper.GetRouteData(request).Values["navigationProperty"]);
         }
     }

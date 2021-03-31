@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
@@ -27,13 +28,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void Property_Name_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
+            ReflectionAssert.Property<StructuralTypeConfiguration, string, ArgumentException>(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
         }
 
         [Fact]
         public void Property_Namespace_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
+            ReflectionAssert.Property<StructuralTypeConfiguration, string, ArgumentException>(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
         }
 
         [Fact]
@@ -54,6 +55,19 @@ namespace Microsoft.AspNet.OData.Test.Builder
             ExceptionAssert.ThrowsArgument(() => configuration.AddDynamicPropertyDictionary(property),
                 "propertyInfo",
                 string.Format("The argument must be of type '{0}'.", "IDictionary<string, object>"));
+        }
+
+        [Fact]
+        public void AddInstanceAnnotationDictionary_ThrowsIfTypeIsNotDictionary()
+        {
+            // Arrange
+            MockPropertyInfo property = new MockPropertyInfo(typeof(Int32), "Test");
+            Mock<StructuralTypeConfiguration> mock = new Mock<StructuralTypeConfiguration> { CallBase = true };
+            StructuralTypeConfiguration configuration = mock.Object;
+
+            // Act & Assert
+            ExceptionAssert.ThrowsArgument(() => configuration.AddInstanceAnnotationContainer(property),
+                "propertyInfo", string.Format(SRResources.PropertyTypeShouldBeOfType, "IODataInstanceAnnotationContainer"));
         }
 
         /// <summary>
@@ -173,6 +187,42 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderLine>().Namespace);
             Assert.Equal(expectedNamespace, modelBuilder.EntityType<OrderHeader>().Namespace);
             Assert.Equal(expectedNamespace, modelBuilder.ComplexType<ZipCode>().Namespace);
+        }
+
+        /// <summary>
+        /// Tests the Namespace property setter logic with a null or white space value throws an argument exception.
+        /// </summary>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NamespaceAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string @namespace)
+        {
+            // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Namespace = @namespace, "value");
+        }
+
+        /// <summary>
+        /// Tests the Name property setter logic with a null or white space value throws an argument exception.
+        /// </summary>
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void NameAssignment_WithNullOrWhiteSpace_ThrowsArgumentException(string name)
+        {
+            // Arrange
+            ODataConventionModelBuilder modelBuilder = new ODataConventionModelBuilder();
+
+            EntityTypeConfiguration<MyOrder> entityTypeConfiguration = modelBuilder.EntitySet<MyOrder>("orders").EntityType;
+
+            // Act and Assert
+            ExceptionAssert.ThrowsArgument(() => entityTypeConfiguration.Name = name, "value");
         }
     }
 }

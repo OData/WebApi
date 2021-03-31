@@ -259,6 +259,30 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public async Task SelectExpand_WithNullComplexProperty()
+        {
+            // Arrange
+            var uri = "/odata/SelectExpandTestCustomers?$select=ID,Address";
+
+            // Act
+            var response = await GetResponse(uri, AcceptJson);
+
+            // Assert
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            SelectExpandTestCustomer[] customers = JObject.Parse(content).GetValue("value").ToObject<SelectExpandTestCustomer[]>();
+            Assert.NotNull(customers);
+            Assert.Equal(3, customers.Length);
+
+            for (int i = 0; i < 3; i++)
+            {
+                SelectExpandTestCustomer customer = customers[i];
+                Assert.Equal(42 + i, customer.ID);
+                Assert.Null(customer.Address);
+            }
+        }
+
+        [Fact]
         public async Task SelectExpand_QueryableOnSingleEntity_Works()
         {
             // Arrange
@@ -569,6 +593,8 @@ namespace Microsoft.AspNet.OData.Test
             }
         }
 
+        public SelectExpandTestCustomerAddress Address { get; set; }
+
         public int ID { get; set; }
 
         public string Name { get; set; }
@@ -576,6 +602,11 @@ namespace Microsoft.AspNet.OData.Test
         public SelectExpandTestOrder[] Orders { get; set; }
 
         public SelectExpandTestCustomer PreviousCustomer { get; set; }
+    }
+
+    public class SelectExpandTestCustomerAddress
+    {
+        public string City { get; set; }
     }
 
     public class SelectExpandTestSpecialCustomer : SelectExpandTestCustomer

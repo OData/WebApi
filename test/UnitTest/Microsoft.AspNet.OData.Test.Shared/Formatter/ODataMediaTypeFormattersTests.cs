@@ -14,7 +14,10 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.AspNetCore.Mvc.Internal;
+#if NETCOREAPP3_1
+#else
+    using Microsoft.AspNetCore.Mvc.Internal;
+#endif
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Primitives;
@@ -319,6 +322,18 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var expectedMediaTypes = GetMediaTypes(new string[]
             {
                 "application/xml",
+                "application/json",
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false"
             });
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
@@ -452,13 +467,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             // Arrange
             IEdmModel model = CreateModel();
-            Type serviceDocumentType = typeof(IEdmModel);
+            Type metadataDocumentType = typeof(IEdmModel);
 
             // Act
-            MediaTypeHeaderValue mediaType = GetDefaultContentType(model, serviceDocumentType);
+            MediaTypeHeaderValue mediaType = GetDefaultContentType(model, metadataDocumentType);
 
             // Assert
             Assert.Equal(MediaTypeHeaderValue.Parse("application/xml"), mediaType);
+        }
+
+        [Theory]
+        [InlineData("xml", "application/xml")]
+        [InlineData("application%2fxml", "application/xml")]
+        [InlineData("json", "application/json")]
+        [InlineData("application%2fjson", "application/json")]
+        public void TestCreate_MetadataDocument_DollarFormat(string dollarFormatValue, string expectedMediaType)
+        {
+            // Arrange
+            IEdmModel model = CreateModel();
+            Type metadataDocumentType = typeof(IEdmModel);
+
+            // Act
+            MediaTypeHeaderValue mediaType = GetContentTypeFromQueryString(model, metadataDocumentType, dollarFormatValue);
+
+            // Assert
+            Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), mediaType);
         }
 
         [Theory]
@@ -767,7 +800,11 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return null;
         }
 
-        private class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory
+#if NETCOREAPP3_1
+        public class TestHttpResponseStreamWriterFactory
+#else
+        public class TestHttpResponseStreamWriterFactory : IHttpResponseStreamWriterFactory
+#endif
         {
             public const int DefaultBufferSize = 16 * 1024;
 

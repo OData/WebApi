@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Batch
             ODataMessageReader reader = await request.Content.GetODataMessageReaderAsync(requestContainer, cancellationToken);
             request.RegisterForDispose(reader);
 
-            ODataBatchReader batchReader = reader.CreateODataBatchReader();
+            ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();
             Guid batchId = Guid.NewGuid();
 
@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Batch
 
             try
             {
-                while (batchReader.Read())
+                while (await batchReader.ReadAsync())
                 {
                     ODataBatchResponseItem responseItem = null;
                     if (batchReader.State == ODataBatchReaderState.ChangesetStart)
@@ -157,7 +157,7 @@ namespace Microsoft.AspNet.OData.Batch
             Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
             try
             {
-                while (batchReader.Read() && batchReader.State != ODataBatchReaderState.ChangesetEnd)
+                while (await batchReader.ReadAsync() && batchReader.State != ODataBatchReaderState.ChangesetEnd)
                 {
                     if (batchReader.State == ODataBatchReaderState.Operation)
                     {

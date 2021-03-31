@@ -112,18 +112,8 @@ namespace Microsoft.AspNet.OData.Test
             if (unqualifiedNameCall)
             {
                 resolver = new UnqualifiedODataUriResolver();
-                if (caseInsensitive)
-                {
-                    resolver = new UnqualifiedCaseInsensitiveResolver();
-                }
             }
-            else
-            {
-                if (caseInsensitive)
-                {
-                    resolver = new CaseInsensitiveResolver();
-                }
-            }
+            resolver.EnableCaseInsensitive = caseInsensitive;
 
             config.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("odata", "odata",
@@ -217,11 +207,10 @@ namespace Microsoft.AspNet.OData.Test
         private static HttpConfiguration GetQueryOptionConfiguration(bool caseInsensitive)
         {
             var config = RoutingConfigurationFactory.CreateWithTypes(new[] { typeof(ParserExtenstionCustomersController) });
-            ODataUriResolver resolver = new ODataUriResolver();
-            if (caseInsensitive)
+            ODataUriResolver resolver = new ODataUriResolver
             {
-                resolver = new CaseInsensitiveResolver();
-            }
+                EnableCaseInsensitive = caseInsensitive,
+            };
 
             config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
             config.MapODataServiceRoute("query", "query",

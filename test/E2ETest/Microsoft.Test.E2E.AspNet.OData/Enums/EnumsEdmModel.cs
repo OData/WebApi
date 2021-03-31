@@ -67,6 +67,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Enums
             return edmModel;
         }
 
+        public static IEdmModel GetEnumAliasModel(WebRouteConfiguration configuration)
+        {
+            ODataConventionModelBuilder builder = configuration.CreateConventionModelBuilder();
+            builder.EntitySet<WeatherForecast>("WeatherForecast");
+            return builder.GetEdmModel();
+        }
+
         private static void AddBoundActionsAndFunctions(EntityTypeConfiguration<Employee> employee)
         {
             var actionConfiguration = employee.Action("AddSkill");

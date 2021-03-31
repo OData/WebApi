@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -43,6 +44,13 @@ namespace Microsoft.AspNet.OData.Test.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> { { "CustomerId", 15} }
+                        }
+                    },
+                    {
+                        "aggregate(cast(CustomerId, Edm.Int64) with sum as CustomerId)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "CustomerId", 15L} }
                         }
                     },
                     {
@@ -162,6 +170,88 @@ namespace Microsoft.AspNet.OData.Test.Query
                         {
                             new Dictionary<string, object> { { "MaxCity", "seattle"}, { "Address/State", "WA"} },
                             new Dictionary<string, object> { { "MaxCity", "hobart"}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(startswith(Address/City, 's') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(endswith(Address/City, 't') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", false}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(contains(Address/City, 'o') with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", true}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(length(Address/City) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", 7}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", 6}, { "Address/State", null} },
+                        }
+                    },
+                    {
+                        "aggregate(year(StartDate) with max as MaxYear, year(StartDate) with min as MinYear)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxYear", 2018}, { "MinYear", 2016} },
+                        }
+                    },
+                    {
+                        "aggregate(month(StartDate) with max as MaxMonth, month(StartDate) with min as MinMonth)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMonth", 5}, { "MinMonth", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(day(StartDate) with max as MaxDay, day(StartDate) with min as MinDay)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxDay", 7}, { "MinDay", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(hour(StartDate) with max as MaxHour, hour(StartDate) with min as MinHour)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxHour", 5 }, { "MinHour", 1} },
+                        }
+                    },
+                    {
+                        "aggregate(minute(StartDate) with max as MaxMinute, minute(StartDate) with min as MinMinute)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxMinute", 6}, { "MinMinute", 2} },
+                        }
+                    },
+                    {
+                        "aggregate(second(StartDate) with max as MaxSecond, second(StartDate) with min as MinSecond)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxSecond", 7}, { "MinSecond", 3} },
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(concat(Address/City,Address/State) with max as MaxCity))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattleWA"}, { "Address/State", "WA"} },
+                            new Dictionary<string, object> { { "MaxCity", null}, { "Address/State", null} },
                         }
                     },
                     {
@@ -375,6 +465,91 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> { { "StringProp", null } },
                         }
                     },
+                    {
+                        "aggregate($count as Count)/compute(Count add Count as DoubleCount)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Count", 5L}, { "DoubleCount", 10L } }
+                        }
+                    },
+                    {
+                        "groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total add Total as DoubleTotal, length(Name) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"},  { "Total", 10}, { "DoubleTotal", 20}, { "NameLen", 6},},
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} , { "DoubleTotal", 4} , { "NameLen", 7} ,},
+                            new Dictionary<string, object> { { "Name", "Middle"},  { "Total", 3 }, { "DoubleTotal", 6 }, { "NameLen", 6 }, }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 1},},
+                            new Dictionary<string, object> { { "Name", "Highest"},  { "NameLen", 7}, { "CustomerId", 2},},
+                            new Dictionary<string, object> { { "Name", "Middle" },  { "NameLen", 6}, { "CustomerId", 3},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 4},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", 6}, { "CustomerId", 5},},
+                        }
+                    },
+                    {
+                        "compute(length(ShareSymbol) as NameLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 1},},
+                            new Dictionary<string, object> { { "Name", "Highest"},  { "NameLen", null}, { "CustomerId", 2},},
+                            new Dictionary<string, object> { { "Name", "Middle" },  { "NameLen", null}, { "CustomerId", 3},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 4},},
+                            new Dictionary<string, object> { { "Name", "Lowest" },  { "NameLen", null}, { "CustomerId", 5},},
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/aggregate(NameLen with sum as TotalLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalLen", 31} }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/aggregate(NameLen add CustomerId with sum as TotalLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "TotalLen", 46} }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/groupby((Name),aggregate( CustomerId with sum as Total, NameLen with max as MaxNameLen))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Name", "Lowest"},  { "Total", 10},  { "MaxNameLen", 6},},
+                            new Dictionary<string, object> { { "Name", "Highest"}, { "Total", 2} ,  { "MaxNameLen", 7} ,},
+                            new Dictionary<string, object> { { "Name", "Middle"},  { "Total", 3 },  { "MaxNameLen", 6 }, }
+                        }
+                    },
+                    {
+                        "compute(length(Name) as NameLen)/groupby((NameLen),aggregate( CustomerId with sum as Total))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "Total", 13},  { "NameLen", 6},},
+                            new Dictionary<string, object> { { "Total", 2} ,  { "NameLen", 7} ,},
+                        }
+                    },
+                    {
+                        "groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity))/compute(length(MaxCity) as MaxCityLen)",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"}, {"MaxCityLen", 7 } },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null}, {"MaxCityLen", 6 } },
+                        }
+                    },
+                    {
+                        "compute(length(Address/City) as CityLength)/groupby((Address/State), aggregate(Address/City with max as MaxCity, Address/City with min as MinCity, CityLength with max as MaxCityLen))",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> { { "MaxCity", "seattle"}, { "MinCity", "redmond"}, { "Address/State", "WA"}, {"MaxCityLen", 7 } },
+                            new Dictionary<string, object> { { "MaxCity", "hobart"}, { "MinCity", "hobart" }, { "Address/State", null}, {"MaxCityLen", 6 } },
+                        }
+                    },
                 };
             }
         }
@@ -561,6 +736,22 @@ namespace Microsoft.AspNet.OData.Test.Query
                         new List<Dictionary<string, object>>
                         {
                             new Dictionary<string, object> {{"Company/CEO/EmployeeName", "john"}},
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total mul 2 as NewTotal)&$orderby=Name, NewTotal",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Highest"}, {"Total", 2},  {"NewTotal", 4}, },
+                            new Dictionary<string, object> {{"Name", "Lowest"},  {"Total", 10}, {"NewTotal", 20},},
+                            new Dictionary<string, object> {{"Name", "Middle"},  {"Total", 3},  {"NewTotal", 6}, },
+                        }
+                    },
+                    {
+                        "$apply=groupby((Name), aggregate(CustomerId with sum as Total))/compute(Total mul 2 as NewTotal)/filter(NewTotal gt 6)&$orderby=Name, NewTotal",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{"Name", "Lowest"},  {"Total", 10}, {"NewTotal", 20},},
                         }
                     },
                     //{
@@ -829,6 +1020,13 @@ namespace Microsoft.AspNet.OData.Test.Query
                             new Dictionary<string, object> {{"Address/City", "hobart"}, {"Address/State", null}},
                         }
                     },
+                    {
+                        "$apply=compute(0 as ComputeProperty)/groupby((ComputeProperty))&$orderby=ComputeProperty desc",
+                        new List<Dictionary<string, object>>
+                        {
+                            new Dictionary<string, object> {{ "ComputeProperty", 0}},
+                        }
+                    },
                 };
             }
         }
@@ -885,7 +1083,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Name = "Lowest",
                     SharePrice = 10,
                     Address = new Address { City = "redmond", State = "WA" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test1" }, { "IntProp", 1 }, { "MixedProp", 1 } },
+                    StartDate = new DateTimeOffset(new DateTime(2018, 02, 07, 1, 2, 3)),
                 };
                 c.Company = new Company()
                 {
@@ -911,7 +1110,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                     SharePrice = 2.5M,
                     Address = new Address { City = "seattle", State = "WA" },
                     Aliases = new List<string> { "alias2", "alias2" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test2" }, { "IntProp", 2 }, { "MixedProp", "String" } },
+                    StartDate = new DateTimeOffset(new DateTime(2017, 03, 07, 5, 6, 7))
                 };
                 c.Company = new Company()
                 {
@@ -931,7 +1131,8 @@ namespace Microsoft.AspNet.OData.Test.Query
                     Name = "Middle",
                     Address = new Address { City = "hobart" },
                     Aliases = new List<string> { "alias2", "alias34", "alias31" },
-                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } }
+                    DynamicProperties = new Dictionary<string, object> { { "StringProp", "Test3" } },
+                    StartDate = new DateTimeOffset(new DateTime(2018, 01, 01, 2, 3, 4)),
                 };
                 c.Company = new Company()
                 {
@@ -950,6 +1151,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     CustomerId = 4,
                     Name = "Lowest",
                     Aliases = new List<string> { "alias34", "alias4" },
+                    StartDate = new DateTimeOffset(new DateTime(2016, 05, 07, 2, 3, 4)),
                 };
                 c.Company = new Company()
                 {
@@ -1282,6 +1484,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var address0 = results[0]["Address"] as JObject;
             Assert.Equal("redmond", address0["City"].ToString());
         }
+
 
         private object GetValue(DynamicTypeWrapper wrapper, string path)
         {

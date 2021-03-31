@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
@@ -24,6 +26,10 @@ namespace Microsoft.AspNet.OData.Batch
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class ODataBatchReaderExtensions
     {
+        private static readonly string[] nonInheritableHeaders = new string[] { "content-length", "content-type" };
+        // do not inherit respond-async and continue-on-error (odata.continue-on-error in OData 4.0) from Prefer header
+        private static readonly string[] nonInheritablePreferences = new string[] { "respond-async", "continue-on-error", "odata.continue-on-error" };
+
         /// <summary>
         /// Reads a ChangeSet request.
         /// </summary>
@@ -40,6 +46,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("reader");
             }
+
             if (reader.State != ODataBatchReaderState.ChangesetStart)
             {
                 throw Error.InvalidOperation(
@@ -50,13 +57,14 @@ namespace Microsoft.AspNet.OData.Batch
 
             Guid changeSetId = Guid.NewGuid();
             List<HttpContext> contexts = new List<HttpContext>();
-            while (reader.Read() && reader.State != ODataBatchReaderState.ChangesetEnd)
+            while (await reader.ReadAsync() && reader.State != ODataBatchReaderState.ChangesetEnd)
             {
                 if (reader.State == ODataBatchReaderState.Operation)
                 {
                     contexts.Add(await ReadOperationInternalAsync(reader, context, batchId, changeSetId, cancellationToken));
                 }
             }
+
             return contexts;
         }
 
@@ -76,6 +84,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("reader");
             }
+
             if (reader.State != ODataBatchReaderState.Operation)
             {
                 throw Error.InvalidOperation(
@@ -104,6 +113,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("reader");
             }
+
             if (reader.State != ODataBatchReaderState.Operation)
             {
                 throw Error.InvalidOperation(
@@ -118,7 +128,7 @@ namespace Microsoft.AspNet.OData.Batch
         private static async Task<HttpContext> ReadOperationInternalAsync(
             ODataBatchReader reader, HttpContext originalContext, Guid batchId, Guid? changeSetId, CancellationToken cancellationToken, bool bufferContentStream = true)
         {
-            ODataBatchOperationRequestMessage batchRequest = reader.CreateOperationRequestMessage();
+            ODataBatchOperationRequestMessage batchRequest = await reader.CreateOperationRequestMessageAsync();
 
             HttpContext context = CreateHttpContext(originalContext);
             HttpRequest request = context.Request;
@@ -129,7 +139,7 @@ namespace Microsoft.AspNet.OData.Batch
             // Not using bufferContentStream. Unlike AspNet, AspNetCore cannot guarantee the disposal
             // of the stream in the context of execution so there is no choice but to copy the stream
             // from the batch reader.
-            using (Stream stream = batchRequest.GetStream())
+            using (Stream stream = await batchRequest.GetStreamAsync())
             {
                 MemoryStream bufferedStream = new MemoryStream();
                 // Passing in the default buffer size of 81920 so that we can also pass in a cancellation token
@@ -140,10 +150,21 @@ namespace Microsoft.AspNet.OData.Batch
 
             foreach (var header in batchRequest.Headers)
             {
-                // Copy headers from batch, overwriting any existing headers.
                 string headerName = header.Key;
                 string headerValue = header.Value;
-                request.Headers[headerName] = headerValue;
+
+                if (headerName.Trim().ToLowerInvariant() == "prefer")
+                {
+                    // in the case of Prefer header, we don't want to overwrite,
+                    // instead we merge preferences defined in the individual request with those inherited from the batch
+                    request.Headers.TryGetValue(headerName, out StringValues batchReferences);
+                    request.Headers[headerName] = MergeIndividualAndBatchPreferences(headerValue, batchReferences);
+                }
+                else
+                {
+                    // Copy headers from batch, overwriting any existing headers.
+                    request.Headers[headerName] = headerValue;
+                }
             }
 
             request.SetODataBatchId(batchId);
@@ -199,6 +220,13 @@ namespace Microsoft.AspNet.OData.Batch
                     continue;
                 }
 
+#if !NETSTANDARD2_0
+                if (kvp.Key == typeof(IEndpointFeature))
+                {
+                    continue;
+                }
+#endif
+
                 features[kvp.Key] = kvp.Value;
             }
 
@@ -208,6 +236,7 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 PathBase = pathBase
             };
+
             features[typeof(IHttpResponseFeature)] = new HttpResponseFeature();
 
             // Create a context from the factory or use the default context.
@@ -227,14 +256,141 @@ namespace Microsoft.AspNet.OData.Batch
             context.Request.Cookies = originalContext.Request.Cookies;
             foreach (KeyValuePair<string, StringValues> header in originalContext.Request.Headers)
             {
-                context.Request.Headers.Add(header);
+                string headerKey = header.Key.ToLowerInvariant();
+                // do not copy over headers that should not be inherited from batch to individual requests
+                if (!nonInheritableHeaders.Contains(headerKey))
+                {
+                    // some preferences may be inherited, others discarded
+                    if (headerKey == "prefer")
+                    {
+                        string preferencesToInherit = GetPreferencesToInheritFromBatch(header.Value);
+                        if (!string.IsNullOrEmpty(preferencesToInherit))
+                        {
+                            context.Request.Headers.Add(header.Key, preferencesToInherit);
+                        }
+                    }
+                    // do not copy already existing headers, such as Cookie
+                    else if (!context.Request.Headers.ContainsKey(header.Key))
+                    {
+                        context.Request.Headers.Add(header);
+                    }
+                }
             }
 
             // Create a response body as the default response feature does not
             // have a valid stream.
-            context.Response.Body = new MemoryStream();
+            // Use a special batch stream that remains open after the writer is disposed.
+            context.Response.Body = new ODataBatchStream();
 
             return context;
+        }
+
+        /// <summary>
+        /// Extract preferences that can be inherited from the overall batch request to
+        /// an individual request.
+        /// </summary>
+        /// <param name="batchPreferences">The value of the Prefer header from the batch request</param>
+        /// <returns>comma-separated preferences that can be passed down to an individual request</returns>
+        private static string GetPreferencesToInheritFromBatch(string batchPreferences)
+        {
+            IEnumerable<string> preferencesToInherit = SplitPreferences(batchPreferences)
+                .Where(value =>
+                    !nonInheritablePreferences.Any(
+                        prefToIgnore =>
+                        value.ToLowerInvariant().StartsWith(prefToIgnore)
+                    )
+                );
+            return string.Join(",", preferencesToInherit);
+        }
+
+        /// <summary>
+        /// Merges the preferences from the batch request and an individual request inside the batch into one value.
+        /// If a given preference is defined in both the batch and individual request, the one from the individual
+        /// request is retained and the one from the batch is discarded.
+        /// </summary>
+        /// <param name="individualPreferences">The value of the Prefer header from the individual request inside the batch</param>
+        /// <param name="batchPreferences">The value of the Prefer header from the overall batch request</param>
+        /// <returns>Value containing the combined preferences</returns>
+        private static string MergeIndividualAndBatchPreferences(string individualPreferences, string batchPreferences)
+        {
+            if (string.IsNullOrEmpty(individualPreferences))
+            {
+                return batchPreferences;
+            }
+
+            if (string.IsNullOrEmpty(batchPreferences))
+            {
+                return individualPreferences;
+            }
+            // get the name of each preference to avoid adding duplicates from batch
+            IEnumerable<string> individualList = SplitPreferences(individualPreferences);
+            HashSet<string> individualPreferenceNames = new HashSet<string>(individualList.Select(pref => pref.Split('=').FirstOrDefault()));
+
+            
+            IEnumerable<string> filteredBatchList = SplitPreferences(batchPreferences)
+                // do not add duplicate preferences from batch
+                .Where(pref => !individualPreferenceNames.Contains(pref.Split('=').FirstOrDefault()));
+            string filteredBatchPreferences = string.Join(",", filteredBatchList);
+
+            if (string.IsNullOrEmpty(filteredBatchPreferences))
+            {
+                return individualPreferences;
+            }
+
+            return string.Join(",", individualPreferences, filteredBatchPreferences);
+        }
+
+        /// <summary>
+        /// Splits the value of a Prefer header into separate preferences
+        /// e.g. a value like 'a, b=c, foo="bar,baz"' will return an IEnumerable with
+        /// - a
+        /// - b=c
+        /// - foo="bar,baz"
+        /// </summary>
+        /// <param name="preferences"></param>
+        /// <returns></returns>
+        private static IEnumerable<string> SplitPreferences(string preferences)
+        {
+            int preferenceStartIndex = 0;
+
+            HashSet<string> addedPreferences = new HashSet<string>();
+            bool insideQuotedValue = false;
+            for (int currentIndex = 0; currentIndex < preferences.Length; currentIndex++)
+            {
+                char c = preferences[currentIndex];
+                if (c == '"')
+                {
+                    if (!insideQuotedValue)
+                    {
+                        // we are starting a double-quoted value
+                        insideQuotedValue = true;
+                    }
+                    else
+                    {
+                        // this could be the end of a quoted value, or it could be an escaped quote
+                        // we're sure that currentIndex > 0 here since insideQuotedValue is true, so need to check for bounds
+                        insideQuotedValue = preferences[currentIndex - 1] == '\\';
+                    }
+                }
+                else if (c == ',' && !insideQuotedValue)
+                {
+                    string result = preferences.Substring(preferenceStartIndex, currentIndex - preferenceStartIndex).Trim();
+                    string prefName = result.Split('=')[0].Trim();
+                    // do not add duplicate preference
+                    if (!addedPreferences.Contains(prefName))
+                    {
+                        addedPreferences.Add(prefName);
+                        yield return result;
+                    }
+
+                    preferenceStartIndex = currentIndex + 1;
+                }
+            }
+
+            if (preferences.Length > preferenceStartIndex + 1)
+            {
+                yield return preferences.Substring(preferenceStartIndex).Trim();
+            }
         }
     }
 }

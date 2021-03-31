@@ -172,21 +172,27 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
                 Contract.Assert(keyProperty != null);
 
-                // if there's only one key, just use the given key name, for example: "key, relatedKey"
-                // otherwise, to append the key name after the given key name.
+                // if there's only one key, provide two paramters, one using the given key name, e.g., "key, relatedKey"
+                // and the other appending the property name to the given key name: "keyId, relatedKeyId"
+                // in other cases, just append the property names to the given key name
                 // so for multiple keys, the parameter name is "keyId1, keyId2..."
                 // for navigation property, the parameter name is "relatedKeyId1, relatedKeyId2 ..."
-                string newKeyName;
                 if (alternateKey || keyCount > 1)
                 {
-                    newKeyName = keyName + keyValuePair.Key;
+                    var newKeyName = keyName + keyValuePair.Key;
+                    AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
                 }
                 else
                 {
-                    newKeyName = keyName;
+                    AddKeyValues(keyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
+                    if (keyCount == 1)
+                    {
+                        var anotherKeyName = keyName + keyValuePair.Key;
+                        AddKeyValues(anotherKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
+                    }
                 }
 
-                AddKeyValues(newKeyName, keyValuePair.Value, keyProperty.Type, controllerContext.RouteData, routingConventionsStore);
+                IncrementKeyCount(routingConventionsStore);
             }
         }
 
@@ -220,6 +226,45 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             // For FromODataUri
             string prefixName = ODataParameterValue.ParameterValuePrefix + name;
             odataValues[prefixName] = odataValue;
+        }
+
+        public static void AddFunctionParameterToRouteData(this IWebApiControllerContext controllerContext, OperationImportSegment importSegment)
+        {
+            Contract.Assert(controllerContext != null);
+            Contract.Assert(importSegment != null);
+
+            IDictionary<string, object> routingConventionsStore = controllerContext.Request.Context.RoutingConventionsStore;
+
+            IEdmFunctionImport functionImport = importSegment.OperationImports.First() as IEdmFunctionImport;
+            if (functionImport == null)
+            {
+                return;
+            }
+
+            IEdmFunction function = functionImport.Function;
+            foreach (OperationSegmentParameter parameter in importSegment.Parameters)
+            {
+                string name = parameter.Name;
+                object value = importSegment.GetParameterValue(name);
+
+                AddFunctionParameters(function, name, value, controllerContext.RouteData,
+                    routingConventionsStore, null);
+            }
+
+            // Append the optional parameters into RouteData.
+            ODataOptionalParameter optional = new ODataOptionalParameter();
+            foreach (var optionalParameter in function.Parameters.OfType<IEdmOptionalParameter>())
+            {
+                if (!importSegment.Parameters.Any(c => c.Name == optionalParameter.Name))
+                {
+                    optional.Add(optionalParameter);
+                }
+            }
+
+            if (optional.OptionalParameters.Any())
+            {
+                controllerContext.RouteData.Add(ODataRouteConstants.OptionalParameters, optional);
+            }
         }
 
         public static void AddFunctionParameterToRouteData(this IWebApiControllerContext controllerContext, OperationSegment functionSegment)
@@ -297,6 +342,33 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             {
                 // Remove the type name of the ODataEnumValue and keep the value.
                 routeData[name] = enumValue.Value;
+            }
+
+            IncrementKeyCount(values);
+        }
+
+        public static void AddNavigationPropertyToRouteData(this IWebApiControllerContext controllerContext,
+            NavigationPropertyLinkSegment navigationLinkSegment)
+        {
+            controllerContext.RouteData.Add(ODataRouteConstants.NavigationProperty, navigationLinkSegment.NavigationProperty.Name);
+            IncrementKeyCount(controllerContext.Request.Context.RoutingConventionsStore);
+        }
+
+        /// <summary>
+        /// Increments the number of keys, navigation properties and operation parameters.
+        /// This count is tracked by the <see cref="ODataRouteConstants.KeyCount"/> key
+        /// in the controller context route data.
+        /// </summary>
+        /// <param name="routingConventionsStore">Store where the key count is stored</param>
+        public static void IncrementKeyCount(IDictionary<string, object> routingConventionsStore)
+        {
+            if (routingConventionsStore.TryGetValue(ODataRouteConstants.KeyCount, out object count))
+            {
+                routingConventionsStore[ODataRouteConstants.KeyCount] = ((int)count) + 1;
+            }
+            else
+            {
+                routingConventionsStore[ODataRouteConstants.KeyCount] = 1;
             }
         }
 

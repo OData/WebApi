@@ -48,16 +48,16 @@ namespace Microsoft.AspNet.OData.Batch
         private async Task WriteToResponseMessageAsync(IODataResponseMessage responseMessage)
         {
             ODataMessageWriter messageWriter = new ODataMessageWriter(responseMessage, _writerSettings);
-            ODataBatchWriter writer = messageWriter.CreateODataBatchWriter();
+            ODataBatchWriter writer = await messageWriter.CreateODataBatchWriterAsync();
 
-            writer.WriteStartBatch();
+            await writer.WriteStartBatchAsync();
 
             foreach (ODataBatchResponseItem response in Responses)
             {
-                await response.WriteResponseAsync(writer);
+                await response.WriteResponseAsync(writer, /*asyncWriter*/ true);
             }
 
-            writer.WriteEndBatch();
+            await writer.WriteEndBatchAsync();
         }
     }
 }

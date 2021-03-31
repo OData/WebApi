@@ -599,6 +599,23 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
+        [InlineData("Category/QueryableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/ProductID in (1))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Int32].Contains(P.ProductID))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((P == null), null, Convert(P.ProductID)))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Guid].Contains(P.GuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((P == null), null, Convert(P.GuidProperty)))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(P.NullableGuidProperty))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((P == null), null, P.NullableGuidProperty))))) == True)")]
+        [InlineData("Category/QueryableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.QueryableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.QueryableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.QueryableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
+        [InlineData("Category/EnumerableProducts/any(P: P/Discontinued in (false, null))", "$it => $it.Category.EnumerableProducts.Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(P.Discontinued))", "$it => (IIF((IIF(($it.Category == null), null, $it.Category.EnumerableProducts) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.EnumerableProducts).Any(P => System.Collections.Generic.List`1[System.Nullable`1[System.Boolean]].Contains(IIF((P == null), null, P.Discontinued))))) == True)")]
+        public void AnyInOnNavigation(string filter, string expression, string expressionWithNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               filter,
+               expression,
+               expressionWithNullPropagation);
+        }
+
+        [Theory]
         [InlineData("Category/QueryableProducts/any(P: false)", "$it => False")]
         [InlineData("Category/QueryableProducts/any(P: false and P/ProductName eq 'Snacks')", "$it => $it.Category.QueryableProducts.Any(P => (False AndAlso (P.ProductName == \"Snacks\")))")]
         [InlineData("Category/QueryableProducts/any(P: true)", "$it => $it.Category.QueryableProducts.Any()")]
@@ -1642,11 +1659,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)");
             Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
 
-            // expression tree is guaranteed by expression string above
-            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression) expression.Body).Arguments[0]).Value;
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
             Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
         }
+
+        [Fact]
+        public void EnumInExpression_WithNullValue_Throws()
+        {
+            ExceptionAssert.Throws<ODataException>(
+                () => VerifyQueryDeserialization<DataTypes>("SimpleEnumProp in ('First', null)"),
+                "A null value was found with the expected type 'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum[Nullable=False]'. The expected type 'Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum[Nullable=False]' does not allow null values.");
+        }
+
+        [Fact]
+        public void EnumInExpression_NullableEnum_WithNullable()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "NullableSimpleEnumProp in ('First', 'Second')",
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
+            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
+        }
         
+        [Fact]
+        public void EnumInExpression_NullableEnum_WithNullValue()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "NullableSimpleEnumProp in ('First', null)",
+                "$it => System.Collections.Generic.List`1[System.Nullable`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum]].Contains($it.NullableSimpleEnumProp)");
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
+            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
+        }
 
         [Fact]
         public void RealLiteralSuffixes()
@@ -2264,38 +2314,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             ExceptionAssert.Throws<ODataException>(() => Bind<Product>(filter), expectedMessage);
         }
 
-        // Demonstrates a bug in FilterBinder.
         [Theory]
-        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "DerivedProductName")]
-        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
-        [InlineData("cast(Category, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "DerivedCategoryName")]
-        public void CastToQuotedEntityType_ThrowsArgumentException(string filter, string propertyName)
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "$it => (($it As DerivedProduct).DerivedProductName == null)","$it => (IIF((($it As DerivedProduct) == null), null, ($it As DerivedProduct).DerivedProductName) == null)")]
+        [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it.Category As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it.Category As DerivedCategory) == null), null, ($it.Category As DerivedCategory).DerivedCategoryName) == null)")]
+        public void CastToQuotedEntityOrComplexType_DerivedProductName(string filter, string expectedExpression, string expectedExpressionWithNullCheck)
         {
-            // Arrange
-            var expectedMessage = string.Format(
-                "Instance property '{0}' is not defined for type '{1}'",
-                propertyName,
-                typeof(object).FullName);
-
-            // Act & Assert
-            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
+            // Arrange, Act & Assert
+            VerifyQueryDeserialization<Product>(
+                filter,
+                expectedResult: expectedExpression,
+                expectedResultWithNullPropagation: expectedExpressionWithNullCheck);
         }
-
-        [Theory]
-        [InlineData("cast(null,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
-        [InlineData("cast(null, 'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null")]
-        public void CastNullToQuotedEntityType_ThrowsArgumentException(string filter)
-        {
-            // Arrange
-            var expectedMessage =
-                "Instance property 'DerivedCategoryName' is not defined for type 'System.Object'";
-
-            // Act & Assert
-            // System.Linq provides more information in the exception on NetCore than NetFx, search for partial match.
-            ExceptionAssert.Throws<ArgumentException>(() => Bind<Product>(filter), expectedMessage, partialMatch: true);
-        }
-
+                
 #endregion
 
 #region 'isof' in query option
@@ -2322,8 +2352,13 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void Isof_WithNullTypeName_ThrowsArgumentNullException(string filter)
         {
             // Arrange & Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.Throws<ArgumentNullException>(() => Bind<Product>(filter),
+                "Value cannot be null. (Parameter 'qualifiedName')");
+#else
             ExceptionAssert.Throws<ArgumentNullException>(() => Bind<Product>(filter),
                 "Value cannot be null.\r\nParameter name: qualifiedName");
+#endif
         }
 
         [Theory]
@@ -2838,6 +2873,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
         }
 
+        [Theory]
+        [InlineData("Category/Product/ProductID in (1)", "$it => System.Collections.Generic.List`1[System.Int32].Contains($it.Category.Product.ProductID)", "$it => System.Collections.Generic.List`1[System.Int32].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.ProductID)))")]
+        [InlineData("Category/Product/GuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Guid].Contains($it.Category.Product.GuidProperty)", "$it => System.Collections.Generic.List`1[System.Guid].Cast().Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, Convert($it.Category.Product.GuidProperty)))")]
+        [InlineData("Category/Product/NullableGuidProperty in (dc75698b-581d-488b-9638-3e28dd51d8f7)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains($it.Category.Product.NullableGuidProperty)", "$it => System.Collections.Generic.List`1[System.Nullable`1[System.Guid]].Contains(IIF((IIF(($it.Category == null), null, $it.Category.Product) == null), null, $it.Category.Product.NullableGuidProperty))")]
+        public void InOnNavigation(string filter, string expression, string expressionWithNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               filter,
+               expression,
+               expressionWithNullPropagation);
+        }
+
         [Fact]
         public void MultipleConstants_Are_Parameterized()
         {
@@ -2858,11 +2905,71 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void CollectionConstants_Are_Parameterized()
+        {
+            var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
+                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)");
+
+            Expression<Func<Product, bool>> expression = result.WithNullPropagation;
+
+            var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
+            var values = (IList<string>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
+            Assert.Equal(new[] { "Prod1", "Prod2" }, values);
+        }
+
+        [Fact]
+        public void CollectionConstants_Are_Not_Parameterized_If_Disabled()
+        {
+            var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
+                "$it => System.Collections.Generic.List`1[System.String].Contains($it.ProductName)",
+                settingsCustomizer: (settings) =>
+                {
+                    settings.EnableConstantParameterization = false;
+                });
+
+            Expression<Func<Product, bool>> expression = result.WithNullPropagation;
+            var values = (IList<string>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            Assert.Equal(new[] { "Prod1", "Prod2" }, values);
+        }
+
+        [Fact]
+        public void CollectionConstants_OfEnums_Are_Not_Parameterized_If_Disabled()
+        {
+            var result = VerifyQueryDeserialization<DataTypes>(
+                "SimpleEnumProp in ('First', 'Second')",
+                "$it => System.Collections.Generic.List`1[Microsoft.AspNet.OData.Test.Common.Types.SimpleEnum].Contains($it.SimpleEnumProp)",
+                settingsCustomizer: (settings) =>
+                {
+                    settings.EnableConstantParameterization = false;
+                });
+
+            Expression<Func<DataTypes, bool>> expression = result.WithNullPropagation;
+            var values = (IList<SimpleEnum>)((ConstantExpression)((MethodCallExpression)expression.Body).Arguments[0]).Value;
+            Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second }, values);
+        }
+
+        [Fact]
         public void FilterByDynamicProperty()
         {
             VerifyQueryDeserialization<DynamicProduct>("Token eq '1'",
                 "$it => (Convert(IIF($it.ProductProperties.ContainsKey(Token), $it.ProductPropertiesToken, null)) == \"1\")",
                 "$it => (Convert(IIF((($it.ProductProperties != null) AndAlso $it.ProductProperties.ContainsKey(Token)), $it.ProductPropertiesToken, null)) == \"1\")");
+        }
+
+        [Theory]
+        [InlineData(new[] { 1, 2, 42 }, true)]
+        [InlineData(new[] { 1, 2 }, false)]
+        public void InOnPrimitiveCollectionPropertyOnRHS(int[] alternateIds, bool withNullPropagation)
+        {
+            var filters = VerifyQueryDeserialization(
+               "42 in AlternateIDs",
+               "$it => $it.AlternateIDs.Contains(42)",
+               NotTesting);
+
+            RunFilters(
+                filters,
+                new Product { AlternateIDs = alternateIds },
+                new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withNullPropagation });
         }
 
 #region Negative Tests

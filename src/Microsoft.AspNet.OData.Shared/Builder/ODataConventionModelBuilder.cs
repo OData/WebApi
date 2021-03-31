@@ -29,6 +29,7 @@ namespace Microsoft.AspNet.OData.Builder
             new DataContractAttributeEdmTypeConvention(),
             new NotMappedAttributeConvention(), // NotMappedAttributeConvention has to run before EntityKeyConvention
             new DataMemberAttributeEdmPropertyConvention(),
+            new DerivedTypeConstraintAttributeConvention(),
             new RequiredAttributeEdmPropertyConvention(),
             new DefaultValueAttributeEdmPropertyConvention(),
             new ConcurrencyCheckAttributeEdmPropertyConvention(),
@@ -556,6 +557,10 @@ namespace Microsoft.AspNet.OData.Builder
                 {
                     structuralType.AddDynamicPropertyDictionary(property);
                 }
+                else if (propertyKind == PropertyKind.InstanceAnnotations)
+                {
+                    structuralType.AddInstanceAnnotationContainer(property);
+                }
                 else
                 {
                     // don't add this property if the user has already added it.
@@ -697,6 +702,16 @@ namespace Microsoft.AspNet.OData.Builder
                 mappedType = null;
                 isCollection = false;
                 return PropertyKind.Dynamic;
+            }
+
+            // IODataInstanceAnnotationContainer is used as a container to save/retrieve instance annotation properties for a CLR type.
+            // It is different from other collections (for example, IDictionary<string,IDictionary<string, int>>)          
+            if (typeof(IODataInstanceAnnotationContainer).IsAssignableFrom(property.PropertyType))
+            {
+                mappedType = null;
+                isCollection = false;
+
+                return PropertyKind.InstanceAnnotations;
             }
 
             PropertyKind propertyKind;

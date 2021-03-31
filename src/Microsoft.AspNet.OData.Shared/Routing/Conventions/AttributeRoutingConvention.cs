@@ -52,13 +52,18 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 ODataPathTemplate template = attributeMapping.Key;
                 IWebApiActionDescriptor action = attributeMapping.Value;
 
-                if (action.IsHttpMethodSupported(request.Method) && template.TryMatch(odataPath, values))
+                if (action.IsHttpMethodSupported(request.GetRequestMethodOrPreflightMethod()) && template.TryMatch(odataPath, values))
                 {
                     values["action"] = action.ActionName;
                     SelectControllerResult result = new SelectControllerResult(action.ControllerName, values);
 
                     return result;
                 }
+
+                // It's possible that template.TryMatch inserted values in the values dict even if
+                // it did not match the current path. So let's clear the dict before trying
+                // the next template
+                values.Clear();
             }
 
             return null;
@@ -79,6 +84,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         item.Value is ODataParameterValue)
                     {
                         routingConventionsStore.Add(item);
+                        RoutingConventionHelpers.IncrementKeyCount(routingConventionsStore);
                     }
                     else
                     {

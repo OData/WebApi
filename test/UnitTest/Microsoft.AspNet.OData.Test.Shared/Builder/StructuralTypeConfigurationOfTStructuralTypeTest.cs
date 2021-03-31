@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Test.Common;
 using Moq;
@@ -28,13 +29,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
         [Fact]
         public void Property_Name_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
+            ReflectionAssert.Property<StructuralTypeConfiguration<object>, string, ArgumentException>(_configuration, c => c.Name, "Name", allowNull: false, roundTripTestValue: _name);
         }
 
         [Fact]
         public void Property_Namespace_RoundTrips()
         {
-            ReflectionAssert.Property(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
+            ReflectionAssert.Property<StructuralTypeConfiguration<object>, string, ArgumentException>(_configuration, c => c.Namespace, "Namespace", allowNull: false, roundTripTestValue: _namespace);
         }
 
         [Fact]

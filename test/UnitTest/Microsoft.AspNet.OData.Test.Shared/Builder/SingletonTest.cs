@@ -25,8 +25,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var entityType = new Mock<EntityTypeConfiguration>().Object;
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton(null, entityType),
+                "The argument 'name' is null or empty. (Parameter 'name')");
+#else
             ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton(null, entityType),
                 "The argument 'name' is null or empty.\r\nParameter name: name");
+#endif
         }
 
         [Fact]
@@ -63,8 +68,13 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var otherType = new Mock<EntityTypeConfiguration>().Object;
 
             // Act & Assert
+#if NETCOREAPP3_1
+            ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton("OsCorp", otherType),
+                "The singleton 'OsCorp' was already configured with a different EntityType ('Company'). (Parameter 'entityType')");
+#else
             ExceptionAssert.Throws<ArgumentException>(() => builder.AddSingleton("OsCorp", otherType),
                 "The singleton 'OsCorp' was already configured with a different EntityType ('Company').\r\nParameter name: entityType");
+#endif
         }
 
         [Fact]

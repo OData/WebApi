@@ -238,6 +238,71 @@ namespace Microsoft.AspNet.OData.Test
             Assert.NotNull(resultArray[4]["Token"]);//customer 4 has a token
         }
 
+        [Theory]
+        [InlineData("$select=Address/Street,Address/City")]
+        [InlineData("$select=Address($select=Street,City)")]
+        public async Task Get_OpenEntityTypeWithMultiplePropertySelect(string select)
+        {
+            // Arrange
+            string requestUri = "http://localhost/odata/SimpleOpenCustomers?" + select;
+            var controllers = new[] { typeof(SimpleOpenCustomersController) };
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.Select();
+                config.MapODataServiceRoute("odata", "odata", GetEdmModel());
+            });
+            var client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+          //  Assert.True(response.IsSuccessStatusCode);
+            JObject result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            var resultArray = result["value"] as JArray;
+            Assert.Equal(6, resultArray.Count);
+            Assert.Equal(@"[
+  {
+    ""Address"": {
+      ""Street"": ""Street 0"",
+      ""City"": ""City 0""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 1"",
+      ""City"": ""City 1""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 2"",
+      ""City"": ""City 2""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 3"",
+      ""City"": ""City 3""
+    }
+  },
+  {
+    ""Address"": {
+      ""Street"": ""Street 4"",
+      ""City"": ""City 4""
+    }
+  },
+  {
+    ""@odata.type"": ""#Microsoft.AspNet.OData.Test.Common.SimpleVipCustomer"",
+    ""Address"": {
+      ""Street"": ""Vip Street "",
+      ""City"": ""Vip City ""
+    }
+  }
+]", resultArray.ToString());
+        }
+
         [Fact]
         public async Task Get_OpenEntityTypeWithSelectWildcard()
         {
@@ -268,11 +333,13 @@ namespace Microsoft.AspNet.OData.Test
             const string Payload = "{" +
               "\"@odata.context\":\"http://localhost/odata/$metadata#OpenCustomers/$entity\"," +
               "\"CustomerId\":6,\"Name\":\"FirstName 6\"," +
-              "\"Address\":{" +
+              "\"Address\":{" +                
                 "\"Street\":\"Street 6\",\"City\":\"City 6\",\"Place\":\"Earth\",\"Token@odata.type\":\"#Guid\"," +
                 "\"Token\":\"4DB52263-4382-4BCB-A63E-3129C1B5FA0D\"," +
-                "\"Number\":990" +
+                 "\"@NS1.abc\": \"Test\"," +
+                "\"Number\":990" +                
               "}," +
+              "\"Website@NS.Street\": \"Test\"," +
               "\"Website\": \"WebSite #6\"," +
               "\"Place@odata.type\":\"#String\",\"Place\":\"My Dynamic Place\"," + // odata.type is necessary, otherwise it will get an ODataUntypedValue
               "\"Token@odata.type\":\"#Guid\",\"Token\":\"2c1f450a-a2a7-4fe1-a25d-4d9332fc0694\"," +

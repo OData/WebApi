@@ -26,9 +26,11 @@ namespace Microsoft.AspNet.OData.Builder
         private readonly Dictionary<PropertyInfo, IEdmProperty> _properties = new Dictionary<PropertyInfo, IEdmProperty>();
         private readonly Dictionary<IEdmProperty, QueryableRestrictions> _propertiesRestrictions = new Dictionary<IEdmProperty, QueryableRestrictions>();
         private readonly Dictionary<IEdmProperty, ModelBoundQuerySettings> _propertiesQuerySettings = new Dictionary<IEdmProperty, ModelBoundQuerySettings>();
+        private readonly Dictionary<IEdmProperty, PropertyConfiguration> _propertyConfigurations = new Dictionary<IEdmProperty, PropertyConfiguration>();
         private readonly Dictionary<IEdmStructuredType, ModelBoundQuerySettings> _structuredTypeQuerySettings = new Dictionary<IEdmStructuredType, ModelBoundQuerySettings>();
         private readonly Dictionary<Enum, IEdmEnumMember> _members = new Dictionary<Enum, IEdmEnumMember>();
         private readonly Dictionary<IEdmStructuredType, PropertyInfo> _openTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
+        private readonly Dictionary<IEdmStructuredType, PropertyInfo> _instanceAnnotableTypes = new Dictionary<IEdmStructuredType, PropertyInfo>();
 
         internal EdmTypeBuilder(IEnumerable<IEdmTypeConfiguration> configurations)
         {
@@ -42,6 +44,8 @@ namespace Microsoft.AspNet.OData.Builder
             _properties.Clear();
             _members.Clear();
             _openTypes.Clear();
+            _propertyConfigurations.Clear();
+            _instanceAnnotableTypes.Clear();
 
             // Create headers to allow CreateEdmTypeBody to blindly references other things.
             foreach (IEdmTypeConfiguration config in _configurations)
@@ -89,6 +93,13 @@ namespace Microsoft.AspNet.OData.Builder
                         // add a mapping between the open complex type and its dynamic property dictionary.
                         _openTypes.Add(complexType, complex.DynamicPropertyDictionary);
                     }
+
+                    if (complex.SupportsInstanceAnnotations)
+                    {
+                        // add a mapping between the complex type and its instance annotation dictionary.
+                        _instanceAnnotableTypes.Add(complexType, complex.InstanceAnnotationsContainer);
+                    }
+
                     edmType = complexType;
                 }
                 else if (config.Kind == EdmTypeKind.Entity)
@@ -114,6 +125,13 @@ namespace Microsoft.AspNet.OData.Builder
                         // add a mapping between the open entity type and its dynamic property dictionary.
                         _openTypes.Add(entityType, entity.DynamicPropertyDictionary);
                     }
+
+                    if (entity.SupportsInstanceAnnotations)
+                    {
+                        // add a mapping between the entity type and its instance annotation dictionary.
+                        _instanceAnnotableTypes.Add(entityType, entity.InstanceAnnotationsContainer);
+                    }
+
                     edmType = entityType;
                 }
                 else
@@ -293,6 +311,8 @@ namespace Microsoft.AspNet.OData.Builder
                     {
                         _propertiesQuerySettings.Add(edmProperty, property.QueryConfiguration.ModelBoundQuerySettings);
                     }
+
+                    _propertyConfigurations[edmProperty] = property;
                 }
             }
         }
@@ -452,6 +472,8 @@ namespace Microsoft.AspNet.OData.Builder
                     {
                         _propertiesQuerySettings.Add(edmProperty, prop.QueryConfiguration.ModelBoundQuerySettings);
                     }
+
+                    _propertyConfigurations[edmProperty] = prop;
                 }
             }
         }
@@ -544,7 +566,9 @@ namespace Microsoft.AspNet.OData.Builder
                 builder._propertiesQuerySettings,
                 builder._structuredTypeQuerySettings,
                 builder._members,
-                builder._openTypes);
+                builder._openTypes,
+                builder._propertyConfigurations,
+                builder._instanceAnnotableTypes);
         }
 
         /// <summary>

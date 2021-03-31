@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNetCore.Routing;
@@ -24,16 +25,35 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         {
             if (builder == null)
             {
-                throw Error.ArgumentNull("builder");
+                throw Error.ArgumentNull(nameof(builder));
             }
 
+            return CreateDefaultWithAttributeRouting(routeName, builder.ServiceProvider);
+        }
+
+        /// <summary>
+        /// Creates a mutable list of the default OData routing conventions with attribute routing enabled.
+        /// For Endpoint routing, please use this version.
+        /// </summary>
+        /// <param name="routeName">The name of the route.</param>
+        /// <param name="serviceProvider">The service provider.</param>
+        /// <returns>A mutable list of the default OData routing conventions.</returns>
+        public static IList<IODataRoutingConvention> CreateDefaultWithAttributeRouting(
+            string routeName,
+            IServiceProvider serviceProvider)
+        {
             if (routeName == null)
             {
                 throw Error.ArgumentNull("routeName");
             }
 
+            if (serviceProvider == null)
+            {
+                throw Error.ArgumentNull(nameof(serviceProvider));
+            }
+
             IList<IODataRoutingConvention> routingConventions = CreateDefault();
-            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, builder.ServiceProvider);
+            AttributeRoutingConvention routingConvention = new AttributeRoutingConvention(routeName, serviceProvider);
             routingConventions.Insert(0, routingConvention);
             return routingConventions;
         }
@@ -49,6 +69,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 new MetadataRoutingConvention(),
                 new EntitySetRoutingConvention(),
                 new SingletonRoutingConvention(),
+                new OperationImportRoutingConvention(),
                 new EntityRoutingConvention(),
                 new NavigationRoutingConvention(),
                 new PropertyRoutingConvention(),

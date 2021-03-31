@@ -360,6 +360,22 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Adds an InstanceAnnotation container property.
+        /// </summary>
+        /// <param name="propertyExpression">A lambda expression representing the instance annotation container property for the relationship.
+        /// For example, in C# <c>t => t.MyProperty</c> and in Visual Basic .NET <c>Function(t) t.MyProperty</c>.</param>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures",
+            Justification = "Nested generics appropriate here")]
+        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters",
+            Justification = "More specific expression type is clearer")]
+        public void HasInstanceAnnotations(Expression<Func<TStructuralType, IODataInstanceAnnotationContainer>> propertyExpression)
+        {
+            PropertyInfo propertyInfo = PropertySelectorVisitor.GetSelectedProperty(propertyExpression);
+
+            _configuration.AddInstanceAnnotationContainer(propertyInfo);
+        }
+
+        /// <summary>
         /// Configures a many relationship from this structural type.
         /// </summary>
         /// <typeparam name="TTargetEntity">The type of the entity at the other end of the relationship.</typeparam>

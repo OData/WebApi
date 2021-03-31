@@ -17,14 +17,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         [EnableQuery]
         public IEnumerable<Person> Get()
         {
-            return _repo.Get();
+            return _repo.People;
         }
 
         [HttpGet]
         [EnableQuery]
         public ITestActionResult Get([FromODataUri]int key)
         {
-            Person person = _repo.people.FirstOrDefault(p => p.Id == key);
+            Person person = _repo.People.FirstOrDefault(p => p.Id == key);
             if (person == null)
             {
                 return NotFound();
@@ -34,16 +34,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         }
 
         [EnableQuery]
-        public ITestActionResult GetLocationFromPerson([FromODataUri]int key)
+        public ITestActionResult GetHomeLocationFromPerson([FromODataUri]int key)
         {
-            Person person = _repo.people.FirstOrDefault(p => p.Id == key);
+            Person person = _repo.People.FirstOrDefault(p => p.Id == key);
             if (person == null)
             {
                 return NotFound();
             }
-            return Ok(person.Location);
+            return Ok(person.HomeLocation);
         }
 
+        [EnableQuery]
+        public ITestActionResult GetRepoLocationsFromPerson([FromODataUri]int key)
+        {
+            Person person = _repo.People.FirstOrDefault(p => p.Id == key);
+            if (person == null)
+            {
+                return NotFound();
+            }
+            return Ok(person.RepoLocations);
+        }
+
+        /*
         [EnableQuery]
         public ITestActionResult GetLocationOfAddress([FromODataUri]int key)
         {
@@ -53,33 +65,40 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
                 return NotFound();
             }
             return Ok(person.Location as Address);
-        }
+        }*/
 
         [EnableQuery]
-        public ITestActionResult GetLocationOfGeolocation([FromODataUri]int key)
+        public ITestActionResult GetHomeLocationOfGeolocation([FromODataUri]int key)
         {
-            Person person = _repo.people.FirstOrDefault(p => p.Id == key);
+            Person person = _repo.People.FirstOrDefault(p => p.Id == key);
             if (person == null)
             {
                 return NotFound();
             }
-            return Ok(person.Location as GeoLocation);
+
+            return Ok(person.HomeLocation as GeoLocation);
         }
 
         [EnableQuery]
-        [ODataRoute("people({id})/Order")]
-        public ITestActionResult GetOrdeFromPerson([FromODataUri]int id)
+        [ODataRoute("People({id})/OrderInfo")]
+        public ITestActionResult GetOrdeInfoFromPerson([FromODataUri]int id)
         {
-            return Ok(_repo.people.FirstOrDefault(p => p.Id == id).Order);
+            return Ok(_repo.People.FirstOrDefault(p => p.Id == id).OrderInfo);
         }
 
-        [ODataRoute("people({id})/Location/ZipCode")]
+        [ODataRoute("People({id})/HomeLocation/ZipCode")]
         public ITestActionResult GetZipCode([FromODataUri]int id)
         {
-            return Ok(_repo.people.FirstOrDefault().Location.ZipCode);
+            Person person = _repo.People.FirstOrDefault(p => p.Id == id);
+            if (person == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(person.HomeLocation.ZipCode);
         }
 
-        [ODataRoute("people({id})/Location/ZipCode/$ref")]
+        [ODataRoute("People({id})/HomeLocation/ZipCode/$ref")]
         public ITestActionResult CreateRefToZipCode([FromODataUri] int id, [FromBody] ZipCode zip)
         {
             return Ok(zip);

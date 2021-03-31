@@ -153,6 +153,24 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Empty(container.ToDictionary(new IdentityPropertyMapper(), includeAutoSelected: true));
         }
 
+        [Fact]
+        public void CreatePropertyContainer_WithNullTruncatedCollection_DoesNotThrow()
+        {
+            // Arrange
+            int pageSize = 5;
+            Expression propertyName = Expression.Constant("PropertyName");
+            Expression propertyValue = Expression.Constant(null, typeof(IEnumerable<int>));
+            var properties = new[] { new NamedPropertyExpression(propertyName, propertyValue) { PageSize = pageSize } };
+
+            // Act
+            Expression containerExpression = PropertyContainer.CreatePropertyContainer(properties);
+
+            // Assert
+            PropertyContainer container = ToContainer(containerExpression);
+            var result = container.ToDictionary(new IdentityPropertyMapper())["PropertyName"];
+            Assert.Null(result);
+        }
+
         [Theory]
         [InlineData(1)]
         [InlineData(2)]

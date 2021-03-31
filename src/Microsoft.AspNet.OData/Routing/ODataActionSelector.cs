@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -11,6 +12,7 @@ using System.Web.Http.Controllers;
 using System.Web.Http.Routing;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing.Conventions;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -87,7 +89,11 @@ namespace Microsoft.AspNet.OData.Routing
                 if (actionName != null)
                 {
                     routeData.Values[ODataRouteConstants.Action] = actionName;
-                    return _innerSelector.SelectAction(controllerContext);
+                    var action = _innerSelector.SelectAction(controllerContext);
+                    if (ActionParametersMatchRequest(action, controllerContext))
+                    {
+                        return action;
+                    }
                 }
             }
 
@@ -105,6 +111,33 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             return request.CreateErrorResponse(statusCode, error);
+        }
+
+        private static bool ActionParametersMatchRequest(HttpActionDescriptor action, HttpControllerContext context)
+        {
+            var parameters = action.GetParameters();
+            var routeData = context.RouteData;
+            var routingConventionsStore = context.Request.ODataProperties().RoutingConventionsStore;
+
+            int keyCount = 0;
+            if (routingConventionsStore.ContainsKey(ODataRouteConstants.KeyCount))
+            {
+                keyCount = (int)routingConventionsStore[ODataRouteConstants.KeyCount];
+            }
+
+            // navigationProperty is optional in some cases, therefore an action
+            // should not be rejected simply because it does not declare a navigationProperty parameter
+            if (routeData.Values.ContainsKey(ODataRouteConstants.NavigationProperty))
+            {
+                keyCount -= 1;
+            }
+
+            if (parameters.Count < keyCount)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

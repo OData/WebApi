@@ -84,6 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 #endif
 
 
+#if !NETCORE
     public class LinqToSqlAggregationTests : WebHostTestBase
     {
         protected string AggregationTestBaseUrl => "{0}/aggregation/Customers";
@@ -93,8 +94,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         {
         }
 
+
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
+
             configuration.AddControllers(typeof(LinqToSqlCustomersController));
             configuration.JsonReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null);
@@ -122,8 +125,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             Assert.Contains("$apply query options not supported for LINQ to SQL providers",result);
         }
-
     }
+#endif
 
     public abstract class AggregationTests : WebHostTestBase
     {
@@ -142,7 +145,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
                 AggregationEdmModel.GetEdmModel(configuration));
         }
 
-        #region "SQL logging"
+#region "SQL logging"
         public static async Task CleanUpSQlCommandsLog(string BaseAddress)
         {
             string queryUrl = $"{BaseAddress}/aggregation/CleanCommands()";
@@ -152,7 +155,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             HttpResponseMessage response = await client.SendAsync(request);
         }
 
-        public static async Task<string> GetLastSQLCommand(string BaseAddress)
+        public async Task<string> GetLastSQLCommand(string BaseAddress)
         {
             string queryUrl = $"{BaseAddress}/aggregation/GetLastCommand()";
 
@@ -162,44 +165,51 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             var lastCommandResponse = await response.Content.ReadAsStringAsync();
             return  (string)JObject.Parse(lastCommandResponse)["value"];
         }
-        #endregion
+#endregion
 
         [Fact]
         public async Task AggregateNavigationPropertyWorks()
         {
             // Arrange
-            await CleanUpSQlCommandsLog(BaseAddress);
-
-            string queryUrl =
-                string.Format(
-                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
-                    BaseAddress);
-            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
-            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
-            HttpClient client = new HttpClient();
-
-            // Act
-            HttpResponseMessage response = await client.SendAsync(request);
-
-            // Assert
-            var result = await response.Content.ReadAsObject<JObject>();
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-            var results = result["value"] as JArray;
-            Assert.Equal(3, results.Count);
-            Assert.Equal("0", results[0]["TotalPrice"].ToString());
-            Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
-            Assert.Equal("2000", results[1]["TotalPrice"].ToString());
-            Assert.Equal("Customer0", results[1]["Name"].ToString());
-            Assert.Equal("2500", results[2]["TotalPrice"].ToString());
-            Assert.Equal("Customer1", results[2]["Name"].ToString());
-
-            string lastCommand = await GetLastSQLCommand(BaseAddress);
-            if (lastCommand != "")
+            try
             {
-                // Only one join with Customers table
-                var num = Regex.Matches(lastCommand, @"\[Customers]").Count;
-                Assert.True(num == 1, $"More than one Customers table reference in the output {lastCommand}");
+                await CleanUpSQlCommandsLog(BaseAddress);
+
+                string queryUrl =
+                    string.Format(
+                        AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalPrice))&$orderby=TotalPrice",
+                        BaseAddress);
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+                request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+                HttpClient client = new HttpClient();
+
+                // Act
+                HttpResponseMessage response = await client.SendAsync(request);
+
+                // Assert
+                var result = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+                var results = result["value"] as JArray;
+                Assert.Equal(3, results.Count);
+                Assert.Equal("0", results[0]["TotalPrice"].ToString());
+                Assert.Equal(JValue.CreateNull(), results[0]["Name"]);
+                Assert.Equal("2000", results[1]["TotalPrice"].ToString());
+                Assert.Equal("Customer0", results[1]["Name"].ToString());
+                Assert.Equal("2500", results[2]["TotalPrice"].ToString());
+                Assert.Equal("Customer1", results[2]["Name"].ToString());
+
+                string lastCommand = await GetLastSQLCommand(BaseAddress);
+                if (lastCommand != "")
+                {
+                    // Only one join with Customers table
+                    var num = Regex.Matches(lastCommand, @"\[Customers]").Count;
+                    Assert.True(num == 1, $"More than one Customers table reference in the output {lastCommand}");
+                }
+            }
+            finally
+            {
+                await CleanUpSQlCommandsLog(BaseAddress);
             }
         }
 
@@ -225,6 +235,38 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             Assert.Equal(2, results.Count);
             Assert.Equal("30", results[0]["TotalId"].ToString());
             Assert.Equal("25", results[1]["TotalId"].ToString());
+            var order0 = results[0]["Order"] as JObject;
+            var order1 = results[1]["Order"] as JObject;
+            Assert.Equal("Order0", order0["Name"].ToString());
+            Assert.Equal("Order1", order1["Name"].ToString());
+        }
+
+        [Fact]
+        public async Task GroupByNavigationPropertyWithComputeWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Order/Name), aggregate(Id with sum as TotalId))/compute(TotalId add TotalId as DoubleId)&$orderby=Order/Name",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
+            var result = await response.Content.ReadAsObject<JObject>();
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("30", results[0]["TotalId"].ToString());
+            Assert.Equal("25", results[1]["TotalId"].ToString());
+            Assert.Equal("60", results[0]["DoubleId"].ToString());
+            Assert.Equal("50", results[1]["DoubleId"].ToString());
             var order0 = results[0]["Order"] as JObject;
             var order1 = results[1]["Order"] as JObject;
             Assert.Equal("Order0", order0["Name"].ToString());
@@ -316,6 +358,54 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
         }
 
         [Fact]
+        public async Task AggregateWithCastWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(cast(Order/Price, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public async Task AggregateWithConstantWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(Order/Price div 10 with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("450", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
         public async Task AggregateAggregatedPropertyWorks()
         {
             // Arrange
@@ -330,6 +420,30 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
 
             // Act
             HttpResponseMessage response = await client.SendAsync(request);
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+        }
+
+        [Fact]
+        public async Task AggregateAggregatedWitCastPropertyWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=groupby((Name), aggregate(cast(Order/Price, Edm.Int64) with sum as TotalPrice))/aggregate(cast(TotalPrice, Edm.Decimal) with sum as TotalAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
 
             // Assert
             var result = await response.Content.ReadAsObject<JObject>();
@@ -532,6 +646,136 @@ namespace Microsoft.Test.E2E.AspNet.OData.Aggregation
             var results = result["value"] as JArray;
             Assert.Single(results);
             Assert.Equal(expectedResult, results[0]["Result"].ToString());
+        }
+
+        [Fact]
+        public async Task ComputeAfterAggregateWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl +
+                    "?$apply=aggregate(cast(Order/Price, Edm.Decimal) with sum as TotalAmount)"
+                    + "/compute(TotalAmount mul 2 as DoubleAmount)",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+
+            var result = await response.Content.ReadAsObject<JObject>();
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var results = result["value"] as JArray;
+            Assert.Single(results);
+            Assert.Equal("4500", results[0]["TotalAmount"].ToString());
+            Assert.Equal("9000", results[0]["DoubleAmount"].ToString());
+        }
+
+        [Fact]
+        public async Task ComputeAfterGroupByWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=groupby((Name), aggregate(Order/Price with sum as TotalAmount))"
+                    + "/filter(Name ne null)/compute(TotalAmount mul 2 as DoubleAmount, length(Name) as NameLen)"
+                    + "&$orderby=TotalAmount",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("2000", results[0]["TotalAmount"].ToString());
+            Assert.Equal("4000", results[0]["DoubleAmount"].ToString());
+            Assert.Equal("9", results[0]["NameLen"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
+            Assert.Equal("2500", results[1]["TotalAmount"].ToString());
+            Assert.Equal("5000", results[1]["DoubleAmount"].ToString());
+            Assert.Equal("9", results[1]["NameLen"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
+        }
+
+        [Fact]
+        public async Task ComputeBeforeGroupByWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=filter(Name ne null)/compute(length(Name) as NameLen)/groupby((Name), aggregate(Id with sum as TotalId, NameLen with max as NameLen))"
+                    + "&$orderby=TotalId",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var results = result["value"] as JArray;
+            Assert.Equal(2, results.Count);
+            Assert.Equal("20", results[0]["TotalId"].ToString());
+            Assert.Equal("9", results[0]["NameLen"].ToString());
+            Assert.Equal("Customer0", results[0]["Name"].ToString());
+            Assert.Equal("25", results[1]["TotalId"].ToString());
+            Assert.Equal("9", results[1]["NameLen"].ToString());
+            Assert.Equal("Customer1", results[1]["Name"].ToString());
+        }
+
+        [Fact]
+        public async Task ComputeWorks()
+        {
+            // Arrange
+            string queryUrl =
+                string.Format(
+                    AggregationTestBaseUrl + "?$apply=compute(length(Name) as NameLen)&$filter=Name ne null",
+                    BaseAddress);
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, queryUrl);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json;odata.metadata=none"));
+            HttpClient client = new HttpClient();
+
+            // Act
+            HttpResponseMessage response = client.SendAsync(request).Result;
+
+            // Assert
+            var result = await response.Content.ReadAsObject<JObject>();
+            System.Console.WriteLine(result);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var results = result["value"] as JArray;
+            Assert.Equal(9, results.Count);
+            foreach (var customer in results)
+            {
+                Assert.NotNull(customer["Id"]);
+                var name = customer["Name"]?.ToString();
+                if (JValue.CreateNull().Equals(customer["Name"]))
+                {
+                    Assert.Equal(JValue.CreateNull(), customer["NameLen"]);
+                }
+                else
+                {
+                    Assert.Equal(customer["Name"].ToString().Length.ToString(), customer["NameLen"].ToString());
+                }
+            }
         }
     }
 }

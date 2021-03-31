@@ -222,6 +222,9 @@
   <data name="CannotRecognizeNodeType" xml:space="preserve">
     <value>'{0}' does not recognize the node with type '{1}'.</value>
   </data>
+  <data name="MissingConvertNode" xml:space="preserve">
+    <value>Missing the value of the parameter '{0}' in the function '{1}' calling.</value>
+  </data>
   <data name="TargetKindNotImplemented" xml:space="preserve">
     <value>'{0}' of kind '{1}' is not implemented.</value>
   </data>
@@ -580,6 +583,12 @@
   <data name="UnsupportedSelectExpandPath" xml:space="preserve">
     <value>A path within the select or expand query option is not supported.</value>
   </data>
+  <data name="InvalidSegmentInSelectExpandPath" xml:space="preserve">
+    <value>A segment '{0}' within the select or expand query option is not supported.</value>
+  </data>
+  <data name="InvalidLastSegmentInSelectExpandPath" xml:space="preserve">
+    <value>The last segment '{0}' of the select or expand query option is not supported.</value>
+  </data>
   <data name="UrlHelperNull" xml:space="preserve">
     <value>The property 'Url' of {0} cannot be null.</value>
   </data>
@@ -775,6 +784,21 @@
   <data name="InvalidPropertyInfoForDynamicPropertyAnnotation" xml:space="preserve">
     <value>Type '{0}' is not supported as dynamic property annotation. Referenced property must be of type '{1}'.</value>
   </data>
+  <data name="MoreThanOneAnnotationPropertyContainerFound" xml:space="preserve">
+    <value>Found more than one Annotation property container in type '{0}'. Each open type must have at most one Annotation property container.</value>
+  </data>
+  <data name="AnnotationPropertyNameAlreadyUsedAsDeclaredPropertyName" xml:space="preserve">
+    <value>The name of Annotation property '{0}' was already used as the declared property name of open type '{1}'.</value>
+  </data>
+  <data name="DuplicateAnnotationPropertyNameFound" xml:space="preserve">
+    <value>Duplicate Annotation property name '{0}' found in open type '{1}'. Each Annotation property name must be unique.</value>
+  </data>
+  <data name="CannotSetAnnotationPropertyDictionary" xml:space="preserve">
+    <value>The Annotation dictionary property '{0}' of type '{1}' cannot be set. The Annotation property dictionary must have a setter.</value>
+  </data>
+  <data name="InvalidPropertyInfoForAnnotationPropertyAnnotation" xml:space="preserve">
+    <value>Type '{0}' is not supported as Annotation property annotation. Referenced property must be of type '{1}'.</value>
+  </data>
   <data name="RequestUriTooShortForODataPath" xml:space="preserve">
     <value>Request URI '{0}' too short to contain OData path '{1}'.</value>
   </data>
@@ -792,6 +816,12 @@
   </data>
   <data name="TypeOfDynamicPropertyNotSupported" xml:space="preserve">
     <value>The type '{0}' of dynamic property '{1}' is not supported.</value>
+  </data>
+  <data name="InstanceAnnotationCannotBeSerialized" xml:space="preserve">
+    <value>The instance annotation for '{0}' with Edm type '{1}' cannot be serialized.</value>
+  </data>
+  <data name="TypeOfInstanceAnnotationNotSupported" xml:space="preserve">
+    <value>The type '{0}' of instance annotation '{1}' is not supported.</value>
   </data>
   <data name="CannotReconfigEntityTypeAsComplexType" xml:space="preserve">
     <value>The entity type '{0}' cannot be configured as a complex type because the derived type '{1}' is already configured as an entity type.</value>
@@ -903,5 +933,65 @@
   </data>
   <data name="ApplyQueryOptionNotSupportedForLinq2SQL" xml:space="preserve">
     <value>$apply query options not supported for LINQ to SQL providers</value>
+  </data>
+  <data name="CantFindEdmType" xml:space="preserve">
+    <value>Cannot find EdmType corresponding to {0}</value>
+  </data>
+  <data name="ConstraintAlreadyExists" xml:space="preserve">
+    <value>Type {0} already added as derived type constraint</value>
+  </data>
+  <data name="NoClrTypeSpecified" xml:space="preserve">
+    <value>No CLR Type specified for this configuration.</value>
+  </data>
+  <data name="NotADerivedType" xml:space="preserve">
+    <value>{0} is not a subclass of {1}. Cannot add this derived type constraint.</value>
+  </data>
+  <data name="BaseTypeNotSpecified" xml:space="preserve">
+    <value>The base type for the derived type constraint set is not specified. </value>
+  </data>
+  <data name="ReturnTypeOfOperationNotSpecified" xml:space="preserve">
+    <value>Return type of operation is not specified.</value>
+  </data>
+  <data name="CannotParseQueryOptionsPayload" xml:space="preserve">
+    <value>Unable to parse query options payload.</value>
+  </data>
+  <data name="CannotFindParserForRequestMediaType" xml:space="preserve">
+    <value>Could not find parser designed to handle '{0}' query options payload</value>
+  </data>
+  <data name="QueryOptionsMustNotBeRepeated" xml:space="preserve">
+    <value>The same system query option, irrespective of casing or whether or not it is prefixed with a $, must not be specified more than once for any resource.</value>
+  </data>
+  <data name="QueryOptionsNotInExpectedFormat" xml:space="preserve">
+    <value>Query options in request body not in expected format: {0}. A series of field-value pairs that meet the defined syntax rules expected.</value>
+  </data>
+  <data name="CannotGetEnumClrMember" xml:space="preserve">
+    <value>Cannot Get the Enum Clr member using '{0}'.</value>
+  </data>
+  <data name="CannotCreateInstanceForProperty" xml:space="preserve">
+    <value>Cannot Create an instance for the property '{0}'.</value>
+  </data>
+  <data name="PropertyTypeShouldBeOfType" xml:space="preserve">
+    <value>The Property should be of Type {0}.</value>
+  </data>
+  <data name="InstanceAnnotationNotContain" xml:space="preserve">
+    <value>Instance Annotation name cannot have a '@' as the first character and cannot have a '.' as first or last character.</value>
+  </data>
+  <data name="InstanceAnnotationShouldContain" xml:space="preserve">
+    <value>Instance Annotation should have a '.' in it and should not be the first or last character, usually in a format Namespace.TermName</value>
+  </data>
+  <data name="InstanceAnnotationNotEmpty" xml:space="preserve">
+    <value>An Instance Annotation name cannot be null or empty.</value>
+  </data>
+  <data name="InstanceAnnotationPropertyNotEmpty" xml:space="preserve">
+    <value>InstanceAnnotation Property name cannot be null or empty.</value>
+  </data>
+  <data name="ResourcesShouldbePresent" xml:space="preserve">
+    <value>ResourceSetWrapper should have ResourceWrappers in it</value>
+  </data>
+  <data name="ResourceSetWrapperSupported" xml:space="preserve">
+    <value>Can only add ResourceWrapper to ResourceSetWrapper</value>
+  </data>
+  <data name="ChangedObjectTypeMismatch" xml:space="preserve">
+    <value>Cannot use Changed Object of type '{0}' on an entity of type '{1}'.</value>
   </data>
 </root>

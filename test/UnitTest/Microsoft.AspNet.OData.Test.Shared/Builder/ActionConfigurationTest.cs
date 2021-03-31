@@ -971,6 +971,49 @@ namespace Microsoft.AspNet.OData.Test.Builder
             Assert.Equal("Remove Old Movies", removeOldTitle.Title);
         }
 
+        [Fact]
+        public void CanConfigureDerivedTypeConstraints()
+        {
+            ODataModelBuilder builder = new ODataModelBuilder();
+            builder.EntitySet<Creature>("Creatures").EntityType.HasKey(c => c.Id);
+            builder.EntityType<Animal>().DerivesFrom<Creature>();
+            builder.EntityType<Human>().DerivesFrom<Creature>();
+            builder.EntityType<Gene>().DerivesFrom<Creature>(); // No restriction
+            builder.EntityType<StateZoo>().DerivesFrom<Zoo>(); // No restriction
+            builder.EntityType<NationZoo>().DerivesFrom<Zoo>();
+            builder.EntityType<SeaZoo>().DerivesFrom<Zoo>();
+            var zooType = builder.EntityType<Zoo>();
+
+            var action = zooType.Action("MyAction").ReturnsFromEntitySet<Creature>("Creatures");
+
+            action.BindingParameter.HasDerivedTypeConstraint<SeaZoo>().HasDerivedTypeConstraint<NationZoo>();
+            action.HasDerivedTypeConstraintForReturnType<Animal>().HasDerivedTypeConstraintForReturnType<Human>();
+            IEdmModel model = builder.GetEdmModel();
+
+            string csdl = MetadataTest.GetCSDL(model);
+            Assert.NotNull(csdl);
+
+            Assert.Contains("<Action Name=\"MyAction\" IsBound=\"true\">" +
+            "<Parameter Name=\"bindingParameter\" Type=\"Microsoft.AspNet.OData.Test.Builder.TestModels.Zoo\">" +
+               "<Annotation Term=\"Org.OData.Validation.V1.DerivedTypeConstraint\">" +
+                  "<Collection>" +
+                     "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.SeaZoo</String>" +
+                     "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.NationZoo</String>" +
+                  "</Collection>" +
+               "</Annotation>" +
+            "</Parameter>" +
+            "<ReturnType Type=\"Microsoft.AspNet.OData.Test.Builder.TestModels.Creature\">" +
+               "<Annotation Term=\"Org.OData.Validation.V1.DerivedTypeConstraint\">" +
+                  "<Collection>" +
+                     "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Animal</String>" +
+                     "<String>Microsoft.AspNet.OData.Test.Builder.TestModels.Human</String>" +
+                  "</Collection>" +
+               "</Annotation>" +
+            "</ReturnType>" +
+         "</Action>", csdl);
+        }
+
+
         public class Movie
         {
             public int ID { get; set; }

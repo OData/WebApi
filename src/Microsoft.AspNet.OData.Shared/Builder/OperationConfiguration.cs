@@ -18,6 +18,7 @@ namespace Microsoft.AspNet.OData.Builder
         private List<ParameterConfiguration> _parameters = new List<ParameterConfiguration>();
         private BindingParameterConfiguration _bindingParameter;
         private string _namespace;
+        private IEdmTypeConfiguration _returnType;
 
         /// <summary>
         /// Initializes a new instance of <see cref="OperationConfiguration" /> class.
@@ -91,7 +92,14 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// The type returned when the operation is invoked.
         /// </summary>
-        public IEdmTypeConfiguration ReturnType { get; set; }
+        public IEdmTypeConfiguration ReturnType
+        {
+            get { return _returnType; }
+            set
+            {
+                _returnType = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the return is nullable or not.
@@ -145,6 +153,11 @@ namespace Microsoft.AspNet.OData.Builder
                 return _bindingParameter != null;
             }
         }
+
+        /// <summary>
+        /// Type constraints for the return type of the operation.
+        /// </summary>
+        public DerivedTypeConstraintConfiguration ReturnTypeConstraints { get; protected set; }
 
         /// <summary>
         /// Sets the return type to a single EntityType instance.

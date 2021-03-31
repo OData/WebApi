@@ -28,6 +28,7 @@ namespace Microsoft.AspNet.OData.Query
     /// Currently this only supports $filter, $orderby, $top, $skip, and $count.
     /// </summary>
     [ODataQueryParameterBinding]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Relies on many ODataLib classes.")]
     public partial class ODataQueryOptions
     {
         private static readonly MethodInfo _limitResultsGenericMethod = typeof(ODataQueryOptions).GetMethods(BindingFlags.Public | BindingFlags.Static)
@@ -668,8 +669,9 @@ namespace Microsoft.AspNet.OData.Query
                 propertyFunc = node => node.Property.Name;
             }
 
-            HashSet<string> usedPropertyNames =
-            new HashSet<string>(orderBy.OrderByNodes.OfType<OrderByPropertyNode>().Select(propertyFunc));
+            HashSet<string> usedPropertyNames = new HashSet<string>(orderBy.OrderByNodes
+                                                                           .OfType<OrderByPropertyNode>().Select(propertyFunc)
+                                                                           .Concat(orderBy.OrderByNodes.OfType<OrderByOpenPropertyNode>().Select(p => p.PropertyName)));
 
             if (applySortOptions != null)
             {

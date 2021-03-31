@@ -57,6 +57,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(ProductsController),
                 typeof(EnumCustomersController),
                 typeof(DestinationsController),
+                typeof(IncidentsController),
+                typeof(NotFoundWithIdCustomersController),
+                typeof(NotFoundCustomersController),
+                typeof(AttributeCustomersController)
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -126,6 +130,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "PATCH", "Products(10)", "Patch(10)" },
                     { "MERGE", "Products(10)", "Patch(10)" },
                     { "DELETE", "Products(10)", "Delete(10)" },
+                    // entity by key  defaults using keyID as param name
+                    { "GET", "Incidents(10)", "Get(10) with keyID" },
+                    { "PUT", "Incidents(10)", "Put(10) with keyID" },
+                    { "PATCH", "Incidents(10)", "Patch(10) with keyID" },
+                    { "MERGE", "Incidents(10)", "Patch(10) with keyID" },
+                    { "DELETE", "Incidents(10)", "Delete(10) with keyID" },
                     // entity by key
                     { "GET", "RoutingCustomers(10)", "GetRoutingCustomer(10)" },
                     { "PUT", "RoutingCustomers(10)", "PutRoutingCustomer(10)" },
@@ -143,6 +153,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "RoutingCustomers(10)/Address", "GetAddress(10)" },
                     { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Name", "GetName(10)" },
                     { "GET", "RoutingCustomers(10)/Microsoft.AspNet.OData.Test.Routing.VIP/Company", "GetCompanyFromVIP(10)" },
+                    { "GET", "Incidents(10)/Name", "GetName(10) with keyID" },
                     // refs
                     { "PUT", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
                     { "POST", "RoutingCustomers(1)/Products/$ref", "CreateRef(1)(Products)" },
@@ -290,7 +301,10 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     // test optional parameter routing (white space is intentional.)
                     { "GET", "Products/Default.GetCount(minSalary=1.1)",                               "GetCount(1.1, 0, 1200.99)" },
                     { "GET", "Products/Default.GetCount(minSalary=1.2, maxSalary=2.9)",                "GetCount(1.2, 2.9, 1200.99)" },
-                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" }
+                    { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" },
+                    // test [ODataRoute] works correctly for overloaded actions
+                    { "GET", "AttributeCustomers", "Get()" },
+                    { "GET", "AttributeCustomers(10)", "Get(10)" }
                 };
             }
         }
@@ -482,6 +496,22 @@ namespace Microsoft.AspNet.OData.Test.Routing
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             string responseString = await response.Content.ReadAsStringAsync();
             Assert.Contains(expectedError, responseString);
+        }
+
+        [Theory]
+        [InlineData("NotFoundWithIdCustomers", "GET")]
+        [InlineData("NotFoundCustomers(10)", "GET")]
+        [InlineData("NotFoundCustomers(10)", "DELETE")]
+        [InlineData("NotFoundCustomers(10)", "PUT")]
+        [InlineData("NotFoundCustomers(10)", "PATCH")]
+        public async Task ActionsDoNotMatch_ReturnsNotFound(string uri, string httpMethod)
+        {
+            // Arrange & Act
+            HttpResponseMessage response = await _nullPrefixClient.SendAsync(new HttpRequestMessage(
+                new HttpMethod(httpMethod), "http://localhost/" + uri));
+
+            // Assert
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
     }
 
@@ -854,6 +884,86 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     Color = Color.Red | Color.Blue
                 }
             });
+        }
+    }
+
+    public class IncidentsController : TestODataController
+    {
+        public string Get(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Get({0}) with keyID", keyID);
+        }
+
+        public string Put(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Put({0}) with keyID", keyID);
+        }
+
+        [AcceptVerbs("PATCH", "MERGE")]
+        public string Patch(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Patch({0}) with keyID", keyID);
+        }
+
+        public string Delete(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "Delete({0}) with keyID", keyID);
+        }
+
+        public string GetName(int keyID)
+        {
+            return String.Format(CultureInfo.InvariantCulture, "GetName({0}) with keyID", keyID);
+        }
+    }
+
+    public class NotFoundWithIdCustomersController: TestODataController
+    {
+        public string Get(int key)
+        {
+            return $"Get({key})";
+        }
+    }
+
+    public class NotFoundCustomersController: TestODataController
+    {
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        public string Put()
+        {
+            return "Put()";
+        }
+
+        public string Patch()
+        {
+            return "Patch()";
+        }
+
+        public string Post()
+        {
+            return "Post()";
+        }
+
+        public string Delete()
+        {
+            return "Delete()";
+        }
+    }
+
+    public class AttributeCustomersController: TestODataController
+    {
+        [ODataRoute("AttributeCustomers")]
+        public string Get()
+        {
+            return "Get()";
+        }
+
+        [ODataRoute("AttributeCustomers({key})")]
+        public string Get(int key)
+        {
+            return $"Get({key})";
         }
     }
 }

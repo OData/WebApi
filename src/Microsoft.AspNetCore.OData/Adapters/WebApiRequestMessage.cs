@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
+using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
@@ -28,7 +29,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <summary>
         /// The inner request wrapped by this instance.
         /// </summary>
-        internal HttpRequest innerRequest;
+        private HttpRequest innerRequest;
 
         /// <summary>
         /// Initializes a new instance of the WebApiRequestMessage class.
@@ -183,7 +184,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns></returns>
         public IDictionary<string, string> ODataContentIdMapping
         {
-            get { return null; }
+            get { return innerRequest.GetODataContentIdMapping(); }
         }
 
         /// <summary>

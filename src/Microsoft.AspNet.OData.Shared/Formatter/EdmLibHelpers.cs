@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
@@ -130,14 +131,29 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 if (testCollections)
                 {
+                    Type entityType;
+
+                    if (IsDeltaSetWrapper(clrType, out entityType))
+                    {
+                        IEdmType elementType = GetEdmType(edmModel, entityType, testCollections: false);
+                        if (elementType != null)
+                        {
+                            return new EdmCollectionType(elementType.ToEdmTypeReference(IsNullable(entityType)));
+                        }
+                    }
+
                     Type enumerableOfT = ExtractGenericInterface(clrType, typeof(IEnumerable<>));
                     if (enumerableOfT != null)
                     {
                         Type elementClrType = enumerableOfT.GetGenericArguments()[0];
 
-                        // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
-                        Type entityType;
+                        // IEnumerable<SelectExpandWrapper<T>> is a collection of T.                       
                         if (IsSelectExpandWrapper(elementClrType, out entityType))
+                        {
+                            elementClrType = entityType;
+                        }
+
+                        if (IsComputeWrapper(elementClrType, out entityType))
                         {
                             elementClrType = entityType;
                         }
@@ -730,10 +746,32 @@ namespace Microsoft.AspNet.OData.Formatter
             if (edmModel == null)
             {
                 throw Error.ArgumentNull("edmModel");
-            }
+            }         
 
             DynamicPropertyDictionaryAnnotation annotation =
                 edmModel.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(edmType);
+            if (annotation != null)
+            {
+                return annotation.PropertyInfo;
+            }
+
+            return null;
+        }
+
+        public static PropertyInfo GetInstanceAnnotationsContainer(IEdmStructuredType edmType, IEdmModel edmModel)
+        {
+            if (edmType == null)
+            {
+                throw Error.ArgumentNull("edmType");
+            }
+
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull("edmModel");
+            }
+
+            ODataInstanceAnnotationContainerAnnotation annotation =
+                edmModel.GetAnnotationValue<ODataInstanceAnnotationContainerAnnotation>(edmType);
             if (annotation != null)
             {
                 return annotation.PropertyInfo;
@@ -874,14 +912,17 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             IEdmTypeReference expectedPayloadType = null;
 
-            if (typeof(IEdmObject).IsAssignableFrom(type))
+            if (typeof(IEdmObject).IsAssignableFrom(type) || typeof(IDeltaSet).IsAssignableFrom(type))
             {
                 // typeless mode. figure out the expected payload type from the OData Path.
                 IEdmType edmType = path.EdmType;
                 if (edmType != null)
                 {
                     expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
-                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
+
+                    //This loop should execute only if its not a type of edmchangedobjectcollection, In case of edmchangedobjectcollection,
+                    //Expectedpayloadtype should not be of elementytype, but of collection.
+                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection && !(typeof(ICollection).IsAssignableFrom(type) || typeof(IDeltaSet).IsAssignableFrom(type)))
                     {
                         IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
                         if (elementType.IsEntity())
@@ -895,7 +936,7 @@ namespace Microsoft.AspNet.OData.Formatter
             else
             {
                 TryGetInnerTypeForDelta(ref type);
-                expectedPayloadType = model.GetEdmTypeReference(type);
+                expectedPayloadType = model.GetTypeMappingCache().GetEdmType(type, model);
             }
 
             return expectedPayloadType;
@@ -1013,7 +1054,12 @@ namespace Microsoft.AspNet.OData.Formatter
             return _coreModel.GetPrimitiveType(primitiveKind);
         }
 
-        private static bool IsSelectExpandWrapper(Type type, out Type entityType)
+        private static bool IsSelectExpandWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(SelectExpandWrapper<>), type, out entityType);
+        private static bool IsDeltaSetWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(DeltaSet<>), type, out entityType);
+
+        internal static bool IsComputeWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(ComputeWrapper<>), type, out entityType);
+
+        private static bool IsTypeWrapper(Type wrappedType, Type type, out Type entityType)
         {
             if (type == null)
             {
@@ -1021,13 +1067,13 @@ namespace Microsoft.AspNet.OData.Formatter
                 return false;
             }
 
-            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(SelectExpandWrapper<>))
+            if (TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == wrappedType)
             {
                 entityType = type.GetGenericArguments()[0];
                 return true;
             }
 
-            return IsSelectExpandWrapper(TypeHelper.GetBaseType(type), out entityType);
+            return IsTypeWrapper(wrappedType, TypeHelper.GetBaseType(type), out entityType);
         }
 
         private static Type ExtractGenericInterface(Type queryType, Type interfaceType)

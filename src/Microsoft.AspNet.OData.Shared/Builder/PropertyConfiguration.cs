@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Query;
@@ -37,6 +38,7 @@ namespace Microsoft.AspNet.OData.Builder
             AddedExplicitly = true;
             _name = property.Name;
             QueryConfiguration = new QueryConfiguration();
+            DerivedTypeConstraints = new DerivedTypeConstraintConfiguration();
         }
 
         /// <summary>
@@ -73,6 +75,11 @@ namespace Microsoft.AspNet.OData.Builder
         /// Gets the CLR <see cref="Type"/> of the property.
         /// </summary>
         public abstract Type RelatedClrType { get; }
+
+        /// <summary>
+        /// List of allowed derived types that are allowed for the property. 
+        /// </summary>
+        public DerivedTypeConstraintConfiguration DerivedTypeConstraints { get; private set; }
 
         /// <summary>
         /// Gets the <see cref="PropertyKind"/> of the property.
@@ -271,7 +278,7 @@ namespace Microsoft.AspNet.OData.Builder
         public PropertyConfiguration Count()
         {
             QueryConfiguration.SetCount(true);
-            return this;    
+            return this;
         }
 
         /// <summary>

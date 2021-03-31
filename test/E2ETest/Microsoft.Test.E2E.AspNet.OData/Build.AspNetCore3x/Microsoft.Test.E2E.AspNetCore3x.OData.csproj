@@ -1662,6 +1662,15 @@
     <Compile Include="..\Validation\DeltaOfTValidationTests.cs">
       <Link>Validation\DeltaOfTValidationTests.cs</Link>
     </Compile>
+	<Compile Include="..\BulkOperation\BulkInsertDataModel.cs">
+		<Link>BulkOperation\BulkInsertDataModel.cs</Link>
+	</Compile>
+	<Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
+		<Link>BulkOperation\BulkInsertEdmModel.cs</Link>
+	</Compile>
+	<Compile Include="..\BulkOperation\BulkInsertTest.cs">
+		<Link>BulkOperation\BulkInsertTest.cs</Link>
+	</Compile>
   </ItemGroup>
   
   <ItemGroup>
@@ -1675,4 +1684,5 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 
+	
 </Project>

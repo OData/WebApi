@@ -152,7 +152,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                     .Build();
 
                                 _selfHostServer.Start();
-#else
+#else                                
                                 _selfHostServer = WebApp.Start(this.BaseAddress, DefaultKatanaConfigure);
 #endif
                             }

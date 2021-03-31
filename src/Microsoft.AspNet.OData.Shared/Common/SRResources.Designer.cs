@@ -499,6 +499,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Cannot use Changed Object of type &apos;{0}&apos; on an entity of type &apos;{1}&apos;..
+        /// </summary>
+        internal static string ChangedObjectTypeMismatch
+        {
+            get
+            {
+                return ResourceManager.GetString("ChangedObjectTypeMismatch", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The given model does not contain the type &apos;{0}&apos;..
         /// </summary>
         internal static string ClrTypeNotInModel
@@ -2721,6 +2732,28 @@ namespace Microsoft.AspNet.OData.Common
             }
         }
 
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
+        /// </summary>
+        internal static string ResourcesShouldbePresent
+        {
+            get
+            {
+                return ResourceManager.GetString("ResourcesShouldbePresent", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Cannot find the resource wrapper type &apos;{0}&apos; in the model..
+        /// </summary>
+        internal static string ResourceSetWrapperSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("ResourceSetWrapperSupported", resourceCulture);
+            }
+        }
+        
         /// <summary>
         ///   Looks up a localized string similar to Cannot find the resource type &apos;{0}&apos; in the model..
         /// </summary>

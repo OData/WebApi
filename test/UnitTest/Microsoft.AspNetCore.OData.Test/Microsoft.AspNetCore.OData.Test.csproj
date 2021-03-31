@@ -60,4 +60,14 @@
     <Folder Include="Properties\" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.EntityFrameworkCore">
+      <Version>5.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory">
+      <Version>5.0.4</Version>
+    </PackageReference>
+  </ItemGroup>
+
+	
 </Project>

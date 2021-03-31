@@ -2,7 +2,10 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Reflection;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
+using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
 {
@@ -38,6 +41,55 @@ namespace Microsoft.AspNet.OData
         public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
             : base(edmType, isNullable)
         {
+            PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
+            TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
+        }
+
+        /// <summary>
+        /// Instance Annotation container to hold Transient Annotations
+        /// </summary>
+        internal IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <summary>
+        /// Instance Annotation container to hold Persistent Annotations
+        /// </summary>/// <inheritdoc />
+        public IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer { get; set; }
+
+        /// <summary>
+        /// To set Persistent Instance Annotation
+        /// </summary>        
+        /// <param name="value">InstanceAnnotation container value</param>
+        /// <returns>boolean representing whether the setting of instanceannotation was successful</returns>
+        public virtual bool TrySetInstanceAnnotations(IODataInstanceAnnotationContainer value)
+        {
+            PersistentInstanceAnnotationsContainer = value;
+            return true;
+        }
+
+        /// <summary>
+        /// To get Persistent Instance Annotation
+        /// </summary>        
+        /// <returns>persistence instanceannotation container </returns>
+        public virtual IODataInstanceAnnotationContainer TryGetInstanceAnnotations()
+        {
+            return PersistentInstanceAnnotationsContainer;            
+        }
+
+        /// <summary>
+        /// Method to Add Data Modification Exception
+        /// </summary>
+        public void AddDataException(DataModificationExceptionType dataModificationException)
+        {
+            TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationException);           
+        }
+
+        /// <summary>
+        /// Method to Add Data Modification Exception
+        /// </summary>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
+        public object GetDataException()
+        {
+            return TransientInstanceAnnotationContainer.GetResourceAnnotation("Core.DataModificationException");
         }
     }
 }

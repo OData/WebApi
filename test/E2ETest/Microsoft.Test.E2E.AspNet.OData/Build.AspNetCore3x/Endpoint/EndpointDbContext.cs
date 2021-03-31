@@ -22,7 +22,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
             modelBuilder.Entity<EpCustomer>().OwnsOne(c => c.HomeAddress);
             modelBuilder.Entity<EpCustomer>().OwnsMany(c => c.FavoriteAddresses, a =>
             {
-                a.HasForeignKey("OwnerId");
+                a.HasForeignKey("OwnerId");               
                 a.Property<int>("Id");
                 a.HasKey("Id");
             });

@@ -259,6 +259,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Results\ResultHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\DynamicPropertyRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationSourceRoutingConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NestedPathsRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\RequestMethodExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SelectControllerResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SingletonRoutingConvention.cs" />

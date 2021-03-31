@@ -77,6 +77,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 new RefRoutingConvention(),
                 new ActionRoutingConvention(),
                 new FunctionRoutingConvention(),
+                new NestedPathsRoutingConvention(),
                 new UnmappedRequestRoutingConvention()
             };
         }

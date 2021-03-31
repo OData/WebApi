@@ -21,10 +21,7 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch()
         {
             //Assign
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
-            var lstId = new List<string>();
+               var lstId = new List<string>();
             lstId.Add("Id");
             var deltaSet = new DeltaSet<Friend>(lstId);
 
@@ -58,9 +55,6 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch_WithDeletes()
         {
             //Assign
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
             var deltaSet = new DeltaSet<Friend>(new List<string>() { "Id" });
 
 
@@ -91,9 +85,7 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch_WithInstanceAnnotations()
         {
             //Assign
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
+            
             var deltaSet = new DeltaSet<Friend>((new List<string>() { "Id" }));
 
 
@@ -145,11 +137,6 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch_WithNestedDelta()
         {
             //Assign
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
-            EdmEntityType _entityType1 = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "NewFriend");
-            _entityType1.AddKeys(_entityType1.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
 
             var lstId = new List<string>();
             lstId.Add("Id");

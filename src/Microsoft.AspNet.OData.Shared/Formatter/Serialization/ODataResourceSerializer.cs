@@ -989,7 +989,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             if (delta != null)
             {
-                delta.TryGetPropertyValue(instanceAnnotationInfo.Name, out value);
+                if (instanceAnnotationInfo != null)
+                {
+                    delta.TryGetPropertyValue(instanceAnnotationInfo.Name, out value);
+
+                }
 
                 IDeltaSetItem deltaitem = resourceContext.ResourceInstance as IDeltaSetItem;
 
@@ -1005,12 +1009,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     edmEntityObject = structuredObject as EdmEntityObject;
 
-                    if (edmEntityObject != null && edmEntityObject.PersistentInstanceAnnotationsContainer != null)
+                    if (edmEntityObject != null)
                     {
                         value = edmEntityObject.PersistentInstanceAnnotationsContainer;
-                    }
-
-                    transientAnnotations = edmEntityObject.TransientInstanceAnnotationContainer;
+                        transientAnnotations = edmEntityObject.TransientInstanceAnnotationContainer;
+                    }                    
                 }
             }
 

@@ -38,6 +38,43 @@ namespace Microsoft.AspNet.OData.Test
              Assert.Same(_entityType, collectionTypeReference.ElementType().Definition);
          }
 
+        public static List<EdmStructuredObject> friends = new List<EdmStructuredObject>();
+
+        internal void InitFriends()
+        {
+            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+         
+            EdmEntityType _entityType1 = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "NewFriend");
+            _entityType1.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            _entityType1.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
+
+            var friend1 = new EdmEntityObject(_entityType);
+            friend1.TrySetPropertyValue("Id", 1);
+            friend1.TrySetPropertyValue("Name", "Test1");
+
+            var friend2 = new EdmEntityObject(_entityType);
+            friend2.TrySetPropertyValue("Id", 2);
+            friend2.TrySetPropertyValue("Name", "Test2");
+
+            var nfriend1 = new EdmEntityObject(_entityType1);
+            nfriend1.TrySetPropertyValue("Id", 1);
+            nfriend1.TrySetPropertyValue("Name", "Test1");
+
+            var nfriend2 = new EdmEntityObject(_entityType1);
+            nfriend2.TrySetPropertyValue("Id", 2);
+            nfriend2.TrySetPropertyValue("Name", "Test2");
+
+            var nfriends = new List<EdmStructuredObject>();
+            nfriends.Add(nfriend1);
+            nfriends.Add(nfriend2);
+
+            friend1.TrySetPropertyValue("NewFriends", nfriends);
+
+            friends.Add(friend1);
+            friends.Add(friend2);
+        }
 
         [Fact]
         public void EdmChangedObjectCollection_Add_WrongItem_ThrowsError()
@@ -60,35 +97,36 @@ namespace Microsoft.AspNet.OData.Test
         public void EdmChangedObjectCollection_Patch()
         {
             //Assign
+            InitFriends();
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
             var lstId = new List<string>();
             lstId.Add("Id");
-            var deltaSet = new DeltaSet<Friend>(lstId);
+            var deltaSet = new EdmChangedObjectCollection(_entityType);
 
-            var edmChangedObj1 = new Delta<Friend>();
+            var edmChangedObj1 = new EdmDeltaEntityObject(_entityType);
             edmChangedObj1.TrySetPropertyValue("Id", 1);
             edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
 
-            var edmChangedObj2 = new Delta<Friend>();
+            var edmChangedObj2 = new EdmDeltaEntityObject(_entityType);
             edmChangedObj2.TrySetPropertyValue("Id", 2);
             edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
                         
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
-            var friends = new List<Friend>();
-            friends.Add(new Friend { Id = 1, Name = "Test1" });
-            friends.Add(new Friend { Id = 2, Name = "Test2" });
-
             //Act
-            deltaSet.Patch(friends);
+            deltaSet.Patch(new FriendTypelessPatchHandler(_entityType));
 
             //Assert
             Assert.Equal(2, friends.Count);
-            Assert.Equal("Friend1", friends[0].Name);
-            Assert.Equal("Friend2", friends[1].Name);
+            object obj;
+            friends[0].TryGetPropertyValue("Name", out obj);
+            Assert.Equal("Friend1", obj );
+            friends[1].TryGetPropertyValue("Name", out obj);
+            Assert.Equal("Friend2", obj);
 
         }
 
@@ -97,162 +135,75 @@ namespace Microsoft.AspNet.OData.Test
         public void EdmChangedObjectCollection_Patch_WithDeletes()
         {
             //Assign
+            InitFriends();
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
-            var deltaSet = new DeltaSet<Friend>();
+            var changedObjCollection = new EdmChangedObjectCollection(_entityType);
 
-
-            var edmChangedObj1 = new Delta<Friend>();
+            var edmChangedObj1 = new EdmDeltaEntityObject(_entityType);
             edmChangedObj1.TrySetPropertyValue("Id", 1);
             edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
 
-            var edmChangedObj2 = new DeltaDeletedEntityObject<Friend>();
+            var edmChangedObj2 = new EdmDeltaDeletedEntityObject(_entityType);
             edmChangedObj2.TrySetPropertyValue("Id", 2);
-            
+            edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
 
-            deltaSet.Add(edmChangedObj1);
-            deltaSet.Add(edmChangedObj2);
-
-            var friends = new List<Friend>();
-            friends.Add(new Friend { Id = 1, Name = "Test1" });
-            friends.Add(new Friend { Id = 2, Name = "Test2" });
+            changedObjCollection.Add(edmChangedObj1);
+            changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            deltaSet.Patch(friends);
+            changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType));
 
             //Assert
             Assert.Single(friends);
-            Assert.Equal("Friend1", friends[0].Name);
+            object obj;
+            friends[0].TryGetPropertyValue("Name", out obj);
+            Assert.Equal("Friend1", obj);
+      
         }
 
         [Fact]
         public void EdmChangedObjectCollection_Patch_WithInstanceAnnotations()
         {
             //Assign
+            InitFriends();
             EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
+            _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
-            var deltaSet = new DeltaSet<Friend>();
+            var changedObjCollection = new EdmChangedObjectCollection(_entityType);
 
-
-            var edmChangedObj1 = new Delta<Friend>();
+            var edmChangedObj1 = new EdmDeltaEntityObject(_entityType);
             edmChangedObj1.TrySetPropertyValue("Id", 1);
             edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+            edmChangedObj1.PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
+            edmChangedObj1.PersistentInstanceAnnotationsContainer.AddResourceAnnotation("NS.Test", 1);
 
-            var annotation = new ODataInstanceAnnotationContainer();
-            annotation.AddResourceAnnotation("NS.Test1", 1);
-            edmChangedObj1.TrySetPropertyValue("InstanceAnnotations", annotation);
-
-            var edmChangedObj2 = new DeltaDeletedEntityObject<Friend>();
-            edmChangedObj2.TrySetPropertyValue("Id", 2);
-        
-            edmChangedObj2.TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
-            edmChangedObj2.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.ContentID", 3);
-
-            deltaSet.Add(edmChangedObj1);
-            deltaSet.Add(edmChangedObj2);
-
-            var friends = new List<Friend>();
-            friends.Add(new Friend { Id = 1, Name = "Test1" });
-            friends.Add(new Friend { Id = 2, Name = "Test2" });
-
-            //Act
-            var coll = deltaSet.Patch(friends).ToArray();
-
-            //Assert
-            Assert.Single(friends);
-            Assert.Equal("Friend1", friends[0].Name);
-            var changedObj = coll[0] as Delta<Friend>;
-            Assert.NotNull(changedObj);
-            
-            object obj;
-            changedObj.TryGetPropertyValue("InstanceAnnotations",out obj);
-            var annotations = (obj as IODataInstanceAnnotationContainer).GetResourceAnnotations();
-            Assert.Equal("NS.Test1", annotations.First().Key);
-            Assert.Equal(1, annotations.First().Value);
-
-            DeltaDeletedEntityObject<Friend> changedObj1 = coll[1] as DeltaDeletedEntityObject<Friend>;
-            Assert.NotNull(changedObj1);
-
-            annotations = changedObj1.TransientInstanceAnnotationContainer.GetResourceAnnotations();
-            Assert.Equal("Core.ContentID", annotations.First().Key);
-            Assert.Equal(3, annotations.First().Value);
-        }
-
-        [Fact]
-        public void EdmChangedObjectCollection_Patch_WithNestedDelta()
-        {
-            //Assign
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
-            _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
-            EdmEntityType _entityType1 = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "NewFriend");
-            _entityType1.AddKeys(_entityType1.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
-
-            var lstId = new List<string>();
-            lstId.Add("Id");
-
-            var deltaSet = new DeltaSet<Friend>(lstId);
-
-            var deltaSet1 = new DeltaSet<NewFriend>(lstId);
-
-            var edmNewObj1 = new Delta<NewFriend>();
-            edmNewObj1.TrySetPropertyValue("Id", 1);
-            edmNewObj1.TrySetPropertyValue("Name", "NewFriend1");
-
-            var edmNewObj2 = new Delta<NewFriend>();
-            edmNewObj2.TrySetPropertyValue("Id", 2);
-            edmNewObj2.TrySetPropertyValue("Name", "NewFriend2");
-
-            deltaSet1.Add(edmNewObj1);
-            deltaSet1.Add(edmNewObj2);
-
-            var deltaSet2 = new DeltaSet<NewFriend>(lstId);
-
-            var edmNewObj21 = new Delta<NewFriend>();
-            edmNewObj21.TrySetPropertyValue("Id", 3);
-            edmNewObj21.TrySetPropertyValue("Name", "NewFriend3");
-
-            var edmNewObj22 = new Delta<NewFriend>();
-            edmNewObj22.TrySetPropertyValue("Id", 4);
-            edmNewObj22.TrySetPropertyValue("Name", "NewFriend4");
-
-            deltaSet2.Add(edmNewObj21);
-            deltaSet2.Add(edmNewObj22);
-
-            var edmChangedObj1 = new Delta<Friend>();
-            edmChangedObj1.TrySetPropertyValue("Id", 1);
-            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
-            edmChangedObj1.TrySetPropertyValue("NewFriends", deltaSet1);
-
-            var edmChangedObj2 = new Delta<Friend>();
+            var edmChangedObj2 = new EdmDeltaEntityObject(_entityType);
             edmChangedObj2.TrySetPropertyValue("Id", 2);
             edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
-            edmChangedObj2.TrySetPropertyValue("NewFriends", deltaSet2);
 
-            deltaSet.Add(edmChangedObj1);
-            deltaSet.Add(edmChangedObj2);
-
-            var friends = new List<Friend>();
-            friends.Add(new Friend { Id = 1, Name = "Test1" });
-            friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
+            changedObjCollection.Add(edmChangedObj1);
+            changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            deltaSet.Patch(friends);
+            var coll= changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType));
 
             //Assert
             Assert.Equal(2, friends.Count);
-            Assert.Equal("Friend1", friends[0].Name);
-            Assert.Equal("Friend2", friends[1].Name);
+            object obj;
+            friends[0].TryGetPropertyValue("Name", out obj);
+            Assert.Equal("Friend1", obj);
 
-            Assert.Equal(2, friends[0].NewFriends.Count);
-            Assert.Equal(2, friends[1].NewFriends.Count);
+            var edmObj = coll[0] as EdmDeltaEntityObject;
 
-            Assert.Equal("NewFriend1", friends[0].NewFriends[0].Name);
-            Assert.Equal("NewFriend2", friends[0].NewFriends[1].Name);
-            Assert.Equal("NewFriend3", friends[1].NewFriends[0].Name);
-            Assert.Equal("NewFriend4", friends[1].NewFriends[1].Name);
+            Assert.Equal("NS.Test", edmObj.PersistentInstanceAnnotationsContainer.GetResourceAnnotations().First().Key);
+            Assert.Equal(1, edmObj.PersistentInstanceAnnotationsContainer.GetResourceAnnotations().First().Value);
+
+            friends[1].TryGetPropertyValue("Name", out obj);
+            Assert.Equal("Friend2", obj);
         }
 
     }
@@ -272,4 +223,246 @@ namespace Microsoft.AspNet.OData.Test
         public int Id { get; set; }
         public string Name { get; set; }
     }
+
+    public class FriendTypelessPatchHandler : TypelessPatchMethodHandler
+    {
+        IEdmEntityType entityType;
+
+        public FriendTypelessPatchHandler(IEdmEntityType entityType)
+        {            
+            this.entityType = entityType;
+        }
+
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new EdmEntityObject(entityType);
+  
+                EdmChangedObjectCollectionTest.friends.Add(createdObject);
+                
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                var id = keyValues.First().Value.ToString();
+    
+                foreach (var emp in EdmChangedObjectCollectionTest.friends)
+                {
+                    object id1;
+                    emp.TryGetPropertyValue("Id", out id1);
+
+                    if (id == id1.ToString())
+                    {
+                        EdmChangedObjectCollectionTest.friends.Remove(emp);
+
+                        break;
+                    }
+                }
+
+
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        {
+            PatchStatus status = PatchStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                var id = keyValues["Id"].ToString();
+
+                foreach (var friend in EdmChangedObjectCollectionTest.friends)
+                {
+                    object id1;
+                    friend.TryGetPropertyValue("Id", out id1);
+
+                    if (id == id1.ToString())
+                    {
+                        originalObject = friend;
+                        break;
+                    }
+                }
+
+
+                if (originalObject == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                status = PatchStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        {
+            switch (navigationPropertyName)
+            {
+                case "NewFriends":
+                    return new NewFriendTypelessPatchHandler(parent, entityType.DeclaredNavigationProperties().First().Type.Definition.AsElementType() as IEdmEntityType);
+                default:
+                    return null;
+            }
+        }
+
+    }
+
+    public class NewFriendTypelessPatchHandler : TypelessPatchMethodHandler
+    {
+        IEdmEntityType entityType;
+        EdmStructuredObject friend;
+
+        public NewFriendTypelessPatchHandler(EdmStructuredObject friend, IEdmEntityType entityType)
+        {
+            this.entityType = entityType;
+            this.friend = friend;
+        }
+
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        {
+            createdObject = null;
+            errorMessage = string.Empty;
+
+            try
+            {
+                createdObject = new EdmEntityObject(entityType);
+
+                object obj;
+                friend.TryGetPropertyValue("NewFriends", out obj);
+
+                var nfriends = obj as List<EdmStructuredObject>;
+
+                nfriends.Add(createdObject);
+
+                friend.TrySetPropertyValue("NewFriends", nfriends);
+
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+
+            try
+            {
+                object obj;
+                friend.TryGetPropertyValue("NewFriends", out obj);
+
+                var nfriends = obj as List<EdmStructuredObject>;
+
+                var id = keyValues.First().Value.ToString();
+
+                foreach (var frnd in nfriends)
+                {
+                    object id1;
+                    frnd.TryGetPropertyValue("Id", out id1);
+
+                    if (id == id1.ToString())
+                    {
+                        nfriends.Remove(frnd);
+
+                        break;
+                    }
+                }
+
+
+                return PatchStatus.Success;
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+
+                return PatchStatus.Failure;
+            }
+        }
+
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        {
+            PatchStatus status = PatchStatus.Success;
+            errorMessage = string.Empty;
+            originalObject = null;
+
+            try
+            {
+                object obj;
+                friend.TryGetPropertyValue("NewFriends", out obj);
+
+                var nfriends = obj as List<EdmStructuredObject>;
+
+                var id = keyValues.First().Value.ToString();
+
+                foreach (var frnd in nfriends)
+                {
+                    object id1;
+                    frnd.TryGetPropertyValue("Id", out id1);
+
+                    if (id == id1.ToString())
+                    {
+                        originalObject = frnd;
+
+                        break;
+                    }
+                }
+
+
+
+                if (originalObject == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                status = PatchStatus.Failure;
+                errorMessage = ex.Message;
+            }
+
+            return status;
+        }
+
+        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        {
+            return null;
+        }
+
+    }
+
 }

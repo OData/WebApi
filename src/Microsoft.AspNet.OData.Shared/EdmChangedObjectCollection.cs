@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if (PatchHandler.TryCreate(out original, out errorMessage) != PatchStatus.Success)
+                            if (PatchHandler.TryCreate(changedObj, out original, out errorMessage) != PatchStatus.Success)
                             {
                                 //Handle failed Opreataion - create
                                 IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, original, keys, errorMessage);
@@ -211,42 +211,68 @@ namespace Microsoft.AspNet.OData
         {
             foreach (string propertyName in changedObj.GetChangedPropertyNames())
             {
-                object value;
-                if (changedObj.TryGetPropertyValue(propertyName, out value))
+                ApplyProperties(changedObj, originalObj, propertyName);
+            }
+
+            foreach (string propertyName in changedObj.GetUnchangedPropertyNames())
+            {
+                ApplyProperties(changedObj, originalObj, propertyName);
+            }
+        }
+
+        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName)
+        {
+            object value;
+            if (changedObj.TryGetPropertyValue(propertyName, out value))
+            {
+                EdmChangedObjectCollection changedColl = value as EdmChangedObjectCollection;
+                if (changedColl != null)
                 {
-                    EdmChangedObjectCollection changedColl = value as EdmChangedObjectCollection;
-                    if (changedColl != null)
+                    TypelessPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(originalObj, propertyName);
+                    if (patchHandler != null)
                     {
-                        TypelessPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(originalObj, propertyName);
-                        if (patchHandler != null) 
+                        changedColl.Patch(patchHandler);
+                    }
+                    else
+                    {
+                        object obj;
+                        originalObj.TryGetPropertyValue(propertyName, out obj);
+
+                        ICollection<EdmStructuredObject> edmColl = obj as ICollection<EdmStructuredObject>;
+
+                        changedColl.Patch(edmColl);
+                    }
+                }
+                else
+                {
+                    //call patchitem if its single structuredobj
+                    EdmStructuredObject structuredObj = value as EdmStructuredObject;
+
+                    if (structuredObj != null)
+                    {
+                        object obj;
+                        originalObj.TryGetPropertyValue(propertyName, out obj);
+
+                        EdmStructuredObject origStructuredObj = obj as EdmStructuredObject;
+
+                        if(origStructuredObj == null)
                         {
-                            changedColl.Patch(patchHandler);
-                        }
-                        else
-                        {
-                            object obj;
-                            originalObj.TryGetPropertyValue(propertyName, out obj);
-
-                            ICollection<EdmStructuredObject> edmColl = obj as ICollection<EdmStructuredObject>;
-
-                            changedColl.Patch(edmColl);
+                            if(structuredObj is EdmComplexObject)
+                            {
+                                origStructuredObj = new EdmComplexObject(structuredObj.ActualEdmType as IEdmComplexType);
+                            }
+                            else
+                            {
+                                origStructuredObj = new EdmEntityObject(structuredObj.ActualEdmType as IEdmEntityType);
+                            }                            
                         }
 
-                        
+                        PatchItem(structuredObj, origStructuredObj);                        
                     }
                     else
                     {
                         originalObj.TrySetPropertyValue(propertyName, value);
                     }
-                }
-            }
-
-            foreach (string propertyName in changedObj.GetUnchangedPropertyNames())
-            {
-                object value;
-                if (changedObj.TryGetPropertyValue(propertyName, out value))
-                {
-                    originalObj.TrySetPropertyValue(propertyName, value);
                 }
             }
         }

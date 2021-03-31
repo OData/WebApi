@@ -146,7 +146,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             var entity =   Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = friendColl.Patch(new FriendTypelessPatchHandler(EmployeesTypeless[key-1], entity));
+            var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedFriend") as IEdmEntityType;
+
+            var changedObjColl = friendColl.Patch(new FriendTypelessPatchHandler(EmployeesTypeless[key-1], entity1));
 
             return changedObjColl;
         }
@@ -285,6 +287,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             if (key == 1)
             {
                 var changedObjColl = PatchWithUsersMethodTypeLess(key, friendColl);
+
+                var emp = EmployeesTypeless[key - 1];
+                object obj;
+                emp.TryGetPropertyValue("UnTypedFriends", out obj);
+                var lst = obj as List<EdmStructuredObject>;
+
+                if (lst != null && lst.Count > 1)
+                {
+                    object obj1;
+                    if(lst[1].TryGetPropertyValue("Name", out obj1) && Equals("Friend007", obj1))
+                    {
+                        lst[1].TryGetPropertyValue("Address", out obj1);
+                        Assert.NotNull(obj1);
+                        object obj2;
+                        (obj1 as EdmStructuredObject).TryGetPropertyValue("Street", out obj2);
+
+                        Assert.Equal("Abc 123", obj2);
+                        
+                    }
+                }
+                
+
 
                 return Ok(changedObjColl);
             }

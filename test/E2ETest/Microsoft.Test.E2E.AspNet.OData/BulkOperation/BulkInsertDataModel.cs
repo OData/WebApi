@@ -68,7 +68,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public int Age { get; set; }
 
         public List<Order> Orders { get; set; }
+
     }
+
 
     public class Order
     {
@@ -107,7 +109,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public string Name { get; set; }
 
         public int Age { get; set; }
+
+        [AutoExpand]
+        public UnTypedAddress Address { get; set; }
+
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
+    }
+
+    public class UnTypedAddress
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string Street { get; set; }
     }
 
     public class FriendColl<T> : ICollection<T>

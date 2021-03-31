@@ -88,12 +88,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
             }
 
-            if (type == typeof(EdmChangedObjectCollection) ||
-               (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(DeltaSet<>)))
-            {
-                return _rootContainer.GetRequiredService<ODataResourceSetDeserializer>();
-            }
-
 
             // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
             // until after the above checks have passed.

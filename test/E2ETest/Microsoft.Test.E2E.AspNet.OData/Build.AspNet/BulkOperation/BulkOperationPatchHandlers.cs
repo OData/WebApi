@@ -371,7 +371,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -484,7 +484,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;

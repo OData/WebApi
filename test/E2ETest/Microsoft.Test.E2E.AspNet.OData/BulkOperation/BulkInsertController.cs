@@ -202,6 +202,27 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             return Ok(emp.Friends);
         }
 
+        [ODataRoute("Employees({key})/UnTypedFriends")]
+        public ITestActionResult GetUnTypedFriends(int key)
+        {
+            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
+            InitTypeLessEmployees(entity);
+
+            foreach (var emp in EmployeesTypeless)
+            {
+                object obj;
+                emp.TryGetPropertyValue("ID", out obj);
+
+                if(Equals(key, obj))
+                {
+                    object friends ;
+                    emp.TryGetPropertyValue("UntypedFriends", out friends);
+                    return Ok(friends);
+                }
+            }
+            return Ok();
+        }
+
 
         [ODataRoute("Employees")]
         [HttpPatch]

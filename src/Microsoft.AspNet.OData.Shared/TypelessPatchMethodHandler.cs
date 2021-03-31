@@ -17,11 +17,12 @@ namespace Microsoft.AspNet.OData
     {
         /// <summary>
         /// TryCreate method to create a new object.
-        /// </summary>        
+        /// </summary>
+        /// <param name="changedObj">Changed object which can be appied on creted object, optional</param>
         /// <param name="createdObject">The created object (Typeless)</param>
         /// <param name="errorMessage">Any error message in case of an exception</param>
         /// <returns></returns>
-        public abstract PatchStatus TryCreate(out EdmStructuredObject createdObject, out string errorMessage);
+        public abstract PatchStatus TryCreate(IEdmChangedObject changedObj, out EdmStructuredObject createdObject, out string errorMessage);
 
         /// <summary>
         /// TryGet method to which pointer to TryGet method can be assigned to.  This tries to Get based on a keyvalues.
@@ -87,7 +88,7 @@ namespace Microsoft.AspNet.OData
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryCreate(out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = default(EdmStructuredObject);
             errorMessage = string.Empty;

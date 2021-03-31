@@ -422,8 +422,36 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             }
         }
 
+        [Fact]
+        public async Task PatchEmployee_WithAdds_Friends_WithNested_Untyped()
+        {
+            //Arrange
 
-            [Fact]
+            string requestUri = this.BaseAddress + "/convention/Employees(1)/UnTypedFriends";
+            //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/UnTypedFriends/$delta',     
+                    'value':[{ 'Id':2, 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$delta");
+                json.ToString().Contains("@NS.Test");
+            }
+
+        }
+
+
+        [Fact]
         public async Task PatchEmployee_WithAdds_Friends_WithAnnotations_Untyped()
         {
             //Arrange

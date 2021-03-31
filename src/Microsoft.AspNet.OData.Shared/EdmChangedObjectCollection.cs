@@ -264,7 +264,9 @@ namespace Microsoft.AspNet.OData
                             else
                             {
                                 origStructuredObj = new EdmEntityObject(structuredObj.ActualEdmType as IEdmEntityType);
-                            }                            
+                            }
+
+                            originalObj.TrySetPropertyValue(propertyName, origStructuredObj);
                         }
 
                         PatchItem(structuredObj, origStructuredObj);                        

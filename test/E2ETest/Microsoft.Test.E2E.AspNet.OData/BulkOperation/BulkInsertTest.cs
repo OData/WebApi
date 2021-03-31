@@ -430,7 +430,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             string requestUri = this.BaseAddress + "/convention/Employees(1)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/UnTypedFriends/$delta',     
-                    'value':[{ 'Id':2, 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
+                    'value':[{ 'Id':2, 'Name': 'Friend007', 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
                      }";
 
 

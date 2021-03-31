@@ -64,10 +64,5 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             get { return this.innerContext.RouteData.Values; }
         }
-
-        /// <summary>
-        /// TODO: remove this
-        /// </summary>
-        public RouteContext RouteContext => innerContext;
     }
 }

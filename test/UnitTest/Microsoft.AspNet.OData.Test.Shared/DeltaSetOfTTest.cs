@@ -1,14 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Test.Common;
-using Microsoft.OData.Edm;
-using Moq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Microsoft.AspNet.OData.Builder;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -17,10 +13,10 @@ namespace Microsoft.AspNet.OData.Test
     {
        public static List<Friend> friends;
 
-       [Fact]
+        [Fact]
         public void DeltaSet_Patch()
         {
-            //Assign
+            //Arrange
                var lstId = new List<string>();
             lstId.Add("Id");
             var deltaSet = new DeltaSet<Friend>(lstId);
@@ -54,7 +50,7 @@ namespace Microsoft.AspNet.OData.Test
         [Fact]
         public void DeltaSet_Patch_WithDeletes()
         {
-            //Assign
+            //Arrange
             var deltaSet = new DeltaSet<Friend>(new List<string>() { "Id" });
 
 
@@ -84,7 +80,7 @@ namespace Microsoft.AspNet.OData.Test
         [Fact]
         public void DeltaSet_Patch_WithInstanceAnnotations()
         {
-            //Assign
+            //Arrange
             
             var deltaSet = new DeltaSet<Friend>((new List<string>() { "Id" }));
 
@@ -136,7 +132,7 @@ namespace Microsoft.AspNet.OData.Test
         [Fact]
         public void DeltaSet_Patch_WithNestedDelta()
         {
-            //Assign
+            //Arrange
 
             var lstId = new List<string>();
             lstId.Add("Id");

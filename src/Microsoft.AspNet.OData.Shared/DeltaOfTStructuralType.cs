@@ -161,28 +161,6 @@ namespace Microsoft.AspNet.OData
             Reset(_structuredType);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="keys"></param>
-        /// <returns></returns>
-        public IDictionary<string, object> GetKeyValues(IList<string> keys)
-        {
-            IDictionary<string, object> dictKeyValues = new Dictionary<string, object>();
-           
-            for (int i = 0; i < keys.Count; i++)
-            {
-                object obj;
-
-                if (TryGetPropertyValue(keys[i], out obj))
-                {
-                    dictKeyValues.Add(keys[i], obj);
-                }
-            }
-
-            return dictKeyValues;
-        }
-
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {

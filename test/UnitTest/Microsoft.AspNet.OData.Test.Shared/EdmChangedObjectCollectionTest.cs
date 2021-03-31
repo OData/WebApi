@@ -1,14 +1,14 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Test.Common;
-using Microsoft.OData.Edm;
-using Moq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData.Edm;
+using Moq;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -42,11 +42,11 @@ namespace Microsoft.AspNet.OData.Test
 
         internal void InitFriends()
         {
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
          
-            EdmEntityType _entityType1 = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "NewFriend");
+            EdmEntityType _entityType1 = new EdmEntityType("Microsoft.AspNet.OData.Test", "NewFriend");
             _entityType1.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType1.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
@@ -80,7 +80,7 @@ namespace Microsoft.AspNet.OData.Test
         public void EdmChangedObjectCollection_Add_WrongItem_ThrowsError()
         {
             //Assign
-            IEdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            IEdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             var edmChangedObjectcollection = new DeltaSet<Friend>();
 
             var edmChangedObj1 = new Delta<NewFriend>();
@@ -98,7 +98,7 @@ namespace Microsoft.AspNet.OData.Test
         {
             //Assign
             InitFriends();
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
@@ -136,7 +136,7 @@ namespace Microsoft.AspNet.OData.Test
         {
             //Assign
             InitFriends();
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 
@@ -169,7 +169,7 @@ namespace Microsoft.AspNet.OData.Test
         {
             //Assign
             InitFriends();
-            EdmEntityType _entityType = new EdmEntityType("namespace Microsoft.AspNet.OData.Test", "Friend");
+            EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
 

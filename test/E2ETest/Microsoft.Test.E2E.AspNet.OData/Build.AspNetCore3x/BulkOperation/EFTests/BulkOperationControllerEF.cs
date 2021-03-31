@@ -2,29 +2,22 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net;
-using System.Threading;
 using Microsoft.AspNet.OData;
-using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
-using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
+namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
-    public class EmployeesController : TestODataController
+    public class EmployeesControllerEF : TestODataController
     {
-        public EmployeesController()
+        public EmployeesControllerEF()
         {
            
         }
@@ -96,7 +89,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             Assert.NotNull(coll);
 
-            var returncoll = coll.Patch(new EmployeePatchHandler()) ;
+            var returncoll = coll.Patch(new EmployeeEFPatchHandler()) ;
 
             return Ok(returncoll);
         }
@@ -116,7 +109,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
             try
             {
-                delta.Patch(employee);
+                delta.Patch(employee, new EmployeeEFPatchHandler());
                 dbContext.SaveChanges();
             }
             catch (ArgumentException ae)
@@ -131,14 +124,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             return Ok(employee);
         }
 
-
-        [HttpPost]
-        [ODataRoute("ResetDataSource")]
-        public ITestActionResult ResetDataSource()
-        {
-           
-            return this.StatusCode(HttpStatusCode.NoContent);
-        }
 
     }
 }

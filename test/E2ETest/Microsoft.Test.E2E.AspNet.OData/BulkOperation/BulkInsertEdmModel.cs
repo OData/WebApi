@@ -5,7 +5,7 @@ using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
+namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
     internal class BulkInsertEdmModel
     {
@@ -96,8 +96,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             functionConfiguration.Parameter<int>("ID");
             functionConfiguration.Parameter<AccessLevel>("AccessLevel");
             functionConfiguration.Returns<bool>();
-
-            var actionConfiguration2 = odataModelBuilder.Action("ResetDataSource");
         }
     }
 }

@@ -57,7 +57,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)DeltaSetOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeltaDeletedEntityObjectOfT.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaEntityObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ETagMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
@@ -84,8 +83,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaDeltedEntityObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IEdmChangedObjectOfT.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IEdmDeltaDeletedEntityObjectOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TypelessPatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransientAnnotations.cs" />

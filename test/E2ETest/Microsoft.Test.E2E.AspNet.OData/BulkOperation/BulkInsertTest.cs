@@ -20,7 +20,7 @@ using Microsoft.Test.E2E.AspNet.OData.ModelBuilder;
 using Newtonsoft.Json.Linq;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
+namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
     public class BulkInsertTest : WebHostTestBase
     {
@@ -254,13 +254,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
-            //Assert
+          
             requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
@@ -269,7 +270,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
                 var json = await response.Content.ReadAsObject<JObject>();
                 var result = json.GetValue("value") as JArray;
 
-                Assert.Single(result);
                 Assert.Contains("Friend2", result.ToString());
             }
 
@@ -570,11 +570,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
             string requestUri = this.BaseAddress + "/convention/Employees";
 
             var content = @"{'@odata.context':'http://host/service/$metadata#Employees/$delta',     
-                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert1.Employee', 'ID':1,'Name':'Employee1',
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
                                 },
-                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert1.Employee', 'ID':2,'Name':'Employee2',
+                            {  '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':2,'Name':'Employee2',
                             'Friends@odata.delta':[{'Id':3,'Name':'Friend3',
                             'Orders@odata.delta' :[{'Id':3,'Price': 30}, {'Id':4,'Price': 40} ]},{'Id':4,'Name':'Friend4'}]
                                 }]
@@ -777,12 +777,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         #endregion
 
-        private async Task<HttpResponseMessage> ResetDatasource()
-        {
-            var uriReset = this.BaseAddress + "/convention/ResetDataSource";
-            var response = await this.Client.PostAsync(uriReset, null);
-            Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-            return response;
-        }
     }
 }

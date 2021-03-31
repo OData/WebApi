@@ -126,7 +126,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
-        public void ReadFeed_Calls_ReadInlineForDeltaFeeds()
+        public void ReadResourceSet_Calls_ReadInlineForDeltaFeeds()
         {
             // Arrange
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();
@@ -152,7 +152,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
-        public void ReadFeed_Calls_ReadInlineForDeltaFeeds_WithDeletes()
+        public void ReadResourceSet_Calls_ReadInlineForDeltaFeeds_WithDeletes()
         {
             // Arrange
             Mock<ODataDeserializerProvider> deserializerProvider = new Mock<ODataDeserializerProvider>();

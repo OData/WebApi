@@ -8,7 +8,7 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Basic interface to represented a typed deleted entity object
+    /// Base interface to represented a typed deleted entity object
     /// </summary>
     public interface IDeltaDeletedEntityObject
     {

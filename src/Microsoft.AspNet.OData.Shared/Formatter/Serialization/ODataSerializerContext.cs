@@ -159,7 +159,9 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// </summary>
         public ODataPath Path { get; set; }
 
-        internal bool IsUntyped { get; set; }
+        internal Type Type { get; set; }
+
+        internal bool IsUntyped { get { return typeof(IEdmObject).IsAssignableFrom(Type); } }
        
         /// <summary>
         /// Gets or sets the root element name which is used when writing primitive and enum types
@@ -289,8 +291,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmObject edmObject = instance as IEdmObject;
             if (edmObject != null)
             {
-                IsUntyped = true;
-
                 edmType = edmObject.GetEdmType();
                 if (edmType == null)
                 {
@@ -302,8 +302,6 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 if (typeof(IDeltaSet).IsAssignableFrom(type)) 
                 {
-                    IsUntyped = false;
-
                     return EdmLibHelpers.ToEdmTypeReference(Path.EdmType, isNullable: false);
                 }
                 

@@ -1671,6 +1671,12 @@
 	<Compile Include="..\BulkOperation\BulkInsertTest.cs">
 		<Link>BulkOperation\BulkInsertTest.cs</Link>
 	</Compile>
+	<Compile Include="..\BulkOperation\BulkInsertController.cs">
+		<Link>BulkOperation\BulkInsertController.cs</Link>
+	</Compile>
+	<Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+		<Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+	</Compile>
   </ItemGroup>
   
   <ItemGroup>

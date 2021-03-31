@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
     public abstract class ODataResourceSetWrapperBase : ODataItemBase
     {
         /// <summary>
-        /// To determint the type of Resource Set
+        /// To determine the type of Resource Set
         /// </summary>        
         internal abstract ResourceSetType ResourceSetType { get; }
 
@@ -25,18 +25,13 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             : base(item)
         {
             Resources = new List<ODataResourceWrapper>();
+            ResourceSetBase = item;
         }
 
         /// <summary>
         /// Gets the wrapped <see cref="ResourceSetBase"/>.
         /// </summary>
-        public ODataResourceSetBase ResourceSetBase
-        {
-            get
-            {
-                return Item as ODataResourceSetBase;
-            }
-        }
+        public ODataResourceSetBase ResourceSetBase { get; }
 
         /// <summary>
         /// Gets the members of this ResourceSet.

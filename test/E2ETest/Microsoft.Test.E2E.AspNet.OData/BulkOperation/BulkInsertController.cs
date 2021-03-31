@@ -2,23 +2,18 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
-using Microsoft.Test.E2E.AspNet.OData.Common.Models.Vehicle;
 using Xunit;
 
-namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
+namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
     public class EmployeesController : TestODataController
     {
@@ -143,10 +138,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(int key, EdmChangedObjectCollection friendColl)
         {
              
-            var entity =   Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
+            var entity =   Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedFriend") as IEdmEntityType;
+            var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedFriend") as IEdmEntityType;
 
             var changedObjColl = friendColl.Patch(new FriendTypelessPatchHandler(EmployeesTypeless[key-1], entity1));
 
@@ -155,7 +150,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
 
         public EdmChangedObjectCollection EmployeePatchMethodTypeLess(EdmChangedObjectCollection empColl)
         {            
-            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
+            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
             var changedObjColl = empColl.Patch(EmployeesTypeless);
@@ -207,7 +202,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert1
         [ODataRoute("Employees({key})/UnTypedFriends")]
         public ITestActionResult GetUnTypedFriends(int key)
         {
-            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert1.UnTypedEmployee") as IEdmEntityType;
+            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
             foreach (var emp in EmployeesTypeless)

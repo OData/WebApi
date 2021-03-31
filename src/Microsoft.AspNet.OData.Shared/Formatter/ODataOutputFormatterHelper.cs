@@ -203,7 +203,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 writeContext.Path = path;
                 writeContext.MetadataLevel = metadataLevel;
                 writeContext.QueryOptions = internalRequest.Context.QueryOptions;
-                writeContext.IsUntyped = typeof(IEdmObject).IsAssignableFrom(type);
+                writeContext.Type = type;
 
                 //Set the SelectExpandClause on the context if it was explicitly specified.
                 if (selectExpandDifferentFromQueryOptions != null)

@@ -20,10 +20,6 @@ namespace Microsoft.AspNet.OData
     [NonValidatingParameterBinding]
     public class DeltaDeletedEntityObject<TStructuralType> : Delta<TStructuralType>, IDeltaDeletedEntityObject where TStructuralType : class
     {
-        private Uri _id;
-        private DeltaDeletedEntryReason _reason;
-        private IEdmNavigationSource _navigationSource;
-
         /// <summary>
         /// Initializes a new instance of <see cref="DeltaDeletedEntityObject{TStructuralType}"/>.
         /// </summary>
@@ -103,42 +99,12 @@ namespace Microsoft.AspNet.OData
 
      
         /// <inheritdoc />
-        public Uri Id
-        {
-            get
-            {
-                return _id;
-            }
-            set
-            {
-                _id = value;
-            }
-        }
-
+        public Uri Id { get; set; }
+        
         /// <inheritdoc />
-        public DeltaDeletedEntryReason Reason
-        {
-            get
-            {
-                return _reason;
-            }
-            set
-            {
-                _reason = (DeltaDeletedEntryReason)value;
-            }
-        }
-
+        public DeltaDeletedEntryReason Reason { get; set; }
+        
         /// <inheritdoc />
-        public IEdmNavigationSource NavigationSource
-        {
-            get
-            {
-                return _navigationSource;
-            }
-            set
-            {
-                _navigationSource = value;
-            }
-        }
+        public IEdmNavigationSource NavigationSource { get; set; }  
     }
 }

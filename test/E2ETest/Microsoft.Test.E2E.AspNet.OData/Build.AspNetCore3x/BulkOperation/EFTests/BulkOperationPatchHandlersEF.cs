@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNet.OData;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Test.E2E.AspNet.OData.BulkInsert1;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.AspNet.OData;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
@@ -41,9 +42,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
        
     }
 
-    public class EmployeePatchHandler : PatchMethodHandler<Employee>
+    public class EmployeeEFPatchHandler : PatchMethodHandler<Employee>
     {
-        public override PatchStatus TryCreate(out Employee createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Employee> deltaObject, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -51,7 +52,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new Employee();
-                EmployeesController.dbContext.Employees.Add(createdObject);
+                EmployeesControllerEF.dbContext.Employees.Add(createdObject);
 
                 return PatchStatus.Success;
             }
@@ -70,9 +71,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
-                var customer = EmployeesController.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+                var customer = EmployeesControllerEF.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
 
-                EmployeesController.dbContext.Employees.Remove(customer);
+                EmployeesControllerEF.dbContext.Employees.Remove(customer);
 
                 return PatchStatus.Success;
             }
@@ -93,7 +94,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["ID"].ToString();
-                originalObject = EmployeesController.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+                originalObject = EmployeesControllerEF.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
 
 
                 if (originalObject == null)
@@ -116,9 +117,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             switch (navigationPropertyName)
             {
                 case "Friends":
-                    return new FriendPatchHandler(parent);
+                    return new FriendEFPatchHandler(parent);
                 case "NewFriends":
-                    return new NewFriendPatchHandler(parent);
+                    return new NewFriendEFPatchHandler(parent);
                 default:
                     return null;
             }
@@ -127,15 +128,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class FriendPatchHandler : PatchMethodHandler<Friend>
+    public class FriendEFPatchHandler : PatchMethodHandler<Friend>
     {
         Employee employee;
-        public FriendPatchHandler(Employee employee)
+        public FriendEFPatchHandler(Employee employee)
         {
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(out Friend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Friend> deltaObject, out Friend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -205,21 +206,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         public override IPatchMethodHandler GetNestedPatchHandler(Friend parent, string navigationPropertyName)
         {
-            return new OrderPatchHandler(parent);
+            return new OrderEFPatchHandler(parent);
         }
 
     }
 
 
-    public class NewFriendPatchHandler : PatchMethodHandler<NewFriend>
+    public class NewFriendEFPatchHandler : PatchMethodHandler<NewFriend>
     {
         Employee employee;
-        public NewFriendPatchHandler(Employee employee)
+        public NewFriendEFPatchHandler(Employee employee)
         {
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(out NewFriend createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<NewFriend> deltaObject, out NewFriend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -296,15 +297,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
 
 
-    public class OrderPatchHandler : PatchMethodHandler<Order>
+    public class OrderEFPatchHandler : PatchMethodHandler<Order>
     {
         Friend friend;
-        public OrderPatchHandler(Friend friend)
+        public OrderEFPatchHandler(Friend friend)
         {
             this.friend = friend;
         }
 
-        public override PatchStatus TryCreate(out Order createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(Delta<Order> deltaObject, out Order createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;

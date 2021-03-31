@@ -206,10 +206,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Type clrType = EdmLibHelpers.GetClrType(elementType, readContext.Model);                           
 
-                foreach (ODataItemBase odataItemBase in resourceSet.Resources)
+                foreach (ODataResourceWrapper resourceWrapper in resourceSet.Resources)
                 {
-                    ODataResourceWrapper resourceWrapper = odataItemBase as ODataResourceWrapper;
-
                     if (readContext.IsUntyped)
                     {
                         readContext.ResourceType = resourceWrapper.ResourceBase is ODataDeletedResource ? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject);

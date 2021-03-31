@@ -48,10 +48,7 @@ namespace Org.OData.Core.V1
         /// </summary>
         public ExceptionType()
         {
-            ODataConventionModelBuilder builder = new ODataConventionModelBuilder();
-            builder.EntityType<DataModificationExceptionType>();
-      
-            builder.Namespace = typeof(DataModificationExceptionType).Namespace;
+
         }
 
         /// <summary>
@@ -77,7 +74,7 @@ namespace Org.OData.Core.V1
         /// Represents king of <see cref="DataModificationOperationKind"/> type of operation 
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "failed")]
-        public DataModificationOperationKind failedOperation { get; set; }
+        public DataModificationOperationKind failedOperation { get; }
 
         /// <summary>
         /// Represents response code

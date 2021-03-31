@@ -272,7 +272,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(edmType)).Returns(customerSerializer.Object);
 
             ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(serializerProvider.Object);
-            _writeContext.IsUntyped = true;
+            _writeContext.Type = typeof(IEdmObject);
 
             // Act
             serializer.WriteDeltaFeedInline(new[] { edmObject.Object }, feedType, mockWriter.Object, _writeContext);
@@ -290,7 +290,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             var mockWriter = new Mock<ODataWriter>();
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(_deltaFeedCustomers[0], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();
             _serializer = new ODataDeltaFeedSerializer(provider);
-            _writeContext.IsUntyped = true;
+            _writeContext.Type = typeof(IEdmObject);
 
             // Act
             _serializer.WriteDeltaFeedInline(_deltaFeedCustomers, _customersType, mockWriter.Object, _writeContext);

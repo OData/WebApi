@@ -523,7 +523,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             // Arrange
             QueryCustomer aCustomer = new QueryCustomer
             {
-                Emails = new [] { "E1", "E3", "E2" }
+                Emails = new[] { "E1", "E3", "E2" }
             };
             Expression source = Expression.Constant(aCustomer);
             SelectExpandClause selectExpandClause = ParseSelectExpand(select, null, _model, _customer, _customers);
@@ -660,7 +660,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             {
                 HomeAddress = new QueryAddress
                 {
-                    Codes = new [] { "C1", "C4" , "C2" }
+                    Codes = new[] { "C1", "C4", "C2" }
                 }
             };
             Expression source = Expression.Constant(aCustomer);
@@ -824,6 +824,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_Element_ExpandAndMultipleOrderBy_ShouldOrder()
+        {
+            // Arrange
+            string expand = "Orders($expand=Customer;$orderBy=Title,Customer/Id,Id)";
+            SelectExpandQueryOption selectExpand = new SelectExpandQueryOption(null, expand, _context);
+            var orders = new List<QueryOrder>
+            {
+               new QueryOrder{ Title = "QueryOrder", Customer = new QueryCustomer() { Id = 342 }, Id = 2  },
+               new QueryOrder{ Title = "QueryOrder", Customer = new QueryCustomer() { Id = 123 }, Id = 1  },
+               new QueryOrder{ Title = "QueryOrder", Customer = new QueryCustomer() { Id = 987 }, Id = 4  },
+               new QueryOrder{ Title = "QueryOrder", Customer = new QueryCustomer() { Id = 987 }, Id = 3  },
+            };
+            Expression source = Expression.Constant(new QueryCustomer() { Orders = orders });
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpand.SelectExpandClause, _customer, _customers);
+            var customerWrappers = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
+            var orderWrappers = customerWrappers.Container.ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
+            var sortedOrders = orderWrappers.Select(s => s.Instance).ToList();
+
+            var first = sortedOrders[0];
+            Assert.Equal(123, first.Customer.Id);
+            Assert.Equal(1, first.Id);
+
+            var second = sortedOrders[1];
+            Assert.Equal(342, second.Customer.Id);
+            Assert.Equal(2, second.Id);
+
+            var third = sortedOrders[2];
+            Assert.Equal(987, third.Customer.Id);
+            Assert.Equal(3, third.Id);
+
+            var fourth = sortedOrders[3];
+            Assert.Equal(987, fourth.Customer.Id);
+            Assert.Equal(4, fourth.Id);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_Element_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpandOnSubNavigationProperty()
         {
             // Arrange
@@ -864,7 +902,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void ProjectAsWrapper_ReturnsKeysAndConcurrencyProperties_EvenIfNotPresentInSelectClause(string select, bool containAddress, int count)
         {
             // Arrange
-            IEdmStructuralProperty etagProperty =  _customer.DeclaredStructuralProperties().FirstOrDefault(c => c.Name == "CustomerETag");
+            IEdmStructuralProperty etagProperty = _customer.DeclaredStructuralProperties().FirstOrDefault(c => c.Name == "CustomerETag");
             Assert.NotNull(etagProperty); // Guard
             ((EdmModel)_model).SetOptimisticConcurrencyAnnotation(_customers, new[] { etagProperty });
 
@@ -1027,7 +1065,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             Assert.Equal(3, propertyToInclude.Value.SelectAndExpand.SelectedItems.Count()); // Street, Region, Codes
 
-            Assert.Equal(new [] { "Street", "Region", "Codes"},
+            Assert.Equal(new[] { "Street", "Region", "Codes" },
                 propertyToInclude.Value.SelectAndExpand.SelectedItems.Select(s =>
             {
                 PathSelectItem subSelectItem = (PathSelectItem)s;
@@ -1049,7 +1087,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             // Act
             IDictionary<IEdmStructuralProperty, PathSelectItem> propertiesToInclude;
-            IDictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem > propertiesToExpand;
+            IDictionary<IEdmNavigationProperty, ExpandedReferenceSelectItem> propertiesToExpand;
             ISet<IEdmStructuralProperty> autoSelectedProperties;
             bool isContainDynamicProperty = SelectExpandBinder.GetSelectExpandProperties(_model, _customer, _customers, selectExpandClause,
                 out propertiesToInclude, out propertiesToExpand, out autoSelectedProperties);
@@ -1784,7 +1822,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             builder.EntitySet<QueryOrder>("Orders");
             builder.EntitySet<QueryCity>("Cities");
 
-            customer.Collection.Function("IsUpgraded").Returns<bool>().Namespace="NS";
+            customer.Collection.Function("IsUpgraded").Returns<bool>().Namespace = "NS";
             customer.Collection.Action("UpgradeAll").Namespace = "NS";
             return builder.GetEdmModel();
         }

@@ -162,7 +162,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
                 var matchedCandidates = considerCandidates
-                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys,
+                    .Where(c => TryMatch(context, c.ActionDescriptor, c.FilteredParameters, availableKeys,
                         optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount)
@@ -203,6 +203,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// of the action with the data in the route.
         /// </summary>
         /// <param name="context">The current <see cref="RouteContext"/></param>
+        /// <param name="actionDescriptor">The action descriptor</param>
         /// <param name="parameters">Parameters of the action. This excludes the <see cref="ODataPath"/> and <see cref="Query.ODataQueryOptions"/> parameters</param>
         /// <param name="availableKeys">The names of the keys found in the uri (entity set keys, related keys, operation parameters)</param>
         /// <param name="optionalWrapper">Used to check whether a parameter is optional</param>
@@ -212,12 +213,25 @@ namespace Microsoft.AspNet.OData.Routing
         /// <returns></returns>
         private bool TryMatch(
             RouteContext context,
+            ActionDescriptor actionDescriptor,
             IList<ParameterDescriptor> parameters,
             IList<string> availableKeys,
             ODataOptionalParameter optionalWrapper,
             int totalParameterCount,
             int availableKeysCount)
         {
+
+            // if action has [EnableNestedPaths] attribute, then it doesn't
+            // need to match parameters, since this action is expected to
+            // match arbitrarily nested paths even if it doesn't have any parameters
+            // TODO: this assumes [EnableNestedPaths] is implemented as an action filter,
+            // maybe it would be more robust to just test wether the underlying method has the attribute
+            if (actionDescriptor.FilterDescriptors.Any(f => f.Filter is EnableNestedPathsAttribute))
+            {
+                return true;
+            }
+
+
             // navigationProperty is optional in some cases, therefore an action
             // should not be rejected simply because it does not declare a navigationProperty parameter
             if (availableKeys.Contains(ODataRouteConstants.NavigationProperty.ToLowerInvariant()))

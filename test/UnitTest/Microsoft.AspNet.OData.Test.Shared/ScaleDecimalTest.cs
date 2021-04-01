@@ -1,15 +1,18 @@
-﻿using Microsoft.AspNet.OData.Builder;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Builder.TestModels;
 using Microsoft.OData.Edm;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Xunit;
-using System.Globalization;
 
 namespace Microsoft.AspNet.OData.Test
 {
@@ -37,7 +40,7 @@ namespace Microsoft.AspNet.OData.Test
 
         private static HttpClient GetClient()
         {
-            var controllers = new[] { typeof(MetadataController), typeof(OrdersController) };
+            var controllers = new[] { typeof(OrdersController) };
 
             var server = TestServerFactory.Create(controllers, (config) =>
             {

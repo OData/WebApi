@@ -844,6 +844,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var orderWrappers = customerWrappers.Container.ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
             var sortedOrders = orderWrappers.Select(s => s.Instance).ToList();
 
+            // Assert
             var first = sortedOrders[0];
             Assert.Equal(123, first.Customer.Id);
             Assert.Equal(1, first.Id);

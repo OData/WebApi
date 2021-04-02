@@ -1,17 +1,13 @@
-﻿using Microsoft.AspNet.OData.Extensions;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.OData.Edm;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
@@ -20,8 +16,8 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
        Justification = "We want to be able to subclass this type.")]
-    [AttributeUsage(AttributeTargets.Method, Inherited = true, AllowMultiple = false)]
-    public class EnableNestedPathsAttribute : ActionFilterAttribute
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    public sealed class EnableNestedPathsAttribute : ActionFilterAttribute
     {
         /// <summary>
         /// 
@@ -53,9 +49,19 @@ namespace Microsoft.AspNet.OData
             if (result != null)
             {
                 var queryBuilder = new ODataPathQueryBuilder(result, model, path);
-                object transformedResult = queryBuilder.BuildQuery();
-                
-                responseContent.Value = transformedResult;
+                ODataPathQueryResult transformedResult = queryBuilder.BuildQuery();
+
+                if (path.EdmType.TypeKind == EdmTypeKind.Collection || transformedResult.HasCountSegment)
+                {
+                    responseContent.Value = transformedResult.Result;
+                }
+                else
+                {
+                    Type elementType = transformedResult.Result.ElementType;
+                    var singleResultType = typeof(SingleResult<>).MakeGenericType(elementType);
+                    var transformedSingleResult =  Activator.CreateInstance(singleResultType, new[] { transformedResult.Result });
+                    responseContent.Value = transformedSingleResult;
+                }
             }
         }
     }

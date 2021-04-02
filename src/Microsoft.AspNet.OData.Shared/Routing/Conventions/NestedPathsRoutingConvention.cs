@@ -43,8 +43,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
 
 
             // unsupported path segments
-            if (odataPath.PathTemplate.EndsWith("$ref")
-                || odataPath.PathTemplate.EndsWith("$value")) // TODO: check whether we support $value
+            if (odataPath.PathTemplate.EndsWith("$ref"))
             {
                 return null;
             }

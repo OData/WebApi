@@ -78,6 +78,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ODataPathQueryBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ODataQueryOptionsParserFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\OrderByCountNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParser.cs" />

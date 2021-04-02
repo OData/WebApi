@@ -114,8 +114,6 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
         [Theory]
         // $ref requests are currently not supported
         [InlineData("RoutingCustomers(1)/Products(1)/$ref")]
-        // $value currently not supported
-        [InlineData("RoutingCustomers(1)/Products(1)/$value")]
         public void SelectAction_ReturnsNull_IfUnsupportPathSegment(string path)
         {
             // Arrange

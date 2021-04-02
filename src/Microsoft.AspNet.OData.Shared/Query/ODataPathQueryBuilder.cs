@@ -1,21 +1,19 @@
-﻿using Microsoft.AspNet.OData;
-using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 
-namespace Microsoft.AspNet.OData
+namespace Microsoft.AspNet.OData.Query
 {
     internal class ODataPathQueryBuilder
     {
-        IQueryable source;
-        IEdmModel model;
-        Routing.ODataPath path;
+        readonly IQueryable source;
+        readonly IEdmModel model;
+        readonly Routing.ODataPath path;
 
         public ODataPathQueryBuilder(IQueryable source, IEdmModel model, Routing.ODataPath path)
         {
@@ -24,8 +22,10 @@ namespace Microsoft.AspNet.OData
             this.path = path;
         }
 
-        public object BuildQuery()
+        public ODataPathQueryResult BuildQuery()
         {
+            var result = new ODataPathQueryResult();
+
             var segments = path.Segments;
             // assume first segment is entitySet
             var firstSegment = segments.FirstOrDefault() as EntitySetSegment;
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData
                         var selectBody =
                             Expression.Lambda(navPropExpression, param);
                         queryable = Select(queryable, selectBody);
-                    }   
+                    }
                 }
                 else if (segment is PropertySegment propertySegment)
                 {
@@ -126,7 +126,7 @@ namespace Microsoft.AspNet.OData
                         var selectBody =
                             Expression.Lambda(propertyExpression, param);
                         queryable = Select(queryable, selectBody);
-                    }    
+                    }
                 }
                 else if (segment is TypeSegment typeSegment)
                 {
@@ -143,13 +143,25 @@ namespace Microsoft.AspNet.OData
                     if (edmType.TypeKind == EdmTypeKind.Entity)
                     {
                         currentType = GetClrType(edmType, this.model);
-                        queryable =OfType(queryable, currentType);
+                        queryable = OfType(queryable, currentType);
                     }
+                }
+                else if (segment is CountSegment)
+                {
+                    result.HasCountSegment = true;
+                }
+                else if (segment is ValueSegment)
+                {
+                    result.HasValueSegment = true;
                 }
                 else if (segment is Routing.UnresolvedPathSegment)
                 {
                     // TODO: use appropriate exception kind
                     throw new Exception("Unresolved path segment");
+                }
+                else if (segment is NavigationPropertyLinkSegment)
+                {
+                    // do nothing
                 }
                 else
                 {
@@ -158,18 +170,9 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (path.EdmType.TypeKind == EdmTypeKind.Collection)
-            {
-                return queryable;
-            }
-            else
-            {
-                Type elementType = queryable.ElementType;
-                var singleResultType = typeof(SingleResult<>).MakeGenericType(elementType);
-                return Activator.CreateInstance(singleResultType, new[] { queryable });
-            }
+            result.Result = queryable;
 
-            //return queryable;
+            return result;
         }
 
         private static MethodInfo QueryableWhereGeneric { get; } = GenericMethodOf(_ => Queryable.Where(default, default(Expression<Func<int, bool>>)));
@@ -313,5 +316,12 @@ namespace Microsoft.AspNet.OData
                 "Cast not supported for type {0}",
                 edmType.FullTypeName()));
         }
+    }
+
+    internal class ODataPathQueryResult
+    {
+        public IQueryable Result { get; set; }
+        public bool HasCountSegment { get; set; }
+        public bool HasValueSegment { get; set; }
     }
 }

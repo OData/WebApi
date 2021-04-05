@@ -337,7 +337,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = employee.NewFriends.First(x => x.Id == Int32.Parse(id));
+
+                if(employee.NewFriends == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+
+                originalObject = employee.NewFriends.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
 
                 if (originalObject == null)

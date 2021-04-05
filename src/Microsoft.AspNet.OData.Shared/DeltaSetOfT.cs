@@ -9,6 +9,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Common;
 using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
@@ -45,7 +46,19 @@ namespace Microsoft.AspNet.OData
             _clrType = typeof(TStructuralType);            
         }
 
+    
+       /// <inheritdoc/>      
+        protected override void InsertItem(int index, IDeltaSetItem item)
+        {
+            Delta<TStructuralType> deltaItem = item as Delta<TStructuralType>;
 
+            if (deltaItem == null)
+            {
+                throw Error.Argument("item", SRResources.ChangedObjectTypeMismatch, item.GetType(), typeof(TStructuralType));
+            }
+
+            base.InsertItem(index, item);
+        }
 
         /// <summary>
         /// Handler for users Create, Get and Delete Methods

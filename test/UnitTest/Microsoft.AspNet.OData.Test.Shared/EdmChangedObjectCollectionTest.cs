@@ -42,6 +42,7 @@ namespace Microsoft.AspNet.OData.Test
 
         internal void InitFriends()
         {
+            friends = new List<EdmStructuredObject>();
             EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
@@ -76,22 +77,6 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(friend2);
         }
 
-        [Fact]
-        public void EdmChangedObjectCollection_Add_WrongItem_ThrowsError()
-        {
-            //Assign
-            IEdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
-            var edmChangedObjectcollection = new DeltaSet<Friend>();
-
-            var edmChangedObj1 = new Delta<NewFriend>();
-            edmChangedObj1.TrySetPropertyValue("Id", 1);
-            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
-
-            //Act & Assert
-            Assert.Throws<ArgumentException>(() => edmChangedObjectcollection.Add(edmChangedObj1));
-        }
-
-            
 
         [Fact]
         public void EdmChangedObjectCollection_Patch()

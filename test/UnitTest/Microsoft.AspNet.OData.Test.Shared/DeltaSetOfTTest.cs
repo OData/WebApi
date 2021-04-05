@@ -48,6 +48,23 @@ namespace Microsoft.AspNet.OData.Test
 
 
         [Fact]
+        public void DeltaSet_Add_WrongItem_ThrowsError()
+        {
+            //Assign
+            
+            var edmChangedObjectcollection = new DeltaSet<Friend>();
+
+            var edmChangedObj1 = new Delta<NewFriend>();
+            edmChangedObj1.TrySetPropertyValue("Id", 1);
+            edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
+
+            //Act & Assert
+            Assert.Throws<ArgumentException>(() => edmChangedObjectcollection.Add(edmChangedObj1));
+        }
+
+
+
+        [Fact]
         public void DeltaSet_Patch_WithDeletes()
         {
             //Arrange

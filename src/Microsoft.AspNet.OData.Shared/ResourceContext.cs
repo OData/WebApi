@@ -191,10 +191,13 @@ namespace Microsoft.AspNet.OData
             }
 
             object value;
-            IDelta delta = ResourceInstance as IDelta;
-            if (delta != null && delta.TryGetPropertyValue(propertyName, out value))
+            if (SerializerContext.IsDeltaOfT)
             {
-                return value;
+                IDelta delta = ResourceInstance as IDelta;
+                if (delta != null && delta.TryGetPropertyValue(propertyName, out value))
+                {
+                    return value;
+                }
             }
                         
             if (EdmObject.TryGetPropertyValue(propertyName, out value))

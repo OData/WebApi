@@ -270,7 +270,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
         }
 
-        private void AppendDeletedProperties(dynamic resource, ODataDeletedResource deletedResource, bool isUntyped)
+        private static void AppendDeletedProperties(dynamic resource, ODataDeletedResource deletedResource, bool isUntyped)
         {
             if (isUntyped)
             {

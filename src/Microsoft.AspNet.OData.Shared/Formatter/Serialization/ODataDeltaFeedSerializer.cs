@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     public class ODataDeltaFeedSerializer : ODataEdmTypeSerializer
     {
         private const string DeltaFeed = "deltafeed";
+        IEdmStructuredTypeReference _elementType;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ODataDeltaFeedSerializer"/>.
@@ -187,6 +188,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmStructuredTypeReference elementType = GetResourceType(feedType);
+            _elementType = elementType;
 
             if (elementType.IsComplex())
             {
@@ -258,9 +260,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                         deltaEntityKind = deltaSetItem.DeltaKind;
                     }
-
-                    ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;                    
-                                       
+                                      
                     switch (deltaEntityKind)
                     {
                         case EdmDeltaEntityKind.DeletedEntry:
@@ -274,6 +274,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                             break;
                         case EdmDeltaEntityKind.Entry:
                             {
+                                ODataResourceSerializer entrySerializer = SerializerProvider.GetEdmTypeSerializer(elementType) as ODataResourceSerializer;
+
                                 if (entrySerializer == null)
                                 {
                                     throw new SerializationException(
@@ -309,6 +311,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(feedType != null);
 
             IEdmStructuredTypeReference elementType = GetResourceType(feedType);
+            _elementType = elementType;
 
             if (elementType.IsComplex())
             {
@@ -357,13 +360,32 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
 
                     lastResource = entry;
-                    IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
-                    if (edmChangedObject == null)
+
+                    EdmDeltaEntityKind deltaEntityKind;
+                    if (writeContext.IsUntyped)
                     {
-                        throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        IEdmChangedObject edmChangedObject = entry as IEdmChangedObject;
+                        if (edmChangedObject == null)
+                        {
+                            throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        }
+
+                        deltaEntityKind = edmChangedObject.DeltaKind;
                     }
-                    
-                    switch (edmChangedObject.DeltaKind)
+                    else
+                    {
+                        IDeltaSetItem deltaSetItem = entry as IDeltaSetItem;
+
+                        if (deltaSetItem == null)
+                        {
+                            throw new SerializationException(Error.Format(SRResources.CannotWriteType, GetType().Name, enumerable.GetType().FullName));
+                        }
+
+                        deltaEntityKind = deltaSetItem.DeltaKind;
+                    }
+                                        
+
+                    switch (deltaEntityKind)
                     {
                         case EdmDeltaEntityKind.DeletedEntry:
                             await WriteDeltaDeletedEntryAsync(entry, writer, writeContext);
@@ -461,7 +483,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>        
         public virtual void WriteDeltaDeletedEntry(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
-            ODataResourceSerializer serializer = new ODataResourceSerializer(SerializerProvider);
+            ODataResourceSerializer serializer = SerializerProvider.GetEdmTypeSerializer(_elementType) as ODataResourceSerializer;
             ResourceContext resourceContext = serializer.GetResourceContext(graph, writeContext);
             SelectExpandNode selectExpandNode = serializer.CreateSelectExpandNode(resourceContext);
          
@@ -487,7 +509,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// <param name="writeContext">The <see cref="ODataSerializerContext"/>.</param>        
         public virtual async Task WriteDeltaDeletedEntryAsync(object graph, ODataWriter writer, ODataSerializerContext writeContext)
         {
-            ODataResourceSerializer serializer = new ODataResourceSerializer(SerializerProvider);
+            ODataResourceSerializer serializer = SerializerProvider.GetEdmTypeSerializer(_elementType) as ODataResourceSerializer;
             ResourceContext resourceContext = serializer.GetResourceContext(graph, writeContext);
             SelectExpandNode selectExpandNode = serializer.CreateSelectExpandNode(resourceContext);
 

@@ -162,7 +162,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         internal Type Type { get; set; }
 
         internal bool IsUntyped { get { return typeof(IEdmObject).IsAssignableFrom(Type); } }
-       
+
+        internal bool IsDeltaOfT { get { return Type != null && TypeHelper.IsGenericType(Type) && (Type.GetGenericTypeDefinition() == typeof(DeltaSet<>) || 
+                    Type.GetGenericTypeDefinition() == typeof(Delta<>) || Type.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>)); } }
+
         /// <summary>
         /// Gets or sets the root element name which is used when writing primitive and enum types
         /// </summary>

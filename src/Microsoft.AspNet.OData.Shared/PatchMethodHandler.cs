@@ -28,6 +28,8 @@ namespace Microsoft.AspNet.OData
         /// <param name="createdObject">The created object (CLR or Typeless)</param>
         /// <param name="errorMessage">Any error message in case of an exception</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#")]
         public abstract PatchStatus TryCreate(Delta<TStructuralType> patchObject, out TStructuralType createdObject, out string errorMessage);
 
         /// <summary>

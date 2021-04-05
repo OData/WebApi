@@ -985,7 +985,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             object value = null;
             IODataInstanceAnnotationContainer transientAnnotations = null;
 
-            IDelta delta = resourceContext.ResourceInstance as IDelta;
+            IDelta delta = null;
+
+            if (resourceContext.SerializerContext.IsDeltaOfT)
+            {
+                delta = resourceContext.ResourceInstance as IDelta;
+            }
 
             if (delta != null)
             {

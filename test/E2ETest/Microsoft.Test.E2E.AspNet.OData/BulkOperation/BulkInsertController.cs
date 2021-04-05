@@ -375,13 +375,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         }
 
 
-        [HttpPost]
-        [ODataRoute("ResetDataSource")]
-        public ITestActionResult ResetDataSource()
-        {
-            this.InitEmployees();
-            return this.StatusCode(HttpStatusCode.NoContent);
-        }
-
     }
 }

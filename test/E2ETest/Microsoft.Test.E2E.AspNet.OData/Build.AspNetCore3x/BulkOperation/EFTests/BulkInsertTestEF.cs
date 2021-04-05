@@ -11,6 +11,9 @@ using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Execution;
 using Microsoft.Test.E2E.AspNet.OData.Common.Extensions;
 using Newtonsoft.Json.Linq;
@@ -21,25 +24,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
     public class BulkInsertTestEF : WebHostTestBase
     {
         public BulkInsertTestEF(WebHostTestFixture fixture)
-            :base(fixture)
-        {
+            :base(fixture, UpdateConfigureServices)
+        {            
         }
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
             var controllers = new[] { typeof(EmployeesControllerEF), typeof(MetadataController) };
             configuration.AddControllers(controllers);
-
+            
             configuration.Routes.Clear();
             configuration.Count().Filter().OrderBy().Expand().MaxTop(null).Select();
             configuration.MapODataServiceRoute("convention", "convention", BulkInsertEdmModel.GetConventionModel(configuration));
-            configuration.MapODataServiceRoute("explicit", "explicit", BulkInsertEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());
+            configuration.MapODataServiceRoute("explicit", "explicit", BulkInsertEdmModel.GetExplicitModel(configuration), new DefaultODataPathHandler(), ODataRoutingConventions.CreateDefault());            
             configuration.EnsureInitialized();
+            
         }
 
+        protected static void UpdateConfigureServices(IServiceCollection services)
+        {
+            // Add your custom services
+            services.AddDbContext<EmployeeDBContext>(opt =>
+                opt.UseInMemoryDatabase("EmployeeDB"));
+        }
 
         #region Update
-         
+
         [Fact]
         public async Task PatchEmployee_WithUpdates()
         {
@@ -57,26 +67,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
-            //Act
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = await response.Content.ReadAsObject<JObject>();                
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains("Sql", json.ToString());
             }
-
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Equal(2, result.Count);
-                Assert.Contains("Test2", result.ToString());
-            }
-
+                       
         }
 
         [Fact]
@@ -87,7 +85,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'SqlFU'  ,
                     'Friends':[{'Id':345,'Name':'Test2'},{'Id':400,'Name':'Test3'},{'Id':900,'Name':'Test93'}]
                      }";
 
@@ -96,25 +94,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
-
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Equal(3, result.Count);
-                Assert.Contains("345", result.ToString());
-                Assert.Contains("400", result.ToString());
-                Assert.Contains("900", result.ToString());
+                Assert.Contains("SqlFU", json.ToString());
             }
 
         }
@@ -161,7 +146,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'Sql',
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1}]
                      }";
 
@@ -170,24 +155,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
-
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Single(result);
-                Assert.DoesNotContain("Test0", result.ToString());
-            }
+           
+  
         }
 
 
@@ -195,11 +170,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public async Task PatchEmployee_WithAddUpdateAndDelete()
         {
             //Arrange
-            
+
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'SqlUD',
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'}]
                      }";
 
@@ -208,26 +183,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                //var result = json.GetValue("value") as JArray;
             }
 
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Equal(2, result.Count);
-                Assert.DoesNotContain("Test0", result.ToString());
-                Assert.Contains("Test3", result.ToString());
-                Assert.Contains("Test4", result.ToString());
-            }
         }
 
 
@@ -239,7 +202,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'SqlMU'  ,
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':1,'Name':'Test_1'},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'}]
                      }";
 
@@ -248,27 +211,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Equal(3, result.Count);
-                Assert.DoesNotContain("Test0", result.ToString());
-                Assert.Contains("Test_1", result.ToString());
-                Assert.Contains("Test3", result.ToString());
-                Assert.Contains("Test4", result.ToString());
-            }
         }
 
         [Fact]
@@ -279,7 +228,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'SqlMU1'  ,
                     'Friends@odata.delta':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{'Id':1,'Name':'Test_1'},{'Id':2,'Name':'Test3'},{'Id':3,'Name':'Test4'},{ '@odata.removed' : {'reason':'changed'}, 'Id':1}]
                      }";
 
@@ -288,27 +237,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
+            //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
-
-            //Assert
-            requestUri = this.BaseAddress + "/convention/Employees(1)";
-            using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
-            {
-                response.EnsureSuccessStatusCode();
-
-                var json = await response.Content.ReadAsObject<JObject>();
-                var result = json.GetValue("value") as JArray;
-
-                Assert.Equal(2, result.Count);
-                Assert.DoesNotContain("Test0", result.ToString());
-                Assert.DoesNotContain("Test_1", result.ToString());
-                Assert.Contains("Test3", result.ToString());
-                Assert.Contains("Test4", result.ToString());
-            }
+                        
         }
 
 

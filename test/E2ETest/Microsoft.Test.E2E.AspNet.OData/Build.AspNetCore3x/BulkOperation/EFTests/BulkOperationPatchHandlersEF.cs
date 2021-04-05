@@ -31,7 +31,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             modelBuilder.Entity<Employee>().Ignore(c => c.SkillSet);
             modelBuilder.Entity<Employee>().Ignore(c => c.NewFriends);
             modelBuilder.Entity<Employee>().Ignore(c => c.UnTypedFriends);
-            
+            modelBuilder.Entity<Employee>().Ignore(c => c.InstanceAnnotations);
+
             modelBuilder.Entity<NewFriend>().Ignore(c => c.InstanceAnnotations);
             modelBuilder.Entity<UnTypedFriend>().Ignore(c => c.InstanceAnnotations);
 
@@ -186,7 +187,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = employee.Friends.First(x => x.Id == Int32.Parse(id));
+                originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
 
                 if (originalObject == null)

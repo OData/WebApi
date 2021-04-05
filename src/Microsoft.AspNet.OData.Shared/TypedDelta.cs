@@ -28,7 +28,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>True if it is a Delta generic type; false otherwise.</returns>
         internal static bool IsDeltaOfT(Type type)
         {
-            return type != null && TypeHelper.IsGenericType(type) && type.GetGenericTypeDefinition() == typeof(Delta<>);
+            return type != null && TypeHelper.IsGenericType(type) && (type.GetGenericTypeDefinition() == typeof(Delta<>) || type.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>) );
         }
     }
 }

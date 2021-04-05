@@ -1,6 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+#if NETCORE
+using Microsoft.Extensions.DependencyInjection;
+#endif
+
 using System;
 using System.Net.Http;
 using Xunit;
@@ -23,6 +27,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
             this.BaseAddress = fixture.BaseAddress;
             this.Client = new HttpClient();
         }
+
+#if NETCORE
+        protected WebHostTestBase(WebHostTestFixture fixture, Action<IServiceCollection> services)
+        {
+            // Initialize the fixture and get the client and base address.
+            fixture.Initialize(this.UpdateConfiguration, services);
+            this.BaseAddress = fixture.BaseAddress;
+            this.Client = new HttpClient();
+        }
+#endif
 
         /// <summary>
         /// The base address of the server.

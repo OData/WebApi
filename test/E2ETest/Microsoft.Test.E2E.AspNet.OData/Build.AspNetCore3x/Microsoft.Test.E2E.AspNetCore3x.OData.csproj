@@ -1668,9 +1668,6 @@
 	<Compile Include="..\BulkOperation\BulkInsertEdmModel.cs">
 		<Link>BulkOperation\BulkInsertEdmModel.cs</Link>
 	</Compile>
-	<Compile Include="..\BulkOperation\BulkInsertTest.cs">
-		<Link>BulkOperation\BulkInsertTest.cs</Link>
-	</Compile>
 	<Compile Include="..\BulkOperation\BulkInsertController.cs">
 		<Link>BulkOperation\BulkInsertController.cs</Link>
 	</Compile>

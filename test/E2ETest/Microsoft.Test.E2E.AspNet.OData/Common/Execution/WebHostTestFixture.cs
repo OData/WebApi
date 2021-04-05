@@ -95,6 +95,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// </summary>
         public bool IncludeErrorDetail { get; set; } = true;
 
+
+#if NETCORE
+        Action<IServiceCollection> servicesAction;
+
+        /// <summary>
+        /// Initialize the fixture.
+        /// </summary>
+        /// <param name="testConfigurationAction">The test configuration action.</param>
+        /// <param name="servicesAction">Action for adding to servicecollection</param>
+        /// <returns>true of the server is initialized, false otherwise.</returns>
+        /// <remarks>
+        /// This is done lazily to allow the update configuration
+        /// function to be passed in from the first test class instance.
+        /// </remarks>
+        public bool Initialize(Action<WebRouteConfiguration> testConfigurationAction, Action<IServiceCollection> servicesAction )
+        {
+            this.servicesAction = servicesAction;
+
+            return Initialize(testConfigurationAction);
+        }
+#endif
+
         /// <summary>
         /// Initialize the fixture.
         /// </summary>
@@ -143,6 +165,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                         // Add ourself to the container so WebHostTestStartup
                                         // can call UpdateConfiguration.
                                         services.AddSingleton<WebHostTestFixture>(this);
+                                        if (servicesAction != null)
+                                        {
+                                            servicesAction(services);
+                                        }
                                     })
                                     .ConfigureLogging((hostingContext, logging) =>
                                     {
@@ -152,7 +178,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                     .Build();
 
                                 _selfHostServer.Start();
-#else                                
+#else                              
+                                
                                 _selfHostServer = WebApp.Start(this.BaseAddress, DefaultKatanaConfigure);
 #endif
                             }
@@ -170,6 +197,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
 
             throw new TimeoutException(string.Format("Unable to start server after {0} attempts", attempts));
         }
+
 
         /// <summary>
         /// Cleanup the server.

@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData
     /// Represents an <see cref="IEdmEntityObject"/> with no backing CLR <see cref="Type"/>.
     /// </summary>
     [NonValidatingParameterBinding]
-    public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject
+    public class EdmEntityObject : EdmStructuredObject, IEdmEntityObject, IEdmChangedObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmEntityObject"/> class.
@@ -40,7 +40,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="isNullable">true if this object can be nullable; otherwise, false.</param>
         public EdmEntityObject(IEdmEntityType edmType, bool isNullable)
             : base(edmType, isNullable)
-        {
+        {            
             PersistentInstanceAnnotationsContainer = new ODataInstanceAnnotationContainer();
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
         }
@@ -54,6 +54,11 @@ namespace Microsoft.AspNet.OData
         /// Instance Annotation container to hold Persistent Annotations
         /// </summary>/// <inheritdoc />
         public IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer { get; set; }
+
+        /// <summary>
+        /// DeltaKind as Entry
+        /// </summary>
+        public virtual EdmDeltaEntityKind DeltaKind { get { return EdmDeltaEntityKind.Entry; } }
 
         /// <summary>
         /// To set Persistent Instance Annotation

@@ -88,7 +88,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
+        public override EdmDeltaEntityKind DeltaKind
         {
             get
             {

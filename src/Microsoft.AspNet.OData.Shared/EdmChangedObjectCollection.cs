@@ -141,7 +141,7 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        EdmDeltaEntityObject deltaEntityObject = changedObj as EdmDeltaEntityObject;
+                        EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
 
                         PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
 
@@ -170,7 +170,7 @@ namespace Microsoft.AspNet.OData
                         }                                              
 
                         //Patch for addition/update. 
-                        PatchItem(changedObj as EdmEntityObject, original);
+                        PatchItem(deltaEntityObject, original);
 
                         changedObjectCollection.Add(changedObj);
                     }

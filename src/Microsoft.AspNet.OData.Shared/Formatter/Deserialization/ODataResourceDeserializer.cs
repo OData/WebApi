@@ -223,11 +223,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         return new EdmDeltaDeletedEntityObject(structuredType.AsEntity());
                     }
 
-                    if (readContext.IsDeltaEntity)
-                    {
-                        return new EdmDeltaEntityObject(structuredType.AsEntity());
-                    }
-
                     return new EdmEntityObject(structuredType.AsEntity());
                 }
 

@@ -461,11 +461,12 @@ public class Microsoft.AspNet.OData.EdmDeltaLink : EdmEntityObject, IDynamicMeta
 [
 NonValidatingParameterBindingAttribute(),
 ]
-public class Microsoft.AspNet.OData.EdmEntityObject : EdmStructuredObject, IDynamicMetaObjectProvider, IDelta, IEdmEntityObject, IEdmObject, IEdmStructuredObject {
+public class Microsoft.AspNet.OData.EdmEntityObject : EdmStructuredObject, IDynamicMetaObjectProvider, IDelta, IEdmChangedObject, IEdmEntityObject, IEdmObject, IEdmStructuredObject {
 	public EdmEntityObject (Microsoft.OData.Edm.IEdmEntityType edmType)
 	public EdmEntityObject (Microsoft.OData.Edm.IEdmEntityTypeReference edmType)
 	public EdmEntityObject (Microsoft.OData.Edm.IEdmEntityType edmType, bool isNullable)
 
+	EdmDeltaEntityKind DeltaKind  { public virtual get; }
 	IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer  { public get; public set; }
 
 	public void AddDataException (Org.OData.Core.V1.DataModificationExceptionType dataModificationException)

@@ -114,7 +114,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull, bool createDateBinaryExpression = false)
+        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull, bool containsDateFunction = false)
         {
             ExpressionType binaryExpressionType;
 
@@ -143,7 +143,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
                 (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)) ||
-                createDateBinaryExpression)
+                containsDateFunction)
             {
                 left = CreateDateBinaryExpression(left);
                 right = CreateDateBinaryExpression(right);
@@ -1078,7 +1078,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return IsType<Date>(type);
         }
 
-        internal static bool IsDate(BinaryOperatorNode binaryOperatorNode)
+        internal static bool ContainsDateFunction(BinaryOperatorNode binaryOperatorNode)
         {
             bool isDate = false;
             if (binaryOperatorNode.Left is SingleValueFunctionCallNode leftFunctionCallNode)

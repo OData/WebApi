@@ -473,7 +473,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression left = Bind(binaryOperatorNode.Left);
             Expression right = Bind(binaryOperatorNode.Right);
 
-            bool createDateBinaryExpression = IsDate(binaryOperatorNode);
+            bool containsDateFunction = ContainsDateFunction(binaryOperatorNode);
             // handle null propagation only if either of the operands can be null
             bool isNullPropagationRequired = QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && (IsNullable(left.Type) || IsNullable(right.Type));
             if (isNullPropagationRequired)
@@ -505,11 +505,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
 
                 // Expression trees do a very good job of handling the 3VL truth table if we pass liftToNull true.
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: liftToNull, createDateBinaryExpression);
+                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: liftToNull, containsDateFunction);
             }
             else
             {
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: false, createDateBinaryExpression);
+                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: false, containsDateFunction);
             }
         }
 

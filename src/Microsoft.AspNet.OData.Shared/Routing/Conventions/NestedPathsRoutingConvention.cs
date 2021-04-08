@@ -1,15 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
-using Microsoft.AspNet.OData.Adapters;
-using Microsoft.AspNet.OData.Interfaces;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OData.Edm;
-using Microsoft.OData.UriParser;
-using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.OData.UriParser;
+
 
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {

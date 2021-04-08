@@ -66,6 +66,9 @@ namespace Microsoft.AspNet.OData.Query
 
                     if (navigationSegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.Many)
                     {
+                        var condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
+                        var nullFilter = Expression.Lambda(condition, param);
+                        queryable = Where(queryable, nullFilter, currentType);
                         // collection navigation property
                         // e.g. Product/Categories
                         var propertyType = currentType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
@@ -99,12 +102,12 @@ namespace Microsoft.AspNet.OData.Query
                     var propertyExpression = Expression.Property(param, propertySegment.Property.Name);
 
                     // check whether property is null or not before further selection
-                    //if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
-                    //{
-                    //    var condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
-                    //    var nullFilter = Expression.Lambda(condition, param);
-                    //    queryable = Where(queryable, nullFilter, currentType);
-                    //}
+                    if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
+                    {
+                        var condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
+                        var nullFilter = Expression.Lambda(condition, param);
+                        queryable = Where(queryable, nullFilter, currentType);
+                    }
 
                     if (propertySegment.Property.Type.IsCollection())
                     {
@@ -128,24 +131,6 @@ namespace Microsoft.AspNet.OData.Query
                         queryable = Select(queryable, selectBody);
                     }
                 }
-                else if (segment is TypeSegment typeSegment)
-                {
-                    // This only covers entity type cast
-                    // complex type cast uses ComplexCastPathSegment and is not supported by EF now
-                    // CLR type is got from model annotation, which means model must include that annotation.
-                    var edmType = typeSegment.EdmType;
-
-                    if (typeSegment.EdmType.TypeKind == EdmTypeKind.Collection)
-                    {
-                        edmType = ((IEdmCollectionType)typeSegment.EdmType).ElementType.Definition;
-                    }
-
-                    if (edmType.TypeKind == EdmTypeKind.Entity)
-                    {
-                        currentType = GetClrType(edmType, this.model);
-                        queryable = OfType(queryable, currentType);
-                    }
-                }
                 else if (segment is CountSegment)
                 {
                     result.HasCountSegment = true;
@@ -154,19 +139,10 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     result.HasValueSegment = true;
                 }
-                else if (segment is Routing.UnresolvedPathSegment)
-                {
-                    // TODO: use appropriate exception kind
-                    throw new Exception("Unresolved path segment");
-                }
-                else if (segment is NavigationPropertyLinkSegment)
-                {
-                    // do nothing
-                }
                 else
                 {
-                    // TODO: throw unsupport segment exception
-                    throw new Exception("Unsupported segment");
+                    // reached unsupported segment
+                    return null;
                 }
             }
 

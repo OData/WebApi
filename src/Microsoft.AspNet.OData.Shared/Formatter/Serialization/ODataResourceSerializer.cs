@@ -786,7 +786,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 AddTypeNameAnnotationAsNeeded(resource, pathType, resourceContext.SerializerContext.MetadataLevel);
             }
 
-            if (resourceContext.StructuredType.TypeKind == EdmTypeKind.Entity && resourceContext.NavigationSource != null)
+            if (!isDeletedResource && resourceContext.StructuredType.TypeKind == EdmTypeKind.Entity && resourceContext.NavigationSource != null)
             {
                 if (!(resourceContext.NavigationSource is IEdmContainedEntitySet))
                 {
@@ -1624,10 +1624,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     }
 
                     ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
-                    if (property != null)
+                    if (property == null || (resourceContext.EdmObject is EdmDeltaDeletedEntityObject && property.Value == null))
                     {
-                        properties.Add(property);
+                        continue;
                     }
+
+                    properties.Add(property);
                 }
             }
 

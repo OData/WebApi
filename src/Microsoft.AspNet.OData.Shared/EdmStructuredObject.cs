@@ -221,7 +221,10 @@ namespace Microsoft.AspNet.OData
                     (isCollection && propertyType.AsCollection().ElementType().IsPrimitive()))
                 {
                     // primitive or primitive collection
-                    return Activator.CreateInstance(clrType);
+                    if (clrType.GetConstructor(Type.EmptyTypes) != null)
+                    {
+                        return Activator.CreateInstance(clrType);
+                    }
                 }
                 else
                 {

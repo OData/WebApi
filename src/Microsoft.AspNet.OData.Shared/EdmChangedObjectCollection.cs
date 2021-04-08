@@ -24,8 +24,7 @@ namespace Microsoft.AspNet.OData
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
-        private ICollection<EdmStructuredObject> originalList;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
         /// </summary>
@@ -77,8 +76,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="originalCollection"></param>
         /// <returns>ChangedObjectCollection response</returns>
         public EdmChangedObjectCollection Patch(ICollection<EdmStructuredObject> originalCollection)
-        {
-            this.originalList = originalCollection;
+        {            
             PatchHandler = new DefaultTypelessPatchHandler(originalCollection, _entityType);
 
             return CopyChangedValues();

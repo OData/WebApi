@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -9,12 +12,23 @@ using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData.Query
 {
+
+    /// <summary>
+    /// This class transforms an <see cref="IQueryable"/> based on
+    /// the key and property accesses in the segments of an <see cref="ODataPath"/>
+    /// </summary>
     internal class ODataPathQueryBuilder
     {
         readonly IQueryable source;
         readonly IEdmModel model;
         readonly Routing.ODataPath path;
 
+        /// <summary>
+        /// Creates an instance of <see cref="ODataPathQueryBuilder"/>
+        /// </summary>
+        /// <param name="source">The original <see cref="IQueryable"/> to be transformed</param>
+        /// <param name="model">The <see cref="IEdmModel"/></param>
+        /// <param name="path">The <see cref="ODataPath"/> based on which to transform the <see cref="source"/></param>
         public ODataPathQueryBuilder(IQueryable source, IEdmModel model, Routing.ODataPath path)
         {
             this.source = source;
@@ -22,6 +36,10 @@ namespace Microsoft.AspNet.OData.Query
             this.path = path;
         }
 
+        /// <summary>
+        /// Transforms the source <see cref="IQueryable"/> based on the sequence of path segments in the <see cref="ODataPath"/>
+        /// </summary>
+        /// <returns>The result of the query transformtions or null if the path contained unsupported segments</returns>
         public ODataPathQueryResult BuildQuery()
         {
             var result = new ODataPathQueryResult();
@@ -272,32 +290,26 @@ namespace Microsoft.AspNet.OData.Query
             return type.IsGenericType &&
                    type.GetGenericTypeDefinition() == definition;
         }
-
-        /// <summary>
-        /// Get the clr type for a specified edm type
-        /// </summary>
-        /// <param name="edmType">The edm type to get clr type</param>
-        /// <param name="edmModel">The edm model </param>
-        /// <returns>The clr type</returns>
-        private static Type GetClrType(IEdmType edmType, IEdmModel edmModel)
-        {
-
-            var annotation = edmModel.GetAnnotationValue<ClrTypeAnnotation>(edmType);
-            if (annotation != null)
-            {
-                return annotation.ClrType;
-            }
-
-            throw new NotSupportedException(string.Format(
-                "Cast not supported for type {0}",
-                edmType.FullTypeName()));
-        }
     }
 
+    /// <summary>
+    /// Result returned by <see cref="ODataPathQueryBuilder"/> after
+    /// applying transformations based on path.
+    /// </summary>
     internal class ODataPathQueryResult
     {
+        /// <summary>
+        /// The result of the query transformations applied to the original <see cref="IQueryable"/>
+        /// by the <see cref="ODataPathQueryBuilder"/>
+        /// </summary>
         public IQueryable Result { get; set; }
+        /// <summary>
+        /// Whether the path has a $count segment
+        /// </summary>
         public bool HasCountSegment { get; set; }
+        /// <summary>
+        /// Whether the path has a $value segment
+        /// </summary>
         public bool HasValueSegment { get; set; }
     }
 }

@@ -224,11 +224,13 @@ namespace Microsoft.AspNet.OData.Routing
             // if action has [EnableNestedPaths] attribute, then it doesn't
             // need to match parameters, since this action is expected to
             // match arbitrarily nested paths even if it doesn't have any parameters
-            // TODO: this assumes [EnableNestedPaths] is implemented as an action filter,
-            // maybe it would be more robust to just test wether the underlying method has the attribute
-            if (actionDescriptor.FilterDescriptors.Any(f => f.Filter is EnableNestedPathsAttribute))
+            if (actionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
             {
-                return true;
+                if (controllerActionDescriptor.MethodInfo.GetCustomAttributes(true)
+                    .OfType<EnableNestedPathsAttribute>().Any())
+                {
+                    return true;
+                }
             }
 
 

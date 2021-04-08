@@ -1,6 +1,9 @@
-﻿#if NETCORE
-// Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
+
+#if NETCORE
+
+// TODO: [EnableNestedPaths] feature has not yet been ported to AspNet classic
 
 using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;

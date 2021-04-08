@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -17,10 +20,11 @@ using Microsoft.OData.Edm;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// TODO: add summary
+    /// This class defines an attribute that can be applied to an action to allow handling
+    /// of arbitrarily nested paths. The result of the action should be an IQueryable
+    /// or SingleResult. The sequence of property and key accesses in the path will be
+    /// applied to the result of the action through query transformations.
     /// </summary>
-    [SuppressMessage("Microsoft.Performance", "CA1813:AvoidUnsealedAttributes",
-       Justification = "We want to be able to subclass this type.")]
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
     public sealed class EnableNestedPathsAttribute : ActionFilterAttribute
     {

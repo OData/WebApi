@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNet.OData.Builder;
+﻿#if NETCORE
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
@@ -448,3 +449,5 @@ namespace Microsoft.AspNet.OData.Test
         public string City { get; set; }
     }
 }
+
+#endif

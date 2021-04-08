@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNet.OData.Routing;
-using Microsoft.AspNet.OData.Routing.Conventions;
-using Microsoft.AspNet.OData.Test.Abstraction;
+﻿#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Routing.Conventions;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Routing.Conventions
@@ -155,3 +156,4 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
 
     }
 }
+#endif

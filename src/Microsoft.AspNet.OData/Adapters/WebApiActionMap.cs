@@ -41,5 +41,29 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             return this.innerMap.Contains(name);
         }
+
+        /// <summary>
+        /// Gets the action descriptor of the specified action
+        /// </summary>
+        /// <param name="actionName">The name of the action</param>
+        /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
+        public IWebApiActionDescriptor GetActionDescriptor(string actionName)
+        {
+            var group = this.innerMap.FirstOrDefault(g => g.Key == actionName);
+
+            if (group == null)
+            {
+                return null;
+            }
+
+            HttpActionDescriptor descriptor = group.FirstOrDefault();
+
+            if (descriptor == null)
+            {
+                return null;
+            }
+
+            return new WebApiActionDescriptor(descriptor);
+        }
     }
 }

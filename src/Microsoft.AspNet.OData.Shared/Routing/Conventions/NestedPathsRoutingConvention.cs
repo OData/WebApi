@@ -1,4 +1,5 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+﻿#if NETCORE
+// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System.Linq;
@@ -61,8 +62,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             }
 
 
-
-
             // if we did no find a matching action amongst the conventional user-defined methods
             // then let's check if the controller has a Get method with [EnableNestedPaths] attribute
             // which should be used to catch any any nested GET request
@@ -81,3 +80,4 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
         }
     }
 }
+#endif

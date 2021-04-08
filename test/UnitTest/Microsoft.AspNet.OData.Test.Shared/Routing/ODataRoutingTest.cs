@@ -60,9 +60,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(IncidentsController),
                 typeof(NotFoundWithIdCustomersController),
                 typeof(NotFoundCustomersController),
-                typeof(AttributeCustomersController)
+                typeof(AttributeCustomersController),
+#if NETCORE
+// TODO enable when [EnableNestedPaths] is supported in ASP.NET classic
                 typeof(NestedPathsCustomersController),
                 typeof(NestedPathsWithOverridesCustomersController)
+#endif
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -326,7 +329,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Name", "GetName(1)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products(2)/Name", "GetProductName(1, 2)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products/$count", "GetProductCount(1)" },
-                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products", "GetNestedPathsWithOverridesCustomers()" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products", "GetNestedPathsWithOverridesCustomers()" },
                     { "GET", "NestedPathsWithOverridesCustomers/$count", "GetNestedPathsWithOverridesCustomers()" },
 
 
@@ -976,6 +979,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
             return "Delete()";
         }
     }
+#if NETCORE
+// TODO: enable when [EnableNestedPaths] are supported in AspNet classic
 
     public class AttributeCustomersController: TestODataController
     {
@@ -1031,4 +1036,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
             return $"CountProducts({key})";
         }
     }
+#endif
+
 }

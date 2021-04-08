@@ -222,7 +222,7 @@ namespace Microsoft.AspNet.OData
                     (isCollection && propertyType.AsCollection().ElementType().IsPrimitive()))
                 {
 
-                    bool hasDefaultConstructor = clrType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).
+                    bool hasDefaultConstructor = (!clrType.IsClass) || clrType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).
                                                  Any(x => x.GetParameters().Count() == 0);
 
                     // primitive or primitive collection

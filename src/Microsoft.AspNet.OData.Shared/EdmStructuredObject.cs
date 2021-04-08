@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.Edm;
@@ -220,8 +221,12 @@ namespace Microsoft.AspNet.OData
                 if (propertyType.IsPrimitive() ||
                     (isCollection && propertyType.AsCollection().ElementType().IsPrimitive()))
                 {
+
+                    bool hasDefaultConstructor = clrType.GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static).
+                                                 Any(x => x.GetParameters().Count() == 0);
+
                     // primitive or primitive collection
-                    if (clrType.GetConstructor(Type.EmptyTypes) != null)
+                    if (hasDefaultConstructor)
                     {
                         return Activator.CreateInstance(clrType);
                     }

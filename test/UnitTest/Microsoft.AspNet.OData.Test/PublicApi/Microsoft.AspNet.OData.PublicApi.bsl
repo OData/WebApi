@@ -41,7 +41,6 @@ public interface Microsoft.AspNet.OData.IDeltaSet {
 
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; public abstract set; }
-	System.Reflection.PropertyInfo InstanceAnnotationsPropertyInfo  { public abstract get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
 }
 
@@ -301,7 +300,6 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; public virtual set; }
 	System.Type ExpectedClrType  { public virtual get; }
-	System.Reflection.PropertyInfo InstanceAnnotationsPropertyInfo  { public virtual get; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
 

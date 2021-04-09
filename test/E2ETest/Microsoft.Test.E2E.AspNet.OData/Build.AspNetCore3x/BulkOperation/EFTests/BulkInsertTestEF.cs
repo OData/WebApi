@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -24,7 +25,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
     public class BulkInsertTestEF : WebHostTestBase
     {
         public BulkInsertTestEF(WebHostTestFixture fixture)
-            :base(fixture, UpdateConfigureServices)
+            :base(fixture)
         {            
         }
 
@@ -41,12 +42,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
         }
 
-        protected static void UpdateConfigureServices(IServiceCollection services)
-        {
-            // Add your custom services
-            services.AddDbContext<EmployeeDBContext>(opt =>
-                opt.UseInMemoryDatabase("EmployeeDB"));
-        }
 
         #region Update
 
@@ -54,7 +49,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public async Task PatchEmployee_WithUpdates()
         {
             //Arrange
-            
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
@@ -131,8 +125,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("Employee1", json);
+                Assert.Contains("Employee2", json);
             }
 
         }
@@ -158,8 +154,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("Sql", json);
             }
            
   
@@ -186,9 +183,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                //var result = json.GetValue("value") as JArray;
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlUD", json);
             }
 
         }
@@ -214,8 +211,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;                
+                Assert.Contains("SqlMU", json);
             }
 
         }
@@ -240,8 +238,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Contains("SqlMU1", json);
             }
                         
         }

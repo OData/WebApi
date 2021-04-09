@@ -33,7 +33,7 @@ public interface Microsoft.AspNet.OData.IDelta {
 public interface Microsoft.AspNet.OData.IDeltaDeletedEntityObject {
 	System.Uri Id  { public abstract get; public abstract set; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public abstract get; public abstract set; }
-	Microsoft.OData.DeltaDeletedEntryReason Reason  { public abstract get; public abstract set; }
+	System.Nullable`1[[Microsoft.OData.DeltaDeletedEntryReason]] Reason  { public abstract get; public abstract set; }
 }
 
 public interface Microsoft.AspNet.OData.IDeltaSet {
@@ -349,7 +349,7 @@ public class Microsoft.AspNet.OData.DeltaDeletedEntityObject`1 : Delta`1, IDynam
 
 	System.Uri Id  { public virtual get; public virtual set; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public virtual get; public virtual set; }
-	Microsoft.OData.DeltaDeletedEntryReason Reason  { public virtual get; public virtual set; }
+	System.Nullable`1[[Microsoft.OData.DeltaDeletedEntryReason]] Reason  { public virtual get; public virtual set; }
 }
 
 [
@@ -3640,8 +3640,8 @@ public abstract class Org.OData.Core.V1.ExceptionType {
 public class Org.OData.Core.V1.DataModificationExceptionType : Org.OData.Core.V1.ExceptionType {
 	public DataModificationExceptionType (Org.OData.Core.V1.DataModificationOperationKind failedOperation)
 
-	Org.OData.Core.V1.DataModificationOperationKind failedOperation  { public get; }
-	short responseCode  { public get; public set; }
+	Org.OData.Core.V1.DataModificationOperationKind FailedOperation  { public get; }
+	short ResponseCode  { public get; public set; }
 }
 
 public class Org.OData.Core.V1.MessageType {

@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.OData
         public Uri Id { get; set; }
         
         /// <inheritdoc />
-        public DeltaDeletedEntryReason Reason { get; set; }
+        public DeltaDeletedEntryReason? Reason { get; set; }
         
         /// <inheritdoc />
         public IEdmNavigationSource NavigationSource { get; set; }  

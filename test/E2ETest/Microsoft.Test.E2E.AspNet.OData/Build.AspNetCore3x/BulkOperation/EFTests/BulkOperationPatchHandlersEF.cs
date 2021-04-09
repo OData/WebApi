@@ -45,6 +45,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     public class EmployeeEFPatchHandler : PatchMethodHandler<Employee>
     {
+        EmployeeDBContext dbContext = null;
+
+        public EmployeeEFPatchHandler(EmployeeDBContext dbContext)
+        {
+            this.dbContext = dbContext;
+        }
+
         public override PatchStatus TryCreate(Delta<Employee> deltaObject, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
@@ -53,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new Employee();
-                EmployeesControllerEF.dbContext.Employees.Add(createdObject);
+                dbContext.Employees.Add(createdObject);
 
                 return PatchStatus.Success;
             }
@@ -72,9 +79,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
-                var customer = EmployeesControllerEF.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+                var customer = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
 
-                EmployeesControllerEF.dbContext.Employees.Remove(customer);
+                dbContext.Employees.Remove(customer);
 
                 return PatchStatus.Success;
             }
@@ -95,7 +102,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["ID"].ToString();
-                originalObject = EmployeesControllerEF.dbContext.Employees.First(x => x.ID == Int32.Parse(id));
+                originalObject = dbContext.Employees.First(x => x.ID == Int32.Parse(id));
 
 
                 if (originalObject == null)
@@ -187,7 +194,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues["Id"].ToString();
-                originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                if (employee.Friends == null)
+                {
+                    status = PatchStatus.NotFound;
+                }
+                else
+                {
+                    originalObject = employee.Friends.FirstOrDefault(x => x.Id == Int32.Parse(id));
+                }
 
 
                 if (originalObject == null)

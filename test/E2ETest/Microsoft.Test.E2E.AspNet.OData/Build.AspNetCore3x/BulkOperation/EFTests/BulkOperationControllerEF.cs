@@ -17,16 +17,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
     public class EmployeesControllerEF : TestODataController
     {
-        public EmployeesControllerEF(EmployeeDBContext context)
+        public EmployeesControllerEF()
         {
-            dbContext = context;
+            
         }
-
-        public static EmployeeDBContext dbContext;
+                
         public static List<Employee> employees;
         public static List<Friend> friends;
 
-        public static DbSet<Employee> GenerateData(EmployeeDBContext context)
+        public DbSet<Employee> GenerateData(EmployeeDBContext context)
         {
             if (context.Employees.Any())
             {
@@ -47,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return context.Employees;
         }
 
-        public static DbSet<Friend> GenerateDataOrders(EmployeeDBContext context)
+        public DbSet<Friend> GenerateDataOrders(EmployeeDBContext context)
         {
             if (context.Friends.Any())
             {
@@ -74,41 +73,55 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         [HttpPatch]
         public ITestActionResult PatchEmployees([FromBody] DeltaSet<Employee> coll)
         {
-            GenerateData(dbContext);
+            using (var dbContext = CreateDbContext())
+            {
+                GenerateData(dbContext);
 
-            Assert.NotNull(coll);
+                Assert.NotNull(coll);
 
-            var returncoll = coll.Patch(new EmployeeEFPatchHandler()) ;
+                var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext));
 
-            return Ok(returncoll);
+
+                return Ok(returncoll);
+            }
+        }
+
+        private EmployeeDBContext CreateDbContext()
+        {
+            var buiilder = new DbContextOptionsBuilder<EmployeeDBContext>().UseInMemoryDatabase(Guid.NewGuid().ToString());
+            var dbContext = new EmployeeDBContext(buiilder.Options);
+            return dbContext;
         }
 
         [ODataRoute("Employees({key})")]
         public ITestActionResult Patch(int key, [FromBody] Delta<Employee> delta)
         {
-            GenerateData(dbContext);
-
-            delta.TrySetPropertyValue("ID", key); // It is the key property, and should not be updated.
-            object obj;
-            delta.TryGetPropertyValue("Friends", out obj);
-
-            var employee = dbContext.Employees.First(x => x.ID == key);
-
-            try
+            using (var dbContext = CreateDbContext())
             {
-                delta.Patch(employee, new EmployeeEFPatchHandler());
+                GenerateData(dbContext);
 
+                delta.TrySetPropertyValue("ID", key); // It is the key property, and should not be updated.
+                object obj;
+                delta.TryGetPropertyValue("Friends", out obj);
+
+                var employee = dbContext.Employees.First(x => x.ID == key);
+
+                try
+                {
+                    delta.Patch(employee, new EmployeeEFPatchHandler(dbContext));
+
+                }
+                catch (ArgumentException ae)
+                {
+                    return BadRequest(ae.Message);
+                }
+
+                employee = dbContext.Employees.First(x => x.ID == key);
+
+                ValidateFriends(key, employee);
+
+                return Ok(employee);
             }
-            catch (ArgumentException ae)
-            {
-                return BadRequest(ae.Message);
-            }
-
-            employee = dbContext.Employees.First(x => x.ID == key);
-
-            ValidateFriends(key, employee);
-
-            return Ok(employee);
         }
 
         private static void ValidateFriends(int key, Employee employee)
@@ -146,27 +159,36 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         [HttpPatch]
         public ITestActionResult PatchFriends(int key, [FromBody] DeltaSet<Friend> friendColl)
         {
-            GenerateData(dbContext);
+            using (var dbContext = CreateDbContext())
+            {
+                GenerateData(dbContext);
 
-            Employee originalEmployee = dbContext.Employees.SingleOrDefault(c => c.ID == key);
-            Assert.NotNull(originalEmployee);
+                Employee originalEmployee = dbContext.Employees.SingleOrDefault(c => c.ID == key);
+                Assert.NotNull(originalEmployee);
 
-            var changedObjColl = friendColl.Patch(originalEmployee.Friends);
+                var changedObjColl = friendColl.Patch(originalEmployee.Friends);
 
-            return Ok(changedObjColl);
+                return Ok(changedObjColl);
+            }
         }
 
         public ITestActionResult Get(int key)
         {
-            var emp = dbContext.Employees.SingleOrDefault(e => e.ID == key);
-            return Ok(emp);
+            using (var dbContext = CreateDbContext())
+            {
+                var emp = dbContext.Employees.SingleOrDefault(e => e.ID == key);
+                return Ok(emp);
+            }
         }
 
         [ODataRoute("Employees({key})/Friends")]
         public ITestActionResult GetFriends(int key)
         {
-            var emp = dbContext.Employees.SingleOrDefault(e => e.ID == key);
-            return Ok(emp.Friends);
+            using (var dbContext = CreateDbContext())
+            {
+                var emp = dbContext.Employees.SingleOrDefault(e => e.ID == key);
+                return Ok(emp.Friends);
+            }
         }
 
 

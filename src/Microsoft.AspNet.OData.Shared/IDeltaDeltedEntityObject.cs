@@ -20,7 +20,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Optional. Either deleted, if the entity was deleted (destroyed), or changed if the entity was removed from membership in the result (i.e., due to a data change).
         /// </summary>
-        DeltaDeletedEntryReason Reason { get; set; }
+        DeltaDeletedEntryReason? Reason { get; set; }
 
         /// <summary>
         /// The navigation source of the deleted entity. If null, then the deleted entity is from the current feed.

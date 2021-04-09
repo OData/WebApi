@@ -67,20 +67,20 @@ namespace Org.OData.Core.V1
         /// </summary>
         public DataModificationExceptionType(DataModificationOperationKind failedOperation)
         {
-            this.failedOperation = failedOperation;
+            this.FailedOperation = failedOperation;
         }
 
         /// <summary>
         /// Represents king of <see cref="DataModificationOperationKind"/> type of operation 
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "failed")]
-        public DataModificationOperationKind failedOperation { get; }
+        public DataModificationOperationKind FailedOperation { get; }
 
         /// <summary>
         /// Represents response code
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "response")]
-        public Int16 responseCode { get; set; }
+        public Int16 ResponseCode { get; set; }
     }
 
     /// <summary>

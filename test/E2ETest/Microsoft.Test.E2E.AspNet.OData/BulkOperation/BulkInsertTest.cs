@@ -64,7 +64,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -102,7 +102,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -131,7 +131,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
             
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+            var content = @"{'@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',
+                            '@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
                     'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -143,7 +144,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -180,7 +181,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -206,7 +207,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -218,7 +219,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -244,7 +245,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'@odata.removed' : {'reason':'changed'}, 'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -257,7 +258,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Act & Assert
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -299,7 +300,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$deletedEntity");
             }
@@ -325,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$deletedEntity");
             }
@@ -350,9 +351,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Contains("$delta", json.ToString());
+                Assert.Contains("$delta", json);
             }
 
         }
@@ -377,7 +378,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var str = json.ToString();
                 Assert.Contains("$delta",str);                
@@ -416,7 +417,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$deletedEntity");
             }
@@ -442,7 +443,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$delta");
                 json.ToString().Contains("@NS.Test");
@@ -471,7 +472,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$delta");
                 json.ToString().Contains("@NS.Test");
@@ -498,7 +499,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 json.ToString().Contains("$deletedEntity");
             }
@@ -523,7 +524,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("@Core.DataModificationException", json.ToString());
                 Assert.Contains("@NS.Test", json.ToString());
@@ -551,7 +552,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 var str = json.ToString();
                 Assert.Contains("$delta", str);                
@@ -587,7 +588,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -597,7 +598,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 
                 Assert.Contains("Friend1", json.ToString());
                 Assert.Contains("Friend2", json.ToString());
@@ -608,7 +609,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             {
                 response.EnsureSuccessStatusCode();
 
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
 
                 Assert.Contains("Friend3", json.ToString());
                 Assert.Contains("Friend4", json.ToString());
@@ -635,7 +636,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -673,7 +674,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -713,7 +714,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 
@@ -753,7 +754,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
-                var json = await response.Content.ReadAsObject<JObject>();
+                var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }
 

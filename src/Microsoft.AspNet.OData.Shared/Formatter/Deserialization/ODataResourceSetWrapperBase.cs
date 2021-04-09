@@ -7,7 +7,7 @@ using Microsoft.OData;
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
     /// <summary>
-    /// Encapsulates an <see cref="ODataResourceSet"/> and the <see cref="ODataResource"/>'s that are part of it.
+    /// Encapsulates an <see cref="ODataResourceSet"/>  or <see cref="ODataDeltaResourceSet"/>  and the <see cref="ODataResource"/>'s that are part of it.
     /// </summary>        
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
     public abstract class ODataResourceSetWrapperBase : ODataItemBase
@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Gets the wrapped <see cref="ResourceSetBase"/>.
+        /// Gets the wrapped <see cref="ODataResourceSetBase"/>.
         /// </summary>
         public ODataResourceSetBase ResourceSetBase { get; }
 

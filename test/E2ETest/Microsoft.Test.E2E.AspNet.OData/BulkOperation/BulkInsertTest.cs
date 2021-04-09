@@ -584,7 +584,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
-            this.Client.Timeout= TimeSpan.FromMinutes(2);
+            
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = await response.Content.ReadAsObject<JObject>();

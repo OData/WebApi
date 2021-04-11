@@ -114,7 +114,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
+        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull, bool containsDateFunction = false)
         {
             ExpressionType binaryExpressionType;
 
@@ -142,7 +142,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
 
             if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
-                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)) ||
+                containsDateFunction)
             {
                 left = CreateDateBinaryExpression(left);
                 right = CreateDateBinaryExpression(right);
@@ -1077,6 +1078,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return IsType<Date>(type);
         }
 
+        internal static bool ContainsDateFunction(BinaryOperatorNode binaryOperatorNode)
+        {
+            bool isDate = false;
+            if (binaryOperatorNode.Left is SingleValueFunctionCallNode leftFunctionCallNode)
+            {
+                isDate = leftFunctionCallNode.Name == "date";
+            }
+            if (!isDate && binaryOperatorNode.Left is SingleValueFunctionCallNode rightFunctionCallNode)
+            {
+                isDate = rightFunctionCallNode.Name == "date";
+            }
+            return isDate;
+        }
+
         internal static bool IsInteger(Type type)
         {
             return IsType<short>(type) || IsType<int>(type) || IsType<long>(type);
@@ -1110,7 +1125,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             var member = source as MemberExpression;
             return member != null
-                && this.Parameter.Type.IsGenericType() 
+                && this.Parameter.Type.IsGenericType()
                 && this.Parameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
                 && member.Expression == this.Parameter;
         }

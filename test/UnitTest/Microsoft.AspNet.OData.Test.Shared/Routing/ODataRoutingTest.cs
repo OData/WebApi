@@ -328,7 +328,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "NestedPathsWithOverridesCustomers(1)", "Get(1)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Name", "GetName(1)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products(2)/Name", "GetProductName(1, 2)" },
-                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products/$count", "GetProductCount(1)" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products/$count", "CountProducts(1)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products", "GetNestedPathsWithOverridesCustomers()" },
                     { "GET", "NestedPathsWithOverridesCustomers/$count", "GetNestedPathsWithOverridesCustomers()" },
 
@@ -1030,6 +1030,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
             return $"GetProductName({key}, {relatedKey})";
         }
 
+        [HttpGet]
         [ODataRoute("NestedPathsWithOverridesCustomers({key})/Products/$count")]
         public string CountProducts(int key)
         {

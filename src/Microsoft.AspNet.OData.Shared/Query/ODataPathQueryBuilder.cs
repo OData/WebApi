@@ -59,8 +59,6 @@ namespace Microsoft.AspNet.OData.Query
 
             foreach (ODataPathSegment segment in remainingSegments)
             {
-                Type currentType = queryable.ElementType;
-
                 if (segment is KeySegment keySegment)
                 {
                     Dictionary<string, object> keys = new Dictionary<string, object>();
@@ -70,7 +68,7 @@ namespace Microsoft.AspNet.OData.Query
                     }
 
                     // filterPredicate
-                    ParameterExpression filterParam = Expression.Parameter(currentType, "entity");
+                    ParameterExpression filterParam = Expression.Parameter(queryable.ElementType, "entity");
                     IEnumerable<BinaryExpression> conditions = keySegment.Keys.Select(kvp =>
                         Expression.Equal(
                             Expression.Property(filterParam, kvp.Key),
@@ -78,48 +76,46 @@ namespace Microsoft.AspNet.OData.Query
                     BinaryExpression filterBody = conditions.Aggregate((left, right) => Expression.AndAlso(left, right));
                     LambdaExpression filterPredicate = Expression.Lambda(filterBody, filterParam);
 
-                    queryable = ExpressionHelpers.Where(queryable, filterPredicate, currentType);
+                    queryable = ExpressionHelpers.Where(queryable, filterPredicate, queryable.ElementType);
 
                 }
                 else if (segment is NavigationPropertySegment navigationSegment)
                 {
-                    ParameterExpression param = Expression.Parameter(currentType);
+                    ParameterExpression param = Expression.Parameter(queryable.ElementType);
                     MemberExpression navPropExpression = Expression.Property(param, navigationSegment.NavigationProperty.Name);
 
                     if (navigationSegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.Many)
                     {
                         BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
                         LambdaExpression nullFilter = Expression.Lambda(condition, param);
-                        queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
+                        queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
                         // collection navigation property
                         // e.g. Product/Categories
-                        Type propertyType = currentType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
+                        Type propertyType = queryable.ElementType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
                         propertyType = GetEnumerableItemType(navPropExpression.Type);
 
-                        currentType = propertyType;
 
                         Type delegateType = typeof(Func<,>).MakeGenericType(
                             queryable.ElementType,
-                            typeof(IEnumerable<>).MakeGenericType(currentType));
+                            typeof(IEnumerable<>).MakeGenericType(propertyType));
                         LambdaExpression selectBody =
                             Expression.Lambda(delegateType, navPropExpression, param);
-                        queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.SelectMany(queryable, selectBody, queryable.ElementType, propertyType);
                     }
                     else
                     {
                         BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
                         LambdaExpression nullFilter = Expression.Lambda(condition, param);
-                        queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
+                        queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
 
-                        currentType = navPropExpression.Type;
                         LambdaExpression selectBody =
                             Expression.Lambda(navPropExpression, param);
-                        queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.Select(queryable, selectBody, queryable.ElementType);
                     }
                 }
                 else if (segment is PropertySegment propertySegment)
                 {
-                    ParameterExpression param = Expression.Parameter(currentType);
+                    ParameterExpression param = Expression.Parameter(queryable.ElementType);
                     MemberExpression propertyExpression = Expression.Property(param, propertySegment.Property.Name);
 
                     // check whether property is null or not before further selection
@@ -136,21 +132,21 @@ namespace Microsoft.AspNet.OData.Query
                         // Produces new query like 'queryable.SelectMany(param => param.PropertyName)'.
                         // Suppose 'param.PropertyName' is of type 'IEnumerable<T>', the type of the
                         // resulting query would be 'IEnumerable<T>' too.
-                        currentType = GetEnumerableItemType(propertyExpression.Type);
+                        Type collectionPropertyElementType = GetEnumerableItemType(propertyExpression.Type);
                         Type delegateType = typeof(Func<,>).MakeGenericType(
                             queryable.ElementType,
-                            typeof(IEnumerable<>).MakeGenericType(currentType));
+                            typeof(IEnumerable<>).MakeGenericType(collectionPropertyElementType));
                         LambdaExpression selectBody =
                         Expression.Lambda(delegateType, propertyExpression, param);
-                        queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.SelectMany(
+                            queryable, selectBody, queryable.ElementType, collectionPropertyElementType);
                     }
                     else
                     {
                         // Produces new query like 'queryable.Select(param => param.PropertyName)'.
-                        currentType = propertyExpression.Type;
                         LambdaExpression selectBody =
                             Expression.Lambda(propertyExpression, param);
-                        queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.Select(queryable, selectBody, queryable.ElementType);
                     }
                 }
                 else if (segment is CountSegment)

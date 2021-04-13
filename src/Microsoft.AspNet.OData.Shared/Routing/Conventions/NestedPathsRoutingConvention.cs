@@ -9,7 +9,6 @@ using System.Linq;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.OData.UriParser;
 
-
 namespace Microsoft.AspNet.OData.Routing.Conventions
 {
     /// <summary>
@@ -40,7 +39,6 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 return null;
             }
 
-
             // unsupported path segments
             if (odataPath.PathTemplate.EndsWith("$ref"))
             {
@@ -64,10 +62,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 return null;
             }
 
-
-            // if we did no find a matching action amongst the conventional user-defined methods
+            // if we did not find a matching action amongst the conventional user-defined methods
             // then let's check if the controller has a Get method with [EnableNestedPaths] attribute
-            // which should be used to catch any any nested GET request
+            // which should be used to catch any nested GET request
             IWebApiActionDescriptor descriptor = actionMap.GetActionDescriptor($"Get{sourceName}") ?? actionMap.GetActionDescriptor("Get");
             if (descriptor == null)
             {

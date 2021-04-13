@@ -233,7 +233,6 @@ namespace Microsoft.AspNet.OData.Routing
                 }
             }
 
-
             // navigationProperty is optional in some cases, therefore an action
             // should not be rejected simply because it does not declare a navigationProperty parameter
             if (availableKeys.Contains(ODataRouteConstants.NavigationProperty.ToLowerInvariant()))
@@ -304,7 +303,6 @@ namespace Microsoft.AspNet.OData.Routing
 
             return true;
         }
-
         private bool RequestHasBody(RouteContext context)
         {
             string method = context.HttpContext.Request.Method;

@@ -32,7 +32,6 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
         [InlineData("RoutingCustomers(1)/Products(2)/Name", "GetRoutingCustomers")]
         [InlineData("RoutingCustomers(1)/Products/$count", "Get")]
         [InlineData("RoutingCustomers(1)/Products/$count", "GetRoutingCustomers")]
-
         public void SelectAction_ReturnsGetAction_IfActionHasNestedPathsAttribute(string path, string expectedAction)
         {
             // Arrange
@@ -133,7 +132,6 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             Assert.Null(selectedAction);
         }
 
-
         MethodInfo GetMethodWithNestedPathsAttribute()
         {
             return this.GetType().GetMethod("MethodWithNestedPathsAttribute", BindingFlags.Instance | BindingFlags.NonPublic);
@@ -144,19 +142,14 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
             return this.GetType().GetMethod("MethodWithoutNestedPathsAttribute", BindingFlags.Instance | BindingFlags.NonPublic);
         }
 
-
         [EnableNestedPaths]
         void MethodWithNestedPathsAttribute()
         {
-
         }
 
         void MethodWithoutNestedPathsAttribute()
         {
-
         }
-
-
     }
 }
 #endif

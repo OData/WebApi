@@ -36,11 +36,16 @@ namespace Microsoft.AspNet.OData
             // a filter with a lower order will be executed after a filter with a higher order
             Order = 1;
         }
-        
+
         /// <summary>
-        /// 
+        /// Transforms the result of the action based on the sequence of property accesses in the odata path
+        /// after the action is executed.
+        /// It first tries to retrieve the IQueryable from the
+        /// returning response message. It then uses the <see cref="ODataPathQueryBuilder"/> to transform
+        /// the query and sets the result back to the response message.
         /// </summary>
-        /// <param name="actionExecutedContext"></param>
+        /// <param name="actionExecutedContext">The context related to this action, including the response message,
+        /// request message and HttpConfiguration etc.</param>
         public override void OnActionExecuted(ActionExecutedContext actionExecutedContext)
         {
             if (actionExecutedContext == null)
@@ -54,15 +59,12 @@ namespace Microsoft.AspNet.OData
                 throw Error.Argument("actionExecutedContext", SRResources.ActionExecutedContextMustHaveRequest);
             }
 
-            ActionDescriptor actionDescriptor = actionExecutedContext.ActionDescriptor;
+            ControllerActionDescriptor actionDescriptor = actionExecutedContext.ActionDescriptor as ControllerActionDescriptor;
             if (actionDescriptor == null)
             {
                 throw Error.Argument("actionExecutedContext", SRResources.ActionContextMustHaveDescriptor);
             }
 
-
-
-            //base.OnActionExecuted(context);
             HttpResponse response = actionExecutedContext.HttpContext.Response;
 
             ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
@@ -81,7 +83,6 @@ namespace Microsoft.AspNet.OData
                 result = propInfo.GetValue(singleResult) as IQueryable;
             }
 
-            
             if (result != null)
             {
                 ODataPath path = actionExecutedContext.HttpContext.ODataFeature().Path;

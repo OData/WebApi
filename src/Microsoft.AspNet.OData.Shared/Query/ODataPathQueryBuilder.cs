@@ -44,19 +44,23 @@ namespace Microsoft.AspNet.OData.Query
         {
             var result = new ODataPathQueryResult();
 
-            var segments = path.Segments;
-            // assume first segment is entitySet
-            var firstSegment = segments.FirstOrDefault() as EntitySetSegment;
+            IEnumerable<ODataPathSegment> segments = path.Segments;
 
-            //var edmType = firstSegment.EdmType;
+            IQueryable queryable = source;
+            
+            ODataPathSegment firstSegment = segments.FirstOrDefault();
 
-            var queryable = source;
-            var currentType = queryable.ElementType;
+            if (!(firstSegment is EntitySetSegment || firstSegment is SingletonSegment))
+            {
+                return null;
+            }
 
             var remainingSegments = segments.Skip(1);
 
             foreach (var segment in remainingSegments)
             {
+                Type currentType = queryable.ElementType;
+
                 if (segment is KeySegment keySegment)
                 {
                     var keys = new Dictionary<string, object>();
@@ -65,7 +69,7 @@ namespace Microsoft.AspNet.OData.Query
                         keys.Add(kvp.Key, kvp.Value);
                     }
 
-                    // filerPredicate
+                    // filterPredicate
                     var filterParam = Expression.Parameter(currentType, "entity");
                     var conditions = keySegment.Keys.Select(kvp =>
                         Expression.Equal(
@@ -74,7 +78,7 @@ namespace Microsoft.AspNet.OData.Query
                     var filterBody = conditions.Aggregate((left, right) => Expression.AndAlso(left, right));
                     var filterPredicate = Expression.Lambda(filterBody, filterParam);
 
-                    queryable = Where(queryable, filterPredicate, currentType);
+                    queryable = ExpressionHelpers.Where(queryable, filterPredicate, currentType);
 
                 }
                 else if (segment is NavigationPropertySegment navigationSegment)
@@ -86,7 +90,7 @@ namespace Microsoft.AspNet.OData.Query
                     {
                         var condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
                         var nullFilter = Expression.Lambda(condition, param);
-                        queryable = Where(queryable, nullFilter, currentType);
+                        queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
                         // collection navigation property
                         // e.g. Product/Categories
                         var propertyType = currentType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
@@ -99,19 +103,18 @@ namespace Microsoft.AspNet.OData.Query
                             typeof(IEnumerable<>).MakeGenericType(currentType));
                         var selectBody =
                             Expression.Lambda(delegateType, navPropExpression, param);
-
-                        queryable = SelectMany(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
                     }
                     else
                     {
                         var condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
                         var nullFilter = Expression.Lambda(condition, param);
-                        queryable = Where(queryable, nullFilter, currentType);
+                        queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
 
                         currentType = navPropExpression.Type;
                         var selectBody =
                             Expression.Lambda(navPropExpression, param);
-                        queryable = Select(queryable, selectBody);
+                        queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
                     }
                 }
                 else if (segment is PropertySegment propertySegment)
@@ -122,9 +125,10 @@ namespace Microsoft.AspNet.OData.Query
                     // check whether property is null or not before further selection
                     if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
                     {
+                        // queryable = queryable.Where( => .Property != null)
                         var condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
                         var nullFilter = Expression.Lambda(condition, param);
-                        queryable = Where(queryable, nullFilter, currentType);
+                        queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
                     }
 
                     if (propertySegment.Property.Type.IsCollection())
@@ -138,7 +142,7 @@ namespace Microsoft.AspNet.OData.Query
                             typeof(IEnumerable<>).MakeGenericType(currentType));
                         var selectBody =
                         Expression.Lambda(delegateType, propertyExpression, param);
-                        queryable = SelectMany(queryable, selectBody, currentType);
+                        queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
                     }
                     else
                     {
@@ -146,7 +150,7 @@ namespace Microsoft.AspNet.OData.Query
                         currentType = propertyExpression.Type;
                         var selectBody =
                             Expression.Lambda(propertyExpression, param);
-                        queryable = Select(queryable, selectBody);
+                        queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
                     }
                 }
                 else if (segment is CountSegment)
@@ -169,54 +173,15 @@ namespace Microsoft.AspNet.OData.Query
             return result;
         }
 
-        private static MethodInfo QueryableWhereGeneric { get; } = GenericMethodOf(_ => Queryable.Where(default, default(Expression<Func<int, bool>>)));
-
-        private static MethodInfo QueryableSelectGeneric { get; } = GenericMethodOf(_ => Queryable.Select(default(IQueryable<int>), i => i));
-
-        private static MethodInfo QueryableSelectManyGeneric { get; } = GenericMethodOf(_ => Queryable.SelectMany(default(IQueryable<int>), i => default(IQueryable<int>)));
-
-        public static MethodInfo QueryableOfTypeGeneric { get; } = GenericMethodOf(_ => Queryable.OfType<int>(default(IQueryable)));
-
-        private static IQueryable Where(IQueryable query, LambdaExpression where, Type type)
-        {
-            var whereMethod = QueryableWhereGeneric.MakeGenericMethod(type);
-            return whereMethod.Invoke(null, new object[] { query, where }) as IQueryable;
-        }
-
-        public static IQueryable OfType(IQueryable query, Type type)
-        {
-            var ofTypeMethod = QueryableOfTypeGeneric.MakeGenericMethod(type);
-            return ofTypeMethod.Invoke(null, new object[] { query }) as IQueryable;
-        }
-
-        private static IQueryable SelectMany(IQueryable query, LambdaExpression selectMany, Type selectedPropertyType)
-        {
-            var selectManyMethod = QueryableSelectManyGeneric.MakeGenericMethod(query.ElementType, selectedPropertyType);
-            return selectManyMethod.Invoke(null, new object[] { query, selectMany }) as IQueryable;
-        }
-
-        private static IQueryable Select(IQueryable query, LambdaExpression select)
-        {
-            var selectMethod =
-                QueryableSelectGeneric.MakeGenericMethod(
-                    query.ElementType,
-                    select.Body.Type);
-            return selectMethod.Invoke(null, new object[] { query, select }) as IQueryable;
-        }
-
-        private static MethodInfo GenericMethodOf<TReturn>(Expression<Func<object, TReturn>> expression) => GenericMethodOf(expression as Expression);
-
-        private static MethodInfo GenericMethodOf(Expression expression)
-        {
-            var lambdaExpression = expression as LambdaExpression;
-
-            Contract.Assert(expression.NodeType == ExpressionType.Lambda);
-            Contract.Assert(lambdaExpression != null);
-            Contract.Assert(lambdaExpression.Body.NodeType == ExpressionType.Call);
-
-            return (lambdaExpression.Body as MethodCallExpression).Method.GetGenericMethodDefinition();
-        }
-
+        /// <summary>
+        /// Gets the element type "T" of the given type
+        /// if it implements <see cref="IEnumerable{T}"/>
+        /// </summary>
+        /// <param name="enumerableType"></param>
+        /// <returns>
+        /// The element type if <paramref name="enumerableType"/> implements <see cref="IEnumerable{T}"/>
+        /// otherwise returns <paramref name="enumerableType"/> itself
+        /// </returns>
         private static Type GetEnumerableItemType(Type enumerableType)
         {
             var type = FindGenericType(enumerableType, typeof(IEnumerable<>));
@@ -285,6 +250,16 @@ namespace Microsoft.AspNet.OData.Query
             return null;
         }
 
+        /// <summary>
+        /// Checks whether <paramref name="type"/> conforms to a generic
+        /// definition of the given generic type <paramref name="definition"/>
+        /// </summary>
+        /// <param name="type">The type to test</param>
+        /// <param name="definition">The generic type definition to test against</param>
+        /// <returns>
+        /// True if <paramref name="type"/> conforms to a generic
+        /// definition of the given generic type <paramref name="definition"/> otherwise false
+        /// </returns>
         private static bool IsGenericDefinition(Type type, Type definition)
         {
             return type.IsGenericType &&

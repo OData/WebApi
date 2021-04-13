@@ -996,7 +996,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
     }
 
 #if NETCORE
-    // TODO: enable when [EnableNestedPaths] are supported in AspNet classic
+    // TODO: enable for NETFX when [EnableNestedPaths] are supported in AspNet classic
     public class NestedPathsCustomersController: TestODataController
     {
         [EnableNestedPaths]

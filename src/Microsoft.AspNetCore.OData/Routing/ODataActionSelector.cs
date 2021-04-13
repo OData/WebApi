@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -136,7 +137,7 @@ namespace Microsoft.AspNet.OData.Routing
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
-                var considerCandidates = candidates
+                IEnumerable<ActionIdAndParameters> considerCandidates = candidates
                     .Select(c => new ActionIdAndParameters(
                         id: c.Id,
                         parameterCount: c.Parameters.Count,
@@ -161,7 +162,7 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,ODataQueryOptions) vs Method(key).
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
-                var matchedCandidates = considerCandidates
+                List<ActionIdAndParameters> matchedCandidates = considerCandidates
                     .Where(c => TryMatch(context, c.ActionDescriptor, c.FilteredParameters, availableKeys,
                         optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
@@ -173,7 +174,7 @@ namespace Microsoft.AspNet.OData.Routing
                 {
                     // prioritize actions which explicitly declare the request method
                     // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
-                    var bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                    ActionIdAndParameters bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
                     if (bestCandidate != null)
                     {
@@ -248,9 +249,9 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             bool matchedBody = false;
-            var conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
+            IDictionary<string, object> conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
             // use the parameter name to match.
-            foreach (var p in parameters)
+            foreach (ParameterDescriptor p in parameters)
             {
                 string parameterName = p.Name.ToLowerInvariant();
                 if (availableKeys.Contains(parameterName))
@@ -325,7 +326,7 @@ namespace Microsoft.AspNet.OData.Routing
         {
             Contract.Assert(action != null);
 
-            var param = action.MethodInfo.GetParameters().FirstOrDefault(p => p.Name == paramName);
+            ParameterInfo param = action.MethodInfo.GetParameters().FirstOrDefault(p => p.Name == paramName);
             if (param == null)
             {
                 return false;
@@ -341,8 +342,8 @@ namespace Microsoft.AspNet.OData.Routing
                 return false;
             }
 
-            var modelMetadata = _modelMetadataProvider.GetMetadataForType(param.ParameterType);
-            var binderContext = new ModelBinderFactoryContext()
+            ModelMetadata modelMetadata = _modelMetadataProvider.GetMetadataForType(param.ParameterType);
+            ModelBinderFactoryContext binderContext = new ModelBinderFactoryContext()
             {
                 Metadata = modelMetadata,
                 BindingInfo = param.BindingInfo,
@@ -352,7 +353,7 @@ namespace Microsoft.AspNet.OData.Routing
 
             try
             {
-                var binder = _modelBinderFactory.CreateBinder(binderContext);
+                IModelBinder binder = _modelBinderFactory.CreateBinder(binderContext);
                 // ignore some built-in model binders because we already account for parameters that come from the request
                 return (!(binder is SimpleTypeModelBinder)
                     && !(binder is BodyModelBinder)

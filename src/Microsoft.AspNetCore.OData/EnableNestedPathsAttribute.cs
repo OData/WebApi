@@ -68,7 +68,7 @@ namespace Microsoft.AspNet.OData
             HttpResponse response = actionExecutedContext.HttpContext.Response;
 
             ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
-            var result = responseContent.Value as IQueryable;
+            IQueryable result = responseContent.Value as IQueryable;
             SingleResult singleResult = responseContent.Value as SingleResult;
             if (singleResult != null)
             {

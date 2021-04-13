@@ -42,7 +42,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The result of the query transformtions or null if the path contained unsupported segments</returns>
         public ODataPathQueryResult BuildQuery()
         {
-            var result = new ODataPathQueryResult();
+            ODataPathQueryResult result = new ODataPathQueryResult();
 
             IEnumerable<ODataPathSegment> segments = path.Segments;
 
@@ -55,79 +55,79 @@ namespace Microsoft.AspNet.OData.Query
                 return null;
             }
 
-            var remainingSegments = segments.Skip(1);
+            IEnumerable<ODataPathSegment> remainingSegments = segments.Skip(1);
 
-            foreach (var segment in remainingSegments)
+            foreach (ODataPathSegment segment in remainingSegments)
             {
                 Type currentType = queryable.ElementType;
 
                 if (segment is KeySegment keySegment)
                 {
-                    var keys = new Dictionary<string, object>();
+                    Dictionary<string, object> keys = new Dictionary<string, object>();
                     foreach (var kvp in keySegment.Keys)
                     {
                         keys.Add(kvp.Key, kvp.Value);
                     }
 
                     // filterPredicate
-                    var filterParam = Expression.Parameter(currentType, "entity");
-                    var conditions = keySegment.Keys.Select(kvp =>
+                    ParameterExpression filterParam = Expression.Parameter(currentType, "entity");
+                    IEnumerable<BinaryExpression> conditions = keySegment.Keys.Select(kvp =>
                         Expression.Equal(
                             Expression.Property(filterParam, kvp.Key),
                             Expression.Constant(kvp.Value)));
-                    var filterBody = conditions.Aggregate((left, right) => Expression.AndAlso(left, right));
-                    var filterPredicate = Expression.Lambda(filterBody, filterParam);
+                    BinaryExpression filterBody = conditions.Aggregate((left, right) => Expression.AndAlso(left, right));
+                    LambdaExpression filterPredicate = Expression.Lambda(filterBody, filterParam);
 
                     queryable = ExpressionHelpers.Where(queryable, filterPredicate, currentType);
 
                 }
                 else if (segment is NavigationPropertySegment navigationSegment)
                 {
-                    var param = Expression.Parameter(currentType);
-                    var navPropExpression = Expression.Property(param, navigationSegment.NavigationProperty.Name);
+                    ParameterExpression param = Expression.Parameter(currentType);
+                    MemberExpression navPropExpression = Expression.Property(param, navigationSegment.NavigationProperty.Name);
 
                     if (navigationSegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.Many)
                     {
-                        var condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
-                        var nullFilter = Expression.Lambda(condition, param);
+                        BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
+                        LambdaExpression nullFilter = Expression.Lambda(condition, param);
                         queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
                         // collection navigation property
                         // e.g. Product/Categories
-                        var propertyType = currentType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
+                        Type propertyType = currentType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
                         propertyType = GetEnumerableItemType(navPropExpression.Type);
 
                         currentType = propertyType;
 
-                        var delegateType = typeof(Func<,>).MakeGenericType(
+                        Type delegateType = typeof(Func<,>).MakeGenericType(
                             queryable.ElementType,
                             typeof(IEnumerable<>).MakeGenericType(currentType));
-                        var selectBody =
+                        LambdaExpression selectBody =
                             Expression.Lambda(delegateType, navPropExpression, param);
                         queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
                     }
                     else
                     {
-                        var condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
-                        var nullFilter = Expression.Lambda(condition, param);
+                        BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
+                        LambdaExpression nullFilter = Expression.Lambda(condition, param);
                         queryable = ExpressionHelpers.Where(queryable, nullFilter, currentType);
 
                         currentType = navPropExpression.Type;
-                        var selectBody =
+                        LambdaExpression selectBody =
                             Expression.Lambda(navPropExpression, param);
                         queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
                     }
                 }
                 else if (segment is PropertySegment propertySegment)
                 {
-                    var param = Expression.Parameter(currentType);
-                    var propertyExpression = Expression.Property(param, propertySegment.Property.Name);
+                    ParameterExpression param = Expression.Parameter(currentType);
+                    MemberExpression propertyExpression = Expression.Property(param, propertySegment.Property.Name);
 
                     // check whether property is null or not before further selection
                     if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
                     {
                         // queryable = queryable.Where( => .Property != null)
-                        var condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
-                        var nullFilter = Expression.Lambda(condition, param);
+                        BinaryExpression condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
+                        LambdaExpression nullFilter = Expression.Lambda(condition, param);
                         queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
                     }
 
@@ -137,10 +137,10 @@ namespace Microsoft.AspNet.OData.Query
                         // Suppose 'param.PropertyName' is of type 'IEnumerable<T>', the type of the
                         // resulting query would be 'IEnumerable<T>' too.
                         currentType = GetEnumerableItemType(propertyExpression.Type);
-                        var delegateType = typeof(Func<,>).MakeGenericType(
+                        Type delegateType = typeof(Func<,>).MakeGenericType(
                             queryable.ElementType,
                             typeof(IEnumerable<>).MakeGenericType(currentType));
-                        var selectBody =
+                        LambdaExpression selectBody =
                         Expression.Lambda(delegateType, propertyExpression, param);
                         queryable = ExpressionHelpers.SelectMany(queryable, selectBody, currentType);
                     }
@@ -148,7 +148,7 @@ namespace Microsoft.AspNet.OData.Query
                     {
                         // Produces new query like 'queryable.Select(param => param.PropertyName)'.
                         currentType = propertyExpression.Type;
-                        var selectBody =
+                        LambdaExpression selectBody =
                             Expression.Lambda(propertyExpression, param);
                         queryable = ExpressionHelpers.Select(queryable, selectBody, currentType);
                     }
@@ -184,7 +184,7 @@ namespace Microsoft.AspNet.OData.Query
         /// </returns>
         private static Type GetEnumerableItemType(Type enumerableType)
         {
-            var type = FindGenericType(enumerableType, typeof(IEnumerable<>));
+            Type type = FindGenericType(enumerableType, typeof(IEnumerable<>));
             if (type != null)
             {
                 return type.GetGenericArguments()[0];
@@ -222,7 +222,7 @@ namespace Microsoft.AspNet.OData.Query
             // If the definition is interface, we only need to check the interfaces implemented by the current type
             if (definition.IsInterface)
             {
-                foreach (var interfaceType in type.GetInterfaces())
+                foreach (Type interfaceType in type.GetInterfaces())
                 {
                     if (IsGenericDefinition(interfaceType, definition))
                     {

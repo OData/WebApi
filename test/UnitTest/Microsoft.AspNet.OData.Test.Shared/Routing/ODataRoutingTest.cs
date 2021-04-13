@@ -979,8 +979,6 @@ namespace Microsoft.AspNet.OData.Test.Routing
             return "Delete()";
         }
     }
-#if NETCORE
-// TODO: enable when [EnableNestedPaths] are supported in AspNet classic
 
     public class AttributeCustomersController: TestODataController
     {
@@ -997,6 +995,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
         }
     }
 
+#if NETCORE
+    // TODO: enable when [EnableNestedPaths] are supported in AspNet classic
     public class NestedPathsCustomersController: TestODataController
     {
         [EnableNestedPaths]

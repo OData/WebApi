@@ -86,9 +86,9 @@ namespace Microsoft.AspNet.OData.Query
 
                     if (navigationSegment.NavigationProperty.TargetMultiplicity() == EdmMultiplicity.Many)
                     {
-                        BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
-                        LambdaExpression nullFilter = Expression.Lambda(condition, param);
-                        queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
+                        //BinaryExpression condition = Expression.NotEqual(navPropExpression, Expression.Constant(null));
+                        //LambdaExpression nullFilter = Expression.Lambda(condition, param);
+                        //queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
                         // collection navigation property
                         // e.g. Product/Categories
                         Type propertyType = queryable.ElementType.GetProperty(navigationSegment.NavigationProperty.Name).PropertyType;
@@ -118,15 +118,6 @@ namespace Microsoft.AspNet.OData.Query
                     ParameterExpression param = Expression.Parameter(queryable.ElementType);
                     MemberExpression propertyExpression = Expression.Property(param, propertySegment.Property.Name);
 
-                    // check whether property is null or not before further selection
-                    if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
-                    {
-                        // queryable = queryable.Where( => .Property != null)
-                        BinaryExpression condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
-                        LambdaExpression nullFilter = Expression.Lambda(condition, param);
-                        queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
-                    }
-
                     if (propertySegment.Property.Type.IsCollection())
                     {
                         // Produces new query like 'queryable.SelectMany(param => param.PropertyName)'.
@@ -143,6 +134,15 @@ namespace Microsoft.AspNet.OData.Query
                     }
                     else
                     {
+                        // check whether property is null or not before further selection
+                        if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
+                        {
+                            // queryable = queryable.Where( => .Property != null)
+                            BinaryExpression condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
+                            LambdaExpression nullFilter = Expression.Lambda(condition, param);
+                            queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
+                        }
+
                         // Produces new query like 'queryable.Select(param => param.PropertyName)'.
                         LambdaExpression selectBody =
                             Expression.Lambda(propertyExpression, param);

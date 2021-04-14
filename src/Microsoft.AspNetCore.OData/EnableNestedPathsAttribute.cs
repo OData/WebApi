@@ -103,16 +103,45 @@ namespace Microsoft.AspNet.OData
                 else
                 {
                     Type elementType = transformedResult.Result.ElementType;
-                    object singleValue = EnableQueryAttribute.SingleOrDefault(transformedResult.Result, new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor));
-             
-                    if (singleValue == null)
+
+                    // If we return the IQueryable as the result, then the response will be returned as a collection
+                    // so we have to return a single result. We can either return the materialized single result using SingleOrDefault,
+                    // which will run the query against the underlying data source. Or we can wrap the IQueryable result with
+                    // a SingleResult<T>.
+                    // If the action has [EnableQuery], then we return a SingleResult<T> which allows query options to be
+                    // applied to the IQueryable. If we returned the materialized object, then query options like $expand
+                    // would return null because navigation properties are not fetched from relational databases by default.
+                    // If the action does not have [EnableQuery], then we run the query using SingleOrDefault and return the
+                    // actual object. If we returned a SingleResult<T> in this case, we'd get an error because the serializer
+                    // does not recognize it.
+                    if (actionDescriptor.MethodInfo.GetCustomAttributes<EnableQueryAttribute>().Any())
                     {
-                        // TODO: is this the best way to return 404
-                        actionExecutedContext.Result = new NotFoundObjectResult(null);
+                        // calls SingleResult.Create<T>(IQueryable<T>)
+                        MethodInfo singleResultCreate = typeof(SingleResult)
+                            .GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
+                            .MakeGenericMethod(transformedResult.Result.ElementType);
+                        responseContent.Value = singleResultCreate.Invoke(null, new[] { transformedResult.Result });
                     }
                     else
                     {
-                        responseContent.Value = singleValue;
+                        try
+                        {
+                            object singleValue = EnableQueryAttribute.SingleOrDefault(transformedResult.Result, new WebApiActionDescriptor(actionDescriptor));
+
+                            if (singleValue == null)
+                            {
+                                // TODO: is this the best way to return 404
+                                actionExecutedContext.Result = new NotFoundObjectResult(null);
+                            }
+                            else
+                            {
+                                responseContent.Value = singleValue;
+                            }
+                        }
+                        catch (NullReferenceException)
+                        {
+                            actionExecutedContext.Result = new NotFoundObjectResult(null);
+                        }
                     }
                 }
             }

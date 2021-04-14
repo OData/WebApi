@@ -38,15 +38,15 @@ namespace Microsoft.AspNet.OData.Test.Query
                     // collection navigation properties
                     {
                         "Customers(1)/Products",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products)"
                     },
                     {
                         "Customers(1)/Products(2)",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2))"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products).Where(entity => (entity.Id == 2))"
                     },
                     {
                         "Customers(1)/Products(2)/Name",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
                     },
                     // non-collection navigation property
                     {
@@ -60,7 +60,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     // collection complex properties
                     {
                         "Customers(1)/Addresses",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Addresses != null)).SelectMany( => .Addresses)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Addresses)"
                     },
                     // non-collection complex properties
                     {
@@ -74,11 +74,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     // key segments with composite-keys
                     {
                         "Customers(1)/Projects(2, 'abc')",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Projects != null)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc)))"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc)))"
                     },
                     {
                         "Customers(1)/Projects(2, 'abc')/IsDone",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Projects != null)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc))).Select( => .IsDone)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc))).Select( => .IsDone)"
                     },
                     // paths with singleton navigation source
                     {
@@ -95,7 +95,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "TopCustomer/Addresses",
-                        "ODataPathQuery_Customer[].Where( => (.Addresses != null)).SelectMany( => .Addresses)"
+                        "ODataPathQuery_Customer[].SelectMany( => .Addresses)"
                     },
                     {
                         "TopCustomer/HomeAddress/City",
@@ -103,15 +103,15 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "TopCustomer/Products",
-                        "ODataPathQuery_Customer[].Where( => (.Products != null)).SelectMany( => .Products)"
+                        "ODataPathQuery_Customer[].SelectMany( => .Products)"
                     },
                     {
                         "TopCustomer/Products(2)",
-                        "ODataPathQuery_Customer[].Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2))"
+                        "ODataPathQuery_Customer[].SelectMany( => .Products).Where(entity => (entity.Id == 2))"
                     },
                     {
                         "TopCustomer/Products(2)/Name",
-                        "ODataPathQuery_Customer[].Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
+                        "ODataPathQuery_Customer[].SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
                     },
                     {
                         "TopCustomer/FavoriteProduct",
@@ -138,11 +138,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "Customers(1)/Products/$count",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products)"
                     },
                     {
                         "Customers(1)/Addresses/$count",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Addresses != null)).SelectMany( => .Addresses)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Addresses)"
                     }
                 };
             }
@@ -164,11 +164,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "Customers(1)/Products(2)/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2))"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products).Where(entity => (entity.Id == 2))"
                     },
                     {
                         "Customers(1)/Products(2)/Name/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Products != null)).SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Products).Where(entity => (entity.Id == 2)).Select( => .Name)"
                     },
                     {
                         "Customers(1)/FavoriteProduct/$value",
@@ -188,11 +188,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "Customers(1)/Projects(2, 'abc')/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Projects != null)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc)))"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc)))"
                     },
                     {
                         "Customers(1)/Projects(2, 'abc')/IsDone/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.Projects != null)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc))).Select( => .IsDone)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).SelectMany( => .Projects).Where(entity => ((entity.KeyOne == 2) AndAlso (entity.KeyTwo == abc))).Select( => .IsDone)"
                     },
                 };
             }

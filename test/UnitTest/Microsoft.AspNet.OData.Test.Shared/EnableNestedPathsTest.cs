@@ -336,7 +336,7 @@ namespace Microsoft.AspNet.OData.Test
                 {
                     Id = 3,
                     Name = "Cust3",
-                    Products = null,
+                    Products = new List<EnableNestedPathsProduct>(),
                     Emails = new List<string>(),
                     FavoriteProduct = null,
                     HomeAddress = addresses[2],

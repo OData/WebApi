@@ -229,6 +229,12 @@ namespace Microsoft.AspNet.OData
             return selectManyMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
         }
 
+        public static IQueryable SelectMany(IQueryable query, LambdaExpression expression, Type sourceType, Type resultType)
+        {
+            MethodInfo selectManyMethod = ExpressionHelperMethods.QueryableSelectManyGeneric.MakeGenericMethod(sourceType, resultType);
+            return selectManyMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+        }
+
         public static IQueryable Aggregate(IQueryable query, object init, LambdaExpression sumLambda, Type type, Type wrapperType)
         {
             Type returnType = sumLambda.Body.Type;

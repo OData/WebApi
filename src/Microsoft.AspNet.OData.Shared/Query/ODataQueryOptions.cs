@@ -875,10 +875,18 @@ namespace Microsoft.AspNet.OData.Query
         private string GetAutoExpandRawValue()
         {
             var expandRawValue = RawValues.Expand;
-            IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
+            IEdmEntityType baseEntityType;
+            if (Context.ElementClrType != null)
+            {
+                IEdmType edmType = Context.Model.GetTypeMappingCache().GetEdmType(Context.ElementClrType, Context.Model)?.Definition;
+                baseEntityType = edmType as IEdmEntityType;
+            }
+            else
+                baseEntityType = Context.TargetStructuredType as IEdmEntityType;
+
             var autoExpandRawValue = String.Empty;
             var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(
-                Context.TargetProperty, Context.TargetStructuredType, Context.Model,
+                Context.TargetProperty, baseEntityType, Context.Model,
                 !String.IsNullOrEmpty(RawValues.Select));
 
             foreach (var property in autoExpandNavigationProperties)

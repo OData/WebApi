@@ -50,20 +50,8 @@ namespace Microsoft.AspNet.OData.Adapters
         public IWebApiActionDescriptor GetActionDescriptor(string actionName)
         {
             var group = this.innerMap.FirstOrDefault(g => g.Key == actionName);
-
-            if (group == null)
-            {
-                return null;
-            }
-
-            HttpActionDescriptor descriptor = group.FirstOrDefault();
-
-            if (descriptor == null)
-            {
-                return null;
-            }
-
-            return new WebApiActionDescriptor(descriptor);
+            HttpActionDescriptor descriptor = group?.FirstOrDefault();
+            return descriptor == null ? null : new WebApiActionDescriptor(descriptor);
         }
     }
 }

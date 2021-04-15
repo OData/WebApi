@@ -227,8 +227,8 @@ namespace Microsoft.AspNet.OData.Routing
             // match arbitrarily nested paths even if it doesn't have any parameters
             if (actionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
             {
-                if (controllerActionDescriptor.MethodInfo.GetCustomAttributes(true)
-                    .OfType<EnableNestedPathsAttribute>().Any())
+                if (controllerActionDescriptor.MethodInfo
+                    .GetCustomAttributes<EnableNestedPathsAttribute>().Any())
                 {
                     return true;
                 }

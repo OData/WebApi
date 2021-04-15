@@ -126,7 +126,7 @@ namespace Microsoft.AspNet.OData
                     {
                         try
                         {
-                            object singleValue = EnableQueryAttribute.SingleOrDefault(transformedResult.Result, new WebApiActionDescriptor(actionDescriptor));
+                            object singleValue = QueryHelpers.SingleOrDefault(transformedResult.Result, new WebApiActionDescriptor(actionDescriptor));
 
                             if (singleValue == null)
                             {

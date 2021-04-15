@@ -65,11 +65,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     // non-collection complex properties
                     {
                         "Customers(1)/HomeAddress",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.HomeAddress != null)).Select( => .HomeAddress)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Select( => .HomeAddress)"
                     },
                     {
                         "Customers(1)/HomeAddress/City",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.HomeAddress != null)).Select( => .HomeAddress).Select( => .City)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Select( => .HomeAddress).Select( => .City)"
                     },
                     // key segments with composite-keys
                     {
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "TopCustomer/HomeAddress",
-                        "ODataPathQuery_Customer[].Where( => (.HomeAddress != null)).Select( => .HomeAddress)"
+                        "ODataPathQuery_Customer[].Select( => .HomeAddress)"
                     },
                     {
                         "TopCustomer/Addresses",
@@ -99,7 +99,7 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "TopCustomer/HomeAddress/City",
-                        "ODataPathQuery_Customer[].Where( => (.HomeAddress != null)).Select( => .HomeAddress).Select( => .City)"
+                        "ODataPathQuery_Customer[].Select( => .HomeAddress).Select( => .City)"
                     },
                     {
                         "TopCustomer/Products",
@@ -121,7 +121,6 @@ namespace Microsoft.AspNet.OData.Test.Query
                         "TopCustomer/FavoriteProduct/Name",
                         "ODataPathQuery_Customer[].Where( => (.FavoriteProduct != null)).Select( => .FavoriteProduct).Select( => .Name)"
                     },
-
                 };
             }
         }
@@ -180,11 +179,11 @@ namespace Microsoft.AspNet.OData.Test.Query
                     },
                     {
                         "Customers(1)/HomeAddress/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.HomeAddress != null)).Select( => .HomeAddress)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Select( => .HomeAddress)"
                     },
                     {
                         "Customers(1)/HomeAddress/City/$value",
-                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Where( => (.HomeAddress != null)).Select( => .HomeAddress).Select( => .City)"
+                        "ODataPathQuery_Customer[].Where(entity => (entity.Id == 1)).Select( => .HomeAddress).Select( => .City)"
                     },
                     {
                         "Customers(1)/Projects(2, 'abc')/$value",

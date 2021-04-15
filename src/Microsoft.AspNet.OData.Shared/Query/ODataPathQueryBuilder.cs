@@ -138,9 +138,9 @@ namespace Microsoft.AspNet.OData.Query
                         if (propertySegment.Property.Type.IsNullable && !propertySegment.Property.Type.IsPrimitive())
                         {
                             // queryable = queryable.Where( => .Property != null)
-                            BinaryExpression condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
-                            LambdaExpression nullFilter = Expression.Lambda(condition, param);
-                            queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
+                            //BinaryExpression condition = Expression.NotEqual(propertyExpression, Expression.Constant(null));
+                            //LambdaExpression nullFilter = Expression.Lambda(condition, param);
+                            //queryable = ExpressionHelpers.Where(queryable, nullFilter, queryable.ElementType);
                         }
 
                         // Produces new query like 'queryable.Select(param => param.PropertyName)'.

@@ -136,7 +136,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="propertyName">The name of the single-valued property to select</param>
         /// <param name="checkIfNull">If true, checks whether the property is null before selecting it</param>
         /// <returns>The transformed <see cref="IQueryable"/></returns>
-        private IQueryable GetSinglePropertyQuery(IQueryable queryable, string propertyName, bool checkIfNull = false)
+        private static IQueryable GetSinglePropertyQuery(IQueryable queryable, string propertyName, bool checkIfNull = false)
         {
             ParameterExpression param = Expression.Parameter(queryable.ElementType);
             MemberExpression propertyExpression = Expression.Property(param, propertyName);
@@ -163,7 +163,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="queryable">The <see cref="IQueryable"/> to apply the property selection to</param>
         /// <param name="propertyName">The name of the collection-valued property to select</param>
         /// <returns>The transformed <see cref="IQueryable"/></returns>
-        private IQueryable GetCollectionPropertyQuery(IQueryable queryable, string propertyName)
+        private static IQueryable GetCollectionPropertyQuery(IQueryable queryable, string propertyName)
         {
             ParameterExpression param = Expression.Parameter(queryable.ElementType);
             MemberExpression propertyExpression = Expression.Property(param, propertyName);

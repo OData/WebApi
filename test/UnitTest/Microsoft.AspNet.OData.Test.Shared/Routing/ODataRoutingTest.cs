@@ -311,6 +311,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "AttributeCustomers", "Get()" },
                     { "GET", "AttributeCustomers(10)", "Get(10)" },
 
+#if NETCORE // TODO enable these scenarios for NETFX when support added for AspNet classic
                     // test nested paths when there are no user-defined actions that override the [EnableNestedPaths] action
                     // all Get() requests should route the Get() method with [EnableNestedPaths]
                     { "GET", "NestedPathsCustomers", "Get()" },
@@ -331,8 +332,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products/$count", "CountProducts(1)" },
                     { "GET", "NestedPathsWithOverridesCustomers(1)/Products", "GetNestedPathsWithOverridesCustomers()" },
                     { "GET", "NestedPathsWithOverridesCustomers/$count", "GetNestedPathsWithOverridesCustomers()" },
-
-
+#endif
                 };
             }
         }

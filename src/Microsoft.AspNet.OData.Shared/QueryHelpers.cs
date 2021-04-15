@@ -8,7 +8,7 @@ using Microsoft.AspNet.OData.Interfaces;
 
 namespace Microsoft.AspNet.OData.Query
 {
-    internal class QueryHelpers
+    internal static class QueryHelpers
     {
         /// <summary>
         /// Get a single or default value from a collection.

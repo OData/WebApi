@@ -245,7 +245,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ODataPathQueryBuilderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Query\QueryHelpersTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\ODataQueryValidatorTest.cs" />

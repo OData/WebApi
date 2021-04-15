@@ -192,7 +192,6 @@ namespace Microsoft.AspNet.OData.Test
         [InlineData("EnableNestedPathsCustomers(1)/Products(3)")]
         [InlineData("EnableNestedPathsCustomers(1)/Products(3)/Name")]
         [InlineData("EnableNestedPathsCustomers(2)/HomeAddress")]
-        [InlineData("EnableNestedPathsCustomers(2)/HomeAddress/City")]
         [InlineData("EnableNestedPathsCustomers(3)/HomeAddress/City")]
         [InlineData("EnableNestedPathsCustomers(3)/Products(2)")]
         [InlineData("EnableNestedPathsCustomers(3)/Products(2)/Name")]

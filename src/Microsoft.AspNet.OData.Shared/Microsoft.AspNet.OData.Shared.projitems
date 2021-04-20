@@ -367,7 +367,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\EntityTypeConfigurationOfTEntityType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\NavigationPropertyBindingConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\NavigationPropertyConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Builder\NonbindingParameterConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\NonBindingParameterConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ODataConventionModelBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ODataModelBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ParameterConfiguration.cs" />

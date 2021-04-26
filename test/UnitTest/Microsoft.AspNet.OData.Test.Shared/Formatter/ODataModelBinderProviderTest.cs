@@ -46,6 +46,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             _configuration.Routes.MapHttpRoute("default", "{controller}/{action}({id})");
 
             _server = new HttpServer(_configuration);
+
             _client = new HttpClient(_server);
         }
 

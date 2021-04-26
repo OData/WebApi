@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Xunit;
 
@@ -31,12 +32,25 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
             string baselineString = GetBaseLineString();
 
             // Assert
-            Assert.True(String.Compare(baselineString, outputString, StringComparison.Ordinal) == 0,
-                String.Format("Base line file {1} and output file {2} do not match, please check.{0}" +
-                "To update the baseline, please run:{0}{0}" +
-                "copy /y \"{2}\" \"{1}\"", Environment.NewLine,
-                BaseLineFileFolder + BaseLineFileName,
-                outputFile));
+            if (string.Compare(baselineString, outputString, StringComparison.Ordinal) != 0)
+            {
+                const int sliceSize = 128;
+
+                var diffPoint = baselineString.Zip(outputString, (c1, c2) => c1 == c2).TakeWhile(b => b).Count();
+
+                var displayBaseline = baselineString.SliceCenter(diffPoint, sliceSize);
+                var displayOutput = outputString.SliceCenter(diffPoint, sliceSize);
+
+                Assert.True(false,
+                    string.Format("Base line file {1} and output file {2} do not match, please check.{0}" +
+                    "Baseline:{0}\"{3}\"{0}" +
+                    "Output:  {0}\"{4}\"{0}{0}" +
+                    "To update the baseline, please run:{0}{0}" +
+                    "copy /y \"{2}\" \"{1}\"", Environment.NewLine,
+                    BaseLineFileFolder + BaseLineFileName,
+                    outputFile,
+                    displayBaseline, displayOutput));
+            }
         }
 
         private string GetBaseLineString()
@@ -59,6 +73,38 @@ namespace Microsoft.AspNet.OData.Test.PublicApi
                     return reader.ReadToEnd();
                 }
             }
+        }
+    }
+
+    static class TestStringExtensions
+    {
+        internal static string SliceCenter(this string text, int center, int width)
+        {
+            int start;
+
+            if (center < 0)
+            {
+                start = 0;
+                return string.Empty;
+            }
+
+            center = (center <= text.Length) ? center : text.Length;
+
+            start = center - (width / 2);
+            var length = width;
+
+            if (start < 0)
+            {
+                start = 0;
+                length = center + (width / 2);
+            }
+
+            if (start + length > text.Length)
+            {
+                length = text.Length - start;
+            }
+
+            return text.Substring(start, length);
         }
     }
 }

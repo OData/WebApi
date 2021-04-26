@@ -107,6 +107,23 @@ namespace Microsoft.AspNet.OData
             get { return typeof(TStructuralType); }
         }
 
+        /// <summary>
+        /// The list of property names that can be updated.
+        /// </summary>
+        /// <remarks>When the list is modified, any modified properties that were removed from the list are no longer
+        /// considered to be changed.</remarks>
+        public IEnumerable<string> UpdatableProperties
+        {
+            get => _updatableProperties;
+            set
+            {
+                _updatableProperties = InitializeUpdatableProperties(value);
+
+                // Remove any un-updatable properties from the changed list
+                _changedProperties.IntersectWith(_updatableProperties);
+            }
+        }
+
         /// <inheritdoc/>
         public override void Clear()
         {
@@ -503,20 +520,28 @@ namespace Microsoft.AspNet.OData
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
 
+            _updatableProperties = InitializeUpdatableProperties(updatableProperties);
+        }
+
+        private HashSet<string> InitializeUpdatableProperties(IEnumerable<string> updatableProperties)
+        {
+            HashSet<string> newUpdatableProperties;
             if (updatableProperties != null)
             {
-                _updatableProperties = new HashSet<string>(updatableProperties);
-                _updatableProperties.IntersectWith(_allProperties.Keys);
+                newUpdatableProperties = new HashSet<string>(updatableProperties);
+                newUpdatableProperties.IntersectWith(_allProperties.Keys);
             }
             else
             {
-                _updatableProperties = new HashSet<string>(_allProperties.Keys);
+                newUpdatableProperties = new HashSet<string>(_allProperties.Keys);
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
             {
-                _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
+                newUpdatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
             }
+
+            return newUpdatableProperties;
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties

@@ -19,9 +19,8 @@ namespace Microsoft.AspNet.OData.Query
     /// </summary>
     internal class ODataPathQueryBuilder
     {
-        readonly IQueryable source;
-        readonly IEdmModel model;
-        readonly Routing.ODataPath path;
+        private readonly IQueryable source;
+        private readonly Routing.ODataPath path;
 
         /// <summary>
         /// Creates an instance of <see cref="ODataPathQueryBuilder"/>
@@ -32,7 +31,6 @@ namespace Microsoft.AspNet.OData.Query
         public ODataPathQueryBuilder(IQueryable source, IEdmModel model, Routing.ODataPath path)
         {
             this.source = source;
-            this.model = model;
             this.path = path;
         }
 
@@ -61,12 +59,6 @@ namespace Microsoft.AspNet.OData.Query
             {
                 if (segment is KeySegment keySegment)
                 {
-                    Dictionary<string, object> keys = new Dictionary<string, object>();
-                    foreach (var kvp in keySegment.Keys)
-                    {
-                        keys.Add(kvp.Key, kvp.Value);
-                    }
-
                     // filterPredicate = entity => (entity.KeyProp1 == Val1) && (entity.keyProp2 == Val2) && ...
                     ParameterExpression filterParam = Expression.Parameter(queryable.ElementType, "entity");
                     IEnumerable<BinaryExpression> conditions = keySegment.Keys.Select(kvp =>
@@ -177,7 +169,7 @@ namespace Microsoft.AspNet.OData.Query
 
             // We expect the collection navigation property to implements IEnumerable<T>
             // Here we extract the element type T
-            Type collectionPropertyElementType = GetEnumerableItemType(propertyExpression.Type);
+            Type collectionPropertyElementType = TypeHelper.GetImplementedIEnumerableType(propertyExpression.Type) ?? propertyExpression.Type;
 
             // The lambda passed to queryable.SelectMany() has a signature Func<TSource, IEnumerable<TResult>>
             // TSource corresponds to our queryable.ElementType and TResult is the element type of the nav property
@@ -190,99 +182,6 @@ namespace Microsoft.AspNet.OData.Query
             // return queryable.SelectMany(entity => entity.CollectionNavProp)
             return ExpressionHelpers
                 .SelectMany(queryable, selectBody, queryable.ElementType, collectionPropertyElementType);
-        }
-
-        /// <summary>
-        /// Gets the element type "T" of the given type
-        /// if it implements <see cref="IEnumerable{T}"/>
-        /// </summary>
-        /// <param name="enumerableType"></param>
-        /// <returns>
-        /// The element type if <paramref name="enumerableType"/> implements <see cref="IEnumerable{T}"/>
-        /// otherwise returns <paramref name="enumerableType"/> itself
-        /// </returns>
-        private static Type GetEnumerableItemType(Type enumerableType)
-        {
-            Type type = FindGenericType(enumerableType, typeof(IEnumerable<>));
-            if (type != null)
-            {
-                return type.GetGenericArguments()[0];
-            }
-
-            return enumerableType;
-        }
-
-        /// <summary>
-        /// Find a base type or implemented interface which has a generic definition
-        /// represented by the parameter, <c>definition</c>.
-        /// </summary>
-        /// <param name="type">
-        /// The subject type.
-        /// </param>
-        /// <param name="definition">
-        /// The generic definition to check with.
-        /// </param>
-        /// <returns>
-        /// The base type or the interface found; otherwise, <c>null</c>.
-        /// </returns>
-        private static Type FindGenericType(Type type, Type definition)
-        {
-            if (type == null)
-            {
-                return null;
-            }
-
-            // If the type conforms the given generic definition, no further check required.
-            if (IsGenericDefinition(type, definition))
-            {
-                return type;
-            }
-
-            // If the definition is interface, we only need to check the interfaces implemented by the current type
-            if (definition.IsInterface)
-            {
-                foreach (Type interfaceType in type.GetInterfaces())
-                {
-                    if (IsGenericDefinition(interfaceType, definition))
-                    {
-                        return interfaceType;
-                    }
-                }
-            }
-            else if (!type.IsInterface)
-            {
-                // If the definition is not an interface, then the current type cannot be an interface too.
-                // Otherwise, we should only check the parent class types of the current type.
-
-                // no null check for the type required, as we are sure it is not an interface type
-                while (type != typeof(object))
-                {
-                    if (IsGenericDefinition(type, definition))
-                    {
-                        return type;
-                    }
-
-                    type = type.BaseType;
-                }
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Checks whether <paramref name="type"/> conforms to a generic
-        /// definition of the given generic type <paramref name="definition"/>
-        /// </summary>
-        /// <param name="type">The type to test</param>
-        /// <param name="definition">The generic type definition to test against</param>
-        /// <returns>
-        /// True if <paramref name="type"/> conforms to a generic
-        /// definition of the given generic type <paramref name="definition"/> otherwise false
-        /// </returns>
-        private static bool IsGenericDefinition(Type type, Type definition)
-        {
-            return type.IsGenericType &&
-                   type.GetGenericTypeDefinition() == definition;
         }
     }
 

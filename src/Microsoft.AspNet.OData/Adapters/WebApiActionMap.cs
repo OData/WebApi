@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
         public IWebApiActionDescriptor GetActionDescriptor(string actionName)
         {
-            var group = this.innerMap.FirstOrDefault(g => g.Key == actionName);
+            IGrouping<string, HttpActionDescriptor> group = this.innerMap.FirstOrDefault(g => g.Key == actionName);
             HttpActionDescriptor descriptor = group?.FirstOrDefault();
             return descriptor == null ? null : new WebApiActionDescriptor(descriptor);
         }

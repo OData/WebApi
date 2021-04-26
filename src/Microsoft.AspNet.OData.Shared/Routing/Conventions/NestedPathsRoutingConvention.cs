@@ -65,7 +65,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
             // if we did not find a matching action amongst the conventional user-defined methods
             // then let's check if the controller has a Get method with [EnableNestedPaths] attribute
             // which should be used to catch any nested GET request
-            IWebApiActionDescriptor descriptor = actionMap.GetActionDescriptor($"Get{sourceName}") ?? actionMap.GetActionDescriptor("Get");
+            string action = actionMap.FindMatchingAction("Get" + sourceName, "Get");
+            if (action == null)
+            {
+                return null;
+            }
+
+            IWebApiActionDescriptor descriptor = actionMap.GetActionDescriptor(action);
             if (descriptor == null)
             {
                 return null;

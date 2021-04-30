@@ -39,11 +39,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             ODataModelBuilder builder = config.CreateConventionModelBuilder();
             builder.EntitySet<DerivedTypeA>("SetA");
             builder.EntitySet<DerivedTypeB>("SetB");
-            builder.EntitySet<BaseType>("SetC");
 
             builder.EntityType<BaseType>(); // this line is necessary.
-
-            builder.Function("ReturnAll").ReturnsCollectionFromEntitySet<BaseType>("SetC");
+            builder.Function("ReturnAll").ReturnsCollection<BaseType>();
 
             return builder.GetEdmModel();
         }
@@ -63,7 +61,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.NotNull(response.Content);
 
             JObject content = await response.Content.ReadAsObject<JObject>();
-            Assert.Contains("/odata/$metadata#SetC", content["@odata.context"].ToString());
+            Assert.Contains("/odata/$metadata#Collection(Microsoft.Test.E2E.AspNet.OData.Formatter.BaseType)", content["@odata.context"].ToString());
 
             Assert.Equal(2, content["value"].Count());
 

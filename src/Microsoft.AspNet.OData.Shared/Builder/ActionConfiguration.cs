@@ -225,6 +225,20 @@ namespace Microsoft.AspNet.OData.Builder
         }
 
         /// <summary>
+        /// Establishes the return type of the Action
+        /// <remarks>Used when the return type is a collection of Entity Types.</remarks>
+        /// </summary>
+        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
+        public ActionConfiguration ReturnsEntityCollection<TReturnElementType>()
+        {
+            Type clrElementType = typeof(TReturnElementType);
+            IEdmTypeConfiguration edmElementType = ModelBuilder.GetTypeConfigurationOrNull(clrElementType);
+
+            ReturnsCollectionImplementation<TReturnElementType>();
+            return this;
+        }
+
+        /// <summary>
         /// Specifies the bindingParameter name, type and whether it is alwaysBindable, use only if the Action "isBindable".
         /// </summary>
         public ActionConfiguration SetBindingParameter(string name, IEdmTypeConfiguration bindingParameterType)

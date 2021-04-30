@@ -1378,6 +1378,7 @@ public class Microsoft.AspNet.OData.Builder.ActionConfiguration : OperationConfi
 	public ActionConfiguration ReturnsCollectionFromEntitySet (string entitySetName)
 	public ActionConfiguration ReturnsCollectionViaEntitySetPath (string entitySetPath)
 	public ActionConfiguration ReturnsCollectionViaEntitySetPath (string[] entitySetPath)
+	public ActionConfiguration ReturnsEntityCollection ()
 	public ActionConfiguration ReturnsEntityViaEntitySetPath (string entitySetPath)
 	public ActionConfiguration ReturnsEntityViaEntitySetPath (string[] entitySetPath)
 	public ActionConfiguration ReturnsFromEntitySet (EntitySetConfiguration`1 entitySetConfiguration)

@@ -22,6 +22,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateAndTimeOfDay
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class DateAndTimeOfDayTest : WebHostTestBase
     {
         public DateAndTimeOfDayTest(WebHostTestFixture fixture)

@@ -21,6 +21,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DateTimeSupport
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class DateTimeTest : WebHostTestBase
     {
         public DateTimeTest(WebHostTestFixture fixture)

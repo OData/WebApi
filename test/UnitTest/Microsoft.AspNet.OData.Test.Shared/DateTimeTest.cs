@@ -37,6 +37,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class DateTimeTest
     {
         // Note: the product uses a static TimezoneHelper class to store the timezone. As a result,

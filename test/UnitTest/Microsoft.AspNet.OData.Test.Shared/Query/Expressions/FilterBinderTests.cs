@@ -25,6 +25,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class FilterBinderTests
     {
         private const string NotTesting = "";

@@ -13,6 +13,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class EdmPrimitiveHelpersTest
     {
         public static TheoryDataSet<object, object, Type> ConvertPrimitiveValue_NonStandardPrimitives_Data

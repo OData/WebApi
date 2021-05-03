@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class DefaultODataETagHandlerTests
     {
         public static TheoryDataSet<object> CreateAndParseETagForValue_DataSet

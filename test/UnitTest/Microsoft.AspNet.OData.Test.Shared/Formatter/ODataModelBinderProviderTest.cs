@@ -30,6 +30,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class ODataModelBinderProviderTest
     {
         private HttpConfiguration _configuration;

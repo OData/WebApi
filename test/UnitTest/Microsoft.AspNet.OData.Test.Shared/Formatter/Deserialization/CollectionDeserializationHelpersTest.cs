@@ -15,6 +15,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class CollectionDeserializationHelpersTest
     {
         public static TheoryDataSet<IList, IEnumerable> CopyItemsToCollectionData

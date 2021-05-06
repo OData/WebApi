@@ -404,7 +404,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         private ODataResourceWrapper CreateResourceWrapper(IEdmTypeReference edmPropertyType, ODataEntityReferenceLinkBase refLink, ODataDeserializerContext readContext)
-        {
+        { 
             Contract.Assert(readContext != null);
 
             ODataResource resource = new ODataResource
@@ -432,7 +432,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="readContext">The read context.</param>
         /// <returns>The resource wrapper.</returns>
         private ODataResourceWrapper UpdateResourceWrapper(ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext)
-        {
+        { 
             Contract.Assert(readContext != null);
 
             if (resourceWrapper?.Resource?.Id == null)
@@ -473,7 +473,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="id">The key Id.</param>
         /// <param name="readContext">The reader context.</param>
         /// <returns>The key properties.</returns>
-        private static IList<ODataProperty> CreateKeyProperties(Uri id, ODataDeserializerContext readContext)
+        private IList<ODataProperty> CreateKeyProperties(Uri id, ODataDeserializerContext readContext)
         {
             Contract.Assert(id != null);
             Contract.Assert(readContext != null);

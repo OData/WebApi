@@ -426,7 +426,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         /// <summary>
-        /// Update the resource wrapper if it's have the "Id" value.
+        /// Update the resource wrapper if it has the "Id" value.
         /// </summary>
         /// <param name="resourceWrapper">The resource wrapper.</param>
         /// <param name="readContext">The read context.</param>
@@ -483,36 +483,29 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return properties;
             }
 
-            try
-            {
-                IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
-                IWebApiRequestMessage internalRequest = readContext.InternalRequest;
-                IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;    
-                string serviceRoot = urlHelper.CreateODataLink(
-                    internalRequest.Context.RouteName,
-                    internalRequest.PathHandler,
-                    new List<ODataPathSegment>());
+            IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
+            IWebApiRequestMessage internalRequest = readContext.InternalRequest;
+            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
+            string serviceRoot = urlHelper.CreateODataLink(
+                internalRequest.Context.RouteName,
+                internalRequest.PathHandler,
+                new List<ODataPathSegment>());
 
-                ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
-                IList<KeySegment> keySegments = odataPath.Segments.OfType<KeySegment>().ToList();
-                foreach (KeySegment keySegment in keySegments)
-                {            
-                    foreach (KeyValuePair<string, object> key in keySegment.Keys)
+            ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
+            IList<KeySegment> keySegments = odataPath.Segments.OfType<KeySegment>().ToList();
+            foreach (KeySegment keySegment in keySegments)
+            {
+                foreach (KeyValuePair<string, object> key in keySegment.Keys)
+                {
+                    properties.Add(new ODataProperty
                     {
-                        properties.Add(new ODataProperty
-                        {
-                            Name = key.Key,
-                            Value = key.Value
-                        });
-                    }
+                        Name = key.Key,
+                        Value = key.Value
+                    });
                 }
+            }
 
-                return properties;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
+            return properties;
         }
 
         /// <summary>

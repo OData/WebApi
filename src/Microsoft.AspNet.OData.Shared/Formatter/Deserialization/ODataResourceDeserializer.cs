@@ -492,8 +492,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 new List<ODataPathSegment>());
 
             ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
-            IList<KeySegment> keySegments = odataPath.Segments.OfType<KeySegment>().ToList();
-            foreach (KeySegment keySegment in keySegments)
+            KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
+            if (keySegment != null)
             {
                 foreach (KeyValuePair<string, object> key in keySegment.Keys)
                 {

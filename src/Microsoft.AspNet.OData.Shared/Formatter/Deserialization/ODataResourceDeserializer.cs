@@ -384,8 +384,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
 
-        private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType,
-    IList<ODataEntityReferenceLinkBase> refLinks, ODataDeserializerContext readContext)
+        private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType, 
+            IList<ODataEntityReferenceLinkBase> refLinks, ODataDeserializerContext readContext)
         {
             ODataResourceSet resourceSet = new ODataResourceSet
             {
@@ -473,7 +473,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// <param name="id">The key Id.</param>
         /// <param name="readContext">The reader context.</param>
         /// <returns>The key properties.</returns>
-        private IList<ODataProperty> CreateKeyProperties(Uri id, ODataDeserializerContext readContext)
+        private static IList<ODataProperty> CreateKeyProperties(Uri id, ODataDeserializerContext readContext)
         {
             Contract.Assert(id != null);
             Contract.Assert(readContext != null);
@@ -486,26 +486,32 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
             IWebApiRequestMessage internalRequest = readContext.InternalRequest;
             IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
-            string serviceRoot = urlHelper.CreateODataLink(
-                internalRequest.Context.RouteName,
-                internalRequest.PathHandler,
-                new List<ODataPathSegment>());
-
-            ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
-            KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
-            if (keySegment != null)
+            try
             {
-                foreach (KeyValuePair<string, object> key in keySegment.Keys)
+                string serviceRoot = urlHelper.CreateODataLink(
+                    internalRequest.Context.RouteName,
+                    internalRequest.PathHandler,
+                    new List<ODataPathSegment>());
+                ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
+                KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
+                if (keySegment != null)
                 {
-                    properties.Add(new ODataProperty
+                    foreach (KeyValuePair<string, object> key in keySegment.Keys)
                     {
-                        Name = key.Key,
-                        Value = key.Value
-                    });
+                        properties.Add(new ODataProperty
+                        {
+                            Name = key.Key,
+                            Value = key.Value
+                        });
+                    }
                 }
-            }
 
-            return properties;
+                return properties;
+            }
+            catch (Exception)
+            {
+                return properties;
+            }          
         }
 
         /// <summary>

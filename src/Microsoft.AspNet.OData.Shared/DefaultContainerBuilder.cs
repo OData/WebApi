@@ -85,9 +85,7 @@ namespace Microsoft.AspNet.OData
             * More info at https://github.com/OData/WebApi/pull/1082
             */
 
-            Assembly microsoftExtensionsDependencyInjectionAssembly = services.GetType().GetTypeInfo().Assembly;
-            TypeInfo serviceCollectionContainerBuilderExtensionsType = microsoftExtensionsDependencyInjectionAssembly.GetType(typeof(ServiceCollectionContainerBuilderExtensions).GetTypeInfo().FullName).GetTypeInfo();
-            MethodInfo buildServiceProviderMethod = serviceCollectionContainerBuilderExtensionsType.GetMethod("BuildServiceProvider", new[] { typeof(IServiceCollection) });
+            MethodInfo buildServiceProviderMethod = typeof(ServiceCollectionContainerBuilderExtensions).GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) });
 
             return (IServiceProvider)buildServiceProviderMethod.Invoke(null, new object[] { services });
         }

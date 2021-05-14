@@ -23,6 +23,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private ODataQueryContext _queryContext;
         private SelectExpandClause _selectExpandClause;
         private bool _isSelectExpandClauseSet;
+        private bool? _isUntyped;
+        private bool? _isDeltaOfT;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
@@ -161,10 +163,31 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         internal Type Type { get; set; }
 
-        internal bool IsUntyped { get { return typeof(IEdmObject).IsAssignableFrom(Type); } }
+        internal bool IsUntyped 
+        { 
+            get 
+            {   if (_isUntyped == null)
+                {
+                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(Type);
+                }
 
-        internal bool IsDeltaOfT { get { return Type != null && TypeHelper.IsGenericType(Type) && (Type.GetGenericTypeDefinition() == typeof(DeltaSet<>) || 
-                    Type.GetGenericTypeDefinition() == typeof(Delta<>) || Type.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>)); } }
+                return _isUntyped.Value;
+            } 
+        }
+
+        internal bool IsDeltaOfT 
+        { 
+            get 
+            {
+                if (_isDeltaOfT == null)
+                {
+                    _isDeltaOfT = Type != null && TypeHelper.IsGenericType(Type) && (Type.GetGenericTypeDefinition() == typeof(DeltaSet<>) ||
+                        Type.GetGenericTypeDefinition() == typeof(Delta<>) || Type.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>));
+                }
+
+                return _isDeltaOfT.Value;
+            } 
+        }
 
         /// <summary>
         /// Gets or sets the root element name which is used when writing primitive and enum types

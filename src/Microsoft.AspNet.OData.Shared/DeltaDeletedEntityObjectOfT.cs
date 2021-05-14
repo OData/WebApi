@@ -96,7 +96,6 @@ namespace Microsoft.AspNet.OData
         {
             DeltaKind = EdmDeltaEntityKind.DeletedEntry;
         }
-
      
         /// <inheritdoc />
         public Uri Id { get; set; }

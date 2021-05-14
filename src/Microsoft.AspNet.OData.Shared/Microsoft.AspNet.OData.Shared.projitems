@@ -80,10 +80,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\Serialization\ODataSerializerProvider.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)GetNextPageHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IDeltaDeltedEntityObject.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IDeltaDeletedEntityObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)TypelessPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EdmPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DefaultPatchHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransientAnnotations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />

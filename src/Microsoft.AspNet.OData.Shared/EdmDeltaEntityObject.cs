@@ -51,8 +51,7 @@ namespace Microsoft.AspNet.OData
         {
             get
             {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
+                return EdmDeltaEntityKind.Entry;
             }
         }
 

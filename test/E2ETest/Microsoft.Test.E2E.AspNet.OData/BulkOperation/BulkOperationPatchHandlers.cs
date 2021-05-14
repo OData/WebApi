@@ -295,6 +295,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new NewFriend();
+
+                if(employee.NewFriends == null)
+                {
+                    employee.NewFriends = new List<NewFriend>();
+                }
+
                 employee.NewFriends.Add(createdObject);
 
                 return PatchStatus.Success;
@@ -340,7 +346,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 if(employee.NewFriends == null)
                 {
-                    status = PatchStatus.NotFound;
+                    return PatchStatus.NotFound;
                 }
 
                 originalObject = employee.NewFriends.FirstOrDefault(x => x.Id == Int32.Parse(id));
@@ -369,15 +375,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class EmployeeTypelessPatchHandler : TypelessPatchMethodHandler
+    public class EmployeeEdmPatchHandler : EdmPatchMethodHandler
     {
         IEdmEntityType entityType;
-        public EmployeeTypelessPatchHandler(IEdmEntityType entityType)
+        public EmployeeEdmPatchHandler(IEdmEntityType entityType)
         {
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -385,7 +391,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 createdObject = new EdmEntityObject(entityType);
-                EmployeesController.EmployeesTypeless.Add(createdObject);
+                EmployeesController.EmployeesTypeless.Add(createdObject as EdmStructuredObject);
 
                 return PatchStatus.Success;
             }
@@ -427,7 +433,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
             PatchStatus status = PatchStatus.Success;
             errorMessage = string.Empty;
@@ -464,7 +470,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return status;
         }
 
-        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             switch (navigationPropertyName)
             {
@@ -479,18 +485,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class FriendTypelessPatchHandler : TypelessPatchMethodHandler
+    public class FriendTypelessPatchHandler : EdmPatchMethodHandler
     {
         IEdmEntityType entityType;
         EdmStructuredObject employee;
 
-        public FriendTypelessPatchHandler(EdmStructuredObject employee,  IEdmEntityType entityType)
+        public FriendTypelessPatchHandler(IEdmStructuredObject employee,  IEdmEntityType entityType)
         {
-            this.employee = employee;
+            this.employee = employee as EdmStructuredObject;
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -507,11 +513,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 object obj;
                 employee.TryGetPropertyValue("UnTypedFriends", out obj);
 
-                var friends = obj as ICollection<EdmStructuredObject>;
+                var friends = obj as ICollection<IEdmStructuredObject>;
 
                 if(friends == null)
                 {
-                    friends = new List<EdmStructuredObject>();
+                    friends = new List<IEdmStructuredObject>();
                 }
 
                 friends.Add(createdObject);
@@ -549,7 +555,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         object obj;
                         employee.TryGetPropertyValue("UnTypedFriends", out obj);
 
-                        var friends = obj as IList<EdmStructuredObject>;
+                        var friends = obj as IList<IEdmStructuredObject>;
 
                         friends.Remove(emp);
 
@@ -570,7 +576,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
             PatchStatus status = PatchStatus.Success;
             errorMessage = string.Empty;
@@ -617,7 +623,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return status;
         }
 
-        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             return null;            
         }

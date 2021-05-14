@@ -30,7 +30,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         /// </summary>
         public static IList<Employee> Employees = null;
 
-        public static IList<EdmStructuredObject> EmployeesTypeless = null;
+        public static IList<IEdmStructuredObject> EmployeesTypeless = null;
 
         private  List<Friend> Friends = null;
 
@@ -72,7 +72,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private void InitTypeLessEmployees(IEdmEntityType entityType)
         {
-            EmployeesTypeless = new List<EdmStructuredObject>();
+            EmployeesTypeless = new List<IEdmStructuredObject>();
             var emp1 = new EdmEntityObject(entityType);
             emp1.TrySetPropertyValue("ID", 1);
             emp1.TrySetPropertyValue("Name", "Test1");
@@ -153,12 +153,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = empColl.Patch(EmployeesTypeless);
-
-            ValidateSuccessfulTypeless();
-            InitTypeLessEmployees(entity);
-
-            changedObjColl = empColl.Patch(new EmployeeTypelessPatchHandler(entity));
+            var changedObjColl = empColl.Patch(new EmployeeEdmPatchHandler(entity));
             ValidateSuccessfulTypeless();
 
             return changedObjColl;
@@ -309,12 +304,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
             else if(key ==2)
             {
+                var entitytype = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
                 var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
                 entity.TrySetPropertyValue("Id", 2);
 
-                var friendCollection = new FriendColl<EdmStructuredObject>() { entity };
+                var friendCollection = new FriendColl<IEdmStructuredObject>() { entity };
 
-                var changedObjColl = friendColl.Patch(friendCollection);
+                var changedObjColl = friendColl.Patch(new EmployeeEdmPatchHandler(entitytype));
 
                 object obj;
                 Assert.Single(friendCollection);

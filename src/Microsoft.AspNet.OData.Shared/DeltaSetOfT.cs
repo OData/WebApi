@@ -23,18 +23,6 @@ namespace Microsoft.AspNet.OData
     {        
         private Type _clrType;
         IList<string> _keys;
-               
-        internal IDictionary<string, IDictionary<string, object>> dictKeyValues;
-        internal string currentPathValue;
-
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
-        /// </summary>
-        public DeltaSet()            
-        {            
-            _clrType = typeof(TStructuralType);
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
@@ -52,6 +40,7 @@ namespace Microsoft.AspNet.OData
         {
             Delta<TStructuralType> deltaItem = item as Delta<TStructuralType>;
 
+            //To ensure we dont insert null or a non related type to deltaset
             if (deltaItem == null)
             {
                 throw Error.Argument("item", SRResources.ChangedObjectTypeMismatch, item.GetType(), typeof(TStructuralType));
@@ -59,11 +48,6 @@ namespace Microsoft.AspNet.OData
 
             base.InsertItem(index, item);
         }
-
-        /// <summary>
-        /// Handler for users Create, Get and Delete Methods
-        /// </summary>
-        internal PatchMethodHandler<TStructuralType> PatchHandler { get; set; }
 
 
         /// <summary>
@@ -73,9 +57,9 @@ namespace Microsoft.AspNet.OData
         /// /// <returns>DeltaSet response</returns>
         public DeltaSet<TStructuralType> Patch(ICollection<TStructuralType> originalCollection)
         {
-            PatchHandler = new DefaultPatchHandler<TStructuralType>(originalCollection);
+            PatchMethodHandler<TStructuralType> patchHandler = new DefaultPatchHandler<TStructuralType>(originalCollection);
 
-            return CopyChangedValues();
+            return CopyChangedValues(patchHandler);
         }
 
         /// <summary>
@@ -83,19 +67,18 @@ namespace Microsoft.AspNet.OData
         /// </summary>     
         /// <returns>DeltaSet response</returns>
         public DeltaSet<TStructuralType> Patch(IPatchMethodHandler patchHandler)
-        {
-            this.PatchHandler = patchHandler as PatchMethodHandler<TStructuralType>;
-            return CopyChangedValues();
+        {            
+            return CopyChangedValues(patchHandler as PatchMethodHandler<TStructuralType>);
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal DeltaSet<TStructuralType> CopyChangedValues()
+        internal DeltaSet<TStructuralType> CopyChangedValues(PatchMethodHandler<TStructuralType> patchHandler)
         {
             //Here we are getting the keys and using the keys to find the original object 
             //to patch from the list of collection
 
-            DeltaSet<TStructuralType> deltaSet = CreateDetlaSet();
+            DeltaSet<TStructuralType> deltaSet = CreateDeltaSet();
 
             foreach (Delta<TStructuralType> changedObj in Items)
             {
@@ -104,38 +87,49 @@ namespace Microsoft.AspNet.OData
                 //Get filtered item based on keys
                 TStructuralType original = null;
                 string errorMessage = string.Empty;
-                string geterrorMessage = string.Empty;
+                string getErrorMessage = string.Empty;
 
                 Dictionary<string, object> keyValues = new Dictionary<string, object>();
 
                 foreach (string key in _keys)
                 {
                     object value;
-                    changedObj.TryGetPropertyValue(key, out value);
 
-                    if (value != null)
+                    if (changedObj.TryGetPropertyValue(key, out value))                   
                     {
                         keyValues.Add(key, value);
                     }
                 }
 
                 try
-                {                    
-                    PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
+                {
+                    PatchStatus patchStatus = patchHandler.TryGet(keyValues, out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
+
+                    if (deletedObj != null || patchStatus == PatchStatus.Failure)
+                    {
+                        IDeltaSetItem deltaSetItem = changedObj;
+
+                        DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                        dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
+
+                        deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
+
+                        continue;
+                    }
 
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
 
-                        changedObj.Patch(original, PatchHandler);
+                        changedObj.Patch(original, patchHandler);
 
-                        if (PatchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
+                        if (patchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
                         {
                             //Handle Failed Operation - Delete                           
                             
-                            if(status == PatchStatus.Success)
+                            if (patchStatus == PatchStatus.Success)
                             {
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
                                 deltaSet.Add(changedObject);
@@ -147,11 +141,11 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        if (status == PatchStatus.NotFound)
+                        if (patchStatus == PatchStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if(PatchHandler.TryCreate(changedObj, out original, out errorMessage) != PatchStatus.Success)
+                            if (patchHandler.TryCreate(changedObj, out original, out errorMessage) != PatchStatus.Success)
                             {
                                 //Handle failed Opreataion - create
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
@@ -159,26 +153,26 @@ namespace Microsoft.AspNet.OData
                                 continue;
                             }                            
                         }
-                        else if(status == PatchStatus.Success)
+                        else if (patchStatus == PatchStatus.Success)
                         {
                             operation = DataModificationOperationKind.Update;
                         }
                         else
                         {
                             //Handle failed operation 
-                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, geterrorMessage);
+                            IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, getErrorMessage);
                             deltaSet.Add(changedObject);
                             continue;
                         }
                         
                         //Patch for addition/update. This will call Delta<T> for each item in the collection
                         // This will work in case we use delegates for using users method to create an object
-                        changedObj.Patch(original, PatchHandler);                                                
+                        changedObj.Patch(original, patchHandler);                                                
 
                         deltaSet.Add(changedObj);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     //For handling the failed operations.
                     IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, ex.Message);                    
@@ -189,21 +183,18 @@ namespace Microsoft.AspNet.OData
             return deltaSet;
         }
 
-
-        private DeltaSet<TStructuralType> CreateDetlaSet()
+        private DeltaSet<TStructuralType> CreateDeltaSet()
         {
             Type type = typeof(DeltaSet<>).MakeGenericType(_clrType);
 
-            DeltaSet<TStructuralType> deltaSet = Activator.CreateInstance(type, _keys) as DeltaSet<TStructuralType>;
-            return deltaSet;
+            return Activator.CreateInstance(type, _keys) as DeltaSet<TStructuralType>;            
         }
 
         private IDeltaSetItem HandleFailedOperation(Delta<TStructuralType> changedObj, DataModificationOperationKind operation, TStructuralType originalObj, string errorMessage)
         {
             IDeltaSetItem deltaSetItem = null;
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
-            dataModificationExceptionType.MessageType = new MessageType();
-            dataModificationExceptionType.MessageType.Message = errorMessage;
+            dataModificationExceptionType.MessageType = new MessageType { Message = errorMessage };
 
             // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
             //The failed operation will be based on the protocol
@@ -220,38 +211,41 @@ namespace Microsoft.AspNet.OData
                     }
                 case DataModificationOperationKind.Delete:
                     {
-                        deltaSetItem = CreateEntityObjectforFailedOperation(changedObj, originalObj);                        
+                        deltaSetItem = CreateEntityObjectForFailedOperation(changedObj, originalObj);                        
                         break;
                     }
             }
 
 
             deltaSetItem.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
-            deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationExceptionType);
+            deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
 
             Contract.Assert(deltaSetItem != null);
 
             return deltaSetItem;
         }
 
-        private IDeltaSetItem CreateEntityObjectforFailedOperation(Delta<TStructuralType> changedObj, TStructuralType originalObj)
+        private IDeltaSetItem CreateEntityObjectForFailedOperation(Delta<TStructuralType> changedObj, TStructuralType originalObj)
         {
             Type type = typeof(Delta<>).MakeGenericType(_clrType);
 
-            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, _clrType.GetProperties().Select(x=>x.Name), null,
+            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, null, null,
                 changedObj.InstanceAnnotationsPropertyInfo) as Delta<TStructuralType>;
 
             SetProperties(originalObj, deltaObject);
 
-            if (deltaObject.InstanceAnnotationsPropertyInfo != null) {
-
+            if (deltaObject.InstanceAnnotationsPropertyInfo != null)
+            {
                 object instAnnValue;
                 changedObj.TryGetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, out instAnnValue);
-                IODataInstanceAnnotationContainer instanceAnnotations = instAnnValue as IODataInstanceAnnotationContainer;
-
-                if (instanceAnnotations != null)
+                if (instAnnValue != null)
                 {
-                    deltaObject.TrySetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                    IODataInstanceAnnotationContainer instanceAnnotations = instAnnValue as IODataInstanceAnnotationContainer;
+
+                    if (instanceAnnotations != null)
+                    {
+                        deltaObject.TrySetPropertyValue(deltaObject.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                    }
                 }
             }
 
@@ -260,11 +254,6 @@ namespace Microsoft.AspNet.OData
 
         private void SetProperties(TStructuralType originalObj, Delta<TStructuralType> edmDeltaEntityObject)
         {
-            foreach (string property in edmDeltaEntityObject.GetChangedPropertyNames())
-            {
-                edmDeltaEntityObject.TrySetPropertyValue(property, _clrType.GetProperty(property).GetValue(originalObj));
-            }
-
             foreach (string property in edmDeltaEntityObject.GetUnchangedPropertyNames())
             {
                 edmDeltaEntityObject.TrySetPropertyValue(property, _clrType.GetProperty(property).GetValue(originalObj));
@@ -288,13 +277,14 @@ namespace Microsoft.AspNet.OData
             }
 
             object annValue;
-            changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annValue);
-
-            IODataInstanceAnnotationContainer instanceAnnotations = annValue as IODataInstanceAnnotationContainer;
-
-            if (instanceAnnotations != null)
+            if (changedObj.TryGetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, out annValue))            
             {
-                deletedObject.TrySetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                IODataInstanceAnnotationContainer instanceAnnotations = annValue as IODataInstanceAnnotationContainer;
+
+                if (instanceAnnotations != null)
+                {
+                    deletedObject.TrySetPropertyValue(changedObj.InstanceAnnotationsPropertyInfo.Name, instanceAnnotations);
+                }
             }
 
             deletedObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
@@ -321,7 +311,7 @@ namespace Microsoft.AspNet.OData
 
             if (takeContentId)
             {
-                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation("Core.ContentID");
+                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.ContentID);
                 if (contentId != null)
                 {
                     edmDeletedObject.Id = new Uri(contentId.ToString());
@@ -340,18 +330,6 @@ namespace Microsoft.AspNet.OData
             {
                 edmDeletedObject.TrySetPropertyValue(property, objectVal);
             }
-        }
-
-        internal ICollection<TStructuralType> GetInstance()
-        {
-            ICollection<TStructuralType> collection = new List<TStructuralType>();
-
-            foreach(Delta<TStructuralType> item in Items)
-            {
-                collection.Add(item.GetInstance());
-            }
-
-            return collection;
         }
     }
 }

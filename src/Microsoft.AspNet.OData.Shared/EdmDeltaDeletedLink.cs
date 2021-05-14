@@ -91,9 +91,8 @@ namespace Microsoft.AspNet.OData
         public override EdmDeltaEntityKind DeltaKind
         {
             get
-            {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
+            {                
+                return EdmDeltaEntityKind.DeletedLinkEntry;
             }
         }
     }

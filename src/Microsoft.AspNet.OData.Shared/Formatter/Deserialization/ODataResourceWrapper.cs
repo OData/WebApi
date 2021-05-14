@@ -28,9 +28,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         /// Gets the wrapped <see cref="ODataResourceBase"/>.
         /// </summary>
         public ODataResourceBase ResourceBase {get;}
-                
+
         /// <summary>
-        /// Gets the wrapped <see cref="ODataResource"/>.
+        /// Gets the wrapped <see cref="ODataResource"/>. This will return null for deleted resources.
         /// </summary>
         [Obsolete("Please use ResourceBase instead")]
         public ODataResource Resource

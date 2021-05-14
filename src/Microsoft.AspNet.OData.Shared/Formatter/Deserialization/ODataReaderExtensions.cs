@@ -189,7 +189,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 case ODataReaderState.DeltaDeletedLink:
 
                     //Throw error if Delta Link appears
-                    throw Error.NotSupported("DeltaLinks are not supported");
+                    throw Error.NotSupported(SRResources.DeltaLinkNotSupported);
                     
                 default:
                     Contract.Assert(false, "We should never get here, it means the ODataReader reported a wrong state.");

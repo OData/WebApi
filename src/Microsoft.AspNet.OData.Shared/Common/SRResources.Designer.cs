@@ -576,6 +576,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to ContentID.
+        /// </summary>
+        internal static string ContentID
+        {
+            get
+            {
+                return ResourceManager.GetString("ContentID", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Type {0} already added as derived type constraint.
         /// </summary>
         internal static string ConstraintAlreadyExists
@@ -609,6 +620,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to the error DataModificationException
+        /// </summary>
+        internal static string DataModificationException
+        {
+            get
+            {
+                return ResourceManager.GetString("DataModificationException", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The actual entity type &apos;{0}&apos; is not assignable to the expected type &apos;{1}&apos;..
         /// </summary>
         internal static string DeltaEntityTypeNotAssignable
@@ -618,6 +640,17 @@ namespace Microsoft.AspNet.OData.Common
                 return ResourceManager.GetString("DeltaEntityTypeNotAssignable", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The actual error DeltaLinkNotSupported
+        /// </summary>
+        internal static string DeltaLinkNotSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("DeltaLinkNotSupported", resourceCulture);
+            }
+        }        
 
         /// <summary>
         ///   Looks up a localized string similar to Cannot find nested resource name &apos;{0}&apos; in parent resource type &apos;{1}&apos;.

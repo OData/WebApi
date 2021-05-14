@@ -8,10 +8,10 @@ using System.Text;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Basic interface to reperesenta deltaset which is a collection of Deltas.
+    /// Basic interface to reperesent a deltaset which is a collection of Deltas.
     /// </summary>
     public interface IDeltaSet
     {
-     
+        
     }
 }

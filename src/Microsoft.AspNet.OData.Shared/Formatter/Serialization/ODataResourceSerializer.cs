@@ -976,13 +976,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             IEdmStructuredObject structuredObject = resourceContext.EdmObject;
 
             //For appending transient and persistent instance annotations for both enity object and normal resources
-            //var entityObject = structuredObject;
 
             PropertyInfo instanceAnnotationInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType,
                 resourceContext.EdmModel);
 
             EdmEntityObject edmEntityObject = null;
-            object value = null;
+            object instanceAnnotations = null;
             IODataInstanceAnnotationContainer transientAnnotations = null;
 
             IDelta delta = null;
@@ -996,7 +995,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 if (instanceAnnotationInfo != null)
                 {
-                    delta.TryGetPropertyValue(instanceAnnotationInfo.Name, out value);
+                    delta.TryGetPropertyValue(instanceAnnotationInfo.Name, out instanceAnnotations);
 
                 }
 
@@ -1010,19 +1009,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             else
             {
                 if (instanceAnnotationInfo == null || structuredObject == null ||
-                    !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out value) || value == null)
+                    !structuredObject.TryGetPropertyValue(instanceAnnotationInfo.Name, out instanceAnnotations) || instanceAnnotations == null)
                 {
                     edmEntityObject = structuredObject as EdmEntityObject;
 
                     if (edmEntityObject != null)
                     {
-                        value = edmEntityObject.PersistentInstanceAnnotationsContainer;
+                        instanceAnnotations = edmEntityObject.PersistentInstanceAnnotationsContainer;
                         transientAnnotations = edmEntityObject.TransientInstanceAnnotationContainer;
                     }                    
                 }
             }
 
-            ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, value, SerializerProvider);
+            ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, instanceAnnotations, SerializerProvider);
                       
             ODataSerializerHelper.AppendInstanceAnnotations(resource, resourceContext, transientAnnotations, SerializerProvider);            
         }
@@ -1615,21 +1614,24 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     structuralProperties = structuralProperties.Where(p => changedProperties.Contains(p.Name));
                 }
 
-                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                if (!(resourceContext.EdmObject is EdmDeltaDeletedEntityObject))
                 {
-                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
                     {
-                        // skip the stream property, the stream property is written in its own logic
-                        continue;
-                    }
+                        if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                        {
+                            // skip the stream property, the stream property is written in its own logic
+                            continue;
+                        }
 
-                    ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
-                    if (property == null || (resourceContext.EdmObject is EdmDeltaDeletedEntityObject && property.Value == null))
-                    {
-                        continue;
-                    }
+                        ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
+                        if (property == null || property.Value == null)
+                        {
+                            continue;
+                        }
 
-                    properties.Add(property);
+                        properties.Add(property);
+                    }
                 }
             }
 

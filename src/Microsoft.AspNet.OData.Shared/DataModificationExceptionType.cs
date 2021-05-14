@@ -39,18 +39,9 @@ namespace Org.OData.Core.V1
 
     /// <summary>
     /// Represents an Exception Type
-    /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1012:AbstractTypesShouldNotHaveConstructors")]
+    /// </summary>    
     public abstract class ExceptionType
     {
-        /// <summary>
-        /// Instanciates a type of <see cref="ExceptionType"/>
-        /// </summary>
-        public ExceptionType()
-        {
-
-        }
-
         /// <summary>
         /// Represents a MessageType
         /// </summary>
@@ -72,14 +63,12 @@ namespace Org.OData.Core.V1
 
         /// <summary>
         /// Represents king of <see cref="DataModificationOperationKind"/> type of operation 
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "failed")]
+        /// </summary>        
         public DataModificationOperationKind FailedOperation { get; }
 
         /// <summary>
         /// Represents response code
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA1709:IdentifiersShouldBeCasedCorrectly", MessageId = "response")]
+        /// </summary>        
         public Int16 ResponseCode { get; set; }
     }
 

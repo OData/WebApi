@@ -50,7 +50,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Represents EntityType of the changedobject
         /// </summary>
-        protected IEdmEntityType EntityType { get { return _entityType; } }
+        public IEdmEntityType EntityType { get { return _entityType; } }
 
         /// <inheritdoc/>
         public IEdmTypeReference GetEdmType()
@@ -75,61 +75,55 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="originalCollection"></param>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(ICollection<EdmStructuredObject> originalCollection)
-        {            
-            PatchHandler = new DefaultTypelessPatchHandler(originalCollection, _entityType);
+        internal EdmChangedObjectCollection Patch(ICollection<IEdmStructuredObject> originalCollection)
+        {
+            EdmPatchMethodHandler patchHandler = new DefaultEdmPatchMethodHandler(originalCollection, _entityType);
 
-            return CopyChangedValues();
+            return CopyChangedValues(patchHandler);
         }
-
-        /// <summary>
-        /// Handler for users Create, Get and Delete Methods
-        /// </summary>
-        internal TypelessPatchMethodHandler PatchHandler { get; set; }
 
         /// <summary>
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(TypelessPatchMethodHandler patchHandler)
-        {
-            PatchHandler = patchHandler;
-            return CopyChangedValues();
+        public EdmChangedObjectCollection Patch(EdmPatchMethodHandler patchHandler)
+        {            
+            return CopyChangedValues(patchHandler);
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        internal EdmChangedObjectCollection CopyChangedValues()
+        internal EdmChangedObjectCollection CopyChangedValues(EdmPatchMethodHandler patchHandler)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
-            List<IEdmStructuralProperty> keys = _entityType.Key().ToList();
+            IEdmStructuralProperty[] keys = _entityType.Key().ToArray();
 
             foreach (IEdmChangedObject changedObj in Items)
             {                
                 DataModificationOperationKind operation = DataModificationOperationKind.Update;
                 EdmStructuredObject originalObj = null;
                 string errorMessage = string.Empty;
-                string geterrorMessage = string.Empty;
+                string getErrorMessage = string.Empty;
                 IDictionary<string, object> keyValues = GetKeyValues(keys, changedObj);
 
                 try
                 {
-                    EdmStructuredObject original = null;
+                    IEdmStructuredObject original = null;
                     EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
 
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
 
-                        if (PatchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
+                        if (patchHandler.TryDelete(keyValues, out errorMessage) != PatchStatus.Success)
                         {
                             //Handle Failed Operation - Delete                            
-                            PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
-                            if (status == PatchStatus.Success)
+                            PatchStatus patchStatus = patchHandler.TryGet(keyValues, out original, out getErrorMessage);
+                            if (patchStatus == PatchStatus.Success)
                             {
-                                IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage);
+                                IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage, patchHandler);
                                 changedObjectCollection.Add(changedObject);
                                 continue;
                             }
@@ -141,42 +135,42 @@ namespace Microsoft.AspNet.OData
                     {
                         EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
 
-                        PatchStatus status = PatchHandler.TryGet(keyValues, out original, out geterrorMessage);
+                        PatchStatus patchStatus = patchHandler.TryGet(keyValues, out original, out getErrorMessage);
 
-                        if (status == PatchStatus.NotFound)
+                        if (patchStatus == PatchStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if (PatchHandler.TryCreate(changedObj, out original, out errorMessage) != PatchStatus.Success)
+                            if (patchHandler.TryCreate(changedObj, out original, out errorMessage) != PatchStatus.Success)
                             {
                                 //Handle failed Opreataion - create
-                                IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, original, keys, errorMessage);
+                                IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, original, keys, errorMessage, patchHandler);
                                 changedObjectCollection.Add(changedObject);
                                 continue;
                             }
                         }
-                        else if (status == PatchStatus.Success)
+                        else if (patchStatus == PatchStatus.Success)
                         {
                             operation = DataModificationOperationKind.Update;
                         }
                         else
                         {
                             //Handle failed operation 
-                            IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, null, keys, geterrorMessage);
+                            IEdmChangedObject changedObject = HandleFailedOperation(deltaEntityObject, operation, null, keys, getErrorMessage, patchHandler);
                             changedObjectCollection.Add(changedObject);
                             continue;
                         }                                              
 
                         //Patch for addition/update. 
-                        PatchItem(deltaEntityObject, original);
+                        PatchItem(deltaEntityObject, original as EdmStructuredObject, patchHandler);
 
                         changedObjectCollection.Add(changedObj);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     //Handle Failed Operation
-                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj as EdmEntityObject, operation, originalObj, keys, ex.Message);
+                    IEdmChangedObject changedObject = HandleFailedOperation(changedObj as EdmEntityObject, operation, originalObj, keys, ex.Message, patchHandler);
                     
                     Contract.Assert(changedObject != null);
                     changedObjectCollection.Add(changedObject);
@@ -185,9 +179,8 @@ namespace Microsoft.AspNet.OData
 
             return changedObjectCollection;
         }
-
-    
-        private static IDictionary<string, object> GetKeyValues(List<IEdmStructuralProperty> keys, IEdmChangedObject changedObj)
+            
+        private static IDictionary<string, object> GetKeyValues(IEdmStructuralProperty [] keys, IEdmChangedObject changedObj)
         {
             IDictionary<string, object> keyValues = new Dictionary<string, object>();
 
@@ -205,20 +198,20 @@ namespace Microsoft.AspNet.OData
             return keyValues;
         }
 
-        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj)
+        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmPatchMethodHandler patchHandler)
         {
             foreach (string propertyName in changedObj.GetChangedPropertyNames())
             {
-                ApplyProperties(changedObj, originalObj, propertyName);
+                ApplyProperties(changedObj, originalObj, propertyName, patchHandler);
             }
 
             foreach (string propertyName in changedObj.GetUnchangedPropertyNames())
             {
-                ApplyProperties(changedObj, originalObj, propertyName);
+                ApplyProperties(changedObj, originalObj, propertyName, patchHandler);
             }
         }
 
-        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName)
+        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmPatchMethodHandler patchHandler)
         {
             object value;
             if (changedObj.TryGetPropertyValue(propertyName, out value))
@@ -226,17 +219,17 @@ namespace Microsoft.AspNet.OData
                 EdmChangedObjectCollection changedColl = value as EdmChangedObjectCollection;
                 if (changedColl != null)
                 {
-                    TypelessPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(originalObj, propertyName);
-                    if (patchHandler != null)
+                    EdmPatchMethodHandler patchHandlerNested = patchHandler.GetNestedPatchHandler(originalObj, propertyName);
+                    if (patchHandlerNested != null)
                     {
-                        changedColl.Patch(patchHandler);
+                        changedColl.Patch(patchHandlerNested);
                     }
                     else
                     {
                         object obj;
                         originalObj.TryGetPropertyValue(propertyName, out obj);
 
-                        ICollection<EdmStructuredObject> edmColl = obj as ICollection<EdmStructuredObject>;
+                        ICollection<IEdmStructuredObject> edmColl = obj as ICollection<IEdmStructuredObject>;
 
                         changedColl.Patch(edmColl);
                     }
@@ -267,7 +260,7 @@ namespace Microsoft.AspNet.OData
                             originalObj.TrySetPropertyValue(propertyName, origStructuredObj);
                         }
 
-                        PatchItem(structuredObj, origStructuredObj);                        
+                        PatchItem(structuredObj, origStructuredObj, patchHandler);                        
                     }
                     else
                     {
@@ -277,13 +270,12 @@ namespace Microsoft.AspNet.OData
             }
         }
 
-        private IEdmChangedObject HandleFailedOperation(EdmEntityObject changedObj, DataModificationOperationKind operation, EdmStructuredObject originalObj, 
-            List<IEdmStructuralProperty> keys, string errorMessage)
+        private IEdmChangedObject HandleFailedOperation(EdmEntityObject changedObj, DataModificationOperationKind operation, IEdmStructuredObject originalObj, 
+            IEdmStructuralProperty[] keys, string errorMessage, EdmPatchMethodHandler patchHandler)
         {
             IEdmChangedObject edmChangedObject = null;
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
-            dataModificationExceptionType.MessageType = new MessageType();
-            dataModificationExceptionType.MessageType.Message = errorMessage;
+            dataModificationExceptionType.MessageType = new MessageType { Message = errorMessage };
 
             // This handles the Data Modification exception. This adds Core.DataModificationException annotation and also copy other instance annotations.
             //The failed operation will be based on the protocol
@@ -295,27 +287,26 @@ namespace Microsoft.AspNet.OData
                 case DataModificationOperationKind.Insert:
                     {
                         EdmDeltaDeletedEntityObject edmDeletedObject = new EdmDeltaDeletedEntityObject(EntityType);
-                        PatchItem(edmDeletedObject, changedObj);
+                        PatchItem(edmDeletedObject, changedObj, patchHandler);
 
                         TryGetContentId(changedObj, keys, edmDeletedObject);
 
                         edmDeletedObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
                         edmDeletedObject.PersistentInstanceAnnotationsContainer = changedObj.PersistentInstanceAnnotationsContainer;
 
-                        edmDeletedObject.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationExceptionType);
+                        edmDeletedObject.AddDataException(dataModificationExceptionType);
                         edmChangedObject = edmDeletedObject;
                         break;
                     }
-                case DataModificationOperationKind.Delete:
-                case DataModificationOperationKind.Unlink:
+                case DataModificationOperationKind.Delete:                
                     {
                         EdmDeltaEntityObject edmEntityObject = new EdmDeltaEntityObject(EntityType);
-                        PatchItem(originalObj, edmEntityObject);
+                        PatchItem(originalObj as EdmStructuredObject, edmEntityObject, patchHandler);
 
                         edmEntityObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
                         edmEntityObject.PersistentInstanceAnnotationsContainer = changedObj.PersistentInstanceAnnotationsContainer;
 
-                        edmEntityObject.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.DataModificationException", dataModificationExceptionType);
+                        edmEntityObject.AddDataException( dataModificationExceptionType);
                         edmChangedObject = edmEntityObject;
                         break;
                     }
@@ -324,15 +315,13 @@ namespace Microsoft.AspNet.OData
             return edmChangedObject;
         }
 
-        private static void TryGetContentId(dynamic changedObj, List<IEdmStructuralProperty> keys, EdmDeltaDeletedEntityObject edmDeletedObject)
+        private static void TryGetContentId(dynamic changedObj, IEdmStructuralProperty[] keys, EdmDeltaDeletedEntityObject edmDeletedObject)
         {
             bool takeContentId = false;
-            for (int i = 0; i < keys.Count; i++)
+            for (int i = 0; i < keys.Length; i++)
             {
                 object value;
-                edmDeletedObject.TryGetPropertyValue(keys[i].Name, out value);
-
-                if (value == null)
+                if (edmDeletedObject.TryGetPropertyValue(keys[i].Name, out value))                
                 {
                     takeContentId = true;
                     break;
@@ -341,7 +330,7 @@ namespace Microsoft.AspNet.OData
 
             if (takeContentId)
             {
-                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation("Core.ContentID");
+                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.ContentID);
                 if (contentId != null)
                 {
                     edmDeletedObject.Id = contentId.ToString();

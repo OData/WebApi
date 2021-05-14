@@ -45,8 +45,7 @@ namespace Microsoft.AspNet.OData
         private PropertyInfo _instanceAnnotationsPropertyInfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
-        private IODataInstanceAnnotationContainer _instanceAnnotationCache;
-
+        
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -117,12 +116,6 @@ namespace Microsoft.AspNet.OData
             DeltaKind = EdmDeltaEntityKind.Entry;
         }
 
-
-        /// <summary>
-        /// Handler for users Create, Get and Delete Methods
-        /// </summary>
-        internal PatchMethodHandler<TStructuralType> PatchHandler { get; set; }
-
         /// <inheritdoc/>
         public override Type StructuredType
         {
@@ -134,7 +127,7 @@ namespace Microsoft.AspNet.OData
 
         internal IDictionary<string, object> DeltaNestedResources
         {
-            get {return _deltaNestedResources; }
+            get { return _deltaNestedResources; }
         }
 
         /// <inheritdoc/>
@@ -146,7 +139,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Gets the enum type of <see cref="EdmDeltaEntityKind"/>.
         /// </summary>
-        public EdmDeltaEntityKind DeltaKind { get; set; }
+        public EdmDeltaEntityKind DeltaKind { get; protected set; }
 
         /// <inheritdoc />
         public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
@@ -169,19 +162,17 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (_instanceAnnotationsPropertyInfo != null)
+            if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
             {                
-                if (name == _instanceAnnotationsPropertyInfo.Name)
+                IODataInstanceAnnotationContainer annotationValue = value as IODataInstanceAnnotationContainer;
+                if (value != null && annotationValue == null)
                 {
-                    IODataInstanceAnnotationContainer annotationValue = value as IODataInstanceAnnotationContainer;
-                    if (_instanceAnnotationCache == null && annotationValue != null)
-                    {
-                        _instanceAnnotationCache =
-                            GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, annotationValue, create: true);
-                    }
-                                        
-                    return true;
+                    return false;
                 }
+
+                _instanceAnnotationsPropertyInfo.SetValue(_instance, annotationValue);
+
+                return true;                
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -220,22 +211,17 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (_instanceAnnotationsPropertyInfo != null)
-            {
-                if (name == _instanceAnnotationsPropertyInfo.Name)
+            if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
+            {                
+                object propertyValue = _instanceAnnotationsPropertyInfo.GetValue(_instance);
+                if (propertyValue != null)
                 {
-                    if (_instanceAnnotationCache == null)
-                    {
-                        _instanceAnnotationCache =
-                            GetInstanceannotationContainer(_instanceAnnotationsPropertyInfo, _instance, null,create: false);
-                    }
-
-                    if(_instanceAnnotationCache != null)
-                    {
-                        value = _instanceAnnotationCache;
-                        return true;
-                    }                    
+                    value =  (IODataInstanceAnnotationContainer)propertyValue;
+                    return true;
                 }
+
+                value = null;
+                return false;                
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -257,14 +243,15 @@ namespace Microsoft.AspNet.OData
                 // If this is a nested resource, get the value from the dictionary of nested resources.
                 object deltaNestedResource = _deltaNestedResources[name];
 
+                Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+
                 //If DeltaSet collection, we are handling delta collections so the value will be that itself and no need to get instance value
-                if(deltaNestedResource is IDeltaSet)
+                if (deltaNestedResource is IDeltaSet)
                 {
                     value = deltaNestedResource;
                     return true;
                 }
-
-                Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+                                
                 Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
 
                 // Get the Delta<{NestedResourceType}>._instance using Reflection.
@@ -365,9 +352,14 @@ namespace Microsoft.AspNet.OData
         /// to the <paramref name="original"/> entity recursively.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
+        public void CopyChangedValues(TStructuralType original)
+        {
+            CopyChangedValues(original, null);
+        }
+
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        public void CopyChangedValues(TStructuralType original)
+        internal void CopyChangedValues(TStructuralType original, PatchMethodHandler<TStructuralType> patchHandler = null)
         {
             if (original == null)
             {
@@ -402,11 +394,11 @@ namespace Microsoft.AspNet.OData
 
                 if(deltaNestedResource is IDeltaSet)
                 {
-                    IPatchMethodHandler patchHandler = PatchHandler.GetNestedPatchHandler(original, nestedResourceName);
+                    IPatchMethodHandler patchHandlerNested = patchHandler.GetNestedPatchHandler(original, nestedResourceName);
 
-                    if (patchHandler != null)
+                    if (patchHandlerNested != null)
                     {
-                        deltaNestedResource.Patch(patchHandler);
+                        deltaNestedResource.Patch(patchHandlerNested);
                     }
                 }
                 else
@@ -484,9 +476,8 @@ namespace Microsoft.AspNet.OData
         /// <param name="original">The entity to be updated.</param>
         /// <param name="patchHandler">Patch Handler</param>
         public void Patch(TStructuralType original, IPatchMethodHandler patchHandler)
-        {
-            PatchHandler = patchHandler as PatchMethodHandler<TStructuralType>;
-            CopyChangedValues(original);
+        {            
+            CopyChangedValues(original, patchHandler as PatchMethodHandler<TStructuralType>);
         }
 
         /// <summary>
@@ -531,36 +522,6 @@ namespace Microsoft.AspNet.OData
                 }
             }
         }
-
-        private static IODataInstanceAnnotationContainer GetInstanceannotationContainer(PropertyInfo propertyInfo,
-        TStructuralType entity, IODataInstanceAnnotationContainer value, bool create)
-        {
-            if (entity == null)
-            {
-                throw Error.ArgumentNull("entity");
-            }
-
-            object propertyValue = propertyInfo.GetValue(entity);
-            if (propertyValue != null)
-            {
-                return (IODataInstanceAnnotationContainer)propertyValue;
-            }
-
-            if (create)
-            {
-                if (!propertyInfo.CanWrite)
-                {
-                    throw Error.InvalidOperation(SRResources.CannotSetAnnotationPropertyDictionary, propertyInfo.Name,
-                            entity.GetType().FullName);
-                }                
-
-                propertyInfo.SetValue(entity, value);
-                return value;
-            }
-
-            return null;
-        }
-
 
         private static IDictionary<string, object> GetDynamicPropertyDictionary(PropertyInfo propertyInfo,
             TStructuralType entity, bool create)
@@ -648,7 +609,6 @@ namespace Microsoft.AspNet.OData
                     .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
-
      
             if (updatableProperties != null)
             {
@@ -831,6 +791,5 @@ namespace Microsoft.AspNet.OData
 
             return true;
         }
-
     }
 }

@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Entry or Deleted Entry for Delta Set Item
         /// </summary>
-        EdmDeltaEntityKind DeltaKind { get; set; }
+        EdmDeltaEntityKind DeltaKind { get; }
 
         /// <summary>
         /// Annotation container to hold Transient Instance Annotations

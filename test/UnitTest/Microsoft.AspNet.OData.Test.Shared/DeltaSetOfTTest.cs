@@ -52,7 +52,7 @@ namespace Microsoft.AspNet.OData.Test
         {
             //Assign
             
-            var edmChangedObjectcollection = new DeltaSet<Friend>();
+            var edmChangedObjectcollection = new DeltaSet<Friend>(new List<string>() { "Id" });
 
             var edmChangedObj1 = new Delta<NewFriend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);

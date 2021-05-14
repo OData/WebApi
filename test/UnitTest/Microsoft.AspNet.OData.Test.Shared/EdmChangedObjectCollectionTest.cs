@@ -38,11 +38,11 @@ namespace Microsoft.AspNet.OData.Test
              Assert.Same(_entityType, collectionTypeReference.ElementType().Definition);
          }
 
-        public static List<EdmStructuredObject> friends = new List<EdmStructuredObject>();
+        public static List<IEdmStructuredObject> friends = new List<IEdmStructuredObject>();
 
         internal void InitFriends()
         {
-            friends = new List<EdmStructuredObject>();
+            friends = new List<IEdmStructuredObject>();
             EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
@@ -209,7 +209,7 @@ namespace Microsoft.AspNet.OData.Test
         public string Name { get; set; }
     }
 
-    public class FriendTypelessPatchHandler : TypelessPatchMethodHandler
+    public class FriendTypelessPatchHandler : EdmPatchMethodHandler
     {
         IEdmEntityType entityType;
 
@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.OData.Test
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -271,7 +271,7 @@ namespace Microsoft.AspNet.OData.Test
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
             PatchStatus status = PatchStatus.Success;
             errorMessage = string.Empty;
@@ -309,7 +309,7 @@ namespace Microsoft.AspNet.OData.Test
             return status;
         }
 
-        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             switch (navigationPropertyName)
             {
@@ -322,18 +322,18 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class NewFriendTypelessPatchHandler : TypelessPatchMethodHandler
+    public class NewFriendTypelessPatchHandler : EdmPatchMethodHandler
     {
         IEdmEntityType entityType;
         EdmStructuredObject friend;
 
-        public NewFriendTypelessPatchHandler(EdmStructuredObject friend, IEdmEntityType entityType)
+        public NewFriendTypelessPatchHandler(IEdmStructuredObject friend, IEdmEntityType entityType)
         {
             this.entityType = entityType;
-            this.friend = friend;
+            this.friend = friend as EdmStructuredObject;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out EdmStructuredObject createdObject, out string errorMessage)
+        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -345,7 +345,7 @@ namespace Microsoft.AspNet.OData.Test
                 object obj;
                 friend.TryGetPropertyValue("NewFriends", out obj);
 
-                var nfriends = obj as List<EdmStructuredObject>;
+                var nfriends = obj as List<IEdmStructuredObject>;
 
                 nfriends.Add(createdObject);
 
@@ -398,7 +398,7 @@ namespace Microsoft.AspNet.OData.Test
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out EdmStructuredObject originalObject, out string errorMessage)
+        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
             PatchStatus status = PatchStatus.Success;
             errorMessage = string.Empty;
@@ -409,7 +409,7 @@ namespace Microsoft.AspNet.OData.Test
                 object obj;
                 friend.TryGetPropertyValue("NewFriends", out obj);
 
-                var nfriends = obj as List<EdmStructuredObject>;
+                var nfriends = obj as List<IEdmStructuredObject>;
 
                 var id = keyValues.First().Value.ToString();
 
@@ -443,7 +443,7 @@ namespace Microsoft.AspNet.OData.Test
             return status;
         }
 
-        public override TypelessPatchMethodHandler GetNestedPatchHandler(EdmStructuredObject parent, string navigationPropertyName)
+        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             return null;
         }

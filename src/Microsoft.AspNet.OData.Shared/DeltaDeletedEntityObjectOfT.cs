@@ -52,7 +52,6 @@ namespace Microsoft.AspNet.OData
 
         }
 
-
         /// <summary>
         /// Initializes a new instance of <see cref="DeltaDeletedEntityObject{TStructuralType}"/>.
         /// </summary>

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics.Contracts;
 using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
@@ -66,6 +67,8 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public void AddDataException(DataModificationExceptionType dataModificationException)
         {
+            Contract.Assert(TransientInstanceAnnotationContainer != null);
+
             TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationException);           
         }
 
@@ -73,9 +76,13 @@ namespace Microsoft.AspNet.OData
         /// Method to Add Data Modification Exception
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate")]
-        public object GetDataException()
+        public DataModificationExceptionType GetDataException()
         {
-            return TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.DataModificationException);
+            Contract.Assert(TransientInstanceAnnotationContainer != null);
+
+            DataModificationExceptionType dataModificationExceptionType = TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.DataModificationException) as DataModificationExceptionType;
+
+            return dataModificationExceptionType;
         }
     }
 }

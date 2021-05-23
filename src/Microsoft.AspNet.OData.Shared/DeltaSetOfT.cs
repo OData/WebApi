@@ -289,14 +289,15 @@ namespace Microsoft.AspNet.OData
 
             deletedObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
 
-            TryGetContentId(changedObj, _keys, deletedObject);
+            ValidateForDeletedEntityId(_keys, deletedObject);
             
             return deletedObject;
         }
 
-        private static void TryGetContentId(Delta<TStructuralType> changedObj, IList<string> keys, DeltaDeletedEntityObject<TStructuralType> edmDeletedObject)
+        //This is for ODL to work to set id as empty, because if there are missing keys, id wouldnt be set and we need to set it as empty.
+        private static void ValidateForDeletedEntityId(IList<string> keys, DeltaDeletedEntityObject<TStructuralType> edmDeletedObject)
         {
-            bool takeContentId = false;
+            bool hasnullKeys = false;
             for (int i = 0; i < keys.Count; i++)
             {
                 object value;
@@ -304,22 +305,14 @@ namespace Microsoft.AspNet.OData
 
                 if (value == null)
                 {
-                    takeContentId = true;
+                    hasnullKeys = true;
                     break;
                 }
             }
 
-            if (takeContentId)
-            {
-                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.ContentID);
-                if (contentId != null)
-                {
-                    edmDeletedObject.Id = new Uri(contentId.ToString());
-                }
-                else
-                {
-                    edmDeletedObject.Id = new Uri(string.Empty);
-                }
+            if (hasnullKeys)
+            {               
+                edmDeletedObject.Id = new Uri(string.Empty);                
             }
         }
 

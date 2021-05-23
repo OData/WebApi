@@ -289,7 +289,7 @@ namespace Microsoft.AspNet.OData
                         EdmDeltaDeletedEntityObject edmDeletedObject = new EdmDeltaDeletedEntityObject(EntityType);
                         PatchItem(edmDeletedObject, changedObj, patchHandler);
 
-                        TryGetContentId(changedObj, keys, edmDeletedObject);
+                        ValidateForDeletedEntityId(keys, edmDeletedObject);
 
                         edmDeletedObject.TransientInstanceAnnotationContainer = changedObj.TransientInstanceAnnotationContainer;
                         edmDeletedObject.PersistentInstanceAnnotationsContainer = changedObj.PersistentInstanceAnnotationsContainer;
@@ -315,30 +315,23 @@ namespace Microsoft.AspNet.OData
             return edmChangedObject;
         }
 
-        private static void TryGetContentId(dynamic changedObj, IEdmStructuralProperty[] keys, EdmDeltaDeletedEntityObject edmDeletedObject)
+        //This is for ODL to work to set id as empty, because if there are missing keys, id wouldnt be set and we need to set it as empty.
+        private static void ValidateForDeletedEntityId(IEdmStructuralProperty[] keys, EdmDeltaDeletedEntityObject edmDeletedObject)
         {
-            bool takeContentId = false;
+            bool hasNullKeys = false;
             for (int i = 0; i < keys.Length; i++)
             {
                 object value;
                 if (edmDeletedObject.TryGetPropertyValue(keys[i].Name, out value))                
                 {
-                    takeContentId = true;
+                    hasNullKeys = true;
                     break;
                 }
             }
 
-            if (takeContentId)
-            {
-                object contentId = changedObj.TransientInstanceAnnotationContainer.GetResourceAnnotation(SRResources.ContentID);
-                if (contentId != null)
-                {
-                    edmDeletedObject.Id = contentId.ToString();
-                }
-                else
-                {
-                    edmDeletedObject.Id = string.Empty;
-                }
+            if (hasNullKeys)
+            {               
+                edmDeletedObject.Id = string.Empty;                
             }
         }
     }

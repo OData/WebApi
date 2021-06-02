@@ -107,7 +107,7 @@ namespace Microsoft.AspNet.OData
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
-                    if (deletedObj != null || patchStatus == PatchStatus.Failure)
+                    if (patchStatus == PatchStatus.Failure || (deletedObj != null && patchStatus == PatchStatus.NotFound))
                     {
                         IDeltaSetItem deltaSetItem = changedObj;
 

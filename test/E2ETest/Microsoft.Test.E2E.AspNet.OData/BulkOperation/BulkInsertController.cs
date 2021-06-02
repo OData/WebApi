@@ -298,8 +298,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     }
                 }
                 
-
-
                 return Ok(changedObjColl);
             }
             else if(key ==2)
@@ -310,12 +308,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 var friendCollection = new FriendColl<IEdmStructuredObject>() { entity };
 
-                var changedObjColl = friendColl.Patch(new EmployeeEdmPatchHandler(entitytype));
+                var changedObjColl = PatchWithUsersMethodTypeLess(key, friendColl);
 
                 object obj;
-                Assert.Single(friendCollection);
+                Assert.Single(changedObjColl);
 
-                friendCollection.First().TryGetPropertyValue("Age", out obj);
+                changedObjColl.First().TryGetPropertyValue("Age", out obj);
                 Assert.Equal(35, obj);
 
                 return Ok(changedObjColl);

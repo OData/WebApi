@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData
 
             foreach (KeyValuePair<string, string> kvp in queryParameters)
             {
-                string key = kvp.Key.ToLowerInvariant();
+                string key = kvp.Key.StartsWith("$")? kvp.Key.ToLowerInvariant() : kvp.Key;
                 string value = kvp.Value;
 
                 switch (key)

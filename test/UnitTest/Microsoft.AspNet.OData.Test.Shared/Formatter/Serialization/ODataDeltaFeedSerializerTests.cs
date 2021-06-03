@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Formatter;
@@ -275,6 +276,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             serializerProvider.Setup(s => s.GetEdmTypeSerializer(edmType)).Returns(customerSerializer.Object);
 
             ODataDeltaFeedSerializer serializer = new ODataDeltaFeedSerializer(serializerProvider.Object);
+            _writeContext.Type = typeof(IEdmObject);
 
             // Act
             serializer.WriteDeltaFeedInline(new[] { edmObject.Object }, feedType, mockWriter.Object, _writeContext);
@@ -292,6 +294,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             var mockWriter = new Mock<ODataWriter>();
             customerSerializer.Setup(s => s.WriteDeltaObjectInline(_deltaFeedCustomers[0], _customersType.ElementType(), mockWriter.Object, _writeContext)).Verifiable();
             _serializer = new ODataDeltaFeedSerializer(provider);
+            _writeContext.Type = typeof(IEdmObject);
 
             // Act
             _serializer.WriteDeltaFeedInline(_deltaFeedCustomers, _customersType, mockWriter.Object, _writeContext);
@@ -333,6 +336,33 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Serialization
             // Arrange
             IEnumerable instance = new object[0];
             ODataDeltaResourceSet deltafeed = new ODataDeltaResourceSet { DeltaLink = new Uri("http://deltalink.com/") };
+            Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
+            serializer.CallBase = true;
+            serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);
+            var mockWriter = new Mock<ODataWriter>();
+
+            mockWriter.Setup(m => m.WriteStart(deltafeed));
+            mockWriter
+                .Setup(m => m.WriteEnd())
+                .Callback(() =>
+                {
+                    Assert.Equal("http://deltalink.com/", deltafeed.DeltaLink.AbsoluteUri);
+                })
+                .Verifiable();
+
+            // Act
+            serializer.Object.WriteDeltaFeedInline(instance, _customersType, mockWriter.Object, _writeContext);
+
+            // Assert
+            mockWriter.Verify();
+        }
+
+        [Fact]
+        public void WriteDeltaFeedInline_Sets_DeltaResource_WithAnnotations()
+        {
+            // Arrange
+            IEnumerable instance = new object[0];
+            ODataDeltaResourceSet deltafeed = new ODataDeltaResourceSet { DeltaLink = new Uri("http://deltalink.com/"), InstanceAnnotations=new List<ODataInstanceAnnotation>() { new ODataInstanceAnnotation("NS.Test",new ODataPrimitiveValue( 1)) } };
             Mock<ODataDeltaFeedSerializer> serializer = new Mock<ODataDeltaFeedSerializer>(_serializerProvider);
             serializer.CallBase = true;
             serializer.Setup(s => s.CreateODataDeltaFeed(instance, _customersType, _writeContext)).Returns(deltafeed);

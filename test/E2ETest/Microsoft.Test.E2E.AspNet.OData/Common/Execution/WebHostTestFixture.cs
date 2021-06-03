@@ -60,7 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
     public class WebHostTestFixture : IDisposable
     {
         private static readonly string NormalBaseAddressTemplate = "http://{0}:{1}";
-        
+
         private int _port;
         private bool disposedValue = false;
         private Object thisLock = new Object();
@@ -152,7 +152,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
                                     .Build();
 
                                 _selfHostServer.Start();
-#else
+#else                                
                                 _selfHostServer = WebApp.Start(this.BaseAddress, DefaultKatanaConfigure);
 #endif
                             }

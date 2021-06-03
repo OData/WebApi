@@ -39,10 +39,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Common.Execution
         /// </summary>
         /// <param name="configuration"></param>
         protected abstract void UpdateConfiguration(WebRouteConfiguration configuration);
-   
+
         public void Dispose()
         {
-            if(Client != null)
+            if (Client != null)
             {
                 Client.Dispose();
             }

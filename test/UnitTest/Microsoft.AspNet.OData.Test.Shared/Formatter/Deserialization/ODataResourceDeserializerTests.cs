@@ -1037,7 +1037,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 Model = _readContext.Model,
                 ResourceType = typeof(Delta<Product>)
             };
-            var structuralProperties = _productEdmType.StructuralProperties().Select(p => p.Name);
+            var structuralProperties = _productEdmType.StructuralProperties().Select(p => p.Name).Union(_productEdmType.NavigationProperties().Select(p => p.Name));
 
             // Act
             Delta<Product> resource = deserializer.CreateResourceInstance(_productEdmType, readContext) as Delta<Product>;
@@ -1159,6 +1159,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 "resource");
         }
 
+        
         [Fact]
         public void ApplyNestedProperty_ThrowsODataException_NavigationPropertyNotfound()
         {
@@ -1172,35 +1173,6 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 "Cannot find nested property 'SomeProperty' on the resource type 'ODataDemo.Product'.");
         }
 
-        [Fact]
-        public void ApplyNestedProperty_ThrowsODataException_WhenPatchingNavigationProperty()
-        {
-            // Arrange
-            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Supplier" });
-            resourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(new ODataResource()));
-            _readContext.ResourceType = typeof(Delta<Supplier>);
-
-            // Act & Assert
-            ExceptionAssert.Throws<ODataException>(
-                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _productEdmType, _readContext),
-                "Cannot apply PATCH to navigation property 'Supplier' on entity type 'ODataDemo.Product'.");
-        }
-
-        [Fact]
-        public void ApplyNestedProperty_ThrowsODataException_WhenPatchingCollectionNavigationProperty()
-        {
-            // Arrange
-            var deserializer = new ODataResourceDeserializer(_deserializerProvider);
-            ODataNestedResourceInfoWrapper resourceInfoWrapper = new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Products" });
-            resourceInfoWrapper.NestedItems.Add(new ODataResourceSetWrapper(new ODataResourceSet()));
-            _readContext.ResourceType = typeof(Delta<Supplier>);
-
-            // Act & Assert
-            ExceptionAssert.Throws<ODataException>(
-                () => deserializer.ApplyNestedProperty(42, resourceInfoWrapper, _supplierEdmType, _readContext),
-                "Cannot apply PATCH to navigation property 'Products' on entity type 'ODataDemo.Supplier'.");
-        }
 
         [Fact]
         public void ApplyNestedProperty_UsesThePropertyAlias_ForResourceSet()

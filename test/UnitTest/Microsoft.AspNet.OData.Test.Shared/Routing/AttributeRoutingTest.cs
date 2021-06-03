@@ -144,6 +144,13 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 return "PostCustomerFromSpecialCustomer";
             }
 
+            [HttpPatch]
+            [ODataRoute("Customers/NS.SpecialCustomer")]
+            public string PatchCustomerFromSpecialCustomer()
+            {
+                return "PatchCustomerFromSpecialCustomer";
+            }
+
             [HttpPost]
             [ODataRoute("Customers")]
             public string CreateCustomer()

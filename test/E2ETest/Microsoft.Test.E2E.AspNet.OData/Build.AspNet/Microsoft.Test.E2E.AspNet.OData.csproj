@@ -180,6 +180,9 @@
     <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
       <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
     </Compile>
+	<Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+		<Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+	</Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
     </Compile>

@@ -67,7 +67,6 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Scope = "member", Target = "Microsoft.AspNet.OData.Common.Error.#PropertyNullOrWhiteSpace()")]
 
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Scope = "member", Target = "Microsoft.AspNet.OData.Delta`1.#CopyChangedValues(!0)")]
-
 [assembly: SuppressMessage("Microsoft.Design", "CA1033:InterfaceMethodsShouldBeCallableByChildTypes", Scope = "member", Target = "Microsoft.AspNet.OData.Delta`1.#Microsoft.AspNet.OData.IEdmObject.GetEdmType()")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Upsert", Scope = "member", Target = "Microsoft.AspNet.OData.DataModificationOperationKind.#Upsert")]
 [assembly: SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Upsert", Scope = "member", Target = "Org.OData.Core.V1.DataModificationOperationKind.#Upsert")]
@@ -121,6 +120,7 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "2#", Scope = "member", Target = "Microsoft.AspNet.OData.ODataAPIHandler`1.#TryGet(System.Collections.Generic.IDictionary`2<System.String,System.Object>,!0&,System.String&)")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Scope = "member", Target = "Microsoft.AspNet.OData.ODataAPIHandler`1.#TryDelete(System.Collections.Generic.IDictionary`2<System.String,System.Object>,System.String&)")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Scope = "member", Target = "Microsoft.AspNet.OData.ODataAPIHandler`1.#TryGet(System.Collections.Generic.IDictionary`2<System.String,System.Object>,!0&,System.String&)")]
+[assembly: SuppressMessage("Microsoft.Performance", "CA1822:MarkMembersAsStatic", Scope = "member", Target = "Microsoft.AspNet.OData.ODataAPIHandler`1.#GetODataPath(System.String,Microsoft.OData.Edm.IEdmModel)")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1040:AvoidEmptyInterfaces", Scope = "type", Target = "Microsoft.AspNet.OData.IODataAPIHandler")]
 [assembly: SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Scope = "member", Target = "Microsoft.AspNet.OData.Formatter.Serialization.DefaultODataSerializerProvider.#GetODataPayloadSerializerImpl(System.Type,System.Func`1<Microsoft.OData.Edm.IEdmModel>,Microsoft.AspNet.OData.Routing.ODataPath,System.Type)")]
 [assembly: SuppressMessage("Microsoft.Design", "CA1021:AvoidOutParameters", MessageId = "1#", Scope = "member", Target = "Microsoft.AspNet.OData.EdmODataAPIHandler.#TryDelete(System.Collections.Generic.IDictionary`2<System.String,System.Object>,System.String&)")]

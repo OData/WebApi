@@ -166,8 +166,8 @@
     <Compile Include="..\Aggregation\AggregationTests.cs">
       <Link>Aggregation\AggregationTests.cs</Link>
     </Compile>
-    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
-      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+    <Compile Include="..\BulkOperation\BulkOperationTest.cs">
+      <Link>BulkOperation\BulkOperationTest.cs</Link>
     </Compile>
     <Compile Include="..\BulkOperation\BulkOperationDataModel.cs">
       <Link>BulkOperation\BulkOperationDataModel.cs</Link>

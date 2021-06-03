@@ -129,8 +129,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 throw Error.ArgumentNull("readContext");
             }
-
-
+            
             if (!String.IsNullOrEmpty(resourceWrapper.ResourceBase.TypeName) && structuredType.FullName() != resourceWrapper.ResourceBase.TypeName)
             {
                 // received a derived type in a base type deserializer. delegate it to the appropriate derived type deserializer.
@@ -835,7 +834,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
         private void ApplyResourceProperties(object resource, ODataResourceWrapper resourceWrapper,
             IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
-
         {
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);

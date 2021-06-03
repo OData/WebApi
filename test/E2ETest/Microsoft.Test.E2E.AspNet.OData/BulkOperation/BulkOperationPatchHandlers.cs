@@ -13,6 +13,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
+using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
@@ -139,7 +140,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                                     default:
                                         return null;
-
                                 }
                             }
                         }
@@ -147,7 +147,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                     default:
                         return null;
-
                 }
             }
             return null;
@@ -176,14 +175,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                     default:
                         return null;
-
                 }
             }
 
             return null;
         }
     }
-
 
     internal class CompanyAPIHandler : ODataAPIHandler<Company>
     {
@@ -243,7 +240,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -265,7 +261,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
-
         }
     }
 
@@ -330,12 +325,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var id = keyValues["Id"].ToString();
                 originalObject = parent.OverdueOrders.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -350,11 +343,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             switch (navigationPropertyName)
             {
-
                 default:
                     return null;
             }
-
         }
     }
 
@@ -424,7 +415,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -443,10 +433,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
-
         }
     }
-
 
     internal class EmployeeAPIHandler : ODataAPIHandler<Employee>
     {
@@ -502,12 +490,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var id = keyValues["ID"].ToString();
                 originalObject = EmployeesController.Employees.First(x => x.ID == Int32.Parse(id));
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -529,7 +515,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
-
         }
     }
 
@@ -598,7 +583,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -617,10 +601,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     return new OrderAPIHandler(parent);
                 default:
                     return null;
-
             }
         }
-
     }
 
     internal class NewOrderAPIHandler : ODataAPIHandler<NewOrder>
@@ -696,7 +678,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -711,7 +692,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             throw new NotImplementedException();
         }
-
     }
 
     internal class MyNewOrderAPIHandler : ODataAPIHandler<MyNewOrder>
@@ -787,7 +767,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -802,9 +781,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             throw new NotImplementedException();
         }
-
     }
-
 
     internal class OrderAPIHandler : ODataAPIHandler<Order>
     {
@@ -879,7 +856,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -894,10 +870,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             throw new NotImplementedException();
         }
-
     }
-
-
 
     internal class NewFriendAPIHandler : ODataAPIHandler<NewFriend>
     {
@@ -971,12 +944,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 originalObject = employee.NewFriends.FirstOrDefault(x => x.Id == Int32.Parse(id));
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -991,9 +962,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             throw new NotImplementedException();
         }
-
     }
-
 
     internal class EmployeeEdmAPIHandler : EdmODataAPIHandler
     {
@@ -1042,7 +1011,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     }
                 }
 
-
                 return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
@@ -1074,12 +1042,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     }
                 }
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -1100,9 +1066,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 default:
                     return null;
             }
-
         }
-
     }
 
     internal class FriendTypelessAPIHandler : EdmODataAPIHandler
@@ -1180,11 +1144,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                         friends.Remove(emp);
 
                         employee.TrySetPropertyValue("UnTypedFriends", friends);
-
                         break;
                     }
                 }
-
 
                 return ODataAPIResponseStatus.Success;
             }
@@ -1227,12 +1189,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                     }
                 }
 
-
                 if (originalObject == null)
                 {
                     status = ODataAPIResponseStatus.NotFound;
                 }
-
             }
             catch (Exception ex)
             {
@@ -1247,6 +1207,5 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             return null;
         }
-
     }
 }

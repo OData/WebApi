@@ -647,6 +647,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         WriteDynamicComplexProperties(resourceContext, writer);
                         WriteNavigationLinks(selectExpandNode, resourceContext, writer);
                         WriteExpandedNavigationProperties(selectExpandNode, resourceContext, writer);
+                        WriteNestedNavigationProperties(selectExpandNode, resourceContext, writer);
                         WriteReferencedNavigationProperties(selectExpandNode, resourceContext, writer);
                         writer.WriteEnd();
                     }
@@ -689,6 +690,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         await WriteDynamicComplexPropertiesAsync(resourceContext, writer);
                         await WriteNavigationLinksAsync(selectExpandNode, resourceContext, writer);
                         await WriteExpandedNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
+                        await WriteNestedNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteReferencedNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await writer.WriteEndAsync();
                     }
@@ -1118,7 +1120,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(selectExpandNode != null);
             Contract.Assert(resourceContext != null);
 
-            if (selectExpandNode.SelectedNavigationProperties == null)
+            if (selectExpandNode.SelectedNavigationProperties == null || resourceContext.IsPostRequest)
             {
                 return;
             }
@@ -1139,7 +1141,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             Contract.Assert(selectExpandNode != null);
             Contract.Assert(resourceContext != null);
 
-            if (selectExpandNode.SelectedNavigationProperties == null)
+            if (selectExpandNode.SelectedNavigationProperties == null || resourceContext.IsPostRequest)
             {
                 return;
             }
@@ -1396,35 +1398,65 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             ISet<IEdmNavigationProperty> navigationProperties = selectExpandNode.SelectedNavigationProperties;
 
-            if (navigationProperties != null)
+            if (navigationProperties == null)
             {
-                IEnumerable<string> changedProperties = null;
-                if (null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
-                {
-                    changedProperties = changedObject.GetChangedPropertyNames();
+                yield break;
+            }
 
-                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+            IEnumerable<string> changedProperties = null;
+
+            if (null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
+            {
+                changedProperties = changedObject.GetChangedPropertyNames();
+
+                foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                {
+                    if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
                     {
-                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
-                        {
-                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
-                        }
+                        yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
                     }
                 }
-                else if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
-                {
-                    changedProperties = deltaObject.GetChangedPropertyNames();
-                    dynamic delta = deltaObject;
+            }
+            else if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
+            {
+                changedProperties = deltaObject.GetChangedPropertyNames();
+                dynamic delta = deltaObject;
 
-                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                {
+                    Object obj = null;
+
+                    if (changedProperties == null || changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
                     {
-                        Object obj = null;
-                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
+                        yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
+                    }
+                }
+            }
+            // Serializing nested navigation properties from a deep insert request.
+            // We currently don't deserialize Deep insert nested resources as Delta<T> but as T. If this was to change in the future, logic in this method will have to change.
+            else if (resourceContext.IsPostRequest)
+            {
+                object instance = resourceContext.ResourceInstance;
+                PropertyInfo[] properties = instance.GetType().GetProperties();
+                Dictionary<string, object> propertyNamesAndValues = new Dictionary<string, object>();
+
+                foreach (PropertyInfo propertyInfo in properties)
+                {
+                    string name = propertyInfo.Name;
+                    object value = propertyInfo.GetValue(instance);
+                    propertyNamesAndValues.Add(name, value);
+                }
+
+                foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                {
+                    if (propertyNamesAndValues.TryGetValue(navigationProperty.Name, out object obj))
+                    {
+                        if (obj != null)
                         {
                             yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
                         }
                     }
-                }                
+                }
             }
         }
 
@@ -1581,7 +1613,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             object propertyValue = resourceContext.GetPropertyValue(edmProperty.Name);
 
-            if (propertyValue == null || propertyValue is NullEdmComplexObject)
+            if (propertyValue == null || propertyValue is NullEdmComplexObject || propertyValue is ODataIdContainer)
             {
                 if (edmProperty.Type.IsCollection())
                 {
@@ -1615,6 +1647,58 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 }
 
                 await serializer.WriteObjectInlineAsync(propertyValue, edmProperty.Type, writer, nestedWriteContext);
+            }
+        }
+
+        private void WriteNestedNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (!resourceContext.IsPostRequest)
+            {
+                return;
+            }
+
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer);
+                writer.WriteEnd();
+            }
+        }
+
+        private async Task WriteNestedNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (!resourceContext.IsPostRequest)
+            {
+                return;
+            }
+
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                await writer.WriteStartAsync(nestedResourceInfo);
+                await WriteComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer);
+                await writer.WriteEndAsync();
             }
         }
 

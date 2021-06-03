@@ -99,6 +99,7 @@ namespace Microsoft.AspNet.OData.Common
         /// Creates an <see cref="ArgumentException"/> with a default message.
         /// </summary>
         /// <returns>The logged <see cref="Exception"/>.</returns>
+        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly")]
         internal static ArgumentException PropertyNullOrWhiteSpace()
         {
             return new ArgumentException(CommonWebApiResources.PropertyNullOrWhiteSpace, "value");

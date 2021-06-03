@@ -28,6 +28,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
 using Xunit;
+using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
@@ -326,6 +327,66 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 
             // Assert
             resource.Verify();
+        }
+
+
+
+        [Fact]
+        public void ReadResource_DeletedResource_WithTransientTypeAndAnnotations()
+        {
+            // Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntityType<SimpleOpenCustomer>();
+            builder.EnumType<SimpleEnum>();
+            IEdmModel model = builder.GetEdmModel();
+
+            IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+            ODataDeserializerProvider _deserializerProvider = ODataDeserializerProviderFactory.Create();
+            var deserializer = new ODataResourceSetDeserializer(_deserializerProvider);
+
+            var instAnn = new List<ODataInstanceAnnotation>();
+            instAnn.Add(new ODataInstanceAnnotation("NS.Test2", new ODataPrimitiveValue(345)));
+            instAnn.Add(new ODataInstanceAnnotation("Core.ContentID", new ODataPrimitiveValue(1)));
+
+            ODataResourceBase odataResource = new ODataDeletedResource
+            {
+                Properties = new[]
+                {
+                    // declared properties
+                    new ODataProperty { Name = "CustomerId", Value = 991 },
+                    new ODataProperty { Name = "Name", Value = "Name #991" },
+                },
+                TypeName = typeof(SimpleOpenCustomer).FullName,
+                
+                InstanceAnnotations = instAnn
+            };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model
+            };
+
+            ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
+            var deletedEntity = new DeltaDeletedEntityObject<SimpleOpenCustomer>();
+
+            // Act
+            DeserializationHelpers.ApplyInstanceAnnotations(deletedEntity, customerTypeReference, odataResource, _deserializerProvider, readContext);
+
+            // Assert
+
+            //Verify Instance Annotations
+            object value;
+             deletedEntity.TryGetPropertyValue("InstanceAnnotations", out value);
+            var persistentAnnotations = (value as IODataInstanceAnnotationContainer).GetResourceAnnotations();
+            var transientAnnotations = deletedEntity.TransientInstanceAnnotationContainer.GetResourceAnnotations();
+
+            Assert.Single(persistentAnnotations);
+            Assert.Single(transientAnnotations);
+
+            Assert.Equal("NS.Test2", persistentAnnotations.First().Key);
+            Assert.Equal("Core.ContentID", transientAnnotations.First().Key);
+            Assert.Equal(345, persistentAnnotations.First().Value);
+            Assert.Equal(1, transientAnnotations.First().Value);
         }
 
         [Fact]

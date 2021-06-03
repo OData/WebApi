@@ -144,7 +144,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
                 return BadRequest(responseMessage);
             }
 
-            var employee = _DLEmployees.Single(e=>e.ID == key);
+            var employee = _DLEmployees.Single(e => e.ID == key);
             var appliedEmployee = queryOptions.ApplyTo(employee, new ODataQuerySettings());
             return Ok(appliedEmployee, appliedEmployee.GetType());
         }

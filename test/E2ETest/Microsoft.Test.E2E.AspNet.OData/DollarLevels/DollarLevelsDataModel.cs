@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
 {
@@ -25,5 +26,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.DollarLevels
         public int ID { get; set; }
 
         public DLEmployee Friend { get; set; }
+    }
+
+
+    public class TestQueryOptions
+    {
+        [Key]
+        public string Id { get; set; }
+        public string name { get; set; }
     }
 }

@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
@@ -134,13 +135,23 @@ namespace Microsoft.AspNet.OData.Formatter
             {
                 if (testCollections)
                 {
+                    Type entityType;
+
+                    if (IsDeltaSetWrapper(clrType, out entityType))
+                    {
+                        IEdmType elementType = GetEdmType(edmModel, entityType, testCollections: false);
+                        if (elementType != null)
+                        {
+                            return new EdmCollectionType(elementType.ToEdmTypeReference(IsNullable(entityType)));
+                        }
+                    }
+
                     Type enumerableOfT = ExtractGenericInterface(clrType, typeof(IEnumerable<>));
                     if (enumerableOfT != null)
                     {
                         Type elementClrType = enumerableOfT.GetGenericArguments()[0];
 
-                        // IEnumerable<SelectExpandWrapper<T>> is a collection of T.
-                        Type entityType;
+                        // IEnumerable<SelectExpandWrapper<T>> is a collection of T.                       
                         if (IsSelectExpandWrapper(elementClrType, out entityType))
                         {
                             elementClrType = entityType;
@@ -905,14 +916,17 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             IEdmTypeReference expectedPayloadType = null;
 
-            if (typeof(IEdmObject).IsAssignableFrom(type))
+            if (typeof(IEdmObject).IsAssignableFrom(type) || typeof(IDeltaSet).IsAssignableFrom(type))
             {
                 // typeless mode. figure out the expected payload type from the OData Path.
                 IEdmType edmType = path.EdmType;
                 if (edmType != null)
                 {
                     expectedPayloadType = EdmLibHelpers.ToEdmTypeReference(edmType, isNullable: false);
-                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection)
+
+                    //This loop should execute only if its not a type of edmchangedobjectcollection, In case of edmchangedobjectcollection,
+                    //Expectedpayloadtype should not be of elementytype, but of collection.
+                    if (expectedPayloadType.TypeKind() == EdmTypeKind.Collection && !(typeof(ICollection).IsAssignableFrom(type) || typeof(IDeltaSet).IsAssignableFrom(type)))
                     {
                         IEdmTypeReference elementType = expectedPayloadType.AsCollection().ElementType();
                         if (elementType.IsEntity())
@@ -1045,6 +1059,7 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         private static bool IsSelectExpandWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(SelectExpandWrapper<>), type, out entityType);
+        private static bool IsDeltaSetWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(DeltaSet<>), type, out entityType);
 
         internal static bool IsComputeWrapper(Type type, out Type entityType) => IsTypeWrapper(typeof(ComputeWrapper<>), type, out entityType);
 

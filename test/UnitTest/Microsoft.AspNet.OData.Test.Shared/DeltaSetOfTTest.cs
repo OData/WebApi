@@ -296,8 +296,6 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
- 
-
             //Act
             deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(model));
 

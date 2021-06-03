@@ -27,7 +27,7 @@ namespace Microsoft.AspNet.OData
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
-    
+
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
         /// </summary>
@@ -71,7 +71,7 @@ namespace Microsoft.AspNet.OData
             _entityType = entityType;
             _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
             _edmTypeReference = new EdmCollectionTypeReference(_edmType);
-            
+
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Microsoft.AspNet.OData
         internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
-            string[] keys = _entityType.Key().Select(x=>x.Name).ToArray();
+            string[] keys = _entityType.Key().Select(x => x.Name).ToArray();
 
             foreach (IEdmChangedObject changedObj in Items)
             {

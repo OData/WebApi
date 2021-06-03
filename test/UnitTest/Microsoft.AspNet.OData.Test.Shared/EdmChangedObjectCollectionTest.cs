@@ -176,9 +176,7 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal("Friend1", obj );
             friends[1].TryGetPropertyValue("Name", out obj);
             Assert.Equal("Friend2", obj);
-
         }
-
 
         [Fact]
         public void EdmChangedObjectCollection_Patch_WithDeletes()
@@ -238,8 +236,6 @@ namespace Microsoft.AspNet.OData.Test
             EdmEntityType _entityType = new EdmEntityType("Microsoft.AspNet.OData.Test", "Friend");
             _entityType.AddKeys(_entityType.AddStructuralProperty("Id", EdmPrimitiveTypeKind.Int32));
             _entityType.AddStructuralProperty("Name", EdmPrimitiveTypeKind.String);
-
-     
 
             var changedObjCollection = new EdmChangedObjectCollection(_entityType);
 
@@ -486,8 +482,7 @@ namespace Microsoft.AspNet.OData.Test
                         break;
                     }
                 }
-
-
+                
                 return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)

@@ -985,4 +985,22 @@
   <data name="InstanceAnnotationPropertyNotEmpty" xml:space="preserve">
     <value>InstanceAnnotation Property name cannot be null or empty.</value>
   </data>
+  <data name="ResourcesShouldbePresent" xml:space="preserve">
+    <value>ResourceSetWrapper should have ResourceWrappers in it</value>
+  </data>
+  <data name="ResourceSetWrapperSupported" xml:space="preserve">
+    <value>Can only add ResourceWrapper to ResourceSetWrapper</value>
+  </data>
+  <data name="ChangedObjectTypeMismatch" xml:space="preserve">
+    <value>Cannot use Changed Object of type '{0}' on an entity of type '{1}'.</value>
+  </data>
+  <data name="DataModificationException" xml:space="preserve">
+    <value>Core.DataModificationException</value>
+  </data>
+  <data name="ContentID" xml:space="preserve">
+    <value>Core.ContentID</value>
+  </data>
+  <data name="DeltaLinkNotSupported" xml:space="preserve">
+    <value>DeltaLinks are not supported</value>
+  </data>
 </root>

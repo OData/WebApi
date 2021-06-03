@@ -298,7 +298,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         'Center':{'X':1,'Y':2},
         'HasBorder':true
     },
-    'OptionalShapes': [ ]
+    'OptionalShapes': [
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',  
+        'Radius':1,
+        'Center':{'X':1,'Y':2},
+        'HasBorder':true
+    }]
 }";
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             request.Content = stringContent;
@@ -320,7 +326,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
                 String.Format("\nExpected that Radius: 2, but actually: {0},\n request uri: {1},\n response payload: {2}", radius, requestUri, contentOfString));
 
             JArray windows = contentOfJObject["OptionalShapes"] as JArray;
-            Assert.True(0 == windows.Count,
+            Assert.True(1 == windows.Count,
                 String.Format("\nExpected count: {0},\n actual: {1},\n request uri: {2},\n response payload: {3}", 1, windows.Count, requestUri, contentOfString));
         }
 

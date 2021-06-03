@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -119,9 +120,25 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             clearMethod.Invoke(collection, _emptyObjectArray);
         }
 
-        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance)
+        public static bool TryCreateInstance(Type collectionType, IEdmCollectionTypeReference edmCollectionType, Type elementType, out IEnumerable instance, bool isDelta = false)
         {
             Contract.Assert(collectionType != null);
+
+            //For Delta Collection requests
+            if (isDelta)
+            {
+                if (elementType == typeof(IEdmEntityObject))
+                {
+                    instance = new EdmChangedObjectCollection(edmCollectionType.ElementType().AsEntity().Definition as IEdmEntityType);
+                }
+                else
+                {
+                    Type type = typeof(DeltaSet<>).MakeGenericType(elementType);
+                    instance = Activator.CreateInstance(type, edmCollectionType.ElementType().AsEntity().Key().Select(x => x.Name).ToList()) as ICollection<IDeltaSetItem>;
+                }
+
+                return true;
+            }
 
             if (collectionType == typeof(EdmComplexObjectCollection))
             {

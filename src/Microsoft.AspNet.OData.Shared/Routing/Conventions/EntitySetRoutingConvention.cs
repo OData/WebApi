@@ -48,7 +48,7 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 }
                 else if (ODataRequestMethod.Patch == controllerContext.Request.Method)
                 {
-                    // e.g. Try PatchCustomers first, then fall back to Patch action name
+                    // e.g. Try PatchCustomer first, then fall back to Patch action name
                     return actionMap.FindMatchingAction(
                         "Patch" + entitySet.Name,
                         "Patch");

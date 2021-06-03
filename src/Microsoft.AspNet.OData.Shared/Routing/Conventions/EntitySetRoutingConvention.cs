@@ -46,6 +46,13 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                         "Post" + entitySet.EntityType().Name,
                         "Post");
                 }
+                else if (ODataRequestMethod.Patch == controllerContext.Request.Method)
+                {
+                    // e.g. Try PatchCustomer first, then fall back to Patch action name
+                    return actionMap.FindMatchingAction(
+                        "Patch" + entitySet.Name,
+                        "Patch");
+                }
             }
             else if (odataPath.PathTemplate == "~/entityset/$count" &&
                 ODataRequestMethod.Get == controllerContext.Request.GetRequestMethodOrPreflightMethod())

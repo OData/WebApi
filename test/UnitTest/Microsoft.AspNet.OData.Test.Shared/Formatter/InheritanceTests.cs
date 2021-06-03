@@ -774,7 +774,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
         public Engine PatchMotorcycle_DerivedEngine(Delta<Engine> patch)
         {
-            var engine = patch.Patch(motorcycle.MyEngine);
+            patch.Patch(motorcycle.MyEngine);
+
+            var engine = motorcycle.MyEngine as V4;
 
             Assert.NotNull(engine);
             Assert.Equal(7000, engine.Hp);

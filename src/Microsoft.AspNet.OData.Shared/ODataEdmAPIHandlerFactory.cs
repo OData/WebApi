@@ -1,0 +1,49 @@
+﻿//-----------------------------------------------------------------------------
+// <copyright file="ODataEdmAPIHandlerFactory.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
+
+using System;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+
+namespace Microsoft.AspNet.OData
+{
+    /// <summary>
+    /// Factory class for ODataAPIHandlers for typeless entities
+    /// </summary>
+    internal abstract class ODataEdmAPIHandlerFactory
+    {
+        protected ODataEdmAPIHandlerFactory(IEdmModel model)
+        {
+            Model = model;
+        }
+
+        /// <summary>
+        /// The IEdmModel for the Factory.
+        /// </summary>
+        public IEdmModel Model { get; private set; }
+
+        /// <summary>
+        /// Get the handler depending on OData path.
+        /// </summary>
+        /// <param name="odataPath">OData path corresponding to an odataid.</param>
+        /// <returns>ODataAPIHandler for the specified OData path.</returns>
+        public abstract EdmODataAPIHandler GetHandler(ODataPath odataPath);
+
+        /// <summary>
+        /// Get the handler based on the OData path uri string.
+        /// </summary>
+        /// <param name="path">OData path uri string.</param>
+        /// <returns>ODataAPIHandler for the specified odata path uri string.</returns>
+        public EdmODataAPIHandler GetHandler(string path)
+        {
+            ODataUriParser parser = new ODataUriParser(this.Model, new Uri(path, UriKind.Relative));
+            ODataPath odataPath = parser.ParsePath();
+
+            return this.GetHandler(odataPath);
+        }
+    }
+}

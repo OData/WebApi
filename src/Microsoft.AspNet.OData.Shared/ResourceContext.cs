@@ -95,6 +95,18 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        internal bool IsPostRequest
+        {
+            get
+            {
+#if NETCORE
+                return Request == null ? false : String.Equals(Request.Method, "post", StringComparison.OrdinalIgnoreCase);
+#else
+                return Request == null ? false : String.Equals(Request.Method.ToString(), "post", StringComparison.OrdinalIgnoreCase);
+#endif
+            }
+        }
+
         /// <summary>
         /// Gets or sets the <see cref="IEdmNavigationSource"/> to which this instance belongs.
         /// </summary>
@@ -195,12 +207,21 @@ namespace Microsoft.AspNet.OData
             }
 
             object value;
+            if (SerializerContext.IsDeltaOfT)
+            {
+                IDelta delta = ResourceInstance as IDelta;
+                if (delta != null && delta.TryGetPropertyValue(propertyName, out value))
+                {
+                    return value;
+                }
+            }
+                        
             if (EdmObject.TryGetPropertyValue(propertyName, out value))
             {
                 return value;
             }
             else
-            {
+            {              
                 IEdmTypeReference edmType = EdmObject.GetEdmType();
                 if (edmType == null)
                 {

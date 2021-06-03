@@ -40,7 +40,7 @@ public interface Microsoft.AspNet.OData.IDeltaSet {
 }
 
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
-	EdmDeltaEntityKind DeltaKind  { public abstract get; public abstract set; }
+	EdmDeltaEntityKind DeltaKind  { public abstract get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
 }
 
@@ -109,6 +109,15 @@ public abstract class Microsoft.AspNet.OData.Delta : System.Dynamic.DynamicObjec
 	public abstract bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetMember (System.Dynamic.SetMemberBinder binder, object value)
 	public abstract bool TrySetPropertyValue (string name, object value)
+}
+
+public abstract class Microsoft.AspNet.OData.EdmPatchMethodHandler {
+	protected EdmPatchMethodHandler ()
+
+	public abstract EdmPatchMethodHandler GetNestedPatchHandler (IEdmStructuredObject parent, string navigationPropertyName)
+	public abstract PatchStatus TryCreate (IEdmChangedObject changedObject, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
+	public abstract PatchStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
+	public abstract PatchStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
 }
 
 [
@@ -214,15 +223,6 @@ public abstract class Microsoft.AspNet.OData.TypedDelta : Delta, IDynamicMetaObj
 	System.Type StructuredType  { public abstract get; }
 }
 
-public abstract class Microsoft.AspNet.OData.TypelessPatchMethodHandler {
-	protected TypelessPatchMethodHandler ()
-
-	public abstract TypelessPatchMethodHandler GetNestedPatchHandler (EdmStructuredObject parent, string navigationPropertyName)
-	public abstract PatchStatus TryCreate (IEdmChangedObject changedObj, out EdmStructuredObject& createdObject, out System.String& errorMessage)
-	public abstract PatchStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
-	public abstract PatchStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out EdmStructuredObject& originalObject, out System.String& errorMessage)
-}
-
 [
 EditorBrowsableAttribute(),
 ExtensionAttribute(),
@@ -317,7 +317,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
 
-	EdmDeltaEntityKind DeltaKind  { public virtual get; public virtual set; }
+	EdmDeltaEntityKind DeltaKind  { public virtual get; protected set; }
 	System.Type ExpectedClrType  { public virtual get; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
@@ -356,7 +356,6 @@ public class Microsoft.AspNet.OData.DeltaDeletedEntityObject`1 : Delta`1, IDynam
 NonValidatingParameterBindingAttribute(),
 ]
 public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.Collection`1[[Microsoft.AspNet.OData.IDeltaSetItem]], ICollection, IEnumerable, IList, IDeltaSet, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
-	public DeltaSet`1 ()
 	public DeltaSet`1 (System.Collections.Generic.IList`1[[System.String]] keys)
 
 	protected virtual void InsertItem (int index, IDeltaSetItem item)
@@ -371,11 +370,10 @@ public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collecti
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType)
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.IEdmChangedObject]] changedObjectList)
 
-	Microsoft.OData.Edm.IEdmEntityType EntityType  { protected get; }
+	Microsoft.OData.Edm.IEdmEntityType EntityType  { public get; }
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
-	public EdmChangedObjectCollection Patch (TypelessPatchMethodHandler patchHandler)
-	public EdmChangedObjectCollection Patch (System.Collections.Generic.ICollection`1[[Microsoft.AspNet.OData.EdmStructuredObject]] originalCollection)
+	public EdmChangedObjectCollection Patch (EdmPatchMethodHandler patchHandler)
 }
 
 [
@@ -472,9 +470,7 @@ public class Microsoft.AspNet.OData.EdmEntityObject : EdmStructuredObject, IDyna
 	IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer  { public get; public set; }
 
 	public void AddDataException (Org.OData.Core.V1.DataModificationExceptionType dataModificationException)
-	public object GetDataException ()
-	public virtual IODataInstanceAnnotationContainer TryGetInstanceAnnotations ()
-	public virtual bool TrySetInstanceAnnotations (IODataInstanceAnnotationContainer value)
+	public Org.OData.Core.V1.DataModificationExceptionType GetDataException ()
 }
 
 [
@@ -3632,7 +3628,7 @@ public enum Org.OData.Core.V1.DataModificationOperationKind : int {
 }
 
 public abstract class Org.OData.Core.V1.ExceptionType {
-	public ExceptionType ()
+	protected ExceptionType ()
 
 	Org.OData.Core.V1.MessageType MessageType  { public get; public set; }
 }

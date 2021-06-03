@@ -1614,25 +1614,24 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     structuralProperties = structuralProperties.Where(p => changedProperties.Contains(p.Name));
                 }
 
-                if (!(resourceContext.EdmObject is EdmDeltaDeletedEntityObject))
+                bool isDeletedEntity = resourceContext.EdmObject is EdmDeltaDeletedEntityObject;
+                
+                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
                 {
-                    foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
                     {
-                        if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
-                        {
-                            // skip the stream property, the stream property is written in its own logic
-                            continue;
-                        }
-
-                        ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
-                        if (property == null || property.Value == null)
-                        {
-                            continue;
-                        }
-
-                        properties.Add(property);
+                        // skip the stream property, the stream property is written in its own logic
+                        continue;
                     }
-                }
+
+                    ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
+                    if (property == null || (isDeletedEntity && property.Value == null) )
+                    {
+                        continue;
+                    }
+
+                    properties.Add(property);
+                }                
             }
 
             return properties;

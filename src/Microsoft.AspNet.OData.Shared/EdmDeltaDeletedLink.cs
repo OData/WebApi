@@ -21,7 +21,6 @@ namespace Microsoft.AspNet.OData
         private Uri _source;
         private Uri _target;
         private string _relationship;
-        private EdmDeltaType _edmType;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmDeltaDeletedLink"/> class.
@@ -49,7 +48,7 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaDeletedLink(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedLinkEntry);
+            
         }
 
         /// <inheritdoc />
@@ -92,12 +91,11 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <inheritdoc />
-        public EdmDeltaEntityKind DeltaKind
+        public override EdmDeltaEntityKind DeltaKind
         {
             get
-            {
-                Contract.Assert(_edmType != null);
-                return _edmType.DeltaKind;
+            {                
+                return EdmDeltaEntityKind.DeletedLinkEntry;
             }
         }
     }

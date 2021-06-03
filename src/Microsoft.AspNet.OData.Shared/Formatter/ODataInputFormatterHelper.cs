@@ -80,8 +80,9 @@ namespace Microsoft.AspNet.OData.Formatter
                 oDataReaderSettings.BaseUri = baseAddress;
                 oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
                 oDataReaderSettings.Version = version;
+                oDataReaderSettings.MaxProtocolVersion = version;
 
-                IODataRequestMessage oDataRequestMessage = getODataRequestMessage();
+                IODataRequestMessage oDataRequestMessage = getODataRequestMessage();                
 
                 string preferHeader = RequestPreferenceHelpers.GetRequestPreferHeader(internalRequest.Headers);
                 string annotationFilter = null;

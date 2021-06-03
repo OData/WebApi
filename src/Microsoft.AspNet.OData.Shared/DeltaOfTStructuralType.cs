@@ -16,8 +16,11 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
 {
@@ -26,7 +29,7 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     /// <typeparam name="TStructuralType">TStructuralType is the type of the instance this delta tracks changes for.</typeparam>
     [NonValidatingParameterBinding]
-    public class Delta<TStructuralType> : TypedDelta, IDelta where TStructuralType : class
+    public class Delta<TStructuralType> : TypedDelta, IDelta, IDeltaSetItem where TStructuralType : class
     {
         // cache property accessors for this type and all its derived types.
         private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
@@ -44,6 +47,7 @@ namespace Microsoft.AspNet.OData
         private Type _structuredType;
 
         private readonly PropertyInfo _dynamicDictionaryPropertyinfo;
+        private PropertyInfo _instanceAnnotationsPropertyInfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
 
@@ -88,11 +92,11 @@ namespace Microsoft.AspNet.OData
         /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
         /// names, including those of dynamic properties, are ignored.</param>
         /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
-        /// properties. <c>null</c> means this entity type is not open.</param>
-        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
-            PropertyInfo dynamicDictionaryPropertyInfo)
-            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, false)
+        /// properties. <c>null</c> means this entity type is not open.</param>                
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, isComplexType: false)
         {
+
         }
 
         /// <summary>
@@ -108,18 +112,47 @@ namespace Microsoft.AspNet.OData
         /// <param name="isComplexType">Boolean value to determine if its a complex type</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
             PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, isComplexType, instanceAnnotationsPropertyInfo: null)
+        {
+
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        /// <param name="isComplexType">Boolean value to determine if its a complex type</param>
+        /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
+            PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType, PropertyInfo instanceAnnotationsPropertyInfo)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(structuralType);
             InitializeProperties(updatableProperties);
+            TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
+            _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
+            DeltaKind = EdmDeltaEntityKind.Entry;
             IsComplexType = isComplexType;
         }
 
         /// <inheritdoc/>
-        public override Type StructuredType => _structuredType;
+        public override Type StructuredType
+            => _structuredType;
+
+        internal IDictionary<string, object> DeltaNestedResources
+        {
+            get { return _deltaNestedResources; }
+        }
 
         /// <inheritdoc/>
-        public override Type ExpectedClrType => typeof(TStructuralType);
+        public override Type ExpectedClrType
+            => typeof(TStructuralType);
 
         /// <summary>
         /// The list of property names that can be updated.
@@ -133,6 +166,23 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public bool IsComplexType { get; private set; }
 
+        /// <summary>
+        /// Gets the enum type of <see cref="EdmDeltaEntityKind"/>.
+        /// </summary>
+        public EdmDeltaEntityKind DeltaKind { get; protected set; }
+
+        /// <inheritdoc />
+        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <inheritdoc />
+        public IODataIdContainer ODataIdContainer { get; set; }
+
+        /// <inheritdoc />
+        public ODataPath ODataPath { get; set; }
+
+        /// <inheritdoc />
+        internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
+
         /// <inheritdoc/>
         public override void Clear()
         {
@@ -145,6 +195,19 @@ namespace Microsoft.AspNet.OData
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw Error.ArgumentNull(nameof(name));
+            }
+
+            if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
+            {
+                IODataInstanceAnnotationContainer annotationValue = value as IODataInstanceAnnotationContainer;
+                if (value != null && annotationValue == null)
+                {
+                    return false;
+                }
+
+                _instanceAnnotationsPropertyInfo.SetValue(_instance, annotationValue);
+
+                return true;
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -165,7 +228,7 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (value is IDelta)
+            if (value is IDelta || value is IDeltaSet)
             {
                 return TrySetNestedResourceInternal(name, value);
             }
@@ -181,6 +244,19 @@ namespace Microsoft.AspNet.OData
             if (name == null)
             {
                 throw Error.ArgumentNull(nameof(name));
+            }
+
+            if (_instanceAnnotationsPropertyInfo != null && name == _instanceAnnotationsPropertyInfo.Name)
+            {
+                object propertyValue = _instanceAnnotationsPropertyInfo.GetValue(_instance);
+                if (propertyValue != null)
+                {
+                    value = (IODataInstanceAnnotationContainer)propertyValue;
+                    return true;
+                }
+
+                value = null;
+                return false;
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -203,6 +279,14 @@ namespace Microsoft.AspNet.OData
                 object deltaNestedResource = _deltaNestedResources[name];
 
                 Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
+
+                //If DeltaSet collection, we are handling delta collections so the value will be that itself and no need to get instance value
+                if (deltaNestedResource is IDeltaSet)
+                {
+                    value = deltaNestedResource;
+                    return true;
+                }
+
                 Contract.Assert(IsDeltaOfT(deltaNestedResource.GetType()));
 
                 // Get the Delta<{NestedResourceType}>._instance using Reflection.
@@ -344,11 +428,18 @@ namespace Microsoft.AspNet.OData
         /// to the <paramref name="original"/> entity recursively.
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        public TStructuralType CopyChangedValues(TStructuralType original)
+        public void CopyChangedValues(TStructuralType original)
+        {
+            CopyChangedValues(original, null, null);
+        }
+
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+        internal void CopyChangedValues(TStructuralType original, ODataAPIHandler<TStructuralType> apiHandler = null, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             if (original == null)
             {
-                throw Error.ArgumentNull(nameof(original));
+                throw Error.ArgumentNull("original");
             }
 
             // Delta parameter type cannot be derived type of original
@@ -356,6 +447,19 @@ namespace Microsoft.AspNet.OData
             if (!_structuredType.IsAssignableFrom(original.GetType()))
             {
                 throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+            }
+
+            //To apply ODataId based handler to apply properties on original.
+            if (apiHandlerFactory != null)
+            {
+                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataPath);
+
+                if (refapiHandler != null && ODataPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
+                {
+                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+
+                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, ODataPath.GetKeys());
+                }
             }
 
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -376,54 +480,145 @@ namespace Microsoft.AspNet.OData
                 // Patch for each nested resource changed under this TStructuralType.
                 dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
                 dynamic originalNestedResource = null;
-                if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
+
+                if (deltaNestedResource is IDeltaSet)
                 {
-                    throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
-                        nestedResourceName, original.GetType());
-                }
+                    IODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(original, nestedResourceName);
 
-                if (originalNestedResource == null)
-                {
-                    // When patching original target of null value, directly set nested resource.
-                    dynamic deltaObject = _deltaNestedResources[nestedResourceName];
-                    dynamic instance = deltaObject.GetInstance();
-
-                    // Recursively patch up the instance with the nested resources.
-                    deltaObject.CopyChangedValues(instance);
-
-                    _allProperties[nestedResourceName].SetValue(original, instance);
+                    if (apiHandlerNested != null)
+                    {
+                        deltaNestedResource.CopyChangedValues(apiHandlerNested, apiHandlerFactory);
+                    }
                 }
                 else
                 {
-                    // Recursively patch the subtree.                    
-                    Contract.Assert(TypedDelta.IsDeltaOfT(((object)deltaNestedResource).GetType()), nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
-
-                    Type newType = deltaNestedResource.StructuredType;
-                    Type originalType = originalNestedResource.GetType();
-
-                    if (deltaNestedResource.IsComplexType && newType != originalType)
+                    if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
                     {
-                        originalNestedResource = ReAssignComplexDerivedType(originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
-                        _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
+                        throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
+                            nestedResourceName, original.GetType());
                     }
 
-                    deltaNestedResource.CopyChangedValues(originalNestedResource);
-                }
-            }
+                    if (originalNestedResource == null)
+                    {
+                        // When patching original target of null value, directly set nested resource.
+                        dynamic deltaObject = _deltaNestedResources[nestedResourceName];
+                        dynamic instance = deltaObject.GetInstance();
 
-            return original;
+                        // Recursively patch up the instance with the nested resources.
+                        deltaObject.CopyChangedValues(instance);
+
+                        _allProperties[nestedResourceName].SetValue(original, instance);
+                    }
+                    else
+                    {
+                        // Recursively patch the subtree.                    
+                        Contract.Assert(TypedDelta.IsDeltaOfT(((object)deltaNestedResource).GetType()), nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
+
+                        Type newType = deltaNestedResource.StructuredType;
+                        Type originalType = originalNestedResource.GetType();
+
+                        if (deltaNestedResource.IsComplexType && newType != originalType)
+                        {
+                            originalNestedResource = ReAssignComplexDerivedType(original, nestedResourceName, originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
+                        }
+
+                        deltaNestedResource.CopyChangedValues(originalNestedResource);
+                    }
+                }
+
+            }
         }
 
-        private static dynamic ReAssignComplexDerivedType(dynamic originalValue, Type newType, Type originalType, Type declaredType)
+        /// <summary>
+        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />)
+        /// to the <paramref name="original"/> entity.
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        public void CopyUnchangedValues(TStructuralType original)
+        {
+            if (original == null)
+            {
+                throw Error.ArgumentNull(nameof(original));
+            }
+
+            if (!_structuredType.IsInstanceOfType(original))
+            {
+                throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+            }
+
+            IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
+            foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
+            {
+                propertyToCopy.Copy(_instance, original);
+            }
+
+            CopyUnchangedDynamicValues(original);
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
+        /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        public void Patch(TStructuralType original)
+        {
+            CopyChangedValues(original);
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
+        /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory</param>
+        internal void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            Debug.Assert(apiHandler != null);
+
+            CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);
+        }
+
+        /// <summary>
+        /// This is basically Patch on ODataId. This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
+        /// </summary>    
+        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refapiHandlerOfT, Dictionary<string, object> keyProperties)
+        {
+            Debug.Assert(refapiHandlerOfT != null);
+
+            TStructuralType referencedObj;
+            string error;
+
+            //todo: this logic feels brittle to me
+            //Checking to get the referenced entity, get the properties and apply it on original object
+            if (refapiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            {
+                foreach (string property in _updatableProperties)
+                {
+                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+
+                    object value = propertyInfo.GetValue(referencedObj);
+                    propertyInfo.SetValue(original, value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the values stored in this Delta.
+        /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
+        /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        public void Put(TStructuralType original)
+        {
+            CopyChangedValues(original);
+            CopyUnchangedValues(original);
+        }
+
+        private dynamic ReAssignComplexDerivedType(TStructuralType parent, string nestedPropertyName, dynamic originalValue, Type newType, Type originalType, Type declaredType)
         {
             //As per OASIS discussion, changing a complex type from 1 derived type to another is allowed if both derived type have a common ancestor and the property
             //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.
             //And copy the common properties.
-
-            if(newType == originalType)
-            {
-                return originalValue;
-            }
 
             Type newBaseType = newType;
             HashSet<Type> newBaseTypes = new HashSet<Type>();
@@ -460,6 +655,8 @@ namespace Microsoft.AspNet.OData
                         property.SetValue(newOriginalNestedResource, value);
                     }
 
+                    _structuredType.GetProperty(nestedPropertyName).SetValue(parent, (object)newOriginalNestedResource);
+
                     break;
                 }
 
@@ -467,60 +664,6 @@ namespace Microsoft.AspNet.OData
             }
 
             return newOriginalNestedResource;
-        }
-
-        /// <summary>
-        /// Copies the unchanged property values from the underlying entity (accessible via <see cref="GetInstance()" />)
-        /// to the <paramref name="original"/> entity.
-        /// </summary>
-        /// <param name="original">The entity to be updated.</param>
-        public void CopyUnchangedValues(TStructuralType original)
-        {
-            if (original == null)
-            {
-                throw Error.ArgumentNull(nameof(original));
-            }
-
-            if (!_structuredType.IsInstanceOfType(original))
-            {
-                throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
-            }
-
-            IEnumerable<PropertyAccessor<TStructuralType>> propertiesToCopy = GetUnchangedPropertyNames().Select(s => _allProperties[s]);
-            foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
-            {
-                propertyToCopy.Copy(_instance, original);
-            }
-
-            CopyUnchangedDynamicValues(original);
-        }
-
-
-        /// <summary>
-        /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
-        /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
-        /// </summary>
-        /// <param name="original">The entity to be updated.</param>
-        /// <returns>The original value after Patching</returns>
-        public TStructuralType Patch(TStructuralType original)
-        {
-            if (IsComplexType)
-            {
-                original = ReAssignComplexDerivedType(original, _structuredType, original.GetType(), ExpectedClrType) as TStructuralType;                
-            }
-
-            return CopyChangedValues(original);           
-        }
-
-        /// <summary>
-        /// Overwrites the <paramref name="original"/> entity with the values stored in this Delta.
-        /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
-        /// </summary>
-        /// <param name="original">The entity to be updated.</param>
-        public void Put(TStructuralType original)
-        {
-            CopyChangedValues(original);
-            CopyUnchangedValues(original);
         }
 
         private static void CopyDynamicPropertyDictionary(IDictionary<string, object> source,
@@ -820,11 +963,16 @@ namespace Microsoft.AspNet.OData
                 return false;
             }
 
-            PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
-            // Get the Delta<{NestedResourceType}>._instance using Reflection.
-            FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
-            Contract.Assert(field != null, "field != null");
-            cacheHit.SetValue(_instance, field.GetValue(deltaNestedResource));
+            //If Edmchangedobject collection, we are handling delta collections so the instance value need not be set,
+            //as we consider the value as collection of Delta itself and not instance value of the field
+            if (!(deltaNestedResource is IDeltaSet))
+            {
+                PropertyAccessor<TStructuralType> cacheHit = _allProperties[name];
+                // Get the Delta<{NestedResourceType}>._instance using Reflection.
+                FieldInfo field = deltaNestedResource.GetType().GetField("_instance", BindingFlags.NonPublic | BindingFlags.Instance);
+                Contract.Assert(field != null, "field != null");
+                cacheHit.SetValue(_instance, field.GetValue(deltaNestedResource));
+            }
 
             // Add the nested resource in the hierarchy.
             // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which

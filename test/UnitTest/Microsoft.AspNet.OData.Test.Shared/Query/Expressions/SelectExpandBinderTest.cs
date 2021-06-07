@@ -760,6 +760,34 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void ProjectAsWrapper_Element_ProjectedValueContainsCount_IfDollarCountInDollarExpand()
+        {
+            // Arrange
+            string expand = "Orders/$count";
+            QueryCustomer aCustomer = new QueryCustomer
+            {
+                Orders = new[]
+                {
+                    new QueryOrder { Id = 42 },
+                    new QueryVipOrder { Id = 38 }
+                }
+            };
+            Expression source = Expression.Constant(aCustomer);
+            SelectExpandClause selectExpandClause = ParseSelectExpand(null, expand, _model, _customer, _customers);
+            Assert.NotNull(selectExpandClause);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpandClause, _customer, _customers);
+
+            // Assert
+            Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
+            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+            SelectExpandWrapper<QueryCustomer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
+            var orders = customerWrapper.Container.ToDictionary(PropertyMapper)["Orders"];
+            Assert.Equal((long)2, orders);
+        }
+
+        [Fact]
         public void ProjectAsWrapper_Element_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpand()
         {
             // Arrange

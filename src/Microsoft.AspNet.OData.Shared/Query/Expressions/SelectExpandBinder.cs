@@ -596,18 +596,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 return countExpression;
             }
 
-            MethodInfo countMethod;
-            if (typeof(IQueryable).IsAssignableFrom(source.Type))
-            {
-                countMethod = ExpressionHelperMethods.QueryableCountGeneric.MakeGenericMethod(elementType);
-            }
-            else
-            {
-                countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
-            }
-
             // call Count() method.
-            countExpression = Expression.Call(null, countMethod, new[] { source });
+            countExpression = ExpressionHelpers.Count(source, elementType);
 
             if (_settings.HandleNullPropagation == HandleNullPropagationOption.True)
             {
@@ -635,7 +625,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 foreach (var propertyToExpand in propertiesToExpand)
                 {
-                    // $expand=abc or $expand=abc/$ref
+                    // $expand=abc or $expand=abc/$ref or $expand=abc/$count
                     BuildExpandedProperty(source, structuredType, propertyToExpand.Key, propertyToExpand.Value, includedProperties);
                 }
             }
@@ -714,11 +704,23 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression countExpression = CreateTotalCountExpression(propertyValue, expandedItem.CountOption);
 
             int? modelBoundPageSize = querySettings == null ? null : querySettings.PageSize;
-            propertyValue = ProjectAsWrapper(propertyValue, subSelectExpandClause, edmEntityType, expandedItem.NavigationSource,
+
+            if(expandedItem is ExpandedCountSelectItem)
+            {
+                Type elementType;
+                if (TypeHelper.IsCollection(propertyValue.Type, out elementType))
+                {
+                    propertyValue = ExpressionHelpers.Count(propertyValue, elementType);
+                }
+            }
+            else
+            {
+                propertyValue = ProjectAsWrapper(propertyValue, subSelectExpandClause, edmEntityType, expandedItem.NavigationSource,
                 expandedItem.OrderByOption, // $orderby=...
                 expandedItem.TopOption, // $top=...
                 expandedItem.SkipOption, // $skip=...
                 modelBoundPageSize);
+            }
 
             NamedPropertyExpression propertyExpression = new NamedPropertyExpression(propertyName, propertyValue);
             if (subSelectExpandClause != null)
@@ -888,6 +890,13 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             if (expandNavigationSelectItem != null)
             {
                 return expandNavigationSelectItem.SelectAndExpand;
+            }
+
+            // for $expand=.../$count, return null since we cannot have a select/expand after $count segment
+            ExpandedCountSelectItem expandedCountSelectItem = expandedItem as ExpandedCountSelectItem;
+            if (expandedCountSelectItem != null)
+            {
+                return null;
             }
 
             // for $expand=..../$ref, just includes the keys properties

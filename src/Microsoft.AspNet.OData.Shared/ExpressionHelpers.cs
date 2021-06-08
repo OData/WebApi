@@ -252,12 +252,6 @@ namespace Microsoft.AspNet.OData
             return whereMethod.Invoke(null, new object[] { query, where }) as IQueryable;
         }
 
-        public static SingleResult CreateSingleResult(IQueryable query, Type type)
-        {
-            MethodInfo createSingleResultMethod = ExpressionHelperMethods.QueryableCreateSingleResult.MakeGenericMethod(type);
-            return createSingleResultMethod.Invoke(null, new[] { query }) as SingleResult;
-        }
-
         // If the expression is not a nullable type, cast it to one.
         public static Expression ToNullable(Expression expression)
         {
@@ -288,5 +282,14 @@ namespace Microsoft.AspNet.OData
             MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);
             return Expression.Lambda(propertyAccess, odataItParameter);
         }
+
+#if NETCORE // Not supported in NETFX
+
+        public static SingleResult CreateSingleResult(IQueryable query, Type type)
+        {
+            MethodInfo createSingleResultMethod = ExpressionHelperMethods.QueryableCreateSingleResult.MakeGenericMethod(type);
+            return createSingleResultMethod.Invoke(null, new[] { query }) as SingleResult;
+        }
+#endif
     }
 }

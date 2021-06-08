@@ -75,8 +75,6 @@ namespace Microsoft.AspNet.OData
 
         private static MethodInfo _queryableDistinctMethod = GenericMethodOf(_ => Queryable.Distinct<int>(default(IQueryable<int>)));
 
-        private static MethodInfo _queryableCreateSingleResultMethod = GenericMethodOf(_ => SingleResult.Create<int>(default(IQueryable<int>)));
-
         private static MethodInfo _createQueryGenericMethod = GetCreateQueryGenericMethod();
 
         //Unlike the Sum method, the return types are not unique and do not match the input type of the expression.
@@ -112,6 +110,10 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
 
         private static MethodInfo _safeConvertToDecimalMethod = typeof(ExpressionHelperMethods).GetMethod("SafeConvertToDecimal");
+
+#if NETCORE // Not supported in NETFX
+        private static MethodInfo _queryableCreateSingleResultMethod = GenericMethodOf(_ => SingleResult.Create<int>(default(IQueryable<int>)));
+#endif
 
         public static MethodInfo EnumerableWhereGeneric
         {
@@ -368,10 +370,12 @@ namespace Microsoft.AspNet.OData
             get { return _createQueryGenericMethod; }
         }
 
+#if NETCORE // Not supported in NETFX
         public static MethodInfo QueryableCreateSingleResult
         {
             get { return _queryableCreateSingleResultMethod; }
         }
+#endif
 
         public static decimal? SafeConvertToDecimal(object value)
         {

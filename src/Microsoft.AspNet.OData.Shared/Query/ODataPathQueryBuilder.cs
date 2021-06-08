@@ -59,6 +59,7 @@ namespace Microsoft.AspNet.OData.Query
             {
                 if (segment is KeySegment keySegment)
                 {
+                    // The following block is equivalent to:
                     // filterPredicate = entity => (entity.KeyProp1 == Val1) && (entity.keyProp2 == Val2) && ...
                     ParameterExpression filterParam = Expression.Parameter(queryable.ElementType, "entity");
                     IEnumerable<BinaryExpression> conditions = keySegment.Keys.Select(kvp =>
@@ -68,6 +69,7 @@ namespace Microsoft.AspNet.OData.Query
                     BinaryExpression filterBody = conditions.Aggregate((left, right) => Expression.AndAlso(left, right));
                     LambdaExpression filterPredicate = Expression.Lambda(filterBody, filterParam);
 
+                    // The following statement is equivalent to:
                     // queryable = queryable.Where(entity => (entity.KeyProp1 == Val1) && (entity.KeyProp2 == Val2) ...)
                     queryable = ExpressionHelpers.Where(queryable, filterPredicate, queryable.ElementType);
 

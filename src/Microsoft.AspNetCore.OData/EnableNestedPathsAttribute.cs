@@ -75,10 +75,10 @@ namespace Microsoft.AspNet.OData
                 // This could be a SingleResult, which has the property Queryable.
                 // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
                 // on the property and get the one with the most parameters.
-                PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
-                    .OrderBy(p => p.GetIndexParameters().Count())
+                PropertyInfo propInfo = singleResult.GetType().GetProperties()
                     .Where(p => p.Name.Equals("Queryable"))
-                    .LastOrDefault();
+                    .OrderByDescending(p => p.GetIndexParameters().Count())
+                    .FirstOrDefault();
 
                 result = propInfo.GetValue(singleResult) as IQueryable;
             }
@@ -117,10 +117,7 @@ namespace Microsoft.AspNet.OData
                     if (actionDescriptor.MethodInfo.GetCustomAttributes<EnableQueryAttribute>().Any())
                     {
                         // calls SingleResult.Create<T>(IQueryable<T>)
-                        MethodInfo singleResultCreate = typeof(SingleResult)
-                            .GetMethod("Create", BindingFlags.Public | BindingFlags.Static)
-                            .MakeGenericMethod(transformedResult.Result.ElementType);
-                        responseContent.Value = singleResultCreate.Invoke(null, new[] { transformedResult.Result });
+                        responseContent.Value = ExpressionHelpers.CreateSingleResult(transformedResult.Result, transformedResult.Result.ElementType);
                     }
                     else
                     {

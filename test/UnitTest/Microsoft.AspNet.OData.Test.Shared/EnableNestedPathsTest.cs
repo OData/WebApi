@@ -57,7 +57,6 @@ namespace Microsoft.AspNet.OData.Test
                 .Collection
                 .Action("SetDiscountRate");
 
-
             _model = builder.GetEdmModel();
 
             Type[] controllers = new Type[] {
@@ -83,7 +82,6 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsCustomers";
 
-
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
 
@@ -102,7 +100,6 @@ namespace Microsoft.AspNet.OData.Test
         {
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsCustomers(2)";
-
 
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
@@ -125,7 +122,6 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsTopCustomer";
 
-
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
 
@@ -147,7 +143,6 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsTopCustomer/FavoriteProduct";
 
-
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
 
@@ -168,7 +163,6 @@ namespace Microsoft.AspNet.OData.Test
         {
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsCustomers(1)/Name";
-
 
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
@@ -231,7 +225,6 @@ namespace Microsoft.AspNet.OData.Test
             // Arrange
             string url = $"{_baseUrl}EnableNestedPathsCustomers(1)/Products?$orderby=Id desc";
 
-
             // Act
             HttpResponseMessage response = await _client.GetAsync(url);
 
@@ -275,8 +268,6 @@ namespace Microsoft.AspNet.OData.Test
             object readValue = _primitiveDeserializer.Read(messageReader, typeof(T), readContext);
             return (T)readValue;
         }
-
-
     }
 
     class EnableNestedPathsDatabase
@@ -342,12 +333,10 @@ namespace Microsoft.AspNet.OData.Test
                     Addresses = new List<EnableNestedPathsAddress> { addresses[1], addresses[2] }
                 }
             };
-
         }
 
         public IList<EnableNestedPathsProduct> Products { get; set; }
         public IList<EnableNestedPathsCustomer> Customers { get; set; }
-
     }
 
     class EnableNestedPathsCustomerComparer : IEqualityComparer<EnableNestedPathsCustomer>
@@ -420,7 +409,6 @@ namespace Microsoft.AspNet.OData.Test
             return new SingleResult<EnableNestedPathsProduct>(_db.Products.Where(p => p.Id == 1).AsQueryable());
         }
     }
-
 
     class EnableNestedPathsCustomer
     {

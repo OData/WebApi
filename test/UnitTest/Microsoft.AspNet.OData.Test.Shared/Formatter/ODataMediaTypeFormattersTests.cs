@@ -725,6 +725,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 var exception = Record.Exception(() => formatter.GetSupportedContentTypes("application/json", typeof(string)));
                 Assert.Null(exception);
+                Assert.Null(formatter.GetSupportedContentTypes("application/json", typeof(string)));
             }
         }
 
@@ -746,6 +747,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             {
                 var exception = Record.Exception(() => formatter.GetSupportedContentTypes("application/json", typeof(string)));
                 Assert.Null(exception);
+                Assert.Null(formatter.GetSupportedContentTypes("application/json", typeof(string)));
             }
         }
 

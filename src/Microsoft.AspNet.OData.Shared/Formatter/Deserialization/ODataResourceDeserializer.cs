@@ -11,9 +11,12 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.AspNet.OData.Formatter.Serialization;
+using Microsoft.AspNet.OData.Interfaces;
+using Microsoft.AspNet.OData.Routing;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
+using ODataPath = Microsoft.AspNet.OData.Routing.ODataPath;
 
 namespace Microsoft.AspNet.OData.Formatter.Deserialization
 {
@@ -97,6 +100,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
+            resourceWrapper = UpdateResourceWrapper(resourceWrapper, readContext);
 
             return ReadResource(resourceWrapper, edmType.AsStructured(), readContext);
         }
@@ -331,7 +335,39 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            foreach (ODataItemBase childItem in resourceInfoWrapper.NestedItems)
+            IList<ODataItemBase> nestedItems;
+            ODataEntityReferenceLinkBase[] referenceLinks = resourceInfoWrapper.NestedItems.OfType<ODataEntityReferenceLinkBase>().ToArray();
+            if (referenceLinks.Length > 0)
+            {
+                // Be noted:
+                // 1) OData v4.0, it's "Orders@odata.bind", and we get "ODataEntityReferenceLinkWrapper"(s) for that.
+                // 2) OData v4.01, it's {"odata.id" ...}, and we get "ODataResource"(s) for that.
+                // So, in OData v4, if it's a single, NestedItems contains one ODataEntityReferenceLinkWrapper,
+                // if it's a collection, NestedItems contains multiple ODataEntityReferenceLinkWrapper(s)
+                // We can use the following code to adjust the `ODataEntityReferenceLinkWrapper` to `ODataResourceWrapper`.
+                // In OData v4.01, we will not be here.
+                // Only supports declared property
+                Contract.Assert(edmProperty != null);
+
+                nestedItems = new List<ODataItemBase>();
+                if (edmProperty.Type.IsCollection())
+                {
+                    IEdmCollectionTypeReference edmCollectionTypeReference = edmProperty.Type.AsCollection();
+                    ODataResourceSetWrapper resourceSetWrapper = CreateResourceSetWrapper(edmCollectionTypeReference, referenceLinks, readContext);
+                    nestedItems.Add(resourceSetWrapper);
+                }
+                else
+                {
+                    ODataResourceWrapper resourceWrapper = CreateResourceWrapper(edmProperty.Type, referenceLinks[0], readContext);
+                    nestedItems.Add(resourceWrapper);
+                }
+            }
+            else
+            {
+                nestedItems = resourceInfoWrapper.NestedItems;
+            }
+
+            foreach (ODataItemBase childItem in nestedItems)
             {
                 // it maybe null.
                 if (childItem == null)
@@ -347,14 +383,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         ApplyResourceInNestedProperty(edmProperty, resource, null, readContext);
                     }
                 }
-
-                ODataEntityReferenceLinkBase entityReferenceLink = childItem as ODataEntityReferenceLinkBase;
-                if (entityReferenceLink != null)
-                {
-                    // ignore entity reference links.
-                    continue;
-                }
-
+                
                 ODataResourceSetWrapperBase resourceSetWrapper = childItem as ODataResourceSetWrapperBase;
                 if (resourceSetWrapper != null)
                 {
@@ -386,6 +415,137 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
             }
+        }
+
+
+        private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType, 
+            IList<ODataEntityReferenceLinkBase> refLinks, ODataDeserializerContext readContext)
+        {
+            ODataResourceSet resourceSet = new ODataResourceSet
+            {
+                TypeName = edmPropertyType.FullName(),
+            };
+
+            IEdmTypeReference elementType = edmPropertyType.ElementType();
+            ODataResourceSetWrapper resourceSetWrapper = new ODataResourceSetWrapper(resourceSet);
+            foreach (ODataEntityReferenceLinkBase refLinkWrapper in refLinks)
+            {
+                ODataResourceWrapper resourceWrapper = CreateResourceWrapper(elementType, refLinkWrapper, readContext);
+                resourceSetWrapper.Resources.Add(resourceWrapper);
+            }
+
+            return resourceSetWrapper;
+        }
+
+        private ODataResourceWrapper CreateResourceWrapper(IEdmTypeReference edmPropertyType, ODataEntityReferenceLinkBase refLink, ODataDeserializerContext readContext)
+        { 
+            Contract.Assert(readContext != null);
+
+            ODataResource resource = new ODataResource
+            {
+                TypeName = edmPropertyType.FullName(),
+            };
+
+            resource.Properties = CreateKeyProperties(refLink.EntityReferenceLink.Url, readContext);
+         
+            if (refLink.EntityReferenceLink.InstanceAnnotations != null)
+            {
+                foreach (ODataInstanceAnnotation instanceAnnotation in refLink.EntityReferenceLink.InstanceAnnotations)
+                {
+                    resource.InstanceAnnotations.Add(instanceAnnotation);
+                };
+            }
+
+            return new ODataResourceWrapper(resource);
+        }
+
+        /// <summary>
+        /// Update the resource wrapper if it has the "Id" value.
+        /// </summary>
+        /// <param name="resourceWrapper">The resource wrapper.</param>
+        /// <param name="readContext">The read context.</param>
+        /// <returns>The resource wrapper.</returns>
+        private ODataResourceWrapper UpdateResourceWrapper(ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext)
+        { 
+            Contract.Assert(readContext != null);
+
+            if (resourceWrapper?.Resource?.Id == null)
+            {
+                return resourceWrapper;
+            }
+
+            IEnumerable<ODataProperty> keys = CreateKeyProperties(resourceWrapper.Resource.Id, readContext);
+            if (keys == null)
+            {
+                return resourceWrapper;
+            }
+
+            if (resourceWrapper.Resource.Properties == null)
+            {
+                resourceWrapper.Resource.Properties = keys;
+            }
+            else
+            {
+                IDictionary<string, ODataProperty> newPropertiesDic = resourceWrapper.Resource.Properties.ToDictionary(p => p.Name, p => p);
+                foreach (ODataProperty key in keys)
+                {
+                    if (!newPropertiesDic.ContainsKey(key.Name))
+                    {
+                        newPropertiesDic[key.Name] = key;
+                    }
+                }
+
+                resourceWrapper.Resource.Properties = newPropertiesDic.Values;
+            }
+
+            return resourceWrapper;
+        }
+
+        /// <summary>
+        /// Do uri parsing to get the key values.
+        /// </summary>
+        /// <param name="id">The key Id.</param>
+        /// <param name="readContext">The reader context.</param>
+        /// <returns>The key properties.</returns>
+        private static IList<ODataProperty> CreateKeyProperties(Uri id, ODataDeserializerContext readContext)
+        {
+            Contract.Assert(id != null);
+            Contract.Assert(readContext != null);
+            IList<ODataProperty> properties = new List<ODataProperty>();
+            if (readContext.Request == null)
+            {
+                return properties;
+            }
+
+            IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
+            IWebApiRequestMessage internalRequest = readContext.InternalRequest;
+            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
+            try
+            {
+                string serviceRoot = urlHelper.CreateODataLink(
+                    internalRequest.Context.RouteName,
+                    internalRequest.PathHandler,
+                    new List<ODataPathSegment>());
+                ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
+                KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
+                if (keySegment != null)
+                {
+                    foreach (KeyValuePair<string, object> key in keySegment.Keys)
+                    {
+                        properties.Add(new ODataProperty
+                        {
+                            Name = key.Key,
+                            Value = key.Value
+                        });
+                    }
+                }
+
+                return properties;
+            }
+            catch (Exception)
+            {
+                return properties;
+            }          
         }
 
         /// <summary>
@@ -516,7 +676,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
-                Request = readContext.Request,
+                Request = readContext.Request
             };
 
             Type clrType = null;
@@ -542,7 +702,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 : clrType;
             return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
         }
-
         private void ApplyResourceSetInNestedProperty(IEdmProperty nestedProperty, object resource,
             ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
@@ -614,7 +773,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
-                Request = readContext.Request,
+                Request = readContext.Request
             };
 
             if (readContext.IsUntyped)

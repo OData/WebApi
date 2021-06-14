@@ -638,6 +638,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                         await WriteComplexPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteDynamicComplexPropertiesAsync(resourceContext, writer);
                         await WriteNavigationLinksAsync(selectExpandNode, resourceContext, writer);
+                        await WriteExpandedCountPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteExpandedNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteReferencedNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await writer.WriteEndAsync();
@@ -1393,6 +1394,32 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     await WriteComplexAndExpandedNavigationPropertyAsync(navigationProperty, navPropertyToExpand.Value, resourceContext, writer);
                     await writer.WriteEndAsync();
                 }
+            }
+        }
+
+        private async Task WriteExpandedCountPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            IDictionary<IEdmNavigationProperty, ExpandedCountSelectItem> navigationPropertiesToExpand = selectExpandNode.ExpandedCountProperties;
+            if (navigationPropertiesToExpand == null)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<IEdmNavigationProperty, ExpandedCountSelectItem> navPropertyToExpand in navigationPropertiesToExpand)
+            {
+                IEdmNavigationProperty navigationProperty = navPropertyToExpand.Key;
+
+                object propertyValue = resourceContext.GetPropertyValue(navigationProperty.Name);
+
+                // We should be able to write something like this:
+                // JsonWriter.WriteName(navigationProperty.Name + "@odata.count");
+                // JsonWriter.WriteValue(propertyValue)
+
+                // Or Even better have one method in ODL that we can call and write the odata.count
+                await Task.CompletedTask;
             }
         }
 

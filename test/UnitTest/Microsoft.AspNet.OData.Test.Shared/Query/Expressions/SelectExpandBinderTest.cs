@@ -513,11 +513,11 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
         [Theory]
         [InlineData("Emails", new[] { "E1", "E3", "E2" })]
-        // [InlineData("Emails($orderby=$it)", new[] { "E1", "E2", "E3" })] TODO: enable it when ODL supports $this
-        // [InlineData("Emails($orderby=$it desc)", new[] { "E3", "E2", "E1" })] TODO: enable it when ODL supports $this
+        [InlineData("Emails($orderby=$this)", new[] { "E1", "E2", "E3" })]
+        [InlineData("Emails($orderby=$this desc)", new[] { "E3", "E2", "E1" })]
         [InlineData("Emails($top=1)", new[] { "E1" })]
         [InlineData("Emails($top=1;$skip=1)", new[] { "E3" })]
-        // [InlineData("Emails($filter=$it le 'E2')", new[] { "E1", "E2" })] TODO: enable it when ODL supports $this
+        [InlineData("Emails($filter=$this le 'E2')", new[] { "E1", "E2" })]
         public void ProjectAsWrapper_Element_ProjectedValueContains_SelectedCollectStructuralProperties(string select, object expect)
         {
             // Arrange
@@ -650,9 +650,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [InlineData("HomeAddress($select=Codes)", "C1,C4,C2")]
         [InlineData("HomeAddress/Codes($top=2;$skip=1)", "C4,C2")]
         [InlineData("HomeAddress($select=Codes($top=1;$skip=2))", "C2")]
-        // [InlineData("HomeAddress/Codes($orderby=$it)", "C1,C2,C4")] TODO: enable it when ODL supports $this
-        // [InlineData("HomeAddress($select=Codes($orderby=$it desc))", "C4,C2,C1")] TODO: enable it when ODL supports $this
-        // [InlineData("HomeAddress($select=Codes($filter=$it eq 'C2'))", "C2")] TODO: enable it when ODL supports $this
+        [InlineData("HomeAddress/Codes($orderby=$this)", "C1,C2,C4")]
+        [InlineData("HomeAddress($select=Codes($orderby=$this desc))", "C4,C2,C1")]
+        [InlineData("HomeAddress($select=Codes($filter=$this eq 'C2'))", "C2")]
         public void ProjectAsWrapper_Element_ProjectedValueContains_SelectedSubCollectionStructuralProperties(string select, string expect)
         {
             // Arrange
@@ -685,9 +685,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [InlineData("Addresses($select=Codes)", "C1,C4,C2", "C3,C6,C5")]
         [InlineData("Addresses/Codes($top=2;$skip=1)", "C4,C2", "C6,C5")]
         [InlineData("Addresses($select=Codes($top=1;$skip=2))", "C2", "C5")]
-        // [InlineData("Addresses/Codes($orderby=$it)", "C1,C2,C4", "C3,C5,C6")] TODO: enable it when ODL supports $this
-        // [InlineData("Addresses($select=Codes($orderby=$it desc))", "C4,C2,C1", "C6,C5,C3")] TODO: enable it when ODL supports $this
-        // [InlineData("Addresses($select=Codes($filter=$it eq 'C2'))", "C2", "")] TODO: enable it when ODL supports $this
+        [InlineData("Addresses/Codes($orderby=$this)", "C1,C2,C4", "C3,C5,C6")]
+        [InlineData("Addresses($select=Codes($orderby=$this desc))", "C4,C2,C1", "C6,C5,C3")]
+        [InlineData("Addresses($select=Codes($filter=$this eq 'C2'))", "C2", "")]
         public void ProjectAsWrapper_Element_ProjectedValueContains_SelectedToCollectionAndSubCollectionStructuralProperties(string select, string expect1, string expect2)
         {
             // Arrange

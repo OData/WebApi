@@ -22,10 +22,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Endpoint
             modelBuilder.Entity<EpCustomer>().OwnsOne(c => c.HomeAddress);
             modelBuilder.Entity<EpCustomer>().OwnsMany(c => c.FavoriteAddresses, a =>
             {
-                a.HasForeignKey("OwnerId");
+                a.WithOwner().HasForeignKey("OwnerId");
                 a.Property<int>("Id");
                 a.HasKey("Id");
             });
+
+            //modelBuilder.Entity<EpCustomer>().Navigation(c => c.FavoriteAddresses).
 
             // But, in EF Core 3.x, it seems we can only use the following codes:
             // modelBuilder.Entity<EpCustomer>().OwnsOne(c => c.HomeAddress).WithOwner();

@@ -229,6 +229,12 @@ namespace Microsoft.AspNet.OData
             return selectManyMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
         }
 
+        public static IQueryable SelectMany(IQueryable query, LambdaExpression expression, Type sourceType, Type resultType)
+        {
+            MethodInfo selectManyMethod = ExpressionHelperMethods.QueryableSelectManyGeneric.MakeGenericMethod(sourceType, resultType);
+            return selectManyMethod.Invoke(null, new object[] { query, expression }) as IQueryable;
+        }
+
         public static IQueryable Aggregate(IQueryable query, object init, LambdaExpression sumLambda, Type type, Type wrapperType)
         {
             Type returnType = sumLambda.Body.Type;
@@ -276,5 +282,14 @@ namespace Microsoft.AspNet.OData
             MemberExpression propertyAccess = Expression.Property(odataItParameter, propertyName);
             return Expression.Lambda(propertyAccess, odataItParameter);
         }
+
+#if NETCORE // Not supported in NETFX
+
+        public static SingleResult CreateSingleResult(IQueryable query, Type type)
+        {
+            MethodInfo createSingleResultMethod = ExpressionHelperMethods.QueryableCreateSingleResult.MakeGenericMethod(type);
+            return createSingleResultMethod.Invoke(null, new[] { query }) as SingleResult;
+        }
+#endif
     }
 }

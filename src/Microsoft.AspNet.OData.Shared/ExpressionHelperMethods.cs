@@ -111,6 +111,10 @@ namespace Microsoft.AspNet.OData
 
         private static MethodInfo _safeConvertToDecimalMethod = typeof(ExpressionHelperMethods).GetMethod("SafeConvertToDecimal");
 
+#if NETCORE // Not supported in NETFX
+        private static MethodInfo _queryableCreateSingleResultMethod = GenericMethodOf(_ => SingleResult.Create<int>(default(IQueryable<int>)));
+#endif
+
         public static MethodInfo EnumerableWhereGeneric
         {
             get { return _enumerableWhereMethod; }
@@ -365,6 +369,13 @@ namespace Microsoft.AspNet.OData
         {
             get { return _createQueryGenericMethod; }
         }
+
+#if NETCORE // Not supported in NETFX
+        public static MethodInfo QueryableCreateSingleResult
+        {
+            get { return _queryableCreateSingleResultMethod; }
+        }
+#endif
 
         public static decimal? SafeConvertToDecimal(object value)
         {

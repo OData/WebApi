@@ -112,7 +112,7 @@ namespace Microsoft.AspNet.OData.Adapters
         /// <returns>A list of attributes of type T.</returns>
         public IEnumerable<T> GetCustomAttributes<T>(bool inherit) where T : Attribute
         {
-            return this.innerDescriptor.ControllerTypeInfo.GetCustomAttributes<T>(inherit);
+            return this.innerDescriptor.MethodInfo.GetCustomAttributes<T>(inherit);
         }
 
         /// <summary>

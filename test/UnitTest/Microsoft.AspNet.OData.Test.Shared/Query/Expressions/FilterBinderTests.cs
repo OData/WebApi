@@ -2910,6 +2910,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void DateTimeConstants_Are_Parameterized()
+        {
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z",
+                "$it => ($it.Birthday == 11/08/2016 00:00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            var filters = VerifyQueryDeserialization("Birthday eq 2016-11-08Z", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+
+            Assert.Equal("$it => ($it.Birthday == 08/11/2016 00:00:00)", (filters.WithoutNullPropagation as Expression).ToString());
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Parameterized()
+        {
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00",
+                "$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            var filters = VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+
+            Assert.Equal("$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)", (filters.WithoutNullPropagation as Expression).ToString());
+        }
+
+        [Fact]
         public void CollectionConstants_Are_Parameterized()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",

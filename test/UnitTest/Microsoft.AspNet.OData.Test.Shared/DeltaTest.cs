@@ -123,6 +123,43 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void CanGetChangedPropertyNamesButOnlyUpdatable()
+        {
+            var original = new AddressEntity { ID = 1, City = "Redmond", State = "NY", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+
+            dynamic delta = new Delta<AddressEntity>();
+            var idelta = delta as IDelta;
+            // modify in the way we expect the formatter too.
+            idelta.TrySetPropertyValue("City", "Sammamish");
+            Assert.Single(idelta.GetChangedPropertyNames());
+            Assert.Equal("City", idelta.GetChangedPropertyNames().Single());
+
+            // read the property back
+            object city = null;
+            Assert.True(idelta.TryGetPropertyValue("City", out city));
+            Assert.Equal("Sammamish", city);
+
+            // limit updatable properties
+            delta.UpdatableProperties = new[] { "City", "StreetAddress" };
+
+            // modify the way people will through custom code
+            delta.StreetAddress = "23213 NE 15th Ct";
+            var mods = idelta.GetChangedPropertyNames().ToArray();
+            Assert.Equal(2, mods.Count());
+            Assert.Contains("StreetAddress", mods);
+            Assert.Contains("City", mods);
+            Assert.Equal("23213 NE 15th Ct", delta.StreetAddress);
+
+            // try to modify an un-updatable property
+            idelta.TrySetPropertyValue("State", "IA");
+            mods = idelta.GetChangedPropertyNames().ToArray();
+            Assert.Equal(2, mods.Count());
+            Assert.Contains("StreetAddress", mods);
+            Assert.Contains("City", mods);
+            Assert.Null(delta.State);
+        }
+
+        [Fact]
         public void CanReadUnmodifiedDefaultValuesFromDelta()
         {
             dynamic patch = new Delta<AddressEntity>();
@@ -354,6 +391,55 @@ namespace Microsoft.AspNet.OData.Test
             // Assert
             Assert.Equal(expectedInt, entity.BaseInt);
             Assert.Equal(expectedString, entity.BaseString);
+        }
+
+        [Fact]
+        public void Put_DoesNotClear_ChangedNonUpdatableProperties()
+        {
+            // Arrange
+            string expectedString = "hello, world";
+            int expectedInt = 24;
+            var delta = new Delta<Base>(typeof(Base));
+            delta.TrySetPropertyValue("BaseInt", expectedInt);
+            delta.UpdatableProperties = new[] { "BaseInt" };
+
+            Base entity = new Base { BaseInt = 42, BaseString = expectedString };
+
+            // Act
+            delta.Put(entity);
+
+            // Assert
+            Assert.Equal(expectedInt, entity.BaseInt);
+            Assert.Equal(expectedString, entity.BaseString);
+        }
+
+        [Fact]
+        public void Patch_DoesNotSet_ChangedUpdatableProperties()
+        {
+            var original = new AddressEntity { ID = 1, City = "Redmond", State = "WA", StreetAddress = "21110 NE 44th St", ZipCode = 98074 };
+
+            dynamic delta = new Delta<AddressEntity>();
+            delta.City = "Sammamish";
+            delta.StreetAddress = "23213 NE 15th Ct";
+
+            var idelta = delta as IDelta;
+            var mods = idelta.GetChangedPropertyNames().ToArray();
+            Assert.Equal(2, mods.Count());
+            Assert.Contains("StreetAddress", mods);
+            Assert.Contains("City", mods);
+
+            delta.UpdatableProperties = new[] { "City" };
+
+            delta.Patch(original);
+            // unchanged
+            Assert.Equal(1, original.ID);
+            Assert.Equal("WA", original.State);
+            Assert.Equal("21110 NE 44th St", original.StreetAddress);
+            Assert.Equal(98074, original.ZipCode);
+            // changed
+            Assert.Equal("Sammamish", original.City);
+
+            Assert.Equal(delta.GetChangedPropertyNames(), new[] { "City" });
         }
 
         [Fact]

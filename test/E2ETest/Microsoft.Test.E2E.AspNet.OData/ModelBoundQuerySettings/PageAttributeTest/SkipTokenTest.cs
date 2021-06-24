@@ -12,6 +12,7 @@ using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.ModelBoundQuerySettings.PageAttributeTest.SkipTokenTest
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class SkipTokenTest : WebHostTestBase
     {
         private const string CustomerBaseUrl = "{0}/skiptokentest/Customers";

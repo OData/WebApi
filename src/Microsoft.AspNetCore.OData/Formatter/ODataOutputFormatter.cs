@@ -308,6 +308,18 @@ namespace Microsoft.AspNet.OData.Formatter
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
         }
 
+        /// <inheritdoc />
+        public override IReadOnlyList<string> GetSupportedContentTypes(string contentType, Type objectType)
+        {
+            if (SupportedMediaTypes.Count == 0)
+            {
+                // note: this is parity with the base implementation when there are no matches
+                return default;
+            }
+
+            return base.GetSupportedContentTypes(contentType, objectType);
+        }
+
         private MediaTypeHeaderValue GetContentType(string contentTypeValue)
         {
             MediaTypeHeaderValue contentType = null;

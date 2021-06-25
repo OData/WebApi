@@ -2920,6 +2920,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void DateTimeConstants_Are_Not_Parameterized_IfDisabled()
         {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
             var filters = VerifyQueryDeserialization("Birthday eq 2016-11-08Z", settingsCustomizer: (settings) =>
             {
                 settings.EnableConstantParameterization = false;
@@ -2939,6 +2940,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void DateTimeOffsetsConstants_Are_Not_Parameterized_IfDisabled()
         {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
             var filters = VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00", settingsCustomizer: (settings) =>
             {
                 settings.EnableConstantParameterization = false;

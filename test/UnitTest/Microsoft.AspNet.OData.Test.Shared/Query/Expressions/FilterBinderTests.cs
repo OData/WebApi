@@ -2927,7 +2927,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 settings.EnableConstantParameterization = false;
             });
 
-            Assert.Equal("$it => ($it.Birthday == 08/11/2016 00:00:00)", (filters.WithoutNullPropagation as Expression).ToString());
+            string dateValue = String.Format(CultureInfo.InvariantCulture, "{0}", (filters.WithoutNullPropagation as Expression).ToString());
+            Assert.Equal("$it => ($it.Birthday == 08/11/2016 00:00:00)", dateValue);
         }
 
         [Fact]
@@ -2948,7 +2949,8 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 settings.EnableConstantParameterization = false;
             });
 
-            Assert.Equal("$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)", (filters.WithoutNullPropagation as Expression).ToString());
+            string dateValue = String.Format(CultureInfo.InvariantCulture, "{0}", (filters.WithoutNullPropagation as Expression).ToString());
+            Assert.Equal("$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)", dateValue);
         }
 
         [Fact]

@@ -2912,6 +2912,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void DateTimeConstants_Are_Parameterized()
         {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
             VerifyQueryDeserialization("Birthday eq 2016-11-08Z",
                 "$it => ($it.Birthday == 11/08/2016 00:00:00)",
                 NotTesting);
@@ -2932,6 +2933,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void DateTimeOffsetsConstants_Are_Parameterized()
         {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
             VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00",
                 "$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)",
                 NotTesting);

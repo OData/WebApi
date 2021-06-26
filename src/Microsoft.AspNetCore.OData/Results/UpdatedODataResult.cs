@@ -16,7 +16,7 @@ namespace Microsoft.AspNet.OData.Results
     /// </summary>
     /// <typeparam name="T">The entity type.</typeparam>
     /// <remarks>This action result handles content negotiation and the HTTP prefer header.</remarks>
-    public class UpdatedODataResult<T> : IActionResult
+    public class UpdatedODataResult<T> : IActionResult, IInnerActionResult
     {
         private readonly T _innerResult;
 
@@ -55,7 +55,8 @@ namespace Microsoft.AspNet.OData.Results
             ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request)));
         }
 
-        internal IActionResult GetInnerActionResult(HttpRequest request)
+        /// <inheritdoc/>
+        public IActionResult GetInnerActionResult(HttpRequest request)
         {
             if (RequestPreferenceHelpers.RequestPrefersReturnContent(new WebApiRequestHeaders(request.Headers)))
             {

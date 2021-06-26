@@ -5,6 +5,7 @@ using System;
 using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -26,15 +27,28 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("actionExecutedContext");
             }
 
+            HttpResponse response = actionExecutedContext.HttpContext.Response;
+            HttpRequest request = actionExecutedContext.HttpContext.Request;
+
             // Need a value to operate on.
             ObjectResult result = actionExecutedContext.Result as ObjectResult;
             if (result == null)
             {
-                return;
-            }
+                IInnerActionResult innerActionResult = actionExecutedContext.Result as IInnerActionResult;
+                if (innerActionResult == null)
+                {
+                    return;
+                }
 
-            HttpResponse response = actionExecutedContext.HttpContext.Response;
-            HttpRequest request = actionExecutedContext.HttpContext.Request;
+                if (innerActionResult !=null)
+                {
+                    result = innerActionResult.GetInnerActionResult(request) as ObjectResult;
+                    if (result == null)
+                    {
+                        return;
+                    }
+                }
+            }
 
             EntityTagHeaderValue etag = GetETag(
                 response?.StatusCode,

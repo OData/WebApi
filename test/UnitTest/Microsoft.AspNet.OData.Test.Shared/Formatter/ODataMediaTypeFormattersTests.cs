@@ -49,6 +49,47 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 {
     public class ODataMediaTypeFormattersTests
     {
+
+        private static string[] expectedSupportedJsonMediaTypes =
+            {
+                "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false",
+                "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true",
+                "application/json;odata.metadata=minimal;odata.streaming=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false",
+                "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true",
+                "application/json;odata.metadata=minimal;odata.streaming=false",
+                "application/json;odata.metadata=minimal;IEEE754Compatible=false",
+                "application/json;odata.metadata=minimal;IEEE754Compatible=true",
+                "application/json;odata.metadata=minimal",
+                "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false",
+                "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true",
+                "application/json;odata.metadata=full;odata.streaming=true",
+                "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false",
+                "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true",
+                "application/json;odata.metadata=full;odata.streaming=false",
+                "application/json;odata.metadata=full;IEEE754Compatible=false",
+                "application/json;odata.metadata=full;IEEE754Compatible=true",
+                "application/json;odata.metadata=full",
+                "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false",
+                "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true",
+                "application/json;odata.metadata=none;odata.streaming=true",
+                "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false",
+                "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true",
+                "application/json;odata.metadata=none;odata.streaming=false",
+                "application/json;odata.metadata=none;IEEE754Compatible=false",
+                "application/json;odata.metadata=none;IEEE754Compatible=true",
+                "application/json;odata.metadata=none",
+                "application/json;odata.streaming=true;IEEE754Compatible=false",
+                "application/json;odata.streaming=true;IEEE754Compatible=true",
+                "application/json;odata.streaming=true",
+                "application/json;odata.streaming=false;IEEE754Compatible=false",
+                "application/json;odata.streaming=false;IEEE754Compatible=true",
+                "application/json;odata.streaming=false",
+                "application/json;IEEE754Compatible=false",
+                "application/json;IEEE754Compatible=true",
+                "application/json",
+            };
+
         [Fact]
         public void TestCreate_CombinedFormatters_SupportedEncodings()
         {
@@ -80,22 +121,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var supportedMediaTypes = formatters.SelectMany(f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-                "application/xml"
-            });
+            string[] expectedSupportedMediaType = expectedSupportedJsonMediaTypes.Concat(new string[] {"application/xml" }).ToArray();
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedMediaType);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -115,21 +142,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -149,21 +162,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -183,21 +182,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -217,21 +202,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -251,21 +222,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -285,21 +242,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -354,21 +297,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
             Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
         }
@@ -387,23 +316,9 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             var supportedMediaTypes = parameterFormatters.SelectMany(f => f.SupportedMediaTypes).Distinct();
 
             // Assert
-            var expectedMediaTypes = GetMediaTypes(new string[]
-            {
-                "application/json;odata.metadata=minimal;odata.streaming=true",
-                "application/json;odata.metadata=minimal;odata.streaming=false",
-                "application/json;odata.metadata=minimal",
-                "application/json;odata.metadata=full;odata.streaming=true",
-                "application/json;odata.metadata=full;odata.streaming=false",
-                "application/json;odata.metadata=full",
-                "application/json;odata.metadata=none;odata.streaming=true",
-                "application/json;odata.metadata=none;odata.streaming=false",
-                "application/json;odata.metadata=none",
-                "application/json;odata.streaming=true",
-                "application/json;odata.streaming=false",
-                "application/json",
-            });
+            var expectedMediaTypes = GetMediaTypes(expectedSupportedJsonMediaTypes);
 
-            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes));
+            Assert.True(expectedMediaTypes.SequenceEqual(supportedMediaTypes.ToArray()));
         }
 
         [Fact]
@@ -417,7 +332,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, feedType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false"), mediaType);
         }
 
         [Fact]
@@ -431,7 +346,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, entryType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false"), mediaType);
         }
 
         [Fact]
@@ -445,7 +360,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, propertyType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false"), mediaType);
         }
 
         [Fact]
@@ -459,7 +374,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             MediaTypeHeaderValue mediaType = GetDefaultContentType(model, serviceDocumentType);
 
             // Assert
-            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true"), mediaType);
+            Assert.Equal(MediaTypeHeaderValue.Parse("application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false"), mediaType);
         }
 
         [Fact]
@@ -509,6 +424,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_Feed(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -537,6 +477,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_Entry(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -565,6 +530,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_Property(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -593,6 +583,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_EntityReferenceLink(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -621,6 +636,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_Collection(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -649,6 +689,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_ServiceDocument(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange
@@ -693,6 +758,31 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         [InlineData("application%2fjson%3bodata.streaming%3dfalse", "application/json;odata.streaming=false")]
         [InlineData("application%2fjson", "application/json")]
         [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bodata.metadata%3dminimal", "application/json;odata.streaming=true;odata.metadata=minimal")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=minimal;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dminimal%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=minimal;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=full;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dtrue", "application/json;odata.metadata=none;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.metadata%3dnone%3bIEEE754Compatible%3dfalse", "application/json;odata.metadata=none;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=true;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dtrue%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=true;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dtrue", "application/json;odata.streaming=false;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bodata.streaming%3dfalse%3bIEEE754Compatible%3dfalse", "application/json;odata.streaming=false;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dtrue", "application/json;IEEE754Compatible=true")]
+        [InlineData("application%2fjson%3bIEEE754Compatible%3dfalse", "application/json;IEEE754Compatible=false")]
+        [InlineData("application%2fjson%3bodata.metadata%3dfull%3bIEEE754Compatible%3dfalse%3bodata.streaming%3dtrue", "application/json;odata.metadata=full;IEEE754Compatible=false;odata.streaming=true")]
         public void TestCreate_DollarFormat_Error(string dollarFormatValue, string expectedMediaType)
         {
             // Arrange

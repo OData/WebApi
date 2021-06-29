@@ -2922,21 +2922,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void DateTimeConstants_Are_Not_Parameterized_IfDisabled()
         {
             TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
-            var filters = VerifyQueryDeserialization("Birthday eq 2016-11-08Z", settingsCustomizer: (settings) =>
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z", "$it => ($it.Birthday == 11/08/2016 00:00:00)", settingsCustomizer: (settings) =>
             {
                 settings.EnableConstantParameterization = false;
             });
-
-            string dateValue = String.Format(CultureInfo.InvariantCulture, "{0}", filters.WithoutNullPropagation as Expression);
-            Assert.Equal("$it => ($it.Birthday == 08/11/2016 00:00:00)", dateValue);
         }
 
         [Fact]
         public void DateTimeOffsetsConstants_Are_Parameterized()
         {
             TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
-            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00",
-                "$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)",
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00",
+                "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)",
                 NotTesting);
         }
 
@@ -2944,13 +2941,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void DateTimeOffsetsConstants_Are_Not_Parameterized_IfDisabled()
         {
             TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
-            var filters = VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2012-01-01T00:00:00+00:00", settingsCustomizer: (settings) =>
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00", "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)", settingsCustomizer: (settings) =>
             {
                 settings.EnableConstantParameterization = false;
             });
-
-            string dateValue = String.Format(CultureInfo.InvariantCulture, "{0}", filters.WithoutNullPropagation as Expression);
-            Assert.Equal("$it => ($it.NonNullableDiscontinuedDate == 01/01/2012 00:00:00 +00:00)", dateValue);
         }
 
         [Fact]

@@ -333,6 +333,35 @@ namespace Microsoft.AspNet.OData.Query.Validators
         }
 
         /// <summary>
+        /// Override this method to restrict the '$count' inside the filter query.
+        /// </summary>
+        /// <param name="countNode"></param>
+        /// <param name="settings"></param>
+        public virtual void ValidateCountNode(CountNode countNode, ODataValidationSettings settings)
+        {
+            if (countNode == null)
+            {
+                throw Error.ArgumentNull("convertNode");
+            }
+
+            if (settings == null)
+            {
+                throw Error.ArgumentNull("settings");
+            }
+            ValidateQueryNode(countNode.Source, settings);
+
+            if (countNode.FilterClause != null)
+            {
+                ValidateQueryNode(countNode.FilterClause.Expression, settings);
+            }
+
+            if (countNode.SearchClause != null)
+            {
+                ValidateQueryNode(countNode.SearchClause.Expression, settings);
+            }
+        }
+
+        /// <summary>
         /// Override this method for the navigation property node.
         /// </summary>
         /// <remarks>
@@ -780,6 +809,10 @@ namespace Microsoft.AspNet.OData.Query.Validators
 
                 case QueryNodeKind.Convert:
                     ValidateConvertNode(node as ConvertNode, settings);
+                    break;
+
+                case QueryNodeKind.Count:
+                    ValidateCountNode(node as CountNode, settings);
                     break;
 
                 case QueryNodeKind.ResourceRangeVariableReference:

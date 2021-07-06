@@ -300,6 +300,12 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, Expression.Constant(true)));
                 isInstancePropertySet = true;
             }
+            else if (_settings.EnableDeterministicSelectExpandWrapperInstance)
+            {
+                // Initialize property 'Instance' on the wrapper class
+                wrapperProperty = wrapperType.GetProperty("Instance");
+                wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
+            }
             else
             {
                 // Initialize property 'TypeName' on the wrapper class as we don't have the instance.

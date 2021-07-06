@@ -58,9 +58,16 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             _queryable = new[] { customer }.AsQueryable();
         }
 
-        private static SelectExpandBinder GetBinder<T>(IEdmModel model, HandleNullPropagationOption nullPropagation = HandleNullPropagationOption.False)
+        private static SelectExpandBinder GetBinder<T>(
+            IEdmModel model,
+            bool enableDeterministicSelectExpandWrapperInstance = false,
+            HandleNullPropagationOption nullPropagation = HandleNullPropagationOption.False)
         {
-            var settings = new ODataQuerySettings { HandleNullPropagation = nullPropagation };
+            var settings = new ODataQuerySettings
+            {
+                EnableDeterministicSelectExpandWrapperInstance = enableDeterministicSelectExpandWrapperInstance,
+                HandleNullPropagation = nullPropagation,
+            };
 
             var context = new ODataQueryContext(model, typeof(T)) { RequestContainer = new MockContainer() };
 
@@ -94,22 +101,39 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Same(_customer, edmType.AsElementType());
         }
 
-        [Fact]
-        public void Bind_GeneratedExpression_ContainsExpandedObject()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void Bind_GeneratedExpression_ContainsExpandedObject(bool enableDeterministicSelectExpandWrapperInstance)
         {
             // Arrange
             SelectExpandQueryOption selectExpand = new SelectExpandQueryOption("Orders", "Orders,Orders($expand=Customer)", _context);
+            var settings = new ODataQuerySettings
+            {
+                EnableDeterministicSelectExpandWrapperInstance = enableDeterministicSelectExpandWrapperInstance,
+                HandleNullPropagation = HandleNullPropagationOption.False,
+            };
 
             // Act
-            IQueryable queryable = SelectExpandBinder.Bind(_queryable, _settings, selectExpand);
+            IQueryable queryable = SelectExpandBinder.Bind(_queryable, settings, selectExpand);
 
             // Assert
             IEnumerator enumerator = queryable.GetEnumerator();
             Assert.True(enumerator.MoveNext());
             var partialCustomer = Assert.IsAssignableFrom<SelectExpandWrapper<QueryCustomer>>(enumerator.Current);
             Assert.False(enumerator.MoveNext());
-            Assert.Null(partialCustomer.Instance);
-            Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", partialCustomer.InstanceType);
+
+            if (enableDeterministicSelectExpandWrapperInstance)
+            {
+                Assert.Same(_queryable.Single(), partialCustomer.Instance);
+                Assert.Null(partialCustomer.InstanceType);
+            }
+            else
+            {
+                Assert.Null(partialCustomer.Instance);
+                Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", partialCustomer.InstanceType);
+            }
+
             IEnumerable<SelectExpandWrapper<QueryOrder>> innerOrders = partialCustomer.Container
                 .ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
             Assert.NotNull(innerOrders);
@@ -459,8 +483,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Same(aCustomer, customerWrapper.Instance);
         }
 
-        [Fact]
-        public void ProjectAsWrapper_Element_ProjectedValueDoesNotContainInstance_IfSelectionIsPartial()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ProjectAsWrapper_Element_ProjectedValueDoesNotContainInstance_IfSelectionIsPartial(bool alwaysSetSelectExpandWrapperInstance)
         {
             // Arrange
             string select = "Id,Orders";
@@ -474,16 +500,37 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             SelectExpandClause selectExpandClause = ParseSelectExpand(select, expand, _model, _customer, _customers);
             Assert.NotNull(selectExpandClause);
 
+            SelectExpandBinder binder = GetBinder<QueryCustomer>(_model, alwaysSetSelectExpandWrapperInstance);
+
             // Act
-            Expression projection = _binder.ProjectAsWrapper(source, selectExpandClause, _customer, _customers);
+            Expression projection = binder.ProjectAsWrapper(source, selectExpandClause, _customer, _customers);
 
             // Assert
             Assert.Equal(ExpressionType.MemberInit, projection.NodeType);
-            Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
-            Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
+
+            if (alwaysSetSelectExpandWrapperInstance)
+            {
+                Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+                Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
+            }
+            else
+            {
+                Assert.Empty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "Instance"));
+                Assert.NotEmpty((projection as MemberInitExpression).Bindings.Where(p => p.Member.Name == "InstanceType"));
+            }
+
             SelectExpandWrapper<QueryCustomer> customerWrapper = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
-            Assert.Null(customerWrapper.Instance);
-            Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", customerWrapper.InstanceType);
+
+            if (alwaysSetSelectExpandWrapperInstance)
+            {
+                Assert.Same(aCustomer, customerWrapper.Instance);
+                Assert.Null(customerWrapper.InstanceType);
+            }
+            else
+            {
+                Assert.Null(customerWrapper.Instance);
+                Assert.Equal("Microsoft.AspNet.OData.Test.Query.Expressions.QueryCustomer", customerWrapper.InstanceType);
+            }
         }
 
         [Theory]

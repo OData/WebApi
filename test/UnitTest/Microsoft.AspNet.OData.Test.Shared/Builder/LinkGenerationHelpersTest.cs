@@ -55,6 +55,24 @@ namespace Microsoft.AspNet.OData.Test.Builder
         }
 
         [Theory]
+        [InlineData(false, "http://localhost/MyOrders(42)/OrderLines")]
+        [InlineData(true, "http://localhost/MyOrders(42)/NS.MyOrder/OrderLines")]
+        public void GenerateContainedNavigationLink_WorksToGenerateExpectedNavigationLink_ForContainedEntitySet(bool includeCast, string expectedNavigationLink)
+        {
+            // Arrange
+            var request = RequestFactory.CreateFromModel(_model.Model);
+            var serializerContext = ODataSerializerContextFactory.Create(_model.Model, _model.MyOrders, request);
+            var entityContext = new ResourceContext(serializerContext, _model.MyOrder.AsReference(), new { ID = 42 });
+            IEdmNavigationProperty ordersLinesProperty = _model.MyOrder.NavigationProperties().First(x => x.ContainsTarget == true);
+
+            // Act
+            Uri uri = entityContext.GenerateContainedNavigationPropertyLink(ordersLinesProperty, includeCast);
+
+            // Assert
+            Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
+        }
+
+        [Theory]
         [InlineData(false, "http://localhost/Mary")]
         [InlineData(true, "http://localhost/Mary/NS.SpecialCustomer")]
         public void GenerateSelfLink_WorksToGenerateExpectedSelfLink_ForSingleton(bool includeCast, string expectedIdLink)
@@ -84,6 +102,24 @@ namespace Microsoft.AspNet.OData.Test.Builder
 
             // Act
             Uri uri = entityContext.GenerateNavigationPropertyLink(ordersProperty, includeCast);
+
+            // Assert
+            Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);
+        }
+
+        [Theory]
+        [InlineData(false, "http://localhost/RootOrder/OrderLines")]
+        [InlineData(true, "http://localhost/RootOrder/NS.MyOrder/OrderLines")]
+        public void GenerateContainedNavigationLink_WorksToGenerateExpectedNavigationLink_ForSingleton(bool includeCast, string expectedNavigationLink)
+        {
+            // Arrange
+            var request = RequestFactory.CreateFromModel(_model.Model);
+            var serializerContext = ODataSerializerContextFactory.Create(_model.Model, _model.RootOrder, request);
+            var entityContext = new ResourceContext(serializerContext, _model.MyOrder.AsReference(), new { ID = 42 });
+            IEdmNavigationProperty ordersLinesProperty = _model.MyOrder.NavigationProperties().First(x => x.ContainsTarget == true);
+
+            // Act
+            Uri uri = entityContext.GenerateContainedNavigationPropertyLink(ordersLinesProperty, includeCast);
 
             // Assert
             Assert.Equal(expectedNavigationLink, uri.AbsoluteUri);

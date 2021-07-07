@@ -15,6 +15,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public List<PaymentInstrument> PayinPIs { get; set; }
         [Contained]
         public PaymentInstrument PayoutPI { get; set; }
+        public PaymentInstrument MostRecentPI { get; set; }
     }
 
     public class PremiumAccount : Account
@@ -37,6 +38,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public string FriendlyName { get; set; }
         [Contained]
         public Statement Statement { get; set; }
+        [Contained]
+        public List<Signatory> Signatories { get; set; }
     }
 
     public class Statement
@@ -44,5 +47,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         public int StatementID { get; set; }
         public string TransactionDescription { get; set; }
         public double Amount { get; set; }
+    }
+
+    public class Signatory
+    {
+        public int SignatoryID { get; set; }
+        public string SignatoryName { get; set; }
     }
 }

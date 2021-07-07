@@ -28,10 +28,32 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                         },
                         PayinPIs = new List<PaymentInstrument>()
                         {
-                             new PaymentInstrument()
+                            new PaymentInstrument()
                             {
                                 PaymentInstrumentID = 0,
-                                FriendlyName = "Anonymous payin PI",
+                                FriendlyName = "Anonymous payin PI 0",
+                                Statement =
+                                    new Statement()
+                                    {
+                                        StatementID=0,
+                                        TransactionDescription="Physical Goods.",
+                                    },
+                            },
+                            new PaymentInstrument()
+                            {
+                                PaymentInstrumentID = 1,
+                                FriendlyName = "Anonymous payin PI 1",
+                                Statement =
+                                    new Statement()
+                                    {
+                                        StatementID=0,
+                                        TransactionDescription="Physical Goods.",
+                                    },
+                            },
+                             new PaymentInstrument()
+                            {
+                                PaymentInstrumentID = 2,
+                                FriendlyName = "Anonymous payin PI 2",
                                 Statement =
                                     new Statement()
                                     {
@@ -156,6 +178,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                        PaymentInstrumentID = 100,
                        FriendlyName = "Payout PI: Paypal",
                    },
+                   MostRecentPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 199,
+                       FriendlyName = "Most Recent PI: Paypal",
+                       Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=10001,
+                                    SignatoryName="Signatory 10001"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=10002,
+                                    SignatoryName="Signatory 10002"
+                                }
+                            }
+                   },
                     PayinPIs = new List<PaymentInstrument>()
                     {
                         new PaymentInstrument()
@@ -168,6 +208,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=1,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1001,
+                                    SignatoryName="Signatory 1"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1002,
+                                    SignatoryName="Signatory 2"
+                                }
+                            }
                         },
                         new PaymentInstrument()
                         {
@@ -179,6 +232,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=101,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1003,
+                                    SignatoryName="Signatory 3"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1004,
+                                    SignatoryName="Signatory 4"
+                                }
+                            }
                         },
                     },
                 },
@@ -190,6 +256,24 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                    {
                        PaymentInstrumentID = 200,
                        FriendlyName = "Payout PI: Paypal",
+                   },
+                   MostRecentPI = new PaymentInstrument()
+                   {
+                       PaymentInstrumentID = 299,
+                       FriendlyName = "Most Recent PI: Paypal",
+                       Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=10003,
+                                    SignatoryName="Signatory 10003"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=10004,
+                                    SignatoryName="Signatory 10004"
+                                }
+                            }
                    },
                     PayinPIs = new List<PaymentInstrument>()
                     {
@@ -203,6 +287,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=1,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1005,
+                                    SignatoryName="Signatory 5"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1006,
+                                    SignatoryName="Signatory 6"
+                                }
+                            }
                         },
                         new PaymentInstrument()
                         {
@@ -214,6 +311,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
                                     StatementID=201,
                                     TransactionDescription="Physical Goods.",
                                 },
+                            Signatories = new List<Signatory>()
+                            {
+                                new Signatory()
+                                {
+                                    SignatoryID=1007,
+                                    SignatoryName="Signatory 7"
+                                },
+                                new Signatory()
+                                {
+                                    SignatoryID=1008,
+                                    SignatoryName="Signatory 8"
+                                }
+                            }
                         }
                     }
                 },

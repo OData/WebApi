@@ -112,7 +112,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var edmModel = reader.ReadMetadataDocument();
 
             var accountType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "Account");
-            Assert.Equal(4, accountType.Properties().Count());
+            Assert.Equal(5, accountType.Properties().Count());
             var payinPIs = accountType.NavigationProperties().Single(np => np.Name == "PayinPIs");
             Assert.True(payinPIs.ContainsTarget, "The navigation property 'PayinPIs' should be a containment navigation property.");
             Assert.Equal(string.Format("Collection({0})", typeof(PaymentInstrument).FullName), payinPIs.Type.Definition.FullTypeName());
@@ -121,10 +121,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             Assert.Equal(EdmMultiplicity.ZeroOrOne, payoutPI.TargetMultiplicity());
 
             var paymentInstrumentType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "PaymentInstrument");
-            Assert.Equal(3, paymentInstrumentType.Properties().Count());
+            Assert.Equal(4, paymentInstrumentType.Properties().Count());
             var statement = paymentInstrumentType.NavigationProperties().Single(np => np.Name == "Statement");
             Assert.True(statement.ContainsTarget, "PaymentInstrumentType.ContainsTarget");
             Assert.Equal(EdmMultiplicity.ZeroOrOne, statement.TargetMultiplicity());
+            var signatories = paymentInstrumentType.NavigationProperties().Single(np => np.Name == "Signatories");
+            Assert.True(signatories.ContainsTarget);
+            Assert.Equal(EdmMultiplicity.Many, signatories.TargetMultiplicity());
 
             var premiumAccountType = edmModel.SchemaElements.OfType<IEdmEntityType>().Single(et => et.Name == "PremiumAccount");
             Assert.Single(premiumAccountType.DeclaredProperties);
@@ -494,6 +497,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 0,
                 FriendlyName = "Pi103",
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PostAsJsonAsync<PaymentInstrument>(requestUri, pi);
@@ -575,6 +586,71 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             var payload = await response.Content.ReadAsStringAsync();
             payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
             Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs?$filter=PaymentInstrumentID%20gt%201", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of collection type when using $expand.
+        public async Task QueryMultiExpandPaginatedPayinPIsFromAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts?$expand=PayinPIs($expand=Signatories)&$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"Signatories@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs(101)/Signatories?$skip=1", BaseAddress, mode).ToLower(), payload);
+            Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/PayinPIs?$expand=Signatories&$skip=1", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of collection type when using $expand.
+        public async Task QueryExpandPaginatedSignatoriesFromMostRecentPIInAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/MostRecentPI?$expand=Signatories&$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"Signatories@odata.nextLink\":\"{0}/{1}/PaginatedAccounts(100)/MostRecentPI/Signatories?$skip=1", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [MemberData(nameof(MediaTypes))]
+        // To test if we can get the odata.nextLink in a contained navigation property of a singleton when using $expand.
+        public async Task QueryExpandPaginatedPayinPIsFromAnonymousAccount(string mode, string mime)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/AnonymousAccount?$expand=PayinPIs($filter=PaymentInstrumentID gt 0)&$format={2}", BaseAddress, mode, mime);
+
+            HttpResponseMessage response = await this.Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var payload = await response.Content.ReadAsStringAsync();
+            payload = payload.Replace("%28", "(").Replace("%29", ")").ToLower();
+            Assert.Contains(string.Format("\"PayinPIs@odata.nextLink\":\"{0}/{1}/AnonymousAccount/PayinPIs?$filter=PaymentInstrumentID%20gt%200", BaseAddress, mode).ToLower(), payload);
+        }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // Function bound to a single contained entity.
+        public async Task GetPaginatedPayinPIsCountWhoseNameContainsGivenString(string mode)
+        {
+            await ResetDatasource();
+            string requestUri = string.Format("{0}/{1}/PaginatedAccounts(100)/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains='10')", BaseAddress, mode);
+            var response = await Client.GetAsync(requestUri);
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            var json = await response.Content.ReadAsObject<JObject>();
+            var count = (int)json["value"];
+
+            Assert.Equal(2, count);
         }
 
         [Theory]
@@ -780,6 +856,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 101,
                 FriendlyName = newFriendlyName,
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);
@@ -805,6 +889,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             {
                 PaymentInstrumentID = 1000,
                 FriendlyName = newFriendlyName,
+                Signatories = new List<Signatory>()
+                {
+                    new Signatory()
+                    {
+                        SignatoryID=1,
+                        SignatoryName="Sig 1"
+                    }
+                }
             };
 
             var response = await Client.PutAsJsonAsync<PaymentInstrument>(requestUri, pi);

@@ -483,13 +483,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
             // In Contained Navigation, we don't have navigation property binding,
             // Hence we cannot get the NavigationLink from the NavigationLinkBuilder
-            if (writeContext.NavigationSource.NavigationSourceKind() == EdmNavigationSourceKind.ContainedEntitySet)
+            if (writeContext.NavigationProperty.ContainsTarget)
             {
                 // Contained navigation.
-                Uri idlink = linkBuilder.BuildIdLink(writeContext.ExpandedResource);
-
-                var link = idlink.ToString() + "/" + writeContext.NavigationProperty.Name;
-                navigationLink = new Uri(link);
+                navigationLink = writeContext.ExpandedResource.GenerateContainedNavigationPropertyLink(writeContext.NavigationProperty, /*includeCast*/ false);
             }
             else
             {

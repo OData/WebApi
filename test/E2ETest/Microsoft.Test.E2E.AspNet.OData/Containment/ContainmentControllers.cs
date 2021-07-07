@@ -405,13 +405,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
             }
         }
 
-        [EnableQuery]
+        [EnableQuery(PageSize = 1)]
         public ITestActionResult Get()
         {
             return Ok(_dataSource.AnonymousAccount);
         }
 
-        [EnableQuery]
+        [EnableQuery(PageSize = 1)]
         public ITestActionResult GetPayinPIs()
         {
             var payinPIs = _dataSource.AnonymousAccount.PayinPIs;
@@ -449,8 +449,27 @@ namespace Microsoft.Test.E2E.AspNet.OData.Containment
         [ODataRoute("PaginatedAccounts({key})/PayinPIs")]
         public ITestActionResult GetPayinPIsFromAccountImport(int key)
         {
-            var payinPIs = _dataSource.Accounts.Single(a => a.AccountID == key).PayinPIs;
+            var payinPIs = _dataSource.PaginatedAccounts.Single(a => a.AccountID == key).PayinPIs;
             return Ok(payinPIs);
+        }
+
+        [EnableQuery(PageSize = 1)]
+        [ODataRoute("PaginatedAccounts({key})/MostRecentPI")]
+        public ITestActionResult GetPayoutPIFromAccount(int key)
+        {
+            var payoutPI = _dataSource.PaginatedAccounts.Single(a => a.AccountID == key).MostRecentPI;
+            return Ok(payoutPI);
+        }
+
+        // GET ~/PaginatedAccounts(100)/PayinPIs/Namespace.GetCount)
+        [HttpGet]
+        [ODataRoute("PaginatedAccounts({accountId})/PayinPIs/Microsoft.Test.E2E.AspNet.OData.Containment.GetCount(nameContains={name})")]
+        public ITestActionResult GetPayinPIsCountWhoseNameContainsGivenValue(int accountId, [FromODataUri] string name)
+        {
+            var account = _dataSource.PaginatedAccounts.Single(a => a.AccountID == accountId);
+            var count = account.PayinPIs.Where(pi => pi.FriendlyName.Contains(name)).Count();
+
+            return Ok(count);
         }
 
     }

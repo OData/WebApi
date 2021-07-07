@@ -149,6 +149,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         public IDictionary<IEdmNavigationProperty, ExpandedNavigationSelectItem> ExpandedProperties { get; internal set; }
 
         /// <summary>
+        /// Gets the list of EDM navigation properties odata.count values to be added in the response.
+        /// It could be null if no navigation property with a $count segment.
+        /// </summary>
+        public IDictionary<IEdmNavigationProperty, ExpandedCountSelectItem> ExpandedCountProperties { get; internal set; }
+
+        /// <summary>
         /// Gets the list of EDM navigation properties to be referenced in the response along with the nested query options embedded in the expand.
         /// It could be null if no navigation property to reference.
         /// </summary>
@@ -367,6 +373,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 if (structuralTypeInfo.IsNavigationPropertyDefined(firstNavigationSegment.NavigationProperty))
                 {
+                    // $expand=..../nav/$count
+                    ExpandedCountSelectItem expandedCount = expandReferenceItem as ExpandedCountSelectItem;
+                    if (expandedCount != null)
+                    {
+                        if (ExpandedCountProperties == null)
+                        {
+                            ExpandedCountProperties = new Dictionary<IEdmNavigationProperty, ExpandedCountSelectItem>();
+                        }
+
+                        ExpandedCountProperties[firstNavigationSegment.NavigationProperty] = expandedCount;
+                        return;
+                    }
+
                     // It's not allowed to have mulitple navigation expanded or referenced.
                     // for example: "$expand=nav($top=2),nav($skip=3)" is not allowed and will be merged (or throw exception) at ODL side.
                     ExpandedNavigationSelectItem expanded = expandReferenceItem as ExpandedNavigationSelectItem;

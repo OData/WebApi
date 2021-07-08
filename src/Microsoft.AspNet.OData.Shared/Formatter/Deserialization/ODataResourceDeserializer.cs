@@ -469,24 +469,24 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         { 
             Contract.Assert(readContext != null);
 
-            if (resourceWrapper?.Resource?.Id == null)
+            if (resourceWrapper?.ResourceBase?.Id == null)
             {
                 return resourceWrapper;
             }
 
-            IEnumerable<ODataProperty> keys = CreateKeyProperties(resourceWrapper.Resource.Id, readContext);
+            IEnumerable<ODataProperty> keys = CreateKeyProperties(resourceWrapper.ResourceBase.Id, readContext);
             if (keys == null)
             {
                 return resourceWrapper;
             }
 
-            if (resourceWrapper.Resource.Properties == null)
+            if (resourceWrapper.ResourceBase.Properties == null)
             {
-                resourceWrapper.Resource.Properties = keys;
+                resourceWrapper.ResourceBase.Properties = keys;
             }
             else
             {
-                IDictionary<string, ODataProperty> newPropertiesDic = resourceWrapper.Resource.Properties.ToDictionary(p => p.Name, p => p);
+                IDictionary<string, ODataProperty> newPropertiesDic = resourceWrapper.ResourceBase.Properties.ToDictionary(p => p.Name, p => p);
                 foreach (ODataProperty key in keys)
                 {
                     if (!newPropertiesDic.ContainsKey(key.Name))
@@ -495,7 +495,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
 
-                resourceWrapper.Resource.Properties = newPropertiesDic.Values;
+                resourceWrapper.ResourceBase.Properties = newPropertiesDic.Values;
             }
 
             return resourceWrapper;

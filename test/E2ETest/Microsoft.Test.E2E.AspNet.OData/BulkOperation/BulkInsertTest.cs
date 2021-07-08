@@ -654,6 +654,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
         }
 
+        [Fact]
+        public async Task PatchEmployee_WithODataBind()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Employees(1)";
+
+            var content = @"{
+                    'Name':'Bind1'  ,
+                    'Friends@odata.bind':['Friends(3)']
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+            
+            
+        }
+
 
         [Fact]
         public async Task PatchEmployee_WithAddUpdateAndDelete()

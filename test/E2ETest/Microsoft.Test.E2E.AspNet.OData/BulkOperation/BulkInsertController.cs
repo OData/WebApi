@@ -359,6 +359,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             try
             {
                 delta.Patch(employee, new EmployeePatchHandler());
+
+                if(employee.Name == "Bind1")
+                {
+                    Assert.NotNull(employee.Friends.Single(x => x.Id == 3));
+                }
             }
             catch (ArgumentException ae)
             {

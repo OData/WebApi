@@ -341,13 +341,14 @@ namespace Microsoft.AspNet.OData.Query.Validators
         {
             if (countNode == null)
             {
-                throw Error.ArgumentNull("convertNode");
+                throw Error.ArgumentNull("countNode");
             }
 
             if (settings == null)
             {
                 throw Error.ArgumentNull("settings");
             }
+
             ValidateQueryNode(countNode.Source, settings);
 
             if (countNode.FilterClause != null)

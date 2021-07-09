@@ -106,8 +106,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public string Name { get; set; }
 
         public int Age { get; set; }
-
-        [AutoExpand]
+               
         public UnTypedAddress Address { get; set; }
 
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }

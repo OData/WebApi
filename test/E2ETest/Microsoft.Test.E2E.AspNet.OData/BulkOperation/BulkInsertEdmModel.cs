@@ -60,6 +60,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             EntitySetConfiguration<Order> orders = builder.EntitySet<Order>("Orders");
             EntitySetConfiguration<NewFriend> fnewriends = builder.EntitySet<NewFriend>("NewFriends");
             EntitySetConfiguration<UnTypedFriend> funtypenewriends = builder.EntitySet<UnTypedFriend>("UnTypedFriends");
+            EntitySetConfiguration<UnTypedAddress> addresses = builder.EntitySet<UnTypedAddress>("Address");
 
             EntitySetConfiguration<UnTypedEmployee> unemployees = builder.EntitySet<UnTypedEmployee>("UnTypedEmployees");
             EntityTypeConfiguration<UnTypedEmployee> unemployee = unemployees.EntityType;

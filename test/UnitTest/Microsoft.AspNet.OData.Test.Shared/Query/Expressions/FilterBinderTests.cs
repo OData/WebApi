@@ -2910,6 +2910,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void DateTimeConstants_Are_Parameterized()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z",
+                "$it => ($it.Birthday == 11/08/2016 00:00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z", "$it => ($it.Birthday == 11/08/2016 00:00:00)", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Parameterized()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00",
+                "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00", "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+        }
+
+        [Fact]
         public void CollectionConstants_Are_Parameterized()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",

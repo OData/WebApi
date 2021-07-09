@@ -242,7 +242,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 filterExpression = BindFilterClause(this, node.FilterClause, elementType);
 
                 // The source expression looks like: $it.Authors
-                // So the generated countExpression below will look like: $it.Authors.Where($it => $it.Id > 1)
+                // So the generated source expression below will look like: $it.Authors.Where($it => $it.Id > 1)
                 source = Expression.Call(null, whereMethod, new[] { source, filterExpression });
             }
 

@@ -34,6 +34,28 @@ namespace Microsoft.AspNet.OData.Test.Routing.Conventions
         }
 
         [Theory]
+        [InlineData("POST", "PostCustomer")]
+        [InlineData("PATCH", "PatchCustomers")]
+        public void SelectAction_Returns_ExpectedActionName(string method, string expected)
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+
+            IEdmCollectionType collection = new EdmCollectionType(new EdmEntityTypeReference(model.SpecialCustomer, isNullable: false));
+
+            ODataPath odataPath = new ODataPath(new EntitySetSegment(model.Customers));
+
+            var request = RequestFactory.Create(new HttpMethod(method), "http://localhost/");
+            var actionMap = SelectActionHelper.CreateActionMap(expected);
+
+            // Act
+            string selectedAction = SelectActionHelper.SelectAction(new EntitySetRoutingConvention(), odataPath, request, actionMap);
+
+            // Assert
+            Assert.Equal(expected, selectedAction);
+        }
+
+        [Theory]
         [InlineData("GET", "GetCustomersFromSpecialCustomer")]
         [InlineData("POST", "PostCustomerFromSpecialCustomer")]
         public void SelectAction_WithCast_Returns_ExpectedActionName(string method, string expected)

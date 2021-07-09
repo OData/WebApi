@@ -23,6 +23,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         private ODataQueryContext _queryContext;
         private SelectExpandClause _selectExpandClause;
         private bool _isSelectExpandClauseSet;
+        private bool? _isUntyped;
+        private bool? _isDeltaOfT;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ODataSerializerContext"/> class.
@@ -158,6 +160,34 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         /// Gets or sets the <see cref="ODataPath"/> of the request.
         /// </summary>
         public ODataPath Path { get; set; }
+
+        internal Type Type { get; set; }
+
+        internal bool IsUntyped 
+        { 
+            get 
+            {   if (_isUntyped == null)
+                {
+                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(Type);
+                }
+
+                return _isUntyped.Value;
+            } 
+        }
+
+        internal bool IsDeltaOfT 
+        { 
+            get 
+            {
+                if (_isDeltaOfT == null)
+                {
+                    _isDeltaOfT = Type != null && TypeHelper.IsGenericType(Type) && (Type.GetGenericTypeDefinition() == typeof(DeltaSet<>) ||
+                        Type.GetGenericTypeDefinition() == typeof(Delta<>) || Type.GetGenericTypeDefinition() == typeof(DeltaDeletedEntityObject<>));
+                }
+
+                return _isDeltaOfT.Value;
+            } 
+        }
 
         /// <summary>
         /// Gets or sets the root element name which is used when writing primitive and enum types
@@ -296,6 +326,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
             else
             {
+                if (typeof(IDeltaSet).IsAssignableFrom(type)) 
+                {
+                    return EdmLibHelpers.ToEdmTypeReference(Path.EdmType, isNullable: false);
+                }
+                
                 if (Model == null)
                 {
                     throw Error.InvalidOperation(SRResources.RequestMustHaveModel);
@@ -308,7 +343,15 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     if (instance != null)
                     {
-                        edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        TypedDelta delta = instance as TypedDelta;
+                        if (delta != null)
+                        {
+                            edmType = _typeMappingCache.GetEdmType(delta.ExpectedClrType, Model);
+                        }
+                        else
+                        {
+                            edmType = _typeMappingCache.GetEdmType(instance.GetType(), Model);
+                        }
                     }
 
                     if (edmType == null)

@@ -88,8 +88,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return _rootContainer.GetRequiredService<ODataActionPayloadDeserializer>();
             }
 
-            // Get the model. Using a Func<IEdmModel> to delay evaluation of the model
-            // until after the above checks have passed.
             IEdmModel model = modelFunction();
             ClrTypeCache typeMappingCache = model.GetTypeMappingCache();
             IEdmTypeReference edmType = typeMappingCache.GetEdmType(type, model);

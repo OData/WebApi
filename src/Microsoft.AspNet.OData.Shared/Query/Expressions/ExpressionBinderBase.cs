@@ -134,11 +134,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (leftUnderlyingType == typeof(DateTime) && rightUnderlyingType == typeof(DateTimeOffset))
             {
-                right = DateTimeOffsetToDateTime(right);
+                right = DateTimeOffsetToDateTime(right, QuerySettings.EnableConstantParameterization);
             }
             else if (rightUnderlyingType == typeof(DateTime) && leftUnderlyingType == typeof(DateTimeOffset))
             {
-                left = DateTimeOffsetToDateTime(left);
+                left = DateTimeOffsetToDateTime(left, QuerySettings.EnableConstantParameterization);
             }
 
             if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
@@ -972,7 +972,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return null;
         }
 
-        internal static Expression DateTimeOffsetToDateTime(Expression expression)
+        internal static Expression DateTimeOffsetToDateTime(Expression expression, bool EnableConstantParameterization = false)
         {
             var unaryExpression = expression as UnaryExpression;
             if (unaryExpression != null)
@@ -985,11 +985,26 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             var parameterizedConstantValue = ExtractParameterizedConstant(expression);
             var dto = parameterizedConstantValue as DateTimeOffset?;
-            if (dto != null)
+            object expressionValue;
+
+            if(dto != null)
             {
-                expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
+                expressionValue = dto.Value;
             }
-            return expression;
+            else
+            {
+                expressionValue = (expression as ConstantExpression).Value;
+            }
+
+            object value = EdmPrimitiveHelpers.ConvertPrimitiveValue(expressionValue, typeof(DateTime));
+            if (EnableConstantParameterization)
+            {
+                return LinqParameterContainer.Parameterize(typeof(DateTime), value);
+            }
+            else
+            {
+                return Expression.Constant(value, typeof(DateTime));
+            }
         }
 
         internal static bool IsNullable(Type t)

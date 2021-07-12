@@ -224,7 +224,31 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
             }
 
-            // call Count() method. 
+            MethodInfo whereMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                whereMethod = ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                whereMethod = ExpressionHelperMethods.EnumerableWhereGeneric.MakeGenericMethod(elementType);
+            }
+
+            // Bind the inner $filter clause within the $count segment.
+            // e.g Books?$filter=Authors/$count($filter=Id gt 1) gt 1
+            Expression filterExpression = null;
+            if (node.FilterClause != null)
+            {
+                filterExpression = BindFilterClause(this, node.FilterClause, elementType);
+
+                // The source expression looks like: $it.Authors
+                // So the generated source expression below will look like: $it.Authors.Where($it => $it.Id > 1)
+                source = Expression.Call(null, whereMethod, new[] { source, filterExpression });
+            }
+
+            // append LongCount() method.
+            // The final countExpression with the nested $filter clause will look like: $it.Authors.Where($it => $it.Id > 1).LongCount()
+            // The final countExpression without the nested $filter clause will look like: $it.Authors.LongCount()
             countExpression = Expression.Call(null, countMethod, new[] { source });
 
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)

@@ -398,7 +398,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The translated node.</returns> 
         public override QueryNode Visit(CountNode nodeIn)
         {
-            return new CountNode((CollectionNode)nodeIn.Source.Accept(this));
+            return new CountNode((CollectionNode)nodeIn.Source.Accept(this), nodeIn.FilterClause, nodeIn.SearchClause);
         }
     }
 }

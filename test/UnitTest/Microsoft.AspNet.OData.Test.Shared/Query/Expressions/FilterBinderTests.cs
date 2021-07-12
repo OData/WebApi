@@ -3015,6 +3015,17 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withNullPropagation });
         }
 
+        [Theory]
+        [InlineData("AlternateAddresses/$count gt 2", "$it => ($it.AlternateAddresses.LongCount() > 2)", "$it => ((IIF(($it.AlternateAddresses == null), null, Convert($it.AlternateAddresses.LongCount())) > Convert(2)) == True)")] // Products?$filter=AlternateAddresses/$count gt 2
+        [InlineData("Category/Products/$count($filter=ProductID gt 2) gt 2", "$it => ($it.Category.Products.Where($it => ($it.ProductID > 2)).LongCount() > 2)", "$it => ((IIF((IIF(($it.Category == null), null, $it.Category.Products).Where($it => ($it.ProductID > 2)) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.Products).Where($it => ($it.ProductID > 2)).LongCount())) > Convert(2)) == True)")] // Products?$filter=Category/Products/$count($filter=ProductID gt 2) gt 2
+        public void CountExpression(string clause, string expectedExpression, string expectedExpressionWithNullPropagation)
+        {
+            VerifyQueryDeserialization(
+                clause,
+                expectedExpression,
+                expectedExpressionWithNullPropagation);
+        }
+
         #region Negative Tests
 
         [Fact]

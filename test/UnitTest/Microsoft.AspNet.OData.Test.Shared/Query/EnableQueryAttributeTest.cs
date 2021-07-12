@@ -2,12 +2,25 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 #if NETCORE
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.AspNet.OData.Test.Query.Controllers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Xunit;
 #else
 using System;
@@ -254,8 +267,70 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
         }
-
 #if NETCORE // Following functionality is only supported in NetCore.
+        [Fact]
+        public void OnActionExecuted_HandlesStatusCodesCorrectly()
+        {
+            // Arrange
+            HttpContext httpContext = new DefaultHttpContext();
+            httpContext.Request.Method = "Get";
+            ActionDescriptor actionDescriptor = new ActionDescriptor();
+            ActionContext actionContext = new ActionContext(httpContext, new RouteData(), actionDescriptor);
+
+            ActionExecutedContext context = new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), "someController");
+            context.Result = new ObjectResult(new { Error = "Error", Message = "Message" }) { StatusCode = 500 };
+
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+
+            // Act and Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+        }
+
+        [Fact]
+        public void OnActionExecuted_HandlesRequestsNormally()
+        {
+            // Arrange
+            var routeName = "odata";
+            IEdmModel model = new CustomersModelWithInheritance().Model;
+            var configuration = RoutingConfigurationFactory.Create();
+
+            configuration.Filter();
+
+            var request = RequestFactory.CreateFromModel(model, "http://localhost/odata/Customers?$filter=Id eq 1", routeName, new ODataPath());
+
+            IServiceProvider serviceProvider = GetServiceProvider(configuration, model, routeName);
+            request.ODataFeature().RequestContainer = serviceProvider;
+            HttpContext httpContext = request.HttpContext;
+            httpContext.RequestServices = serviceProvider;
+
+            ActionDescriptor actionDescriptor = ControllerDescriptorFactory
+                                                .Create(configuration, "CustomersController", typeof(CustomersController))
+                                                .First(descriptor => descriptor.ActionName.StartsWith("Get", StringComparison.OrdinalIgnoreCase));
+            ActionContext actionContext = new ActionContext(httpContext, new RouteData(), actionDescriptor);
+
+            ActionExecutedContext context = new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), new CustomersController());
+            context.Result = new ObjectResult(new List<Customer>()) { StatusCode = 200 };
+
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+
+            // Act and Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+
+            Assert.NotNull(context.Result as ObjectResult);
+        }
+
+        private IServiceProvider GetServiceProvider(IRouteBuilder builder, IEdmModel model, string routeName)
+        {
+            IPerRouteContainer perRouteContainer = builder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
+
+            // Create an service provider for this route. Add the default services to the custom configuration actions.
+            Action<IContainerBuilder> builderAction = ODataRouteBuilderExtensions.ConfigureDefaultServices(builder, b =>
+            {
+                b.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
+            });
+            return perRouteContainer.CreateODataRootContainer(routeName, builderAction);
+        }
+
         [Fact]
         public void OnActionExecuting_Throws_Null_Context()
         {

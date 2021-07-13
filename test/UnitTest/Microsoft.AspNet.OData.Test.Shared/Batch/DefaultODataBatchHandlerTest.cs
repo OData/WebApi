@@ -12,11 +12,14 @@ using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
 #if !NETCORE
 using System.Web.Http;
 using System.Web.Http.Routing;
 #else
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 #endif
@@ -727,7 +730,7 @@ Accept-Charset: UTF-8
             var changesetRef = $"changeset_{Guid.NewGuid()}";
             var endpoint = "http://localhost";
 
-            Type[] controllers = new[] { typeof(BatchTestCustomersController), typeof(BatchTestOrdersController), };
+            Type[] controllers = new[] { typeof(BatchTestOrdersController), };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 var builder = ODataConventionModelBuilderFactory.Create(config);
@@ -782,8 +785,73 @@ Prefer: return=representation
             var response = await client.SendAsync(batchRequest);
 
             ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+        }
 
-            // TODO: assert somehow?
+        [Fact]
+        public async Task ProcessBatchAsync_PreservesHttpContext()
+        {
+            var batchRef = $"batch_{Guid.NewGuid()}";
+            var changesetRef = $"changeset_{Guid.NewGuid()}";
+            var endpoint = "http://localhost";
+
+            Type[] controllers = new[] { typeof(BatchTestOrdersController), };
+            var server = TestServerFactory.Create(
+                controllers,
+                config =>
+                {
+                    var builder = ODataConventionModelBuilderFactory.Create(config);
+                    builder.EntitySet<BatchTestOrder>("BatchTestOrders");
+
+                    config.MapODataServiceRoute("odata", null, builder.GetEdmModel(), new CustomODataBatchHandler());
+                    config.Expand();
+                    config.EnableDependencyInjection();
+                },
+                config =>
+                {
+                    config.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+                });
+
+            var client = TestServerFactory.CreateClient(server);
+
+            var orderId = 2;
+            var createOrderPayload = $@"{{""@odata.type"":""Microsoft.AspNet.OData.Test.Batch.BatchTestOrder"",""Id"":{orderId},""Amount"":50}}";
+
+            var batchRequest = new HttpRequestMessage(HttpMethod.Post, $"{endpoint}/$batch");
+            batchRequest.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("text/plain"));
+
+            var batchContent = $@"
+--{batchRef}
+Content-Type: multipart/mixed;boundary={changesetRef}
+
+--{changesetRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 1
+
+POST {endpoint}/BatchTestOrders HTTP/1.1
+Content-Type: application/json;type=entry
+Prefer: return=representation
+
+{createOrderPayload}
+--{changesetRef}--
+--{batchRef}
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+
+GET {endpoint}/BatchTestOrders({orderId}) HTTP/1.1
+Content-Type: application/json;type=entry
+Prefer: return=representation
+
+--{batchRef}--
+";
+
+            var httpContent = new StringContent(batchContent);
+            httpContent.Headers.ContentType = MediaTypeHeaderValue.Parse($"multipart/mixed;boundary={batchRef}");
+            httpContent.Headers.ContentLength = batchContent.Length;
+            batchRequest.Content = httpContent;
+            var response = await client.SendAsync(batchRequest);
+
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
         }
 #endif
     }
@@ -823,6 +891,13 @@ Prefer: return=representation
 
                 return new List<BatchTestOrder> { order01 };
             });
+
+
+        [EnableQuery]
+        public SingleResult<BatchTestOrder> Get([FromODataUri]int key)
+        {
+            return SingleResult.Create(Orders.Where(d => d.Id.Equals(key)).AsQueryable());
+        }
 
         public static IList<BatchTestOrder> Orders
         {
@@ -926,6 +1001,23 @@ Prefer: return=representation
     public class BatchTestHeadersCustomer
     {
         public int Id { get; set; }
+    }
+
+    public class CustomODataBatchHandler : DefaultODataBatchHandler
+    {
+        /// <inheritdoc />
+        public override async Task ProcessBatchAsync(HttpContext context, RequestDelegate nextHandler)
+        {
+            // Retrieve current httpcontext.
+            var httpContextAccessor = context.RequestServices.GetService<IHttpContextAccessor>();
+            var beforeContext = httpContextAccessor?.HttpContext;
+            await base.ProcessBatchAsync(context, nextHandler);
+            var afterContext = httpContextAccessor?.HttpContext;
+            if (httpContextAccessor != null)
+            {
+                Assert.Equal(beforeContext, afterContext);
+            }
+        }
     }
 #endif
 }

@@ -42,7 +42,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal static readonly Expression ZeroConstant = Expression.Constant(0);
 
         internal static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
-                        .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+            .Single(m => m.Name.Equals("TryParse", StringComparison.Ordinal)
+                && m.GetParameters().Length == 2
+                && m.GetParameters()[0].ParameterType.Equals(typeof(string)));
 
         internal static readonly Dictionary<BinaryOperatorKind, ExpressionType> BinaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
         {

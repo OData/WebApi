@@ -7,7 +7,9 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -42,8 +44,13 @@ namespace Microsoft.AspNet.OData.Routing
 
             if (routeDirection == RouteDirection.IncomingRequest)
             {
+                ILoggerFactory loggeFactory = httpContext.RequestServices.GetService<ILoggerFactory>();
+                ILogger logger = loggeFactory.CreateLogger<ODataPathRouteConstraint>();
+
                 ODataPath path = null;
                 HttpRequest request = httpContext.Request;
+
+                logger.LogInformation("[ODataPathRouteConstraint] Match IncomingRequest starting ...");
 
                 object oDataPathValue;
                 if (values.TryGetValue(ODataRouteConstants.ODataPath, out oDataPathValue))
@@ -54,7 +61,11 @@ namespace Microsoft.AspNet.OData.Routing
                     string requestLeftPart = requestUri.GetLeftPart(UriPartial.Path);
                     string queryString = request.QueryString.HasValue ? request.QueryString.ToString() : null;
 
-                    path = GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(RouteName));
+                    logger.LogInformation($"[ODataPathRouteConstraint] GetODataPath Starting {oDataPathValue}...");
+
+                    path = GetODataPath(oDataPathValue as string, requestLeftPart, queryString, () => request.CreateRequestContainer(RouteName), logger);
+
+                    logger.LogInformation($"[ODataPathRouteConstraint] GetODataPath End...");
                 }
 
                 if (path != null)
@@ -64,11 +75,15 @@ namespace Microsoft.AspNet.OData.Routing
                     odataFeature.Path = path;
                     odataFeature.RouteName = RouteName;
 
+                    logger.LogInformation("[ODataPathRouteConstraint] Match IncomingRequest End {true} ...");
+
                     return true;
                 }
 
                 // The request doesn't match this route so dispose the request container.
                 request.DeleteRequestContainer(true);
+
+                logger.LogInformation("[ODataPathRouteConstraint] Match IncomingRequest End {false} ...");
                 return false;
             }
             else

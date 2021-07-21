@@ -4,6 +4,7 @@
 using System;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Routing
@@ -46,8 +47,9 @@ namespace Microsoft.AspNet.OData.Routing
         /// <param name="uriPathString">The Uri from start to end of path, i.e. the left portion.</param>
         /// <param name="queryString">The Uri from the query string to the end, i.e. the right portion.</param>
         /// <param name="requestContainerFactory">The request container factory.</param>
+        /// <param name="logger">The request container factory.</param>
         /// <returns>The OData path.</returns>
-        private static ODataPath GetODataPath(string oDataPathString, string uriPathString, string queryString, Func<IServiceProvider> requestContainerFactory)
+        private static ODataPath GetODataPath(string oDataPathString, string uriPathString, string queryString, Func<IServiceProvider> requestContainerFactory, ILogger logger)
         {
             ODataPath path = null;
 
@@ -95,10 +97,16 @@ namespace Microsoft.AspNet.OData.Routing
 
                 IServiceProvider requestContainer = requestContainerFactory();
                 IODataPathHandler pathHandler = requestContainer.GetRequiredService<IODataPathHandler>();
+
+                logger.LogInformation($"UriParser starting serviceRoot = '{serviceRoot}', oDataPathAndQuery = {oDataPathAndQuery} ...");
+
                 path = pathHandler.Parse(serviceRoot, oDataPathAndQuery, requestContainer);
+
+                logger.LogInformation($"UriParser succeeded!");
             }
-            catch (ODataException)
+            catch (ODataException ex)
             {
+                logger.LogError($"UriParser failed, detail info: {ex}");
                 path = null;
             }
 

@@ -941,7 +941,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 ParameterExpression parameter;
 
-                // Create a Parameter Expression when for rangeVariables which are not $it Lambda parameters or $this.
+                // Create a Parameter Expression for rangeVariables which are not $it Lambda parameters or $this.
                 if (!_lambdaParameters.TryGetValue(rangeVariable.Name, out parameter) && rangeVariable.Name != ODataThisParameterName)
                 {
                     // Work-around issue 481323 where UriParser yields a collection parameter type

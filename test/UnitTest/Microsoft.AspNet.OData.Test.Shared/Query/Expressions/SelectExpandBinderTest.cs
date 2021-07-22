@@ -869,6 +869,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void ProjectAsWrapper_Element_ExpandAndFilterByAny(string expand, object expected)
         {
             // Arrange
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1001))
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1002))
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1003))
 
             var city1 = new QueryCity() { Id = 1, CityName = 1001 };
             var city2 = new QueryCity() { Id = 2, CityName = 1002 };

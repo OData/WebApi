@@ -11,10 +11,11 @@
     <releaseNotes>https://docs.microsoft.com/en-us/odata/changelog/webapi-7x</releaseNotes>
     <language>en-US</language>
     <projectUrl>http://odata.github.io</projectUrl>
-    <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
+    <license type="expression">MIT</license>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNetCore WebApi OData</tags>
-    <iconUrl>http://static.tumblr.com/hgchgxz/9ualgdf98/icon.png</iconUrl>
+    <icon>images\odata.png</icon>    
+    <repository type="git" url="https://github.com/OData/WebApi.git" branch="master"/>
     <dependencies>
       <group targetFramework=".NETStandard2.0">
         <dependency id="Microsoft.AspNetCore.Mvc.Core" version="$AspNetCorePackageDependency$" />
@@ -36,5 +37,6 @@
     <file src="$ProductRoot$\netcoreapp3.1\Microsoft.AspNetCore.OData.xml" target="lib\netcoreapp3.1" />
     <file src="$SourcesRoot$\src\Microsoft.AspNetCore.OData\**\*.cs" target="src\Microsoft.AspNetCore.OData" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
+    <file src="$SourcesRoot$\images\odata.png" target="images\" />
   </files>
 </package>

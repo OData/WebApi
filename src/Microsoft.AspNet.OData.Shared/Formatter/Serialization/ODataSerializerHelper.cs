@@ -1,13 +1,10 @@
 ﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
+using System.Collections.Generic;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.OData;
 using Microsoft.OData.Edm;
-using Org.OData.Core.V1;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
@@ -15,7 +12,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
     /// Helper class for OData Serialization
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1053:StaticHolderTypesShouldNotHaveConstructors")]
-    public class ODataSerializerHelper
+    internal class ODataSerializerHelper
     {
         internal static void AppendInstanceAnnotations(ODataResourceBase resource, ResourceContext resourceContext, object value, ODataSerializerProvider SerializerProvider)
         {

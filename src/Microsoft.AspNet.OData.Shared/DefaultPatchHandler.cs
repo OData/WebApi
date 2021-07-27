@@ -1,13 +1,17 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.OData
-{    
+{
+    /// <summary>
+    /// This is the default Patch Handler for CLR type. This calss has default Get, Create and Update
+    /// and will do these actions. This will be used when the original collection to be Patched is provided.
+    /// </summary>
+    /// <typeparam name="TStructuralType"></typeparam>
     internal class DefaultPatchHandler<TStructuralType> : PatchMethodHandler<TStructuralType> where TStructuralType :class
     {
         Type _clrType;

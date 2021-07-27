@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -6,6 +9,10 @@ using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
+    /// <summary>
+    /// This is the default Patch Handler for non CLR type. This calss has default Get, Create and Update
+    /// and will do these actions. This will be used when the original collection to be Patched is provided.
+    /// </summary>
     internal class DefaultEdmPatchMethodHandler : EdmPatchMethodHandler
     {
         IEdmEntityType entityType;

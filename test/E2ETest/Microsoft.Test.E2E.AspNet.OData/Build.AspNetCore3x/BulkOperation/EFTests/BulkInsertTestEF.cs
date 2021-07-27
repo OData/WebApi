@@ -105,7 +105,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             string requestUri = this.BaseAddress + "/convention/Employees";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees/$delta',     
+            var content = @"{'@odata.context':'http://localhost:11001/convention/$metadata#Employees/$delta',     
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]

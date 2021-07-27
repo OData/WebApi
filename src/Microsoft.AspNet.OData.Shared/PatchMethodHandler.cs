@@ -1,23 +1,13 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+// Licensed under the MIT License.  See License.txt in the project root for license information.
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.AspNet.OData
-{    
+{
     /// <summary>
-    /// Base Interface for PatchMethodHandler
-    /// </summary>
-    public interface IPatchMethodHandler
-    {
-
-    }
-
-    /// <summary>
-    /// Handler Class to handle users methods for create, delete and update
+    /// Handler Class to handle users methods for create, delete and update.
+    /// This is the handler for data modification where there is a CLR type.
     /// </summary>
     public abstract class PatchMethodHandler<TStructuralType>: IPatchMethodHandler where TStructuralType : class
     {
@@ -57,25 +47,4 @@ namespace Microsoft.AspNet.OData
         /// <returns>The type of Nested PatchMethodHandler</returns>
         public abstract IPatchMethodHandler GetNestedPatchHandler(TStructuralType parent, string navigationPropertyName);
     }
-
-
-    /// <summary>
-    /// Enum for Patch Status
-    /// </summary>
-    public enum PatchStatus
-    {
-        /// <summary>
-        /// Success Status
-        /// </summary>
-        Success,
-        /// <summary>
-        /// Failure Status
-        /// </summary>
-        Failure,
-        /// <summary>
-        /// Resource Not Found
-        /// </summary>
-        NotFound
-    }
-
 }

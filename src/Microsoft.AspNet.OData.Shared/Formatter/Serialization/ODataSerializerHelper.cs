@@ -9,7 +9,6 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Org.OData.Core.V1;
 
-
 namespace Microsoft.AspNet.OData.Formatter.Serialization
 {
     /// <summary>

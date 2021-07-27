@@ -86,7 +86,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmPatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmPatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultPatchHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IPatchMethodHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PatchStatus.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)TransientAnnotations.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IPerRouteContainer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />

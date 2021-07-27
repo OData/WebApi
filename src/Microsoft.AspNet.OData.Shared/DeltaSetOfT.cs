@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -67,8 +68,11 @@ namespace Microsoft.AspNet.OData
         /// </summary>     
         /// <returns>DeltaSet response</returns>
         public DeltaSet<TStructuralType> Patch(IPatchMethodHandler patchHandler)
-        {            
-            return CopyChangedValues(patchHandler as PatchMethodHandler<TStructuralType>);
+        {
+            PatchMethodHandler<TStructuralType> patchHandlerOfT = patchHandler as PatchMethodHandler<TStructuralType>;
+            Debug.Assert(patchHandlerOfT != null);
+
+            return CopyChangedValues(patchHandlerOfT);
         }
 
 

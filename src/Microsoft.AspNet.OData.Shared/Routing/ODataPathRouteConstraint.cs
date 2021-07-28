@@ -98,15 +98,15 @@ namespace Microsoft.AspNet.OData.Routing
                 IServiceProvider requestContainer = requestContainerFactory();
                 IODataPathHandler pathHandler = requestContainer.GetRequiredService<IODataPathHandler>();
 
-                logger.LogInformation($"UriParser starting serviceRoot = '{serviceRoot}', oDataPathAndQuery = {oDataPathAndQuery} ...");
+                logger.LogInformation($"[ODataInfo:] UriParser starting serviceRoot='{serviceRoot}',oDataPathAndQuery={oDataPathAndQuery} ...");
 
                 path = pathHandler.Parse(serviceRoot, oDataPathAndQuery, requestContainer);
 
-                logger.LogInformation($"UriParser succeeded!");
+                logger.LogInformation($"[ODataInfo:] UriParser succeeded!");
             }
             catch (ODataException ex)
             {
-                logger.LogError($"UriParser failed, detail info: {ex}");
+                logger.LogWarning($"[ODataInfo:] UriParser failed, detail info: {ex}");
                 path = null;
             }
 

@@ -10,7 +10,9 @@ using Microsoft.AspNet.OData.Adapters;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -102,7 +104,17 @@ namespace Microsoft.AspNet.OData.Batch
 
             HttpRequest request = context.Request;
             IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
+
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+
+            Uri baseUri = requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
+            logger.LogInformation($"[ODataInfo:] ParseBatchRequestsAsync 1, RouteName='{ODataRouteName}', baseUri={baseUri} ...");
+
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
+
+            baseUri = requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
+            logger.LogInformation($"[ODataInfo:] ParseBatchRequestsAsync 2, RouteName='{ODataRouteName}', baseUri={baseUri} ...");
 
             ODataMessageReader reader = request.GetODataMessageReader(requestContainer);
 
@@ -119,6 +131,10 @@ namespace Microsoft.AspNet.OData.Batch
                     {
                         changeSetContext.Request.CopyBatchRequestProperties(request);
                         changeSetContext.Request.DeleteRequestContainer(false);
+
+                        string displayUrl = changeSetContext.Request.GetDisplayUrl();
+                        logger.LogInformation($"[ODataInfo:] ParseBatchRequestsAsync 3, RouteName='{ODataRouteName}', subRequestUri={displayUrl} ...");
+
                     }
                     requests.Add(new ChangeSetRequestItem(changeSetContexts));
                 }
@@ -127,6 +143,10 @@ namespace Microsoft.AspNet.OData.Batch
                     HttpContext operationContext = await batchReader.ReadOperationRequestAsync(context, batchId, true, cancellationToken);
                     operationContext.Request.CopyBatchRequestProperties(request);
                     operationContext.Request.DeleteRequestContainer(false);
+
+                    string displayUrl = operationContext.Request.GetDisplayUrl();
+                    logger.LogInformation($"[ODataInfo:] ParseBatchRequestsAsync 4, RouteName='{ODataRouteName}', subRequestUri={displayUrl} ...");
+
                     requests.Add(new OperationRequestItem(operationContext));
                 }
             }

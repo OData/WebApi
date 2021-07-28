@@ -22,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
 using Microsoft.OData;
@@ -269,6 +270,11 @@ namespace Microsoft.AspNet.OData.Batch
         {
             Contract.Assert(request != null);
 
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+
+            logger.LogInformation($"[ODataInfo:] GetODataBatchBaseUri, RouteName='{oDataRouteName}'starting ...");
+
             if (oDataRouteName == null)
             {
                 // Return request's base address.
@@ -304,6 +310,9 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw new InvalidOperationException(SRResources.UnableToDetermineBaseUrl);
             }
+
+            logger.LogInformation($"[ODataInfo:] GetODataBatchBaseUri, return base address='{baseAddress}' End ...");
+
             return new Uri(baseAddress);
         }
     }

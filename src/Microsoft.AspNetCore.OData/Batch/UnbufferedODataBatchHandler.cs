@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -39,7 +40,17 @@ namespace Microsoft.AspNet.OData.Batch
             // This container is for the overall batch request.
             HttpRequest request = context.Request;
             IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
+
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+
+            Uri baseUri = requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
+            logger.LogInformation($"[ODataInfo:] ProcessBatchAsync 1, RouteName='{ODataRouteName}', baseUri={baseUri} ...");
+
             requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
+
+            baseUri = requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
+            logger.LogInformation($"[ODataInfo:] ProcessBatchAsync 2, RouteName='{ODataRouteName}', baseUri={baseUri} ...");
 
             ODataMessageReader reader = request.GetODataMessageReader(requestContainer);
 

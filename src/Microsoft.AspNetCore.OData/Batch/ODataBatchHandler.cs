@@ -8,6 +8,8 @@ using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNet.OData.Batch
 {
@@ -75,6 +77,10 @@ namespace Microsoft.AspNet.OData.Batch
             {
                 throw Error.ArgumentNull("request");
             }
+
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+            logger.LogInformation($"[ODataInfo:] GetODataBatchBaseUri, RouteName='{ODataRouteName}'starting ...");
 
             return request.GetODataBatchBaseUri(ODataRouteName, ODataRoute);
         }

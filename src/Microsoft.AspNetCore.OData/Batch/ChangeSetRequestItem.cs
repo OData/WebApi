@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Microsoft.AspNet.OData.Batch
 {
@@ -50,15 +53,26 @@ namespace Microsoft.AspNet.OData.Batch
 
             foreach (HttpContext context in Contexts)
             {
+                ILoggerFactory loggeFactory = context.RequestServices.GetService<ILoggerFactory>();
+                ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+                string requestUri = context.Request.GetDisplayUrl();
+                logger.LogInformation($"[ODataInfo:] SendSubRequestAsync to requestUri='{requestUri}' starting ...");
+
                 await SendRequestAsync(handler, context, contentIdToLocationMapping);
+
+                logger.LogInformation($"[ODataInfo:] SendSubRequestAsync to requestUri='{requestUri}' End");
 
                 HttpResponse response = context.Response;
                 if (response.IsSuccessStatusCode())
                 {
+                    logger.LogInformation($"[ODataInfo:] SendSubRequestAsync, requestUri='{requestUri}' Successes ...");
+
                     responseContexts.Add(context);
                 }
                 else
                 {
+                    logger.LogInformation($"[ODataInfo:] SendSubRequestAsync, requestUri='{requestUri}' Failed ...");
+
                     responseContexts.Clear();
                     responseContexts.Add(context);
                     return new ChangeSetResponseItem(responseContexts);

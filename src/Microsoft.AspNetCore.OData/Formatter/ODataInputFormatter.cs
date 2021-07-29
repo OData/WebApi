@@ -13,6 +13,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Headers;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
@@ -208,11 +209,20 @@ namespace Microsoft.AspNet.OData.Formatter
                 throw Error.ArgumentNull("request");
             }
 
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataInputFormatter>();
+
+            string routeName = request.ODataFeature().RouteName;
+            string uri = request.GetDisplayUrl();
+            logger.LogInformation($"[ODataInfo:] ODataInputFormatter 1, RouteName='{routeName}', request={uri} ...");
+
             string baseAddress = request.GetUrlHelper().CreateODataLink();
             if (baseAddress == null)
             {
                 throw new SerializationException(SRResources.UnableToDetermineBaseUrl);
             }
+
+            logger.LogInformation($"[ODataInfo:] ODataInputFormatter 4, RouteName='{routeName}', baseAddress={baseAddress} ...");
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
         }

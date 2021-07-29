@@ -10,7 +10,11 @@ using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using ODataPathSegment = Microsoft.OData.UriParser.ODataPathSegment;
+using Microsoft.AspNet.OData.Formatter;
+using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Microsoft.AspNet.OData.Extensions
 {
@@ -53,8 +57,18 @@ namespace Microsoft.AspNet.OData.Extensions
                 throw Error.InvalidOperation(SRResources.RequestMustHaveODataRouteName);
             }
 
+            ILoggerFactory loggeFactory = request.HttpContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataInputFormatter>();
+
+            string uri = request.GetDisplayUrl();
+            logger.LogInformation($"[ODataInfo:] ODataInputFormatter 2, RouteName='{routeName}', request={uri} ...");
+
             IODataPathHandler pathHandler = request.GetPathHandler();
-            return CreateODataLink(urlHelper, routeName, pathHandler, segments);
+            string link = CreateODataLink(urlHelper, routeName, pathHandler, segments);
+
+            logger.LogInformation($"[ODataInfo:] ODataInputFormatter 3, RouteName='{routeName}', link={link} ...");
+
+            return link;
         }
 
         /// <summary>

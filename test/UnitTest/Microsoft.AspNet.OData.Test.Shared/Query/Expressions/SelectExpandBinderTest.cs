@@ -862,6 +862,67 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.Equal(4, fourth.Id);
         }
 
+        [Theory]
+        [InlineData("Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1001))", new[] { "QueryOrder1" })]
+        [InlineData("Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1002))", new[] { "QueryOrder1", "QueryOrder3" })]
+        [InlineData("Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1003))", new[] { "QueryOrder2", "QueryOrder3" })]
+        public void ProjectAsWrapper_Element_ExpandAndFilterByAny(string expand, object expected)
+        {
+            // Arrange
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1001))
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1002))
+            // Customer?$expand=Orders($filter=Customer/HomeAddress/Cities/any(e:e/CityName eq 1003))
+
+            var city1 = new QueryCity() { Id = 1, CityName = 1001 };
+            var city2 = new QueryCity() { Id = 2, CityName = 1002 };
+            var city3 = new QueryCity() { Id = 3, CityName = 1003 };
+            var city4 = new QueryCity() { Id = 4, CityName = 1004 };
+
+            QueryCustomer customer1 = new QueryCustomer
+            {
+                HomeAddress = new QueryAddress
+                {
+                    Cities = new List<QueryCity>() { city1, city2 }
+                }
+            };
+
+            QueryCustomer customer2 = new QueryCustomer
+            {
+                HomeAddress = new QueryAddress
+                {
+                    Cities = new List<QueryCity>() { city3, city4 }
+                }
+            };
+
+            QueryCustomer customer3 = new QueryCustomer
+            {
+                HomeAddress = new QueryAddress
+                {
+                    Cities = new List<QueryCity>() { city2, city3 }
+                }
+            };
+
+            var orders = new List<QueryOrder>
+            {
+               new QueryOrder{ Title = "QueryOrder1", Customer = customer1  },
+               new QueryOrder{ Title = "QueryOrder2", Customer = customer2  },
+               new QueryOrder{ Title = "QueryOrder3", Customer = customer3  },
+            };
+
+            Expression source = Expression.Constant(new QueryCustomer() { Orders = orders });
+            SelectExpandClause selectExpandClause = ParseSelectExpand(null, expand, _model, _customer, _customers);
+            Assert.NotNull(selectExpandClause);
+
+            // Act
+            Expression projection = _binder.ProjectAsWrapper(source, selectExpandClause, _customer, _customers);
+
+            // Assert
+            var customerWrappers = Expression.Lambda(projection).Compile().DynamicInvoke() as SelectExpandWrapper<QueryCustomer>;
+            var orderWrappers = customerWrappers.Container.ToDictionary(PropertyMapper)["Orders"] as IEnumerable<SelectExpandWrapper<QueryOrder>>;
+            var orderTitleList = orderWrappers.Select(s => s.Instance.Title).ToList();
+            Assert.Equal(expected, orderTitleList);
+        }
+
         [Fact]
         public void ProjectAsWrapper_Element_ProjectedValueContainsSubKeys_IfDollarRefInDollarExpandOnSubNavigationProperty()
         {

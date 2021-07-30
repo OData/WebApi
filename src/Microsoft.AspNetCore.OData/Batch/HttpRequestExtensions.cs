@@ -53,6 +53,30 @@ namespace Microsoft.AspNet.OData.Batch
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="requestContainer"></param>
+        /// <param name="baseUri"></param>
+        /// <returns></returns>
+        public static ODataMessageReader GetODataMessageReader(this HttpRequest request, IServiceProvider requestContainer, Uri baseUri)
+        {
+            if (request == null)
+            {
+                throw Error.ArgumentNull("request");
+            }
+
+            IODataRequestMessage oDataRequestMessage = ODataMessageWrapperHelper.Create(request.Body, request.Headers, requestContainer);
+
+            // ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>();
+            ODataMessageReaderSettings settings = new ODataMessageReaderSettings();
+            settings.BaseUri = baseUri;
+            ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
+            
+            return oDataMessageReader;
+        }
+
+        /// <summary>
         /// Copy an absolute Uri to a <see cref="HttpRequest"/> stream.
         /// </summary>
         /// <param name="request">The request.</param>

@@ -2,6 +2,7 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 #if NETFX // System.Data.Linq.Binary is only supported in the AspNet version.
 using System.Data.Linq;
@@ -30,6 +31,8 @@ namespace Microsoft.AspNet.OData.Formatter
     internal static class EdmLibHelpers
     {
         private static readonly EdmCoreModel _coreModel = EdmCoreModel.Instance;
+
+        private static readonly ConcurrentDictionary<IEdmModel, ConcurrentDictionary<Type, IEdmType>> _cache = new ConcurrentDictionary<IEdmModel, ConcurrentDictionary<Type, IEdmType>>();
 
         private static readonly Dictionary<Type, IEdmPrimitiveType> _builtInTypesMapping =
             new[]
@@ -161,6 +164,18 @@ namespace Microsoft.AspNet.OData.Formatter
                     clrType = underlyingType;
                 }
 
+                if (_cache.TryGetValue(edmModel, out var cachedClrTypes))
+                {
+                    if (cachedClrTypes.TryGetValue(clrType, out var cachedType))
+                    {
+                        return cachedType;
+                    }
+                }
+                else
+                {
+                    _cache.TryAdd(edmModel, new ConcurrentDictionary<Type, IEdmType>());
+                }
+
                 // search for the ClrTypeAnnotation and return it if present
                 IEdmType returnType =
                     edmModel
@@ -179,6 +194,8 @@ namespace Microsoft.AspNet.OData.Formatter
                     // go up the inheritance tree to see if we have a mapping defined for the base type.
                     returnType = returnType ?? GetEdmType(edmModel, TypeHelper.GetBaseType(clrType), testCollections);
                 }
+
+                _cache[edmModel].TryAdd(clrType, returnType);
                 return returnType;
             }
         }
@@ -735,7 +752,7 @@ namespace Microsoft.AspNet.OData.Formatter
             if (edmModel == null)
             {
                 throw Error.ArgumentNull("edmModel");
-            }         
+            }
 
             DynamicPropertyDictionaryAnnotation annotation =
                 edmModel.GetAnnotationValue<DynamicPropertyDictionaryAnnotation>(edmType);

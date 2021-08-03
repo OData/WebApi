@@ -8,6 +8,7 @@ using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -38,8 +39,9 @@ namespace Microsoft.AspNet.OData.Batch
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
+        /// <param name="logger">The dependency injection container for the request.</param>
         /// <returns>A task object that produces an <see cref="ODataMessageReader"/> when completed.</returns>
-        public static ODataMessageReader GetODataMessageReader(this HttpRequest request, IServiceProvider requestContainer)
+        public static ODataMessageReader GetODataMessageReader(this HttpRequest request, IServiceProvider requestContainer, ILogger logger = null)
         {
             if (request == null)
             {
@@ -49,6 +51,12 @@ namespace Microsoft.AspNet.OData.Batch
             IODataRequestMessage oDataRequestMessage = ODataMessageWrapperHelper.Create(request.Body, request.Headers, requestContainer);
             ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>();
             ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
+
+            if (logger != null)
+            {
+                 logger.LogInformation($"[ODataInfo:] GetODataMessageReader, settings={settings.BaseUri} ...");
+            }
+
             return oDataMessageReader;
         }
 

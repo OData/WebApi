@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using Microsoft.OData;
 
@@ -118,13 +120,25 @@ namespace Microsoft.AspNet.OData.Batch
         private static async Task<HttpContext> ReadOperationInternalAsync(
             ODataBatchReader reader, HttpContext originalContext, Guid batchId, Guid? changeSetId, CancellationToken cancellationToken, bool bufferContentStream = true)
         {
+            // add log: batchRequest.Url
+            ILoggerFactory loggeFactory = originalContext.RequestServices.GetService<ILoggerFactory>();
+            ILogger logger = loggeFactory.CreateLogger<ODataBatchHandler>();
+            string displayUrl = originalContext.Request.GetDisplayUrl();
+            logger.LogInformation($"[ODataInfo:] ReadOperationInternalAsync 1, original-Request={displayUrl} ...");
+
             ODataBatchOperationRequestMessage batchRequest = await reader.CreateOperationRequestMessageAsync();
+
+            string batchRequestUrl = batchRequest.Url.OriginalString;
+            logger.LogInformation($"[ODataInfo:] ReadOperationInternalAsync 2, Read sub-Request={batchRequestUrl} ...");
 
             HttpContext context = CreateHttpContext(originalContext);
             HttpRequest request = context.Request;
 
             request.Method = batchRequest.Method;
             request.CopyAbsoluteUrl(batchRequest.Url);
+
+            string newUrl = request.GetDisplayUrl();
+            logger.LogInformation($"[ODataInfo:] ReadOperationInternalAsync 3, new-Request={newUrl} ...");
 
             // Not using bufferContentStream. Unlike AspNet, AspNetCore cannot guarantee the disposal
             // of the stream in the context of execution so there is no choice but to copy the stream

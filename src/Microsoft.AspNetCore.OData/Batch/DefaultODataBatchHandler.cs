@@ -117,7 +117,7 @@ namespace Microsoft.AspNet.OData.Batch
             baseUri = requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
             logger.LogInformation($"[ODataInfo:] ParseBatchRequestsAsync 2, RouteName='{ODataRouteName}', baseUri={baseUri} ...");
 
-            ODataMessageReader reader = request.GetODataMessageReader(requestContainer, batchbaseUri);
+            ODataMessageReader reader = request.GetODataMessageReader(requestContainer, logger);
 
             CancellationToken cancellationToken = context.RequestAborted;
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();

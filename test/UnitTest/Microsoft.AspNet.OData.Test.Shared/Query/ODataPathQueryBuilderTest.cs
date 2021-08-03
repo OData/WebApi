@@ -205,7 +205,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var pathHandler = new DefaultODataPathHandler();
             var odataPath = pathHandler.Parse(model, "http://any/", path);
             IQueryable source = Array.CreateInstance(typeof(ODataPathQuery_Customer), 0).AsQueryable();
-            var queryBuilder = new ODataPathQueryBuilder(source, model, odataPath);
+            var queryBuilder = new ODataPathQueryBuilder(source, odataPath);
             ODataPathQueryResult result = queryBuilder.BuildQuery();
 
             string queryExpression = ExpressionStringBuilder.ToString(result.Result.Expression);
@@ -224,7 +224,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var pathHandler = new DefaultODataPathHandler();
             var odataPath = pathHandler.Parse(model, "http://any/", path);
             IQueryable source = Array.CreateInstance(typeof(ODataPathQuery_Customer), 0).AsQueryable();
-            var queryBuilder = new ODataPathQueryBuilder(source, model, odataPath);
+            var queryBuilder = new ODataPathQueryBuilder(source, odataPath);
             ODataPathQueryResult result = queryBuilder.BuildQuery();
 
             string queryExpression = ExpressionStringBuilder.ToString(result.Result.Expression);
@@ -243,7 +243,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var pathHandler = new DefaultODataPathHandler();
             var odataPath = pathHandler.Parse(model, "http://any/", path);
             IQueryable source = Array.CreateInstance(typeof(ODataPathQuery_Customer), 0).AsQueryable();
-            var queryBuilder = new ODataPathQueryBuilder(source, model, odataPath);
+            var queryBuilder = new ODataPathQueryBuilder(source, odataPath);
             ODataPathQueryResult result = queryBuilder.BuildQuery();
 
             string queryExpression = ExpressionStringBuilder.ToString(result.Result.Expression);
@@ -264,7 +264,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             var pathHandler = new DefaultODataPathHandler();
             var odataPath = pathHandler.Parse(model, "http://any/", path);
             IQueryable source = Array.CreateInstance(typeof(ODataPathQuery_Customer), 0).AsQueryable();
-            var queryBuilder = new ODataPathQueryBuilder(source, model, odataPath);
+            var queryBuilder = new ODataPathQueryBuilder(source, odataPath);
             ODataPathQueryResult result = queryBuilder.BuildQuery();
 
             Assert.Null(result);

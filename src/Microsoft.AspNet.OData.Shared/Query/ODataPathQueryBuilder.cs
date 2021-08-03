@@ -26,9 +26,8 @@ namespace Microsoft.AspNet.OData.Query
         /// Creates an instance of <see cref="ODataPathQueryBuilder"/>
         /// </summary>
         /// <param name="source">The original <see cref="IQueryable"/> to be transformed</param>
-        /// <param name="model">The <see cref="IEdmModel"/></param>
         /// <param name="path">The <see cref="ODataPath"/> based on which to transform the <see cref="source"/></param>
-        public ODataPathQueryBuilder(IQueryable source, IEdmModel model, Routing.ODataPath path)
+        public ODataPathQueryBuilder(IQueryable source, Routing.ODataPath path)
         {
             this.source = source;
             this.path = path;

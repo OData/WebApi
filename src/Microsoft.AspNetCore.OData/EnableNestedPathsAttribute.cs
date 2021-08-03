@@ -2,7 +2,6 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNet.OData.Adapters;
@@ -12,7 +11,6 @@ using Microsoft.AspNet.OData.Query;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.OData.Edm;
@@ -88,12 +86,11 @@ namespace Microsoft.AspNet.OData
                 ODataPath path = actionExecutedContext.HttpContext.ODataFeature().Path;
                 IEdmModel model = actionExecutedContext.HttpContext.Request.GetModel();
 
-                var queryBuilder = new ODataPathQueryBuilder(result, model, path);
+                var queryBuilder = new ODataPathQueryBuilder(result, path);
                 ODataPathQueryResult transformedResult = queryBuilder.BuildQuery();
 
                 if (transformedResult == null)
                 {
-                    // TODO: is this the best way to return 404
                     actionExecutedContext.Result = new NotFoundObjectResult(null);
                 }
                 else if (path.EdmType.TypeKind == EdmTypeKind.Collection || transformedResult.HasCountSegment)
@@ -127,7 +124,6 @@ namespace Microsoft.AspNet.OData
 
                             if (singleValue == null)
                             {
-                                // TODO: is this the best way to return 404
                                 actionExecutedContext.Result = new NotFoundObjectResult(null);
                             }
                             else

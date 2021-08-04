@@ -164,9 +164,9 @@ namespace Microsoft.AspNet.OData.Formatter
                     clrType = underlyingType;
                 }
 
-                if (_cache.TryGetValue(edmModel, out var cachedClrTypes))
+                if (_cache.TryGetValue(edmModel, out ConcurrentDictionary<Type, IEdmType> cachedClrTypes))
                 {
-                    if (cachedClrTypes.TryGetValue(clrType, out var cachedType))
+                    if (cachedClrTypes.TryGetValue(clrType, out IEdmType cachedType))
                     {
                         return cachedType;
                     }

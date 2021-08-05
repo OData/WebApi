@@ -43,5 +43,18 @@ namespace Microsoft.AspNet.OData.Adapters
         {
             return this.innerMap.Any(a => String.Equals(a.ActionName, name, StringComparison.InvariantCultureIgnoreCase));
         }
+
+        /// <summary>
+        /// Gets the action descriptor of the specified action
+        /// </summary>
+        /// <param name="actionName">The name of the action</param>
+        /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
+        public IWebApiActionDescriptor GetActionDescriptor(string actionName)
+        {
+            ControllerActionDescriptor innerDescriptor = this.innerMap.FirstOrDefault(
+                a => string.Equals(a.ActionName, actionName, StringComparison.InvariantCultureIgnoreCase));
+
+            return innerDescriptor == null ? null : new WebApiActionDescriptor(innerDescriptor);
+        }
     }
 }

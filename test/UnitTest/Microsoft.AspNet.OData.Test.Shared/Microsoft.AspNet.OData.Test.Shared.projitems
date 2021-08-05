@@ -146,6 +146,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UIntEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UShortEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\VersionTestHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EnableNestedPathsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\RoutingConfigurationExtensions.cs" />
@@ -242,6 +243,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\SelectExpandWrapperTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Expressions\UriFunctionBinderTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandlerTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ODataPathQueryBuilderTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParserTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\CountQueryValidatorTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\Validators\FilterQueryValidatorTest.cs" />
@@ -289,6 +291,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntityRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\EntitySetRoutingConventionTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\FunctionRoutingConventionTests.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NestedPathsRoutingConventionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\OperationImportRoutingConventionTests.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\MockNavigationSourceRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationRoutingConventionTest.cs" />

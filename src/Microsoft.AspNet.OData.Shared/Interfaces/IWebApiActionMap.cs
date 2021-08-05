@@ -19,5 +19,12 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <param name="name">The key.</param>
         /// <returns>True if the key exist; false otherwise.</returns>
         bool Contains(string name);
+
+        /// <summary>
+        /// Gets the action descriptor of the specified action
+        /// </summary>
+        /// <param name="actionName">The name of the action</param>
+        /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
+        IWebApiActionDescriptor GetActionDescriptor(string actionName);
     }
 }

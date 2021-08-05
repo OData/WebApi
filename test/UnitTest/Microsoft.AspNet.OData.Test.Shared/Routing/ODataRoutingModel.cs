@@ -33,6 +33,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
             builder.EntitySet<NotFoundCustomer>("NotFoundCustomers");
             builder.EntitySet<NotFoundWithIdCustomer>("NotFoundWithIdCustomers");
             builder.EntitySet<AttributeCustomer>("AttributeCustomers");
+            builder.EntitySet<NestedPathsCustomer>("NestedPathsCustomers");
+            builder.EntitySet<NestedPathsWithOverridesCustomer>("NestedPathsWithOverridesCustomers");
             builder.ComplexType<Dog>();
             builder.ComplexType<Cat>();
             builder.EntityType<SpecialProduct>();
@@ -393,6 +395,20 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             public int ID { get; set; }
             public string Name { get; set; }
+        }
+
+        public class NestedPathsCustomer
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+            public List<Product> Products { get; set; }
+        }
+
+        public class NestedPathsWithOverridesCustomer
+        {
+            public int ID { get; set; }
+            public string Name { get; set; }
+            public List<Product> Products { get; set; }
         }
     }
 }

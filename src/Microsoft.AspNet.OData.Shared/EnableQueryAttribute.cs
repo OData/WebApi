@@ -611,7 +611,7 @@ namespace Microsoft.AspNet.OData
                 {
                     IQueryable queryable = singleResultCollection as IQueryable;
                     queryable = ApplyQuery(queryable, queryOptions);
-                    return SingleOrDefault(queryable, actionDescriptor);
+                    return QueryHelpers.SingleOrDefault(queryable, actionDescriptor);
                 }
             }
             else
@@ -674,44 +674,6 @@ namespace Microsoft.AspNet.OData
             }
 
             return elementClrType;
-        }
-
-        /// <summary>
-        /// Get a single or default value from a collection.
-        /// </summary>
-        /// <param name="queryable">The response value as <see cref="IQueryable"/>.</param>
-        /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
-        /// <returns></returns>
-        internal static object SingleOrDefault(
-            IQueryable queryable,
-            IWebApiActionDescriptor actionDescriptor)
-        {
-            var enumerator = queryable.GetEnumerator();
-            try
-            {
-                var result = enumerator.MoveNext() ? enumerator.Current : null;
-
-                if (enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException(Error.Format(
-                        SRResources.SingleResultHasMoreThanOneEntity,
-                        actionDescriptor.ActionName,
-                        actionDescriptor.ControllerName,
-                        "SingleResult"));
-                }
-
-                return result;
-            }
-            finally
-            {
-                // Ensure any active/open database objects that were created
-                // iterating over the IQueryable object are properly closed.
-                var disposable = enumerator as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
-            }
         }
 
         /// <summary>

@@ -696,6 +696,15 @@ public class Microsoft.AspNet.OData.UnqualifiedCallAndEnumPrefixFreeResolver : M
 [
 AttributeUsageAttribute(),
 ]
+public sealed class Microsoft.AspNet.OData.EnableNestedPathsAttribute : Microsoft.AspNetCore.Mvc.Filters.ActionFilterAttribute, IActionFilter, IAsyncActionFilter, IAsyncResultFilter, IFilterMetadata, IOrderedFilter, IResultFilter {
+	public EnableNestedPathsAttribute ()
+
+	public virtual void OnActionExecuted (Microsoft.AspNetCore.Mvc.Filters.ActionExecutedContext actionExecutedContext)
+}
+
+[
+AttributeUsageAttribute(),
+]
 public sealed class Microsoft.AspNet.OData.FromODataUriAttribute : Microsoft.AspNetCore.Mvc.ModelBinderAttribute, IBinderTypeProviderMetadata, IBindingSourceMetadata, IModelNameProvider {
 	public FromODataUriAttribute ()
 }
@@ -4170,6 +4179,12 @@ public class Microsoft.AspNet.OData.Routing.Conventions.MetadataRoutingConventio
 
 public class Microsoft.AspNet.OData.Routing.Conventions.NavigationRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
 	public NavigationRoutingConvention ()
+
+	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
+}
+
+public class Microsoft.AspNet.OData.Routing.Conventions.NestedPathsRoutingConvention : NavigationSourceRoutingConvention, IODataRoutingConvention {
+	public NestedPathsRoutingConvention ()
 
 	public virtual string SelectAction (Microsoft.AspNetCore.Routing.RouteContext routeContext, SelectControllerResult controllerResult, System.Collections.Generic.IEnumerable`1[[Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor]] actionDescriptors)
 }

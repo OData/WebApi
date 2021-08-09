@@ -30,16 +30,23 @@ namespace Microsoft.AspNet.OData.Extensions
 
             // ReaderSettings and WriterSettings are registered as prototype services.
             // There will be a copy (if it is accessed) of each prototype for each request.
-            builder.AddServicePrototype(new ODataMessageReaderSettings
+            //builder.AddServicePrototype(new ODataMessageReaderSettings
+            //{
+            //    EnableMessageStreamDisposal = false,
+            //    MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+            //});
+
+            builder.AddService(ServiceLifetime.Scoped, sp => new ODataMessageWriterSettings
             {
                 EnableMessageStreamDisposal = false,
                 MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
             });
-            builder.AddServicePrototype(new ODataMessageWriterSettings
-            {
-                EnableMessageStreamDisposal = false,
-                MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
-            });
+
+            //builder.AddServicePrototype(new ODataMessageWriterSettings
+            //{
+            //    EnableMessageStreamDisposal = false,
+            //    MessageQuotas = new ODataMessageQuotas { MaxReceivedMessageSize = Int64.MaxValue },
+            //});
 
             // QueryValidators.
             builder.AddService<CountQueryValidator>(ServiceLifetime.Singleton);

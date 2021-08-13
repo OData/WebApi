@@ -270,11 +270,13 @@ namespace Microsoft.AspNet.OData.Test
             var delta = new Delta<NewCustomerUnmapped>();
        
             //Act
-            var properties = delta.GetUnchangedPropertyNames();
+            var properties = delta.GetUnchangedPropertyNames().ToList();
 
             //Assert
-            Assert.Single(properties);
-            Assert.Equal("Id", properties.Single());
+            Assert.Equal(3, properties.Count);
+            Assert.Equal("Id", properties.First());            
+            Assert.Equal("City", properties[1]);
+            Assert.Equal("State", properties[2]);
         }
 
         [Fact]
@@ -287,9 +289,10 @@ namespace Microsoft.AspNet.OData.Test
             var properties = delta.GetUnchangedPropertyNames().ToList();
 
             //Assert
-            Assert.Equal(2, properties.Count);
-            Assert.Equal("Id", properties.First());
-            Assert.Equal("Name", properties[1]);
+            Assert.Equal(2, properties.Count);            
+            Assert.Equal("Name", properties[0]);
+            Assert.Equal("Street", properties[1]);
+            
         }
 
         [Fact]

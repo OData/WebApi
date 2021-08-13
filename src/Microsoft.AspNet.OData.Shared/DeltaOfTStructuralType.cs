@@ -612,6 +612,11 @@ namespace Microsoft.AspNet.OData
 
         private bool IsIgnoredProperty(bool isTypeDataContract, PropertyInfo propertyInfo)
         {
+            //This is for Ignoring the property that matches below criteria
+            //1. Its marked as NotMapped
+            //2. Its a datacontract type but property is not marked as datamember
+            //3. Its marked with IgnoreDataMember (but not where types datacontract and property marked with datamember)
+
             bool hasNotMappedAttr = propertyInfo.GetCustomAttributes(typeof(NotMappedAttribute), inherit: true).Any();
 
             if (hasNotMappedAttr)
@@ -619,14 +624,12 @@ namespace Microsoft.AspNet.OData
                 return true;
             }
 
-            bool ignoreDataMember = propertyInfo.GetCustomAttributes(typeof(IgnoreDataMemberAttribute), inherit: true).Any();
-
-            if (ignoreDataMember)
+            if (isTypeDataContract)
             {
-                return !(isTypeDataContract && propertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any());
+                return !propertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
             }
 
-            return false;
+            return propertyInfo.GetCustomAttributes(typeof(IgnoreDataMemberAttribute), inherit: true).Any();           
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties

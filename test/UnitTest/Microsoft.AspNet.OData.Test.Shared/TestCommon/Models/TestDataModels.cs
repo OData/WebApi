@@ -70,6 +70,15 @@ namespace Microsoft.AspNet.OData.Test.Common.Models
         public string Name { get; set; }
         [NotMapped]
         public int Age { get; set; }
+
+        [DataMember]
+        [IgnoreDataMember]
+        public string Street { get; set; }
+
+        [DataMember]
+        public string City { get; set; }
+
+        public string State { get; set; }
     }
 
     [DataContract]
@@ -82,5 +91,11 @@ namespace Microsoft.AspNet.OData.Test.Common.Models
         public string Name { get; set; }
         [IgnoreDataMember]
         public int Age { get; set; }
+
+        [DataMember]
+        public string Street { get; set; }
+
+        public string City { get; set; }
     }
+      
 }

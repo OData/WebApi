@@ -8,11 +8,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -588,7 +591,7 @@ namespace Microsoft.AspNet.OData
                 _structuredType,
                 (backingType) => backingType
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
+                    .Where(p => !IsIgnoredProperty(backingType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any(), p) && (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
 
@@ -605,6 +608,25 @@ namespace Microsoft.AspNet.OData
             {
                 _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
             }
+        }
+
+        private bool IsIgnoredProperty(bool isTypeDataContract, PropertyInfo propertyInfo)
+        {
+            bool hasNotMappedAttr = propertyInfo.GetCustomAttributes(typeof(NotMappedAttribute), inherit: true).Any();
+
+            if (hasNotMappedAttr)
+            {
+                return true;
+            }
+
+            bool ignoreDataMember = propertyInfo.GetCustomAttributes(typeof(IgnoreDataMemberAttribute), inherit: true).Any();
+
+            if (ignoreDataMember)
+            {
+                return !(isTypeDataContract && propertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any());
+            }
+
+            return false;
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties

@@ -4,8 +4,8 @@
     <id>Microsoft.AspNet.OData</id>
     <title>Microsoft ASP.NET Web API 2.2 for OData v4.0</title>
     <version>$VersionNuGetSemantic$</version>
-    <authors>Microsoft</authors>
-    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+    <authors>OData (.NET Foundation)</authors>
+    <copyright>&#169; .NET Foundation and Contributors. All rights reserved.</copyright>
     <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Web API and to support OData query syntax for your web APIs.</description>
     <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Web API.</summary>
 	<releaseNotes>https://docs.microsoft.com/en-us/odata/changelog/webapi-7x</releaseNotes>

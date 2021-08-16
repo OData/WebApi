@@ -80,4 +80,15 @@
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+  <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>ProductRoot=$(ProductBinPath);VersionNuGetSemantic=$(VersionNuGetSemantic)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);NightlyBuildVersion=$(NightlyBuildVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);SourcesRoot=$(RootDir)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);AspNetCorePackageDependency=$(AspNetCorePackageDependency)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);DependencyInjection2PackageDependency=$(DependencyInjection2PackageDependency)</NuspecProperties>
+       <NuspecProperties>$(NuspecProperties);ODataLibPackageDependency=$(ODataLibPackageDependency)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);NewtonsoftJsonPackageDependency=$(NewtonsoftJsonPackageDependency)</NuspecProperties>
+    </PropertyGroup>
+  </Target>
 </Project>

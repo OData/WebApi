@@ -2,7 +2,8 @@
 
  Build  | Status
 --------|---------
-WebApi Rolling | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Rolling?branchName=master"/> 
+Odata.WebApi Rolling Dotnet pipeline | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Rolling?branchName=master"/> 
+WebApi Rolling | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Rolling"/> 
 WebApi Nightly | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Nightly?branchName=master"/> 
 
 ### Introduction

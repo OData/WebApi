@@ -2,7 +2,7 @@
 
  Build  | Status
 --------|---------
-Odata.WebApi Rolling Dotnet pipeline | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Rolling?branchName=master"/> 
+Odata.WebApi Rolling Dotnet pipeline | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi-Rolling?branchName=master"/> 
 WebApi Rolling | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Rolling"/> 
 WebApi Nightly | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Nightly?branchName=master"/> 
 
@@ -125,4 +125,4 @@ This project has adopted the [.NET Foundation Contributor Covenant Code of Condu
 
 This project is supported by the [.NET Foundation](https://dotnetfoundation.org).
 
-OData Connected Service is a Copyright &copy; .NET Foundation and other contributors. It is licensed under [MIT License](https://github.com/OData/WebApi/blob/master/License.txt)
+WebApi is a Copyright of &copy; .NET Foundation and other contributors. It is licensed under [MIT License](https://github.com/OData/WebApi/blob/master/License.txt)

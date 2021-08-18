@@ -26,7 +26,7 @@ Pull request of features and bug fixes are both welcomed. Before you send a pull
 ### Complete a Contribution License Agreement (CLA)
 You will need to complete a Contributor License Agreement (CLA). Briefly, this agreement testifies that you are granting us permission to use the submitted change according to the terms of the project's license, and that the work being submitted is under appropriate copyright.
 
-Please submit a Contributor License Agreement (CLA) before submitting a pull request. Please fill and submit the [Contribution License Agreement Form | Microsoft](https://cla.microsoft.com/). Be sure to include your GitHub user name along with the agreement. Only after we have received the signed CLA, we'll review the pull request that you send. You only need to do this once for contributing to any Microsoft open source projects. 
+Please submit a Contributor License Agreement (CLA) before submitting a pull request. Please fill and submit the [Contributor License Agreement](https://cla.dotnetfoundation.org/). Be sure to include your GitHub user name along with the agreement. Only after we have received the signed CLA, we'll review the pull request that you send. This needs to only be done once for any .NET Foundation OSS project.
 
 ### Create a new issue on the issue tracker and link the pull request to it
 You should have an issue created on the [issue tracker](https://github.com/OData/WebApi/issues) before you work on the pull request. After the OData Web API team has reviewed this issue and change its label to "accepting pull request", you can issue a pull request to us in which the link to the related issue is included.

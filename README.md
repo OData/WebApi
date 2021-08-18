@@ -2,8 +2,9 @@
 
  Build  | Status
 --------|---------
+Odata.WebApi Rolling Dotnet pipeline | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi-Rolling?branchName=master"/> 
 WebApi Rolling | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Rolling"/> 
-WebApi Nightly | <img src="https://identitydivision.visualstudio.com/OData/_apis/build/status/WebApi/WebApi-master-pipeline-Nightly"/> 
+WebApi Nightly | <img src="https://dev.azure.com/dotnet/OData/_apis/build/status/OData.WebApi%20Nightly?branchName=master"/> 
 
 ### Introduction
 
@@ -118,4 +119,10 @@ Please refer to the [How to debug](https://docs.microsoft.com/en-us/odata/webapi
 
 ### Code of Conduct
 
-This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
+This project has adopted the [.NET Foundation Contributor Covenant Code of Conduct](https://dotnetfoundation.org/about/code-of-conduct). For more information see the [Code of Conduct FAQ](https://dotnetfoundation.org/about/faq).
+
+### .NET Foundation
+
+This project is supported by the [.NET Foundation](https://dotnetfoundation.org).
+
+WebApi is a Copyright of &copy; .NET Foundation and other contributors. It is licensed under [MIT License](https://github.com/OData/WebApi/blob/master/License.txt)

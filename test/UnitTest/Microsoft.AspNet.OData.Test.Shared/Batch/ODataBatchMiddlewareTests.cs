@@ -1,4 +1,11 @@
-﻿#if NETCORE
+//-----------------------------------------------------------------------------
+// <copyright file="ODataBatchMiddlewareTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
+
+#if NETCORE
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Batch;

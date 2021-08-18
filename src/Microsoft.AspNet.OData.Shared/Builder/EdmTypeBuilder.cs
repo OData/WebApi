@@ -1,5 +1,9 @@
-ï»¿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EdmTypeBuilder.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -18,7 +22,7 @@ namespace Microsoft.AspNet.OData.Builder
     /// <summary>
     /// <see cref="EdmTypeBuilder"/> builds <see cref="IEdmType"/>'s from <see cref="StructuralTypeConfiguration"/>'s.
     /// </summary>
-    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "ClassÂ couplingÂ acceptable")]
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Class coupling acceptable")]
     internal class EdmTypeBuilder
     {
         private readonly List<IEdmTypeConfiguration> _configurations;

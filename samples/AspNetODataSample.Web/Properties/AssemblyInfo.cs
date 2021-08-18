@@ -1,4 +1,11 @@
-﻿using System.Reflection;
+//-----------------------------------------------------------------------------
+// <copyright file="AssemblyInfo.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
+
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -10,7 +17,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("AspNetODataSample.Web")]
-[assembly: AssemblyCopyright("Copyright ©  2018")]
+[assembly: AssemblyCopyright("Copyright �  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

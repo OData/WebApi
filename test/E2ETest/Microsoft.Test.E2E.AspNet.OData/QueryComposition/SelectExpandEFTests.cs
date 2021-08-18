@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="SelectExpandEFTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -375,4 +379,4 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public int Id { get; set; }
         public virtual EFSelectCustomer SelectCustomer { get; set; }
     }
-}        
+}

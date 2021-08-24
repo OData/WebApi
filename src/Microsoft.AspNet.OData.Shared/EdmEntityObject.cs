@@ -62,6 +62,11 @@ namespace Microsoft.AspNet.OData
         public IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer { get; set; }
 
         /// <summary>
+        /// Container to hold ODataId
+        /// </summary>
+        public ODataIdContainer ODataIdContainer { get; set; }
+
+        /// <summary>
         /// DeltaKind as Entry
         /// </summary>
         public virtual EdmDeltaEntityKind DeltaKind { get { return EdmDeltaEntityKind.Entry; } }

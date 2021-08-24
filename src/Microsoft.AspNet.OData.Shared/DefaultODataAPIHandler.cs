@@ -8,25 +8,25 @@ using System.Reflection;
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// This is the default Patch Handler for CLR type. This calss has default Get, Create and Update
+    /// This is the default ODataAPIHandler for CLR type. This calss has default Get, Create and Update
     /// and will do these actions. This will be used when the original collection to be Patched is provided.
     /// </summary>
     /// <typeparam name="TStructuralType"></typeparam>
-    internal class DefaultPatchHandler<TStructuralType> : PatchMethodHandler<TStructuralType> where TStructuralType :class
+    internal class DefaultODataAPIHandler<TStructuralType> : ODataAPIHandler<TStructuralType> where TStructuralType :class
     {
         Type _clrType;
         ICollection<TStructuralType> originalList;
 
-        public DefaultPatchHandler(ICollection<TStructuralType> originalList)
+        public DefaultODataAPIHandler(ICollection<TStructuralType> originalList)
         {
             this._clrType = typeof(TStructuralType);
             this.originalList = originalList?? new List<TStructuralType>();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out TStructuralType originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = default(TStructuralType);
 
@@ -36,12 +36,12 @@ namespace Microsoft.AspNet.OData
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryCreate(Delta<TStructuralType> patchObject, out TStructuralType createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out TStructuralType createdObject, out string errorMessage)
         {
             createdObject = default(TStructuralType);
             errorMessage = string.Empty;
@@ -64,18 +64,18 @@ namespace Microsoft.AspNet.OData
                 createdObject = Activator.CreateInstance(_clrType) as TStructuralType;
                 originalList.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -84,25 +84,25 @@ namespace Microsoft.AspNet.OData
                 TStructuralType originalObject = GetFilteredItem(keyValues);
                 originalList.Remove(originalObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(TStructuralType parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(TStructuralType parent, string navigationPropertyName)
         {
             foreach (PropertyInfo property in _clrType.GetProperties())
             {
                 if (property.Name == navigationPropertyName)
                 {
-                    Type type = typeof(DefaultPatchHandler<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]);
+                    Type type = typeof(DefaultODataAPIHandler<>).MakeGenericType(property.PropertyType.GetGenericArguments()[0]);
 
-                    return Activator.CreateInstance(type, property.GetValue(parent)) as IPatchMethodHandler;
+                    return Activator.CreateInstance(type, property.GetValue(parent)) as IODataAPIHandler;
                 }
             }
 

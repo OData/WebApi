@@ -43,7 +43,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
        
     }
 
-    public class EmployeeEFPatchHandler : PatchMethodHandler<Employee>
+    public class EmployeeEFPatchHandler : ODataAPIHandler<Employee>
     {
         EmployeeDBContext dbContext = null;
 
@@ -52,7 +52,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.dbContext = dbContext;
         }
 
-        public override PatchStatus TryCreate(Delta<Employee> deltaObject, out Employee createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -62,17 +62,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 createdObject = new Employee();
                 dbContext.Employees.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -83,19 +83,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 dbContext.Employees.Remove(customer);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Employee originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -107,20 +107,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(Employee parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(Employee parent, string navigationPropertyName)
         {
             switch (navigationPropertyName)
             {
@@ -136,7 +136,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class FriendEFPatchHandler : PatchMethodHandler<Friend>
+    public class FriendEFPatchHandler : ODataAPIHandler<Friend>
     {
         Employee employee;
         public FriendEFPatchHandler(Employee employee)
@@ -144,7 +144,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(Delta<Friend> deltaObject, out Friend createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -154,17 +154,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 createdObject = new Friend();
                 employee.Friends.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -175,19 +175,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 employee.Friends.Remove(friend);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -196,7 +196,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 var id = keyValues["Id"].ToString();
                 if (employee.Friends == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
                 else
                 {
@@ -206,20 +206,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(Friend parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)
         {
             return new OrderEFPatchHandler(parent);
         }
@@ -227,7 +227,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class NewFriendEFPatchHandler : PatchMethodHandler<NewFriend>
+    public class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
     {
         Employee employee;
         public NewFriendEFPatchHandler(Employee employee)
@@ -235,7 +235,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.employee = employee;
         }
 
-        public override PatchStatus TryCreate(Delta<NewFriend> deltaObject, out NewFriend createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -245,17 +245,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 createdObject = new NewFriend();
                 employee.NewFriends.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -266,19 +266,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 employee.NewFriends.Remove(friend);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -290,20 +290,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(NewFriend parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
         {
             return null;
         }
@@ -312,7 +312,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
 
 
-    public class OrderEFPatchHandler : PatchMethodHandler<Order>
+    public class OrderEFPatchHandler : ODataAPIHandler<Order>
     {
         Friend friend;
         public OrderEFPatchHandler(Friend friend)
@@ -320,7 +320,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             this.friend = friend;
         }
 
-        public override PatchStatus TryCreate(Delta<Order> deltaObject, out Order createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Order createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -330,17 +330,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                 createdObject = new Order();
                 friend.Orders.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -351,19 +351,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 friend.Orders.Remove(order);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Order originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Order originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -375,20 +375,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(Order parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(Order parent, string navigationPropertyName)
         {
             throw new NotImplementedException();
         }

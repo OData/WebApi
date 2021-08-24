@@ -218,42 +218,42 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class FriendPatchHandler : PatchMethodHandler<Friend>
+    public class FriendPatchHandler : ODataAPIHandler<Friend>
     {
-        public override IPatchMethodHandler GetNestedPatchHandler(Friend parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)
         {
             return new NewFriendPatchHandler(parent);
         }
 
-        public override PatchStatus TryCreate(Delta<Friend> deltaFriend, out Friend createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Friend createdObject, out string errorMessage)
         {
             createdObject = new Friend();
             DeltaSetOfTTest.friends.Add(createdObject);
             errorMessage = string.Empty;
-            return PatchStatus.Success;
+            return ODataAPIResponseStatus.Success;
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             int id = Int32.Parse( keyValues.First().Value.ToString());
 
             DeltaSetOfTTest.friends.Remove(DeltaSetOfTTest.friends.First(x => x.Id == id));
             errorMessage = string.Empty;
 
-            return PatchStatus.Success;
+            return ODataAPIResponseStatus.Success;
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out Friend originalObject, out string errorMessage)
         {
             int id = Int32.Parse(keyValues.First().Value.ToString());
             originalObject = DeltaSetOfTTest.friends.First(x => x.Id == id);
             errorMessage = string.Empty;
 
-            return PatchStatus.Success;
+            return ODataAPIResponseStatus.Success;
         }
     }
 
-    public class NewFriendPatchHandler : PatchMethodHandler<NewFriend>
+    public class NewFriendPatchHandler : ODataAPIHandler<NewFriend>
     {
         Friend parent;
         public NewFriendPatchHandler(Friend parent)
@@ -261,12 +261,12 @@ namespace Microsoft.AspNet.OData.Test
             this.parent = parent;
         }
 
-        public override IPatchMethodHandler GetNestedPatchHandler(NewFriend parent, string navigationPropertyName)
+        public override IODataAPIHandler GetNestedHandler(NewFriend parent, string navigationPropertyName)
         {
             throw new NotImplementedException();
         }
 
-        public override PatchStatus TryCreate(Delta<NewFriend> deltaFriend, out NewFriend createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out NewFriend createdObject, out string errorMessage)
         {
             createdObject = new NewFriend();
             if(parent.NewFriends == null)
@@ -276,34 +276,34 @@ namespace Microsoft.AspNet.OData.Test
 
             parent.NewFriends.Add(createdObject);
             errorMessage = string.Empty;
-            return PatchStatus.Success;
+            return ODataAPIResponseStatus.Success;
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             int id = Int32.Parse(keyValues.First().Value.ToString());
 
             parent.NewFriends.Remove(parent.NewFriends.First(x => x.Id == id));
             errorMessage = string.Empty;
 
-            return PatchStatus.Success;
+            return ODataAPIResponseStatus.Success;
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out NewFriend originalObject, out string errorMessage)
         {
             errorMessage = string.Empty;
             originalObject = null;
 
             if(parent.NewFriends == null)
             {
-                return PatchStatus.NotFound;
+                return ODataAPIResponseStatus.NotFound;
             }
 
             int id = Int32.Parse(keyValues.First().Value.ToString());
             originalObject = parent.NewFriends.FirstOrDefault(x => x.Id == id);
             errorMessage = string.Empty;
 
-            return originalObject!=null? PatchStatus.Success : PatchStatus.NotFound;
+            return originalObject!=null? ODataAPIResponseStatus.Success : ODataAPIResponseStatus.NotFound;
         }
     }
 }

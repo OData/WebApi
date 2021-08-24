@@ -209,7 +209,7 @@ namespace Microsoft.AspNet.OData.Test
         public string Name { get; set; }
     }
 
-    public class FriendTypelessPatchHandler : EdmPatchMethodHandler
+    public class FriendTypelessPatchHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
 
@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.OData.Test
             this.entityType = entityType;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -229,17 +229,17 @@ namespace Microsoft.AspNet.OData.Test
   
                 EdmChangedObjectCollectionTest.friends.Add(createdObject);
                 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -261,19 +261,19 @@ namespace Microsoft.AspNet.OData.Test
                 }
 
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -296,20 +296,20 @@ namespace Microsoft.AspNet.OData.Test
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
+        public override EdmODataAPIHandler GetNestedHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             switch (navigationPropertyName)
             {
@@ -322,7 +322,7 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class NewFriendTypelessPatchHandler : EdmPatchMethodHandler
+    public class NewFriendTypelessPatchHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
         EdmStructuredObject friend;
@@ -333,7 +333,7 @@ namespace Microsoft.AspNet.OData.Test
             this.friend = friend as EdmStructuredObject;
         }
 
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -351,17 +351,17 @@ namespace Microsoft.AspNet.OData.Test
 
                 friend.TrySetPropertyValue("NewFriends", nfriends);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -388,19 +388,19 @@ namespace Microsoft.AspNet.OData.Test
                 }
 
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -430,20 +430,20 @@ namespace Microsoft.AspNet.OData.Test
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
 
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
             return status;
         }
 
-        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
+        public override EdmODataAPIHandler GetNestedHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             return null;
         }

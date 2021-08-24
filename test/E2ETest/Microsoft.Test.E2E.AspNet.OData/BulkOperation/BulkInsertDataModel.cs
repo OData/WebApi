@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
@@ -87,6 +88,48 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public int Age { get; set; }
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
 
+        [Contained]
+        public List<NewOrder> NewOrders { get; set; }
+
+    }
+
+    public class MyNewFriend: NewFriend
+    {
+        public string MyName { get; set; }
+
+        [Contained]
+        public List<MyNewOrder> MyNewOrders { get; set; }
+    }
+
+    public class MyNewOrder
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public int Price { get; set; }
+
+        public ODataIdContainer Container { get; set; }
+    }
+
+    public class NewOrder
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public int Price { get; set; }
+
+        public ODataIdContainer Container {get;set;}
+    }
+
+
+    public class Company
+    {
+        [Key]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+
+        public List<NewOrder> OverdueOrders { get; set; }
     }
 
     public class UnTypedEmployee

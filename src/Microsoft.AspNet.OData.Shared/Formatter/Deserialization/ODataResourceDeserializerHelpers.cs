@@ -371,7 +371,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return properties;
             }
 
-            ODataPath odataPath = ODataResourceDeserializerHelpers.GetODataPath(id.OriginalString, readContext);
+            ODataPath odataPath = GetODataPath(id.OriginalString, readContext);
 
             if (odataPath != null)
             {

@@ -13,7 +13,7 @@ namespace Microsoft.AspNet.OData
     /// since we need to check in a few places (like deserializer) whether the object is a deltaset and the {TStructuralType} is not available,
     /// we need a marker interface which can be used in these checks.
     /// </summary>
-    internal interface IDeltaSet
+    public interface IDeltaSet
     {
     }
 }

@@ -4,21 +4,18 @@
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Enum for Patch Status
+    /// Class to hold Name and value of a key property
     /// </summary>
-    public enum PatchStatus
+    public class KeyProperty
     {
         /// <summary>
-        /// Success Status
+        /// Name of the Key Property
         /// </summary>
-        Success,
+        public string Name { private set; get; }
+
         /// <summary>
-        /// Failure Status
+        /// Value of the Key  Property
         /// </summary>
-        Failure,
-        /// <summary>
-        /// Resource Not Found
-        /// </summary>
-        NotFound
+        public object Value { private set; get; }
     }
 }

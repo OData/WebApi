@@ -31,7 +31,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         protected override void UpdateConfiguration(WebRouteConfiguration configuration)
         {
-            var controllers = new[] { typeof(EmployeesController), typeof(MetadataController) };
+            var controllers = new[] { typeof(EmployeesController), typeof(CompanyController), typeof(MetadataController) };
             configuration.AddControllers(controllers);
 
             configuration.Routes.Clear();
@@ -54,6 +54,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var content = @"{
                     'Name':'Sql'  ,
                     'Friends@odata.delta':[{'Id':1,'Name':'Test2'},{'Id':2,'Name':'Test3'}]
+                     }";
+
+            content = @"{
+                    'Name':'Sql'  ,
+                    'Friends@odata.delta':[{'@odata.id':'Employees(1)/Friends(1)'},{'Id':2,'Name':'Test3'}]
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
@@ -570,7 +575,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             string requestUri = this.BaseAddress + "/convention/Employees";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees/$delta',     
+            var content = @"{'@odata.context':'"+ this.BaseAddress + @"/convention/$metadata#Employees/$delta',     
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Employee', 'ID':1,'Name':'Employee1',
                             'Friends@odata.delta':[{'Id':1,'Name':'Friend1',
                             'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{'Id':2,'Name':'Friend2'}]
@@ -802,6 +807,65 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Contains("Test4", result.ToString());
             }
         }
+
+
+        [Fact]
+        public async Task PatchCompanies_WithUpdates_ODataId()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Company', 'Id':1,'Name':'Company01',
+                            'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+                            
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+           
+        }
+
+
+        [Fact]
+        public async Task PostCompany_WithODataId()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'Id':3,'Name':'Company03',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+                            
+                               
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+        }
+
 
 
         #endregion

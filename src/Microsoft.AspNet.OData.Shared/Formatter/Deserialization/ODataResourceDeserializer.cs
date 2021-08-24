@@ -8,6 +8,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
@@ -520,18 +521,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 return properties;
             }
-
-            IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
-            IWebApiRequestMessage internalRequest = readContext.InternalRequest;
-            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
+                        
             try
             {
-                string serviceRoot = urlHelper.CreateODataLink(
-                    internalRequest.Context.RouteName,
-                    internalRequest.PathHandler,
-                    new List<ODataPathSegment>());
-                ODataPath odataPath = pathHandler.Parse(serviceRoot, id.OriginalString, internalRequest.RequestContainer);
+                ODataPath odataPath = GetODataPath(id.OriginalString, readContext);
                 KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
+
                 if (keySegment != null)
                 {
                     foreach (KeyValuePair<string, object> key in keySegment.Keys)
@@ -551,6 +546,55 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 return properties;
             }          
         }
+
+        private static ODataPath GetODataPath(string id, ODataDeserializerContext readContext)
+        {
+            IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
+            IWebApiRequestMessage internalRequest = readContext.InternalRequest;
+            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
+
+            string serviceRoot = urlHelper.CreateODataLink(
+                internalRequest.Context.RouteName,
+                internalRequest.PathHandler,
+                new List<ODataPathSegment>());
+            ODataPath odataPath = pathHandler.Parse(serviceRoot, id, internalRequest.RequestContainer);
+           
+            return odataPath;
+        }
+
+        private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
+            IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+        {
+            //if  id null check, add delta case as well c
+            if (resourceWrapper.ResourceBase?.Id != null)
+            {
+                string odataId = resourceWrapper.ResourceBase.Id.OriginalString;
+
+                ODataPath odataPath = GetODataPath(odataId, readContext);
+
+                PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
+                if (containerPropertyInfo != null)
+                {
+                    ODataIdContainer container = new ODataIdContainer();
+
+                    NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
+                    container.ODataIdNavigationPath = navigationPath;
+
+                    if(resource is EdmEntityObject edmObject)
+                    {
+                        edmObject.ODataIdContainer = container;
+                    }
+                    else if(resource is IDeltaSetItem deltasetItem)
+                    {
+                        deltasetItem.ODataIdContainer = container;
+                    }
+                    else
+                    {
+                        containerPropertyInfo.SetValue(resource, container);
+                    }                    
+                }
+            }
+        } 
 
         /// <summary>
         /// Deserializes the structural properties from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.
@@ -621,6 +665,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyInstanceAnnotations(resource, resourceWrapper, structuredType, readContext);
+            ApplyODataIDContainer(resource, resourceWrapper, structuredType, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,

@@ -16,6 +16,12 @@ public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	Unknown = 4
 }
 
+public enum Microsoft.AspNet.OData.ODataAPIResponseStatus : int {
+	Failure = 1
+	NotFound = 2
+	Success = 0
+}
+
 public interface Microsoft.AspNet.OData.IDelta {
 	void Clear ()
 	System.Collections.Generic.IEnumerable`1[[System.String]] GetChangedPropertyNames ()
@@ -76,6 +82,9 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 	bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
+public interface Microsoft.AspNet.OData.IODataAPIHandler {
+}
+
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
 	System.Func`1[[Microsoft.OData.IContainerBuilder]] BuilderFactory  { public abstract get; public abstract set; }
 
@@ -102,6 +111,15 @@ public abstract class Microsoft.AspNet.OData.Delta : System.Dynamic.DynamicObjec
 	public abstract bool TrySetPropertyValue (string name, object value)
 }
 
+public abstract class Microsoft.AspNet.OData.EdmODataAPIHandler {
+	protected EdmODataAPIHandler ()
+
+	public abstract EdmODataAPIHandler GetNestedHandler (IEdmStructuredObject parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryCreate (IEdmChangedObject changedObject, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
+}
+
 [
 NonValidatingParameterBindingAttribute(),
 ]
@@ -122,6 +140,25 @@ public abstract class Microsoft.AspNet.OData.EdmStructuredObject : Delta, IDynam
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)
+}
+
+public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandler {
+	protected ODataAPIHandler`1 ()
+
+	public abstract IODataAPIHandler GetNestedHandler (TStructuralType parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& createdObject, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
+	public virtual void UpdateLinkedObjects (TStructuralType resource, Microsoft.OData.Edm.IEdmModel model)
+}
+
+public abstract class Microsoft.AspNet.OData.ODataAPIHandlerFactory {
+	protected ODataAPIHandlerFactory (Microsoft.OData.Edm.IEdmModel model)
+
+	Microsoft.OData.Edm.IEdmModel Model  { public get; }
+
+	public abstract IODataAPIHandler GetHandler (Microsoft.OData.UriParser.ODataPath odataPath)
+	public IODataAPIHandler GetHandler (string path)
 }
 
 [
@@ -319,6 +356,8 @@ public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.
 	public DeltaSet`1 (System.Collections.Generic.IList`1[[System.String]] keys)
 
 	protected virtual void InsertItem (int index, IDeltaSetItem item)
+	public DeltaSet`1 Patch (ICollection`1 originalCollection)
+	public DeltaSet`1 Patch (ODataAPIHandler`1 apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
 }
 
 [
@@ -327,6 +366,8 @@ NonValidatingParameterBindingAttribute(),
 public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collections.ObjectModel.Collection`1[[Microsoft.AspNet.OData.IEdmChangedObject]], ICollection, IEnumerable, IList, IEdmObject, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType)
 	public EdmChangedObjectCollection (Microsoft.OData.Edm.IEdmEntityType entityType, System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.IEdmChangedObject]] changedObjectList)
+
+	Microsoft.OData.Edm.IEdmEntityType EntityType  { public get; }
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
 }

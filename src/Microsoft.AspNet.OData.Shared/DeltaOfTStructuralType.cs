@@ -18,6 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter;
 using Microsoft.OData.UriParser;
 
@@ -423,9 +424,16 @@ namespace Microsoft.AspNet.OData
         /// <param name="original">The entity to be updated.</param>
         public TStructuralType CopyChangedValues(TStructuralType original)
         {
+            return CopyChangedValues(original, null, null);
+        }
+
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
+        [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
+        internal TStructuralType CopyChangedValues(TStructuralType original, ODataAPIHandler<TStructuralType> apiHandler = null, ODataAPIHandlerFactory apiHandlerFactory = null)
+        {
             if (original == null)
             {
-                throw Error.ArgumentNull(nameof(original));
+                throw Error.ArgumentNull("original");
             }
 
             // Delta parameter type cannot be derived type of original
@@ -433,6 +441,19 @@ namespace Microsoft.AspNet.OData
             if (!_structuredType.IsAssignableFrom(original.GetType()))
             {
                 throw Error.Argument(nameof(original), SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
+            }
+
+            //To apply ODataId based handler to apply properties on original.
+            if (apiHandlerFactory != null)
+            {
+                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataPath);
+
+                if (refapiHandler != null && ODataPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
+                {
+                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+
+                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, ODataPath.GetKeys());
+                }
             }
 
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -447,7 +468,7 @@ namespace Microsoft.AspNet.OData
 
             CopyChangedDynamicValues(original);
 
-            CopyChangedNestedProperties(original);
+            CopyChangedNestedProperties(original, apiHandler, apiHandlerFactory);
 
             return original;
         }
@@ -496,8 +517,50 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Overwrites the <paramref name="original"/> entity with the values stored in this delta.
         /// </summary>
+        /// <param name="original">The entity to be updated.</param>
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory</param>
+        internal void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            Debug.Assert(apiHandler != null);
+
+            if (IsComplexType)
+            {
+                original = ReassignComplexDerivedType(original, _structuredType, original.GetType(), ExpectedClrType) as TStructuralType;
+            }
+
+            CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);            
+        }
+
+        /// <summary>
+        /// This is basically Patch on ODataId. This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
+        /// </summary>    
+        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refapiHandlerOfT, Dictionary<string, object> keyProperties)
+        {
+            Debug.Assert(refapiHandlerOfT != null);
+
+            TStructuralType referencedObj;
+            string error;
+
+            //todo: this logic feels brittle to me
+            //Checking to get the referenced entity, get the properties and apply it on original object
+            if (refapiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            {
+                foreach (string property in _updatableProperties)
+                {
+                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+
+                    object value = propertyInfo.GetValue(referencedObj);
+                    propertyInfo.SetValue(original, value);
+                }
+            }            
+        }
+
+        /// <summary>
+        /// Overwrites the <paramref name="original"/> entity with the values stored in this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PUT operation, hence the name.</remarks>
         /// <param name="original">The entity to be updated.</param>
+        /// </summary>
         public void Put(TStructuralType original)
         {
             CopyChangedValues(original);
@@ -795,7 +858,9 @@ namespace Microsoft.AspNet.OData
         /// Copies changed nested properties and leaves the unchanged properties
         /// </summary>
         /// <param name="original">The structural object</param>
-        private void CopyChangedNestedProperties(TStructuralType original)
+        /// <param name="apiHandler">API Handler for the entity.</param>
+        /// <param name="apiHandlerFactory">API Handler Factory</param>
+        private void CopyChangedNestedProperties(TStructuralType original, ODataAPIHandler<TStructuralType> apiHandler = null, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             // For nested resources.
             foreach (string nestedResourceName in _deltaNestedResources.Keys)
@@ -804,42 +869,54 @@ namespace Microsoft.AspNet.OData
                 dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
                 dynamic originalNestedResource = null;
 
-                if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
+                if (deltaNestedResource is IDeltaSet)
                 {
-                    throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
-                        nestedResourceName, original.GetType());
-                }
+                    IODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(original, nestedResourceName);
 
-                if (originalNestedResource == null)
-                {
-                    // When patching original target of null value, directly set nested resource.
-                    dynamic instance = deltaNestedResource.GetInstance();
-
-                    // Recursively patch up the instance with the nested resources.
-                    deltaNestedResource.CopyChangedValues(instance);
-
-                    _allProperties[nestedResourceName].SetValue(original, instance);
+                    if (apiHandlerNested != null)
+                    {
+                        deltaNestedResource.CopyChangedValues(apiHandlerNested, apiHandlerFactory);
+                    }
                 }
                 else
                 {
-                    // Recursively patch the subtree.                    
-                    Contract.Assert(TypedDelta.IsDeltaOfT(((object)deltaNestedResource).GetType()), nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
-
-                    Type newType = deltaNestedResource.StructuredType;
-                    Type originalType = originalNestedResource.GetType();
-
-                    if (deltaNestedResource.IsComplexType && newType != originalType)
+                    if (!TryGetPropertyRef(original, nestedResourceName, out originalNestedResource))
                     {
-                        originalNestedResource = ReassignComplexDerivedType(
-                            originalNestedResource,
-                            newType,
-                            originalType,
-                            deltaNestedResource.ExpectedClrType);
-
-                        _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
+                        throw Error.Argument(nestedResourceName, SRResources.DeltaNestedResourceNameNotFound,
+                            nestedResourceName, original.GetType());
                     }
 
-                    deltaNestedResource.CopyChangedValues(originalNestedResource);
+                    if (originalNestedResource == null)
+                    {
+                        // When patching original target of null value, directly set nested resource.
+                        dynamic instance = deltaNestedResource.GetInstance();
+
+                        // Recursively patch up the instance with the nested resources.
+                        deltaNestedResource.CopyChangedValues(instance);
+
+                        _allProperties[nestedResourceName].SetValue(original, instance);
+                    }
+                    else
+                    {
+                        // Recursively patch the subtree.
+                        Contract.Assert(TypedDelta.IsDeltaOfT(((object)deltaNestedResource).GetType()), nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
+
+                        Type newType = deltaNestedResource.StructuredType;
+                        Type originalType = originalNestedResource.GetType();
+
+                        if (deltaNestedResource.IsComplexType && newType != originalType)
+                        {
+                            originalNestedResource = ReassignComplexDerivedType(
+                                originalNestedResource,
+                                newType,
+                                originalType,
+                                deltaNestedResource.ExpectedClrType);
+
+                            _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
+                        }
+
+                        deltaNestedResource.CopyChangedValues(originalNestedResource);
+                    }
                 }
             }
         }

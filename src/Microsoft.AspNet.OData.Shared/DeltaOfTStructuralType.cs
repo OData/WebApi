@@ -48,6 +48,7 @@ namespace Microsoft.AspNet.OData
         private PropertyInfo _instanceAnnotationsPropertyInfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
+        private NavigationPath _navigationPath;
         
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
@@ -116,6 +117,7 @@ namespace Microsoft.AspNet.OData
             InitializeProperties(updatableProperties);            
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
             _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
+            _navigationPath = new NavigationPath(structuralType.Name, null);
             DeltaKind = EdmDeltaEntityKind.Entry;
         }
 
@@ -147,6 +149,9 @@ namespace Microsoft.AspNet.OData
 
         /// <inheritdoc />
         public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <inheritdoc />
+        public ODataIdContainer ODataIdContainer { get; set; }
 
         /// <inheritdoc />
         internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
@@ -364,7 +369,7 @@ namespace Microsoft.AspNet.OData
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
         [SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
-        internal void CopyChangedValues(TStructuralType original, PatchMethodHandler<TStructuralType> patchHandler = null)
+        internal void CopyChangedValues(TStructuralType original, ODataAPIHandler<TStructuralType> apiHandler = null, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             if (original == null)
             {
@@ -399,11 +404,11 @@ namespace Microsoft.AspNet.OData
 
                 if(deltaNestedResource is IDeltaSet)
                 {
-                    IPatchMethodHandler patchHandlerNested = patchHandler.GetNestedPatchHandler(original, nestedResourceName);
+                    IODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(original, nestedResourceName);
 
-                    if (patchHandlerNested != null)
+                    if (apiHandlerNested != null)
                     {
-                        deltaNestedResource.Patch(patchHandlerNested);
+                        deltaNestedResource.Patch(apiHandlerNested, apiHandlerFactory);
                     }
                 }
                 else
@@ -479,10 +484,50 @@ namespace Microsoft.AspNet.OData
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
-        /// <param name="patchHandler">Patch Handler</param>
-        public void Patch(TStructuralType original, IPatchMethodHandler patchHandler)
-        {            
-            CopyChangedValues(original, patchHandler as PatchMethodHandler<TStructuralType>);
+        /// <param name="apiHandler">API Handler</param>
+        /// <param name="apiHandlerFactory">API Handler Factory</param>
+        public void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
+        {
+            if (apiHandlerFactory != null && ODataIdContainer?.ODataIdNavigationPath != null)
+            {
+                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataIdContainer.ODataIdNavigationPath);
+
+                ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+
+                Debug.Assert(refapiHandlerOfT != null);
+
+                TStructuralType referencedObj;
+                string error;
+
+                if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+                {
+                    if (apiHandler != null)
+                    {
+                        ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
+
+                        TStructuralType createdObj;
+                        string errMsg;
+                        if (apiHandlerOfT.TryCreate(null, out createdObj, out errMsg) == ODataAPIResponseStatus.Success)
+                        {
+                            foreach(string property in _updatableProperties)
+                            {
+                                PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+
+                                object value = propertyInfo.GetValue(referencedObj);
+                                propertyInfo.SetValue(createdObj, value);
+                            }                            
+                        }
+                    }
+                    else
+                    {
+                        original = referencedObj;
+                    }
+                }
+            }
+            else
+            {
+                CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);
+            }
         }
 
         /// <summary>

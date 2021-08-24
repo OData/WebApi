@@ -23,5 +23,10 @@ namespace Microsoft.AspNet.OData
         /// Annotation container to hold Transient Instance Annotations
         /// </summary>
         IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
+
+        /// <summary>
+        /// Container to hold ODataId
+        /// </summary>
+        ODataIdContainer ODataIdContainer { get; set; }
     }
 }

@@ -13,12 +13,12 @@ namespace Microsoft.AspNet.OData
     /// This is the default Patch Handler for non CLR type. This calss has default Get, Create and Update
     /// and will do these actions. This will be used when the original collection to be Patched is provided.
     /// </summary>
-    internal class DefaultEdmPatchMethodHandler : EdmPatchMethodHandler
+    internal class DefaultEdmODataAPIHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
         ICollection<IEdmStructuredObject> originalList;
 
-        public DefaultEdmPatchMethodHandler(ICollection<IEdmStructuredObject> originalList, IEdmEntityType entityType)
+        public DefaultEdmODataAPIHandler(ICollection<IEdmStructuredObject> originalList, IEdmEntityType entityType)
         {
             Contract.Assert(entityType != null);
 
@@ -27,9 +27,9 @@ namespace Microsoft.AspNet.OData
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryGet(IDictionary<string, object> keyValues, out IEdmStructuredObject originalObject, out string errorMessage)
         {
-            PatchStatus status = PatchStatus.Success;
+            ODataAPIResponseStatus status = ODataAPIResponseStatus.Success;
             errorMessage = string.Empty;
             originalObject = null;
 
@@ -41,12 +41,12 @@ namespace Microsoft.AspNet.OData
 
                 if (originalObject == null)
                 {
-                    status = PatchStatus.NotFound;
+                    status = ODataAPIResponseStatus.NotFound;
                 }
             }
             catch (Exception ex)
             {
-                status = PatchStatus.Failure;
+                status = ODataAPIResponseStatus.Failure;
                 errorMessage = ex.Message;
             }
 
@@ -54,7 +54,7 @@ namespace Microsoft.AspNet.OData
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
+        public override ODataAPIResponseStatus TryCreate(IEdmChangedObject changedObject, out IEdmStructuredObject createdObject, out string errorMessage)
         {
             createdObject = null;
             errorMessage = string.Empty;
@@ -64,18 +64,18 @@ namespace Microsoft.AspNet.OData
                 createdObject = new EdmEntityObject(entityType);
                 originalList.Add(createdObject);
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        public override PatchStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
+        public override ODataAPIResponseStatus TryDelete(IDictionary<string, object> keyValues, out string errorMessage)
         {
             errorMessage = string.Empty;
 
@@ -88,17 +88,17 @@ namespace Microsoft.AspNet.OData
                     originalList.Remove(originalObject);
                 }
 
-                return PatchStatus.Success;
+                return ODataAPIResponseStatus.Success;
             }
             catch (Exception ex)
             {
                 errorMessage = ex.Message;
 
-                return PatchStatus.Failure;
+                return ODataAPIResponseStatus.Failure;
             }
         }
 
-        public override EdmPatchMethodHandler GetNestedPatchHandler(IEdmStructuredObject parent, string navigationPropertyName)
+        public override EdmODataAPIHandler GetNestedHandler(IEdmStructuredObject parent, string navigationPropertyName)
         {
             IEdmNavigationProperty navProperty = entityType.NavigationProperties().FirstOrDefault(navProp => navProp.Name == navigationPropertyName);
 
@@ -114,7 +114,7 @@ namespace Microsoft.AspNet.OData
             {
                 ICollection<IEdmStructuredObject> nestedList = obj as ICollection<IEdmStructuredObject>;
 
-                return new DefaultEdmPatchMethodHandler(nestedList, nestedEntityType);
+                return new DefaultEdmODataAPIHandler(nestedList, nestedEntityType);
             }            
 
             return null;

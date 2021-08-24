@@ -32,12 +32,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public static IList<IEdmStructuredObject> EmployeesTypeless = null;
 
-        private  List<Friend> Friends = null;
+        private List<Friend> Friends = null;
 
 
         private void InitEmployees()
         {
-            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } }; 
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
 
             Employees = new List<Employee>
             {
@@ -48,7 +48,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     SkillSet=new List<Skill>{Skill.CSharp,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
-                    
+                    NewFriends = new List<NewFriend>(){new NewFriend {Id =1, Name ="NewFriendTest1", Age=33, NewOrders= new List<NewOrder>() { new NewOrder {Id=1, Price =101 } } } },
                     Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
                 },
                 new Employee()
@@ -57,7 +57,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     SkillSet=new List<Skill>(),
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
-                  
+                    NewFriends = new List<NewFriend>(){ new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444 } } } },
                     Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
                 },
                 new Employee(){
@@ -65,7 +65,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     SkillSet=new List<Skill>{Skill.Web,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read|AccessLevel.Write
-                   
+
                 },
             };
         }
@@ -131,29 +131,29 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl, Employee employee)
         {
-            var changedObjColl = friendColl.Patch(new NewFriendPatchHandler(employee));
+            var changedObjColl = friendColl.Patch(new NewFriendAPIHandler(employee));
 
             return changedObjColl;
         }
         public EdmChangedObjectCollection PatchWithUsersMethodTypeLess(int key, EdmChangedObjectCollection friendColl)
         {
-             
-            var entity =   Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
+
+            var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
             var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedFriend") as IEdmEntityType;
 
-            var changedObjColl = friendColl.Patch(new FriendTypelessPatchHandler(EmployeesTypeless[key-1], entity1));
+            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity1));
 
             return changedObjColl;
         }
 
         public EdmChangedObjectCollection EmployeePatchMethodTypeLess(EdmChangedObjectCollection empColl)
-        {            
+        {
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = empColl.Patch(new EmployeeEdmPatchHandler(entity));
+            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity));
             ValidateSuccessfulTypeless();
 
             return changedObjColl;
@@ -172,7 +172,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             friends.First().TryGetPropertyValue("Name", out obj1);
 
             Assert.Equal("Friend1", obj1.ToString());
-           
+
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 5)]
@@ -205,9 +205,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 object obj;
                 emp.TryGetPropertyValue("ID", out obj);
 
-                if(Equals(key, obj))
+                if (Equals(key, obj))
                 {
-                    object friends ;
+                    object friends;
                     emp.TryGetPropertyValue("UntypedFriends", out friends);
                     return Ok(friends);
                 }
@@ -223,13 +223,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             InitEmployees();
 
             Assert.NotNull(coll);
-                        
-            var returncoll = coll.Patch(new EmployeePatchHandler());
+
+            var returncoll = coll.Patch(new EmployeeAPIHandler());
 
             return Ok(returncoll);
         }
 
-      
+
         [ODataRoute("Employees({key})/Friends")]
         [HttpPatch]
         public ITestActionResult PatchFriends(int key, [FromBody] DeltaSet<Friend> friendColl)
@@ -253,7 +253,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             if (key == 1)
             {
-                var deltaSet = PatchWithUsersMethod(friendColl, Employees.First(x=>x.ID ==key));
+                var deltaSet = PatchWithUsersMethod(friendColl, Employees.First(x => x.ID == key));
 
                 return Ok(deltaSet);
             }
@@ -267,7 +267,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 return Ok(changedObjColl);
             }
-            
+
         }
 
         [ODataRoute("Employees({key})/UnTypedFriends")]
@@ -286,7 +286,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 if (lst != null && lst.Count > 1)
                 {
                     object obj1;
-                    if(lst[1].TryGetPropertyValue("Name", out obj1) && Equals("Friend007", obj1))
+                    if (lst[1].TryGetPropertyValue("Name", out obj1) && Equals("Friend007", obj1))
                     {
                         lst[1].TryGetPropertyValue("Address", out obj1);
                         Assert.NotNull(obj1);
@@ -294,13 +294,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                         (obj1 as EdmStructuredObject).TryGetPropertyValue("Street", out obj2);
 
                         Assert.Equal("Abc 123", obj2);
-                        
+
                     }
                 }
-                
+
                 return Ok(changedObjColl);
             }
-            else if(key ==2)
+            else if (key == 2)
             {
                 var entitytype = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
                 var entity = new EdmEntityObject(friendColl[0].GetEdmType().AsEntity());
@@ -331,11 +331,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         [HttpPatch]
         public ITestActionResult PatchUnTypedEmployees([FromBody] EdmChangedObjectCollection empColl)
         {
-         
+
             var changedObjColl = EmployeePatchMethodTypeLess(empColl);
 
             return Ok(changedObjColl);
-           
+
         }
 
 
@@ -348,19 +348,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             delta.TrySetPropertyValue("ID", key); // It is the key property, and should not be updated.
 
             Employee employee = Employees.FirstOrDefault(e => e.ID == key);
-            
+
             if (employee == null)
             {
                 employee = new Employee();
-                delta.Patch(employee, new EmployeePatchHandler());
+                delta.Patch(employee, new EmployeeAPIHandler());
                 return Created(employee);
             }
 
             try
             {
-                delta.Patch(employee, new EmployeePatchHandler());
+                delta.Patch(employee, new EmployeeAPIHandler());
 
-                if(employee.Name == "Bind1")
+                if (employee.Name == "Bind1")
                 {
                     Assert.NotNull(employee.Friends.Single(x => x.Id == 3));
                 }
@@ -374,5 +374,134 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         }
 
 
+    }
+
+    public class CompanyController : TestODataController
+    {
+        public static IList<Company> Companies = null;
+        public static IList<NewOrder> OverdueOrders = null;
+
+        public CompanyController()
+        {
+            if (null == Companies)
+            {
+                InitCompanies();
+            }
+        }
+
+        private void InitCompanies()
+        {
+            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10 }, new NewOrder { Id = 2, Price = 20 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
+
+            Companies = new List<Company>() { new Company { Id = 1, Name = "Company1", OverdueOrders = OverdueOrders.Where(x => x.Id == 2).ToList() } ,
+                        new Company { Id = 2, Name = "Company2", OverdueOrders = OverdueOrders.Where(x => x.Id == 3 || x.Id == 4).ToList() } };
+        }
+
+
+        [ODataRoute("Companies")]
+        [HttpPatch]
+        public ITestActionResult PatchCompanies([FromBody] DeltaSet<Company> coll)
+        {
+            var empCntrl = new EmployeesController();
+            InitCompanies();
+
+            Assert.NotNull(coll);
+
+            var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory());
+
+            ValidateOverdueOrders1(1,1);
+
+            return Ok(returncoll);
+        }
+
+        [ODataRoute("Companies")]
+        [HttpPost]
+        public ITestActionResult Post([FromBody] Company company)
+        {
+           
+            InitCompanies();
+            InitEmployees();
+
+            MapOdataId(company);
+
+            Companies.Add(company);
+
+            ValidateOverdueOrders1(3,1);
+
+            return Ok(company);
+        }
+
+        private void MapOdataId(Company company)
+        {
+            for(int i =0; i< company.OverdueOrders.Count;i++)
+            {
+                var order = company.OverdueOrders[i];
+                if(order.Container != null)
+                {
+                    var pathItems = order.Container.ODataIdNavigationPath.GetNavigationPathItems();
+
+                    int cnt = 0;
+                    if(pathItems[cnt].Name== "Employees")
+                    {
+                        var emp = GetEmployee(pathItems[cnt].KeyProperties);
+
+                        if(emp != null)
+                        {
+                            if(pathItems[++cnt].Name == "NewFriends")
+                            {
+                                var frnd = GetNewFriendFromEmployee(emp, pathItems[cnt].KeyProperties);
+
+                                if(frnd!= null)
+                                {
+                                    if (pathItems[++cnt].Name == "NewOrders")
+                                    {
+                                        company.OverdueOrders[i] = GetNewOrderFromNewFriend(frnd, pathItems[cnt].KeyProperties);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+
+        
+        private Employee GetEmployee(Dictionary<string,object> keyValues)
+        {            
+            var emp = EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
+
+            return emp;
+        }
+
+        private NewFriend GetNewFriendFromEmployee(Employee emp, Dictionary<string, object> keyValues)
+        {
+            var frnd = emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+
+            return frnd;
+        }
+
+        private NewOrder GetNewOrderFromNewFriend(NewFriend frnd, Dictionary<string, object> keyValues)
+        {
+            var order = frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+
+            return order;
+        }
+
+        private void InitEmployees()
+        {
+            var cntrl = new EmployeesController();
+        }
+
+        private void ValidateOverdueOrders1(int companyId, int orderId)
+        {
+            var comp = Companies.FirstOrDefault(x => x.Id == companyId);
+            Assert.NotNull(comp);
+
+            NewOrder order = comp.OverdueOrders.FirstOrDefault(x => x.Id == orderId);
+            Assert.NotNull(order);
+            Assert.Equal(1, order.Id);
+            Assert.Equal(101, order.Price);
+        }
     }
 }

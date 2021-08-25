@@ -277,6 +277,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 
 	System.Type ExpectedClrType  { public virtual get; }
 	System.Type StructuredType  { public virtual get; }
+	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
 
 	public virtual void Clear ()
 	public void CopyChangedValues (TStructuralType original)

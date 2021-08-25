@@ -8,13 +8,11 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -28,11 +26,11 @@ namespace Microsoft.AspNet.OData
     public class Delta<TStructuralType> : TypedDelta, IDelta where TStructuralType : class
     {
         // cache property accessors for this type and all its derived types.
-        private static ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
+        private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>> _propertyCache
             = new ConcurrentDictionary<Type, Dictionary<string, PropertyAccessor<TStructuralType>>>();
 
         private Dictionary<string, PropertyAccessor<TStructuralType>> _allProperties;
-        private HashSet<string> _updatableProperties;
+        private List<string> _updatableProperties;
 
         private HashSet<string> _changedProperties;
 
@@ -42,7 +40,7 @@ namespace Microsoft.AspNet.OData
         private TStructuralType _instance;
         private Type _structuredType;
 
-        private PropertyInfo _dynamicDictionaryPropertyinfo;
+        private readonly PropertyInfo _dynamicDictionaryPropertyinfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
 
@@ -98,18 +96,19 @@ namespace Microsoft.AspNet.OData
 
         /// <inheritdoc/>
         public override Type StructuredType
-        {
-            get
-            {
-                return _structuredType;
-            }
-        }
+            => _structuredType;
 
         /// <inheritdoc/>
         public override Type ExpectedClrType
-        {
-            get { return typeof(TStructuralType); }
-        }
+            => typeof(TStructuralType);
+
+        /// <summary>
+        /// The list of property names that can be updated.
+        /// </summary>
+        /// <remarks>When the list is modified, any modified properties that were removed from the list are no longer
+        /// considered to be changed.</remarks>
+        public IList<string> UpdatableProperties
+            => _updatableProperties;
 
         /// <inheritdoc/>
         public override void Clear()
@@ -120,7 +119,7 @@ namespace Microsoft.AspNet.OData
         /// <inheritdoc/>
         public override bool TrySetPropertyValue(string name, object value)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (String.IsNullOrWhiteSpace(name))
             {
                 throw Error.ArgumentNull("name");
             }
@@ -175,7 +174,7 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (this._deltaNestedResources.ContainsKey(name))
+            if (_deltaNestedResources.ContainsKey(name))
             {
                 // If this is a nested resource, get the value from the dictionary of nested resources.
                 object deltaNestedResource = _deltaNestedResources[name];
@@ -263,7 +262,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public override IEnumerable<string> GetChangedPropertyNames()
         {
-            return _changedProperties.Concat(_deltaNestedResources.Keys);
+            return _changedProperties.Intersect(_updatableProperties).Concat(_deltaNestedResources.Keys);
         }
 
         /// <summary>
@@ -273,7 +272,8 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         public override IEnumerable<string> GetUnchangedPropertyNames()
         {
-            return _updatableProperties.Except(GetChangedPropertyNames());
+            // UpdatableProperties could include arbitrary strings, filter by _allProperties
+            return _updatableProperties.Intersect(_allProperties.Keys).Except(GetChangedPropertyNames());
         }
 
         /// <summary>
@@ -299,7 +299,7 @@ namespace Microsoft.AspNet.OData
 
             // For regular non-structural properties at current level.
             PropertyAccessor<TStructuralType>[] propertiesToCopy =
-                this._changedProperties.Select(s => _allProperties[s]).ToArray();
+                _changedProperties.Intersect(_updatableProperties).Select(s => _allProperties[s]).ToArray();
             foreach (PropertyAccessor<TStructuralType> propertyToCopy in propertiesToCopy)
             {
                 propertyToCopy.Copy(_instance, original);
@@ -509,12 +509,11 @@ namespace Microsoft.AspNet.OData
 
             if (updatableProperties != null)
             {
-                _updatableProperties = new HashSet<string>(updatableProperties);
-                _updatableProperties.IntersectWith(_allProperties.Keys);
+                _updatableProperties = updatableProperties.Intersect(_allProperties.Keys).ToList();
             }
             else
             {
-                _updatableProperties = new HashSet<string>(_allProperties.Keys);
+                _updatableProperties = new List<string>(_allProperties.Keys);
             }
 
             if (_dynamicDictionaryPropertyinfo != null)
@@ -629,7 +628,7 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (!_updatableProperties.Contains(name))
+            if (!(_allProperties.ContainsKey(name) && _updatableProperties.Contains(name)))
             {
                 return false;
             }
@@ -659,7 +658,7 @@ namespace Microsoft.AspNet.OData
                 throw Error.ArgumentNull("name");
             }
 
-            if (!_updatableProperties.Contains(name))
+            if (!(_allProperties.ContainsKey(name) && _updatableProperties.Contains(name)))
             {
                 return false;
             }

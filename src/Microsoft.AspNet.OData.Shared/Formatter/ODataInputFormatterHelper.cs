@@ -76,7 +76,9 @@ namespace Microsoft.AspNet.OData.Formatter
 
             try
             {
-                ODataMessageReaderSettings oDataReaderSettings = internalRequest.ReaderSettings;
+                // Let's clone the reader setting every time to reset the base uri and others
+                ODataMessageReaderSettings oDataReaderSettings = internalRequest.ReaderSettings.Clone();
+
                 oDataReaderSettings.BaseUri = baseAddress;
                 oDataReaderSettings.Validations = oDataReaderSettings.Validations & ~ValidationKinds.ThrowOnUndeclaredPropertyForNonOpenType;
                 oDataReaderSettings.Version = version;

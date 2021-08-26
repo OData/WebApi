@@ -9,6 +9,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Net.Http.Headers;
@@ -90,16 +91,16 @@ namespace Microsoft.AspNet.OData
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler)
+        public EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {            
-            return CopyChangedValues(apiHandler);
+            return CopyChangedValues(apiHandler, apiHandlerFactory);
         }
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling")]
-        internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler)
+        internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
             IEdmStructuralProperty[] keys = _entityType.Key().ToArray();
@@ -132,6 +133,8 @@ namespace Microsoft.AspNet.OData
                                 continue;
                             }
                         }
+
+                        PatchItem(deletedObj, original as EdmStructuredObject, apiHandler, apiHandlerFactory);
 
                         changedObjectCollection.Add(deletedObj);
                     }
@@ -166,7 +169,7 @@ namespace Microsoft.AspNet.OData
                         }                                              
 
                         //Patch for addition/update. 
-                        PatchItem(deltaEntityObject, original as EdmStructuredObject, apiHandler);
+                        PatchItem(deltaEntityObject, original as EdmStructuredObject, apiHandler, apiHandlerFactory);
 
                         changedObjectCollection.Add(changedObj);
                     }
@@ -202,20 +205,49 @@ namespace Microsoft.AspNet.OData
             return keyValues;
         }
 
-        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmODataAPIHandler apiHandler)
+        private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
+            if(apiHandlerFactory!= null && changedObj is EdmEntityObject entityObject && entityObject.ODataIdContainer != null)
+            {
+                ApplyODataId(entityObject.ODataIdContainer, originalObj, apiHandlerFactory);
+            }
+            
             foreach (string propertyName in changedObj.GetChangedPropertyNames())
             {
-                ApplyProperties(changedObj, originalObj, propertyName, apiHandler);
-            }
-
-            foreach (string propertyName in changedObj.GetUnchangedPropertyNames())
-            {
-                ApplyProperties(changedObj, originalObj, propertyName, apiHandler);
+                ApplyProperties(changedObj, originalObj, propertyName, apiHandler, apiHandlerFactory);
             }
         }
 
-        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmODataAPIHandler apiHandler)
+        private void ApplyODataId(ODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
+        {
+            EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(container.ODataIdNavigationPath);
+
+            if(edmApiHandler == null)
+            {
+                return;
+            }
+
+            IEdmStructuredObject referencedObj;
+            string error;
+
+            if (edmApiHandler.TryGet(container.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            {
+                EdmStructuredObject structuredObj = referencedObj as EdmStructuredObject;
+
+                foreach (string propertyName in structuredObj.GetChangedPropertyNames())
+                {
+                    ApplyProperties(referencedObj as EdmStructuredObject, original, propertyName, edmApiHandler, apiHandlerFactory);
+                }
+
+                foreach (string propertyName in structuredObj.GetUnchangedPropertyNames())
+                {
+                    ApplyProperties(referencedObj as EdmStructuredObject, original, propertyName, edmApiHandler, apiHandlerFactory);
+                }                
+            }
+        }
+
+
+        private void ApplyProperties(EdmStructuredObject changedObj, EdmStructuredObject originalObj, string propertyName, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
             object value;
             if (changedObj.TryGetPropertyValue(propertyName, out value))
@@ -226,7 +258,7 @@ namespace Microsoft.AspNet.OData
                     EdmODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(originalObj, propertyName);
                     if (apiHandlerNested != null)
                     {
-                        changedColl.Patch(apiHandlerNested);
+                        changedColl.Patch(apiHandlerNested, apiHandlerFactory);
                     }
                     else
                     {
@@ -264,7 +296,7 @@ namespace Microsoft.AspNet.OData
                             originalObj.TrySetPropertyValue(propertyName, origStructuredObj);
                         }
 
-                        PatchItem(structuredObj, origStructuredObj, apiHandler);                        
+                        PatchItem(structuredObj, origStructuredObj, apiHandler, apiHandlerFactory);                        
                     }
                     else
                     {

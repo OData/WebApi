@@ -67,6 +67,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             EntitySetConfiguration<Company> companies = builder.EntitySet<Company>("Companies");
             EntitySetConfiguration<NewOrder> overdueorders = builder.EntitySet<NewOrder>("OverdueOrders");
+            EntitySetConfiguration<MyNewOrder> myoverdueorders = builder.EntitySet<MyNewOrder>("MyOverdueOrders");
+            EntitySetConfiguration<NewOrder> myNewOrders = builder.EntitySet<NewOrder>("MyNewOrders");
 
             // maybe following lines are not required once bug #1587 is fixed.
             // 1587: It's better to support automatically adding actions and functions in ODataConventionModelBuilder.

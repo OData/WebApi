@@ -94,14 +94,6 @@ namespace Microsoft.AspNet.OData
                 string errorMessage = string.Empty;
                 string getErrorMessage = string.Empty;
 
-                if (changedObj.ODataIdContainer?.ODataIdNavigationPath != null)
-                {
-                    changedObj.Patch(original, apiHandler, apiHandlerFactory);
-
-                    deltaSet.Add(changedObj);
-                    continue;
-                }
-
                 Dictionary<string, object> keyValues = new Dictionary<string, object>();
 
                 foreach (string key in _keys)

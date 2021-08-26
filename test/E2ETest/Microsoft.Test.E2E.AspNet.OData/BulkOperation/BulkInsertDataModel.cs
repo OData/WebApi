@@ -108,6 +108,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public int Price { get; set; }
 
+        public int Quantity { get; set; }
+
         public ODataIdContainer Container { get; set; }
     }
 
@@ -117,6 +119,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public int Id { get; set; }
 
         public int Price { get; set; }
+
+        public int Quantity { get; set; }
 
         public ODataIdContainer Container {get;set;}
     }
@@ -130,6 +134,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public string Name { get; set; }
 
         public List<NewOrder> OverdueOrders { get; set; }
+
+        public List<MyNewOrder> MyOverdueOrders { get; set; }
     }
 
     public class UnTypedEmployee

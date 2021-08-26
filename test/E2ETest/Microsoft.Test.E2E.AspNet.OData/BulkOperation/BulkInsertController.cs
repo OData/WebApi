@@ -37,7 +37,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private void InitEmployees()
         {
-            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0" }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
+            Friends = new List<Friend> { new Friend { Id = 1, Name = "Test0", Age =33 }, new Friend { Id = 2, Name = "Test1", Orders = new List<Order>() { new Order { Id = 1, Price = 2 } } }, new Friend { Id = 3, Name = "Test3" }, new Friend { Id = 4, Name = "Test4" } };
 
             Employees = new List<Employee>
             {
@@ -57,7 +57,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     SkillSet=new List<Skill>(),
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Read,
-                    NewFriends = new List<NewFriend>(){ new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444 } } } },
+                    NewFriends = new List<NewFriend>(){ new MyNewFriend { Id = 2, MyNewOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 2, Price = 444 , Quantity=2 } } } },
                     Friends =  this.Friends.Where(x=>x.Id ==3 || x.Id==4).ToList()
                 },
                 new Employee(){
@@ -82,6 +82,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var friends = new List<EdmStructuredObject>();
             var friend1 = new EdmEntityObject(friendType);
             friend1.TrySetPropertyValue("Id", 1);
+            friend1.TrySetPropertyValue("Age", 33);
             friend1.TrySetPropertyValue("Name", "Test1");
 
             var friend2 = new EdmEntityObject(friendType);
@@ -153,7 +154,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity));
+            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity), new TypelessAPIHandlerFactory(entity));
             ValidateSuccessfulTypeless();
 
             return changedObjColl;
@@ -171,7 +172,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             friends.First().TryGetPropertyValue("Name", out obj1);
 
-            Assert.Equal("Friend1", obj1.ToString());
+            object name;
+            if (EmployeesTypeless.First().TryGetPropertyValue("Name", out name) && name.ToString() == "Employeeabcd")
+            {
+                Assert.Equal("abcd", obj1.ToString());
+                
+                object age;
+                friends.First().TryGetPropertyValue("Age", out age);
+
+                Assert.Equal(33, (int)age);
+            }
+            else
+            {
+                Assert.Equal("Friend1", obj1.ToString());
+            }
 
         }
 
@@ -380,6 +394,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
     {
         public static IList<Company> Companies = null;
         public static IList<NewOrder> OverdueOrders = null;
+        public static IList<MyNewOrder> MyOverdueOrders = null;
 
         public CompanyController()
         {
@@ -391,9 +406,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private void InitCompanies()
         {
-            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10 }, new NewOrder { Id = 2, Price = 20 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
+            OverdueOrders = new List<NewOrder>() { new NewOrder { Id = 1, Price = 10, Quantity =1 }, new NewOrder { Id = 2, Price = 20, Quantity = 2 }, new NewOrder { Id = 3, Price = 30 }, new NewOrder { Id = 4, Price = 40 } };
+            MyOverdueOrders = new List<MyNewOrder>() { new MyNewOrder { Id = 1, Price = 10, Quantity = 1 }, new MyNewOrder { Id = 2, Price = 20, Quantity = 2 }, new MyNewOrder { Id = 3, Price = 30 }, new MyNewOrder { Id = 4, Price = 40 } };
 
-            Companies = new List<Company>() { new Company { Id = 1, Name = "Company1", OverdueOrders = OverdueOrders.Where(x => x.Id == 2).ToList() } ,
+            Companies = new List<Company>() { new Company { Id = 1, Name = "Company1", OverdueOrders = OverdueOrders.Where(x => x.Id == 2).ToList(), MyOverdueOrders = MyOverdueOrders.Where(x => x.Id == 2).ToList() } ,
                         new Company { Id = 2, Name = "Company2", OverdueOrders = OverdueOrders.Where(x => x.Id == 3 || x.Id == 4).ToList() } };
         }
 
@@ -409,8 +425,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory());
 
-            ValidateOverdueOrders1(1,1);
+            var comp = coll.First() as Delta<Company>;
+            object val;
+            if(comp.TryGetPropertyValue("Name", out val))
+            {
+                if(val.ToString() == "Company02")
+                {
+                    ValidateOverdueOrders2(1, 2, 9);
+                }
+                else
+                {
+                    ValidateOverdueOrders1(1, 1, 9);
+                }
+            }
 
+          
             return Ok(returncoll);
         }
 
@@ -493,7 +522,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var cntrl = new EmployeesController();
         }
 
-        private void ValidateOverdueOrders1(int companyId, int orderId)
+        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0)
         {
             var comp = Companies.FirstOrDefault(x => x.Id == companyId);
             Assert.NotNull(comp);
@@ -502,6 +531,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             Assert.NotNull(order);
             Assert.Equal(1, order.Id);
             Assert.Equal(101, order.Price);
+            Assert.Equal(quantity, order.Quantity);
+        }
+
+        private void ValidateOverdueOrders2(int companyId, int orderId, int quantity = 0)
+        {
+            var comp = Companies.FirstOrDefault(x => x.Id == companyId);
+            Assert.NotNull(comp);
+
+            MyNewOrder order = comp.MyOverdueOrders.FirstOrDefault(x => x.Id == orderId);
+            Assert.NotNull(order);
+            Assert.Equal(orderId, order.Id);
+            Assert.Equal(444, order.Price);
+            Assert.Equal(quantity, order.Quantity);
         }
     }
 }

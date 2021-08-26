@@ -572,26 +572,26 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 ODataPath odataPath = GetODataPath(odataId, readContext);
 
-                PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
-                if (containerPropertyInfo != null)
+                ODataIdContainer container = new ODataIdContainer();
+
+                NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
+                container.ODataIdNavigationPath = navigationPath;
+
+                if (resource is EdmEntityObject edmObject)
                 {
-                    ODataIdContainer container = new ODataIdContainer();
-
-                    NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
-                    container.ODataIdNavigationPath = navigationPath;
-
-                    if(resource is EdmEntityObject edmObject)
-                    {
-                        edmObject.ODataIdContainer = container;
-                    }
-                    else if(resource is IDeltaSetItem deltasetItem)
-                    {
-                        deltasetItem.ODataIdContainer = container;
-                    }
-                    else
+                    edmObject.ODataIdContainer = container;
+                }
+                else if (resource is IDeltaSetItem deltasetItem)
+                {
+                    deltasetItem.ODataIdContainer = container;
+                }
+                else
+                {
+                    PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
+                    if (containerPropertyInfo != null)
                     {
                         containerPropertyInfo.SetValue(resource, container);
-                    }                    
+                    }
                 }
             }
         } 

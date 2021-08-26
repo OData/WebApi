@@ -61,7 +61,18 @@ namespace Microsoft.AspNet.OData
 
             foreach (ODataPathSegment segment in _pathSegments)
             {
-                if(segment is KeySegment keySegment)
+                if (segment is EntitySetSegment || segment is NavigationPropertySegment)
+                {
+                    pathItems.Add(new PathItem());
+                    currentPathItem = pathItems.Last();
+                    currentPathItem.Name = segment.Identifier;
+                }
+                else if(segment is TypeSegment)
+                {
+                    currentPathItem.IsCastType = true;
+                    currentPathItem.CastTypeName = segment.Identifier;
+                }
+                else if (segment is KeySegment keySegment)
                 {
                     currentPathItem.KeyProperties = new Dictionary<string, object>();
 
@@ -70,12 +81,7 @@ namespace Microsoft.AspNet.OData
                         currentPathItem.KeyProperties.Add(key.Key, key.Value); 
                     }
                 }
-                else
-                {
-                    pathItems.Add(new PathItem());
-                    currentPathItem = pathItems.Last();                   
-                    currentPathItem.Name = segment.Identifier;                    
-                }
+                
             }
 
             return pathItems.ToArray();

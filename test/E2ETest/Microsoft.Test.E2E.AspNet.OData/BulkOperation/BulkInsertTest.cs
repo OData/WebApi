@@ -405,7 +405,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     'value':[{ 'Id':3, 'Age':35,}]
                      }";
 
-            content = @"{'@odata.context':'http://host/service/$metadata#UnTypedEmployees/$delta',     
+            content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#UnTypedEmployees/$delta',     
                     'value':[{ 'ID':1,'Name':'Employee1',
                             'UnTypedFriends@odata.delta':[{'Id':1,'Name':'Friend1'},{'Id':2,'Name':'Friend2'}]
                                 },
@@ -413,6 +413,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                             'UnTypedFriends@odata.delta':[{'Id':3,'Name':'Friend3'},{'Id':4,'Name':'Friend4'}]
                                 }]
                      }";
+
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -427,6 +428,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 json.ToString().Contains("$deletedEntity");
             }
         }
+
 
         [Fact]
         public async Task PatchEmployee_WithAdds_Friends_WithNested_Untyped()
@@ -818,10 +820,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
                     'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Company', 'Id':1,'Name':'Company01',
-                            'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+                            'OverdueOrders@odata.delta':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)', 'Quantity': 9}]
                             
                                 }]
                      }";
+
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
@@ -837,6 +840,66 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
            
         }
+
+        [Fact]
+        public async Task PatchCompanies_WithUpdates_ODataId_WithCast()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Companies/$delta',     
+                    'value':[{ '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Company', 'Id':1,'Name':'Company02',
+                            'MyOverdueOrders@odata.delta':[{'@odata.id':'Employees(2)/NewFriends(2)/Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend/MyNewOrders(2)', 'Quantity': 9}]
+                            
+                                }]
+                     }";
+
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+
+        }
+
+
+        [Fact]
+        public async Task PatchUntypedEmployee_WithOdataId()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/UnTypedEmployees";
+            
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#UnTypedEmployees/$delta',     
+                    'value':[{ 'ID':1,'Name':'Employeeabcd',
+                            'UnTypedFriends@odata.delta':[{'@odata.id':'UnTypedEmployees(1)/UnTypedFriends(1)', 'Name':'abcd'}]
+                                }]
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+            Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                json.ToString().Contains("$deletedEntity");
+            }
+        }
+
 
 
         [Fact]

@@ -121,6 +121,45 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, transientAnnotationContainer, deserializerProvider, readContext);            
         }
 
+        internal static void ApplyODataIdContainer(object resource, IEdmStructuredTypeReference structuredType, ODataResourceBase oDataResource,
+            ODataDeserializerProvider deserializerProvider, ODataDeserializerContext readContext)
+        {
+            //Apply instance annotations for both entityobject/changedobject/delta and normal resources
+
+            IODataInstanceAnnotationContainer instanceAnnotationContainer = null;
+            IODataInstanceAnnotationContainer transientAnnotationContainer = null;
+
+            EdmEntityObject edmObject = resource as EdmEntityObject;
+
+            if (edmObject != null)
+            {
+                instanceAnnotationContainer = edmObject.PersistentInstanceAnnotationsContainer;
+                transientAnnotationContainer = edmObject.TransientInstanceAnnotationContainer;
+            }
+            else
+            {
+                PropertyInfo propertyInfo = EdmLibHelpers.GetInstanceAnnotationsContainer(structuredType.StructuredDefinition(), readContext.Model);
+                if (propertyInfo != null)
+                {
+                    instanceAnnotationContainer = GetAnnotationContainer(propertyInfo, resource);
+                }
+
+                IDeltaSetItem deltaItem = resource as IDeltaSetItem;
+
+                if (deltaItem != null)
+                {
+                    transientAnnotationContainer = deltaItem.TransientInstanceAnnotationContainer;
+                }
+            }
+
+            if (instanceAnnotationContainer == null && transientAnnotationContainer == null)
+            {
+                return;
+            }
+
+            SetInstanceAnnotations(oDataResource, instanceAnnotationContainer, transientAnnotationContainer, deserializerProvider, readContext);
+        }
+
         internal static void SetDynamicProperty(object resource, IEdmStructuredTypeReference resourceType,
             EdmTypeKind propertyKind, string propertyName, object propertyValue, IEdmTypeReference propertyType,
             IEdmModel model)

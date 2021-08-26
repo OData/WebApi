@@ -490,43 +490,32 @@ namespace Microsoft.AspNet.OData
         {
             if (apiHandlerFactory != null && ODataIdContainer?.ODataIdNavigationPath != null)
             {
-                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataIdContainer.ODataIdNavigationPath);
-
-                ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
-
-                Debug.Assert(refapiHandlerOfT != null);
-
-                TStructuralType referencedObj;
-                string error;
-
-                if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
-                {
-                    if (apiHandler != null)
-                    {
-                        ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
-
-                        TStructuralType createdObj;
-                        string errMsg;
-                        if (apiHandlerOfT.TryCreate(null, out createdObj, out errMsg) == ODataAPIResponseStatus.Success)
-                        {
-                            foreach(string property in _updatableProperties)
-                            {
-                                PropertyInfo propertyInfo = _structuredType.GetProperty(property);
-
-                                object value = propertyInfo.GetValue(referencedObj);
-                                propertyInfo.SetValue(createdObj, value);
-                            }                            
-                        }
-                    }
-                    else
-                    {
-                        original = referencedObj;
-                    }
-                }
+                ApplyODataId(original, apiHandlerFactory);
             }
-            else
-            {
-                CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);
+
+            CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);            
+        }
+
+        private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
+        {
+            IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataIdContainer.ODataIdNavigationPath);
+
+            ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+
+            Debug.Assert(refapiHandlerOfT != null);
+
+            TStructuralType referencedObj;
+            string error;
+
+            if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            {                
+                foreach (string property in _updatableProperties)
+                {
+                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+
+                    object value = propertyInfo.GetValue(referencedObj);
+                    propertyInfo.SetValue(original, value);
+                }                
             }
         }
 

@@ -106,9 +106,8 @@ namespace Microsoft.AspNet.OData.Batch
 
             HttpRequest request = context.Request;
             IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
-            requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
-
-            ODataMessageReader reader = request.GetODataMessageReader(requestContainer);
+            Uri baseUri =  GetBaseUri(request);
+            ODataMessageReader reader = request.GetODataMessageReader(requestContainer, baseUri);
 
             CancellationToken cancellationToken = context.RequestAborted;
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();

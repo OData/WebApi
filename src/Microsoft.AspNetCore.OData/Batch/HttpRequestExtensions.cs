@@ -42,8 +42,9 @@ namespace Microsoft.AspNet.OData.Batch
         /// </summary>
         /// <param name="request">The request.</param>
         /// <param name="requestContainer">The dependency injection container for the request.</param>
+        /// <param name="baseUri">The base uri.</param>
         /// <returns>A task object that produces an <see cref="ODataMessageReader"/> when completed.</returns>
-        public static ODataMessageReader GetODataMessageReader(this HttpRequest request, IServiceProvider requestContainer)
+        public static ODataMessageReader GetODataMessageReader(this HttpRequest request, IServiceProvider requestContainer, Uri baseUri = null)
         {
             if (request == null)
             {
@@ -51,7 +52,14 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             IODataRequestMessage oDataRequestMessage = ODataMessageWrapperHelper.Create(request.Body, request.Headers, requestContainer);
-            ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>();
+
+            // Let's clone the reader setting every time to reset the base uri.
+            ODataMessageReaderSettings settings = requestContainer.GetRequiredService<ODataMessageReaderSettings>().Clone();
+            if (baseUri != null)
+            {
+                settings.BaseUri = baseUri;
+            }
+
             ODataMessageReader oDataMessageReader = new ODataMessageReader(oDataRequestMessage, settings);
             return oDataMessageReader;
         }

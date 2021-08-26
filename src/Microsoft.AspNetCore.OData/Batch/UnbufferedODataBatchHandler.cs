@@ -43,9 +43,9 @@ namespace Microsoft.AspNet.OData.Batch
             // This container is for the overall batch request.
             HttpRequest request = context.Request;
             IServiceProvider requestContainer = request.CreateRequestContainer(ODataRouteName);
-            requestContainer.GetRequiredService<ODataMessageReaderSettings>().BaseUri = GetBaseUri(request);
+            Uri baseUri = GetBaseUri(request);
 
-            ODataMessageReader reader = request.GetODataMessageReader(requestContainer);
+            ODataMessageReader reader = request.GetODataMessageReader(requestContainer, baseUri);
 
             ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             List<ODataBatchResponseItem> responses = new List<ODataBatchResponseItem>();

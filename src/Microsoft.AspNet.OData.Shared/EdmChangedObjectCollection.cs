@@ -114,14 +114,29 @@ namespace Microsoft.AspNet.OData
                     IEdmStructuredObject original = null;
                     EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
 
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(keyValues, out original, out getErrorMessage);
+
+                    if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
+                    {
+                        DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
+                        dataModificationExceptionType.MessageType = new MessageType { Message = getErrorMessage };
+
+                        deletedObj.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
+
+                        changedObjectCollection.Add(deletedObj);
+
+                        continue;
+                    }
+
                     if (deletedObj != null)
                     {
                         operation = DataModificationOperationKind.Delete;
 
+                        PatchItem(deletedObj, original as EdmStructuredObject, apiHandler, apiHandlerFactory);
+
                         if (apiHandler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
-                            //Handle Failed Operation - Delete                            
-                            ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(keyValues, out original, out getErrorMessage);
+                            //Handle Failed Operation - Delete                                                        
                             if (ODataAPIResponseStatus == ODataAPIResponseStatus.Success)
                             {
                                 IEdmChangedObject changedObject = HandleFailedOperation(deletedObj, operation, original, keys, errorMessage, apiHandler);
@@ -130,15 +145,13 @@ namespace Microsoft.AspNet.OData
                             }
                         }
 
-                        PatchItem(deletedObj, original as EdmStructuredObject, apiHandler, apiHandlerFactory);
+                        
 
                         changedObjectCollection.Add(deletedObj);
                     }
                     else
                     {
                         EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
-
-                        ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(keyValues, out original, out getErrorMessage);
 
                         if (ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
                         {
@@ -214,6 +227,9 @@ namespace Microsoft.AspNet.OData
             }
         }
 
+        /// <summary>
+        /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object, for typeless entities
+        /// </summary> 
         private void ApplyODataId(ODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
             EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(container.ODataIdNavigationPath);

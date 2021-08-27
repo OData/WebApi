@@ -56,11 +56,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     'Friends@odata.delta':[{'Id':1,'Name':'Test2'},{'Id':2,'Name':'Test3'}]
                      }";
 
-            content = @"{
-                    'Name':'Sql'  ,
-                    'Friends@odata.delta':[{'@odata.id':'Employees(1)/Friends(1)'},{'Id':2,'Name':'Test3'}]
-                     }";
-
+    
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
@@ -137,7 +133,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
             
             var content = @"{'@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',
-                            '@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+                            '@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta',     
                     'value':[{ 'Id':1,'Name':'Friend1'}, { 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -175,7 +171,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -212,7 +208,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -250,7 +246,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/Friends";
 
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/Friends/$delta', '@odata.type': '#Microsoft.Test.E2E.AspNet.OData.BulkInsert.Friend',    
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':1, 'Orders@odata.delta' :[{'@odata.removed' : {'reason':'changed'}, 'Id':1,'Price': 10}, {'Id':2,'Price': 20} ] },{ 'Id':2,'Name':'Friend2'}]
                      }";
 
@@ -288,7 +284,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':35, '@NS.Test':1}]
                      }";
 
@@ -318,7 +314,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             string requestUri = this.BaseAddress + "/convention/Employees(1)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
@@ -343,7 +339,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/NewFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@NS.Test':1}]
                      }";
 
@@ -370,7 +366,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(2)/NewFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/NewFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/NewFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':2, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 
@@ -401,7 +397,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/UnTypedEmployees";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':35,}]
                      }";
 
@@ -437,7 +433,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(1)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(1)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(1)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':2, 'Name': 'Friend007', 'Age':35,'Address@odata.delta':{'Id':1, 'Street' : 'Abc 123'}, '@NS.Test':1}]
                      }";
 
@@ -466,7 +462,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(2)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(2)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(2)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':2, 'Age':35, '@NS.Test':1}]
                      }";
 
@@ -493,7 +489,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ 'Id':3, 'Age':3, '@NS.Test':1}]
                      }";
 
@@ -518,7 +514,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@NS.Test':1}]
                      }";
 
@@ -546,7 +542,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             //Arrange            
             string requestUri = this.BaseAddress + "/convention/Employees(3)/UnTypedFriends";
             //{ '@odata.removed' : {'reason':'changed'}, 'Id':1},{ '@odata.removed' : {'reason':'deleted'}, 'Id':2},
-            var content = @"{'@odata.context':'http://host/service/$metadata#Employees(3)/UnTypedFriends/$delta',     
+            var content = @"{'@odata.context':'" + this.BaseAddress + @"/convention/$metadata#Employees(3)/UnTypedFriends/$delta',     
                     'value':[{ '@odata.removed' : {'reason':'changed'}, 'Id':5, '@Core.ContentID':3, '@NS.Test2':'testing'}]
                      }";
 

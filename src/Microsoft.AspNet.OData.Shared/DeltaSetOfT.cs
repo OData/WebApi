@@ -24,6 +24,7 @@ namespace Microsoft.AspNet.OData
     {        
         private Type _clrType;
         IList<string> _keys;
+        NavigationPath _navigationPath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
@@ -32,7 +33,8 @@ namespace Microsoft.AspNet.OData
         public DeltaSet(IList<string> keys)           
         {
             _keys = keys;            
-            _clrType = typeof(TStructuralType);            
+            _clrType = typeof(TStructuralType);
+            _navigationPath = new NavigationPath(_clrType.Name, null);
         }
 
     
@@ -44,7 +46,7 @@ namespace Microsoft.AspNet.OData
             //To ensure we dont insert null or a non related type to deltaset
             if (deltaItem == null)
             {
-                throw Error.Argument("item", SRResources.ChangedObjectTypeMismatch, item.GetType(), typeof(TStructuralType));
+                throw Error.Argument("item", SRResources.ChangedObjectTypeMismatch, item.GetType(), _clrType);
             }
 
             base.InsertItem(index, item);
@@ -68,8 +70,9 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>     
         /// <returns>DeltaSet response</returns>
-        public DeltaSet<TStructuralType> Patch(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
+        public DeltaSet<TStructuralType> Patch(ODataAPIHandlerFactory apiHandlerFactory = null)
         {
+            IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
             ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
             Debug.Assert(apiHandlerOfT != null);
 
@@ -78,10 +81,14 @@ namespace Microsoft.AspNet.OData
 
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes")]
-        internal DeltaSet<TStructuralType> CopyChangedValues(ODataAPIHandler<TStructuralType> apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
+        internal DeltaSet<TStructuralType> CopyChangedValues(IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
             //Here we are getting the keys and using the keys to find the original object 
             //to patch from the list of collection
+
+            ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
+
+            Debug.Assert(apiHandlerOfT != null);
 
             DeltaSet<TStructuralType> deltaSet = CreateDeltaSet();
 
@@ -108,7 +115,7 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(keyValues, out original, out getErrorMessage);
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 
@@ -121,6 +128,8 @@ namespace Microsoft.AspNet.OData
 
                         deltaSetItem.TransientInstanceAnnotationContainer.AddResourceAnnotation(SRResources.DataModificationException, dataModificationExceptionType);
 
+                        deltaSet.Add(deltaSetItem);
+                        
                         continue;
                     }
 
@@ -128,9 +137,9 @@ namespace Microsoft.AspNet.OData
                     {
                         operation = DataModificationOperationKind.Delete;
 
-                        changedObj.Patch(original, apiHandler);
+                        changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);
 
-                        if (apiHandler.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
+                        if (apiHandlerOfT.TryDelete(keyValues, out errorMessage) != ODataAPIResponseStatus.Success)
                         {
                             //Handle Failed Operation - Delete                           
                             
@@ -150,7 +159,7 @@ namespace Microsoft.AspNet.OData
                         {
                             operation = DataModificationOperationKind.Insert;
 
-                            if (apiHandler.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
+                            if (apiHandlerOfT.TryCreate(keyValues, out original, out errorMessage) != ODataAPIResponseStatus.Success)
                             {
                                 //Handle failed Opreataion - create
                                 IDeltaSetItem changedObject = HandleFailedOperation(changedObj, operation, original, errorMessage);
@@ -172,7 +181,7 @@ namespace Microsoft.AspNet.OData
                         
                         //Patch for addition/update. This will call Delta<T> for each item in the collection
                         // This will work in case we use delegates for using users method to create an object
-                        changedObj.Patch(original, apiHandler, apiHandlerFactory);                                                
+                        changedObj.CopyChangedValues(original, apiHandlerOfT, apiHandlerFactory);                                                
 
                         deltaSet.Add(changedObj);
                     }

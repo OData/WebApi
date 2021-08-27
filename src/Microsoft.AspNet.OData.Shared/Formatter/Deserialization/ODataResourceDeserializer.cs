@@ -521,10 +521,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 return properties;
             }
-                        
-            try
+           
+            ODataPath odataPath = GetODataPath(id.OriginalString, readContext);
+            if (odataPath?.Segments != null)
             {
-                ODataPath odataPath = GetODataPath(id.OriginalString, readContext);
                 KeySegment keySegment = odataPath.Segments.OfType<KeySegment>().LastOrDefault();
 
                 if (keySegment != null)
@@ -538,28 +538,32 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         });
                     }
                 }
-
-                return properties;
             }
-            catch (Exception)
-            {
-                return properties;
-            }          
+
+            return properties;                     
         }
 
         private static ODataPath GetODataPath(string id, ODataDeserializerContext readContext)
         {
-            IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
-            IWebApiRequestMessage internalRequest = readContext.InternalRequest;
-            IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
+            try
+            {
+                IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
+                IWebApiRequestMessage internalRequest = readContext.InternalRequest;
+                IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
 
-            string serviceRoot = urlHelper.CreateODataLink(
-                internalRequest.Context.RouteName,
-                internalRequest.PathHandler,
-                new List<ODataPathSegment>());
-            ODataPath odataPath = pathHandler.Parse(serviceRoot, id, internalRequest.RequestContainer);
-           
-            return odataPath;
+                string serviceRoot = urlHelper.CreateODataLink(
+                    internalRequest.Context.RouteName,
+                    internalRequest.PathHandler,
+                    new List<ODataPathSegment>());
+                ODataPath odataPath = pathHandler.Parse(serviceRoot, id, internalRequest.RequestContainer);
+
+
+                return odataPath;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
@@ -572,25 +576,28 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 ODataPath odataPath = GetODataPath(odataId, readContext);
 
-                ODataIdContainer container = new ODataIdContainer();
+                if (odataPath != null)
+                {
+                    ODataIdContainer container = new ODataIdContainer();
 
-                NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
-                container.ODataIdNavigationPath = navigationPath;
+                    NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
+                    container.ODataIdNavigationPath = navigationPath;
 
-                if (resource is EdmEntityObject edmObject)
-                {
-                    edmObject.ODataIdContainer = container;
-                }
-                else if (resource is IDeltaSetItem deltasetItem)
-                {
-                    deltasetItem.ODataIdContainer = container;
-                }
-                else
-                {
-                    PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
-                    if (containerPropertyInfo != null)
+                    if (resource is EdmEntityObject edmObject)
                     {
-                        containerPropertyInfo.SetValue(resource, container);
+                        edmObject.ODataIdContainer = container;
+                    }
+                    else if (resource is IDeltaSetItem deltasetItem)
+                    {
+                        deltasetItem.ODataIdContainer = container;
+                    }
+                    else
+                    {
+                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
+                        if (containerPropertyInfo != null)
+                        {
+                            containerPropertyInfo.SetValue(resource, container);
+                        }
                     }
                 }
             }

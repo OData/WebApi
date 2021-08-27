@@ -132,7 +132,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl, Employee employee)
         {
-            var changedObjColl = friendColl.Patch(new NewFriendAPIHandler(employee));
+            var changedObjColl = friendColl.Patch(new APIHandlerFactory(employee));
 
             return changedObjColl;
         }
@@ -238,7 +238,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             Assert.NotNull(coll);
 
-            var returncoll = coll.Patch(new EmployeeAPIHandler());
+            var returncoll = coll.Patch(new APIHandlerFactory());
 
             return Ok(returncoll);
         }
@@ -366,13 +366,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             if (employee == null)
             {
                 employee = new Employee();
-                delta.Patch(employee, new EmployeeAPIHandler());
+                delta.Patch(employee, new APIHandlerFactory());
                 return Created(employee);
             }
 
             try
             {
-                delta.Patch(employee, new EmployeeAPIHandler());
+                delta.Patch(employee, new APIHandlerFactory());
 
                 if (employee.Name == "Bind1")
                 {
@@ -423,7 +423,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             Assert.NotNull(coll);
 
-            var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory());
+            var returncoll = coll.Patch( new APIHandlerFactory());
 
             var comp = coll.First() as Delta<Company>;
             object val;

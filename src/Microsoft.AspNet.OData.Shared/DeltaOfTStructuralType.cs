@@ -383,6 +383,12 @@ namespace Microsoft.AspNet.OData
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
+            //To apply ODataId if its present
+            if (apiHandlerFactory != null && ODataIdContainer?.ODataIdNavigationPath != null)
+            {
+                ApplyODataId(original, apiHandlerFactory);
+            }
+
             RuntimeHelpers.EnsureSufficientExecutionStack();
 
             // For regular non-structural properties at current level.
@@ -408,7 +414,7 @@ namespace Microsoft.AspNet.OData
 
                     if (apiHandlerNested != null)
                     {
-                        deltaNestedResource.Patch(apiHandlerNested, apiHandlerFactory);
+                        deltaNestedResource.CopyChangedValues(apiHandlerNested, apiHandlerFactory);
                     }
                 }
                 else
@@ -483,39 +489,44 @@ namespace Microsoft.AspNet.OData
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
-        /// <param name="original">The entity to be updated.</param>
-        /// <param name="apiHandler">API Handler</param>
+        /// <param name="original">The entity to be updated.</param>        
         /// <param name="apiHandlerFactory">API Handler Factory</param>
-        public void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory = null)
+        public void Patch(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory = null)
         {
-            if (apiHandlerFactory != null && ODataIdContainer?.ODataIdNavigationPath != null)
-            {
-                ApplyODataId(original, apiHandlerFactory);
-            }
+            IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
+
+            Debug.Assert(apiHandler != null);
 
             CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);            
         }
 
+        /// <summary>
+        /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
+        /// </summary>    
         private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
         {
             IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataIdContainer.ODataIdNavigationPath);
 
-            ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+            if (refapiHandler != null)
+            {
+                ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
 
-            Debug.Assert(refapiHandlerOfT != null);
+                Debug.Assert(refapiHandlerOfT != null);
 
-            TStructuralType referencedObj;
-            string error;
+                TStructuralType referencedObj;
+                string error;
 
-            if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
-            {                
-                foreach (string property in _updatableProperties)
+                //Checking to get the referenced entity, get the properties and apply it on original object
+                if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
                 {
-                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+                    foreach (string property in _updatableProperties)
+                    {
+                        PropertyInfo propertyInfo = _structuredType.GetProperty(property);
 
-                    object value = propertyInfo.GetValue(referencedObj);
-                    propertyInfo.SetValue(original, value);
-                }                
+                        object value = propertyInfo.GetValue(referencedObj);
+                        propertyInfo.SetValue(original, value);
+                    }
+                }
             }
         }
 

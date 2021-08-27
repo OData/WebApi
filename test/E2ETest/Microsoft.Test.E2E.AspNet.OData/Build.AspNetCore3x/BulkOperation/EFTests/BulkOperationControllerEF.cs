@@ -79,7 +79,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 Assert.NotNull(coll);
 
-                var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext));
+                var returncoll = coll.Patch(new APIHandlerFactoryEF(dbContext));
 
 
                 return Ok(returncoll);
@@ -108,7 +108,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 try
                 {
-                    delta.Patch(employee, new EmployeeEFPatchHandler(dbContext));
+                    delta.Patch(employee, new APIHandlerFactoryEF(dbContext));
 
                 }
                 catch (ArgumentException ae)

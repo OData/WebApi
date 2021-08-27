@@ -12,11 +12,39 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     public class APIHandlerFactory : ODataAPIHandlerFactory
     {
+        Employee employee;
+        public APIHandlerFactory()
+        {
+
+        }
+
+        public APIHandlerFactory(Employee employee)
+        {
+            this.employee = employee;
+        }
+
         public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
         {
             if(navigationPath != null)
             {
                 var pathItems = navigationPath.GetNavigationPathItems();
+                
+                if(pathItems == null)
+                {
+                    switch (navigationPath.NavigationPathName)
+                    {
+                        case "Employees":
+                        case "Employee":
+                            return new EmployeeAPIHandler();
+                        case "NewFriend":
+                            return new NewFriendAPIHandler(employee);
+                        case "Company":
+                            return new CompanyAPIHandler();
+                        default:
+                            return null;
+                    }
+                }
+
                 int cnt = 0;
                                     
                     switch (pathItems[cnt].Name)
@@ -44,7 +72,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
         private static IODataAPIHandler GetNestedHandlerForEmployee(PathItem[] pathItems, int cnt, Employee employee)
         {
-            switch (pathItems[++cnt].Name)
+            cnt++;
+            if(pathItems.Length <= cnt)
+            {
+                return null;
+            }
+
+            switch (pathItems[cnt].Name)
             {
                 case "NewFriends":
                     if (pathItems[cnt].IsCastType)

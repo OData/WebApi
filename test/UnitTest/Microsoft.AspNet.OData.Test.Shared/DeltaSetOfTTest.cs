@@ -87,7 +87,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            deltaSet.Patch(new FriendPatchHandler());
+            deltaSet.Patch(new APIHandlerFactory());
 
             //Assert
             Assert.Single(friends);
@@ -124,7 +124,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            var coll = deltaSet.Patch(new FriendPatchHandler()).ToArray();
+            var coll = deltaSet.Patch(new APIHandlerFactory()).ToArray();
 
             //Assert
             Assert.Single(friends);
@@ -200,7 +200,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
             //Act
-            deltaSet.Patch(new FriendPatchHandler());
+            deltaSet.Patch(new APIHandlerFactory());
 
             //Assert
             Assert.Equal(2, friends.Count);
@@ -218,6 +218,30 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
+    public class APIHandlerFactory : ODataAPIHandlerFactory
+    {
+        public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
+        {
+            if (navigationPath != null)
+            {
+                var pathItems = navigationPath.GetNavigationPathItems();
+
+                if (pathItems == null)
+                {
+                    switch (navigationPath.NavigationPathName)
+                    {   
+                        case "Friend":
+                            return new FriendPatchHandler();
+                       
+                        default:
+                            return null;
+                    }
+                }
+            }
+
+            return null;
+        }
+    }
     public class FriendPatchHandler : ODataAPIHandler<Friend>
     {
         public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)

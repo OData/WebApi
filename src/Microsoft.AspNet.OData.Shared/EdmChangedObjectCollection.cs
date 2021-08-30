@@ -25,6 +25,7 @@ namespace Microsoft.AspNet.OData
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
+        private NavigationPath _navigationPath;
         
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
@@ -69,6 +70,7 @@ namespace Microsoft.AspNet.OData
             _entityType = entityType;
             _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
             _edmTypeReference = new EdmCollectionTypeReference(_edmType);
+            _navigationPath = new NavigationPath(entityType.Name, null);
         }
 
         /// <summary>
@@ -87,8 +89,10 @@ namespace Microsoft.AspNet.OData
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
-        {            
+        public EdmChangedObjectCollection Patch(ODataEdmAPIHandlerFactory apiHandlerFactory)
+        {
+            EdmODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
+
             return CopyChangedValues(apiHandler, apiHandlerFactory);
         }
 
@@ -248,12 +252,12 @@ namespace Microsoft.AspNet.OData
 
                 foreach (string propertyName in structuredObj.GetChangedPropertyNames())
                 {
-                    ApplyProperties(referencedObj as EdmStructuredObject, original, propertyName, edmApiHandler, apiHandlerFactory);
+                    ApplyProperties(structuredObj, original, propertyName, edmApiHandler, apiHandlerFactory);
                 }
 
                 foreach (string propertyName in structuredObj.GetUnchangedPropertyNames())
                 {
-                    ApplyProperties(referencedObj as EdmStructuredObject, original, propertyName, edmApiHandler, apiHandlerFactory);
+                    ApplyProperties(structuredObj, original, propertyName, edmApiHandler, apiHandlerFactory);
                 }                
             }
         }
@@ -270,7 +274,7 @@ namespace Microsoft.AspNet.OData
                     EdmODataAPIHandler apiHandlerNested = apiHandler.GetNestedHandler(originalObj, propertyName);
                     if (apiHandlerNested != null)
                     {
-                        changedColl.Patch(apiHandlerNested, apiHandlerFactory);
+                        changedColl.CopyChangedValues(apiHandlerNested, apiHandlerFactory);
                     }
                     else
                     {

@@ -62,7 +62,7 @@ namespace Org.OData.Core.V1
         }
 
         /// <summary>
-        /// Represents king of <see cref="DataModificationOperationKind"/> type of operation 
+        /// Represents kind of <see cref="DataModificationOperationKind"/> type of operation 
         /// </summary>        
         public DataModificationOperationKind FailedOperation { get; }
 

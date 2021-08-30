@@ -567,7 +567,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
-            IEdmStructuredTypeReference structuredType, ODataDeserializerContext readContext)
+            ODataDeserializerContext readContext)
         {
             //if  id null check, add delta case as well c
             if (resourceWrapper.ResourceBase?.Id != null)
@@ -672,7 +672,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ApplyStructuralProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyNestedProperties(resource, resourceWrapper, structuredType, readContext);
             ApplyInstanceAnnotations(resource, resourceWrapper, structuredType, readContext);
-            ApplyODataIDContainer(resource, resourceWrapper, structuredType, readContext);
+            ApplyODataIDContainer(resource, resourceWrapper, readContext);
         }
 
         private void ApplyResourceInNestedProperty(IEdmProperty nestedProperty, object resource,

@@ -32,6 +32,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             modelBuilder.Entity<Employee>().Ignore(c => c.NewFriends);
             modelBuilder.Entity<Employee>().Ignore(c => c.UnTypedFriends);
             modelBuilder.Entity<Employee>().Ignore(c => c.InstanceAnnotations);
+            modelBuilder.Entity<Employee>().Ignore(c => c.FavoriteSports);
 
             modelBuilder.Entity<NewFriend>().Ignore(c => c.InstanceAnnotations);
             modelBuilder.Entity<UnTypedFriend>().Ignore(c => c.InstanceAnnotations);

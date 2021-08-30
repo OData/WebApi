@@ -89,7 +89,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)ODataEdmAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IODataAPIHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)KeyProperty.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PathItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NavigationPath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataIdContainer.cs" />

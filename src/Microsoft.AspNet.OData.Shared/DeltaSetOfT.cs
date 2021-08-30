@@ -70,7 +70,7 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>     
         /// <returns>DeltaSet response</returns>
-        public DeltaSet<TStructuralType> Patch(ODataAPIHandlerFactory apiHandlerFactory = null)
+        public DeltaSet<TStructuralType> Patch(ODataAPIHandlerFactory apiHandlerFactory)
         {
             IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
             ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;

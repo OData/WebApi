@@ -4,13 +4,22 @@
 namespace Microsoft.AspNet.OData
 {
     /// <summary>
-    /// Sealed class to hold ODataID in parsed format, it will be used by POCO objects as well as Delta{TStructuralType}
+    /// Interface to hold ODataID in parsed format, it will be used by POCO objects as well as Delta{TStructuralType}
     /// </summary>
-    public sealed class ODataIdContainer
+    public interface IODataIdContainer
     {
         /// <summary>
         /// The Navigation path corresponding to the ODataId
         /// </summary>
-        public NavigationPath ODataIdNavigationPath { set; get; }
+        NavigationPath ODataIdNavigationPath { set; get; }
+    }
+
+    /// <summary>
+    /// Default implementation of IOdataIdContainer
+    /// </summary>
+    public class ODataIdContainer : IODataIdContainer
+    {
+        ///<inheritdoc/>
+        public NavigationPath ODataIdNavigationPath { get; set; }
     }
 }

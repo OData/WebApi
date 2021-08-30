@@ -569,7 +569,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
             ODataDeserializerContext readContext)
         {
-            //if  id null check, add delta case as well c
+            //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
+            //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
             if (resourceWrapper.ResourceBase?.Id != null)
             {
                 string odataId = resourceWrapper.ResourceBase.Id.OriginalString;
@@ -578,7 +579,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if (odataPath != null)
                 {
-                    ODataIdContainer container = new ODataIdContainer();
+                    IODataIdContainer container = new ODataIdContainer();
 
                     NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
                     container.ODataIdNavigationPath = navigationPath;
@@ -593,10 +594,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                     else
                     {
-                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
+                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(IODataIdContainer)).FirstOrDefault();
                         if (containerPropertyInfo != null)
                         {
-                            containerPropertyInfo.SetValue(resource, container);
+                            IODataIdContainer resourceContainer = containerPropertyInfo.GetValue(resource) as IODataIdContainer;
+                            if (resourceContainer != null)
+                            {
+                                resourceContainer.ODataIdNavigationPath = navigationPath;
+                                containerPropertyInfo.SetValue(resource, resourceContainer);
+                            }
+                            else
+                            {
+                                containerPropertyInfo.SetValue(resource, container);
+                            }
                         }
                     }
                 }

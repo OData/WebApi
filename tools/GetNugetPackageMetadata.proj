@@ -1,5 +1,8 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="WebStack.versions.settings.targets" />
+  <PropertyGroup>
+    <VersionNugetNightlyBuild>$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</VersionNugetNightlyBuild>
+  </PropertyGroup>
   <Target Name="Build">
     <Message Importance="high" Text="##vso[task.setvariable variable=VersionFullSemantic]$(VersionFullSemantic)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=VersionFull]$(VersionFull)" />
@@ -11,4 +14,5 @@
     <Message Importance="high" Text="##vso[task.setvariable variable=ODataLibPackageDependency]$(ODataLibPackageDependency)" />
     <Message Importance="high" Text="##vso[task.setvariable variable=NewtonsoftJsonPackageDependency]$(NewtonsoftJsonPackageDependency)" />
   </Target>
+   
 </Project>

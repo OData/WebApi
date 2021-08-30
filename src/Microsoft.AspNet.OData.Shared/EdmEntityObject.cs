@@ -64,7 +64,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Container to hold ODataId
         /// </summary>
-        public ODataIdContainer ODataIdContainer { get; set; }
+        public IODataIdContainer ODataIdContainer { get; set; }
 
         /// <summary>
         /// DeltaKind as Entry

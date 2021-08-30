@@ -26,7 +26,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public static List<Friend> friends;
 
         public DbSet<Employee> GenerateData(EmployeeDBContext context)
-        {
+        {            
             if (context.Employees.Any())
             {
                 return context.Employees;

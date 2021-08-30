@@ -84,11 +84,12 @@
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmPatchMethodHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EdmPatchMethodHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataEdmAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IODataAPIHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ODataIdResolver.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PathItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)NavigationPath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataIdContainer.cs" />

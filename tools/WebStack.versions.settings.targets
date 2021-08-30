@@ -4,9 +4,9 @@
   <!-- Set the version number: major, minor, build and release (i.e. alpha, beta or blank for RTM)-->
   <PropertyGroup>
     <VersionMajor Condition="'$(VersionMajor)' == ''">7</VersionMajor>
-    <VersionMinor Condition="'$(VersionMinor)' == ''">5</VersionMinor>
-    <VersionBuild Condition="'$(VersionBuild)' == ''">15</VersionBuild>
-    <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">6</VersionMinor>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
+    <VersionRelease Condition="'$(VersionRelease)' == ''">beta</VersionRelease>
   </PropertyGroup>
 
   <!-- For NuGet Package Dependencies -->
@@ -40,7 +40,7 @@
     <VersionNuGetSemantic>$(VersionFullSemantic)</VersionNuGetSemantic>
     <VersionNuGetSemantic Condition="'$(VersionRelease)'!=''">$(VersionFullSemantic)-$(VersionRelease)</VersionNuGetSemantic>
   </PropertyGroup>
-
+  
   <!--
  ==================================================================================================
  Property Groups to define version information. Do not modify this section.

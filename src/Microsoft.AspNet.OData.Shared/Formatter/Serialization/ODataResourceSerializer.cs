@@ -202,12 +202,13 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     writer.WriteStart(resource);
                     WriteDeltaComplexProperties(selectExpandNode, resourceContext, writer);
+                    WriteDeltaNavigationProperties(selectExpandNode, resourceContext, writer);
                     //TODO: Need to add support to write Navigation Links, etc. using Delta Writer
                     //https://github.com/OData/odata.net/issues/155
                     //CLEANUP: merge delta logic with regular logic; requires common base between ODataWriter and ODataDeltaWriter
                     //WriteDynamicComplexProperties(resourceContext, writer);
                     //WriteNavigationLinks(selectExpandNode.SelectedNavigationProperties, resourceContext, writer);
-                    //WriteExpandedNavigationProperties(selectExpandNode.ExpandedNavigationProperties, resourceContext, writer);
+                    //WriteExpandedNavigationProperties(selectExpandNode, resourceContext, writer);
 
                     writer.WriteEnd();
                 }
@@ -226,6 +227,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 {
                     await writer.WriteStartAsync(resource);
                     await WriteDeltaComplexPropertiesAsync(selectExpandNode, resourceContext, writer);
+                    await WriteDeltaNavigationPropertiesAsync(selectExpandNode, resourceContext, writer);
                     //TODO: Need to add support to write Navigation Links, etc. using Delta Writer
                     //https://github.com/OData/odata.net/issues/155
                     //CLEANUP: merge delta logic with regular logic; requires common base between ODataWriter and ODataDeltaWriter
@@ -275,6 +277,48 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
+        internal void WriteDeltaNavigationProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+ 
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {   
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                writer.WriteStart(nestedResourceInfo);
+                WriteDeltaComplexAndExpandedNavigationProperty(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                writer.WriteEnd();
+            }
+        }
+
+        internal async Task WriteDeltaNavigationPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> navigationProperties = GetNavigationPropertiesToWrite(selectExpandNode, resourceContext);
+
+            foreach (KeyValuePair<IEdmNavigationProperty, Type> navigationProperty in navigationProperties)
+            {
+                ODataNestedResourceInfo nestedResourceInfo = new ODataNestedResourceInfo
+                {
+                    IsCollection = navigationProperty.Key.Type.IsCollection(),
+                    Name = navigationProperty.Key.Name
+                };
+
+                await writer.WriteStartAsync(nestedResourceInfo);
+                await WriteDeltaComplexAndExpandedNavigationPropertyAsync(navigationProperty.Key, null, resourceContext, writer, navigationProperty.Value);
+                await writer.WriteEndAsync();
+            }
+        }
+
         private async Task WriteDeltaComplexPropertiesAsync(SelectExpandNode selectExpandNode,
             ResourceContext resourceContext, ODataWriter writer)
         {
@@ -298,7 +342,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private void WriteDeltaComplexAndExpandedNavigationProperty(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
-            ResourceContext resourceContext, ODataWriter writer)
+            ResourceContext resourceContext, ODataWriter writer, Type type = null)
         {
             Contract.Assert(edmProperty != null);
             Contract.Assert(resourceContext != null);
@@ -331,6 +375,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 // create the serializer context for the complex and expanded item.
                 ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
+                nestedWriteContext.Type = type;
 
                 // write object.
 
@@ -355,7 +400,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         }
 
         private async Task WriteDeltaComplexAndExpandedNavigationPropertyAsync(IEdmProperty edmProperty, SelectExpandClause selectExpandClause,
-            ResourceContext resourceContext, ODataWriter writer)
+            ResourceContext resourceContext, ODataWriter writer, Type type = null)
         {
             Contract.Assert(edmProperty != null);
             Contract.Assert(resourceContext != null);
@@ -388,6 +433,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             {
                 // create the serializer context for the complex and expanded item.
                 ODataSerializerContext nestedWriteContext = new ODataSerializerContext(resourceContext, selectExpandClause, edmProperty);
+                nestedWriteContext.Type = type;
 
                 // write object.
 
@@ -1341,6 +1387,43 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     if (changedProperties == null || changedProperties.Contains(complexProperty.Key.Name))
                     {
                         yield return complexProperty;
+                    }
+                }
+            }
+        }
+
+        private IEnumerable<KeyValuePair<IEdmNavigationProperty, Type>> GetNavigationPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
+        {
+            ISet<IEdmNavigationProperty> navigationProperties = selectExpandNode.SelectedNavigationProperties;
+
+            if (navigationProperties != null)
+            {
+                IEnumerable<string> changedProperties = null;
+
+                if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
+                {
+                    changedProperties = deltaObject.GetChangedPropertyNames();
+                    dynamic delta = deltaObject;
+
+                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                    {
+                        Object obj = null;
+                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name) && delta.DeltaNestedResources.TryGetValue(navigationProperty.Name, out obj))
+                        {
+                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
+                        }
+                    }
+                }
+                else if(null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
+                {
+                    changedProperties = changedObject.GetChangedPropertyNames();
+
+                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                    {                         
+                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
+                        {
+                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
+                        }
                     }
                 }
             }

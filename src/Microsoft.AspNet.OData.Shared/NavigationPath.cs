@@ -21,6 +21,14 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Constructor which takes and odataId and creates PathItems
         /// </summary>
+        public NavigationPath()
+        {
+           
+        }
+
+        /// <summary>
+        /// Constructor which takes and odataId and creates PathItems
+        /// </summary>
         /// <param name="navigationPath">ODataId in string format</param>
         /// <param name="pathSegments">Pathsegment collection</param>
         public NavigationPath(string navigationPath, ReadOnlyCollection<ODataPathSegment> pathSegments)

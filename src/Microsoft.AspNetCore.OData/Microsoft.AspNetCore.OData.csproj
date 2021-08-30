@@ -44,6 +44,15 @@
     <PackageReference Include="Microsoft.OData.Core" Version="7.12.2" />
     <PackageReference Include="Microsoft.OData.Edm" Version="7.12.2" />
     <PackageReference Include="Microsoft.Spatial" Version="7.12.2" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.12.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.12.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.12.1" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.11.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.11.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.11.1" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.9.1" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.9.1" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.9.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

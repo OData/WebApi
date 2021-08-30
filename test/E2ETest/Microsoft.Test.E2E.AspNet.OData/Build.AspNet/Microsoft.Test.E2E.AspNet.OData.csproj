@@ -46,6 +46,14 @@
     <Reference Include="Microsoft.OData.Client, Version=7.12.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.12.2\lib\net45\Microsoft.OData.Client.dll</HintPath>
       <Private>True</Private>
+    <Reference Include="Microsoft.OData.Client, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Client.7.9.1\lib\net45\Microsoft.OData.Client.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Core, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.9.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Edm, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Edm.7.9.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.OData.Core, Version=7.12.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.OData.Core.7.12.2\lib\net45\Microsoft.OData.Core.dll</HintPath>
@@ -70,6 +78,8 @@
     <Reference Include="Microsoft.Spatial, Version=7.12.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.12.2\lib\net45\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
+    <Reference Include="Microsoft.Spatial, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\sln\packages\Microsoft.Spatial.7.9.1\lib\net45\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -175,9 +185,9 @@
     <Compile Include="..\BulkOperation\BulkInsertController.cs">
       <Link>BulkOperation\BulkInsertController.cs</Link>
     </Compile>
-	<Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
-		<Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
-	</Compile>
+    <Compile Include="..\BulkOperation\BulkOperationPatchHandlers.cs">
+      <Link>BulkOperation\BulkOperationPatchHandlers.cs</Link>
+    </Compile>
     <Compile Include="..\EntitySetAggregation\EntitySetAggregationController.cs">
       <Link>EntitySetAggregation\EntitySetAggregationController.cs</Link>
     </Compile>

@@ -131,11 +131,6 @@ namespace Microsoft.AspNet.OData
             get { return _deltaNestedResources; }
         }
 
-        internal IDictionary<string, object> DeltaNestedResources
-        {
-            get { return _deltaNestedResources; }
-        }
-
         /// <inheritdoc/>
         public override Type ExpectedClrType
             => typeof(TStructuralType);
@@ -161,22 +156,6 @@ namespace Microsoft.AspNet.OData
 
         /// <inheritdoc />
         internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
-
-
-        /// <summary>
-        /// Gets the enum type of <see cref="EdmDeltaEntityKind"/>.
-        /// </summary>
-        public EdmDeltaEntityKind DeltaKind { get; protected set; }
-
-        /// <inheritdoc />
-        public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
-
-        /// <inheritdoc />
-        public ODataIdContainer ODataIdContainer { get; set; }
-
-        /// <inheritdoc />
-        internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
-
 
         /// <inheritdoc/>
         public override void Clear()

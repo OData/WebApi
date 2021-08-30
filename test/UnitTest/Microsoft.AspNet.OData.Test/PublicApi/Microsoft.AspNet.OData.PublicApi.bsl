@@ -334,7 +334,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public void Patch (TStructuralType original)
-	public void Patch (TStructuralType original, params ODataAPIHandlerFactory apiHandlerFactory)
+	public void Patch (TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
 	public void Put (TStructuralType original)
 	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
@@ -366,7 +366,7 @@ public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.
 
 	protected virtual void InsertItem (int index, IDeltaSetItem item)
 	public DeltaSet`1 Patch (ICollection`1 originalCollection)
-	public DeltaSet`1 Patch (params ODataAPIHandlerFactory apiHandlerFactory)
+	public DeltaSet`1 Patch (ODataAPIHandlerFactory apiHandlerFactory)
 }
 
 [
@@ -379,7 +379,7 @@ public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collecti
 	Microsoft.OData.Edm.IEdmEntityType EntityType  { public get; }
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
-	public EdmChangedObjectCollection Patch (EdmODataAPIHandler apiHandler, params ODataEdmAPIHandlerFactory apiHandlerFactory)
+	public EdmChangedObjectCollection Patch (ODataEdmAPIHandlerFactory apiHandlerFactory)
 }
 
 [
@@ -560,13 +560,6 @@ public class Microsoft.AspNet.OData.HttpRequestScope {
 	System.Net.Http.HttpRequestMessage HttpRequest  { public get; public set; }
 }
 
-public class Microsoft.AspNet.OData.KeyProperty {
-	public KeyProperty ()
-
-	string Name  { public get; }
-	object Value  { public get; }
-}
-
 public class Microsoft.AspNet.OData.MetadataController : ODataController, IDisposable, IHttpController {
 	public MetadataController ()
 
@@ -575,6 +568,7 @@ public class Microsoft.AspNet.OData.MetadataController : ODataController, IDispo
 }
 
 public class Microsoft.AspNet.OData.NavigationPath {
+	public NavigationPath ()
 	public NavigationPath (string navigationPath, System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
 
 	string NavigationPathName  { public get; }

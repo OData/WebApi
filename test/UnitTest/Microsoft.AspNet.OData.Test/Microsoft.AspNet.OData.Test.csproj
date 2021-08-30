@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">  
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props" Condition="Exists('..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props')" />
   <Import Project="..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.props" Condition="Exists('..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.props')" />
   <Import Project="..\..\..\tools\WebStack.settings.targets" />
@@ -35,6 +35,14 @@
     <Reference Include="Microsoft.Spatial, Version=7.11.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.11.1\lib\net45\Microsoft.Spatial.dll</HintPath>
       <Private>True</Private>
+    <Reference Include="Microsoft.OData.Core, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Microsoft.OData.Core.7.9.1\lib\net45\Microsoft.OData.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.OData.Edm, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Microsoft.OData.Edm.7.9.1\lib\net45\Microsoft.OData.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Spatial, Version=7.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\sln\packages\Microsoft.Spatial.7.9.1\lib\net45\Microsoft.Spatial.dll</HintPath>
     </Reference>
     <Reference Include="Moq, Version=4.7.137.0, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <HintPath>..\..\..\sln\packages\Moq.4.7.137\lib\net45\Moq.dll</HintPath>
@@ -157,5 +165,5 @@
     <Error Condition="!Exists('..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets'))" />
     <Error Condition="!Exists('..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\sln\packages\xunit.runner.visualstudio.2.3.1\build\net20\xunit.runner.visualstudio.props'))" />
   </Target>
-  <Import Project="..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets" Condition="Exists('..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets')" />  
+  <Import Project="..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets" Condition="Exists('..\..\..\sln\packages\xunit.core.2.3.1\build\xunit.core.targets')" />
 </Project>

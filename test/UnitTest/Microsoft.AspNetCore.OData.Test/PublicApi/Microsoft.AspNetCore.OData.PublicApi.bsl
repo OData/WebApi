@@ -16,7 +16,7 @@ public enum Microsoft.AspNet.OData.EdmDeltaEntityKind : int {
 	Unknown = 4
 }
 
-public enum Microsoft.AspNet.OData.PatchStatus : int {
+public enum Microsoft.AspNet.OData.ODataAPIResponseStatus : int {
 	Failure = 1
 	NotFound = 2
 	Success = 0
@@ -42,6 +42,7 @@ public interface Microsoft.AspNet.OData.IDeltaSet {
 
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
+	ODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
 }
 
@@ -83,7 +84,7 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 	bool TryGetPropertyValue (string propertyName, out System.Object& value)
 }
 
-public interface Microsoft.AspNet.OData.IPatchMethodHandler {
+public interface Microsoft.AspNet.OData.IODataAPIHandler {
 }
 
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
@@ -112,13 +113,13 @@ public abstract class Microsoft.AspNet.OData.Delta : System.Dynamic.DynamicObjec
 	public abstract bool TrySetPropertyValue (string name, object value)
 }
 
-public abstract class Microsoft.AspNet.OData.EdmPatchMethodHandler {
-	protected EdmPatchMethodHandler ()
+public abstract class Microsoft.AspNet.OData.EdmODataAPIHandler {
+	protected EdmODataAPIHandler ()
 
-	public abstract EdmPatchMethodHandler GetNestedPatchHandler (IEdmStructuredObject parent, string navigationPropertyName)
-	public abstract PatchStatus TryCreate (IEdmChangedObject changedObject, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
-	public abstract PatchStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
-	public abstract PatchStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
+	public abstract EdmODataAPIHandler GetNestedHandler (IEdmStructuredObject parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryCreate (IEdmChangedObject changedObject, out IEdmStructuredObject& createdObject, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out IEdmStructuredObject& originalObject, out System.String& errorMessage)
 }
 
 [
@@ -143,6 +144,21 @@ public abstract class Microsoft.AspNet.OData.EdmStructuredObject : Delta, IDynam
 	public virtual bool TrySetPropertyValue (string name, object value)
 }
 
+public abstract class Microsoft.AspNet.OData.ODataAPIHandler`1 : IODataAPIHandler {
+	protected ODataAPIHandler`1 ()
+
+	public abstract IODataAPIHandler GetNestedHandler (TStructuralType parent, string navigationPropertyName)
+	public abstract ODataAPIResponseStatus TryCreate (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& createdObject, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
+	public abstract ODataAPIResponseStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
+}
+
+public abstract class Microsoft.AspNet.OData.ODataAPIHandlerFactory {
+	protected ODataAPIHandlerFactory ()
+
+	public abstract IODataAPIHandler GetHandler (NavigationPath navigationPath)
+}
+
 [
 ODataFormattingAttribute(),
 ODataRoutingAttribute(),
@@ -163,6 +179,12 @@ public abstract class Microsoft.AspNet.OData.ODataController : Microsoft.AspNetC
 	protected virtual UpdatedODataResult`1 Updated (TEntity entity)
 }
 
+public abstract class Microsoft.AspNet.OData.ODataEdmAPIHandlerFactory {
+	protected ODataEdmAPIHandlerFactory ()
+
+	public abstract EdmODataAPIHandler GetHandler (NavigationPath navigationPath)
+}
+
 [
 DataContractAttribute(),
 ]
@@ -178,15 +200,6 @@ public abstract class Microsoft.AspNet.OData.PageResult {
 	DataMemberAttribute(),
 	]
 	System.Uri NextPageLink  { public get; }
-}
-
-public abstract class Microsoft.AspNet.OData.PatchMethodHandler`1 : IPatchMethodHandler {
-	protected PatchMethodHandler`1 ()
-
-	public abstract IPatchMethodHandler GetNestedPatchHandler (TStructuralType parent, string navigationPropertyName)
-	public abstract PatchStatus TryCreate (Delta`1 patchObject, out TStructuralType& createdObject, out System.String& errorMessage)
-	public abstract PatchStatus TryDelete (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out System.String& errorMessage)
-	public abstract PatchStatus TryGet (System.Collections.Generic.IDictionary`2[[System.String],[System.Object]] keyValues, out TStructuralType& originalObject, out System.String& errorMessage)
 }
 
 public abstract class Microsoft.AspNet.OData.PerRouteContainerBase : IPerRouteContainer {
@@ -336,7 +349,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public TStructuralType GetInstance ()
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public void Patch (TStructuralType original)
-	public void Patch (TStructuralType original, IPatchMethodHandler patchHandler)
+	public void Patch (TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
 	public void Put (TStructuralType original)
 	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
@@ -368,7 +381,7 @@ public class Microsoft.AspNet.OData.DeltaSet`1 : System.Collections.ObjectModel.
 
 	protected virtual void InsertItem (int index, IDeltaSetItem item)
 	public DeltaSet`1 Patch (ICollection`1 originalCollection)
-	public DeltaSet`1 Patch (IPatchMethodHandler patchHandler)
+	public DeltaSet`1 Patch (ODataAPIHandlerFactory apiHandlerFactory)
 }
 
 [
@@ -381,7 +394,7 @@ public class Microsoft.AspNet.OData.EdmChangedObjectCollection : System.Collecti
 	Microsoft.OData.Edm.IEdmEntityType EntityType  { public get; }
 
 	public virtual Microsoft.OData.Edm.IEdmTypeReference GetEdmType ()
-	public EdmChangedObjectCollection Patch (EdmPatchMethodHandler patchHandler)
+	public EdmChangedObjectCollection Patch (ODataEdmAPIHandlerFactory apiHandlerFactory)
 }
 
 [
@@ -475,6 +488,7 @@ public class Microsoft.AspNet.OData.EdmEntityObject : EdmStructuredObject, IDyna
 	public EdmEntityObject (Microsoft.OData.Edm.IEdmEntityType edmType, bool isNullable)
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
+	ODataIdContainer ODataIdContainer  { public get; public set; }
 	IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer  { public get; public set; }
 
 	public void AddDataException (Org.OData.Core.V1.DataModificationExceptionType dataModificationException)
@@ -568,6 +582,15 @@ public class Microsoft.AspNet.OData.MetadataController : ODataController {
 
 	public Microsoft.OData.Edm.IEdmModel GetMetadata ()
 	public Microsoft.OData.ODataServiceDocument GetServiceDocument ()
+}
+
+public class Microsoft.AspNet.OData.NavigationPath {
+	public NavigationPath ()
+	public NavigationPath (string navigationPath, System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
+
+	string NavigationPathName  { public get; }
+
+	public PathItem[] GetNavigationPathItems ()
 }
 
 public class Microsoft.AspNet.OData.NullEdmComplexObject : IEdmComplexObject, IEdmObject, IEdmStructuredObject {
@@ -705,6 +728,15 @@ public class Microsoft.AspNet.OData.PageResult`1 : PageResult, IEnumerable`1, IE
 	System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator ()
 }
 
+public class Microsoft.AspNet.OData.PathItem {
+	public PathItem ()
+
+	string CastTypeName  { public get; }
+	bool IsCastType  { public get; }
+	System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] KeyProperties  { public get; }
+	string Name  { public get; }
+}
+
 public class Microsoft.AspNet.OData.PerRouteContainer : PerRouteContainerBase, IPerRouteContainer {
 	public PerRouteContainer ()
 
@@ -796,6 +828,12 @@ AttributeUsageAttribute(),
 ]
 public sealed class Microsoft.AspNet.OData.FromODataUriAttribute : Microsoft.AspNetCore.Mvc.ModelBinderAttribute, IBinderTypeProviderMetadata, IBindingSourceMetadata, IModelNameProvider {
 	public FromODataUriAttribute ()
+}
+
+public sealed class Microsoft.AspNet.OData.ODataIdContainer {
+	public ODataIdContainer ()
+
+	NavigationPath ODataIdNavigationPath  { public get; public set; }
 }
 
 [
@@ -3903,10 +3941,6 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerConte
 	Microsoft.OData.UriParser.SelectExpandClause SelectExpandClause  { public get; public set; }
 	bool SkipExpensiveAvailabilityChecks  { public get; public set; }
 	Microsoft.AspNetCore.Mvc.IUrlHelper Url  { public get; public set; }
-}
-
-public class Microsoft.AspNet.OData.Formatter.Serialization.ODataSerializerHelper {
-	public ODataSerializerHelper ()
 }
 
 public class Microsoft.AspNet.OData.Formatter.Serialization.ODataServiceDocumentSerializer : ODataSerializer {

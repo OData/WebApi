@@ -131,9 +131,17 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     public class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
     {
         IEdmEntityType entityType;
+        IEdmStructuredObject employee;
+
         public TypelessAPIHandlerFactory(IEdmEntityType entityType)
         {
             this.entityType = entityType;
+        }
+
+        public TypelessAPIHandlerFactory(IEdmEntityType entityType, IEdmStructuredObject employee)
+        {
+            this.entityType = entityType;
+            this.employee = employee;
         }
 
         public override EdmODataAPIHandler GetHandler(NavigationPath navigationPath)
@@ -142,6 +150,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             {
                 var pathItems = navigationPath.GetNavigationPathItems();
                 int cnt = 0;
+
+                if (pathItems == null)
+                {
+                    switch (navigationPath.NavigationPathName)
+                    {                        
+                        case "UnTypedEmployee":
+                            return new EmployeeEdmAPIHandler(entityType);
+                        case "UnTypedFriend":
+                            return new FriendTypelessAPIHandler(employee, entityType);
+                     
+                        default:
+                            return null;
+                    }
+                }
 
                 switch (pathItems[cnt].Name)
                 {
@@ -159,9 +181,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                                     return new FriendTypelessAPIHandler(employee, employee.GetEdmType().Definition as IEdmEntityType);
                                 }                                
                             }
-                        }
-                        return null;
 
+                            return new EmployeeEdmAPIHandler(entityType);
+                        }
+                       
                     default:
                         return null;
 

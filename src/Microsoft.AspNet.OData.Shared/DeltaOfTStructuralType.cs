@@ -491,7 +491,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>
         /// <param name="original">The entity to be updated.</param>        
         /// <param name="apiHandlerFactory">API Handler Factory</param>
-        public void Patch(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory = null)
+        public void Patch(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
         {
             IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
 

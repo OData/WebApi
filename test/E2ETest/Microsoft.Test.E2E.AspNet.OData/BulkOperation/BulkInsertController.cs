@@ -144,7 +144,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedFriend") as IEdmEntityType;
 
-            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity1));
+            var changedObjColl = friendColl.Patch(new TypelessAPIHandlerFactory(entity, EmployeesTypeless[key - 1]));
 
             return changedObjColl;
         }
@@ -154,7 +154,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity), new TypelessAPIHandlerFactory(entity));
+            var changedObjColl = empColl.Patch(new TypelessAPIHandlerFactory(entity));
             ValidateSuccessfulTypeless();
 
             return changedObjColl;

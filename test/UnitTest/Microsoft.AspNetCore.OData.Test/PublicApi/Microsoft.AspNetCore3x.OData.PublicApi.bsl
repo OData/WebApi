@@ -335,10 +335,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	ODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
-
 	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
-
-	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
 
 	public virtual void Clear ()
 	public void CopyChangedValues (TStructuralType original)

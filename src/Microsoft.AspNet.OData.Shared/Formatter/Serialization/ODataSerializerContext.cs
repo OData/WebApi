@@ -172,7 +172,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             get 
             {   if (_isUntyped == null)
                 {
-                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(Type);
+                    _isUntyped = typeof(IEdmObject).IsAssignableFrom(Type) || typeof(EdmChangedObjectCollection).IsAssignableFrom(Type);
                 }
 
                 return _isUntyped.Value;

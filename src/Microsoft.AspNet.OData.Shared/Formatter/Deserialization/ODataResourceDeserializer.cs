@@ -569,7 +569,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
             ODataDeserializerContext readContext)
         {
-            //if  id null check, add delta case as well c
+            //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
+            //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
             if (resourceWrapper.ResourceBase?.Id != null)
             {
                 string odataId = resourceWrapper.ResourceBase.Id.OriginalString;

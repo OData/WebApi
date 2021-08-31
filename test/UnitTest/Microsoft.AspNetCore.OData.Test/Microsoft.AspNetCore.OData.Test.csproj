@@ -59,5 +59,9 @@
     <Folder Include="Builder\Conventions\" />
     <Folder Include="Properties\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="1.0.0" />
+  </ItemGroup>
   	
 </Project>

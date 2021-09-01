@@ -129,7 +129,8 @@ namespace Microsoft.AspNet.OData.Routing
                 IList<string> availableKeys = routeData.Values.Keys
                     .Where((key) => !RoutingConventionHelpers.IsRouteParameter(key)
                         && key != ODataRouteConstants.Action
-                        && key != ODataRouteConstants.ODataPath)
+                        && key != ODataRouteConstants.ODataPath
+                        && key != ODataRouteConstants.MethodInfo)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
 
@@ -176,9 +177,18 @@ namespace Microsoft.AspNet.OData.Routing
                 // if there are still multiple candidate actions at this point, let's try some tie-breakers
                 if (matchedCandidates.Count > 1)
                 {
+                    // prioritize actions with explicit [ODataRoute] (i.e. attribute routing)
+                    ActionIdAndParameters bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                        candidate.ActionDescriptor is ControllerActionDescriptor action
+                        && action.MethodInfo.GetCustomAttributes<ODataRouteAttribute>().Any());
+                    if (bestCandidate != null)
+                    {
+                        return bestCandidate.ActionDescriptor;
+                    }
+
                     // prioritize actions which explicitly declare the request method
                     // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
-                    ActionIdAndParameters bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                    bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
                     if (bestCandidate != null)
                     {
@@ -226,11 +236,23 @@ namespace Microsoft.AspNet.OData.Routing
             int availableKeysCount)
         {
 
-            // if action has [EnableNestedPaths] attribute, then it doesn't
-            // need to match parameters, since this action is expected to
-            // match arbitrarily nested paths even if it doesn't have any parameters
             if (actionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
             {
+                // if this specific method was selected (e.g. via AttributeRouting)
+                // then we return a match regardless of whether or not the parameters of
+                // the method match the keys in the route
+                if (context.RouteData.Values.TryGetValue(ODataRouteConstants.MethodInfo, out object method) && method is MethodInfo methodInfo)
+                {
+                    if (controllerActionDescriptor.MethodInfo == methodInfo)
+                    {
+                        return true;
+                    }
+                }
+
+
+                // if action has [EnableNestedPaths] attribute, then it doesn't
+                // need to match parameters, since this action is expected to
+                // match arbitrarily nested paths even if it doesn't have any parameters
                 if (controllerActionDescriptor.MethodInfo
                     .GetCustomAttributes<EnableNestedPathsAttribute>().Any())
                 {

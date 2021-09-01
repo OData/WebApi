@@ -119,6 +119,13 @@ namespace Microsoft.AspNet.OData.Adapters
             return this.innerDescriptor.MethodInfo.GetCustomAttributes<T>(inherit);
         }
 
+        /// <inheritdoc/>
+        public MethodInfo GetMethodInfo()
+        {
+            return this.innerDescriptor.MethodInfo;
+        }
+
+
         /// <summary>
         /// Determine if the Http method is a match.
         /// </summary>

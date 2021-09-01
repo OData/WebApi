@@ -349,7 +349,8 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
             wrapperType = wrapperGenericType.MakeGenericType(elementType);
-            return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+            ConstructorInfo constructorInfo = wrapperType.GetConstructors().Single();
+            return Expression.MemberInit(Expression.New(constructorInfo, source), wrapperTypeMemberAssignments);
         }
 
         /// <summary>
@@ -1243,18 +1244,34 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private class SelectAllAndExpand<TEntity> : SelectExpandWrapper<TEntity>
         {
+            public SelectAllAndExpand(TEntity entity) : base(entity)
+            {
+
+            }
         }
 
         private class SelectAll<TEntity> : SelectExpandWrapper<TEntity>
         {
+            public SelectAll(TEntity entity) : base(entity)
+            {
+
+            }
         }
 
         private class SelectSomeAndInheritance<TEntity> : SelectExpandWrapper<TEntity>
         {
+            public SelectSomeAndInheritance(TEntity entity) : base(entity)
+            {
+
+            }
         }
 
         private class SelectSome<TEntity> : SelectAllAndExpand<TEntity>
         {
+            public SelectSome(TEntity entity) : base(entity)
+            {
+
+            }
         }
     }
 }

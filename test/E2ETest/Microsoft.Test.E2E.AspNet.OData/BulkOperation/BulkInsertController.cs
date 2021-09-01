@@ -2,9 +2,11 @@
 // Licensed under the MIT License.  See License.txt in the project root for license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
@@ -451,17 +453,40 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             InitCompanies();
             InitEmployees();
 
-            MapOdataId(company);
+            if(company.Id == 4)
+            {
+                AddNewOrder(company);
+            }
+
+            //MapOdataId(company);
+            CheckAndApplyODataId(company );
 
             Companies.Add(company);
 
-            ValidateOverdueOrders1(3,1);
+            if (company.Id == 4)
+            {
+                ValidateOverdueOrders1(4, 4, 0, 30);
+            }
+            else
+            {
+                ValidateOverdueOrders1(3, 1);
+            }
+            
 
             return Ok(company);
         }
 
+        private static void AddNewOrder(Company company)
+        {
+            var newOrder = new NewOrder { Id = 4, Price = company.OverdueOrders[1].Price, Quantity = company.OverdueOrders[1].Quantity };
+            OverdueOrders.Add(newOrder);
+            company.OverdueOrders[1] = newOrder;
+        }
+
+        
         private void MapOdataId(Company company)
         {
+            //More generic. 
             for(int i =0; i< company.OverdueOrders.Count;i++)
             {
                 var order = company.OverdueOrders[i];
@@ -484,6 +509,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                                 {
                                     if (pathItems[++cnt].Name == "NewOrders")
                                     {
+                                        //{ ID= 1, OdataIdContainer {....}} - add comments.
                                         company.OverdueOrders[i] = GetNewOrderFromNewFriend(frnd, pathItems[cnt].KeyProperties);
                                     }
                                 }
@@ -495,7 +521,93 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
         }
 
-        
+   
+
+        private void CheckAndApplyODataId(object obj)
+        {
+            Type type = obj.GetType();
+
+            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
+
+            if(property != null && property.GetValue(obj) is ODataIdContainer container && container != null)
+            {
+                var res =  ApplyODataId(container);
+
+                foreach(var prop in type.GetProperties())
+                {
+                    var resVal = prop.GetValue(res);
+
+
+                    if(resVal != null)
+                    {
+                        prop.SetValue(obj, resVal);
+                    }
+                }
+            }
+            else
+            {
+                foreach (var prop in type.GetProperties().Where(p=> p.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(p.PropertyType)))
+                {
+                    var lst = (IEnumerable)prop.GetValue(obj) ;
+                    if(lst == null)
+                    {
+                        continue;
+                    }
+
+                    foreach (var val in lst)
+                    {
+                        if (val.GetType().IsPrimitive)
+                        {
+                            break;
+                        }
+
+                        CheckAndApplyODataId(val);
+                        
+                    }
+                }
+            }
+                        
+        }
+
+        private object ApplyODataId(ODataIdContainer container)
+        {
+            var pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
+            if(pathItems != null)
+            {
+                int cnt = 0;
+                object value = null;
+
+                while(cnt< pathItems.Length)
+                {
+                    value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
+                    cnt++;
+                }
+
+                return value;
+            }
+
+            return null;
+        }
+
+        private object GetObject(string name, object parent, Dictionary<string, object> keyValues)
+        {
+            switch (name)
+            {
+                case "Employees":
+                    return EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
+                case "NewFriends":
+                    Employee emp = parent as Employee;
+
+                    return emp == null? null: emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+                case "NewOrders":
+                    NewFriend frnd = parent as NewFriend;
+
+                    return frnd == null ? null : frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+                default:
+                    return null;
+            }            
+        }
+
         private Employee GetEmployee(Dictionary<string,object> keyValues)
         {            
             var emp = EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
@@ -522,15 +634,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var cntrl = new EmployeesController();
         }
 
-        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0)
+        private void ValidateOverdueOrders1(int companyId, int orderId, int quantity = 0, int price=101)
         {
             var comp = Companies.FirstOrDefault(x => x.Id == companyId);
             Assert.NotNull(comp);
 
             NewOrder order = comp.OverdueOrders.FirstOrDefault(x => x.Id == orderId);
             Assert.NotNull(order);
-            Assert.Equal(1, order.Id);
-            Assert.Equal(101, order.Price);
+            Assert.Equal(orderId, order.Id);
+            Assert.Equal(price, order.Price);
             Assert.Equal(quantity, order.Quantity);
         }
 

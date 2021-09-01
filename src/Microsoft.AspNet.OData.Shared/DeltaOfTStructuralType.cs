@@ -501,7 +501,7 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
+        /// This is basically Patch on ODataId. This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
         /// </summary>    
         private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
         {

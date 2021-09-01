@@ -896,8 +896,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
         }
 
-
-
         [Fact]
         public async Task PostCompany_WithODataId()
         {
@@ -907,6 +905,34 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var content = @"{'Id':3,'Name':'Company03',
                             'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'}]
+                            
+                               
+                     }";
+
+            var requestForPost = new HttpRequestMessage(new HttpMethod("POST"), requestUri);
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            requestForPost.Content = stringContent;
+
+            //Act & Assert
+            using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
+            {
+                var json = response.Content.ReadAsStringAsync().Result;
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }
+
+        }
+
+
+        [Fact]
+        public async Task PostCompany_WithODataId_AndWithout()
+        {
+            //Arrange
+
+            string requestUri = this.BaseAddress + "/convention/Companies";
+
+            var content = @"{'Id':4,'Name':'Company04',
+                            'OverdueOrders':[{'@odata.id':'Employees(1)/NewFriends(1)/NewOrders(1)'},{Price:30}]
                             
                                
                      }";

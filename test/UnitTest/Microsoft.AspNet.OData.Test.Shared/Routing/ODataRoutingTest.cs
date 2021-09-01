@@ -314,6 +314,8 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     // test [ODataRoute] works correctly for overloaded actions
                     { "GET", "AttributeCustomers", "Get()" },
                     { "GET", "AttributeCustomers(10)", "Get(10)" },
+                    // test [ODataROute] works regardless of action parameters
+                    { "GET", "AttributeCustomers(10)/Products(20)", "GetProductWithAttributeRouting()" },
 
 #if NETCORE // TODO enable these scenarios for NETFX when support added for AspNet classic
                     // test nested paths when there are no user-defined actions that override the [EnableNestedPaths] action
@@ -996,6 +998,26 @@ namespace Microsoft.AspNet.OData.Test.Routing
         public string Get(int key)
         {
             return $"Get({key})";
+        }
+
+        // the route AttributeCustomers(custId)/Products(prodId)
+        // should not reach this action despite that its parameters
+        // match the route. Priority goes to the action with
+        // using attribute routing
+        public string GetProduct(int custId, int prodId)
+        {
+            return $"GetProductWithConvention({custId}, {prodId})";
+        }
+
+        // the route AttributeCustomers(custId)/Products(prodId)
+        // should be handled by this action despite the fact that
+        // parameters don't match the route keys.
+        // Since attribute routing is explicit, we assume the user
+        // knows exactly what they want
+        [ODataRoute("AttributeCustomers({custId})/Products({prodId})")]
+        public string GetProduct()
+        {
+            return $"GetProductWithAttributeRouting()";
         }
     }
 

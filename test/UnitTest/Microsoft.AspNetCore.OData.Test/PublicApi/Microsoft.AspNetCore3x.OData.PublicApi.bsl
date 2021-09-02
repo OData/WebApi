@@ -789,7 +789,7 @@ public sealed class Microsoft.AspNet.OData.Batch.HttpRequestExtensions {
 	[
 	ExtensionAttribute(),
 	]
-	public static Microsoft.OData.ODataMessageReader GetODataMessageReader (Microsoft.AspNetCore.Http.HttpRequest request, System.IServiceProvider requestContainer)
+	public static Microsoft.OData.ODataMessageReader GetODataMessageReader (Microsoft.AspNetCore.Http.HttpRequest request, System.IServiceProvider requestContainer, params System.Uri baseUri)
 
 	[
 	ExtensionAttribute(),

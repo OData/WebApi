@@ -300,7 +300,7 @@ namespace Microsoft.AspNet.OData.Test
             model.SetAnnotationValue<ClrTypeAnnotation>(edmType, new ClrTypeAnnotation(typeof(TestSubEntity)));
             Mock<IEdmComplexObject> edmObject = new Mock<IEdmComplexObject>();
             object propertyValue = 42;
-            object selectExpandWrapper = new SelectExpandWrapper<TestEntity>(null);
+            object selectExpandWrapper = new SelectExpandWrapper<TestEntity>();
             object subEntity2 = new TestSubEntity
             {
                 Property = 33

@@ -1248,11 +1248,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
 
             }
+
+            public SelectAllAndExpand()
+            {
+
+            }
         }
 
         private class SelectAll<TEntity> : SelectExpandWrapper<TEntity>
         {
             public SelectAll(TEntity entity) : base(entity)
+            {
+
+            }
+
+            public SelectAll()
             {
 
             }
@@ -1264,11 +1274,21 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
 
             }
+
+            public SelectSomeAndInheritance()
+            {
+
+            }
         }
 
         private class SelectSome<TEntity> : SelectAllAndExpand<TEntity>
         {
             public SelectSome(TEntity entity) : base(entity)
+            {
+
+            }
+
+            public SelectSome()
             {
 
             }

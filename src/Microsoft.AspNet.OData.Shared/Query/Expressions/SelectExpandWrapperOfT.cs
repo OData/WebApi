@@ -22,6 +22,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Instance = element;
         }
 
+        public SelectExpandWrapper()
+        {
+
+        }
+
         /// <summary>
         /// Gets or sets the instance of the element being selected and expanded.
         /// </summary>

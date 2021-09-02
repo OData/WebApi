@@ -31,14 +31,14 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void Property_Instance_RoundTrips()
         {
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null);
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
             ReflectionAssert.Property(wrapper, w => w.Instance, expectedDefaultValue: null, allowNull: true, roundTripTestValue: new TestEntity());
         }
 
         [Fact]
         public void Property_Container_RoundTrips()
         {
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null);
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
             ReflectionAssert.Property(
                 wrapper, w => w.Container, expectedDefaultValue: null, allowNull: true, roundTripTestValue: new MockPropertyContainer());
@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             _model.Model.SetAnnotationValue(_model.SpecialCustomer, new ClrTypeAnnotation(typeof(DerivedEntity)));
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>() { ModelID = _modelID };
             wrapper.Instance = new DerivedEntity();
 
             IEdmTypeReference edmType = wrapper.GetEdmType();
@@ -62,7 +62,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             _model.Model.SetAnnotationValue(_model.Customer, new ClrTypeAnnotation(typeof(TestEntity)));
             _model.Model.SetAnnotationValue(_model.SpecialCustomer, new ClrTypeAnnotation(typeof(DerivedEntity)));
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>() { ModelID = _modelID };
 
             IEdmTypeReference edmType = wrapper.GetEdmType();
 
@@ -75,7 +75,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             object expectedPropertyValue = new object();
             MockPropertyContainer container = new MockPropertyContainer();
             container.Properties.Add("SampleProperty", expectedPropertyValue);
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>()
             {
                 ModelID = _modelID,
                 Container = container
@@ -94,7 +94,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         {
             object expectedPropertyValue = new object();
             MockPropertyContainer container = new MockPropertyContainer();
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>()
             {
                 ModelID = _modelID,
                 Container = container
@@ -113,7 +113,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void TryGetValue_ReturnsValueFromInstance_IfContainerIsNull()
         {
             object expectedPropertyValue = new object();
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>() { ModelID = _modelID };
             wrapper.Instance = new TestEntity { SampleProperty = expectedPropertyValue };
             wrapper.UseInstanceForProperties = true;
 
@@ -133,7 +133,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 _model.CustomerName,
                 new ClrPropertyInfoAnnotation(typeof(TestEntityWithAlias).GetProperty("SampleProperty")));
             object expectedPropertyValue = new object();
-            SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntityWithAlias> wrapper = new SelectExpandWrapper<TestEntityWithAlias>() { ModelID = _modelID };
             wrapper.Instance = new TestEntityWithAlias { SampleProperty = expectedPropertyValue };
             wrapper.UseInstanceForProperties = true;
 
@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void TryGetValue_ReturnsFalse_IfContainerAndInstanceAreNull()
         {
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>() { ModelID = _modelID };
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleProperty", out value);
@@ -160,7 +160,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         [Fact]
         public void TryGetValue_ReturnsFalse_IfPropertyNotPresentInElement()
         {
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null) { ModelID = _modelID };
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>() { ModelID = _modelID };
 
             object value;
             bool result = wrapper.TryGetPropertyValue("SampleNotPresentProperty", out value);
@@ -178,7 +178,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
-            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>()
             {
                 Instance = new TestEntity { SampleProperty = 42 },
                 ModelID = ModelContainer.GetModelID(model),
@@ -203,7 +203,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             entityType.AddStructuralProperty("SampleProperty", EdmPrimitiveTypeKind.Int32);
             MockPropertyContainer container = new MockPropertyContainer();
             container.Properties.Add("Property", 42);
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>()
             {
                 Container = container,
                 ModelID = ModelContainer.GetModelID(model)
@@ -220,7 +220,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         public void ToDictionary_Throws_IfMapperProviderIsNull()
         {
             // Arrange
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null);
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>();
 
             // Act & Assert
             ExceptionAssert.Throws<ArgumentNullException>(() => wrapper.ToDictionary(mapperProvider: null));
@@ -238,7 +238,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
 
-            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> wrapper = new SelectExpandWrapper<TestEntity>()
             {
                 Instance = new TestEntity { SampleProperty = 42 },
                 ModelID = ModelContainer.GetModelID(model)
@@ -267,7 +267,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
 
-            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>()
             {
                 Instance = new TestEntity { SampleProperty = 42 },
                 ModelID = ModelContainer.GetModelID(model),
@@ -297,7 +297,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             model.SetAnnotationValue(entityType, new ClrTypeAnnotation(typeof(TestEntity)));
             IEdmTypeReference edmType = new EdmEntityTypeReference(entityType, isNullable: false);
 
-            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>(null)
+            SelectExpandWrapper<TestEntity> testWrapper = new SelectExpandWrapper<TestEntity>()
             {
                 Instance = new TestEntity { SampleProperty = 42 },
                 ModelID = ModelContainer.GetModelID(model),

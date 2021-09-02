@@ -476,7 +476,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Expression source = Expression.Constant(aCustomer);
 
             SelectExpandClause selectExpandClause = ParseSelectExpand(select, expand, _model, _customer, _customers);
-            Assert.Null(selectExpandClause);
+            Assert.NotNull(selectExpandClause);
 
             // Act
             Expression projection = _binder.ProjectAsWrapper(source, selectExpandClause, _customer, _customers);

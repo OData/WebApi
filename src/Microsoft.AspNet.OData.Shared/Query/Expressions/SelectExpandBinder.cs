@@ -349,7 +349,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
             wrapperType = wrapperGenericType.MakeGenericType(elementType);
-            ConstructorInfo constructorInfo = wrapperType.GetConstructors().Single();
+            ConstructorInfo constructorInfo = wrapperType.GetConstructors().Single(c => c.GetParameters().Length == 1);
             return Expression.MemberInit(Expression.New(constructorInfo, source), wrapperTypeMemberAssignments);
         }
 

@@ -1000,6 +1000,15 @@ namespace Microsoft.AspNet.OData.Test.Routing
             return $"Get({key})";
         }
 
+#if NETCORE
+        //NOTE: This overload is excluded in NET FX tests because
+        // the ODataActionSelector in in ASP.NET classic does
+        // not have much control in deciding which overload
+        // gets selected among a list of potential candidates
+        // and therefore it cannot prioritize
+        // an overload based on the fact that it has the ODataRoute
+        // attribute
+
         // the route AttributeCustomers(custId)/Products(prodId)
         // should not reach this action despite that its parameters
         // match the route. Priority goes to the action with
@@ -1008,6 +1017,7 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             return $"GetProductWithConvention({custId}, {prodId})";
         }
+#endif
 
         // the route AttributeCustomers(custId)/Products(prodId)
         // should be handled by this action despite the fact that

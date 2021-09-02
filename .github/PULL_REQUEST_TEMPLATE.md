@@ -2,7 +2,7 @@
 
 ### Issues
 
-*This pull request fixes issue #xxx.*
+*This pull request fixes #xxx.*
 
 ### Description
 

@@ -41,6 +41,10 @@
     <VersionNuGetSemantic Condition="'$(VersionRelease)'!=''">$(VersionFullSemantic)-$(VersionRelease)</VersionNuGetSemantic>
   </PropertyGroup>
 
+ <PropertyGroup>
+    <VersionNugetNightlyBuild>$([System.DateTime]::Now.ToString("yyyyMMddHHmm"))</VersionNugetNightlyBuild>
+  </PropertyGroup>
+  
   <!--
  ==================================================================================================
  Property Groups to define version information. Do not modify this section.

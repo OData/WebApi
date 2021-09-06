@@ -186,7 +186,7 @@ namespace Microsoft.AspNet.OData.Routing
                         return bestCandidate.ActionDescriptor;
                     }
 
-                    // prioritize actions which explicitly declare the request method
+                    // Next in priority, actions which explicitly declare the request method
                     // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
                     bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));

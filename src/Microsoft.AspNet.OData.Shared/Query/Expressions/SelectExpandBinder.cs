@@ -293,9 +293,10 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 LinqParameterContainer.Parameterize(typeof(string), _modelID) :
                 Expression.Constant(_modelID);
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, wrapperPropertyValueExpression));
-
+            bool instanseOfWrapperClassWasSet = false;
             if (IsSelectAll(selectExpandClause))
             {
+                instanseOfWrapperClassWasSet = true;
                 // Initialize property 'Instance' on the wrapper class
                 wrapperProperty = wrapperType.GetProperty("Instance");
                 wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, source));
@@ -349,8 +350,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
             wrapperType = wrapperGenericType.MakeGenericType(elementType);
-            ConstructorInfo constructorInfo = wrapperType.GetConstructors().Single(c => c.GetParameters().Length == 1);
-            return Expression.MemberInit(Expression.New(constructorInfo, source), wrapperTypeMemberAssignments);
+
+            if (instanseOfWrapperClassWasSet)
+                return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+            ConstructorInfo constructorWithInstanse = wrapperType.GetConstructors().Single(c => c.GetParameters().Length == 1);
+            return Expression.MemberInit(Expression.New(constructorWithInstanse, source), wrapperTypeMemberAssignments);
         }
 
         /// <summary>

@@ -249,7 +249,6 @@ namespace Microsoft.AspNet.OData.Routing
                     }
                 }
 
-
                 // if action has [EnableNestedPaths] attribute, then it doesn't
                 // need to match parameters, since this action is expected to
                 // match arbitrarily nested paths even if it doesn't have any parameters

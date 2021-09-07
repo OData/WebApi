@@ -629,8 +629,11 @@ namespace Microsoft.AspNet.OData.Formatter
             return edmTypeReference.Definition;
         }
 
-        public static void GetPropertyAndStructuredTypeFromPath(IEnumerable<ODataPathSegment> segments,
-            out IEdmProperty property, out IEdmStructuredType structuredType, out string name)
+        public static void GetPropertyAndStructuredTypeFromPath(
+            IEnumerable<ODataPathSegment> segments,
+            out IEdmProperty property,
+            out IEdmStructuredType structuredType,
+            out string name)
         {
             property = null;
             structuredType = null;
@@ -652,6 +655,19 @@ namespace Microsoft.AspNet.OData.Formatter
 
                         name = navigationPathSegment.NavigationProperty.Name + typeCast;
                         return;
+                    }
+
+                    if (segment is OperationSegment operationSegment)
+                    {
+                        IEdmFunction function = operationSegment.Operations.SingleOrDefault() as IEdmFunction;
+                        if (function != null &&
+                            function.ReturnType.Definition is IEdmStructuredType functionReturnType)
+                        {
+                            name = null;
+                            property = null;
+                            structuredType = functionReturnType;
+                            return;
+                        }
                     }
 
                     PropertySegment propertyAccessPathSegment = segment as PropertySegment;

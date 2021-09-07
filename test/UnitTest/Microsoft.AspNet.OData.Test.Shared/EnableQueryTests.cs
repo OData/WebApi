@@ -452,13 +452,17 @@ namespace Microsoft.AspNet.OData.Test
 
         [Theory]
         [MemberData(nameof(AutoExpandedTestData))]
-        public async Task EnableQuery_Works_WithAutoExpanded(string queryString)
+        public async Task EnableQuery_Works_WithAutoExpand(string queryString)
         {
             // Arrange
             string url = "http://localhost/odata/AutoExpandedCustomers";
             Type[] controllers = new Type[] { typeof(AutoExpandedCustomersController) };
+
             ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
+            builder.EntitySet<EnableQueryCategory>("EnableQueryCategories");
+            builder.EntityType<PremiumEnableQueryCategory>();
+
             IEdmModel model = builder.GetEdmModel();
             var server = TestServerFactory.Create(controllers, (config) =>
             {
@@ -470,6 +474,41 @@ namespace Microsoft.AspNet.OData.Test
 
             // Act
             HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("1234", responseString);
+            Assert.Contains("5678", responseString);
+        }
+
+        [Fact]
+        public async Task EnableQuery_Works_WithAutoExpandAndFunction()
+        {
+            // Arrange
+            string url = "http://localhost/odata/AutoExpandedCustomers/GetCategory(id=1)";
+            Type[] controllers = new Type[] { typeof(AutoExpandedCustomersController) };
+
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
+            builder.EntitySet<EnableQueryCategory>("EnableQueryCategories");
+            builder.EntityType<PremiumEnableQueryCategory>();
+
+            builder.EntityType<AutoExpandedCustomer>().Collection.Function("GetCategory")
+                .Returns(typeof(EnableQueryCategory))
+                .Parameter(typeof(int), "id");
+
+            IEdmModel model = builder.GetEdmModel();
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "odata", model);
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpResponseMessage response = await client.GetAsync(url + "?a=b");
             string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -606,6 +645,12 @@ namespace Microsoft.AspNet.OData.Test
             public IQueryable<AutoExpandedCustomer> Get()
             {
                 return _autoCustomers;
+            }
+
+            [EnableQuery]
+            public IQueryable<EnableQueryCategory> GetCategory(int id)
+            {
+                return _autoCustomers.Where(x => x.Id == id).Select(x => x.Category).AsQueryable();
             }
 
             static AutoExpandedCustomersController()

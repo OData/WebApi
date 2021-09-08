@@ -74,10 +74,8 @@ namespace Microsoft.AspNet.OData.Formatter
                 unchecked
                 {
                     int hashCode = 17;
-                    hashCode = (hashCode * 31) + obj.EdmType.FullTypeName().GetHashCode(); // Ideally we'd avoid FullTypeName since it
-                                                                                           // allocates internally, but we cannot trust
-                                                                                           // EdmType.GetHashCode().
-                    hashCode = (hashCode * 31) + (obj.Nullable ? 1 : 0);
+                    hashCode = (hashCode * 31) + obj.EdmType.GetHashCode();
+                    hashCode = (hashCode * 31) + obj.Nullable.GetHashCode();
                     return hashCode;
                 }
             }

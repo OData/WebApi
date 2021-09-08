@@ -637,15 +637,16 @@ namespace Microsoft.AspNet.OData.Formatter
         {
             property = null;
             structuredType = null;
-            name = String.Empty;
-            string typeCast = String.Empty;
+            name = string.Empty;
+
             if (segments != null)
             {
+                string typeCast = string.Empty;
+
                 IEnumerable<ODataPathSegment> reverseSegments = segments.Reverse();
-                foreach (var segment in reverseSegments)
+                foreach (ODataPathSegment segment in reverseSegments)
                 {
-                    NavigationPropertySegment navigationPathSegment = segment as NavigationPropertySegment;
-                    if (navigationPathSegment != null)
+                    if (segment is NavigationPropertySegment navigationPathSegment)
                     {
                         property = navigationPathSegment.NavigationProperty;
                         if (structuredType == null)
@@ -659,42 +660,39 @@ namespace Microsoft.AspNet.OData.Formatter
 
                     if (segment is OperationSegment operationSegment)
                     {
-                        IEdmFunction function = operationSegment.Operations.SingleOrDefault() as IEdmFunction;
-                        if (function != null &&
-                            function.ReturnType.Definition is IEdmStructuredType functionReturnType)
+                        if (structuredType == null)
                         {
-                            name = null;
-                            property = null;
-                            structuredType = functionReturnType;
-                            return;
+                            structuredType = operationSegment.EdmType as IEdmStructuredType;
                         }
+
+                        name = operationSegment.Operations.First().FullName() + typeCast;
+                        return;
                     }
 
-                    PropertySegment propertyAccessPathSegment = segment as PropertySegment;
-                    if (propertyAccessPathSegment != null)
+                    if (segment is PropertySegment propertyAccessPathSegment)
                     {
                         property = propertyAccessPathSegment.Property;
                         if (structuredType == null)
                         {
                             structuredType = GetElementType(property.Type) as IEdmStructuredType;
                         }
+
                         name = property.Name + typeCast;
                         return;
                     }
 
-                    EntitySetSegment entitySetSegment = segment as EntitySetSegment;
-                    if (entitySetSegment != null)
+                    if (segment is EntitySetSegment entitySetSegment)
                     {
                         if (structuredType == null)
                         {
                             structuredType = entitySetSegment.EntitySet.EntityType();
                         }
+
                         name = entitySetSegment.EntitySet.Name + typeCast;
                         return;
                     }
 
-                    TypeSegment typeSegment = segment as TypeSegment;
-                    if (typeSegment != null)
+                    if (segment is TypeSegment typeSegment)
                     {
                         structuredType = GetElementType(typeSegment.EdmType.ToEdmTypeReference(false)) as IEdmStructuredType;
                         typeCast = "/" + structuredType;

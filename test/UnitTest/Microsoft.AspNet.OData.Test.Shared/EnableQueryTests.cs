@@ -10,7 +10,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using System.Web.Http;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
@@ -482,11 +484,15 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Contains("5678", responseString);
         }
 
-        [Fact]
-        public async Task EnableQuery_Works_WithAutoExpandAndFunction()
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task EnableQuery_Works_WithAutoExpandAndOperation(bool useAction, bool includeQueryString)
         {
             // Arrange
-            string url = "http://localhost/odata/AutoExpandedCustomers/GetCategory(id=1)";
+            string baseUrl = "http://localhost/odata/AutoExpandedCustomers/";
             Type[] controllers = new Type[] { typeof(AutoExpandedCustomersController) };
 
             ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
@@ -494,8 +500,11 @@ namespace Microsoft.AspNet.OData.Test
             builder.EntitySet<EnableQueryCategory>("EnableQueryCategories");
             builder.EntityType<PremiumEnableQueryCategory>();
 
-            builder.EntityType<AutoExpandedCustomer>().Collection.Function("GetCategory")
-                .Returns(typeof(EnableQueryCategory))
+            builder.EntityType<AutoExpandedCustomer>().Collection.Action("GetCategoryViaAction")
+                .ReturnsFromEntitySet<EnableQueryCategory>("EnableQueryCategories")
+                .Parameter(typeof(int), "id");
+            builder.EntityType<AutoExpandedCustomer>().Collection.Function("GetCategoryViaFunction")
+                .ReturnsFromEntitySet<EnableQueryCategory>("EnableQueryCategories")
                 .Parameter(typeof(int), "id");
 
             IEdmModel model = builder.GetEdmModel();
@@ -508,7 +517,18 @@ namespace Microsoft.AspNet.OData.Test
             HttpClient client = TestServerFactory.CreateClient(server);
 
             // Act
-            HttpResponseMessage response = await client.GetAsync(url + "?a=b");
+            HttpResponseMessage response = null;
+            if (useAction)
+            {
+                response = await client.PostAsync(
+                    baseUrl + "GetCategoryViaAction" + (includeQueryString ? "?a=b" : ""),
+                    new StringContent("{\"id\":1}", Encoding.ASCII, "application/json"));
+            }
+            else
+            {
+                response = await client.GetAsync(baseUrl + "GetCategoryViaFunction(id=1)" + (includeQueryString ? "?a=b" : ""));
+            }
+
             string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -648,7 +668,14 @@ namespace Microsoft.AspNet.OData.Test
             }
 
             [EnableQuery]
-            public IQueryable<EnableQueryCategory> GetCategory(int id)
+            [HttpPost]
+            public IQueryable<EnableQueryCategory> GetCategoryViaAction(ODataActionParameters parameters)
+            {
+                return _autoCustomers.Where(x => x.Id == (int)parameters["id"]).Select(x => x.Category).AsQueryable();
+            }
+
+            [EnableQuery]
+            public IQueryable<EnableQueryCategory> GetCategoryViaFunction(int id)
             {
                 return _autoCustomers.Where(x => x.Id == id).Select(x => x.Category).AsQueryable();
             }

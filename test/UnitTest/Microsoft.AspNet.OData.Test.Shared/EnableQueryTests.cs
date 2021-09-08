@@ -5,6 +5,23 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+#if NETCORE
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData.Edm;
+using Xunit;
+#else
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +37,7 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Xunit;
+#endif
 
 namespace Microsoft.AspNet.OData.Test
 {
@@ -522,7 +540,7 @@ namespace Microsoft.AspNet.OData.Test
             {
                 response = await client.PostAsync(
                     baseUrl + "GetCategoryViaAction" + (includeQueryString ? "?a=b" : ""),
-                    new StringContent("{\"id\":1}", Encoding.ASCII, "application/json"));
+                    new StringContent("{\"id\":1}", Encoding.UTF8, "application/json"));
             }
             else
             {

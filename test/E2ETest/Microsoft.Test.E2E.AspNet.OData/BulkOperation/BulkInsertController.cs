@@ -546,24 +546,33 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             }
             else
             {
-                foreach (var prop in type.GetProperties().Where(p=> p.PropertyType.IsGenericType && typeof(IEnumerable).IsAssignableFrom(p.PropertyType)))
+                foreach (var prop in type.GetProperties().Where(p=> !p.PropertyType.IsPrimitive ))
                 {
-                    var lst = (IEnumerable)prop.GetValue(obj) ;
-                    if(lst == null)
+                    var propVal = prop.GetValue(obj);
+                    if(propVal == null)
                     {
                         continue;
                     }
 
-                    foreach (var val in lst)
+                    if (propVal is IEnumerable lst)
                     {
-                        if (val.GetType().IsPrimitive)
-                        {
-                            break;
-                        }
 
-                        CheckAndApplyODataId(val);
-                        
+                        foreach (var val in lst)
+                        {
+                            if (val.GetType().IsPrimitive)
+                            {
+                                break;
+                            }
+
+                            CheckAndApplyODataId(val);
+
+                        }
                     }
+                    else
+                    {
+                        CheckAndApplyODataId(propVal);
+                    }
+
                 }
             }
                         

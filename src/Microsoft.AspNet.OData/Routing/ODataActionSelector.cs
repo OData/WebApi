@@ -119,6 +119,13 @@ namespace Microsoft.AspNet.OData.Routing
 
         private static bool ActionParametersMatchRequest(HttpActionDescriptor action, HttpControllerContext context)
         {
+            // if attribute routing was used, accept the method
+            // regardless of parameters
+            if (action.GetCustomAttributes<ODataRouteAttribute>().Any())
+            {
+                return true;
+            }
+
             var parameters = action.GetParameters();
             var routeData = context.RouteData;
             var routingConventionsStore = context.Request.ODataProperties().RoutingConventionsStore;

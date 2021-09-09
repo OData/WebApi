@@ -172,6 +172,15 @@ namespace Microsoft.AspNet.OData.Test.Routing
                         ("PATCH", "{}"),
                         (typeof(ExtraParametersWithOwnModelBindersController), "Patch",
                         new[] { typeof(int), typeof(System.Threading.CancellationToken), typeof(Delta<object>) })
+                    },
+                    // exact method is specicified in route values (i.e. via attribute routing)
+                    {
+                        new Dictionary<string, object> {
+                            { "key", 1 },
+                            { "methodInfo", typeof(ExactMethodInfoController).GetMethod("Get", Type.EmptyTypes) }
+                        },
+                        ("GET", null),
+                        (typeof(ExactMethodInfoController), "Get", Type.EmptyTypes)
                     }
                 };
             }
@@ -323,6 +332,13 @@ namespace Microsoft.AspNet.OData.Test.Routing
     {
         public void Get(int key, UnknownModel other) { }
         public void Patch(int key, UnknownModel other, Delta<object> delta) { }
+    }
+
+    public class ExactMethodInfoController
+    {
+        [ODataRoute("Customers({key})")]
+        public void Get() { }
+        public void Get(int key) { }
     }
 
     public class UnknownModel { }

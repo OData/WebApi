@@ -38,6 +38,11 @@ namespace Microsoft.AspNet.OData.Routing
         public static readonly string Action = "action";
 
         /// <summary>
+        /// Route data key for the <see cref="System.Reflection.MethodInfo"/> representing a controller action.
+        /// </summary>
+        public static readonly string MethodInfo = "methodInfo";
+
+        /// <summary>
         /// Route data key for the controller name.
         /// </summary>
         public static readonly string Controller = "controller";

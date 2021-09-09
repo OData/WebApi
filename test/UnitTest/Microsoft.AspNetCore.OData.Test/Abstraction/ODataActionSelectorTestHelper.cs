@@ -134,7 +134,10 @@ namespace Microsoft.AspNet.OData.Test.Abstraction
             foreach (var keyValuePair in routeDataValues)
             {
                 routeData.Values[keyValuePair.Key] = keyValuePair.Value;
-                keyCount++;
+                if (keyValuePair.Key != ODataRouteConstants.MethodInfo)
+                {
+                    keyCount++;
+                }
             }
 
             routingConventionsStore[ODataRouteConstants.KeyCount] = keyCount;

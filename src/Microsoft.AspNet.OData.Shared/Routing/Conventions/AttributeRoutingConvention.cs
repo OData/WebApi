@@ -59,6 +59,9 @@ namespace Microsoft.AspNet.OData.Routing.Conventions
                 if (action.IsHttpMethodSupported(request.GetRequestMethodOrPreflightMethod()) && template.TryMatch(odataPath, values))
                 {
                     values["action"] = action.ActionName;
+                    // store the method info to allow the action selector to distinguish
+                    // between this action and other overloads
+                    values[ODataRouteConstants.MethodInfo] = action.GetMethodInfo();
                     SelectControllerResult result = new SelectControllerResult(action.ControllerName, values);
 
                     return result;

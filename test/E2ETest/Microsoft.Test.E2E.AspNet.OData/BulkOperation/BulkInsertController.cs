@@ -458,8 +458,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 AddNewOrder(company);
             }
 
-            //MapOdataId(company);
-            CheckAndApplyODataId(company );
+            var idResolver = new BulkOpODataIdResolver();
+            idResolver.ApplyODataId(company );
 
             Companies.Add(company);
 
@@ -666,5 +666,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             Assert.Equal(444, order.Price);
             Assert.Equal(quantity, order.Quantity);
         }
+    }
+
+    public class BulkOpODataIdResolver: ODataIDResolver
+    {
+        public override object GetObject(string name, object parent, Dictionary<string, object> keyValues)
+        {
+            switch (name)
+            {
+                case "Employees":
+                    return EmployeesController.Employees.FirstOrDefault(x => x.ID == (int)keyValues["ID"]);
+                case "NewFriends":
+                    Employee emp = parent as Employee;
+
+                    return emp == null ? null : emp.NewFriends.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+                case "NewOrders":
+                    NewFriend frnd = parent as NewFriend;
+
+                    return frnd == null ? null : frnd.NewOrders.FirstOrDefault(x => x.Id == (int)keyValues["Id"]);
+                default:
+                    return null;
+            }
+        }
+
     }
 }

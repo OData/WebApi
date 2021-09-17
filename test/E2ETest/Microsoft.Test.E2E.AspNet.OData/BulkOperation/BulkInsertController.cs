@@ -16,7 +16,7 @@ using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
-{
+{    
     public class EmployeesController : TestODataController
     {
         public EmployeesController()
@@ -424,7 +424,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             InitCompanies();
 
             Assert.NotNull(coll);
-
+            
             var returncoll = coll.Patch( new APIHandlerFactory());
 
             var comp = coll.First() as Delta<Company>;

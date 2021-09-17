@@ -30,8 +30,7 @@ namespace Microsoft.AspNet.OData
         public NavigationPath(string navigationPath, ReadOnlyCollection<ODataPathSegment> pathSegments)
         {
             Debug.Assert(navigationPath != null);
-            Debug.Assert(pathSegments != null);
-
+            
             _navigationPathName = navigationPath;
             _pathSegments = pathSegments;           
         }

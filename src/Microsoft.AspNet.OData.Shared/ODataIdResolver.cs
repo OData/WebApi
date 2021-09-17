@@ -20,14 +20,14 @@ namespace Microsoft.AspNet.OData
     public abstract class ODataIDResolver
     {
         /// <summary>
-        /// Apply OdataId for objects with OdataID container
+        /// Apply OdataId for a resource with OdataID container
         /// </summary>
-        /// <param name="obj">object to apply odata id on</param>
-        public virtual void ApplyODataId(object obj)
+        /// <param name="resource">resource to apply odata id on</param>
+        public virtual void ApplyODataId(object resource)
         {
-            if(obj != null)
+            if(resource != null)
             {
-                CheckAndApplyODataId(obj);
+                CheckAndApplyODataId(resource);
             }
         }
 

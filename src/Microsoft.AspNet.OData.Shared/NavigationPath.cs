@@ -1,9 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+﻿//-----------------------------------------------------------------------------
+// <copyright file="NavigationPath.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using Microsoft.OData.UriParser;
 
@@ -14,52 +18,42 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     public class NavigationPath
     {
-        private string navigationPathName;
+        private string _navigationPathName;
         private ReadOnlyCollection<ODataPathSegment> _pathSegments;
-        private ConcurrentDictionary<string, PathItem[]> _pathItemCache = new ConcurrentDictionary<string, PathItem[]>();
+        PathItem[] _pathItems;
 
         /// <summary>
-        /// Constructor which takes and odataId and creates PathItems
-        /// </summary>
-        public NavigationPath()
-        {
-           
-        }
-
-        /// <summary>
-        /// Constructor which takes and odataId and creates PathItems
+        /// Initializes a new instance of the <see cref="NavigationPath"/> class.
         /// </summary>
         /// <param name="navigationPath">ODataId in string format</param>
         /// <param name="pathSegments">Pathsegment collection</param>
         public NavigationPath(string navigationPath, ReadOnlyCollection<ODataPathSegment> pathSegments)
         {
-            navigationPathName = navigationPath;
+            Debug.Assert(navigationPath != null);
+            Debug.Assert(pathSegments != null);
+
+            _navigationPathName = navigationPath;
             _pathSegments = pathSegments;           
         }
 
         
         /// <summary>
-        /// NavigationPath/ODataId in string
+        /// Gets the NavigationPath name
         /// </summary>
-        public string NavigationPathName { get { return navigationPathName; } }
+        public string NavigationPathName { get { return _navigationPathName; } }
 
         /// <summary>
         /// To Get ODataId in Parsed format
         /// </summary>
         /// <returns>Array of PathItems</returns>
         public PathItem[] GetNavigationPathItems()
-        {
-            PathItem[] pathItems;
-            if(!_pathItemCache.TryGetValue(navigationPathName, out pathItems))
+        {            
+            if(_pathItems == null && _pathSegments != null)
             {
-                if (_pathSegments != null)
-                {
-                    pathItems = ParseODataId();
-                    _pathItemCache.TryAdd(navigationPathName, pathItems);
-                }
+                _pathItems = ParseODataId();
             }
 
-            return pathItems;
+            return _pathItems;
         }
 
         private PathItem[] ParseODataId()
@@ -69,7 +63,7 @@ namespace Microsoft.AspNet.OData
 
             foreach (ODataPathSegment segment in _pathSegments)
             {
-                if (segment is EntitySetSegment || segment is NavigationPropertySegment)
+                if (segment is EntitySetSegment || segment is NavigationPropertySegment || segment is PropertySegment)
                 {
                     pathItems.Add(new PathItem());
                     currentPathItem = pathItems.Last();

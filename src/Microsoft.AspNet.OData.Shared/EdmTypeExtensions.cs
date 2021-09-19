@@ -26,7 +26,7 @@ namespace Microsoft.AspNet.OData
             {
                 throw Error.ArgumentNull("type");
             }
-            return (type.GetType() == typeof(EdmDeltaCollectionType));
+            return (type.GetType() == typeof(EdmDeltaCollectionType)) || (type.GetType() == typeof(IDeltaSet));
         }
         
         /// <summary>

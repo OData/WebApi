@@ -26,6 +26,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public List<UnTypedFriend> UnTypedFriends { get; set; }
 
+        public FavoriteSports FavoriteSports { get; set; }
+
         public IODataInstanceAnnotationContainer InstanceAnnotations { get; set; }
     }
 
@@ -54,6 +56,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
     {
         Pingpong,
         Basketball
+    }
+
+    public class FavoriteSports
+    {
+        public string Sport { get; set; }
     }
 
     public class Friend
@@ -110,7 +117,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public int Quantity { get; set; }
 
-        public ODataIdContainer Container { get; set; }
+        public IODataIdContainer Container { get; set; }
     }
 
     public class NewOrder
@@ -122,7 +129,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public int Quantity { get; set; }
 
-        public ODataIdContainer Container {get;set;}
+        public IODataIdContainer Container {get;set;}
     }
 
 

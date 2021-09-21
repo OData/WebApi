@@ -44,9 +44,9 @@ namespace Microsoft.AspNet.OData
         {
             Type type = obj.GetType();
 
-            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
+            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(IODataIdContainer));
 
-            if (property != null && property.GetValue(obj) is ODataIdContainer container && container != null)
+            if (property != null && property.GetValue(obj) is IODataIdContainer container && container != null)
             {
                 object res = ApplyODataIdOnContainer(container);
 
@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData
 
         }
 
-        private object ApplyODataIdOnContainer(ODataIdContainer container)
+        private object ApplyODataIdOnContainer(IODataIdContainer container)
         {
             PathItem[] pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
             if (pathItems != null)

@@ -50,6 +50,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                     SkillSet=new List<Skill>{Skill.CSharp,Skill.Sql},
                     Gender=Gender.Female,
                     AccessLevel=AccessLevel.Execute,
+                    FavoriteSports = new FavoriteSports{Sport ="Football"},
                     NewFriends = new List<NewFriend>(){new NewFriend {Id =1, Name ="NewFriendTest1", Age=33, NewOrders= new List<NewOrder>() { new NewOrder {Id=1, Price =101 } } } },
                     Friends = this.Friends.Where(x=>x.Id ==1 || x.Id==2).ToList()
                 },
@@ -527,9 +528,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         {
             Type type = obj.GetType();
 
-            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(ODataIdContainer));
+            PropertyInfo property = type.GetProperties().FirstOrDefault(s => s.PropertyType == typeof(IODataIdContainer));
 
-            if(property != null && property.GetValue(obj) is ODataIdContainer container && container != null)
+            if(property != null && property.GetValue(obj) is IODataIdContainer container && container != null)
             {
                 var res =  ApplyODataId(container);
 
@@ -578,7 +579,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                         
         }
 
-        private object ApplyODataId(ODataIdContainer container)
+        private object ApplyODataId(IODataIdContainer container)
         {
             var pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
             if(pathItems != null)

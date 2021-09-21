@@ -152,7 +152,7 @@ namespace Microsoft.AspNet.OData
         public IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer { get; set; }
 
         /// <inheritdoc />
-        public ODataIdContainer ODataIdContainer { get; set; }
+        public IODataIdContainer ODataIdContainer { get; set; }
 
         /// <inheritdoc />
         internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }

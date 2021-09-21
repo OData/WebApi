@@ -27,6 +27,6 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// Container to hold ODataId
         /// </summary>
-        ODataIdContainer ODataIdContainer { get; set; }
+        IODataIdContainer ODataIdContainer { get; set; }
     }
 }

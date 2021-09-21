@@ -579,7 +579,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 if (odataPath != null)
                 {
-                    ODataIdContainer container = new ODataIdContainer();
+                    IODataIdContainer container = new ODataIdContainer();
 
                     NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
                     container.ODataIdNavigationPath = navigationPath;
@@ -594,10 +594,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                     else
                     {
-                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(ODataIdContainer)).FirstOrDefault();
+                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(odataPath.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(IODataIdContainer)).FirstOrDefault();
                         if (containerPropertyInfo != null)
                         {
-                            containerPropertyInfo.SetValue(resource, container);
+                            IODataIdContainer resourceContainer = containerPropertyInfo.GetValue(resource) as IODataIdContainer;
+                            if (resourceContainer != null)
+                            {
+                                resourceContainer.ODataIdNavigationPath = navigationPath;
+                                containerPropertyInfo.SetValue(resource, resourceContainer);
+                            }
+                            else
+                            {
+                                containerPropertyInfo.SetValue(resource, container);
+                            }
                         }
                     }
                 }

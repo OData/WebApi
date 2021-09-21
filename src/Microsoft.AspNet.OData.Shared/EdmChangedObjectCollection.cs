@@ -238,7 +238,7 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object, for typeless entities
         /// </summary> 
-        private void ApplyODataId(ODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
+        private void ApplyODataId(IODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
             EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(container.ODataIdNavigationPath);
 

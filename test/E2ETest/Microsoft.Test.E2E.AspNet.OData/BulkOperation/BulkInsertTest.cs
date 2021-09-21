@@ -52,11 +52,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             string requestUri = this.BaseAddress + "/convention/Employees(1)";
 
             var content = @"{
-                    'Name':'Sql'  ,
+                    'Name':'Sql' , 'FavoriteSports' :{'Sport': 'Cricket'},
                     'Friends@odata.delta':[{'Id':1,'Name':'Test2'},{'Id':2,'Name':'Test3'}]
                      }";
 
-    
+            //content = @"{
+            //        'Name':'Sql' , 'FavoriteSports' :{'Sport': 'Cricket'}
+                     
+            //         }";
+
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");

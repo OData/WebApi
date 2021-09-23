@@ -662,7 +662,7 @@ namespace Microsoft.AspNet.OData.Test.Builder.Conventions
             IEdmModel model = builder.GetEdmModel();
 
             // ignore motorcycle, sportbike and MotorcycleManufacturer
-            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 3, model.SchemaElements.Count());
+            Assert.Equal(_totalExpectedSchemaTypesForVehiclesModel - 7, model.SchemaElements.Count());
             Assert.Single(model.EntityContainer.EntitySets());
             model.AssertHasEntitySet("Vehicles", typeof(Vehicle));
 

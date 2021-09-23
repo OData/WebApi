@@ -193,6 +193,49 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
+        public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{ 'CanDoAWheelie' : false, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':4000} }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.False((bool)result.CanDoAWheelie);
+            Assert.Equal(4000, (int)result.MyEngine.Hp);
+        }
+
+        [Fact]
+        public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine_MultiLevel()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{ 'CanDoAWheelie' : false, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V41' ,'Hp':4000, 'MakeName': 'Honda'} }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.False((bool)result.CanDoAWheelie);
+            Assert.Equal(4000, (int)result.MyEngine.Hp);
+            Assert.Equal("Honda", result.MyEngine.MakeName.ToString());
+        }
+
+        [Fact]
         public async Task Can_Post_DerivedType_To_Action_Expecting_BaseType()
         {
             // Arrange
@@ -379,6 +422,18 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                 .Property(m => m.CanDoAWheelie);
 
             builder
+               .EntityType<Motorcycle>()
+               .DerivesFrom<Vehicle>()
+               .ComplexProperty(m => m.MyEngine);
+
+            builder.ComplexType<Engine>().Property(m => m.Hp);
+
+            builder.ComplexType<V2>().DerivesFrom<Engine>();
+            builder.ComplexType<V4>().DerivesFrom<Engine>();
+            builder.ComplexType<V41>().DerivesFrom<V4>();
+            builder.ComplexType<V41>().Property(m => m.MakeName);
+
+            builder
                 .EntityType<Car>()
                 .DerivesFrom<Vehicle>()
                 .Property(c => c.SeatingCapacity);
@@ -405,6 +460,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             builder
                 .Action("PatchMotorcycle_When_Expecting_Motorcycle")
                 .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            builder
+                .Action("PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine")
+                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
+            
             builder
                 .Action("PostMotorcycle_When_Expecting_Motorcycle")
                 .ReturnsFromEntitySet<Motorcycle>("motorcycles");
@@ -434,7 +493,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
     public class InheritanceController : ODataController
     {
-        private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true };
+        private Motorcycle motorcycle = new Motorcycle { Model = 2009, Name = "sample motorcycle", CanDoAWheelie = true, MyEngine=new V2 { Hp = 2000 } };
         private Car car = new Car { Model = 2009, Name = "sample car", SeatingCapacity = 5 };
         private SportBike sportBike = new SportBike { Model = 2009, Name = "sample sportsbike", CanDoAWheelie = true, SportBikeProperty_NotVisible = 100 };
 
@@ -467,6 +526,18 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle(Delta<Motorcycle> patch)
         {
             patch.Patch(motorcycle);
+            return motorcycle;
+        }
+
+        public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine(Delta<Motorcycle> patch)
+        {
+            patch.Patch(motorcycle);
+            
+            var engine = motorcycle.MyEngine as V4;
+            
+            Assert.NotNull(engine);
+            Assert.Equal(4000, engine.Hp);
+
             return motorcycle;
         }
 

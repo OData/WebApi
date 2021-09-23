@@ -54,6 +54,30 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 
         [NotMapped]
         public IEnumerable<MotorcycleManufacturer> Manufacturers { get; set; }
+
+        public Engine MyEngine { get; set; }
+    }
+
+    public class Engine
+    {
+        public int Hp { get; set; }
+    }
+
+
+
+    public class V2: Engine
+    {
+
+    }
+
+    public class V4 : Engine
+    {
+
+    }
+
+    public class V41: V4
+    {
+        public string MakeName { get; set; }
     }
 
     public class SportBike : Motorcycle

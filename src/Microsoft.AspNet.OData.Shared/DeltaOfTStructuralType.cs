@@ -44,6 +44,8 @@ namespace Microsoft.AspNet.OData
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
 
+        internal bool IsComplexType { get; set; }
+
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -88,11 +90,32 @@ namespace Microsoft.AspNet.OData
         /// properties. <c>null</c> means this entity type is not open.</param>
         public Delta(Type structuralType, IEnumerable<string> updatableProperties,
             PropertyInfo dynamicDictionaryPropertyInfo)
+            : this(structuralType, updatableProperties: updatableProperties, dynamicDictionaryPropertyInfo, false)
+        {         
+        }
+
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties">The set of properties that can be updated or reset. Unknown property
+        /// names, including those of dynamic properties, are ignored.</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        /// <param name="isComplexType">Boolean value to determine if its a complex type</param>
+        public Delta(Type structuralType, IEnumerable<string> updatableProperties,
+            PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType)
         {
             _dynamicDictionaryPropertyinfo = dynamicDictionaryPropertyInfo;
             Reset(structuralType);
             InitializeProperties(updatableProperties);
+            IsComplexType = isComplexType;
         }
+
+
 
         /// <inheritdoc/>
         public override Type StructuredType
@@ -336,9 +359,62 @@ namespace Microsoft.AspNet.OData
                     bool isDeltaType = TypedDelta.IsDeltaOfT(deltaNestedResource.GetType());
                     Contract.Assert(isDeltaType, nestedResourceName + "'s corresponding value should be Delta<T> type but is not.");
 
+                    Type nestedType = deltaNestedResource.StructuredType;
+                    Type originalType = originalNestedResource.GetType();
+
+                    if (deltaNestedResource.IsComplexType && !nestedType.IsAssignableFrom(originalType))
+                    {
+                        originalNestedResource = ReAssignComplexDerivedType(original, nestedResourceName, originalNestedResource, nestedType, originalType);
+                    }
+
                     deltaNestedResource.CopyChangedValues(originalNestedResource);
                 }
             }
+        }
+
+        private dynamic ReAssignComplexDerivedType(TStructuralType original, string nestedResourceName, dynamic originalNestedResource, Type nestedType, Type originalType)
+        {
+            //As per OASIS discussion, changing a complex type from 1 derived type to another is allowed if both derived type have a common ancestor and the property
+            //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.
+            //And copy the common properties.
+
+            Type complexBaseType = nestedType.BaseType;
+            HashSet<Type> lst = new HashSet<Type>();
+
+            while (complexBaseType != null)
+            {
+                lst.Add(complexBaseType);
+                complexBaseType = complexBaseType.BaseType;
+            }
+
+            Type originalBaseType = originalType.BaseType;
+            bool foundCommonbase = false;
+
+            while (originalBaseType != null)
+            {
+                if (lst.Contains(originalBaseType))
+                {
+                    dynamic newOriginal = originalNestedResource;
+                    originalNestedResource = Activator.CreateInstance(nestedType);
+
+                    foreach (PropertyInfo property in originalBaseType.GetProperties())
+                    {
+                        object value = property.GetValue(newOriginal);
+                        property.SetValue(originalNestedResource, value);
+                    }
+
+                    foundCommonbase = true;
+
+                    break;
+                }
+            }
+
+            if (foundCommonbase)
+            {
+                _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
+            }
+
+            return originalNestedResource;
         }
 
         /// <summary>

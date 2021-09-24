@@ -407,6 +407,8 @@ namespace Microsoft.AspNet.OData
 
                     break;
                 }
+
+                originalBaseType = originalBaseType.BaseType;
             }
 
             if (foundCommonbase)

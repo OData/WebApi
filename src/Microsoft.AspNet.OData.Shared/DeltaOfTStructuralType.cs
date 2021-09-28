@@ -379,28 +379,37 @@ namespace Microsoft.AspNet.OData
             //And copy the common properties.
 
             Type complexBaseType = nestedType.BaseType;
-            HashSet<Type> lst = new HashSet<Type>();
+            HashSet<Type> lstComplexBaseTypes = new HashSet<Type>();
 
             while (complexBaseType != null)
             {
-                lst.Add(complexBaseType);
+                lstComplexBaseTypes.Add(complexBaseType);
                 complexBaseType = complexBaseType.BaseType;
             }
 
-            Type originalBaseType = originalType.BaseType;
+            //Here original type is the type for original (T) resource.
+            //We will keep  going to base types and finally will get the Common Basetype for the derived complex types in to the originalType variable.
+                        
             bool foundCommonbase = false;
 
-            while (originalBaseType != null)
-            {
-                if (lst.Contains(originalBaseType))
-                {
-                    dynamic newOriginal = originalNestedResource;
-                    originalNestedResource = Activator.CreateInstance(nestedType);
+            //The new Original type, means the new complex type (T) which will replace the current complex type.
+            dynamic newOriginalNestedResource = null;
 
-                    foreach (PropertyInfo property in originalBaseType.GetProperties())
+            while (originalType != null)
+            {
+                if (lstComplexBaseTypes.Contains(originalType))
+                {
+                    //Now originalType = common base type of the derived complex types.
+                    //OriginalNested Resource = T(of current Complex type). We are creating newOriginalNestedResource (T - new complex type).
+                    newOriginalNestedResource = Activator.CreateInstance(nestedType);
+
+                    //Here we get all the properties of common base type and get value from original complex type(T) and 
+                    //copy it to the new complex type newOriginalNestedResource(came as a part of Delta) 
+
+                    foreach (PropertyInfo property in originalType.GetProperties())
                     {
-                        object value = property.GetValue(newOriginal);
-                        property.SetValue(originalNestedResource, value);
+                        object value = property.GetValue(originalNestedResource);
+                        property.SetValue(newOriginalNestedResource, value);
                     }
 
                     foundCommonbase = true;
@@ -408,15 +417,15 @@ namespace Microsoft.AspNet.OData
                     break;
                 }
 
-                originalBaseType = originalBaseType.BaseType;
+                originalType = originalType.BaseType;
             }
 
             if (foundCommonbase)
             {
-                _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
+                _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)newOriginalNestedResource);
             }
 
-            return originalNestedResource;
+            return newOriginalNestedResource;
         }
 
         /// <summary>

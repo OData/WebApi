@@ -56,6 +56,8 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public IEnumerable<MotorcycleManufacturer> Manufacturers { get; set; }
 
         public Engine MyEngine { get; set; }
+
+        public V4 MyV4Engine { get; set; }
     }
 
     public class Engine
@@ -78,6 +80,16 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
     public class V41: V4
     {
         public string MakeName { get; set; }
+    }
+
+    public class V42 : V4
+    {
+        public string Model { get; set; }
+    }
+
+    public class V422 : V42
+    {
+        
     }
 
     public class SportBike : Motorcycle

@@ -364,7 +364,7 @@ namespace Microsoft.AspNet.OData
                     Type newType = deltaNestedResource.StructuredType;
                     Type originalType = originalNestedResource.GetType();
 
-                    if (deltaNestedResource.IsComplexType && !newType.IsAssignableFrom(originalType))
+                    if (deltaNestedResource.IsComplexType && newType != originalType)
                     {
                         originalNestedResource = ReAssignComplexDerivedType(original, nestedResourceName, originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
                     }
@@ -380,7 +380,7 @@ namespace Microsoft.AspNet.OData
             //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.
             //And copy the common properties.
 
-            Type newBaseType = newType.BaseType;
+            Type newBaseType = newType;
             HashSet<Type> newBaseTypes = new HashSet<Type>();
 
             //Iterate till you find the declaring base type and add all that to hashset

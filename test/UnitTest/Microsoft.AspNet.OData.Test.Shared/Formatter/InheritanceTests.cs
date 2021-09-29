@@ -234,6 +234,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.False((bool)result.CanDoAWheelie);
             Assert.Equal(4000, (int)result.MyEngine.Hp);
             Assert.Equal("Honda", result.MyEngine.MakeName.ToString());
+
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V41", result.MyEngine["@odata.type"].ToString());
         }
 
         [Fact]
@@ -257,6 +259,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.False((bool)result.CanDoAWheelie);
             Assert.Equal(4000, (int)result.MyEngine.Hp);
             Assert.Equal("Honda", result.MyEngine.MakeName.ToString());
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V41", result.MyEngine["@odata.type"].ToString());
 
             Assert.Equal(5000, (int)result.MyV4Engine.Hp);
             Assert.Equal("Hero", result.MyV4Engine.Model.ToString());
@@ -282,6 +285,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.False((bool)result.CanDoAWheelie);
             Assert.Equal(4000, (int)result.MyEngine.Hp);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V41", result.MyEngine["@odata.type"].ToString());
+
             Assert.Equal("Honda", result.MyEngine.MakeName.ToString());
             Assert.Equal(7000, (int)result.MyV4Engine.Hp);
         }
@@ -307,7 +312,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.False((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
-            
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V4", result.MyEngine["@odata.type"].ToString());
+
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }
 
@@ -331,7 +337,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
-
+            
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V422", result.MyEngine["@odata.type"].ToString());
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }
 
@@ -356,6 +363,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V4", result.MyEngine["@odata.type"].ToString());
 
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }
@@ -380,6 +388,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
             Assert.True((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V422", result.MyEngine["@odata.type"].ToString());
 
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }
@@ -407,6 +416,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.True((bool)result.CanDoAWheelie);
             Assert.Equal(6000, (int)result.MyEngine.Hp);
             Assert.Equal(5, (int)result.MyEngine.Transmission.Gears);
+            Assert.Equal("#Microsoft.AspNet.OData.Test.Builder.TestModels.V2", result.MyEngine["@odata.type"].ToString());
 
             Assert.Equal(9000, (int)result.MyV4Engine.Hp);
         }

@@ -554,7 +554,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
 
             vehConfig.ComplexProperty(m => m.MyEngine);
             vehConfig.ComplexProperty(m => m.MyV4Engine);
-            builder.ComplexType<Engine>().ComplexProperty(m => m.Transmission);
+            builder.ComplexType<Engine>().ComplexProperty(m => m.Transmission).IsOptional();
                      
             builder.ComplexType<Engine>().Property(m => m.Hp);
             builder.ComplexType<Transmission>().Property(m => m.Gears);

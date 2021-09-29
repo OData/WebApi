@@ -58,11 +58,29 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
         public Engine MyEngine { get; set; }
 
         public V4 MyV4Engine { get; set; }
+
     }
 
     public class Engine
     {
         public int Hp { get; set; }
+
+        public Transmission Transmission { get; set; }
+    }
+
+    public class Transmission
+    {
+        public int Gears { get; set; }
+    }
+
+    public class Automatic: Transmission
+    {
+
+    }
+
+    public class Manual : Transmission
+    {
+
     }
 
 

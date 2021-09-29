@@ -45,11 +45,6 @@ namespace Microsoft.AspNet.OData
         private IDictionary<string, object> _dynamicDictionaryCache;
 
         /// <summary>
-        /// To determine if the StructuralType is a Complex type
-        /// </summary>
-        public bool IsComplexType { get; private set; }
-
-        /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
         public Delta()
@@ -135,6 +130,11 @@ namespace Microsoft.AspNet.OData
         /// considered to be changed.</remarks>
         public IList<string> UpdatableProperties
             => _updatableProperties;
+
+        /// <summary>
+        /// To determine if the StructuralType is a Complex type
+        /// </summary>
+        public bool IsComplexType { get; private set; }
 
         /// <inheritdoc/>
         public override void Clear()

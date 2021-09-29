@@ -312,14 +312,63 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         }
 
         [Fact]
+        public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine_V42CurrentDefine_V422New()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine42");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{ 'CanDoAWheelie' : true, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V422' ,'Hp':6000 }," +
+                "'MyV4Engine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':9000 } }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.True((bool)result.CanDoAWheelie);
+            Assert.Equal(6000, (int)result.MyEngine.Hp);
+
+            Assert.Equal(9000, (int)result.MyV4Engine.Hp);
+        }
+
+
+        [Fact]
+        public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine_V42CurrentDefine_V4New()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine42");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{ 'CanDoAWheelie' : true, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':6000 }," +
+                "'MyV4Engine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':9000 } }");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+            Assert.True((bool)result.CanDoAWheelie);
+            Assert.Equal(6000, (int)result.MyEngine.Hp);
+
+            Assert.Equal(9000, (int)result.MyV4Engine.Hp);
+        }
+
+        [Fact]
         public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine_MultiLevel_2Children()
         {
             // Arrange
             HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine42");
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
             AddRequestInfo(request);
-            request.Content = new StringContent("{ 'CanDoAWheelie' : true, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V2' ,'Hp':6000 }, " +
-                               "'MyV4Engine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':9000 } }");
+            request.Content = new StringContent("{ 'CanDoAWheelie' : true, 'MyEngine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V422' ,'Hp':6000 }, " +
+                               "'MyV4Engine' : {'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V42' ,'Hp':9000 } }");
             request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
 
             // Act
@@ -709,15 +758,8 @@ namespace Microsoft.AspNet.OData.Test.Formatter
         {
             patch.Patch(motorcycle2);
 
-            Engine engine = null;
-            if (motorcycle2.CanDoAWheelie)
-            {
-                engine = motorcycle2.MyEngine as V2;
-            }
-            else
-            {
-                engine = motorcycle2.MyEngine as V4;
-            }
+            Engine engine = motorcycle2.MyEngine;
+            
 
             Assert.NotNull(engine);
             Assert.Equal(6000, engine.Hp);

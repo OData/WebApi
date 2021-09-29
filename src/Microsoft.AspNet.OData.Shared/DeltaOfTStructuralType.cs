@@ -396,7 +396,7 @@ namespace Microsoft.AspNet.OData
             //We will keep  going to base types and finally will get the Common Basetype for the derived complex types in to the originalType variable.
             
             //The new Original type, means the new complex type (T) which will replace the current complex type.
-            dynamic newOriginalNestedResource = null;
+            dynamic newOriginalNestedResource = originalValue;
 
             while (originalType != null)
             {

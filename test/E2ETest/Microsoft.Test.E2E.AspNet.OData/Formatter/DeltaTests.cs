@@ -412,6 +412,28 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             Assert.Equal(3, query.Addresses.Count);
             Assert.Equal(3, query.Orders.Count);
         }
+
+        [Fact]
+        public async Task PatchShouldSupportComplexDerivedTypeTransform()
+        {
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
+            dynamic data = new ExpandoObject();
+            data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
+             
+            string content = JsonConvert.SerializeObject(data);
+            content = @"{'MyAddress':{'@odata.type': 'Microsoft.Test.E2E.AspNet.OData.Formatter.PersonalAddress','Street': 'abc'}}";
+            patch.Content = new StringContent(content);
+            patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            HttpResponseMessage response = await Client.SendAsync(patch);
+
+            Assert.True(response.IsSuccessStatusCode);
+
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            response = await Client.SendAsync(get);
+            Assert.True(response.IsSuccessStatusCode);
+            dynamic query = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal("abc", query.MyAddress.Street.ToString());            
+        }
     }
 
     public class DeltaCustomersController : TestODataController
@@ -432,6 +454,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 Enumerable.Range(0, 2).Select(i => new DeltaAddress { ZipCode = i }),
                 Enumerable.Range(0, 3).Select(i => new DeltaOrder { Details = i.ToString() }));
             customer.Id = 6;
+            customer.MyAddress = new OfficeAddress { Street = "Microsot" };
             customers.Add(customer);
         }
 
@@ -507,6 +530,23 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             get { return _addresses; }
             set { _addresses = value; }
         }
+
+        public Address MyAddress { get; set; }
+    }
+
+    public class Address
+    {
+        public string Street { get; set; }
+    }
+
+    public class OfficeAddress: Address
+    {
+
+    }
+
+    public class PersonalAddress : Address
+    {
+
     }
 
     public class DeltaOrder

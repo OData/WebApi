@@ -1178,8 +1178,8 @@ namespace Microsoft.AspNet.OData.Test.Query
         public void OnActionExecuted_Works_WithPath()
         {
             // Arrange
-            Customer customer = new Customer();
-            SingleResult singleResult = new SingleResult<Customer>(new[] { customer }.AsQueryable());
+            SimpleCustomer customer = new SimpleCustomer();
+            SingleResult singleResult = new SingleResult<SimpleCustomer>(new[] { customer }.AsQueryable());
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = actionExecutedContext.Request;
@@ -1194,6 +1194,12 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Assert
             Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
             Assert.Equal(customer, ((ObjectContent)actionExecutedContext.Response.Content).Value);
+        }
+
+        private class SimpleCustomer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
 
         [Fact]

@@ -985,4 +985,7 @@
   <data name="InstanceAnnotationPropertyNotEmpty" xml:space="preserve">
     <value>InstanceAnnotation Property name cannot be null or empty.</value>
   </data>
+  <data name="ShouldHaveNavigationPropertyInNavigationExpandPath" xml:space="preserve">
+    <value>A navigation property expand path should have navigation property in the path.</value>
+  </data>
 </root>

@@ -163,6 +163,9 @@
     <Compile Include="..\AutoExpand\AutoExpandTests.cs">
       <Link>AutoExpand\AutoExpandTests.cs</Link>
     </Compile>
+    <Compile Include="..\AutoExpand\AutoExpandNavigationOnComplexTests.cs">
+      <Link>AutoExpand\AutoExpandNavigationOnComplexTests.cs</Link>
+    </Compile>
     <Compile Include="..\BoundOperation\BoundOperationController.cs">
       <Link>BoundOperation\BoundOperationController.cs</Link>
     </Compile>

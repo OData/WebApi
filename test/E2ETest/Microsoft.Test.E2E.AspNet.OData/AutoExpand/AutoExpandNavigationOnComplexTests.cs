@@ -125,7 +125,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.AutoExpand
               "}", payload);
         }
 
-#if NETCORE
+#if NETCORE // There's some problem in the ASP.NET Classic if we have the derived type expand.
         [Fact]
         public async Task QueryForProperty_Includes_AutoExpandNavigationProperty()
         {

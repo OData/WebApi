@@ -264,6 +264,38 @@ namespace Microsoft.AspNet.OData.Test
         }
 
         [Fact]
+        public void TestDelta_IgnoresUnmapped()
+        {
+            //Arrange
+            var delta = new Delta<NewCustomerUnmapped>();
+       
+            //Act
+            var properties = delta.GetUnchangedPropertyNames().ToList();
+
+            //Assert
+            Assert.Equal(3, properties.Count);
+            Assert.Equal("Id", properties.First());            
+            Assert.Equal("City", properties[1]);
+            Assert.Equal("State", properties[2]);
+        }
+
+        [Fact]
+        public void TestDelta_IgnoredMember()
+        {
+            //Arrange
+            var delta = new Delta<NewCustomerDataContract>();
+
+            //Act
+            var properties = delta.GetUnchangedPropertyNames().ToList();
+
+            //Assert
+            Assert.Equal(2, properties.Count);            
+            Assert.Equal("Name", properties[0]);
+            Assert.Equal("Street", properties[1]);
+            
+        }
+
+        [Fact]
         public void CanPut_OpenType()
         {
             // Arrange

@@ -419,6 +419,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ExpressionHelperMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExpressionHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\FilterQueryOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\AutoSelectExpandHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ExpandModelPath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\SelectModelPath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDelta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataQueryContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetadataController.cs" />

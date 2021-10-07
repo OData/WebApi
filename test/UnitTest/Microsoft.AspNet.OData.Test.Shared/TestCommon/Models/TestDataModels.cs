@@ -6,6 +6,9 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.AspNet.OData.Builder;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
 namespace Microsoft.AspNet.OData.Test.Common.Models
 {
@@ -58,4 +61,41 @@ namespace Microsoft.AspNet.OData.Test.Common.Models
         public int Id { get; set; }
         public string Name { get; set; }
     }
+
+    public class NewCustomerUnmapped
+    {
+        [Key]
+        public int Id { get; set; }
+        [IgnoreDataMember]
+        public string Name { get; set; }
+        [NotMapped]
+        public int Age { get; set; }
+
+        [DataMember]
+        [IgnoreDataMember]
+        public string Street { get; set; }
+
+        [DataMember]
+        public string City { get; set; }
+
+        public string State { get; set; }
+    }
+
+    [DataContract]
+    public class NewCustomerDataContract
+    {
+        [Key]
+        public int Id { get; set; }
+        [IgnoreDataMember]
+        [DataMember]
+        public string Name { get; set; }
+        [IgnoreDataMember]
+        public int Age { get; set; }
+
+        [DataMember]
+        public string Street { get; set; }
+
+        public string City { get; set; }
+    }
+      
 }

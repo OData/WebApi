@@ -8,11 +8,14 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
 
@@ -588,7 +591,7 @@ namespace Microsoft.AspNet.OData
                 _structuredType,
                 (backingType) => backingType
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                    .Where(p => (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
+                    .Where(p => !IsIgnoredProperty(backingType.GetCustomAttributes(typeof(DataContractAttribute), inherit: true).Any(), p) && (p.GetSetMethod() != null || TypeHelper.IsCollection(p.PropertyType)) && p.GetGetMethod() != null)
                     .Select<PropertyInfo, PropertyAccessor<TStructuralType>>(p => new FastPropertyAccessor<TStructuralType>(p))
                     .ToDictionary(p => p.Property.Name));
 
@@ -605,6 +608,28 @@ namespace Microsoft.AspNet.OData
             {
                 _updatableProperties.Remove(_dynamicDictionaryPropertyinfo.Name);
             }
+        }
+
+        private bool IsIgnoredProperty(bool isTypeDataContract, PropertyInfo propertyInfo)
+        {
+            //This is for Ignoring the property that matches below criteria
+            //1. Its marked as NotMapped
+            //2. Its a datacontract type but property is not marked as datamember
+            //3. Its marked with IgnoreDataMember (but not where types datacontract and property marked with datamember)
+
+            bool hasNotMappedAttr = propertyInfo.GetCustomAttributes(typeof(NotMappedAttribute), inherit: true).Any();
+
+            if (hasNotMappedAttr)
+            {
+                return true;
+            }
+
+            if (isTypeDataContract)
+            {
+                return !propertyInfo.GetCustomAttributes(typeof(DataMemberAttribute), inherit: true).Any();
+            }
+
+            return propertyInfo.GetCustomAttributes(typeof(IgnoreDataMemberAttribute), inherit: true).Any();           
         }
 
         // Copy changed dynamic properties and leave the unchanged dynamic properties

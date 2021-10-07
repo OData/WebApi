@@ -573,6 +573,43 @@ namespace Microsoft.AspNet.OData.Formatter
             return false;
         }
 
+        public static ModelBoundQuerySettings GetModelBoundQuerySettingsOrNull(this IEdmModel edmModel, IEdmStructuredType structuredType, IEdmProperty property)
+        {
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull(nameof(edmModel));
+            }
+
+            ModelBoundQuerySettings querySettingsOnType = null;
+            if (structuredType != null)
+            {
+                querySettingsOnType = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(structuredType);
+            }
+
+            if (property == null)
+            {
+                return querySettingsOnType;
+            }
+
+            ModelBoundQuerySettings querySettingsOnProperty = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(property);
+            if (querySettingsOnProperty == null)
+            {
+                return querySettingsOnType;
+            }
+            else
+            {
+                if (querySettingsOnType == null)
+                {
+                    return querySettingsOnProperty;
+                }
+                else
+                {
+                    // Settings on property is higher priority than the ones on type.
+                    return GetMergedPropertyQuerySettings(querySettingsOnProperty, querySettingsOnType);
+                }
+            }
+        }
+
         public static ModelBoundQuerySettings GetModelBoundQuerySettings(IEdmProperty property,
             IEdmStructuredType structuredType, IEdmModel edmModel, DefaultQuerySettings defaultQuerySettings = null)
         {
@@ -909,6 +946,27 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <summary>
+        /// Get element type reference if it's collection or return itself
+        /// </summary>
+        /// <param name="typeReference">The test type reference.</param>
+        /// <returns>Element type or itself.</returns>
+        public static IEdmTypeReference GetElementTypeOrSelf(this IEdmTypeReference typeReference)
+        {
+            if (typeReference == null)
+            {
+                return typeReference;
+            }
+
+            if (typeReference.TypeKind() == EdmTypeKind.Collection)
+            {
+                IEdmCollectionTypeReference collectType = typeReference.AsCollection();
+                return collectType.ElementType();
+            }
+
+            return typeReference;
+        }
+
+        /// <summary>
         /// Get the expected payload type of an OData path.
         /// </summary>
         /// <param name="type">The Type to use.</param>
@@ -1044,7 +1102,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
+        internal static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
             IEdmModel edmModel)
         {
             Contract.Assert(edmProperty != null);

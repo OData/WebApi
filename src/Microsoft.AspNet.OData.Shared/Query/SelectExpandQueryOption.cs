@@ -372,17 +372,11 @@ namespace Microsoft.AspNet.OData.Query
             out List<SelectItem> autoExpandItems)
         {
             autoSelectItems = new List<SelectItem>();
-            var autoSelectProperties = EdmLibHelpers.GetAutoSelectProperties(null,
-                baseEntityType, model, modelBoundQuerySettings);
+            IList<SelectModelPath> autoSelectProperties = model.GetAutoSelectPaths(baseEntityType, null, modelBoundQuerySettings);
             foreach (var autoSelectProperty in autoSelectProperties)
             {
-                List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
-                {
-                    new PropertySegment(autoSelectProperty)
-                };
-
-                PathSelectItem pathSelectItem = new PathSelectItem(
-                    new ODataSelectPath(pathSegments));
+                ODataSelectPath odataSelectPath = BuildSelectPath(autoSelectProperty, navigationSource);
+                PathSelectItem pathSelectItem = new PathSelectItem(odataSelectPath);
                 autoSelectItems.Add(pathSelectItem);
             }
 
@@ -393,24 +387,26 @@ namespace Microsoft.AspNet.OData.Query
                 return;
             }
 
-            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(null, baseEntityType,
-                model, !isAllSelected, modelBoundQuerySettings);
-
-            foreach (var navigationProperty in autoExpandNavigationProperties)
+            IList<ExpandModelPath> autoExpandNavigationProperties = model.GetAutoExpandPaths(baseEntityType, null, !isAllSelected, modelBoundQuerySettings);
+            foreach (ExpandModelPath itemPath in autoExpandNavigationProperties)
             {
-                IEdmNavigationSource currentEdmNavigationSource =
-                    navigationSource.FindNavigationTarget(navigationProperty);
+                string navigationPath = itemPath.NavigationPropertyPath;
+                IEdmNavigationProperty navigationProperty = itemPath.Navigation;
+
+                IEdmNavigationSource currentEdmNavigationSource;
+                if (navigationPath != null)
+                {
+                    currentEdmNavigationSource = navigationSource.FindNavigationTarget(navigationProperty);
+                }
+                else
+                {
+                    currentEdmNavigationSource = navigationSource.FindNavigationTarget(navigationProperty, new EdmPathExpression(navigationPath));
+                }
 
                 if (currentEdmNavigationSource != null)
                 {
-                    List<ODataPathSegment> pathSegments = new List<ODataPathSegment>()
-                    {
-                        new NavigationPropertySegment(navigationProperty, currentEdmNavigationSource)
-                    };
-
-                    ODataExpandPath expandPath = new ODataExpandPath(pathSegments);
-                    SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(),
-                        true);
+                    ODataExpandPath expandPath = BuildExpandPath(itemPath, navigationSource, currentEdmNavigationSource);
+                    SelectExpandClause selectExpandClause = new SelectExpandClause(new List<SelectItem>(), true);
                     ExpandedNavigationSelectItem item = new ExpandedNavigationSelectItem(expandPath,
                         currentEdmNavigationSource, selectExpandClause);
                     modelBoundQuerySettings = EdmLibHelpers.GetModelBoundQuerySettings(navigationProperty,
@@ -440,14 +436,71 @@ namespace Microsoft.AspNet.OData.Query
                         selectExpandClause);
 
                     autoExpandItems.Add(item);
-                    if (!isAllSelected || autoSelectProperties.Count() != 0)
+                    if (!isAllSelected || autoSelectProperties.Any())
                     {
-                        PathSelectItem pathSelectItem = new PathSelectItem(
-                            new ODataSelectPath(pathSegments));
+                        PathSelectItem pathSelectItem = new PathSelectItem(new ODataSelectPath(expandPath));
                         autoExpandItems.Add(pathSelectItem);
                     }
                 }
             }
+        }
+
+        private static ODataSelectPath BuildSelectPath(SelectModelPath path, IEdmNavigationSource navigationSource)
+        {
+            IList<ODataPathSegment> segments = new List<ODataPathSegment>();
+            IEdmType previousPropertyType = null;
+            foreach (var node in path)
+            {
+                if (node is IEdmStructuralProperty property)
+                {
+                    segments.Add(new PropertySegment(property));
+                    previousPropertyType = EdmLibHelpers.GetElementType(property.Type);
+                }
+                else if (node is IEdmStructuredType typeNode)
+                {
+                    if (previousPropertyType == null)
+                    {
+                        segments.Add(new TypeSegment(typeNode, navigationSource));
+                    }
+                    else
+                    {
+                        segments.Add(new TypeSegment(typeNode, previousPropertyType, navigationSource));
+                    }
+                }
+            }
+
+            return new ODataSelectPath(segments);
+        }
+
+        private static ODataExpandPath BuildExpandPath(ExpandModelPath path, IEdmNavigationSource navigationSource, IEdmNavigationSource currentEdmNavigationSource)
+        {
+            IList<ODataPathSegment> segments = new List<ODataPathSegment>();
+            IEdmType previousPropertyType = null;
+            foreach (var node in path)
+            {
+                if (node is IEdmStructuralProperty property)
+                {
+                    segments.Add(new PropertySegment(property));
+                    previousPropertyType = EdmLibHelpers.GetElementType(property.Type);
+                }
+                else if (node is IEdmStructuredType typeNode)
+                {
+                    if (previousPropertyType == null)
+                    {
+                        segments.Add(new TypeSegment(typeNode, navigationSource));
+                    }
+                    else
+                    {
+                        segments.Add(new TypeSegment(typeNode, previousPropertyType, navigationSource));
+                    }
+                }
+                else if (node is IEdmNavigationProperty navigation)
+                {
+                    segments.Add(new NavigationPropertySegment(navigation, currentEdmNavigationSource));
+                }
+            }
+
+            return new ODataExpandPath(segments);
         }
 
         // Process $levels in ExpandedNavigationSelectItem.

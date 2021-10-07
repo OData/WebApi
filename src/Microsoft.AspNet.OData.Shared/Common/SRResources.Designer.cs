@@ -2821,6 +2821,17 @@ namespace Microsoft.AspNet.OData.Common
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to A navigation property expand path should have navigation property in the path..
+        /// </summary>
+        internal static string ShouldHaveNavigationPropertyInNavigationExpandPath
+        {
+            get
+            {
+                return ResourceManager.GetString("ShouldHaveNavigationPropertyInNavigationExpandPath", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The action &apos;{0}&apos; on controller &apos;{1}&apos; returned a {2} containing more than one element. {2} must have zero or one elements..
         /// </summary>
         internal static string SingleResultHasMoreThanOneEntity

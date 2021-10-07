@@ -718,65 +718,25 @@ namespace Microsoft.AspNet.OData
             }
 
             IEdmType edmType = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition;
-            IEdmEntityType baseEntityType = edmType as IEdmEntityType;
             IEdmStructuredType structuredType = edmType as IEdmStructuredType;
-            IEdmProperty property = null;
+
+            IEdmStructuredType pathStructuredType = null;
+            IEdmProperty pathProperty = null;
             if (path != null)
             {
-                string name;
-                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out property,
-                    out structuredType,
-                    out name);
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out pathProperty,
+                    out pathStructuredType,
+                    out _);
             }
 
-            if (baseEntityType != null)
+            // Take the type and property from path first, it's higher priority than the value type.
+            if (pathStructuredType != null && pathProperty != null)
             {
-                List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
-                entityTypes.Add(baseEntityType);
-                entityTypes.AddRange(EdmLibHelpers.GetAllDerivedEntityTypes(baseEntityType, model));
-                foreach (var entityType in entityTypes)
-                {
-                    IEnumerable<IEdmNavigationProperty> navigationProperties = entityType == baseEntityType
-                        ? entityType.NavigationProperties()
-                        : entityType.DeclaredNavigationProperties();
-                    if (navigationProperties != null)
-                    {
-                        if (navigationProperties.Any(
-                                navigationProperty =>
-                                    EdmLibHelpers.IsAutoExpand(navigationProperty, property, entityType, model)))
-                        {
-                            return true;
-                        }
-                    }
-
-                    IEnumerable<IEdmStructuralProperty> properties = entityType == baseEntityType
-                        ? entityType.StructuralProperties()
-                        : entityType.DeclaredStructuralProperties();
-                    if (properties != null)
-                    {
-                        foreach (var edmProperty in properties)
-                        {
-                            if (EdmLibHelpers.IsAutoSelect(edmProperty, property, entityType, model))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+                return model.HasAutoExpandProperty(pathStructuredType, pathProperty) || model.HasAutoSelectProperty(pathStructuredType, pathProperty);
             }
             else if (structuredType != null)
             {
-                IEnumerable<IEdmStructuralProperty> properties = structuredType.StructuralProperties();
-                if (properties != null)
-                {
-                    foreach (var edmProperty in properties)
-                    {
-                        if (EdmLibHelpers.IsAutoSelect(edmProperty, property, structuredType, model))
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return model.HasAutoExpandProperty(structuredType, null) || model.HasAutoSelectProperty(structuredType, null);
             }
 
             return false;

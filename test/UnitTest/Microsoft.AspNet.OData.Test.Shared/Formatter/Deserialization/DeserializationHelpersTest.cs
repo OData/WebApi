@@ -28,6 +28,7 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
 using Xunit;
+using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {

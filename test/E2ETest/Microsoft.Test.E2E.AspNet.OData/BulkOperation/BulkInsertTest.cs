@@ -142,15 +142,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0}," +
+                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
 
             //Assert
@@ -180,14 +185,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
+
+            var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
+                "\"@id\":\""+this.BaseAddress+"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected.ToLower(), json.ToString().ToLower());
             }
 
             //Assert
@@ -218,14 +228,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
+
+            var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
+                "\"@id\":\""+this.BaseAddress+"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected.ToLower(), json.ToString().ToLower());
             }
 
             //Assert
@@ -256,15 +271,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "$delta\",\"value\":[{\"@removed\":{\"reason\":\"changed\"}," +
+                "\"@id\":\""+ this.BaseAddress +"/convention/Friends(1)\",\"Id\":1,\"Name\":null,\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected.ToLower(), json.ToString().ToLower());
             }
 
           
@@ -294,7 +314,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-
+            requestForPost.Headers.Add("OData-Version", "4.01");
             requestForPost.Content = new StringContent(content);
 
             requestForPost.Content.Headers.ContentType= MediaTypeWithQualityHeaderValue.Parse("application/json");
@@ -303,11 +323,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
+            var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"Id\":3,\"Name\":null,\"Age\":35}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$deletedEntity");
+                Assert.Contains(expected, json.ToString());
             }
         }
 
@@ -324,16 +346,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
            
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
+            var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"Id\":3,\"Name\":null,\"Age\":3}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$deletedEntity");
+                Assert.Contains(expected, json.ToString());
             }
         }
 
@@ -349,16 +374,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "$delta\",\"value\":[{\"@NS.Test\":1,\"@Core.DataModificationException\":" +
+                "{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 Assert.Contains("$delta", json);
+                Assert.Contains(expected, json.ToString());
             }
 
         }
@@ -376,10 +406,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
+
+            var expected = "/convention/$metadata#NewFriends/$delta\",\"value\":[{\"@NS.Test2\":\"testing\",\"@Core.ContentID\":3," +
+                "\"@Core.DataModificationException\":{\"@type\":\"#Org.OData.Core.V1.DataModificationExceptionType\"},\"Id\":2,\"Name\":null,\"Age\":15}]}";
+
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -389,6 +424,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Contains("$delta",str);                
                 Assert.Contains("NS.Test2", str);
                 Assert.Contains("Core.DataModificationException", str);
+                Assert.Contains(expected, str);
             }
 
         }
@@ -416,16 +452,22 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
+            var expected = "/convention/$metadata#UnTypedEmployees/$delta\",\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"UnTypedFriends@delta\":" +
+                "[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0},{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"UnTypedFriends@delta\":" +
+                "[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
+
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$deletedEntity");
+                Assert.Contains(expected, json.ToString());
             }
         }
 
@@ -589,14 +631,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
-            
+
+            var expected = "\"value\":[{\"ID\":1,\"Name\":\"Employee1\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
+                "\"Friends@delta\":[{\"Id\":1,\"Name\":\"Friend1\",\"Age\":0,\"Orders@delta\":[{\"Id\":1,\"Price\":10},{\"Id\":2,\"Price\":20}]}," +
+                "{\"Id\":2,\"Name\":\"Friend2\",\"Age\":0}]},{\"ID\":2,\"Name\":\"Employee2\",\"SkillSet\":[],\"Gender\":\"0\",\"AccessLevel\":\"0\",\"FavoriteSports\":null," +
+                "\"Friends@delta\":[{\"Id\":3,\"Name\":\"Friend3\",\"Age\":0,\"Orders@delta\":[{\"Id\":3,\"Price\":30},{\"Id\":4,\"Price\":40}]},{\"Id\":4,\"Name\":\"Friend4\",\"Age\":0}]}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
 
             //Assert
@@ -611,7 +660,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 Assert.Contains("Friend2", json.ToString());
             }
 
-            requestUri = this.BaseAddress + "/convention/Employees(2)/Friends";
+            requestUri = this.BaseAddress + "/convention/Employees(2)";
             using (HttpResponseMessage response = await this.Client.GetAsync(requestUri))
             {
                 response.EnsureSuccessStatusCode();
@@ -637,14 +686,19 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
-
+            
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
+
+            var expected = "/convention/$metadata#Employees(Friends(),NewFriends(),UnTypedFriends())/$entity\",\"ID\":1,\"Name\":\"Sql\"," +
+                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":2,\"Name\":\"Test1\",\"Age\":0}]," +
+                "\"NewFriends\":[{\"Id\":1,\"Name\":\"NewFriendTest1\",\"Age\":33}],\"UnTypedFriends\":[]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
 
             //Assert
@@ -679,14 +733,16 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "/convention/$metadata#Employees(Friends(),NewFriends(),UnTypedFriends())/$entity\",\"ID\":1,\"Name\":\"Bind1\"," +
+                "\"SkillSet\":[\"CSharp\",\"Sql\"],\"Gender\":\"Female\",\"AccessLevel\":\"Execute\",\"FavoriteSports\":{\"Sport\":\"Football\"},\"Friends\":[{\"Id\":3,\"Name\":null,\"Age\":0}]," +
+                "\"NewFriends\":[{\"Id\":1,\"Name\":\"NewFriendTest1\",\"Age\":33}],\"UnTypedFriends\":[]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
-
-            
-            
         }
 
 
@@ -827,15 +883,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
+                "[{\"Id\":1,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
 
            
@@ -857,15 +918,20 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
 
             //Act & Assert
+            var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company02\",\"MyOverdueOrders@delta\":" +
+                "[{\"Id\":2,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                Assert.Contains(expected, json.ToString());
             }
 
 
@@ -886,17 +952,21 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                      }";
 
             var requestForPost = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+            requestForPost.Headers.Add("OData-Version", "4.01");
 
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             requestForPost.Content = stringContent;
             Client.DefaultRequestHeaders.Add("Prefer", @"odata.include-annotations=""*""");
 
             //Act & Assert
+            var expected = "/convention/$metadata#UnTypedEmployees/$delta\",\"value\":[{\"ID\":1,\"Name\":\"Employeeabcd\"," +
+                "\"UnTypedFriends@delta\":[{\"Id\":1,\"Name\":\"abcd\",\"Age\":0}]}]}";
+
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
                 var json = response.Content.ReadAsStringAsync().Result;
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                json.ToString().Contains("$deletedEntity");
+                Assert.Contains(expected, json.ToString());
             }
         }
 

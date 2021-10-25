@@ -10,6 +10,7 @@ using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
+    [AutoExpand]
     public class Employee
     {
         [Key]
@@ -19,7 +20,6 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public Gender Gender { get; set; }
         public AccessLevel AccessLevel { get; set; }
         
-        [AutoExpand]
         public List<Friend> Friends { get; set; }
 
         public List<NewFriend> NewFriends { get; set; }
@@ -67,9 +67,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
     {
         [Key]
         public int Id { get; set; }
-        [Required]
+    
         public string Name { get; set; }
-        [Range(10, 20)]
+       
         public int Age { get; set; }
 
         public List<Order> Orders { get; set; }

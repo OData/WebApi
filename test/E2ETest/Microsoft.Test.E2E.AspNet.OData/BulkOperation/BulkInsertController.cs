@@ -198,6 +198,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return Ok(Employees.AsQueryable());
         }
 
+        [EnableQuery]
         public ITestActionResult Get(int key)
         {
             var emp = Employees.SingleOrDefault(e => e.ID == key);
@@ -235,6 +236,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         [ODataRoute("Employees")]
         [HttpPatch]
+        [EnableQuery]
         public ITestActionResult PatchEmployees([FromBody] DeltaSet<Employee> coll)
         {
             InitEmployees();
@@ -358,6 +360,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
 
         [ODataRoute("Employees({key})")]
+        [EnableQuery]
         public ITestActionResult Patch(int key, [FromBody] Delta<Employee> delta)
         {
             InitEmployees();

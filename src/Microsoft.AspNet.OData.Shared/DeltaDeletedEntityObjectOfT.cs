@@ -91,11 +91,28 @@ namespace Microsoft.AspNet.OData
         /// properties. <c>null</c> means this entity type is not open.</param>
         /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
         public DeltaDeletedEntityObject(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo, PropertyInfo instanceAnnotationsPropertyInfo)
-            : base(structuralType, updatableProperties, dynamicDictionaryPropertyInfo, instanceAnnotationsPropertyInfo)
+            : this(structuralType, updatableProperties, dynamicDictionaryPropertyInfo, false, instanceAnnotationsPropertyInfo)
+        {
+            
+        }
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="DeltaDeletedEntityObject{TStructuralType}"/>.
+        /// </summary>
+        /// <param name="structuralType">The derived entity type or complex type for which the changes would be tracked.
+        /// <paramref name="structuralType"/> should be assignable to instances of <typeparamref name="TStructuralType"/>.
+        /// </param>
+        /// <param name="updatableProperties"> Properties that can be updated</param>
+        /// <param name="dynamicDictionaryPropertyInfo">The property info that is used as dictionary of dynamic
+        /// properties. <c>null</c> means this entity type is not open.</param>
+        /// <param name="isComplexType">To determine if the entity is a complex type</param>
+        /// <param name="instanceAnnotationsPropertyInfo">The property info that is used as container for Instance Annotations</param>
+        public DeltaDeletedEntityObject(Type structuralType, IEnumerable<string> updatableProperties, PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType, PropertyInfo instanceAnnotationsPropertyInfo)
+            : base(structuralType, updatableProperties, dynamicDictionaryPropertyInfo, isComplexType, instanceAnnotationsPropertyInfo)
         {
             DeltaKind = EdmDeltaEntityKind.DeletedEntry;
         }
-     
+
         /// <inheritdoc />
         public Uri Id { get; set; }
         

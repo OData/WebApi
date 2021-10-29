@@ -440,7 +440,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
              
             string content = JsonConvert.SerializeObject(data);
-            content = @"{'MyAddress':{'@odata.type': 'Microsoft.Test.E2E.AspNet.OData.Formatter.PersonalAddress','Street': 'abc'}}";
+            content = @"{'MyAddress':{'@odata.type': 'Microsoft.Test.E2E.AspNet.OData.Formatter.OfficeAddress','Street': 'abc'}}";
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(patch);

@@ -470,12 +470,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             customer.Id = 5;
             customers.Add(customer);
 
-            customer = new DeltaCustomer("Original name",
+            var customer1 = new DeltaCustomer("Original name",
                 Enumerable.Range(0, 2).Select(i => new DeltaAddress { ZipCode = i }),
                 Enumerable.Range(0, 3).Select(i => new DeltaOrder { Details = i.ToString() }));
-            customer.Id = 6;
-            customer.MyAddress = new OfficeAddress { Street = "Microsot" };
-            customers.Add(customer);
+            customer1.Id = 6;
+            customer1.MyAddress = new OfficeAddress { Street = "Microsot" };
+            customers.Add(customer1);
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]

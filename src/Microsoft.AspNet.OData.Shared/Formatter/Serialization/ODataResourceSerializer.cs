@@ -1404,8 +1404,19 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             if (navigationProperties != null)
             {
                 IEnumerable<string> changedProperties = null;
+                if (null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
+                {
+                    changedProperties = changedObject.GetChangedPropertyNames();
 
-                if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
+                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
+                    {
+                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
+                        {
+                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
+                        }
+                    }
+                }
+                else if (null != resourceContext.ResourceInstance && resourceContext.ResourceInstance is IDelta deltaObject)
                 {
                     changedProperties = deltaObject.GetChangedPropertyNames();
                     dynamic delta = deltaObject;
@@ -1418,19 +1429,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                             yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, obj.GetType());
                         }
                     }
-                }
-                else if(null != resourceContext.EdmObject && resourceContext.EdmObject is IDelta changedObject)
-                {
-                    changedProperties = changedObject.GetChangedPropertyNames();
-
-                    foreach (IEdmNavigationProperty navigationProperty in navigationProperties)
-                    {                         
-                        if (changedProperties == null || changedProperties.Contains(navigationProperty.Name))
-                        {
-                            yield return new KeyValuePair<IEdmNavigationProperty, Type>(navigationProperty, typeof(IEdmChangedObject));
-                        }
-                    }
-                }
+                }                
             }
         }
 

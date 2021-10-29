@@ -57,6 +57,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DeltaSetOfT.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EdmDeltaComplexObject.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DeltaDeletedEntityObjectOfT.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableQueryAttribute.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ETagMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\ContainerBuilderExtensions.cs" />
@@ -84,7 +85,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSet.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDeltaSetItem.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultEdmPatchMethodHandler.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)EdmODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DefaultODataAPIHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataEdmAPIHandlerFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataAPIHandlerFactory.cs" />

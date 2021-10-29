@@ -439,7 +439,7 @@ namespace Microsoft.AspNet.OData
         {
             if (original == null)
             {
-                throw Error.ArgumentNull("original");
+                throw Error.ArgumentNull("original" + typeof(TStructuralType).ToString() );
             }
 
             // Delta parameter type cannot be derived type of original

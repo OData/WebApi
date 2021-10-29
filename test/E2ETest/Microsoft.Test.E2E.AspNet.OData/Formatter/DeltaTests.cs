@@ -435,19 +435,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         [Fact]
         public async Task PatchShouldSupportComplexDerivedTypeTransform()
         {
-            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers(6)");
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers(7)");
             dynamic data = new ExpandoObject();
             data.MyAddress =  new PersonalAddress { Street = "abc" };
              
-            string content = JsonConvert.SerializeObject(data);
-            //string content = @"{'MyAddress':{'@odata.type': 'Microsoft.Test.E2E.AspNet.OData.Formatter.OfficeAddress','Street': 'abc'}}";
+            string content = JsonConvert.SerializeObject(data);            
             patch.Content = new StringContent(content);
             patch.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             HttpResponseMessage response = await Client.SendAsync(patch);
 
             Assert.True(response.IsSuccessStatusCode);
 
-            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(6)?$expand=Orders");
+            HttpRequestMessage get = new HttpRequestMessage(HttpMethod.Get, BaseAddress + "/odata/DeltaCustomers(7)?$expand=Orders");
             response = await Client.SendAsync(get);
             Assert.True(response.IsSuccessStatusCode);
             dynamic query = await response.Content.ReadAsObject<JObject>();
@@ -476,6 +475,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             customer1.Id = 6;
             customer1.MyAddress = new OfficeAddress { Street = "Microsot" };
             customers.Add(customer1);
+
+            var customer2 = new DeltaCustomer("Original name",
+              Enumerable.Range(0, 2).Select(i => new DeltaAddress { ZipCode = i }),
+              Enumerable.Range(0, 3).Select(i => new DeltaOrder { Details = i.ToString() }));
+            customer2.Id = 7;
+            customer2.MyAddress = new OfficeAddress { Street = "Microsot" };
+            customers.Add(customer2);
         }
 
         [EnableQuery(PageSize = 10, MaxExpansionDepth = 2)]

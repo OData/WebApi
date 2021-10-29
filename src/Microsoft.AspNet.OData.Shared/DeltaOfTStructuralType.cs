@@ -430,7 +430,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="original">The entity to be updated.</param>
         public TStructuralType CopyChangedValues(TStructuralType original)
         {
-            CopyChangedValues(original, null);
+            CopyChangedValues(original, null, null);
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity")]
@@ -439,7 +439,7 @@ namespace Microsoft.AspNet.OData
         {
             if (original == null)
             {
-                throw Error.ArgumentNull(nameof(original));
+                throw Error.ArgumentNull("original"+ Environment.StackTrace);
             }
 
             // Delta parameter type cannot be derived type of original

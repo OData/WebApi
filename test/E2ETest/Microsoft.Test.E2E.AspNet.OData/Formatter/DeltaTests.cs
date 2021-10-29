@@ -435,7 +435,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
         [Fact]
         public async Task PatchShouldSupportComplexDerivedTypeTransform()
         {
-            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("MERGE"), BaseAddress + "/odata/DeltaCustomers(6)");
+            HttpRequestMessage patch = new HttpRequestMessage(new HttpMethod("PATCH"), BaseAddress + "/odata/DeltaCustomers(6)");
             dynamic data = new ExpandoObject();
             data.Addresses = Enumerable.Range(10, 3).Select(i => new DeltaAddress { ZipCode = i });
              

@@ -511,9 +511,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 return BadRequest(ModelState);
             }
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
-            var newCustomer = patch.Patch(customer);
-            Assert.True(newCustomer == customer);
-            return Ok(newCustomer);
+            if (customer == null)
+                return Ok();
+
+            patch.Patch(customer);
+            return Ok(customer);
         }
     }
 

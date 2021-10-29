@@ -41,7 +41,7 @@ public interface Microsoft.AspNet.OData.IDeltaSet {
 
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
-	ODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
+	IODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
 }
 
@@ -84,6 +84,10 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 }
 
 public interface Microsoft.AspNet.OData.IODataAPIHandler {
+}
+
+public interface Microsoft.AspNet.OData.IODataIdContainer {
+	NavigationPath ODataIdNavigationPath  { public abstract get; public abstract set; }
 }
 
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
@@ -175,6 +179,13 @@ public abstract class Microsoft.AspNet.OData.ODataEdmAPIHandlerFactory {
 	protected ODataEdmAPIHandlerFactory ()
 
 	public abstract EdmODataAPIHandler GetHandler (NavigationPath navigationPath)
+}
+
+public abstract class Microsoft.AspNet.OData.ODataIDResolver {
+	protected ODataIDResolver ()
+
+	public virtual void ApplyODataId (object resource)
+	public abstract object GetObject (string name, object parent, System.Collections.Generic.Dictionary`2[[System.String],[System.Object]] keyValues)
 }
 
 [
@@ -310,22 +321,15 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType)
-	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
-
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; protected set; }
 	System.Type ExpectedClrType  { public virtual get; }
-
 	bool IsComplexType  { public get; }
-
-	ODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
-
+	IODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
 	System.Type StructuredType  { public virtual get; }
-
-	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
-
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
+	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
 
 	public virtual void Clear ()
 	public void CopyChangedValues (TStructuralType original)
@@ -351,6 +355,7 @@ public class Microsoft.AspNet.OData.DeltaDeletedEntityObject`1 : Delta`1, IDynam
 	public DeltaDeletedEntityObject`1 (System.Type structuralType, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
 	public DeltaDeletedEntityObject`1 (System.Type structuralType, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
 	public DeltaDeletedEntityObject`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
+	public DeltaDeletedEntityObject`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType, System.Reflection.PropertyInfo instanceAnnotationsPropertyInfo)
 
 	System.Uri Id  { public virtual get; public virtual set; }
 	Microsoft.OData.Edm.IEdmNavigationSource NavigationSource  { public virtual get; public virtual set; }
@@ -472,7 +477,7 @@ public class Microsoft.AspNet.OData.EdmEntityObject : EdmStructuredObject, IDyna
 	public EdmEntityObject (Microsoft.OData.Edm.IEdmEntityType edmType, bool isNullable)
 
 	EdmDeltaEntityKind DeltaKind  { public virtual get; }
-	ODataIdContainer ODataIdContainer  { public get; public set; }
+	IODataIdContainer ODataIdContainer  { public get; public set; }
 	IODataInstanceAnnotationContainer PersistentInstanceAnnotationsContainer  { public get; public set; }
 
 	public void AddDataException (Org.OData.Core.V1.DataModificationExceptionType dataModificationException)
@@ -567,7 +572,6 @@ public class Microsoft.AspNet.OData.MetadataController : ODataController, IDispo
 }
 
 public class Microsoft.AspNet.OData.NavigationPath {
-	public NavigationPath ()
 	public NavigationPath (string navigationPath, System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
 
 	string NavigationPathName  { public get; }
@@ -597,6 +601,12 @@ public class Microsoft.AspNet.OData.ODataFormattingAttribute : System.Attribute,
 
 	public virtual System.Collections.Generic.IList`1[[Microsoft.AspNet.OData.Formatter.ODataMediaTypeFormatter]] CreateODataFormatters ()
 	public virtual void Initialize (System.Web.Http.Controllers.HttpControllerSettings controllerSettings, System.Web.Http.Controllers.HttpControllerDescriptor controllerDescriptor)
+}
+
+public class Microsoft.AspNet.OData.ODataIdContainer : IODataIdContainer {
+	public ODataIdContainer ()
+
+	NavigationPath ODataIdNavigationPath  { public virtual get; public virtual set; }
 }
 
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : System.Net.Http.DelegatingHandler, IDisposable {
@@ -762,12 +772,6 @@ public sealed class Microsoft.AspNet.OData.FromODataUriAttribute : System.Web.Ht
 	public FromODataUriAttribute ()
 
 	public virtual System.Web.Http.Controllers.HttpParameterBinding GetBinding (System.Web.Http.Controllers.HttpParameterDescriptor parameter)
-}
-
-public sealed class Microsoft.AspNet.OData.ODataIdContainer {
-	public ODataIdContainer ()
-
-	NavigationPath ODataIdNavigationPath  { public get; public set; }
 }
 
 [

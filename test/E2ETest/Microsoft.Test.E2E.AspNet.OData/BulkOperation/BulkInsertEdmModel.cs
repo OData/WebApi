@@ -76,6 +76,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             AddUnboundActionsAndFunctions(builder);
 
             builder.Namespace = typeof(Employee).Namespace;
+            builder.MaxDataServiceVersion = EdmConstants.EdmVersion401;
+            builder.DataServiceVersion = EdmConstants.EdmVersion401;
 
             var edmModel = builder.GetEdmModel();
             return edmModel;

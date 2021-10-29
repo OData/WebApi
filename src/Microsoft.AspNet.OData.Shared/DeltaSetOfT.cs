@@ -243,7 +243,7 @@ namespace Microsoft.AspNet.OData
         {
             Type type = typeof(Delta<>).MakeGenericType(_clrType);
 
-            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, null, null,
+            Delta<TStructuralType> deltaObject = Activator.CreateInstance(type, _clrType, null, null,false,
                 changedObj.InstanceAnnotationsPropertyInfo) as Delta<TStructuralType>;
 
             SetProperties(originalObj, deltaObject);

@@ -364,7 +364,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [InlineData("convention")]
         [InlineData("explicit")]
         // Patch ~/Widnows(3)
-        public async Task Patchy_Matched_DerivedComplexType(string modelMode)
+        public async Task Patch_Matched_DerivedComplexType(string modelMode)
         {
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(3)/CurrentShape";

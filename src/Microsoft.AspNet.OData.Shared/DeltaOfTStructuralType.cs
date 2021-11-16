@@ -402,7 +402,7 @@ namespace Microsoft.AspNet.OData
 
                     if (deltaNestedResource.IsComplexType && newType != originalType)
                     {
-                        originalNestedResource = ReAssignComplexDerivedType(original, nestedResourceName, originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
+                        originalNestedResource = ReAssignComplexDerivedType(originalNestedResource, newType, originalType, deltaNestedResource.ExpectedClrType);
                         _structuredType.GetProperty(nestedResourceName).SetValue(original, (object)originalNestedResource);
                     }
 
@@ -413,7 +413,7 @@ namespace Microsoft.AspNet.OData
             return original;
         }
 
-        private dynamic ReAssignComplexDerivedType(TStructuralType parent, string nestedPropertyName, dynamic originalValue, Type newType, Type originalType, Type declaredType)
+        private dynamic ReAssignComplexDerivedType(dynamic originalValue, Type newType, Type originalType, Type declaredType)
         {
             //As per OASIS discussion, changing a complex type from 1 derived type to another is allowed if both derived type have a common ancestor and the property
             //is declared in terms of a common ancestor. The logic below checks for a common ancestor. Create a new object of the derived type in delta request.
@@ -500,11 +500,12 @@ namespace Microsoft.AspNet.OData
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
         /// <param name="original">The entity to be updated.</param>
+        /// <returns>The original value after Patching</returns>
         public TStructuralType Patch(TStructuralType original)
         {
             if (IsComplexType)
             {
-                original = ReAssignComplexDerivedType(null, "", original, _structuredType, original.GetType(), ExpectedClrType) as TStructuralType;                
+                original = ReAssignComplexDerivedType(original, _structuredType, original.GetType(), ExpectedClrType) as TStructuralType;                
             }
 
             return CopyChangedValues(original);           

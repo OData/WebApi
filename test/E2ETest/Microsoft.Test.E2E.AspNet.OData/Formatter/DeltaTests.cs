@@ -490,8 +490,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 return BadRequest(ModelState);
             }
             var customer = customers.Where(c => c.Id == key).FirstOrDefault();
-            patch.Patch(customer);
-            return Ok(customer);
+            var newCustomer = patch.Patch(customer);
+            Assert.True(newCustomer == customer);
+            return Ok(newCustomer);
         }
     }
 

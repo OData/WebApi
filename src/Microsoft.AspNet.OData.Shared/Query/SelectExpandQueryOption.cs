@@ -372,6 +372,13 @@ namespace Microsoft.AspNet.OData.Query
             out List<SelectItem> autoExpandItems)
         {
             autoSelectItems = new List<SelectItem>();
+            autoExpandItems = new List<SelectItem>();
+
+            if (baseEntityType == null)
+            {
+                return;
+            }
+
             IEnumerable<SelectModelPath> autoSelectProperties = model.GetAutoSelectPaths(baseEntityType, null, modelBoundQuerySettings);
             foreach (var autoSelectProperty in autoSelectProperties)
             {
@@ -380,7 +387,6 @@ namespace Microsoft.AspNet.OData.Query
                 autoSelectItems.Add(pathSelectItem);
             }
 
-            autoExpandItems = new List<SelectItem>();
             depth--;
             if (depth < 0)
             {

@@ -34,22 +34,24 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(edmModel));
             }
 
-            if (structuredType != null)
+            if (structuredType == null)
             {
-                foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
-                {
-                    // for top type, let's retrieve its properties and the properties from base type of top type if has.
-                    // for derived type, let's retrieve the declared properties.
-                    IEnumerable<IEdmStructuralProperty> properties = edmStructuredType == structuredType
-                            ? edmStructuredType.StructuralProperties()
-                            : edmStructuredType.DeclaredStructuralProperties();
+                throw Error.ArgumentNull(nameof(structuredType));
+            }
 
-                    foreach (IEdmStructuralProperty subProperty in properties)
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
+            {
+                // for top type, let's retrieve its properties and the properties from base type of top type if has.
+                // for derived type, let's retrieve the declared properties.
+                IEnumerable<IEdmStructuralProperty> properties = edmStructuredType == structuredType
+                        ? edmStructuredType.StructuralProperties()
+                        : edmStructuredType.DeclaredStructuralProperties();
+
+                foreach (IEdmStructuralProperty subProperty in properties)
+                {
+                    if (IsAutoSelect(subProperty, property, edmStructuredType, edmModel))
                     {
-                        if (IsAutoSelect(subProperty, property, edmStructuredType, edmModel))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -81,7 +83,7 @@ namespace Microsoft.AspNet.OData.Query
 
         private static bool HasAutoExpandProperty(this IEdmModel edmModel, IEdmStructuredType structuredType, IEdmProperty pathProperty, ISet<IEdmStructuredType> visited)
         {
-            if (structuredType == null || visited.Contains(structuredType))
+            if (visited.Contains(structuredType))
             {
                 return false;
             }
@@ -144,34 +146,36 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(edmModel));
             }
 
-            List<SelectModelPath> autoSelectProperties = null;
-            if (structuredType != null)
+            if (structuredType == null)
             {
-                foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
+                throw Error.ArgumentNull(nameof(structuredType));
+            }
+
+            List<SelectModelPath> autoSelectProperties = null;
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
+            {
+                // for top type, let's retrieve its properties and the properties from base type of top type if has.
+                // for derived type, let's retrieve the declared properties.
+                IEnumerable<IEdmStructuralProperty> properties = (edmStructuredType == structuredType) ?
+                    edmStructuredType.StructuralProperties() :
+                    properties = edmStructuredType.DeclaredStructuralProperties();
+
+                foreach (IEdmStructuralProperty property in properties)
                 {
-                    // for top type, let's retrieve its properties and the properties from base type of top type if has.
-                    // for derived type, let's retrieve the declared properties.
-                    IEnumerable<IEdmStructuralProperty> properties = (edmStructuredType == structuredType) ?
-                        edmStructuredType.StructuralProperties() :
-                        properties = edmStructuredType.DeclaredStructuralProperties();
-
-                    foreach (IEdmStructuralProperty property in properties)
+                    if (IsAutoSelect(property, pathProperty, edmStructuredType, edmModel, querySettings))
                     {
-                        if (IsAutoSelect(property, pathProperty, edmStructuredType, edmModel, querySettings))
+                        if (autoSelectProperties == null)
                         {
-                            if (autoSelectProperties == null)
-                            {
-                                autoSelectProperties = new List<SelectModelPath>(1);
-                            }
+                            autoSelectProperties = new List<SelectModelPath>(1);
+                        }
 
-                            if (edmStructuredType == structuredType)
-                            {
-                                autoSelectProperties.Add(new SelectModelPath(new[] { property }));
-                            }
-                            else
-                            {
-                                autoSelectProperties.Add(new SelectModelPath(new IEdmElement[] { edmStructuredType, property }));
-                            }
+                        if (edmStructuredType == structuredType)
+                        {
+                            autoSelectProperties.Add(new SelectModelPath(new[] { property }));
+                        }
+                        else
+                        {
+                            autoSelectProperties.Add(new SelectModelPath(new IEdmElement[] { edmStructuredType, property }));
                         }
                     }
                 }
@@ -197,21 +201,20 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(edmModel));
             }
 
-            IList<ExpandModelPath> results = null;
-            if (structuredType != null)
+            if (structuredType == null)
             {
-                results = new List<ExpandModelPath>();
-
-                Stack<IEdmElement> nodes = new Stack<IEdmElement>();
-                ISet<IEdmStructuredType> visited = new HashSet<IEdmStructuredType>();
-
-                // type and property from path is higher priority
-                edmModel.GetAutoExpandPaths(structuredType, property, nodes, visited, results, isSelectPresent, querySettings);
-
-                Contract.Assert(nodes.Count == 0);
+                throw Error.ArgumentNull(nameof(structuredType));
             }
 
-            return results ?? Enumerable.Empty<ExpandModelPath>();
+            Stack<IEdmElement> nodes = new Stack<IEdmElement>();
+            ISet<IEdmStructuredType> visited = new HashSet<IEdmStructuredType>();
+            IList<ExpandModelPath> results = new List<ExpandModelPath>();
+
+            // type and property from path is higher priority
+            edmModel.GetAutoExpandPaths(structuredType, property, nodes, visited, results, isSelectPresent, querySettings);
+
+            Contract.Assert(nodes.Count == 0);
+            return results;
         }
 
         public static bool IsAutoExpand(IEdmProperty navigationProperty,
@@ -275,7 +278,7 @@ namespace Microsoft.AspNet.OData.Query
             Stack<IEdmElement> nodes, ISet<IEdmStructuredType> visited, IList<ExpandModelPath> results,
             bool isSelectPresent = false, ModelBoundQuerySettings querySettings = null)
         {
-            if (structuredType == null || visited.Contains(structuredType))
+            if (visited.Contains(structuredType))
             {
                 return;
             }
@@ -347,10 +350,17 @@ namespace Microsoft.AspNet.OData.Query
         /// </summary>
         private struct SelfAndDerivedEnumerator : IEnumerator<IEdmStructuredType>
         {
+            private enum Stage : byte
+            {
+                Initial,
+                Self,
+                Derived,
+            }
+
             private readonly IEnumerator<IEdmStructuredType> derivedEnumerator;
             private readonly IEdmStructuredType structuredType;
 
-            private byte stage;
+            private Stage stage;
 
             public SelfAndDerivedEnumerator(IEdmStructuredType structuredType, IEdmModel edmModel)
             {
@@ -364,7 +374,7 @@ namespace Microsoft.AspNet.OData.Query
                     throw new ArgumentNullException(nameof(edmModel));
                 }
 
-                this.stage = 0;
+                this.stage = Stage.Initial;
                 this.derivedEnumerator = edmModel.FindAllDerivedTypes(structuredType).GetEnumerator();
                 this.structuredType = structuredType;
             }
@@ -375,10 +385,10 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     switch (stage)
                     {
-                        case 1:
+                        case Stage.Self:
                             return this.structuredType;
 
-                        case 2:
+                        case Stage.Derived:
                             return this.derivedEnumerator.Current;
 
                         default:
@@ -391,6 +401,7 @@ namespace Microsoft.AspNet.OData.Query
 
             public void Dispose()
             {
+                this.derivedEnumerator.Dispose();
             }
 
             public SelfAndDerivedEnumerator GetEnumerator()
@@ -402,15 +413,15 @@ namespace Microsoft.AspNet.OData.Query
             {
                 switch (this.stage)
                 {
-                    case 0:
-                        this.stage = 1;
+                    case Stage.Initial:
+                        this.stage = Stage.Self;
                         return true;
 
-                    case 1:
-                        this.stage = 2;
-                        goto case 2;
+                    case Stage.Self:
+                        this.stage = Stage.Derived;
+                        goto case Stage.Derived;
 
-                    case 2:
+                    case Stage.Derived:
                         return this.derivedEnumerator.MoveNext();
 
                     default:

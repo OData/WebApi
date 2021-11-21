@@ -431,7 +431,7 @@ namespace Microsoft.AspNet.OData.Query
 
             public void Reset()
             {
-                this.stage = 0;
+                this.stage = Stage.Initial;
                 this.derivedEnumerator.Reset();
             }
         }

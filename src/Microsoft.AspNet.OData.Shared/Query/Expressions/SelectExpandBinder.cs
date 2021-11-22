@@ -293,6 +293,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 LinqParameterContainer.Parameterize(typeof(string), _modelID) :
                 Expression.Constant(_modelID);
             wrapperTypeMemberAssignments.Add(Expression.Bind(wrapperProperty, wrapperPropertyValueExpression));
+
             if (IsSelectAll(selectExpandClause))
             {
                 // Initialize property 'Instance' on the wrapper class
@@ -345,11 +346,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     }
                 }
             }
+            if (isInstancePropertySet)
+            {
+                Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
+                wrapperType = wrapperGenericType.MakeGenericType(elementType);
+                return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
+            }
+            ConstructorInfo constructorWithInstanse = wrapperType.GetConstructors().Single(c => c.GetParameters().Length == 1);
+            return Expression.MemberInit(Expression.New(constructorWithInstanse, source), wrapperTypeMemberAssignments);
 
-            Type wrapperGenericType = GetWrapperGenericType(isInstancePropertySet, isTypeNamePropertySet, isContainerPropertySet);
-            wrapperType = wrapperGenericType.MakeGenericType(elementType);
 
-            return Expression.MemberInit(Expression.New(wrapperType), wrapperTypeMemberAssignments);
         }
 
         /// <summary>
@@ -1243,54 +1249,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
         private class SelectAllAndExpand<TEntity> : SelectExpandWrapper<TEntity>
         {
-            public SelectAllAndExpand(TEntity entity) : base(entity)
-            {
-
-            }
-
-            public SelectAllAndExpand()
-            {
-
-            }
         }
 
         private class SelectAll<TEntity> : SelectExpandWrapper<TEntity>
         {
-            public SelectAll(TEntity entity) : base(entity)
-            {
-
-            }
-
-            public SelectAll()
-            {
-
-            }
         }
 
         private class SelectSomeAndInheritance<TEntity> : SelectExpandWrapper<TEntity>
         {
-            public SelectSomeAndInheritance(TEntity entity) : base(entity)
-            {
-
-            }
-
-            public SelectSomeAndInheritance()
-            {
-
-            }
         }
 
         private class SelectSome<TEntity> : SelectAllAndExpand<TEntity>
         {
-            public SelectSome(TEntity entity) : base(entity)
-            {
-
-            }
-
-            public SelectSome()
-            {
-
-            }
         }
     }
 }

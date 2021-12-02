@@ -10,7 +10,7 @@ using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    public class APIHandlerFactory : ODataAPIHandlerFactory
+    internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
         Employee employee;
         public APIHandlerFactory()
@@ -128,7 +128,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
     }
 
-    public class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
+    internal class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
     {
         IEdmEntityType entityType;
         IEdmStructuredObject employee;
@@ -248,7 +248,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class CompanyAPIHandler : ODataAPIHandler<Company>
+    internal class CompanyAPIHandler : ODataAPIHandler<Company>
     {
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Company createdObject, out string errorMessage)
         {
@@ -333,7 +333,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
     }
 
-    public class OverdueOrderAPIHandler : ODataAPIHandler<NewOrder>
+    internal class OverdueOrderAPIHandler : ODataAPIHandler<NewOrder>
     {
         Company parent;
 
@@ -422,7 +422,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
     }
 
-    public class MyOverdueOrderAPIHandler : ODataAPIHandler<MyNewOrder>
+    internal class MyOverdueOrderAPIHandler : ODataAPIHandler<MyNewOrder>
     {
         Company parent;
 
@@ -512,8 +512,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class EmployeeAPIHandler : ODataAPIHandler<Employee>
+    internal class EmployeeAPIHandler : ODataAPIHandler<Employee>
     {
+
         public override ODataAPIResponseStatus TryCreate(IDictionary<string, object> keyValues, out Employee createdObject, out string errorMessage)
         {
             createdObject = null;
@@ -541,9 +542,9 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             try
             {
                 var id = keyValues.First().Value.ToString();
-                var customer = EmployeesController.Employees.First(x => x.ID == Int32.Parse(id));
+                var employee = EmployeesController.Employees.First(x => x.ID == Int32.Parse(id));
 
-                EmployeesController.Employees.Remove(customer);
+                EmployeesController.Employees.Remove(employee);
 
                 return ODataAPIResponseStatus.Success;
             }
@@ -597,7 +598,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         }
     }
 
-    public class FriendAPIHandler : ODataAPIHandler<Friend>
+    internal class FriendAPIHandler : ODataAPIHandler<Friend>
     {
         Employee employee;
         public FriendAPIHandler(Employee employee)
@@ -687,7 +688,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class NewOrderAPIHandler : ODataAPIHandler<NewOrder>
+    internal class NewOrderAPIHandler : ODataAPIHandler<NewOrder>
     {
         NewFriend friend;
         public NewOrderAPIHandler(NewFriend friend)
@@ -778,7 +779,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class MyNewOrderAPIHandler : ODataAPIHandler<MyNewOrder>
+    internal class MyNewOrderAPIHandler : ODataAPIHandler<MyNewOrder>
     {
         MyNewFriend friend;
         public MyNewOrderAPIHandler(MyNewFriend friend)
@@ -870,7 +871,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class OrderAPIHandler : ODataAPIHandler<Order>
+    internal class OrderAPIHandler : ODataAPIHandler<Order>
     {
         Friend friend;
         public OrderAPIHandler(Friend friend)
@@ -963,7 +964,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
 
 
-    public class NewFriendAPIHandler : ODataAPIHandler<NewFriend>
+    internal class NewFriendAPIHandler : ODataAPIHandler<NewFriend>
     {
         Employee employee;
         public NewFriendAPIHandler(Employee employee)
@@ -1059,7 +1060,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class EmployeeEdmAPIHandler : EdmODataAPIHandler
+    internal class EmployeeEdmAPIHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
         public EmployeeEdmAPIHandler(IEdmEntityType entityType)
@@ -1169,7 +1170,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class FriendTypelessAPIHandler : EdmODataAPIHandler
+    internal class FriendTypelessAPIHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
         EdmStructuredObject employee;

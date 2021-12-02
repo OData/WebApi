@@ -17,7 +17,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Abstract class for Resolving ODataId
     /// </summary>
-    public abstract class ODataIDResolver
+    internal abstract class ODataIDResolver
     {
         /// <summary>
         /// Apply OdataId for a resource with OdataID container

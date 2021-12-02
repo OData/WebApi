@@ -10,7 +10,7 @@ using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
-    public class EmployeeDBContext : DbContext
+    internal class EmployeeDBContext : DbContext
     {
         public EmployeeDBContext()
         {
@@ -46,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
        
     }
 
-    public class APIHandlerFactoryEF: ODataAPIHandlerFactory
+    internal class APIHandlerFactoryEF: ODataAPIHandlerFactory
     {
         EmployeeDBContext dbContext;
 
@@ -86,7 +86,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class EmployeeEFPatchHandler : ODataAPIHandler<Employee>
+    internal class EmployeeEFPatchHandler : ODataAPIHandler<Employee>
     {
         EmployeeDBContext dbContext = null;
 
@@ -179,7 +179,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
     }
 
-    public class FriendEFPatchHandler : ODataAPIHandler<Friend>
+    internal class FriendEFPatchHandler : ODataAPIHandler<Friend>
     {
         Employee employee;
         public FriendEFPatchHandler(Employee employee)
@@ -270,7 +270,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     }
 
 
-    public class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
+    internal class NewFriendEFPatchHandler : ODataAPIHandler<NewFriend>
     {
         Employee employee;
         public NewFriendEFPatchHandler(Employee employee)
@@ -355,7 +355,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 
 
 
-        public class OrderEFPatchHandler : ODataAPIHandler<Order>
+        internal class OrderEFPatchHandler : ODataAPIHandler<Order>
         {
             Friend friend;
             public OrderEFPatchHandler(Friend friend)

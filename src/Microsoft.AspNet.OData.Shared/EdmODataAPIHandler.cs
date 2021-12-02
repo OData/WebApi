@@ -1,21 +1,13 @@
-﻿using Microsoft.OData.Edm;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Microsoft.AspNet.OData
-{    
-   
+{
+
     /// <summary>
     /// Handler Class to handle users methods for create, delete and update.
     /// This is the handler for data modification where there is no CLR type.
     /// </summary>
-    public abstract class EdmODataAPIHandler
+    internal abstract class EdmODataAPIHandler
     {
         /// <summary>
         /// TryCreate method to create a new object.

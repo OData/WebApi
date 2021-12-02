@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
 {
-    public class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
+    internal class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
     {
         IEdmEntityType entityType;
         IEdmStructuredObject employee;
@@ -255,7 +255,7 @@ namespace Microsoft.AspNet.OData.Test
         public string Name { get; set; }
     }
 
-    public class FriendTypelessPatchHandler : EdmODataAPIHandler
+    internal class FriendTypelessPatchHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
 
@@ -368,7 +368,7 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class NewFriendTypelessPatchHandler : EdmODataAPIHandler
+    internal class NewFriendTypelessPatchHandler : EdmODataAPIHandler
     {
         IEdmEntityType entityType;
         EdmStructuredObject friend;

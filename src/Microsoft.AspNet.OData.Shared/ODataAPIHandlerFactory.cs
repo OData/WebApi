@@ -6,7 +6,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Factory class for ODataAPIHandlers
     /// </summary>
-    public abstract class ODataAPIHandlerFactory
+    internal abstract class ODataAPIHandlerFactory
     {
         /// <summary>
         /// Get the handler depending on navigationpath

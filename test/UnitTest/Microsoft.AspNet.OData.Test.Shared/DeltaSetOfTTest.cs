@@ -218,7 +218,7 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    public class APIHandlerFactory : ODataAPIHandlerFactory
+    internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
         public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
         {
@@ -242,7 +242,7 @@ namespace Microsoft.AspNet.OData.Test
             return null;
         }
     }
-    public class FriendPatchHandler : ODataAPIHandler<Friend>
+    internal class FriendPatchHandler : ODataAPIHandler<Friend>
     {
         public override IODataAPIHandler GetNestedHandler(Friend parent, string navigationPropertyName)
         {
@@ -277,7 +277,7 @@ namespace Microsoft.AspNet.OData.Test
         }
     }
 
-    public class NewFriendPatchHandler : ODataAPIHandler<NewFriend>
+    internal class NewFriendPatchHandler : ODataAPIHandler<NewFriend>
     {
         Friend parent;
         public NewFriendPatchHandler(Friend parent)

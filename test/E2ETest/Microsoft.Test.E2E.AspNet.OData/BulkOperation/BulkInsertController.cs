@@ -672,7 +672,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         }
     }
 
-    public class BulkOpODataIdResolver: ODataIDResolver
+    internal class BulkOpODataIdResolver: ODataIDResolver
     {
         public override object GetObject(string name, object parent, Dictionary<string, object> keyValues)
         {

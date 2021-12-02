@@ -93,7 +93,7 @@ namespace Microsoft.AspNet.OData
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
         /// <returns>ChangedObjectCollection response</returns>
-        public EdmChangedObjectCollection Patch(ODataEdmAPIHandlerFactory apiHandlerFactory)
+        internal EdmChangedObjectCollection Patch(ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
             EdmODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
 

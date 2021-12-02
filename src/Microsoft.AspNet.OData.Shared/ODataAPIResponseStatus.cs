@@ -6,7 +6,7 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Enum for Patch Status
     /// </summary>
-    public enum ODataAPIResponseStatus
+    internal enum ODataAPIResponseStatus
     {
         /// <summary>
         /// Success Status

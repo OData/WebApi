@@ -9,7 +9,7 @@ namespace Microsoft.AspNet.OData
     /// Handler Class to handle users methods for create, delete and update.
     /// This is the handler for data modification where there is a CLR type.
     /// </summary>
-    public abstract class ODataAPIHandler<TStructuralType>: IODataAPIHandler where TStructuralType : class
+    internal abstract class ODataAPIHandler<TStructuralType>: IODataAPIHandler where TStructuralType : class
     {
         /// <summary>
         /// TryCreate method to create a new object.

@@ -25,7 +25,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
         public static List<Employee> employees;
         public static List<Friend> friends;
 
-        public DbSet<Employee> GenerateData(EmployeeDBContext context)
+        internal DbSet<Employee> GenerateData(EmployeeDBContext context)
         {            
             if (context.Employees.Any())
             {
@@ -46,7 +46,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             return context.Employees;
         }
 
-        public DbSet<Friend> GenerateDataOrders(EmployeeDBContext context)
+        internal DbSet<Friend> GenerateDataOrders(EmployeeDBContext context)
         {
             if (context.Friends.Any())
             {

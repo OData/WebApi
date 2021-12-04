@@ -223,25 +223,6 @@ namespace Microsoft.AspNet.OData.Test
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
-        [Fact(Skip ="Temp")]        
-        public async Task EnableNestedPaths_AppliedBeforeEnableQuery()
-        {
-            // Arrange
-            string url = $"{_baseUrl}EnableNestedPathsCustomers(1)/Products?$orderby=Id desc";
-
-            // Act
-            HttpResponseMessage response = await _client.GetAsync(url);
-
-            var stream = await response.Content.ReadAsStreamAsync();
-            var readCustomer = ReadCollectionResponse<EnableNestedPathsProduct>(stream, _model);
-
-            // Assert
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            Assert.Equal(_db.Customers.First().Products.OrderByDescending(p => p.Id).ToList(),
-                readCustomer,
-                new EnableNestedPathsProductComparer());
-        }
-
         private IEnumerable<T> ReadCollectionResponse<T>(Stream stream, IEdmModel model)
         {
             ODataMessageWrapper message = new ODataMessageWrapper(stream);

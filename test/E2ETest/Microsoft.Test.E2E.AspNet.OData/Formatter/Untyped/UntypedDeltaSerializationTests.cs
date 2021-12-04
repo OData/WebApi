@@ -55,6 +55,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             string url = "/untyped/UntypedDeltaCustomers?$deltatoken=abc";
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, BaseAddress + url);
             request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse(acceptHeader));
+            request.Headers.Add("OData-Version", "4.01");
             HttpResponseMessage response = await Client.SendAsync(request);
             Assert.True(response.IsSuccessStatusCode);
             Assert.NotNull(response.Content);
@@ -71,8 +72,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.Untyped
             for (int i=10 ; i < 15 ; i++)
             {
                 string contextUrl = BaseAddress.ToLowerInvariant() + "/untyped/$metadata#UntypedDeltaCustomers/$deletedEntity";
-                Assert.True(contextUrl.Equals(((dynamic)returnedObject).value[i]["@odata.context"].Value));
-                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["id"].Value));
+                Assert.True(i.ToString().Equals(((dynamic)returnedObject).value[i]["@id"].Value));
             }
         }
     }

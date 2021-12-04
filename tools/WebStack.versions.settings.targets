@@ -4,8 +4,8 @@
   <!-- Set the version number: major, minor, build and release (i.e. alpha, beta or blank for RTM)-->
   <PropertyGroup>
     <VersionMajor Condition="'$(VersionMajor)' == ''">7</VersionMajor>
-    <VersionMinor Condition="'$(VersionMinor)' == ''">5</VersionMinor>
-    <VersionBuild Condition="'$(VersionBuild)' == ''">12</VersionBuild>
+    <VersionMinor Condition="'$(VersionMinor)' == ''">6</VersionMinor>
+    <VersionBuild Condition="'$(VersionBuild)' == ''">0</VersionBuild>
     <VersionRelease Condition="'$(VersionRelease)' == ''"></VersionRelease>
   </PropertyGroup>
 
@@ -40,7 +40,7 @@
     <VersionNuGetSemantic>$(VersionFullSemantic)</VersionNuGetSemantic>
     <VersionNuGetSemantic Condition="'$(VersionRelease)'!=''">$(VersionFullSemantic)-$(VersionRelease)</VersionNuGetSemantic>
   </PropertyGroup>
-
+  
   <!--
  ==================================================================================================
  Property Groups to define version information. Do not modify this section.

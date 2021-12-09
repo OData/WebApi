@@ -120,7 +120,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [ODataRoute("Windows({key})/CurrentShape")]
         public ITestActionResult PatchShape(int key, [FromBody] Delta<Shape> delta)
         {
-            Window window = _windows.FirstOrDefault(e => e.Id == key);
+            Window window = _windows.First(e => e.Id == key);
             var currShape = window.CurrentShape;
             Shape newcurrShape = null;
 

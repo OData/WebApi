@@ -603,6 +603,17 @@ namespace Microsoft.AspNet.OData.Test
                     // Nested complex property
                     Assert.NotNull(lineA.PhoneInfo);
                     Assert.Equal(7654321, lineA.PhoneInfo.PhoneNumber);
+
+                    object nestedLineAValue;
+                    // Fetch LineA property using TryGetNestedPropertyValue
+                    Assert.True(address.TryGetNestedPropertyValue("LineA", out nestedLineAValue));
+                    Delta<LineDetails> deltaLineA = nestedLineAValue as Delta<LineDetails>;
+                    Assert.NotNull(deltaLineA);
+
+                    // Nested complex property
+                    dynamic nestedLineA = deltaLineA;
+                    Assert.NotNull(nestedLineA.PhoneInfo);
+                    Assert.Equal(7654321, nestedLineA.PhoneInfo.PhoneNumber);
                     break;
                 default:
                     // Error

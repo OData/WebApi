@@ -270,6 +270,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public void Patch (TStructuralType original)
 	public void Put (TStructuralType original)
+	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)

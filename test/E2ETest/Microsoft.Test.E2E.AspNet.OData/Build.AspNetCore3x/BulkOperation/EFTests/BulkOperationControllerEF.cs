@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
+using static Microsoft.Test.E2E.AspNet.OData.BulkOperation.APIHandlerFactoryEF;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 {
@@ -83,7 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 Assert.NotNull(coll);
 
-                var returncoll = coll.Patch(new APIHandlerFactoryEF(dbContext));
+                var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(dbContext));
 
 
                 return Ok(returncoll);
@@ -112,7 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 try
                 {
-                    delta.Patch(employee, new APIHandlerFactoryEF(dbContext));
+                    delta.Patch(employee, new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(dbContext));
 
                 }
                 catch (ArgumentException ae)

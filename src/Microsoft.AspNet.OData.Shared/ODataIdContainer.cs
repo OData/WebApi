@@ -16,6 +16,11 @@ namespace Microsoft.AspNet.OData
         /// The Navigation path corresponding to the ODataId
         /// </summary>
         NavigationPath ODataIdNavigationPath { set; get; }
+
+        /// <summary>
+        /// OdataId path string
+        /// </summary>
+        string ODataId { set; get; }
     }
 
     /// <summary>
@@ -25,5 +30,8 @@ namespace Microsoft.AspNet.OData
     {
         ///<inheritdoc/>
         public NavigationPath ODataIdNavigationPath { get; set; }
+
+        ///<inheritdoc/>
+        public string ODataId { set; get; }
     }
 }

@@ -29,8 +29,7 @@ namespace Microsoft.AspNet.OData
         private IEdmEntityType _entityType;
         private EdmDeltaCollectionType _edmType;
         private IEdmCollectionTypeReference _edmTypeReference;
-        private NavigationPath _navigationPath;
-
+    
         /// <summary>
         /// Initializes a new instance of the <see cref="EdmChangedObjectCollection"/> class.
         /// </summary>
@@ -74,7 +73,7 @@ namespace Microsoft.AspNet.OData
             _entityType = entityType;
             _edmType = new EdmDeltaCollectionType(new EdmEntityTypeReference(_entityType, isNullable: true));
             _edmTypeReference = new EdmCollectionTypeReference(_edmType);
-            _navigationPath = new NavigationPath(entityType.Name, null);
+            
         }
 
         /// <summary>
@@ -93,10 +92,8 @@ namespace Microsoft.AspNet.OData
         /// Patch for EdmChangedObjectCollection, a collection for IEdmChangedObject 
         /// </summary>
         /// <returns>ChangedObjectCollection response</returns>
-        internal EdmChangedObjectCollection Patch(ODataEdmAPIHandlerFactory apiHandlerFactory)
+        internal EdmChangedObjectCollection Patch(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
-            EdmODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
-
             return CopyChangedValues(apiHandler, apiHandlerFactory);
         }
 

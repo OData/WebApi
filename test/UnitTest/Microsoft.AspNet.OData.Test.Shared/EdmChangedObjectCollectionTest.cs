@@ -149,7 +149,7 @@ namespace Microsoft.AspNet.OData.Test
             deltaSet.Add(edmChangedObj2);
 
             //Act
-            deltaSet.Patch(new TypelessAPIHandlerFactory(_entityType));
+            deltaSet.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
 
             //Assert
             Assert.Equal(2, friends.Count);
@@ -185,7 +185,7 @@ namespace Microsoft.AspNet.OData.Test
             changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            changedObjCollection.Patch(new TypelessAPIHandlerFactory(_entityType));
+            changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
 
             //Assert
             Assert.Single(friends);
@@ -220,7 +220,7 @@ namespace Microsoft.AspNet.OData.Test
             changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            var coll= changedObjCollection.Patch(new TypelessAPIHandlerFactory(_entityType));
+            var coll= changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
 
             //Assert
             Assert.Equal(2, friends.Count);

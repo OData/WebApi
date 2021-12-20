@@ -28,17 +28,15 @@ namespace Microsoft.AspNet.OData
     {        
         private Type _clrType;
         IList<string> _keys;
-        NavigationPath _navigationPath;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="DeltaSet{TStructuralType}"/> class.
         /// </summary>
-        /// <param name="keys">List of key names for the type</param>
+        /// <param name="keys">List of key names for the type</param>        
         public DeltaSet(IList<string> keys)           
         {
             _keys = keys;            
-            _clrType = typeof(TStructuralType);
-            _navigationPath = new NavigationPath(_clrType.Name, null);
+            _clrType = typeof(TStructuralType);            
         }
 
     
@@ -74,10 +72,8 @@ namespace Microsoft.AspNet.OData
         /// Patch for DeltaSet, a collection for Delta<typeparamref name="TStructuralType"/>
         /// </summary>     
         /// <returns>DeltaSet response</returns>
-        internal DeltaSet<TStructuralType> Patch(ODataAPIHandlerFactory apiHandlerFactory)
-        {
-            IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
-            ODataAPIHandler<TStructuralType> apiHandlerOfT = apiHandler as ODataAPIHandler<TStructuralType>;
+        internal DeltaSet<TStructuralType> Patch(ODataAPIHandler<TStructuralType> apiHandlerOfT, ODataAPIHandlerFactory apiHandlerFactory)
+        {         
             Debug.Assert(apiHandlerOfT != null);
 
             return CopyChangedValues(apiHandlerOfT, apiHandlerFactory);

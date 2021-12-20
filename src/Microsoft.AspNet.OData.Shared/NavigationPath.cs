@@ -24,15 +24,14 @@ namespace Microsoft.AspNet.OData
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationPath"/> class.
-        /// </summary>
-        /// <param name="navigationPath">ODataId in string format</param>
+        /// </summary>        
         /// <param name="pathSegments">Pathsegment collection</param>
-        public NavigationPath(string navigationPath, ReadOnlyCollection<ODataPathSegment> pathSegments)
+        public NavigationPath(ReadOnlyCollection<ODataPathSegment> pathSegments)
         {
-            Debug.Assert(navigationPath != null);
-            
-            _navigationPathName = navigationPath;
-            _pathSegments = pathSegments;           
+             Debug.Assert(pathSegments.Count > 0);
+
+            _pathSegments = pathSegments;
+            _navigationPathName = pathSegments.First().Identifier;
         }
 
         

@@ -79,6 +79,7 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 }
 
 public interface Microsoft.AspNet.OData.IODataIdContainer {
+	string ODataId  { public abstract get; public abstract set; }
 	NavigationPath ODataIdNavigationPath  { public abstract get; public abstract set; }
 }
 
@@ -524,7 +525,7 @@ public class Microsoft.AspNet.OData.MetadataController : ODataController, IDispo
 }
 
 public class Microsoft.AspNet.OData.NavigationPath {
-	public NavigationPath (string navigationPath, System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
+	public NavigationPath (System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
 
 	string NavigationPathName  { public get; }
 
@@ -558,6 +559,7 @@ public class Microsoft.AspNet.OData.ODataFormattingAttribute : System.Attribute,
 public class Microsoft.AspNet.OData.ODataIdContainer : IODataIdContainer {
 	public ODataIdContainer ()
 
+	string ODataId  { public virtual get; public virtual set; }
 	NavigationPath ODataIdNavigationPath  { public virtual get; public virtual set; }
 }
 

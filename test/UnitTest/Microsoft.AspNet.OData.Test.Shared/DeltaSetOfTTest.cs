@@ -91,7 +91,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            deltaSet.Patch(new APIHandlerFactory());
+            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory());
 
             //Assert
             Assert.Single(friends);
@@ -128,7 +128,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
             //Act
-            var coll = deltaSet.Patch(new APIHandlerFactory()).ToArray();
+            var coll = deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory()).ToArray();
 
             //Assert
             Assert.Single(friends);
@@ -204,7 +204,7 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
             //Act
-            deltaSet.Patch(new APIHandlerFactory());
+            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory());
 
             //Assert
             Assert.Equal(2, friends.Count);

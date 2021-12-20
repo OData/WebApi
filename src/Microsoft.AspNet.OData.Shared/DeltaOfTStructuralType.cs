@@ -51,8 +51,7 @@ namespace Microsoft.AspNet.OData
         private PropertyInfo _instanceAnnotationsPropertyInfo;
         private HashSet<string> _changedDynamicProperties;
         private IDictionary<string, object> _dynamicDictionaryCache;
-        private NavigationPath _navigationPath;
-        
+                
         /// <summary>
         /// Initializes a new instance of <see cref="Delta{TStructuralType}"/>.
         /// </summary>
@@ -138,8 +137,7 @@ namespace Microsoft.AspNet.OData
             Reset(structuralType);
             InitializeProperties(updatableProperties);            
             TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();            
-            _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;
-            _navigationPath = new NavigationPath(structuralType.Name, null);
+            _instanceAnnotationsPropertyInfo = instanceAnnotationsPropertyInfo;     
             DeltaKind = EdmDeltaEntityKind.Entry;
             IsComplexType = isComplexType;
         }
@@ -569,12 +567,11 @@ namespace Microsoft.AspNet.OData
         /// Overwrites the <paramref name="original"/> entity with the changes tracked by this Delta.
         /// <remarks>The semantics of this operation are equivalent to a HTTP PATCH operation, hence the name.</remarks>
         /// </summary>
-        /// <param name="original">The entity to be updated.</param>        
+        /// <param name="original">The entity to be updated.</param>
+        /// <param name="apiHandler">API Handler for the entity.</param>
         /// <param name="apiHandlerFactory">API Handler Factory</param>
-        internal void Patch(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
+        internal void Patch(TStructuralType original, IODataAPIHandler apiHandler, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            IODataAPIHandler apiHandler = apiHandlerFactory.GetHandler(_navigationPath);
-
             Debug.Assert(apiHandler != null);
 
             CopyChangedValues(original, apiHandler as ODataAPIHandler<TStructuralType>, apiHandlerFactory);            

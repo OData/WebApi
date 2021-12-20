@@ -577,11 +577,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
                 ODataPath odataPath = GetODataPath(odataId, readContext);
 
+                IODataIdContainer container = new ODataIdContainer();
+                container.ODataId = odataId;
+
                 if (odataPath != null)
                 {
-                    IODataIdContainer container = new ODataIdContainer();
-
-                    NavigationPath navigationPath = new NavigationPath(odataId, odataPath.Segments);
+                    NavigationPath navigationPath = new NavigationPath(odataPath.Segments);
                     container.ODataIdNavigationPath = navigationPath;
 
                     if (resource is EdmEntityObject edmObject)

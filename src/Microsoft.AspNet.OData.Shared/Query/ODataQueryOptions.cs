@@ -838,8 +838,7 @@ namespace Microsoft.AspNet.OData.Query
             var selectRawValue = RawValues.Select;
             if (String.IsNullOrEmpty(selectRawValue))
             {
-                IList<SelectModelPath> autoSelectProperties = null;
-
+                IEnumerable<SelectModelPath> autoSelectProperties = null;
                 if (Context.TargetStructuredType != null && Context.TargetProperty != null)
                 {
                     autoSelectProperties = Context.Model.GetAutoSelectPaths(Context.TargetStructuredType, Context.TargetProperty);
@@ -874,7 +873,7 @@ namespace Microsoft.AspNet.OData.Query
         {
             var expandRawValue = RawValues.Expand;
 
-            IList<ExpandModelPath> autoExpandNavigationProperties = null;
+            IEnumerable<ExpandModelPath> autoExpandNavigationProperties = null;
             if (Context.TargetStructuredType != null && Context.TargetProperty != null)
             {
                 autoExpandNavigationProperties = Context.Model.GetAutoExpandPaths(Context.TargetStructuredType, Context.TargetProperty, !string.IsNullOrEmpty(RawValues.Select));

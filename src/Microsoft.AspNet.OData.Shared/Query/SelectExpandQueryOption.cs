@@ -379,7 +379,7 @@ namespace Microsoft.AspNet.OData.Query
                 return;
             }
 
-            IList<SelectModelPath> autoSelectProperties = model.GetAutoSelectPaths(baseEntityType, null, modelBoundQuerySettings);
+            IEnumerable<SelectModelPath> autoSelectProperties = model.GetAutoSelectPaths(baseEntityType, null, modelBoundQuerySettings);
             foreach (var autoSelectProperty in autoSelectProperties)
             {
                 ODataSelectPath odataSelectPath = BuildSelectPath(autoSelectProperty, navigationSource);
@@ -393,7 +393,7 @@ namespace Microsoft.AspNet.OData.Query
                 return;
             }
 
-            IList<ExpandModelPath> autoExpandNavigationProperties = model.GetAutoExpandPaths(baseEntityType, null, !isAllSelected, modelBoundQuerySettings);
+            IEnumerable<ExpandModelPath> autoExpandNavigationProperties = model.GetAutoExpandPaths(baseEntityType, null, !isAllSelected, modelBoundQuerySettings);
             foreach (ExpandModelPath itemPath in autoExpandNavigationProperties)
             {
                 string navigationPath = itemPath.NavigationPropertyPath;

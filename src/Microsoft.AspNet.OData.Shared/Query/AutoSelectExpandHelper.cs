@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
@@ -38,11 +39,7 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(structuredType));
             }
 
-            List<IEdmStructuredType> structuredTypes = new List<IEdmStructuredType>();
-            structuredTypes.Add(structuredType);
-            structuredTypes.AddRange(edmModel.FindAllDerivedTypes(structuredType));
-
-            foreach (IEdmStructuredType edmStructuredType in structuredTypes)
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
             {
                 // for top type, let's retrieve its properties and the properties from base type of top type if has.
                 // for derived type, let's retrieve the declared properties.
@@ -92,11 +89,8 @@ namespace Microsoft.AspNet.OData.Query
             }
             visited.Add(structuredType);
 
-            List<IEdmStructuredType> structuredTypes = new List<IEdmStructuredType>();
-            structuredTypes.Add(structuredType);
-            structuredTypes.AddRange(edmModel.FindAllDerivedTypes(structuredType));
 
-            foreach (IEdmStructuredType edmStructuredType in structuredTypes)
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
             {
                 // for top type, let's retrieve its properties and the properties from base type of top type if has.
                 // for derived type, let's retrieve the declared properties.
@@ -144,7 +138,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="pathProperty">The property from path, it can be null.</param>
         /// <param name="querySettings">The query settings.</param>
         /// <returns>The auto select paths.</returns>
-        public static IList<SelectModelPath> GetAutoSelectPaths(this IEdmModel edmModel, IEdmStructuredType structuredType,
+        public static IEnumerable<SelectModelPath> GetAutoSelectPaths(this IEdmModel edmModel, IEdmStructuredType structuredType,
             IEdmProperty pathProperty, ModelBoundQuerySettings querySettings = null)
         {
             if (edmModel == null)
@@ -157,13 +151,8 @@ namespace Microsoft.AspNet.OData.Query
                 throw Error.ArgumentNull(nameof(structuredType));
             }
 
-            List<SelectModelPath> autoSelectProperties = new List<SelectModelPath>();
-
-            List<IEdmStructuredType> structuredTypes = new List<IEdmStructuredType>();
-            structuredTypes.Add(structuredType);
-            structuredTypes.AddRange(edmModel.FindAllDerivedTypes(structuredType));
-
-            foreach (IEdmStructuredType edmStructuredType in structuredTypes)
+            List<SelectModelPath> autoSelectProperties = null;
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
             {
                 // for top type, let's retrieve its properties and the properties from base type of top type if has.
                 // for derived type, let's retrieve the declared properties.
@@ -175,6 +164,11 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     if (IsAutoSelect(property, pathProperty, edmStructuredType, edmModel, querySettings))
                     {
+                        if (autoSelectProperties == null)
+                        {
+                            autoSelectProperties = new List<SelectModelPath>(1);
+                        }
+
                         if (edmStructuredType == structuredType)
                         {
                             autoSelectProperties.Add(new SelectModelPath(new[] { property }));
@@ -187,7 +181,7 @@ namespace Microsoft.AspNet.OData.Query
                 }
             }
 
-            return autoSelectProperties;
+            return autoSelectProperties ?? Enumerable.Empty<SelectModelPath>();
         }
 
         /// <summary>
@@ -199,7 +193,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <param name="isSelectPresent">Is $select presented.</param>
         /// <param name="querySettings">The query settings.</param>
         /// <returns>The auto expand paths.</returns>
-        public static IList<ExpandModelPath> GetAutoExpandPaths(this IEdmModel edmModel, IEdmStructuredType structuredType,
+        public static IEnumerable<ExpandModelPath> GetAutoExpandPaths(this IEdmModel edmModel, IEdmStructuredType structuredType,
             IEdmProperty property, bool isSelectPresent = false, ModelBoundQuerySettings querySettings = null)
         {
             if (edmModel == null)
@@ -290,11 +284,7 @@ namespace Microsoft.AspNet.OData.Query
             }
             visited.Add(structuredType);
 
-            List<IEdmStructuredType> structuredTypes = new List<IEdmStructuredType>();
-            structuredTypes.Add(structuredType);
-            structuredTypes.AddRange(edmModel.FindAllDerivedTypes(structuredType));
-
-            foreach (IEdmStructuredType edmStructuredType in structuredTypes)
+            foreach (IEdmStructuredType edmStructuredType in new SelfAndDerivedEnumerator(structuredType, edmModel))
             {
                 IEnumerable<IEdmProperty> properties;
 
@@ -345,6 +335,104 @@ namespace Microsoft.AspNet.OData.Query
                 {
                     nodes.Pop(); // pop the type cast for derived type
                 }
+            }
+        }
+
+        /// <summary>
+        /// This is a helper that allows us to avoid inefficiencies in the previous pattern:
+        ///     var structuredTypes = new List&lt;IEdmStructuredType&gt;();
+        ///     structuredTypes.Add(structuredType);
+        ///     structuredTypes.AddRange(edmModel.FindAllDerivedTypes(structuredType));
+        ///
+        /// Specifically, the allocation of the list and the resizing driven by the "AddRange" call are
+        /// avoided by leveraging a struct with a simple state machine for enumerating over a type
+        /// and its derived types.
+        /// </summary>
+        private struct SelfAndDerivedEnumerator : IEnumerator<IEdmStructuredType>
+        {
+            private enum Stage : byte
+            {
+                Initial,
+                Self,
+                Derived,
+            }
+
+            private readonly IEnumerator<IEdmStructuredType> derivedEnumerator;
+            private readonly IEdmStructuredType structuredType;
+
+            private Stage stage;
+
+            public SelfAndDerivedEnumerator(IEdmStructuredType structuredType, IEdmModel edmModel)
+            {
+                if (structuredType == null)
+                {
+                    throw new ArgumentNullException(nameof(structuredType));
+                }
+
+                if (edmModel == null)
+                {
+                    throw new ArgumentNullException(nameof(edmModel));
+                }
+
+                this.stage = Stage.Initial;
+                this.derivedEnumerator = edmModel.FindAllDerivedTypes(structuredType).GetEnumerator();
+                this.structuredType = structuredType;
+            }
+
+            public IEdmStructuredType Current
+            {
+                get
+                {
+                    switch (stage)
+                    {
+                        case Stage.Self:
+                            return this.structuredType;
+
+                        case Stage.Derived:
+                            return this.derivedEnumerator.Current;
+
+                        default:
+                            throw new InvalidOperationException("Enumeration is an invalid state");
+                    }
+                }
+            }
+
+            object IEnumerator.Current => this.Current;
+
+            public void Dispose()
+            {
+                this.derivedEnumerator.Dispose();
+            }
+
+            public SelfAndDerivedEnumerator GetEnumerator()
+            {
+                return this;
+            }
+
+            public bool MoveNext()
+            {
+                switch (this.stage)
+                {
+                    case Stage.Initial:
+                        this.stage = Stage.Self;
+                        return true;
+
+                    case Stage.Self:
+                        this.stage = Stage.Derived;
+                        goto case Stage.Derived;
+
+                    case Stage.Derived:
+                        return this.derivedEnumerator.MoveNext();
+
+                    default:
+                        return false;
+                }
+            }
+
+            public void Reset()
+            {
+                this.stage = Stage.Initial;
+                this.derivedEnumerator.Reset();
             }
         }
     }

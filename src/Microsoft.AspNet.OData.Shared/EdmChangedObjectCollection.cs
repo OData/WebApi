@@ -6,15 +6,11 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
-using System.Net.Http.Headers;
 using Microsoft.AspNet.OData.Common;
-using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Org.OData.Core.V1;
 
@@ -237,7 +233,8 @@ namespace Microsoft.AspNet.OData
         /// </summary> 
         private void ApplyODataId(IODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
-            EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(container.ODataIdNavigationPath);
+            NavigationPath navigationPath = NavigationPath.GetNavigationPath(container.ODataId, apiHandlerFactory.Model);
+            EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(navigationPath);
 
             if (edmApiHandler == null)
             {
@@ -247,7 +244,7 @@ namespace Microsoft.AspNet.OData
             IEdmStructuredObject referencedObj;
             string error;
 
-            if (edmApiHandler.TryGet(container.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+            if (edmApiHandler.TryGet(navigationPath.Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
             {
                 EdmStructuredObject structuredObj = referencedObj as EdmStructuredObject;
 

@@ -13,11 +13,6 @@ namespace Microsoft.AspNet.OData
     public interface IODataIdContainer
     {
         /// <summary>
-        /// The Navigation path corresponding to the ODataId
-        /// </summary>
-        NavigationPath ODataIdNavigationPath { set; get; }
-
-        /// <summary>
         /// OdataId path string
         /// </summary>
         string ODataId { set; get; }
@@ -28,9 +23,6 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     public class ODataIdContainer : IODataIdContainer
     {
-        ///<inheritdoc/>
-        public NavigationPath ODataIdNavigationPath { get; set; }
-
         ///<inheritdoc/>
         public string ODataId { set; get; }
     }

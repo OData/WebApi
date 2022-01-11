@@ -93,20 +93,22 @@ namespace Microsoft.AspNet.OData
 
         private object ApplyODataIdOnContainer(IODataIdContainer container)
         {
-            PathItem[] pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
-            if (pathItems != null)
-            {
-                int cnt = 0;
-                object value = null;
+            // todo: fix this
 
-                while (cnt < pathItems.Length)
-                {
-                    value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
-                    cnt++;
-                }
+            //PathItem[] pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
+            //if (pathItems != null)
+            //{
+            //    int cnt = 0;
+            //    object value = null;
 
-                return value;
-            }
+            //    while (cnt < pathItems.Length)
+            //    {
+            //        value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
+            //        cnt++;
+            //    }
+
+            //    return value;
+            //}
 
             return null;
         }

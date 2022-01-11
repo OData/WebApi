@@ -16,38 +16,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
 {
     internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
-        Employee employee;
-        public APIHandlerFactory()
+        public APIHandlerFactory(IEdmModel model) : base (model)
         {
-
-        }
-
-        public APIHandlerFactory(Employee employee)
-        {
-            this.employee = employee;
         }
 
         public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
         {
             if(navigationPath != null)
             {
-                var pathItems = navigationPath.GetNavigationPathItems();
-                
-                if(pathItems == null)
-                {
-                    switch (navigationPath.NavigationPathName)
-                    {
-                        case "Employees":
-                        case "Employee":
-                            return new EmployeeAPIHandler();
-                        case "NewFriend":
-                            return new NewFriendAPIHandler(employee);
-                        case "Company":
-                            return new CompanyAPIHandler();
-                        default:
-                            return null;
-                    }
-                }
+                var pathItems = navigationPath;
 
                 int cnt = 0;
                                     
@@ -74,10 +51,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             return null;
         }
 
-        private static IODataAPIHandler GetNestedHandlerForEmployee(PathItem[] pathItems, int cnt, Employee employee)
+        private static IODataAPIHandler GetNestedHandlerForEmployee(List<PathItem> pathItems, int cnt, Employee employee)
         {
             cnt++;
-            if(pathItems.Length <= cnt)
+            if(pathItems.Count <= cnt)
             {
                 return null;
             }
@@ -135,39 +112,18 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     internal class TypelessAPIHandlerFactory : ODataEdmAPIHandlerFactory
     {
         IEdmEntityType entityType;
-        IEdmStructuredObject employee;
 
-        public TypelessAPIHandlerFactory(IEdmEntityType entityType)
+        public TypelessAPIHandlerFactory(IEdmModel model, IEdmEntityType entityType) : base(model)
         {
             this.entityType = entityType;
-        }
-
-        public TypelessAPIHandlerFactory(IEdmEntityType entityType, IEdmStructuredObject employee)
-        {
-            this.entityType = entityType;
-            this.employee = employee;
         }
 
         public override EdmODataAPIHandler GetHandler(NavigationPath navigationPath)
         {
             if (navigationPath != null)
             {
-                var pathItems = navigationPath.GetNavigationPathItems();
+                var pathItems = navigationPath;
                 int cnt = 0;
-
-                if (pathItems == null)
-                {
-                    switch (navigationPath.NavigationPathName)
-                    {                        
-                        case "UnTypedEmployee":
-                            return new EmployeeEdmAPIHandler(entityType);
-                        case "UnTypedFriend":
-                            return new FriendTypelessAPIHandler(employee, entityType);
-                     
-                        default:
-                            return null;
-                    }
-                }
 
                 switch (pathItems[cnt].Name)
                 {
@@ -179,7 +135,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                             {
                                 cnt++;
 
-                                if (cnt <pathItems.Length && pathItems[cnt].Name == "UnTypedFriends")
+                                if (cnt <pathItems.Count && pathItems[cnt].Name == "UnTypedFriends")
                                 {
 
                                     return new FriendTypelessAPIHandler(employee, employee.GetEdmType().Definition as IEdmEntityType);

@@ -5,10 +5,10 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
+using Microsoft.OData.Edm;
 using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
@@ -16,55 +16,27 @@ namespace Microsoft.AspNet.OData
     /// <summary>
     /// Navigation Path of an OData ID
     /// </summary>
-    public class NavigationPath
+    public class NavigationPath : List<PathItem>
     {
-        private string _navigationPathName;
-        private ReadOnlyCollection<ODataPathSegment> _pathSegments;
-        PathItem[] _pathItems;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="NavigationPath"/> class.
         /// </summary>        
-        /// <param name="pathSegments">Pathsegment collection</param>
-        public NavigationPath(ReadOnlyCollection<ODataPathSegment> pathSegments)
+        /// <param name="path">ODataPath</param>
+        public NavigationPath(ODataPath path)
         {
-             Debug.Assert(pathSegments.Count > 0);
-
-            _pathSegments = pathSegments;
-            _navigationPathName = pathSegments.First().Identifier;
+            ParseODataId(path);
         }
-
         
-        /// <summary>
-        /// Gets the NavigationPath name
-        /// </summary>
-        public string NavigationPathName { get { return _navigationPathName; } }
-
-        /// <summary>
-        /// To Get ODataId in Parsed format
-        /// </summary>
-        /// <returns>Array of PathItems</returns>
-        public PathItem[] GetNavigationPathItems()
-        {            
-            if(_pathItems == null && _pathSegments != null)
-            {
-                _pathItems = ParseODataId();
-            }
-
-            return _pathItems;
-        }
-
-        private PathItem[] ParseODataId()
+        private void ParseODataId(ODataPath path)
         {
-            List<PathItem> pathItems = new List<PathItem>();
             PathItem currentPathItem = null;
 
-            foreach (ODataPathSegment segment in _pathSegments)
+            foreach (ODataPathSegment segment in path)
             {
                 if (segment is EntitySetSegment || segment is NavigationPropertySegment || segment is PropertySegment)
                 {
-                    pathItems.Add(new PathItem());
-                    currentPathItem = pathItems.Last();
+                    this.Add(new PathItem());
+                    currentPathItem = this.Last();
                     currentPathItem.Name = segment.Identifier;
                 }
                 else if(segment is TypeSegment)
@@ -83,8 +55,26 @@ namespace Microsoft.AspNet.OData
                 }
                 
             }
+        }
 
-            return pathItems.ToArray();
+        // todo: maybe make this a constructor overload
+        /// <summary>
+        /// Gets a NavigationPath for an OData path
+        /// </summary>
+        /// <param name="path">The OData path</param>
+        /// <param name="model">The IEdmModel</param>
+        /// <returns></returns>
+        public static NavigationPath GetNavigationPath(string path, IEdmModel model)
+        {
+            if (string.IsNullOrEmpty(path))
+            { 
+                return null;
+            }
+
+            ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
+
+            ODataPath odataPath = parser.ParsePath();
+            return new NavigationPath(odataPath);
         }
     }
 }

@@ -10,9 +10,9 @@ using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNet.OData;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Test.E2E.AspNet.OData.BulkOperation;
 using Microsoft.Test.E2E.AspNet.OData.Common.Controllers;
 using Xunit;
@@ -84,7 +84,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 Assert.NotNull(coll);
 
-                var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(dbContext));
+                var returncoll = coll.Patch(new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(Request.GetModel(), dbContext));
 
 
                 return Ok(returncoll);
@@ -113,7 +113,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
                 try
                 {
-                    delta.Patch(employee, new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(dbContext));
+                    delta.Patch(employee, new EmployeeEFPatchHandler(dbContext), new APIHandlerFactoryEF(Request.GetModel(), dbContext));
 
                 }
                 catch (ArgumentException ae)

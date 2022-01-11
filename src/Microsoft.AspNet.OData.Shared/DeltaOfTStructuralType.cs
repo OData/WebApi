@@ -6,7 +6,6 @@
 //------------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,10 +17,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
-using Microsoft.AspNet.OData.Builder.Conventions.Attributes;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
-using Microsoft.OData.Edm;
 
 namespace Microsoft.AspNet.OData
 {
@@ -409,7 +406,7 @@ namespace Microsoft.AspNet.OData
             }
 
             //To apply ODataId if its present
-            if (apiHandlerFactory != null && ODataIdContainer?.ODataIdNavigationPath != null)
+            if (apiHandlerFactory != null)
             {
                 ApplyODataId(original, apiHandlerFactory);
             }
@@ -536,7 +533,9 @@ namespace Microsoft.AspNet.OData
         /// </summary>    
         private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(ODataIdContainer.ODataIdNavigationPath);
+            NavigationPath navigationPath = NavigationPath.GetNavigationPath(ODataIdContainer?.ODataId, apiHandlerFactory.Model);
+
+            IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(navigationPath);
 
             if (refapiHandler != null)
             {
@@ -547,8 +546,9 @@ namespace Microsoft.AspNet.OData
                 TStructuralType referencedObj;
                 string error;
 
+                //todo: this logic feels brittle to me
                 //Checking to get the referenced entity, get the properties and apply it on original object
-                if (refapiHandlerOfT.TryGet(ODataIdContainer.ODataIdNavigationPath.GetNavigationPathItems().Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+                if (refapiHandlerOfT.TryGet(navigationPath.Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
                 {
                     foreach (string property in _updatableProperties)
                     {

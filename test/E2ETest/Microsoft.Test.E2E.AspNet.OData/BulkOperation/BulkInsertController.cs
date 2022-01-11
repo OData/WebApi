@@ -9,7 +9,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Reflection;
 using Microsoft.AspNet.OData;
 using Microsoft.AspNet.OData.Extensions;
@@ -139,7 +138,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         public DeltaSet<NewFriend> PatchWithUsersMethod(DeltaSet<NewFriend> friendColl, Employee employee)
         {
-            var changedObjColl = friendColl.Patch(new NewFriendAPIHandler(employee), new APIHandlerFactory(employee));
+            var changedObjColl = friendColl.Patch(new NewFriendAPIHandler(employee), new APIHandlerFactory(Request.GetModel()));
 
             return changedObjColl;
         }
@@ -151,7 +150,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             var entity1 = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedFriend") as IEdmEntityType;
 
-            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity) ,new TypelessAPIHandlerFactory(entity, EmployeesTypeless[key - 1]));
+            var changedObjColl = friendColl.Patch(new FriendTypelessAPIHandler(EmployeesTypeless[key - 1], entity) ,new TypelessAPIHandlerFactory(Request.GetModel(), entity));
 
             return changedObjColl;
         }
@@ -161,7 +160,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             var entity = Request.GetModel().FindDeclaredType("Microsoft.Test.E2E.AspNet.OData.BulkInsert.UnTypedEmployee") as IEdmEntityType;
             InitTypeLessEmployees(entity);
 
-            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity), new TypelessAPIHandlerFactory(entity));
+            var changedObjColl = empColl.Patch(new EmployeeEdmAPIHandler(entity), new TypelessAPIHandlerFactory(Request.GetModel(), entity));
             ValidateSuccessfulTypeless();
 
             return changedObjColl;
@@ -247,7 +246,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             Assert.NotNull(coll);
 
-            var returncoll = coll.Patch(new EmployeeAPIHandler(), new APIHandlerFactory());
+            var returncoll = coll.Patch(new EmployeeAPIHandler(), new APIHandlerFactory(Request.GetModel()));
 
             return Ok(returncoll);
         }
@@ -376,13 +375,14 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             if (employee == null)
             {
                 employee = new Employee();
-                delta.Patch(employee, new EmployeeAPIHandler(), new APIHandlerFactory());
+                delta.Patch(employee, new EmployeeAPIHandler(), new APIHandlerFactory(Request.GetModel()));
                 return Created(employee);
             }
 
             try
             {
-                delta.Patch(employee, new EmployeeAPIHandler(), new APIHandlerFactory());
+                // todo: put APIHandlerFactory in request context
+                delta.Patch(employee, new EmployeeAPIHandler(), new APIHandlerFactory(Request.GetModel()));
 
                 if (employee.Name == "Bind1")
                 {
@@ -433,7 +433,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             Assert.NotNull(coll);
             
-            var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory());
+            var returncoll = coll.Patch(new CompanyAPIHandler(), new APIHandlerFactory(Request.GetModel()));
 
             var comp = coll.First() as Delta<Company>;
             object val;
@@ -500,7 +500,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 var order = company.OverdueOrders[i];
                 if(order.Container != null)
                 {
-                    var pathItems = order.Container.ODataIdNavigationPath.GetNavigationPathItems();
+                    var pathItems = NavigationPath.GetNavigationPath(order.Container.ODataId, Request.GetModel());
 
                     int cnt = 0;
                     if(pathItems[cnt].Name== "Employees")
@@ -588,13 +588,13 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private object ApplyODataId(IODataIdContainer container)
         {
-            var pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
+            var pathItems = NavigationPath.GetNavigationPath(container.ODataId, Request.GetModel());
             if(pathItems != null)
             {
                 int cnt = 0;
                 object value = null;
 
-                while(cnt< pathItems.Length)
+                while(cnt< pathItems.Count)
                 {
                     value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
                     cnt++;

@@ -44,6 +44,8 @@ namespace Microsoft.AspNet.OData
         // Nested resources or structures changed at this level.
         private IDictionary<string, object> _deltaNestedResources;
 
+        private IDictionary<string, object> _deltaNestedResourcesCaseInsensitive;
+
         private TStructuralType _instance;
         private Type _structuredType;
 
@@ -274,10 +276,15 @@ namespace Microsoft.AspNet.OData
                 }
             }
 
-            if (_deltaNestedResources.ContainsKey(name))
+            if (_deltaNestedResources.ContainsKey(name) || _deltaNestedResourcesCaseInsensitive.ContainsKey(name.ToLower()))
             {
                 // If this is a nested resource, get the value from the dictionary of nested resources.
                 object deltaNestedResource = _deltaNestedResources[name];
+
+                if(deltaNestedResource == null)
+                {
+                    deltaNestedResource = _deltaNestedResourcesCaseInsensitive[name.ToLower()];
+                }
 
                 Contract.Assert(deltaNestedResource != null, "deltaNestedResource != null");
 
@@ -433,6 +440,11 @@ namespace Microsoft.AspNet.OData
             {
                 // Patch for each nested resource changed under this TStructuralType.
                 dynamic deltaNestedResource = _deltaNestedResources[nestedResourceName];
+                if(deltaNestedResource == null)
+                {
+                    deltaNestedResource = _deltaNestedResourcesCaseInsensitive[nestedResourceName.ToLower()];
+                }
+
                 dynamic originalNestedResource = null;
 
                 if(deltaNestedResource is IDeltaSet)
@@ -456,6 +468,11 @@ namespace Microsoft.AspNet.OData
                     {
                         // When patching original target of null value, directly set nested resource.
                         dynamic deltaObject = _deltaNestedResources[nestedResourceName];
+                        if(deltaObject == null)
+                        {
+                            deltaObject = _deltaNestedResourcesCaseInsensitive[nestedResourceName.ToLower()];
+                        }
+
                         dynamic instance = deltaObject.GetInstance();
 
                         // Recursively patch up the instance with the nested resources.
@@ -730,6 +747,7 @@ namespace Microsoft.AspNet.OData
             _instance = Activator.CreateInstance(structuralType) as TStructuralType;
             _changedProperties = new HashSet<string>();
             _deltaNestedResources = new Dictionary<string, object>();
+            _deltaNestedResourcesCaseInsensitive = new Dictionary<string, object>();
             _structuredType = structuralType;
 
             _changedDynamicProperties = new HashSet<string>();
@@ -945,6 +963,7 @@ namespace Microsoft.AspNet.OData
             // Note: We shouldn't add the structural properties to the <code>_changedProperties</code>, which
             // is used for keeping track of changed non-structural properties at current level.
             _deltaNestedResources[name] = deltaNestedResource;
+            _deltaNestedResourcesCaseInsensitive[name.ToLower()] = deltaNestedResource;
 
             return true;
         }

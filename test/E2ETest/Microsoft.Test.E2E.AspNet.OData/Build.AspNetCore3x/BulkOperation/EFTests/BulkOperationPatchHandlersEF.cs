@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OData.Edm;
 using Microsoft.Test.E2E.AspNet.OData.BulkInsert;
 
 namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
@@ -54,12 +55,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
     {
         EmployeeDBContext dbContext;
 
-        public APIHandlerFactoryEF()
-        {
-
-        }
-
-        public APIHandlerFactoryEF(EmployeeDBContext dbContext)
+        public APIHandlerFactoryEF(IEdmModel model, EmployeeDBContext dbContext) : base(model)
         {
             this.dbContext = dbContext;
         }
@@ -68,26 +64,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
         {
             if (navigationPath != null)
             {
-                var pathItems = navigationPath.GetNavigationPathItems();
-
-                if (pathItems == null)
-                {
-                    switch (navigationPath.NavigationPathName)
-                    {
-                        case "Employees":
-                        case "Employee":
-                            return new EmployeeEFPatchHandler(dbContext);
-                      
-                        case "Company":
-                            return new CompanyAPIHandler();
-                        default:
-                            return null;
-                    }
-                }
+                var pathItems = navigationPath;
             }
 
             return null;
-
     }
 
     internal class EmployeeEFPatchHandler : ODataAPIHandler<Employee>

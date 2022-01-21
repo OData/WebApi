@@ -569,55 +569,59 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             Routing.ODataPath path = readContext.Path;
             ODataPathSegment lastSegment = path.Segments.Last();
-            IEdmEntityType entityType = lastSegment.EdmType as IEdmEntityType;
+            IEdmEntityType entityType = lastSegment.EdmType.AsElementType() as IEdmEntityType;
 
             if (entityType != null)
             {
                 //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
                 //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
 
-                // if there is not Id on the resource, try to create one from the key properties, if they exist.
-                // this needs lots more testing.  may be something that is already handled (or should be handled) in later versions of ODL.
+                // if there is no Id on the resource, try to create one from path and key properties, if they exist.
                 if (resourceWrapper.ResourceBase.Id == null)
                 {
-                    Uri id;
-                    if (lastSegment is KeySegment) // todo: could be brittle? might there be a segment after the key segment?
+                    ODataPath newPath;
+
+                    switch (lastSegment.EdmType.TypeKind)
                     {
-                        id = new Uri(path.ToString(), UriKind.Relative);
-                    }
-                    else
-                    {
-                        // create the uri for the current object, using path and key values
-                        // this assumes path is correct for the current (potentially deeply nested) item -- verify path is always correct
-                        // todo: do we already have this logic somewhere (i.e., in serializer?)
-                        List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
-                        foreach (IEdmStructuralProperty keyProperty in entityType.Key())
-                        {
-                            string keyName = keyProperty.Name;
-                            ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
-                            if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
+                        case EdmTypeKind.Entity:
+                            newPath = new ODataPath(path.Segments);
+                            break;
+
+                        case EdmTypeKind.Collection:
+                            // create the uri for the current object, using path and key values
+                            List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
+                            foreach (IEdmStructuralProperty keyProperty in entityType.Key())
                             {
-                                //try case insensitive
-                                List<ODataProperty> candidates = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).ToList();
-                                property = candidates.Count == 1 ? candidates.First() : null;
+                                string keyName = keyProperty.Name;
+                                ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
+                                if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
+                                {
+                                    //try case insensitive
+                                    List<ODataProperty> candidates = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                                    property = candidates.Count == 1 ? candidates.First() : null;
+                                }
+
+                                object keyValue = property?.Value;
+                                if (keyValue == null)
+                                {
+                                    return;
+                                }
+
+                                keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
                             }
 
-                            object keyValue = property?.Value;
-                            if (keyValue == null)
-                            {
-                                return;
-                            }
-
-                            keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
-                        }
-
-                        KeySegment keySegment = new KeySegment(keys, entityType, readContext.Path.NavigationSource);
-                        id = new Uri(new ODataPath(path.Segments.Append(keySegment)).ToString(), UriKind.Relative);
+                            KeySegment keySegment = new KeySegment(keys, entityType, readContext.Path.NavigationSource);
+                            newPath = new ODataPath(path.Segments.Append(keySegment));
+                            break;
+                        default:
+                            return;
                     }
 
-                    resourceWrapper.ResourceBase.Id = id;
+                    ODataUri odataUri = new ODataUri { Path = newPath };
+                    resourceWrapper.ResourceBase.Id = odataUri.BuildUri(ODataUrlKeyDelimiter.Parentheses);
                 }
-                else
+
+                if (resourceWrapper.ResourceBase.Id != null)
                 {
                     string odataId = resourceWrapper.ResourceBase.Id.OriginalString;
 
@@ -650,7 +654,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
             }
-        } 
+        }
 
         /// <summary>
         /// Deserializes the structural properties from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.

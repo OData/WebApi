@@ -391,7 +391,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     segmentType = readContext.Model.FindType(propertyTypeName);
                 }
 
-                // could it be a problem that the navigationSource is null?
+                // could it be a problem later that the navigationSource is null?
                 DynamicPathSegment pathSegment = new DynamicPathSegment(
                    nestedInfo.Name,
                    segmentType,
@@ -399,18 +399,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                    nestedInfo.IsCollection != true
                    );
 
-                path = new Routing.ODataPath(readContext.Path.Segments.Append(pathSegment));
+                path = AppendToPath(path, pathSegment);
             }
             else
             {
                 if (edmProperty.PropertyKind == EdmPropertyKind.Navigation)
                 {
+                    Contract.Assert(readContext.Path.NavigationSource != null, "Navigation property segment with null navigationSource");
                     IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
-                    IEdmNavigationSource navigationSource = readContext.Path.NavigationSource.FindNavigationTarget(navigationProperty);
+                    IEdmNavigationSource parentNavigationSource = readContext.Path.NavigationSource;
+                    IEdmNavigationSource navigationSource = parentNavigationSource.FindNavigationTarget(navigationProperty);
 
                     if (navigationProperty.ContainsTarget)
                     {
-                        path = new Routing.ODataPath(path.Segments.Append(new NavigationPropertySegment(navigationProperty, navigationSource)));
+                        path = AppendToPath(path, new NavigationPropertySegment(navigationProperty, navigationSource), navigationProperty.DeclaringType, parentNavigationSource);
                     }
                     else
                     {
@@ -420,7 +422,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 else
                 {
                     IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
-                    path = new Routing.ODataPath(path.Segments.Append(new PropertySegment(structuralProperty)));
+                    path = AppendToPath(path, new PropertySegment(structuralProperty), structuralProperty.DeclaringType, null);
                 }
             }
 
@@ -480,6 +482,28 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
             }
+        }
+
+        //Appends a new segment to an ODataPath
+        private static Routing.ODataPath AppendToPath(Routing.ODataPath path, ODataPathSegment segment)
+        {
+            return AppendToPath(path, segment, null, null);
+        }
+
+        //Appends a new segment to an ODataPath, adding a type segment if required
+        private static Routing.ODataPath AppendToPath(Routing.ODataPath path, ODataPathSegment segment, IEdmType declaringType, IEdmNavigationSource navigationSource)
+        {
+            List<ODataPathSegment> segments = new List<ODataPathSegment>(path.Segments);
+
+            // Append type cast segment if required
+            if(declaringType != null && path.EdmType != declaringType)
+            {
+                segments.Add(new TypeSegment(declaringType, navigationSource));
+            }
+
+            segments.Add(segment);
+
+            return new Routing.ODataPath(segments);
         }
 
         private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType, 
@@ -599,7 +623,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ODataDeserializerContext readContext)
         {
             Routing.ODataPath path = readContext.Path;
-            IEdmEntityType entityType = path.Segments.Last().EdmType.AsElementType() as IEdmEntityType;
+            IEdmEntityType entityType = path.EdmType.AsElementType() as IEdmEntityType;
 
             if (entityType != null)
             {
@@ -609,8 +633,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 // if there is no Id on the resource, try to compute one from path
                 if (resourceWrapper.ResourceBase.Id == null)
                 {
-                    // todo: what is the right validation that the id is valid?
-                    
                     ODataUri odataUri = new ODataUri { Path = new ODataPath(path.Segments) };
                     resourceWrapper.ResourceBase.Id = odataUri.BuildUri(ODataUrlKeyDelimiter.Parentheses);
                 }
@@ -652,6 +674,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
         private static Routing.ODataPath ApplyIdToPath(ODataDeserializerContext readContext, ODataResourceWrapper resourceWrapper)
         {
+            // If an odata.id is provided, try to parse it as an OData Url.
+            // This could fail (as the id is not required to be a valid OData Url)
+            // in which case we fall back to building the path based on the current path and segments.
             if (resourceWrapper.ResourceBase.Id != null)
             {
                 try
@@ -663,17 +688,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         return new Routing.ODataPath(odataPath);
                     }
                 }
-                catch (Exception e)
+                catch
                 {
-                    Contract.Assert(true, String.Format("Unable to parse Id {0}", e.Message));
                 };
             }
 
             Routing.ODataPath path = readContext.Path;
-            ODataPathSegment lastSegment = path.Segments.Last();
-            IEdmEntityType entityType = lastSegment.EdmType.AsElementType() as IEdmEntityType;
+            IEdmEntityType entityType = path.EdmType.AsElementType() as IEdmEntityType;
 
-            if (entityType != null && lastSegment.EdmType.TypeKind == EdmTypeKind.Collection)
+            if (entityType != null && path.EdmType.TypeKind == EdmTypeKind.Collection)
             {
                 // create the uri for the current object, using path and key values
                 List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
@@ -691,16 +714,18 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     object keyValue = property?.Value;
                     if (keyValue == null)
                     {
-                        // in this case, we are returning the path of the parent, not the child, which could cause issues with nested containment
-                        Contract.Assert(true, "key properties not found to build containment path");
-                        return path;
+                        // Note: may be null if the payload did not include key values,
+                        // but still need to add the key so the path is semantically correct.
+                        // Key value type is not validated, so just use string.
+                        // Consider adding tests to ODL to ensure we don't validate key property type in future.
+                        keyValue = "Null";
                     }
 
-                    keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
+                    keys.Add(new KeyValuePair<string, object>(keyName, property?.Value));
                 }
 
                 KeySegment keySegment = new KeySegment(keys, entityType, path.NavigationSource);
-                return new Routing.ODataPath(path.Segments.Append(keySegment));
+                return AppendToPath(path, keySegment);
             }
 
             return path;

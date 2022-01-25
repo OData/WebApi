@@ -67,7 +67,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ODataReader odataReader = await messageReader.CreateODataResourceReaderAsync(navigationSource, structuredType.StructuredDefinition());
             ODataResourceWrapper topLevelResource = await odataReader.ReadResourceOrResourceSetAsync() as ODataResourceWrapper;
             Contract.Assert(topLevelResource != null);
-
+            
             return ReadInline(topLevelResource, structuredType, readContext);
         }
 
@@ -89,7 +89,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.ArgumentNull("item");
             }
 
-            if (!edmType.IsStructured())
+            IEdmStructuredTypeReference structuredType = edmType.AsStructured();
+            if (structuredType == null)
             {
                 throw Error.Argument("edmType", SRResources.ArgumentMustBeOfType, "Entity or Complex");
             }
@@ -100,11 +101,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw Error.Argument("item", SRResources.ArgumentMustBeOfType, typeof(ODataResource).Name);
             }
 
+            // Create the appropriate nested context
+            ODataDeserializerContext nestedContext = new ODataDeserializerContext
+            {
+                Path = structuredType.IsEntity() ? ApplyIdToPath(readContext, resourceWrapper) : readContext.Path,
+                Model = readContext.Model,
+                Request = readContext.Request,
+                ResourceType = readContext.ResourceType
+            };
+
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
-            resourceWrapper = UpdateResourceWrapper(resourceWrapper, readContext);
 
-            return ReadResource(resourceWrapper, edmType.AsStructured(), readContext);
+            return ReadResource(resourceWrapper, edmType.AsStructured(), nestedContext);
         }
 
         /// <summary>
@@ -369,6 +378,60 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 nestedItems = resourceInfoWrapper.NestedItems;
             }
 
+            // this code attempts to make sure that the path is always correct for the level that we are reading.
+            Routing.ODataPath path = readContext.Path;
+            if (edmProperty == null)
+            {
+                ODataNestedResourceInfo nestedInfo = resourceInfoWrapper.NestedResourceInfo;
+
+                IEdmType segmentType = null;
+                string propertyTypeName = nestedInfo.TypeAnnotation?.TypeName;
+                if(!string.IsNullOrEmpty(propertyTypeName))
+                {
+                    segmentType = readContext.Model.FindType(propertyTypeName);
+                }
+
+                // could it be a problem that the navigationSource is null?
+                DynamicPathSegment pathSegment = new DynamicPathSegment(
+                   nestedInfo.Name,
+                   segmentType,
+                   null,
+                   nestedInfo.IsCollection != true
+                   );
+
+                path = new Routing.ODataPath(readContext.Path.Segments.Append(pathSegment));
+            }
+            else
+            {
+                if (edmProperty.PropertyKind == EdmPropertyKind.Navigation)
+                {
+                    IEdmNavigationProperty navigationProperty = edmProperty as IEdmNavigationProperty;
+                    IEdmNavigationSource navigationSource = readContext.Path.NavigationSource.FindNavigationTarget(navigationProperty);
+
+                    if (navigationProperty.ContainsTarget)
+                    {
+                        path = new Routing.ODataPath(path.Segments.Append(new NavigationPropertySegment(navigationProperty, navigationSource)));
+                    }
+                    else
+                    {
+                        path = new Routing.ODataPath(new ODataUriParser(readContext.Model, new Uri(navigationSource.Path.Path, UriKind.Relative)).ParsePath());
+                    }
+                }
+                else
+                {
+                    IEdmStructuralProperty structuralProperty = edmProperty as IEdmStructuralProperty;
+                    path = new Routing.ODataPath(path.Segments.Append(new PropertySegment(structuralProperty)));
+                }
+            }
+
+            ODataDeserializerContext nestedReadContext = new ODataDeserializerContext
+            {
+                Path = path,
+                Model = readContext.Model,
+                Request = readContext.Request,
+                ResourceType = readContext.ResourceType
+            };
+
             foreach (ODataItemBase childItem in nestedItems)
             {
                 // it maybe null.
@@ -378,11 +441,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     {
                         // for the dynamic, OData.net has a bug. see https://github.com/OData/odata.net/issues/977
                         ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
-                            structuredType, null, readContext);
+                            structuredType, null, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceInNestedProperty(edmProperty, resource, null, readContext);
+                        ApplyResourceInNestedProperty(edmProperty, resource, null, nestedReadContext);
                     }
                 }
                 
@@ -392,11 +455,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     if (edmProperty == null)
                     {
                         ApplyDynamicResourceSetInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name,
-                            resource, structuredType, resourceSetWrapper, readContext);
+                            resource, structuredType, resourceSetWrapper, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, readContext);
+                        ApplyResourceSetInNestedProperty(edmProperty, resource, resourceSetWrapper, nestedReadContext);
                     }
 
                     continue;
@@ -409,16 +472,15 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     if (edmProperty == null)
                     {
                         ApplyDynamicResourceInNestedProperty(resourceInfoWrapper.NestedResourceInfo.Name, resource,
-                            structuredType, resourceWrapper, readContext);
+                            structuredType, resourceWrapper, nestedReadContext);
                     }
                     else
                     {
-                        ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, readContext);
+                        ApplyResourceInNestedProperty(edmProperty, resource, resourceWrapper, nestedReadContext);
                     }
                 }
             }
         }
-
 
         private ODataResourceSetWrapper CreateResourceSetWrapper(IEdmCollectionTypeReference edmPropertyType, 
             IList<ODataEntityReferenceLinkBase> refLinks, ODataDeserializerContext readContext)
@@ -461,47 +523,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return new ODataResourceWrapper(resource);
         }
 
-        /// <summary>
-        /// Update the resource wrapper if it has the "Id" value.
-        /// </summary>
-        /// <param name="resourceWrapper">The resource wrapper.</param>
-        /// <param name="readContext">The read context.</param>
-        /// <returns>The resource wrapper.</returns>
-        private ODataResourceWrapper UpdateResourceWrapper(ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext)
-        { 
-            Contract.Assert(readContext != null);
-
-            if (resourceWrapper?.ResourceBase?.Id == null)
-            {
-                return resourceWrapper;
-            }
-
-            IEnumerable<ODataProperty> keys = CreateKeyProperties(resourceWrapper.ResourceBase.Id, readContext);
-            if (keys == null)
-            {
-                return resourceWrapper;
-            }
-
-            if (resourceWrapper.ResourceBase.Properties == null)
-            {
-                resourceWrapper.ResourceBase.Properties = keys;
-            }
-            else
-            {
-                IDictionary<string, ODataProperty> newPropertiesDic = resourceWrapper.ResourceBase.Properties.ToDictionary(p => p.Name, p => p);
-                foreach (ODataProperty key in keys)
-                {
-                    if (!newPropertiesDic.ContainsKey(key.Name))
-                    {
-                        newPropertiesDic[key.Name] = key;
-                    }
-                }
-
-                resourceWrapper.ResourceBase.Properties = newPropertiesDic.Values;
-            }
-
-            return resourceWrapper;
-        }
 
         /// <summary>
         /// Do uri parsing to get the key values.
@@ -540,9 +561,20 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             return properties;                     
         }
 
-        //todo: Can we just use ODataUriParser?
         private static ODataPath GetODataPath(string id, ODataDeserializerContext readContext)
         {
+            // should we just use ODataUriParser?
+            /*
+            try
+            {
+                return new ODataUriParser(readContext.Model, new Uri(id, UriKind.Relative)).ParsePath();
+            }
+            catch 
+            {
+                return null;
+            }
+            */
+
             try
             {
                 Routing.IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
@@ -554,7 +586,6 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     internalRequest.PathHandler,
                     new List<ODataPathSegment>());
                 ODataPath odataPath = pathHandler.Parse(serviceRoot, id, internalRequest.RequestContainer).Path;
-
 
                 return odataPath;
             }
@@ -568,56 +599,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             ODataDeserializerContext readContext)
         {
             Routing.ODataPath path = readContext.Path;
-            ODataPathSegment lastSegment = path.Segments.Last();
-            IEdmEntityType entityType = lastSegment.EdmType.AsElementType() as IEdmEntityType;
+            IEdmEntityType entityType = path.Segments.Last().EdmType.AsElementType() as IEdmEntityType;
 
             if (entityType != null)
             {
                 //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
                 //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
 
-                // if there is no Id on the resource, try to create one from path and key properties, if they exist.
+                // if there is no Id on the resource, try to compute one from path
                 if (resourceWrapper.ResourceBase.Id == null)
                 {
-                    ODataPath newPath;
-
-                    switch (lastSegment.EdmType.TypeKind)
-                    {
-                        case EdmTypeKind.Entity:
-                            newPath = new ODataPath(path.Segments);
-                            break;
-
-                        case EdmTypeKind.Collection:
-                            // create the uri for the current object, using path and key values
-                            List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
-                            foreach (IEdmStructuralProperty keyProperty in entityType.Key())
-                            {
-                                string keyName = keyProperty.Name;
-                                ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
-                                if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
-                                {
-                                    //try case insensitive
-                                    List<ODataProperty> candidates = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).ToList();
-                                    property = candidates.Count == 1 ? candidates.First() : null;
-                                }
-
-                                object keyValue = property?.Value;
-                                if (keyValue == null)
-                                {
-                                    return;
-                                }
-
-                                keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
-                            }
-
-                            KeySegment keySegment = new KeySegment(keys, entityType, readContext.Path.NavigationSource);
-                            newPath = new ODataPath(path.Segments.Append(keySegment));
-                            break;
-                        default:
-                            return;
-                    }
-
-                    ODataUri odataUri = new ODataUri { Path = newPath };
+                    // todo: what is the right validation that the id is valid?
+                    
+                    ODataUri odataUri = new ODataUri { Path = new ODataPath(path.Segments) };
                     resourceWrapper.ResourceBase.Id = odataUri.BuildUri(ODataUrlKeyDelimiter.Parentheses);
                 }
 
@@ -654,6 +648,62 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
             }
+        }
+
+        private static Routing.ODataPath ApplyIdToPath(ODataDeserializerContext readContext, ODataResourceWrapper resourceWrapper)
+        {
+            if (resourceWrapper.ResourceBase.Id != null)
+            {
+                try
+                {
+                    ODataUriParser parser = new ODataUriParser(readContext.Model, resourceWrapper.ResourceBase.Id);
+                    ODataPath odataPath = parser.ParsePath();
+                    if (odataPath != null)
+                    {
+                        return new Routing.ODataPath(odataPath);
+                    }
+                }
+                catch (Exception e)
+                {
+                    Contract.Assert(true, String.Format("Unable to parse Id {0}", e.Message));
+                };
+            }
+
+            Routing.ODataPath path = readContext.Path;
+            ODataPathSegment lastSegment = path.Segments.Last();
+            IEdmEntityType entityType = lastSegment.EdmType.AsElementType() as IEdmEntityType;
+
+            if (entityType != null && lastSegment.EdmType.TypeKind == EdmTypeKind.Collection)
+            {
+                // create the uri for the current object, using path and key values
+                List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
+                foreach (IEdmStructuralProperty keyProperty in entityType.Key())
+                {
+                    string keyName = keyProperty.Name;
+                    ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
+                    if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
+                    {
+                        //try case insensitive
+                        List<ODataProperty> candidates = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                        property = candidates.Count == 1 ? candidates.First() : null;
+                    }
+
+                    object keyValue = property?.Value;
+                    if (keyValue == null)
+                    {
+                        // in this case, we are returning the path of the parent, not the child, which could cause issues with nested containment
+                        Contract.Assert(true, "key properties not found to build containment path");
+                        return path;
+                    }
+
+                    keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
+                }
+
+                KeySegment keySegment = new KeySegment(keys, entityType, path.NavigationSource);
+                return new Routing.ODataPath(path.Segments.Append(keySegment));
+            }
+
+            return path;
         }
 
         /// <summary>
@@ -735,30 +785,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             Contract.Assert(resource != null);
             Contract.Assert(readContext != null);
 
-            // this code attempts to make sure that the path is always correct for the level that we are reading.
-            // todo: needs a lot of testing/validation for edge cases
-            Routing.ODataPath path = readContext.Path;
-            if (nestedProperty.PropertyKind == EdmPropertyKind.Navigation)
-            {
-                IEdmNavigationSource navigationSource = readContext.Path.NavigationSource;
-                IEdmNavigationProperty navigationProperty = nestedProperty as IEdmNavigationProperty;
-                if (navigationProperty.ContainsTarget)
-                {
-                    path = new Routing.ODataPath(path.Segments.Append(new NavigationPropertySegment(navigationProperty, navigationSource)));
-                }
-                else
-                {
-                    IEdmNavigationSource targetNavigationSource = navigationSource.FindNavigationTarget(navigationProperty);
-                    path = new Routing.ODataPath(new ODataUriParser(readContext.Model, new Uri(targetNavigationSource.Path.Path, UriKind.Relative)).ParsePath());
-                }
-            }
-            else
-            {
-                IEdmStructuralProperty structuralProperty = nestedProperty as IEdmStructuralProperty;
-                path = new Routing.ODataPath(path.Segments.Append(new PropertySegment(structuralProperty)));
-            }
-
-            object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext, path);
+            object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext);
             
             // First resolve Data member alias or annotation, then set the regular
             // or delta resource accordingly.
@@ -779,16 +806,14 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 IEdmSchemaType elementType = readContext.Model.FindDeclaredType(resourceWrapper.ResourceBase.TypeName);
                 IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
-                // todo: any issues with using UnresolvedPathSegment? will not have an edmtype -- is that a problem? should we just use PropertySegment for dynamic?
-                Routing.ODataPath path = new Routing.ODataPath(readContext.Path.Segments.Append(new Routing.UnresolvedPathSegment(propertyName)));
-                value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext, path);
+                value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext);
             }
 
             DeserializationHelpers.SetDynamicProperty(resource, propertyName, value,
                 resourceStructuredType.StructuredDefinition(), readContext.Model);
         }
 
-        private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext, Routing.ODataPath nestedPath)
+        private object ReadNestedResourceInline(ODataResourceWrapper resourceWrapper, IEdmTypeReference edmType, ODataDeserializerContext readContext)
         {
             Contract.Assert(edmType != null);
             Contract.Assert(readContext != null);
@@ -806,18 +831,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             IEdmStructuredTypeReference structuredType = edmType.AsStructured();
 
-            ODataDeserializerContext nestedReadContext = new ODataDeserializerContext
-            {
-                Path = nestedPath,
-                Model = readContext.Model,
-                Request = readContext.Request
-            };
-
-            Type clrType = null;
+            Type clrType;
             if (readContext.IsUntyped)
             {
                 clrType = structuredType.IsEntity()
-                    ? (readContext.IsDeltaEntity ? (readContext.IsDeltaDeletedEntity? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject) ) : typeof(EdmEntityObject))
+                    ? (readContext.IsDeltaEntity ? (readContext.IsDeltaDeletedEntity ? typeof(EdmDeltaDeletedEntityObject) : typeof(EdmDeltaEntityObject)) : typeof(EdmEntityObject))
                     : typeof(EdmComplexObject);
             }
             else
@@ -831,11 +849,19 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            nestedReadContext.ResourceType = readContext.IsDeltaOfT
+            ODataDeserializerContext nestedContext = new ODataDeserializerContext
+            {
+                ResourceType = readContext.IsDeltaOfT
                 ? typeof(Delta<>).MakeGenericType(clrType)
-                : clrType;
-            return deserializer.ReadInline(resourceWrapper, edmType, nestedReadContext);
+                : clrType,
+                Path = readContext.Path,
+                Model = readContext.Model,
+                Request = readContext.Request
+            };
+
+            return deserializer.ReadInline(resourceWrapper, edmType, nestedContext);
         }
+
         private void ApplyResourceSetInNestedProperty(IEdmProperty nestedProperty, object resource,
             ODataResourceSetWrapperBase resourceSetWrapper, ODataDeserializerContext readContext)
         {
@@ -890,11 +916,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         private object ReadNestedResourceSetInline(ODataResourceSetWrapperBase resourceSetWrapper, IEdmTypeReference edmType,
-            ODataDeserializerContext readContext)
+            ODataDeserializerContext nestedReadContext)
         {
             Contract.Assert(resourceSetWrapper != null);
             Contract.Assert(edmType != null);
-            Contract.Assert(readContext != null);
+            Contract.Assert(nestedReadContext != null);
 
             ODataEdmTypeDeserializer deserializer = DeserializerProvider.GetEdmTypeDeserializer(edmType);
             if (deserializer == null)
@@ -903,18 +929,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             IEdmStructuredTypeReference structuredType = edmType.AsCollection().ElementType().AsStructured();
-            var nestedReadContext = new ODataDeserializerContext
-            {
-                Path = readContext.Path,
-                Model = readContext.Model,
-                Request = readContext.Request
-            };
 
-            if (readContext.IsUntyped)
+            if (nestedReadContext.IsUntyped)
             {
                 if (structuredType.IsEntity())
                 {
-                    nestedReadContext.ResourceType = (readContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)? 
+                    nestedReadContext.ResourceType = (nestedReadContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)? 
                         typeof(EdmChangedObjectCollection): typeof(EdmEntityObjectCollection);
                 }
                 else
@@ -924,7 +944,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
             else
             {
-                Type clrType = EdmLibHelpers.GetClrType(structuredType, readContext.Model);
+                Type clrType = EdmLibHelpers.GetClrType(structuredType, nestedReadContext.Model);
 
                 if (clrType == null)
                 {
@@ -932,7 +952,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                         Error.Format(SRResources.MappingDoesNotContainResourceType, structuredType.FullName()));
                 }
 
-                nestedReadContext.ResourceType = (readContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)
+                nestedReadContext.ResourceType = (nestedReadContext.IsDeltaOfT && resourceSetWrapper.ResourceSetType == ResourceSetType.DeltaResourceSet)
                 ? typeof(DeltaSet<>).MakeGenericType(clrType) : typeof(List<>).MakeGenericType(clrType);
             }
 

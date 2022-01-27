@@ -13,6 +13,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -541,7 +542,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         }
 
         //todo: Can we just use ODataUriParser?
-        private static ODataPath GetODataPath(string id, ODataDeserializerContext readContext)
+        internal static ODataPath GetODataPath(string id, ODataDeserializerContext readContext)
         {
             try
             {
@@ -567,90 +568,122 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private static void ApplyODataIDContainer(object resource, ODataResourceWrapper resourceWrapper,
             ODataDeserializerContext readContext)
         {
-            Routing.ODataPath path = readContext.Path;
-            ODataPathSegment lastSegment = path.Segments.Last();
+            if(readContext.Path == null)
+            {
+                return;
+            }
+
+            ODataPathSegment lastSegment = readContext.Path.Segments.Last();
             IEdmEntityType entityType = lastSegment.EdmType as IEdmEntityType;
 
-            if (entityType != null)
+            if (!(lastSegment is KeySegment))
             {
-                //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
-                //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
+                return;
+            }
 
-                // if there is not Id on the resource, try to create one from the key properties, if they exist.
-                // this needs lots more testing.  may be something that is already handled (or should be handled) in later versions of ODL.
-                if (resourceWrapper.ResourceBase.Id == null)
-                {
-                    Uri id;
-                    if (lastSegment is KeySegment) // todo: could be brittle? might there be a segment after the key segment?
-                    {
-                        id = new Uri(path.ToString(), UriKind.Relative);
-                    }
-                    else
-                    {
-                        // create the uri for the current object, using path and key values
-                        // this assumes path is correct for the current (potentially deeply nested) item -- verify path is always correct
-                        // todo: do we already have this logic somewhere (i.e., in serializer?)
-                        List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
-                        foreach (IEdmStructuralProperty keyProperty in entityType.Key())
-                        {
-                            string keyName = keyProperty.Name;
-                            ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
-                            if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
-                            {
-                                //try case insensitive
-                                List<ODataProperty> candidates = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).ToList();
-                                property = candidates.Count == 1 ? candidates.First() : null;
-                            }
+            //Setting Odataid , for POCO classes, as a property in the POCO object itself(if user has OdataIDContainer property),
+            //for Delta and EdmEntity object setting as an added property ODataIdcontianer in those classes
 
-                            object keyValue = property?.Value;
-                            if (keyValue == null)
-                            {
-                                return;
-                            }
-
-                            keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
-                        }
-
-                        KeySegment keySegment = new KeySegment(keys, entityType, readContext.Path.NavigationSource);
-                        id = new Uri(new ODataPath(path.Segments.Append(keySegment)).ToString(), UriKind.Relative);
-                    }
-
+            // if there is not Id on the resource, try to create one from the key properties, if they exist.
+            // this needs lots more testing.  may be something that is already handled (or should be handled) in later versions of ODL.
+            if (resourceWrapper.ResourceBase.Id == null)
+            {
+                if (entityType != null)
+                {                    
+                    Uri id = CreateResourceId(resourceWrapper, readContext, lastSegment, entityType);
                     resourceWrapper.ResourceBase.Id = id;
                 }
-                else
+            }
+
+            if (resourceWrapper.ResourceBase.Id == null)
+            {
+                return;
+            }
+            
+            string odataId = resourceWrapper.ResourceBase.Id.OriginalString;
+
+            IODataIdContainer container = new ODataIdContainer();
+            container.ODataId = odataId;
+
+            ODataPath path = GetODataPath(odataId, readContext);
+
+            if (resource is EdmEntityObject edmObject)
+            {
+                edmObject.ODataIdContainer = container;
+                edmObject.ODataPath = path;
+            }
+            else if (resource is IDeltaSetItem deltasetItem)
+            {
+                deltasetItem.ODataIdContainer = container;
+                deltasetItem.ODataPath = path;
+            }
+            else
+            {   
+                PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(path.LastSegment.EdmType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(IODataIdContainer)).FirstOrDefault();
+                if (containerPropertyInfo != null)
                 {
-                    string odataId = resourceWrapper.ResourceBase.Id.OriginalString;
-
-                    IODataIdContainer container = new ODataIdContainer();
-                    container.ODataId = odataId;
-
-                    if (resource is EdmEntityObject edmObject)
+                    IODataIdContainer resourceContainer = containerPropertyInfo.GetValue(resource) as IODataIdContainer;
+                    if (resourceContainer != null)
                     {
-                        edmObject.ODataIdContainer = container;
-                    }
-                    else if (resource is IDeltaSetItem deltasetItem)
-                    {
-                        deltasetItem.ODataIdContainer = container;
+                        containerPropertyInfo.SetValue(resource, resourceContainer);
                     }
                     else
                     {
-                        PropertyInfo containerPropertyInfo = EdmLibHelpers.GetClrType(entityType, readContext.Model).GetProperties().Where(x => x.PropertyType == typeof(IODataIdContainer)).FirstOrDefault();
-                        if (containerPropertyInfo != null)
-                        {
-                            IODataIdContainer resourceContainer = containerPropertyInfo.GetValue(resource) as IODataIdContainer;
-                            if (resourceContainer != null)
-                            {
-                                containerPropertyInfo.SetValue(resource, resourceContainer);
-                            }
-                            else
-                            {
-                                containerPropertyInfo.SetValue(resource, container);
-                            }
-                        }
+                        containerPropertyInfo.SetValue(resource, container);
                     }
                 }
+            }             
+            
+        }
+
+        private static Uri CreateResourceId(ODataResourceWrapper resourceWrapper, ODataDeserializerContext readContext, ODataPathSegment lastSegment, IEdmEntityType entityType)
+        {
+            Routing.ODataPath path = readContext.Path;
+
+            if (lastSegment is KeySegment || lastSegment is TypeSegment) // todo: could be brittle? might there be a segment after the key segment?
+            {
+                return new Uri(path.ToString(), UriKind.Relative);
             }
-        } 
+            else
+            {
+                // create the uri for the current object, using path and key values
+                // this assumes path is correct for the current (potentially deeply nested) item -- verify path is always correct
+                // todo: do we already have this logic somewhere (i.e., in serializer?)
+                List<KeyValuePair<string, object>> keys = new List<KeyValuePair<string, object>>();
+                foreach (IEdmStructuralProperty keyProperty in entityType.Key())
+                {
+                    string keyName = keyProperty.Name;
+                    ODataProperty property = resourceWrapper.ResourceBase.Properties.Where(p => p.Name == keyName).FirstOrDefault();
+                    if (property == null && !readContext.DisableCaseInsensitiveRequestPropertyBinding)
+                    {
+                        //try case insensitive
+                        property = resourceWrapper.ResourceBase.Properties.Where(p => String.Equals(p.Name, keyName, StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
+                    }
+
+                    object keyValue = property?.Value;
+                    if (keyValue == null)
+                    {
+                        return null;
+                    }
+
+                    keys.Add(new KeyValuePair<string, object>(keyName, keyValue));
+                }
+
+                KeySegment keySegment = new KeySegment(keys, entityType, readContext.Path.NavigationSource);
+
+                
+              
+              
+
+                path.SegmentList.Add(keySegment);
+                ODataPath odataPath = new ODataPath(path.SegmentList);
+
+                ODataUri odataUri = new ODataUri { Path = odataPath };
+                return odataUri.BuildUri(ODataUrlKeyDelimiter.Parentheses);
+
+
+            }
+        }
 
         /// <summary>
         /// Deserializes the structural properties from <paramref name="resourceWrapper"/> into <paramref name="resource"/>.
@@ -734,24 +767,30 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             // this code attempts to make sure that the path is always correct for the level that we are reading.
             // todo: needs a lot of testing/validation for edge cases
             Routing.ODataPath path = readContext.Path;
-            if (nestedProperty.PropertyKind == EdmPropertyKind.Navigation)
+            if (path != null)
             {
-                IEdmNavigationSource navigationSource = readContext.Path.NavigationSource;
-                IEdmNavigationProperty navigationProperty = nestedProperty as IEdmNavigationProperty;
-                if (navigationProperty.ContainsTarget)
+                if (nestedProperty.PropertyKind == EdmPropertyKind.Navigation)
                 {
-                    path = new Routing.ODataPath(path.Segments.Append(new NavigationPropertySegment(navigationProperty, navigationSource)));
+                    IEdmNavigationSource navigationSource = readContext.Path.NavigationSource;
+                    IEdmNavigationProperty navigationProperty = nestedProperty as IEdmNavigationProperty;
+                    if (navigationProperty.ContainsTarget)
+                    {
+                        path.SegmentList.Add(new NavigationPropertySegment(navigationProperty, navigationSource));
+                        path = new Routing.ODataPath(path.SegmentList);
+                    }
+                    else
+                    {
+                        IEdmNavigationSource targetNavigationSource = navigationSource.FindNavigationTarget(navigationProperty);
+                        path = new Routing.ODataPath(new ODataUriParser(readContext.Model, new Uri(targetNavigationSource.Path.Path, UriKind.Relative)).ParsePath());
+                    }
                 }
                 else
                 {
-                    IEdmNavigationSource targetNavigationSource = navigationSource.FindNavigationTarget(navigationProperty);
-                    path = new Routing.ODataPath(new ODataUriParser(readContext.Model, new Uri(targetNavigationSource.Path.Path, UriKind.Relative)).ParsePath());
+                    IEdmStructuralProperty structuralProperty = nestedProperty as IEdmStructuralProperty;
+                    path.SegmentList.Add(new PropertySegment(structuralProperty));
+
+                    path = new Routing.ODataPath(path.SegmentList);
                 }
-            }
-            else
-            {
-                IEdmStructuralProperty structuralProperty = nestedProperty as IEdmStructuralProperty;
-                path = new Routing.ODataPath(path.Segments.Append(new PropertySegment(structuralProperty)));
             }
 
             object value = ReadNestedResourceInline(resourceWrapper, nestedProperty.Type, readContext, path);
@@ -776,7 +815,8 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 IEdmTypeReference edmTypeReference = elementType.ToEdmTypeReference(true);
 
                 // todo: any issues with using UnresolvedPathSegment? will not have an edmtype -- is that a problem? should we just use PropertySegment for dynamic?
-                Routing.ODataPath path = new Routing.ODataPath(readContext.Path.Segments.Append(new Routing.UnresolvedPathSegment(propertyName)));
+                readContext.Path.SegmentList.Add(new Routing.UnresolvedPathSegment(propertyName));
+                Routing.ODataPath path = new Routing.ODataPath(readContext.Path.SegmentList);
                 value = ReadNestedResourceInline(resourceWrapper, edmTypeReference, readContext, path);
             }
 

@@ -19,6 +19,7 @@ using System.Runtime.Serialization;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Formatter;
+using Microsoft.OData.UriParser;
 
 namespace Microsoft.AspNet.OData
 {
@@ -175,6 +176,9 @@ namespace Microsoft.AspNet.OData
 
         /// <inheritdoc />
         public IODataIdContainer ODataIdContainer { get; set; }
+
+        /// <inheritdoc />
+        public ODataPath ODataPath { get; set; }
 
         /// <inheritdoc />
         internal PropertyInfo InstanceAnnotationsPropertyInfo { get { return _instanceAnnotationsPropertyInfo; } }
@@ -533,7 +537,7 @@ namespace Microsoft.AspNet.OData
         /// </summary>    
         private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
         {
-            NavigationPath navigationPath = NavigationPath.GetNavigationPath(ODataIdContainer?.ODataId, apiHandlerFactory.Model);
+            NavigationPath navigationPath = new NavigationPath(ODataPath);
 
             IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(navigationPath);
 

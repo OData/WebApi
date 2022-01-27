@@ -466,7 +466,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 AddNewOrder(company);
             }
 
-            var idResolver = new BulkOpODataIdResolver();
+            var idResolver = new BulkOpODataIdResolver(Request.GetModel());
             idResolver.ApplyODataId(company );
 
             Companies.Add(company);
@@ -500,7 +500,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
                 var order = company.OverdueOrders[i];
                 if(order.Container != null)
                 {
-                    var pathItems = NavigationPath.GetNavigationPath(order.Container.ODataId, Request.GetModel());
+                    var pathItems = new NavigationPath(order.Container.ODataId, Request.GetModel());
 
                     int cnt = 0;
                     if(pathItems[cnt].Name== "Employees")
@@ -588,7 +588,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
         private object ApplyODataId(IODataIdContainer container)
         {
-            var pathItems = NavigationPath.GetNavigationPath(container.ODataId, Request.GetModel());
+            var pathItems = new NavigationPath (container.ODataId, Request.GetModel());
             if(pathItems != null)
             {
                 int cnt = 0;
@@ -678,6 +678,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
     internal class BulkOpODataIdResolver: ODataIDResolver
     {
+
+        public BulkOpODataIdResolver(IEdmModel model): base(model)
+        {
+
+        }
+
         public override object GetObject(string name, object parent, Dictionary<string, object> keyValues)
         {
             switch (name)

@@ -9,6 +9,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Xunit;
 
 namespace Microsoft.AspNet.OData.Test
@@ -75,13 +79,23 @@ namespace Microsoft.AspNet.OData.Test
             var deltaSet = new DeltaSet<Friend>(new List<string>() { "Id" });
 
 
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+            var model = builder.GetEdmModel();
+
             var edmChangedObj1 = new Delta<Friend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);
             edmChangedObj1.TrySetPropertyValue("Name", "Friend1");
 
             var edmChangedObj2 = new DeltaDeletedEntityObject<Friend>();
             edmChangedObj2.TrySetPropertyValue("Id", 2);
-            
+
+            var lst = new List<ODataPathSegment>();
+            lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+
+            edmChangedObj1.ODataPath = new ODataPath(lst) ;
+            edmChangedObj2.ODataPath = new ODataPath(lst);
+
 
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
@@ -90,8 +104,9 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
+
             //Act
-            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory());
+            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(model));
 
             //Assert
             Assert.Single(friends);
@@ -127,8 +142,11 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2" });
 
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+
             //Act
-            var coll = deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory()).ToArray();
+            var coll = deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(builder.GetEdmModel())).ToArray();
 
             //Assert
             Assert.Single(friends);
@@ -203,8 +221,11 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+
             //Act
-            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory());
+            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(builder.GetEdmModel()));
 
             //Assert
             Assert.Equal(2, friends.Count);
@@ -224,15 +245,20 @@ namespace Microsoft.AspNet.OData.Test
 
     internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
+        public APIHandlerFactory(IEdmModel model): base(model)
+        {
+
+        }
+
         public override IODataAPIHandler GetHandler(NavigationPath navigationPath)
         {
             if (navigationPath != null)
             {
-                var pathItems = navigationPath.GetNavigationPathItems();
+                var pathItems = navigationPath;
 
                 if (pathItems == null)
                 {
-                    switch (navigationPath.NavigationPathName)
+                    switch (pathItems.Last().Name)
                     {   
                         case "Friend":
                             return new FriendPatchHandler();

@@ -119,7 +119,9 @@ namespace Microsoft.AspNet.OData.Test
             //Arrange
             
             var deltaSet = new DeltaSet<Friend>((new List<string>() { "Id" }));
-
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+            var model = builder.GetEdmModel();
 
             var edmChangedObj1 = new Delta<Friend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);
@@ -135,18 +137,21 @@ namespace Microsoft.AspNet.OData.Test
             edmChangedObj2.TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
             edmChangedObj2.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.ContentID", 3);
 
+            var lst = new List<ODataPathSegment>();
+            lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+
+            edmChangedObj1.ODataPath = new ODataPath(lst);
+            edmChangedObj2.ODataPath = new ODataPath(lst);
+
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
             friends = new List<Friend>();
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2" });
-
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
-            var friendsSet = builder.EntitySet<Friend>("Friends");
-
+ 
             //Act
-            var coll = deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(builder.GetEdmModel())).ToArray();
+            var coll = deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(model)).ToArray();
 
             //Assert
             Assert.Single(friends);
@@ -172,6 +177,9 @@ namespace Microsoft.AspNet.OData.Test
         public void DeltaSet_Patch_WithNestedDelta()
         {
             //Arrange
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+            var model = builder.GetEdmModel();
 
             var lstId = new List<string>();
             lstId.Add("Id");
@@ -201,8 +209,7 @@ namespace Microsoft.AspNet.OData.Test
             edmNewObj22.TrySetPropertyValue("Id", 4);
             edmNewObj22.TrySetPropertyValue("Name", "NewFriend4");
 
-            deltaSet2.Add(edmNewObj21);
-            deltaSet2.Add(edmNewObj22);
+          
 
             var edmChangedObj1 = new Delta<Friend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);
@@ -214,6 +221,24 @@ namespace Microsoft.AspNet.OData.Test
             edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
             edmChangedObj2.TrySetPropertyValue("NewFriends", deltaSet2);
 
+            var lst1 = new List<ODataPathSegment>();
+            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+
+            edmNewObj21.ODataPath = new ODataPath(lst1);
+            edmNewObj22.ODataPath = new ODataPath(lst1);
+
+            edmNewObj1.ODataPath = new ODataPath(lst1);
+            edmNewObj2.ODataPath = new ODataPath(lst1);
+
+            deltaSet2.Add(edmNewObj21);
+            deltaSet2.Add(edmNewObj22);
+
+            var lst = new List<ODataPathSegment>();
+            lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+
+            edmChangedObj1.ODataPath = new ODataPath(lst);
+            edmChangedObj2.ODataPath = new ODataPath(lst);
+
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
@@ -221,11 +246,10 @@ namespace Microsoft.AspNet.OData.Test
             friends.Add(new Friend { Id = 1, Name = "Test1" });
             friends.Add(new Friend { Id = 2, Name = "Test2", NewFriends= new List<NewFriend>() { new NewFriend {Id=3, Name="Test33" }, new NewFriend { Id = 4, Name = "Test44" } } });
 
-            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
-            var friendsSet = builder.EntitySet<Friend>("Friends");
+ 
 
             //Act
-            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(builder.GetEdmModel()));
+            deltaSet.Patch(new FriendPatchHandler(), new APIHandlerFactory(model));
 
             //Assert
             Assert.Equal(2, friends.Count);

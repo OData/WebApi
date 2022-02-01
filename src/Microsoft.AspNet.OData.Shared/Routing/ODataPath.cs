@@ -114,5 +114,10 @@ namespace Microsoft.AspNet.OData.Routing
         /// Gets the ODL path.
         /// </summary>
         public Semantic.ODataPath Path { get; internal set; }
+
+        internal IList<ODataPathSegment> SegmentList
+        {
+            get { return _segments.ToList(); }
+        }
     }
 }

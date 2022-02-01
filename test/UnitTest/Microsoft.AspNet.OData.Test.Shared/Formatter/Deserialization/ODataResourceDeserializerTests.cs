@@ -158,7 +158,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             ODataDeserializerContext readContext = new ODataDeserializerContext();
 
             deserializer.CallBase = true;
-            deserializer.Setup(d => d.ReadResource(entry, _productEdmType, readContext)).Returns(42).Verifiable();
+            deserializer.Setup(d => d.ReadResource(entry, _productEdmType, It.IsAny<ODataDeserializerContext>())).Returns(42).Verifiable();
 
             // Act
             var result = deserializer.Object.ReadInline(entry, _productEdmType, readContext);
@@ -421,9 +421,19 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 TypeName = typeof(SimpleOpenCustomer).FullName
             };
 
+
+            IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+
+            var keys = new[] { new KeyValuePair<string, object>("CustomerId", 991) };
+
             ODataDeserializerContext readContext = new ODataDeserializerContext()
             {
-                Model = model
+                Model = model,
+                Path = new ODataPath(new ODataPathSegment[1] {
+                    new KeySegment(keys, entityType1, navigationSource )
+                })
             };
 
             ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
@@ -547,9 +557,19 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 InstanceAnnotations = instAnn
             };
 
+
+            IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+
+            var keys = new[] { new KeyValuePair<string, object>("CustomerId", 991) };
+
             ODataDeserializerContext readContext = new ODataDeserializerContext()
             {
-                Model = model
+                Model = model,
+                Path = new ODataPath(new ODataPathSegment[1] {
+                    new KeySegment(keys, entityType1, navigationSource )
+                })
             };
 
             ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
@@ -612,6 +632,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             IEdmModel model = builder.GetEdmModel();
 
             IEdmEntityTypeReference customerTypeReference = model.GetEdmTypeReference(typeof(SimpleOpenCustomer)).AsEntity();
+            
 
             var deserializer = new ODataResourceDeserializer(_deserializerProvider);
 
@@ -696,9 +717,19 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 InstanceAnnotations = instAnn
             };
 
+
+            IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+
+            var keys = new[] { new KeyValuePair<string, object>("CustomerId", 991) };
+            
             ODataDeserializerContext readContext = new ODataDeserializerContext()
             {
-                Model = model
+                Model = model,
+                Path = new ODataPath(new ODataPathSegment[1] {
+                    new KeySegment(keys, entityType1, navigationSource )
+                })
             };
 
             ODataResourceWrapper topLevelResourceWrapper = new ODataResourceWrapper(odataResource);
@@ -1221,11 +1252,23 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
                 new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Customer" });
             resourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(resource));
 
-            ODataDeserializerContext context = new ODataDeserializerContext { Model = model.Model };
+            IEdmEntityTypeReference customerTypeReference = model.Model.GetEdmTypeReference(typeof(Customer)).AsEntity();
+
+            IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model.Model               
+            };
+
 
             // Act
             new ODataResourceDeserializer(_deserializerProvider)
-                .ApplyNestedProperty(order, resourceInfoWrapper, model.Order.AsReference(), context);
+                .ApplyNestedProperty(order, resourceInfoWrapper, model.Order.AsReference(), readContext);
 
             // Assert
             Assert.Equal(42, order.AliasedCustomer.ID);

@@ -171,7 +171,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
             object obj;
             Assert.True(EmployeesTypeless.First().TryGetPropertyValue("UnTypedFriends", out obj));
 
-            var friends = obj as ICollection<EdmStructuredObject>;
+            var friends = obj as ICollection<IEdmStructuredObject>;
             Assert.NotNull(friends);
 
             object obj1;

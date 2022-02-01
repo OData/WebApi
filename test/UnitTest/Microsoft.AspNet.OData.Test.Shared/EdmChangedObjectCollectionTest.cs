@@ -22,12 +22,17 @@ namespace Microsoft.AspNet.OData.Test
         IEdmEntityType entityType;
         IEdmStructuredObject employee;
 
-        public TypelessAPIHandlerFactory(IEdmEntityType entityType)
+        protected TypelessAPIHandlerFactory(IEdmModel model): base(model)
+        {
+         
+        }
+
+        public TypelessAPIHandlerFactory(IEdmEntityType entityType, IEdmModel model): base(model)
         {
             this.entityType = entityType;
         }
 
-        public TypelessAPIHandlerFactory(IEdmEntityType entityType, IEdmStructuredObject employee)
+        public TypelessAPIHandlerFactory(IEdmEntityType entityType, IEdmStructuredObject employee, IEdmModel model) : base(model)
         {
             this.entityType = entityType;
             this.employee = employee;
@@ -37,11 +42,11 @@ namespace Microsoft.AspNet.OData.Test
         {
             if (navigationPath != null)
             {
-                var pathItems = navigationPath.GetNavigationPathItems();
+                var pathItems = navigationPath;
                 
                 if (pathItems == null)
                 {
-                    switch (navigationPath.NavigationPathName)
+                    switch (navigationPath.Last().Name)
                     {                       
                         case "UnTypedFriend":
                         case "Friend":
@@ -149,7 +154,7 @@ namespace Microsoft.AspNet.OData.Test
             deltaSet.Add(edmChangedObj2);
 
             //Act
-            deltaSet.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
+            deltaSet.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType, null));
 
             //Assert
             Assert.Equal(2, friends.Count);
@@ -185,7 +190,7 @@ namespace Microsoft.AspNet.OData.Test
             changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
+            changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType, null));
 
             //Assert
             Assert.Single(friends);
@@ -220,7 +225,7 @@ namespace Microsoft.AspNet.OData.Test
             changedObjCollection.Add(edmChangedObj2);
 
             //Act
-            var coll= changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType));
+            var coll= changedObjCollection.Patch(new FriendTypelessPatchHandler(_entityType), new TypelessAPIHandlerFactory(_entityType, null));
 
             //Assert
             Assert.Equal(2, friends.Count);

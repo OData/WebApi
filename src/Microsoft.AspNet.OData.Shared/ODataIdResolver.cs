@@ -5,6 +5,7 @@
 // </copyright>
 //------------------------------------------------------------------------------
 
+using Microsoft.OData.Edm;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -19,6 +20,16 @@ namespace Microsoft.AspNet.OData
     /// </summary>
     internal abstract class ODataIDResolver
     {
+        IEdmModel model;
+
+        /// <summary>
+        /// Creates an instance of <see cref="ODataIDResolver" />
+        /// </summary>
+        public ODataIDResolver(IEdmModel model)
+        {
+            this.model = model;
+        }
+
         /// <summary>
         /// Apply OdataId for a resource with OdataID container
         /// </summary>
@@ -93,22 +104,20 @@ namespace Microsoft.AspNet.OData
 
         private object ApplyODataIdOnContainer(IODataIdContainer container)
         {
-            // todo: fix this
+            NavigationPath navigationPathItems = new NavigationPath(container.ODataId, model);
+            if (navigationPathItems != null)
+            {
+                int cnt = 0;
+                object value = null;
 
-            //PathItem[] pathItems = container.ODataIdNavigationPath.GetNavigationPathItems();
-            //if (pathItems != null)
-            //{
-            //    int cnt = 0;
-            //    object value = null;
+                while (cnt < navigationPathItems.Count)
+                {
+                    value = GetObject(navigationPathItems[cnt].Name, value, navigationPathItems[cnt].KeyProperties);
+                    cnt++;
+                }
 
-            //    while (cnt < pathItems.Length)
-            //    {
-            //        value = GetObject(pathItems[cnt].Name, value, pathItems[cnt].KeyProperties);
-            //        cnt++;
-            //    }
-
-            //    return value;
-            //}
+                return value;
+            }
 
             return null;
         }

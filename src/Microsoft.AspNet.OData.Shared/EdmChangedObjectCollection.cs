@@ -12,6 +12,7 @@ using System.Diagnostics.Contracts;
 using System.Linq;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
@@ -217,9 +218,9 @@ namespace Microsoft.AspNet.OData
 
         private void PatchItem(EdmStructuredObject changedObj, EdmStructuredObject originalObj, EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
-            if (apiHandlerFactory != null && changedObj is EdmEntityObject entityObject && entityObject.ODataIdContainer != null)
+            if (apiHandlerFactory != null && changedObj is EdmEntityObject entityObject && entityObject.ODataPath != null)
             {
-                ApplyODataId(entityObject.ODataIdContainer, originalObj, apiHandlerFactory);
+                ApplyODataId(entityObject.ODataPath, originalObj, apiHandlerFactory);
             }
 
             foreach (string propertyName in changedObj.GetChangedPropertyNames())
@@ -231,9 +232,9 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object, for typeless entities
         /// </summary> 
-        private void ApplyODataId(IODataIdContainer container, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
+        private void ApplyODataId(ODataPath oDataPath, EdmStructuredObject original, ODataEdmAPIHandlerFactory apiHandlerFactory)
         {
-            NavigationPath navigationPath = NavigationPath.GetNavigationPath(container.ODataId, apiHandlerFactory.Model);
+            NavigationPath navigationPath = new NavigationPath(oDataPath);
             EdmODataAPIHandler edmApiHandler = apiHandlerFactory.GetHandler(navigationPath);
 
             if (edmApiHandler == null)

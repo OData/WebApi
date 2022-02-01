@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using Microsoft.AspNet.OData.Builder;
+using Microsoft.OData.UriParser;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -32,5 +33,10 @@ namespace Microsoft.AspNet.OData
         /// Container to hold ODataId
         /// </summary>
         IODataIdContainer ODataIdContainer { get; set; }
+
+        /// <summary>
+        /// OData Path for the Item
+        /// </summary>
+        ODataPath ODataPath { get; set; }
     }
 }

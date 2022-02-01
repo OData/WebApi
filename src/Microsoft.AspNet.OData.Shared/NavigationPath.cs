@@ -26,7 +26,25 @@ namespace Microsoft.AspNet.OData
         {
             ParseODataId(path);
         }
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="NavigationPath"/> class.
+        /// </summary>        
+        /// <param name="path">ODataPath</param>
+        /// <param name="model">The IEdmModel</param>
+        public NavigationPath(string path, IEdmModel model)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                return;
+            }
+
+            ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
+
+            ODataPath odataPath = parser.ParsePath();
+            ParseODataId(odataPath);
+        }
+
         private void ParseODataId(ODataPath path)
         {
             PathItem currentPathItem = null;
@@ -55,26 +73,6 @@ namespace Microsoft.AspNet.OData
                 }
                 
             }
-        }
-
-        // todo: maybe make this a constructor overload
-        /// <summary>
-        /// Gets a NavigationPath for an OData path
-        /// </summary>
-        /// <param name="path">The OData path</param>
-        /// <param name="model">The IEdmModel</param>
-        /// <returns></returns>
-        public static NavigationPath GetNavigationPath(string path, IEdmModel model)
-        {
-            if (string.IsNullOrEmpty(path))
-            { 
-                return null;
-            }
-
-            ODataUriParser parser = new ODataUriParser(model, new Uri(path, UriKind.Relative));
-
-            ODataPath odataPath = parser.ParsePath();
-            return new NavigationPath(odataPath);
         }
     }
 }

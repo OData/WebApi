@@ -33,7 +33,7 @@ namespace Microsoft.AspNet.OData
         /// <returns>ODataAPIHandler for the specified odata path</returns>
         public EdmODataAPIHandler GetHandler(string odataPath)
         {
-            return this.GetHandler(NavigationPath.GetNavigationPath(odataPath, this.Model));
+            return this.GetHandler(new NavigationPath (odataPath, this.Model));
         }
 
         /// <summary>

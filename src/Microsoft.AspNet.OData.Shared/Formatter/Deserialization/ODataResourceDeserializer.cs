@@ -434,8 +434,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         {
             ODataDeserializerContext nestedReadContext = null;
 
-            try
-            {
+            try { 
                 // this code attempts to make sure that the path is always correct for the level that we are reading.
                 Routing.ODataPath path = readContext.Path;
                 if (edmProperty == null)
@@ -730,7 +729,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             Routing.ODataPath path = readContext.Path;
 
-            if (path == null)
+            if(path == null)
             {
                 return null;
             }

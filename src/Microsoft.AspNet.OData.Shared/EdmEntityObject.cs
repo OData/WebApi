@@ -11,6 +11,7 @@ using System.Reflection;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData.Edm;
+using Microsoft.OData.UriParser;
 using Org.OData.Core.V1;
 
 namespace Microsoft.AspNet.OData
@@ -65,6 +66,11 @@ namespace Microsoft.AspNet.OData
         /// Container to hold ODataId
         /// </summary>
         public IODataIdContainer ODataIdContainer { get; set; }
+
+        /// <summary>
+        /// OData Path for the Item
+        /// </summary>
+        internal ODataPath ODataPath { get; set; }
 
         /// <summary>
         /// DeltaKind as Entry

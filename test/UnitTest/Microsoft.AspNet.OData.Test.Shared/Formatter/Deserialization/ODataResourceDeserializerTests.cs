@@ -1275,6 +1275,47 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
         }
 
         [Fact]
+        public void ApplyNestedProperty_UsesThePropertyAlias_ForResourceWrapper1()
+        {
+            // Arrange
+            CustomersModelWithInheritance model = new CustomersModelWithInheritance();
+            model.Model.SetAnnotationValue(model.Customer, new ClrTypeAnnotation(typeof(Customer)));
+            model.Model.SetAnnotationValue(model.Order, new ClrTypeAnnotation(typeof(Order)));
+            model.Model.SetAnnotationValue(
+                model.Order.FindProperty("Customer"),
+                new ClrPropertyInfoAnnotation(typeof(Order).GetProperty("AliasedCustomer")));
+            ODataResource resource = new ODataResource {Id= new Uri("http://works/"), TypeName= "NS.Order", Properties = new[] { new ODataProperty { Name = "ID", Value = 42 } } };
+
+            Order order = new Order();
+            ODataNestedResourceInfoWrapper resourceInfoWrapper =
+                new ODataNestedResourceInfoWrapper(new ODataNestedResourceInfo { Name = "Customer1" });
+            resourceInfoWrapper.NestedItems.Add(new ODataResourceWrapper(resource));
+
+            IEdmEntityTypeReference customerTypeReference = model.Model.GetEdmTypeReference(typeof(Customer)).AsEntity();
+
+            IEdmEntityType entityType1 = customerTypeReference.EntityDefinition();
+            EdmEntityContainer container = new EdmEntityContainer("NS", "Container");
+            IEdmNavigationSource navigationSource = new EdmEntitySet(container, "EntitySet", entityType1);
+
+            var keys = new[] { new KeyValuePair<string, object>("ID", 42) };
+
+            ODataDeserializerContext readContext = new ODataDeserializerContext()
+            {
+                Model = model.Model,
+                Path = new ODataPath(new ODataPathSegment[1] {
+                    new KeySegment(keys, entityType1, navigationSource )
+                })
+            };
+
+            // Act
+            new ODataResourceDeserializer(_deserializerProvider)
+                .ApplyNestedProperty(order, resourceInfoWrapper, model.Order.AsReference(), readContext);
+
+            // Assert
+            Assert.Equal(0, order.ID);
+        }
+
+        [Fact]
         public void ApplyNestedProperties_Preserves_ReadContextRequest()
         {
             // Arrange
@@ -1617,14 +1658,14 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Bronze
         }
 
-        private class Customer
+        public class Customer
         {
             public int ID { get; set; }
 
             public Order[] AliasedOrders { get; set; }
         }
 
-        private class Order
+        public class Order
         {
             public int ID { get; set; }
 

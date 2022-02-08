@@ -409,10 +409,19 @@ namespace Microsoft.AspNet.OData
                 throw Error.Argument("original", SRResources.DeltaTypeMismatch, _structuredType, original.GetType());
             }
 
-            //To apply ODataId if its present
+            //To apply ODataId based handler to apply properties on original.
             if (apiHandlerFactory != null)
             {
-                ApplyODataId(original, apiHandlerFactory);
+                NavigationPath navigationPath = new NavigationPath(ODataPath);
+
+                IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(navigationPath);
+
+                if (refapiHandler != null && navigationPath.Any() && apiHandler.ToString() != refapiHandler.ToString())
+                {
+                    ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
+
+                    ApplyPropertiesBasedOnOdataId(original, refapiHandlerOfT, navigationPath.Last().KeyProperties);
+                }
             }
 
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -535,34 +544,25 @@ namespace Microsoft.AspNet.OData
         /// <summary>
         /// This is basically Patch on ODataId. This applies ODataId parsed Navigation paths, get the value identified by that and copy it on original object
         /// </summary>    
-        private void ApplyODataId(TStructuralType original, ODataAPIHandlerFactory apiHandlerFactory)
+        private void ApplyPropertiesBasedOnOdataId(TStructuralType original, ODataAPIHandler<TStructuralType> refapiHandlerOfT, Dictionary<string, object> keyProperties)
         {
-            NavigationPath navigationPath = new NavigationPath(ODataPath);
+            Debug.Assert(refapiHandlerOfT != null);
 
-            IODataAPIHandler refapiHandler = apiHandlerFactory.GetHandler(navigationPath);
+            TStructuralType referencedObj;
+            string error;
 
-            if (refapiHandler != null)
+            //todo: this logic feels brittle to me
+            //Checking to get the referenced entity, get the properties and apply it on original object
+            if (refapiHandlerOfT.TryGet(keyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
             {
-                ODataAPIHandler<TStructuralType> refapiHandlerOfT = refapiHandler as ODataAPIHandler<TStructuralType>;
-
-                Debug.Assert(refapiHandlerOfT != null);
-
-                TStructuralType referencedObj;
-                string error;
-
-                //todo: this logic feels brittle to me
-                //Checking to get the referenced entity, get the properties and apply it on original object
-                if (refapiHandlerOfT.TryGet(navigationPath.Last().KeyProperties, out referencedObj, out error) == ODataAPIResponseStatus.Success)
+                foreach (string property in _updatableProperties)
                 {
-                    foreach (string property in _updatableProperties)
-                    {
-                        PropertyInfo propertyInfo = _structuredType.GetProperty(property);
+                    PropertyInfo propertyInfo = _structuredType.GetProperty(property);
 
-                        object value = propertyInfo.GetValue(referencedObj);
-                        propertyInfo.SetValue(original, value);
-                    }
+                    object value = propertyInfo.GetValue(referencedObj);
+                    propertyInfo.SetValue(original, value);
                 }
-            }
+            }            
         }
 
         /// <summary>

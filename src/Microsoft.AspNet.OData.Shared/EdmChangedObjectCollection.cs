@@ -114,10 +114,13 @@ namespace Microsoft.AspNet.OData
                 try
                 {
                     IEdmStructuredObject original = null;
+                    EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
+
+                    NavigationPath navigationPath = new NavigationPath(deltaEntityObject.ODataPath);
+
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(navigationPath.Last().KeyProperties, out original, out getErrorMessage);
+
                     EdmDeltaDeletedEntityObject deletedObj = changedObj as EdmDeltaDeletedEntityObject;
-
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandler.TryGet(keyValues, out original, out getErrorMessage);
-
                     if (ODataAPIResponseStatus == ODataAPIResponseStatus.Failure || (deletedObj != null && ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound))
                     {
                         DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
@@ -153,8 +156,6 @@ namespace Microsoft.AspNet.OData
                     }
                     else
                     {
-                        EdmEntityObject deltaEntityObject = changedObj as EdmEntityObject;
-
                         if (ODataAPIResponseStatus == ODataAPIResponseStatus.NotFound)
                         {
                             operation = DataModificationOperationKind.Insert;

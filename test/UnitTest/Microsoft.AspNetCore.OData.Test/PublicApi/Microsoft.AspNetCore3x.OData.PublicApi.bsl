@@ -37,6 +37,7 @@ public interface Microsoft.AspNet.OData.IDeltaSet {
 public interface Microsoft.AspNet.OData.IDeltaSetItem {
 	EdmDeltaEntityKind DeltaKind  { public abstract get; }
 	IODataIdContainer ODataIdContainer  { public abstract get; public abstract set; }
+	Microsoft.OData.UriParser.ODataPath ODataPath  { public abstract get; public abstract set; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public abstract get; public abstract set; }
 }
 
@@ -80,7 +81,6 @@ public interface Microsoft.AspNet.OData.IEdmStructuredObject : IEdmObject {
 
 public interface Microsoft.AspNet.OData.IODataIdContainer {
 	string ODataId  { public abstract get; public abstract set; }
-	NavigationPath ODataIdNavigationPath  { public abstract get; public abstract set; }
 }
 
 public interface Microsoft.AspNet.OData.IPerRouteContainer {
@@ -302,6 +302,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	System.Type ExpectedClrType  { public virtual get; }
 	bool IsComplexType  { public get; }
 	IODataIdContainer ODataIdContainer  { public virtual get; public virtual set; }
+	Microsoft.OData.UriParser.ODataPath ODataPath  { public virtual get; public virtual set; }
 	System.Type StructuredType  { public virtual get; }
 	IODataInstanceAnnotationContainer TransientInstanceAnnotationContainer  { public virtual get; public virtual set; }
 	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
@@ -545,12 +546,9 @@ public class Microsoft.AspNet.OData.MetadataController : ODataController {
 	public Microsoft.OData.ODataServiceDocument GetServiceDocument ()
 }
 
-public class Microsoft.AspNet.OData.NavigationPath {
-	public NavigationPath (System.Collections.ObjectModel.ReadOnlyCollection`1[[Microsoft.OData.UriParser.ODataPathSegment]] pathSegments)
-
-	string NavigationPathName  { public get; }
-
-	public PathItem[] GetNavigationPathItems ()
+public class Microsoft.AspNet.OData.NavigationPath : System.Collections.Generic.List`1[[Microsoft.AspNet.OData.PathItem]], ICollection, IEnumerable, IList, ICollection`1, IEnumerable`1, IList`1, IReadOnlyCollection`1, IReadOnlyList`1 {
+	public NavigationPath (Microsoft.OData.UriParser.ODataPath path)
+	public NavigationPath (string path, Microsoft.OData.Edm.IEdmModel model)
 }
 
 public class Microsoft.AspNet.OData.NullEdmComplexObject : IEdmComplexObject, IEdmObject, IEdmStructuredObject {
@@ -617,7 +615,6 @@ public class Microsoft.AspNet.OData.ODataIdContainer : IODataIdContainer {
 	public ODataIdContainer ()
 
 	string ODataId  { public virtual get; public virtual set; }
-	NavigationPath ODataIdNavigationPath  { public virtual get; public virtual set; }
 }
 
 public class Microsoft.AspNet.OData.ODataNullValueMessageHandler : IFilterMetadata, IResultFilter {

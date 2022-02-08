@@ -894,7 +894,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             //Act & Assert
             var expected = "/convention/$metadata#Companies/$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company01\",\"OverdueOrders@delta\":" +
-                "[{\"Id\":1,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -929,7 +929,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             //Act & Assert
             var expected = "$delta\",\"value\":[{\"Id\":1,\"Name\":\"Company02\",\"MyOverdueOrders@delta\":" +
-                "[{\"Id\":2,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
+                "[{\"Id\":0,\"Price\":0,\"Quantity\":9,\"Container\":null}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {
@@ -964,7 +964,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkInsert
 
             //Act & Assert
             var expected = "/convention/$metadata#UnTypedEmployees/$delta\",\"value\":[{\"ID\":1,\"Name\":\"Employeeabcd\"," +
-                "\"UnTypedFriends@delta\":[{\"Id\":1,\"Name\":\"abcd\",\"Age\":0}]}]}";
+                "\"UnTypedFriends@delta\":[{\"Id\":0,\"Name\":\"abcd\",\"Age\":0}]}]}";
 
             using (HttpResponseMessage response = await this.Client.SendAsync(requestForPost))
             {

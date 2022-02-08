@@ -40,6 +40,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
                             }
                         }
                         return null;
+                    case "Companies":
+                        return new CompanyAPIHandler();
 
                         default:
                             return null;

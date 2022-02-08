@@ -102,13 +102,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             }
 
             // Create the appropriate nested context
-            ODataDeserializerContext nestedContext = new ODataDeserializerContext
-            {
-                Path = structuredType.IsEntity() ? ApplyIdToPath(readContext, resourceWrapper) : readContext.Path,
-                Model = readContext.Model,
-                Request = readContext.Request,
-                ResourceType = readContext.ResourceType
-            };
+            ODataDeserializerContext nestedContext = BuildNestedContextFromCurrentContext(readContext, structuredType.IsEntity() ? ApplyIdToPath(readContext, resourceWrapper) : readContext.Path);
 
             // Recursion guard to avoid stack overflows
             RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -433,10 +427,12 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
         private static ODataDeserializerContext GenerateNestedReadContext(ODataNestedResourceInfoWrapper resourceInfoWrapper, ODataDeserializerContext readContext, IEdmProperty edmProperty)
         {
             ODataDeserializerContext nestedReadContext = null;
+            Routing.ODataPath path = readContext.Path;
 
-            try { 
-                // this code attempts to make sure that the path is always correct for the level that we are reading.
-                Routing.ODataPath path = readContext.Path;
+            try
+            {
+
+                // this code attempts to make sure that the path is always correct for the level that we are reading.                
                 if (edmProperty == null)
                 {
                     ODataNestedResourceInfo nestedInfo = resourceInfoWrapper.NestedResourceInfo;
@@ -483,20 +479,25 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                     }
                 }
 
-                nestedReadContext = new ODataDeserializerContext
-                {
-                    Path = path,
-                    Model = readContext.Model,
-                    Request = readContext.Request,
-                    ResourceType = readContext.ResourceType
-                };
+                nestedReadContext = BuildNestedContextFromCurrentContext(readContext, path);
             }
             catch
             {
-                nestedReadContext = readContext;
+                nestedReadContext = BuildNestedContextFromCurrentContext(readContext);
             }
 
             return nestedReadContext;
+        }
+
+        private static ODataDeserializerContext BuildNestedContextFromCurrentContext(ODataDeserializerContext readContext, Routing.ODataPath path =null, Type resourceType = null)
+        {
+            return new ODataDeserializerContext
+            {
+                Path = path??readContext.Path,
+                Model = readContext.Model,
+                Request = readContext.Request,
+                ResourceType = resourceType??readContext.ResourceType
+            };
         }
 
         //Appends a new segment to an ODataPath
@@ -704,8 +705,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (resourceWrapper.ResourceBase.Id != null)
             {
                 try
-                {
-                    Routing.IODataPathHandler pathHandler = readContext.InternalRequest.PathHandler;
+                {   
                     IWebApiRequestMessage internalRequest = readContext.InternalRequest;
                     IWebApiUrlHelper urlHelper = readContext.InternalUrlHelper;
 
@@ -914,16 +914,10 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 }
             }
 
-            ODataDeserializerContext nestedContext = new ODataDeserializerContext
-            {
-                ResourceType = readContext.IsDeltaOfT
+            ODataDeserializerContext nestedContext = BuildNestedContextFromCurrentContext(readContext, null, readContext.IsDeltaOfT
                 ? typeof(Delta<>).MakeGenericType(clrType)
-                : clrType,
-                Path = readContext.Path,
-                Model = readContext.Model,
-                Request = readContext.Request
-            };
-
+                : clrType);
+  
             return deserializer.ReadInline(resourceWrapper, edmType, nestedContext);
         }
 

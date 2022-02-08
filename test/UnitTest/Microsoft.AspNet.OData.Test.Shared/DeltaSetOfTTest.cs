@@ -36,7 +36,24 @@ namespace Microsoft.AspNet.OData.Test
             var edmChangedObj2 = new Delta<Friend>();
             edmChangedObj2.TrySetPropertyValue("Id", 2);
             edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
-                        
+
+            ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            var friendsSet = builder.EntitySet<Friend>("Friends");
+            var model = builder.GetEdmModel();
+
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            var lst1 = new List<ODataPathSegment>();
+            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst1.Add(new KeySegment(keys, null, null));
+
+            var keys2 = new[] { new KeyValuePair<string, object>("Id", 2) };
+            var lst2 = new List<ODataPathSegment>();
+            lst2.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst2.Add(new KeySegment(keys2, null, null));
+
+            edmChangedObj1.ODataPath = new ODataPath(lst1);
+            edmChangedObj2.ODataPath = new ODataPath(lst2);
+
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
 
@@ -90,11 +107,18 @@ namespace Microsoft.AspNet.OData.Test
             var edmChangedObj2 = new DeltaDeletedEntityObject<Friend>();
             edmChangedObj2.TrySetPropertyValue("Id", 2);
 
-            var lst = new List<ODataPathSegment>();
-            lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            var lst1 = new List<ODataPathSegment>();
+            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst1.Add(new KeySegment(keys, null, null));
 
-            edmChangedObj1.ODataPath = new ODataPath(lst) ;
-            edmChangedObj2.ODataPath = new ODataPath(lst);
+            var keys2 = new[] { new KeyValuePair<string, object>("Id", 2) };
+            var lst2 = new List<ODataPathSegment>();
+            lst2.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst2.Add(new KeySegment(keys2, null, null));
+
+            edmChangedObj1.ODataPath = new ODataPath(lst1);
+            edmChangedObj2.ODataPath = new ODataPath(lst2);
 
 
             deltaSet.Add(edmChangedObj1);
@@ -137,11 +161,18 @@ namespace Microsoft.AspNet.OData.Test
             edmChangedObj2.TransientInstanceAnnotationContainer = new ODataInstanceAnnotationContainer();
             edmChangedObj2.TransientInstanceAnnotationContainer.AddResourceAnnotation("Core.ContentID", 3);
 
-            var lst = new List<ODataPathSegment>();
-            lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            var lst1 = new List<ODataPathSegment>();
+            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst1.Add(new KeySegment(keys, null, null));
 
-            edmChangedObj1.ODataPath = new ODataPath(lst);
-            edmChangedObj2.ODataPath = new ODataPath(lst);
+            var keys2 = new[] { new KeyValuePair<string, object>("Id", 2) };
+            var lst2 = new List<ODataPathSegment>();
+            lst2.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst2.Add(new KeySegment(keys2, null, null));
+
+            edmChangedObj1.ODataPath = new ODataPath(lst1);
+            edmChangedObj2.ODataPath = new ODataPath(lst2);
 
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
@@ -188,6 +219,16 @@ namespace Microsoft.AspNet.OData.Test
 
             var deltaSet1 = new DeltaSet<NewFriend>(lstId);
 
+            var keys = new[] { new KeyValuePair<string, object>("Id", 1) };
+            var lst1 = new List<ODataPathSegment>();
+            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst1.Add(new KeySegment(keys, null, null));
+
+            var keys2 = new[] { new KeyValuePair<string, object>("Id", 2) };
+            var lst2 = new List<ODataPathSegment>();
+            lst2.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst2.Add(new KeySegment(keys2, null, null));
+
             var edmNewObj1 = new Delta<NewFriend>();
             edmNewObj1.TrySetPropertyValue("Id", 1);
             edmNewObj1.TrySetPropertyValue("Name", "NewFriend1");
@@ -195,6 +236,9 @@ namespace Microsoft.AspNet.OData.Test
             var edmNewObj2 = new Delta<NewFriend>();
             edmNewObj2.TrySetPropertyValue("Id", 2);
             edmNewObj2.TrySetPropertyValue("Name", "NewFriend2");
+
+            edmNewObj1.ODataPath = new ODataPath(lst1);
+            edmNewObj2.ODataPath = new ODataPath(lst2);
 
             deltaSet1.Add(edmNewObj1);
             deltaSet1.Add(edmNewObj2);
@@ -209,7 +253,19 @@ namespace Microsoft.AspNet.OData.Test
             edmNewObj22.TrySetPropertyValue("Id", 4);
             edmNewObj22.TrySetPropertyValue("Name", "NewFriend4");
 
-          
+            var keys3 = new[] { new KeyValuePair<string, object>("Id", 3) };
+            var lst3 = new List<ODataPathSegment>();
+            lst3.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst3.Add(new KeySegment(keys3, null, null));
+
+            var keys4 = new[] { new KeyValuePair<string, object>("Id", 4) };
+            var lst4 = new List<ODataPathSegment>();
+            lst4.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
+            lst4.Add(new KeySegment(keys4, null, null));
+
+            edmNewObj21.ODataPath = new ODataPath(lst3);
+            edmNewObj22.ODataPath = new ODataPath(lst4);
+
 
             var edmChangedObj1 = new Delta<Friend>();
             edmChangedObj1.TrySetPropertyValue("Id", 1);
@@ -221,23 +277,17 @@ namespace Microsoft.AspNet.OData.Test
             edmChangedObj2.TrySetPropertyValue("Name", "Friend2");
             edmChangedObj2.TrySetPropertyValue("NewFriends", deltaSet2);
 
-            var lst1 = new List<ODataPathSegment>();
-            lst1.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "NewFriends" });
-
-            edmNewObj21.ODataPath = new ODataPath(lst1);
-            edmNewObj22.ODataPath = new ODataPath(lst1);
-
-            edmNewObj1.ODataPath = new ODataPath(lst1);
-            edmNewObj2.ODataPath = new ODataPath(lst1);
 
             deltaSet2.Add(edmNewObj21);
             deltaSet2.Add(edmNewObj22);
 
+            var keys1 = new[] { new KeyValuePair<string, object>("Id", 2) };
             var lst = new List<ODataPathSegment>();
             lst.Add(new EntitySetSegment(model.EntityContainer.FindEntitySet("Friends")) { Identifier = "Friends" });
+            lst.Add(new KeySegment(keys1, null, null));
 
-            edmChangedObj1.ODataPath = new ODataPath(lst);
-            edmChangedObj2.ODataPath = new ODataPath(lst);
+            edmChangedObj1.ODataPath = new ODataPath(lst1);
+            edmChangedObj2.ODataPath = new ODataPath(lst2);
 
             deltaSet.Add(edmChangedObj1);
             deltaSet.Add(edmChangedObj2);
@@ -267,7 +317,7 @@ namespace Microsoft.AspNet.OData.Test
 
     }
 
-    internal class APIHandlerFactory : ODataAPIHandlerFactory
+       internal class APIHandlerFactory : ODataAPIHandlerFactory
     {
         public APIHandlerFactory(IEdmModel model): base(model)
         {
@@ -283,7 +333,7 @@ namespace Microsoft.AspNet.OData.Test
                 if (pathItems == null)
                 {
                     switch (pathItems.Last().Name)
-                    {   
+                    {
                         case "Friend":
                             return new FriendPatchHandler();
                        

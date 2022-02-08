@@ -115,7 +115,9 @@ namespace Microsoft.AspNet.OData
 
                 try
                 {
-                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(keyValues, out original, out getErrorMessage);
+                    NavigationPath navigationPath = new NavigationPath(changedObj.ODataPath);
+
+                    ODataAPIResponseStatus ODataAPIResponseStatus = apiHandlerOfT.TryGet(navigationPath.Last().KeyProperties, out original, out getErrorMessage);
 
                     DeltaDeletedEntityObject<TStructuralType> deletedObj = changedObj as DeltaDeletedEntityObject<TStructuralType>;
 

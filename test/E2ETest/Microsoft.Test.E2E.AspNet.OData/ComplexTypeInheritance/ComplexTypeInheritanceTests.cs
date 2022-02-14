@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ComplexTypeInheritanceTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Linq;
@@ -328,7 +332,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
         [InlineData("convention")]
         [InlineData("explicit")]
         // Patch ~/Widnows(3)
-        public async Task PatchContainingEntity_MismatchedRuntimeTypeError(string modelMode)
+        public async Task PatchContainingEntity_Matched_DerivedType(string modelMode)
         {
             string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
             string requestUri = serviceRootUri + "/Windows(3)";
@@ -352,7 +356,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             request.Content = stringContent;
             HttpResponseMessage response = await Client.SendAsync(request);
             string contentOfString = await response.Content.ReadAsStringAsync();
-            Assert.True(HttpStatusCode.BadRequest == response.StatusCode);
+            Assert.True(HttpStatusCode.OK == response.StatusCode);
         }
 
         [Theory]

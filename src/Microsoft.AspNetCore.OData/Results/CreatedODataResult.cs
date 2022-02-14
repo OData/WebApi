@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="CreatedODataResult.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Net;
@@ -61,7 +65,7 @@ namespace Microsoft.AspNet.OData.Results
             // before calling AddEntityId() to ensure the response code is set correctly.
             await result.ExecuteResultAsync(context);
             ResultHelpers.AddEntityId(response, () => GenerateEntityId(request));
-            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request)));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request)));
         }
 
         // internal just for unit test.

@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataMediaTypeFormattersTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 #if NETCORE
 using System;
@@ -706,6 +710,52 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.Equal(MediaTypeHeaderValue.Parse(expectedMediaType), mediaType);
         }
 
+#if NETCORE
+        [Fact]
+        public void TestGet_InputFormatterMetadata_DontError()
+        {
+            // Arrange
+            var formatters = CreateInputFormatters().ToList();
+            Assert.NotNull(formatters); // Guard assertion
+
+            // Act
+            foreach (var formatter in formatters)
+            {
+                formatter.SupportedMediaTypes.Clear();
+            }
+
+            // Assert
+            foreach (var formatter in formatters)
+            {
+                var exception = Record.Exception(() => formatter.GetSupportedContentTypes("application/json", typeof(string)));
+                Assert.Null(exception);
+                Assert.Null(formatter.GetSupportedContentTypes("application/json", typeof(string)));
+            }
+        }
+
+        [Fact]
+        public void TestGet_OutputFormatterMetadata_DontError()
+        {
+            // Arrange
+            var formatters = CreateOutputFormatters().ToList();
+            Assert.NotNull(formatters); // Guard assertion
+
+            // Act
+            foreach (var formatter in formatters)
+            {
+                formatter.SupportedMediaTypes.Clear();
+            }
+
+            // Assert
+            foreach (var formatter in formatters)
+            {
+                var exception = Record.Exception(() => formatter.GetSupportedContentTypes("application/json", typeof(string)));
+                Assert.Null(exception);
+                Assert.Null(formatter.GetSupportedContentTypes("application/json", typeof(string)));
+            }
+        }
+
+#endif
         private static IEdmModel CreateModel()
         {
             return new Mock<IEdmModel>().Object;

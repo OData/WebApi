@@ -1,8 +1,13 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="IWebApiActionDescriptor.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace Microsoft.AspNet.OData.Interfaces
 {
@@ -33,6 +38,12 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <param name="inherit">true to search this action's inheritance chain to find the attributes; otherwise, false.</param>
         /// <returns>A list of attributes of type T.</returns>
         IEnumerable<T> GetCustomAttributes<T>(bool inherit) where T : Attribute;
+
+        /// <summary>
+        /// Returns the <see cref="MethodInfo"/> representing the controller action.
+        /// </summary>
+        /// <returns>The <see cref="MethodInfo"/> representing the controller action.</returns>
+        MethodInfo GetMethodInfo();
 
         /// <summary>
         /// Determine if the Http method is a match.

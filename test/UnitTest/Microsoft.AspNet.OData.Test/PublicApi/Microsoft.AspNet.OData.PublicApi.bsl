@@ -255,9 +255,12 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public Delta`1 (System.Type structuralType)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties)
 	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo)
+	public Delta`1 (System.Type structuralType, System.Collections.Generic.IEnumerable`1[[System.String]] updatableProperties, System.Reflection.PropertyInfo dynamicDictionaryPropertyInfo, bool isComplexType)
 
 	System.Type ExpectedClrType  { public virtual get; }
+	bool IsComplexType  { public get; }
 	System.Type StructuredType  { public virtual get; }
+	System.Collections.Generic.IList`1[[System.String]] UpdatableProperties  { public get; }
 
 	public virtual void Clear ()
 	public void CopyChangedValues (TStructuralType original)
@@ -267,6 +270,7 @@ public class Microsoft.AspNet.OData.Delta`1 : TypedDelta, IDynamicMetaObjectProv
 	public virtual System.Collections.Generic.IEnumerable`1[[System.String]] GetUnchangedPropertyNames ()
 	public void Patch (TStructuralType original)
 	public void Put (TStructuralType original)
+	public bool TryGetNestedPropertyValue (string name, out System.Object& value)
 	public virtual bool TryGetPropertyType (string name, out System.Type& type)
 	public virtual bool TryGetPropertyValue (string name, out System.Object& value)
 	public virtual bool TrySetPropertyValue (string name, object value)
@@ -1033,8 +1037,11 @@ public abstract class Microsoft.AspNet.OData.Builder.OperationConfiguration {
 
 	public ParameterConfiguration AddParameter (string name, IEdmTypeConfiguration parameterType)
 	public ParameterConfiguration CollectionEntityParameter (string name)
+	public ParameterConfiguration CollectionEntityParameter (System.Type clrElementEntityType, string name)
 	public ParameterConfiguration CollectionParameter (string name)
+	public ParameterConfiguration CollectionParameter (System.Type clrElementType, string name)
 	public ParameterConfiguration EntityParameter (string name)
+	public ParameterConfiguration EntityParameter (System.Type clrEntityType, string name)
 	public ParameterConfiguration Parameter (string name)
 	public ParameterConfiguration Parameter (System.Type clrParameterType, string name)
 }
@@ -2240,6 +2247,12 @@ public class Microsoft.AspNet.OData.Formatter.ODataPrimitiveValueMediaTypeMappin
 	protected virtual bool IsMatch (Microsoft.OData.UriParser.PropertySegment propertySegment)
 }
 
+public class Microsoft.AspNet.OData.Formatter.ODataStreamMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
+	public ODataStreamMediaTypeMapping ()
+
+	public virtual double TryMatchMediaType (System.Net.Http.HttpRequestMessage request)
+}
+
 public class Microsoft.AspNet.OData.Formatter.QueryStringMediaTypeMapping : System.Net.Http.Formatting.MediaTypeMapping {
 	public QueryStringMediaTypeMapping (string queryStringParameterName, System.Net.Http.Headers.MediaTypeHeaderValue mediaType)
 	public QueryStringMediaTypeMapping (string queryStringParameterName, string mediaType)
@@ -2917,6 +2930,7 @@ public sealed class Microsoft.AspNet.OData.Routing.ODataRouteConstants {
 	public static readonly string DynamicProperty = "dynamicProperty"
 	public static readonly string Key = "key"
 	public static readonly string KeyCount = "ODataRouteKeyCount"
+	public static readonly string MethodInfo = "methodInfo"
 	public static readonly string NavigationProperty = "navigationProperty"
 	public static readonly string ODataPath = "odataPath"
 	public static readonly string ODataPathTemplate = "{*odataPath}"
@@ -3478,6 +3492,7 @@ public class Microsoft.AspNet.OData.Formatter.Serialization.ODataResourceSeriali
 	public virtual Microsoft.OData.ODataFunction CreateODataFunction (Microsoft.OData.Edm.IEdmFunction function, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataResource CreateResource (SelectExpandNode selectExpandNode, ResourceContext resourceContext)
 	public virtual SelectExpandNode CreateSelectExpandNode (ResourceContext resourceContext)
+	internal virtual Microsoft.OData.ODataStreamPropertyInfo CreateStreamProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
 	public virtual Microsoft.OData.ODataProperty CreateStructuralProperty (Microsoft.OData.Edm.IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
 	public virtual void WriteDeltaObjectInline (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
 	public virtual System.Threading.Tasks.Task WriteDeltaObjectInlineAsync (object graph, Microsoft.OData.Edm.IEdmTypeReference expectedType, Microsoft.OData.ODataWriter writer, ODataSerializerContext writeContext)
@@ -3645,6 +3660,7 @@ public class Microsoft.AspNet.OData.Query.Validators.FilterQueryValidator {
 	public virtual void ValidateCollectionResourceCastNode (Microsoft.OData.UriParser.CollectionResourceCastNode collectionResourceCastNode, ODataValidationSettings settings)
 	public virtual void ValidateConstantNode (Microsoft.OData.UriParser.ConstantNode constantNode, ODataValidationSettings settings)
 	public virtual void ValidateConvertNode (Microsoft.OData.UriParser.ConvertNode convertNode, ODataValidationSettings settings)
+	public virtual void ValidateCountNode (Microsoft.OData.UriParser.CountNode countNode, ODataValidationSettings settings)
 	public virtual void ValidateLogicalOperator (Microsoft.OData.UriParser.BinaryOperatorNode binaryNode, ODataValidationSettings settings)
 	public virtual void ValidateNavigationPropertyNode (Microsoft.OData.UriParser.QueryNode sourceNode, Microsoft.OData.Edm.IEdmNavigationProperty navigationProperty, ODataValidationSettings settings)
 	public virtual void ValidateQueryNode (Microsoft.OData.UriParser.QueryNode node, ODataValidationSettings settings)

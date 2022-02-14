@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="UpdatedODataResult.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System.Net;
 using System.Threading.Tasks;
@@ -52,7 +56,7 @@ namespace Microsoft.AspNet.OData.Results
             HttpRequest request = context.HttpContext.Request;
             IActionResult result = GetInnerActionResult(request);
             await result.ExecuteResultAsync(context);
-            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request)));
+            ResultHelpers.AddServiceVersion(response, () => ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request)));
         }
 
         internal IActionResult GetInnerActionResult(HttpRequest request)

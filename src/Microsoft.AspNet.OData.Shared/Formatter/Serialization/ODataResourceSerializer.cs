@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataResourceSerializer.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Concurrent;
@@ -592,6 +596,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     else
                     {
                         writer.WriteStart(resource);
+                        WriteStreamProperties(selectExpandNode, resourceContext, writer);
                         WriteComplexProperties(selectExpandNode, resourceContext, writer);
                         WriteDynamicComplexProperties(resourceContext, writer);
                         WriteNavigationLinks(selectExpandNode, resourceContext, writer);
@@ -633,6 +638,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                     else
                     {
                         await writer.WriteStartAsync(resource);
+                        await WriteStreamPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteComplexPropertiesAsync(selectExpandNode, resourceContext, writer);
                         await WriteDynamicComplexPropertiesAsync(resourceContext, writer);
                         await WriteNavigationLinksAsync(selectExpandNode, resourceContext, writer);
@@ -1269,6 +1275,58 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
         }
 
+        private void WriteStreamProperties(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(selectExpandNode != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (selectExpandNode.SelectedStructuralProperties != null)
+            {
+                IEnumerable<IEdmStructuralProperty> structuralProperties = selectExpandNode.SelectedStructuralProperties;
+
+                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                {
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        ODataStreamPropertyInfo property = CreateStreamProperty(structuralProperty, resourceContext);
+
+                        if (property != null)
+                        {
+                            writer.WriteStart(property);
+                            writer.WriteEnd();
+                        }
+                    }
+                }
+            }
+        }
+
+        private async Task WriteStreamPropertiesAsync(SelectExpandNode selectExpandNode, ResourceContext resourceContext, ODataWriter writer)
+        {
+            Contract.Assert(selectExpandNode != null);
+            Contract.Assert(resourceContext != null);
+            Contract.Assert(writer != null);
+
+            if (selectExpandNode.SelectedStructuralProperties != null)
+            {
+                IEnumerable<IEdmStructuralProperty> structuralProperties = selectExpandNode.SelectedStructuralProperties;
+
+                foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
+                {
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        ODataStreamPropertyInfo property = CreateStreamProperty(structuralProperty, resourceContext);
+
+                        if (property != null)
+                        {
+                            await writer.WriteStartAsync(property);
+                            await writer.WriteEndAsync();
+                        }
+                    }
+                }
+            }
+        }
+
         private IEnumerable<KeyValuePair<IEdmStructuralProperty, PathSelectItem>> GetPropertiesToWrite(SelectExpandNode selectExpandNode, ResourceContext resourceContext)
         {
             IDictionary<IEdmStructuralProperty, PathSelectItem> complexProperties = selectExpandNode.SelectedComplexTypeProperties;
@@ -1561,6 +1619,12 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 foreach (IEdmStructuralProperty structuralProperty in structuralProperties)
                 {
+                    if (structuralProperty.Type != null && structuralProperty.Type.IsStream())
+                    {
+                        // skip the stream property, the stream property is written in its own logic
+                        continue;
+                    }
+
                     ODataProperty property = CreateStructuralProperty(structuralProperty, resourceContext);
                     if (property != null)
                     {
@@ -1570,6 +1634,54 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// Creates the <see cref="ODataStreamPropertyInfo"/> to be written for the given stream property.
+        /// </summary>
+        /// <param name="structuralProperty">The EDM structural property being written.</param>
+        /// <param name="resourceContext">The context for the entity instance being written.</param>
+        /// <returns>The <see cref="ODataStreamPropertyInfo"/> to write.</returns>
+        internal virtual ODataStreamPropertyInfo CreateStreamProperty(IEdmStructuralProperty structuralProperty, ResourceContext resourceContext)
+        {
+            if (structuralProperty == null)
+            {
+                throw Error.ArgumentNull("structuralProperty");
+            }
+
+            if (resourceContext == null)
+            {
+                throw Error.ArgumentNull("resourceContext");
+            }
+
+            if (structuralProperty.Type == null || !structuralProperty.Type.IsStream())
+            {
+                return null;
+            }
+
+            if (resourceContext.SerializerContext.MetadataLevel != ODataMetadataLevel.FullMetadata)
+            {
+                return null;
+            }
+
+            // TODO: we need to return ODataStreamReferenceValue if
+            // 1) If we have the EditLink link builder
+            // 2) If we have the ReadLink link builder
+            // 3) If we have the Core.AcceptableMediaTypes annotation associated with the Stream property
+
+            // We need a way for the user to specify a mediatype for an instance of a stream property.
+            // If specified, we should explicitly write the streamreferencevalue and not let ODL fill it in.
+
+            // Although the mediatype is represented as an instance annotation in JSON, it's really control information.
+            // So we shouldn't use instance annotations to tell us the media type, but have a separate way to specify the media type.
+            // Perhaps we define an interface (and stream wrapper class that derives from stream and implements the interface) that exposes a MediaType property.
+            // If the stream property implements this interface, and it specifies a media-type other than application/octet-stream, we explicitly create and write a StreamReferenceValue with that media type.
+            // We could also use this type to expose properties for things like ReadLink and WriteLink(and even ETag)
+            // that the user could specify to something other than the default convention
+            // if they wanted to provide custom routes for reading/writing the stream values or custom ETag values for the stream.
+
+            // So far, let's return null and let OData.lib to calculate the ODataStreamReferenceValue by conventions.
+            return null;
         }
 
         /// <summary>

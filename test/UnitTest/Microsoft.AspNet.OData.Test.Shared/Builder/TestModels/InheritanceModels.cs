@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="InheritanceModels.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -50,6 +54,60 @@ namespace Microsoft.AspNet.OData.Test.Builder.TestModels
 
         [NotMapped]
         public IEnumerable<MotorcycleManufacturer> Manufacturers { get; set; }
+
+        public Engine MyEngine { get; set; }
+
+        public V4 MyV4Engine { get; set; }
+
+    }
+
+    public class Engine
+    {
+        public int Hp { get; set; }
+
+        public Transmission Transmission { get; set; }
+    }
+
+    public class Transmission
+    {
+        public int Gears { get; set; }
+    }
+
+    public class Automatic: Transmission
+    {
+
+    }
+
+    public class Manual : Transmission
+    {
+
+    }
+
+
+
+    public class V2: Engine
+    {
+
+    }
+
+    public class V4 : Engine
+    {
+
+    }
+
+    public class V41: V4
+    {
+        public string MakeName { get; set; }
+    }
+
+    public class V42 : V4
+    {
+        public string Model { get; set; }
+    }
+
+    public class V422 : V42
+    {
+        
     }
 
     public class SportBike : Motorcycle

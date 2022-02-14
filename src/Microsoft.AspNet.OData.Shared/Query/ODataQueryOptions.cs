@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataQueryOptions.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -832,29 +836,22 @@ namespace Microsoft.AspNet.OData.Query
         private string GetAutoSelectRawValue()
         {
             var selectRawValue = RawValues.Select;
-            var autoSelectRawValue = String.Empty;
-            IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
             if (String.IsNullOrEmpty(selectRawValue))
             {
-                var autoSelectProperties = EdmLibHelpers.GetAutoSelectProperties(Context.TargetProperty,
-                    Context.TargetStructuredType, Context.Model);
-
-                foreach (var property in autoSelectProperties)
+                IEnumerable<SelectModelPath> autoSelectProperties = null;
+                if (Context.TargetStructuredType != null && Context.TargetProperty != null)
                 {
-                    if (!String.IsNullOrEmpty(autoSelectRawValue))
-                    {
-                        autoSelectRawValue += ",";
-                    }
-
-                    if (baseEntityType != null && property.DeclaringType != baseEntityType)
-                    {
-                        autoSelectRawValue += String.Format(CultureInfo.InvariantCulture, "{0}/",
-                            property.DeclaringType.FullTypeName());
-                    }
-
-                    autoSelectRawValue += property.Name;
+                    autoSelectProperties = Context.Model.GetAutoSelectPaths(Context.TargetStructuredType, Context.TargetProperty);
+                }
+                else if (Context.ElementType is IEdmStructuredType structuredType)
+                {
+                    autoSelectProperties = Context.Model.GetAutoSelectPaths(structuredType, null);
                 }
 
+                string autoSelectRawValue = autoSelectProperties == null ? null : string.Join(",", autoSelectProperties.Select(a => a.SelectPath));
+
+                // TODO: so far, it's ok to duplicate the select property in one $select from ODL.
+                // But, it's better to remove the duplicate select property.
                 if (!String.IsNullOrEmpty(autoSelectRawValue))
                 {
                     if (!String.IsNullOrEmpty(selectRawValue))
@@ -875,33 +872,26 @@ namespace Microsoft.AspNet.OData.Query
         private string GetAutoExpandRawValue()
         {
             var expandRawValue = RawValues.Expand;
-            IEdmEntityType baseEntityType = Context.TargetStructuredType as IEdmEntityType;
-            var autoExpandRawValue = String.Empty;
-            var autoExpandNavigationProperties = EdmLibHelpers.GetAutoExpandNavigationProperties(
-                Context.TargetProperty, Context.TargetStructuredType, Context.Model,
-                !String.IsNullOrEmpty(RawValues.Select));
 
-            foreach (var property in autoExpandNavigationProperties)
+            IEnumerable<ExpandModelPath> autoExpandNavigationProperties = null;
+            if (Context.TargetStructuredType != null && Context.TargetProperty != null)
             {
-                if (!String.IsNullOrEmpty(autoExpandRawValue))
-                {
-                    autoExpandRawValue += ",";
-                }
-
-                if (property.DeclaringEntityType() != baseEntityType)
-                {
-                    autoExpandRawValue += String.Format(CultureInfo.InvariantCulture, "{0}/",
-                        property.DeclaringEntityType().FullTypeName());
-                }
-
-                autoExpandRawValue += property.Name;
+                autoExpandNavigationProperties = Context.Model.GetAutoExpandPaths(Context.TargetStructuredType, Context.TargetProperty, !string.IsNullOrEmpty(RawValues.Select));
+            }
+            else if (Context.ElementType is IEdmStructuredType elementType)
+            {
+                autoExpandNavigationProperties = Context.Model.GetAutoExpandPaths(elementType, null, !string.IsNullOrEmpty(RawValues.Select));
             }
 
-            if (!String.IsNullOrEmpty(autoExpandRawValue))
+            string autoExpandRawValue = autoExpandNavigationProperties == null ? null : string.Join(",", autoExpandNavigationProperties.Select(c => c.ExpandPath));
+
+            // TODO: so far, it's ok to duplicate the expand property in one $expand from ODL.
+            // But, it's better to remove the duplicate expand property.
+            if (!string.IsNullOrEmpty(autoExpandRawValue))
             {
-                if (!String.IsNullOrEmpty(expandRawValue))
+                if (!string.IsNullOrEmpty(expandRawValue))
                 {
-                    expandRawValue = String.Format(CultureInfo.InvariantCulture, "{0},{1}",
+                    expandRawValue = string.Format(CultureInfo.InvariantCulture, "{0},{1}",
                         autoExpandRawValue, expandRawValue);
                 }
                 else

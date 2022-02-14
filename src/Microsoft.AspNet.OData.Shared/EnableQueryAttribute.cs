@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EnableQueryAttribute.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -611,7 +615,7 @@ namespace Microsoft.AspNet.OData
                 {
                     IQueryable queryable = singleResultCollection as IQueryable;
                     queryable = ApplyQuery(queryable, queryOptions);
-                    return SingleOrDefault(queryable, actionDescriptor);
+                    return QueryHelpers.SingleOrDefault(queryable, actionDescriptor);
                 }
             }
             else
@@ -677,44 +681,6 @@ namespace Microsoft.AspNet.OData
         }
 
         /// <summary>
-        /// Get a single or default value from a collection.
-        /// </summary>
-        /// <param name="queryable">The response value as <see cref="IQueryable"/>.</param>
-        /// <param name="actionDescriptor">The action context, i.e. action and controller name.</param>
-        /// <returns></returns>
-        internal static object SingleOrDefault(
-            IQueryable queryable,
-            IWebApiActionDescriptor actionDescriptor)
-        {
-            var enumerator = queryable.GetEnumerator();
-            try
-            {
-                var result = enumerator.MoveNext() ? enumerator.Current : null;
-
-                if (enumerator.MoveNext())
-                {
-                    throw new InvalidOperationException(Error.Format(
-                        SRResources.SingleResultHasMoreThanOneEntity,
-                        actionDescriptor.ActionName,
-                        actionDescriptor.ControllerName,
-                        "SingleResult"));
-                }
-
-                return result;
-            }
-            finally
-            {
-                // Ensure any active/open database objects that were created
-                // iterating over the IQueryable object are properly closed.
-                var disposable = enumerator as IDisposable;
-                if (disposable != null)
-                {
-                    disposable.Dispose();
-                }
-            }
-        }
-
-        /// <summary>
         /// Validate the select and expand options.
         /// </summary>
         /// <param name="queryOptions">The query options.</param>
@@ -752,65 +718,25 @@ namespace Microsoft.AspNet.OData
             }
 
             IEdmType edmType = model.GetTypeMappingCache().GetEdmType(elementClrType, model)?.Definition;
-            IEdmEntityType baseEntityType = edmType as IEdmEntityType;
             IEdmStructuredType structuredType = edmType as IEdmStructuredType;
-            IEdmProperty property = null;
+
+            IEdmStructuredType pathStructuredType = null;
+            IEdmProperty pathProperty = null;
             if (path != null)
             {
-                string name;
-                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out property,
-                    out structuredType,
-                    out name);
+                EdmLibHelpers.GetPropertyAndStructuredTypeFromPath(path.Segments, out pathProperty,
+                    out pathStructuredType,
+                    out _);
             }
 
-            if (baseEntityType != null)
+            // Take the type and property from path first, it's higher priority than the value type.
+            if (pathStructuredType != null && pathProperty != null)
             {
-                List<IEdmEntityType> entityTypes = new List<IEdmEntityType>();
-                entityTypes.Add(baseEntityType);
-                entityTypes.AddRange(EdmLibHelpers.GetAllDerivedEntityTypes(baseEntityType, model));
-                foreach (var entityType in entityTypes)
-                {
-                    IEnumerable<IEdmNavigationProperty> navigationProperties = entityType == baseEntityType
-                        ? entityType.NavigationProperties()
-                        : entityType.DeclaredNavigationProperties();
-                    if (navigationProperties != null)
-                    {
-                        if (navigationProperties.Any(
-                                navigationProperty =>
-                                    EdmLibHelpers.IsAutoExpand(navigationProperty, property, entityType, model)))
-                        {
-                            return true;
-                        }
-                    }
-
-                    IEnumerable<IEdmStructuralProperty> properties = entityType == baseEntityType
-                        ? entityType.StructuralProperties()
-                        : entityType.DeclaredStructuralProperties();
-                    if (properties != null)
-                    {
-                        foreach (var edmProperty in properties)
-                        {
-                            if (EdmLibHelpers.IsAutoSelect(edmProperty, property, entityType, model))
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
+                return model.HasAutoExpandProperty(pathStructuredType, pathProperty) || model.HasAutoSelectProperty(pathStructuredType, pathProperty);
             }
             else if (structuredType != null)
             {
-                IEnumerable<IEdmStructuralProperty> properties = structuredType.StructuralProperties();
-                if (properties != null)
-                {
-                    foreach (var edmProperty in properties)
-                    {
-                        if (EdmLibHelpers.IsAutoSelect(edmProperty, property, structuredType, model))
-                        {
-                            return true;
-                        }
-                    }
-                }
+                return model.HasAutoExpandProperty(structuredType, null) || model.HasAutoSelectProperty(structuredType, null);
             }
 
             return false;

@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataRouteConstants.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Microsoft.AspNet.OData.Routing
 {
@@ -32,6 +36,11 @@ namespace Microsoft.AspNet.OData.Routing
         /// Route data key for the action name.
         /// </summary>
         public static readonly string Action = "action";
+
+        /// <summary>
+        /// Route data key for the <see cref="System.Reflection.MethodInfo"/> representing a controller action.
+        /// </summary>
+        public static readonly string MethodInfo = "methodInfo";
 
         /// <summary>
         /// Route data key for the controller name.

@@ -1,10 +1,15 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataActionSelector.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Contracts;
 using System.Linq;
+using System.Reflection;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Routing.Conventions;
@@ -124,7 +129,8 @@ namespace Microsoft.AspNet.OData.Routing
                 IList<string> availableKeys = routeData.Values.Keys
                     .Where((key) => !RoutingConventionHelpers.IsRouteParameter(key)
                         && key != ODataRouteConstants.Action
-                        && key != ODataRouteConstants.ODataPath)
+                        && key != ODataRouteConstants.ODataPath
+                        && key != ODataRouteConstants.MethodInfo)
                     .Select(k => k.ToLowerInvariant())
                     .ToList();
 
@@ -136,7 +142,7 @@ namespace Microsoft.AspNet.OData.Routing
 
                 // Filter out types we know how to bind out of the parameter lists. These values
                 // do not show up in RouteData() but will bind properly later.
-                var considerCandidates = candidates
+                IEnumerable<ActionIdAndParameters> considerCandidates = candidates
                     .Select(c => new ActionIdAndParameters(
                         id: c.Id,
                         parameterCount: c.Parameters.Count,
@@ -161,8 +167,8 @@ namespace Microsoft.AspNet.OData.Routing
                 // Method(key,ODataQueryOptions) vs Method(key).
                 // Method(key,relatedKey) vs Method(key).
                 // Method(key,relatedKey,ODataPath) vs Method(key,relatedKey).
-                var matchedCandidates = considerCandidates
-                    .Where(c => TryMatch(context, c.FilteredParameters, availableKeys,
+                List<ActionIdAndParameters> matchedCandidates = considerCandidates
+                    .Where(c => TryMatch(context, c.ActionDescriptor, c.FilteredParameters, availableKeys,
                         optionalWrapper, c.TotalParameterCount, availableKeysCount))
                     .OrderByDescending(c => c.FilteredParameters.Count)
                     .ThenByDescending(c => c.TotalParameterCount)
@@ -171,9 +177,18 @@ namespace Microsoft.AspNet.OData.Routing
                 // if there are still multiple candidate actions at this point, let's try some tie-breakers
                 if (matchedCandidates.Count > 1)
                 {
-                    // prioritize actions which explicitly declare the request method
+                    // prioritize actions with explicit [ODataRoute] (i.e. attribute routing)
+                    ActionIdAndParameters bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                        candidate.ActionDescriptor is ControllerActionDescriptor action
+                        && action.MethodInfo.GetCustomAttributes<ODataRouteAttribute>().Any());
+                    if (bestCandidate != null)
+                    {
+                        return bestCandidate.ActionDescriptor;
+                    }
+
+                    // Next in priority, actions which explicitly declare the request method
                     // e.g. using [AcceptVerbs("POST")], [HttpPost], etc.
-                    var bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
+                    bestCandidate = matchedCandidates.FirstOrDefault(candidate =>
                         ActionAcceptsMethod(candidate.ActionDescriptor as ControllerActionDescriptor, context.HttpContext.Request.Method));
                     if (bestCandidate != null)
                     {
@@ -203,6 +218,7 @@ namespace Microsoft.AspNet.OData.Routing
         /// of the action with the data in the route.
         /// </summary>
         /// <param name="context">The current <see cref="RouteContext"/></param>
+        /// <param name="actionDescriptor">The action descriptor</param>
         /// <param name="parameters">Parameters of the action. This excludes the <see cref="ODataPath"/> and <see cref="Query.ODataQueryOptions"/> parameters</param>
         /// <param name="availableKeys">The names of the keys found in the uri (entity set keys, related keys, operation parameters)</param>
         /// <param name="optionalWrapper">Used to check whether a parameter is optional</param>
@@ -212,12 +228,37 @@ namespace Microsoft.AspNet.OData.Routing
         /// <returns></returns>
         private bool TryMatch(
             RouteContext context,
+            ActionDescriptor actionDescriptor,
             IList<ParameterDescriptor> parameters,
             IList<string> availableKeys,
             ODataOptionalParameter optionalWrapper,
             int totalParameterCount,
             int availableKeysCount)
         {
+
+            if (actionDescriptor is ControllerActionDescriptor controllerActionDescriptor)
+            {
+                // if this specific method was selected (e.g. via AttributeRouting)
+                // then we return a match regardless of whether or not the parameters of
+                // the method match the keys in the route
+                if (context.RouteData.Values.TryGetValue(ODataRouteConstants.MethodInfo, out object method) && method is MethodInfo methodInfo)
+                {
+                    if (controllerActionDescriptor.MethodInfo == methodInfo)
+                    {
+                        return true;
+                    }
+                }
+
+                // if action has [EnableNestedPaths] attribute, then it doesn't
+                // need to match parameters, since this action is expected to
+                // match arbitrarily nested paths even if it doesn't have any parameters
+                if (controllerActionDescriptor.MethodInfo
+                    .GetCustomAttributes<EnableNestedPathsAttribute>().Any())
+                {
+                    return true;
+                }
+            }
+
             // navigationProperty is optional in some cases, therefore an action
             // should not be rejected simply because it does not declare a navigationProperty parameter
             if (availableKeys.Contains(ODataRouteConstants.NavigationProperty.ToLowerInvariant()))
@@ -233,9 +274,9 @@ namespace Microsoft.AspNet.OData.Routing
             }
 
             bool matchedBody = false;
-            var conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
+            IDictionary<string, object> conventionsStore = context.HttpContext.ODataFeature().RoutingConventionsStore;
             // use the parameter name to match.
-            foreach (var p in parameters)
+            foreach (ParameterDescriptor p in parameters)
             {
                 string parameterName = p.Name.ToLowerInvariant();
                 if (availableKeys.Contains(parameterName))
@@ -288,7 +329,6 @@ namespace Microsoft.AspNet.OData.Routing
 
             return true;
         }
-
         private bool RequestHasBody(RouteContext context)
         {
             string method = context.HttpContext.Request.Method;
@@ -311,7 +351,7 @@ namespace Microsoft.AspNet.OData.Routing
         {
             Contract.Assert(action != null);
 
-            var param = action.MethodInfo.GetParameters().FirstOrDefault(p => p.Name == paramName);
+            ParameterInfo param = action.MethodInfo.GetParameters().FirstOrDefault(p => p.Name == paramName);
             if (param == null)
             {
                 return false;
@@ -327,8 +367,8 @@ namespace Microsoft.AspNet.OData.Routing
                 return false;
             }
 
-            var modelMetadata = _modelMetadataProvider.GetMetadataForType(param.ParameterType);
-            var binderContext = new ModelBinderFactoryContext()
+            ModelMetadata modelMetadata = _modelMetadataProvider.GetMetadataForType(param.ParameterType);
+            ModelBinderFactoryContext binderContext = new ModelBinderFactoryContext()
             {
                 Metadata = modelMetadata,
                 BindingInfo = param.BindingInfo,
@@ -338,7 +378,7 @@ namespace Microsoft.AspNet.OData.Routing
 
             try
             {
-                var binder = _modelBinderFactory.CreateBinder(binderContext);
+                IModelBinder binder = _modelBinderFactory.CreateBinder(binderContext);
                 // ignore some built-in model binders because we already account for parameters that come from the request
                 return (!(binder is SimpleTypeModelBinder)
                     && !(binder is BodyModelBinder)

@@ -1,13 +1,30 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EnableQueryAttributeTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 #if NETCORE
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Routing;
+using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.AspNet.OData.Test.Common.Models;
 using Microsoft.AspNet.OData.Test.Query.Controllers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OData;
+using Microsoft.OData.Edm;
 using Xunit;
 #else
 using System;
@@ -254,8 +271,70 @@ namespace Microsoft.AspNet.OData.Test.Query
         {
             ExceptionAssert.ThrowsArgumentNull(() => new EnableQueryAttribute().OnActionExecuted(null), "actionExecutedContext");
         }
-
 #if NETCORE // Following functionality is only supported in NetCore.
+        [Fact]
+        public void OnActionExecuted_HandlesStatusCodesCorrectly()
+        {
+            // Arrange
+            HttpContext httpContext = new DefaultHttpContext();
+            httpContext.Request.Method = "Get";
+            ActionDescriptor actionDescriptor = new ActionDescriptor();
+            ActionContext actionContext = new ActionContext(httpContext, new RouteData(), actionDescriptor);
+
+            ActionExecutedContext context = new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), "someController");
+            context.Result = new ObjectResult(new { Error = "Error", Message = "Message" }) { StatusCode = 500 };
+
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+
+            // Act and Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+        }
+
+        [Fact]
+        public void OnActionExecuted_HandlesRequestsNormally()
+        {
+            // Arrange
+            var routeName = "odata";
+            IEdmModel model = new CustomersModelWithInheritance().Model;
+            var configuration = RoutingConfigurationFactory.Create();
+
+            configuration.Filter();
+
+            var request = RequestFactory.CreateFromModel(model, "http://localhost/odata/Customers?$filter=Id eq 1", routeName, new ODataPath());
+
+            IServiceProvider serviceProvider = GetServiceProvider(configuration, model, routeName);
+            request.ODataFeature().RequestContainer = serviceProvider;
+            HttpContext httpContext = request.HttpContext;
+            httpContext.RequestServices = serviceProvider;
+
+            ActionDescriptor actionDescriptor = ControllerDescriptorFactory
+                                                .Create(configuration, "CustomersController", typeof(CustomersController))
+                                                .First(descriptor => descriptor.ActionName.StartsWith("Get", StringComparison.OrdinalIgnoreCase));
+            ActionContext actionContext = new ActionContext(httpContext, new RouteData(), actionDescriptor);
+
+            ActionExecutedContext context = new ActionExecutedContext(actionContext, new List<IFilterMetadata>(), new CustomersController());
+            context.Result = new ObjectResult(new List<Customer>()) { StatusCode = 200 };
+
+            EnableQueryAttribute attribute = new EnableQueryAttribute();
+
+            // Act and Assert
+            ExceptionAssert.DoesNotThrow(() => attribute.OnActionExecuted(context));
+
+            Assert.NotNull(context.Result as ObjectResult);
+        }
+
+        private IServiceProvider GetServiceProvider(IRouteBuilder builder, IEdmModel model, string routeName)
+        {
+            IPerRouteContainer perRouteContainer = builder.ServiceProvider.GetRequiredService<IPerRouteContainer>();
+
+            // Create an service provider for this route. Add the default services to the custom configuration actions.
+            Action<IContainerBuilder> builderAction = ODataRouteBuilderExtensions.ConfigureDefaultServices(builder, b =>
+            {
+                b.AddService(Microsoft.OData.ServiceLifetime.Singleton, sp => model);
+            });
+            return perRouteContainer.CreateODataRootContainer(routeName, builderAction);
+        }
+
         [Fact]
         public void OnActionExecuting_Throws_Null_Context()
         {
@@ -871,8 +950,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             Customer customer = new Customer();
             IQueryable<Customer> queryable = new[] { customer }.AsQueryable();
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
-
-            var result = EnableQueryAttribute.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor));
+            var result = QueryHelpers.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor));
 
             Assert.Same(customer, result);
         }
@@ -883,7 +961,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             IQueryable<Customer> queryable = Enumerable.Empty<Customer>().AsQueryable();
             HttpActionDescriptor actionDescriptor = new Mock<HttpActionDescriptor>().Object;
 
-            var result = EnableQueryAttribute.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor));
+            var result = QueryHelpers.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor));
 
             Assert.Null(result);
         }
@@ -900,7 +978,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             };
 
             ExceptionAssert.Throws<InvalidOperationException>(
-                () => EnableQueryAttribute.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor)),
+                () => QueryHelpers.SingleOrDefault(queryable, new WebApiActionDescriptor(actionDescriptor)),
                 "The action 'SomeAction' on controller 'SomeName' returned a SingleResult containing more than one element. " +
                 "SingleResult must have zero or one elements.");
         }
@@ -926,7 +1004,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             };
 
             // Act
-            EnableQueryAttribute.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
+            QueryHelpers.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
 
             // Assert
             disposable.Verify();
@@ -954,7 +1032,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             };
 
             // Act
-            EnableQueryAttribute.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
+            QueryHelpers.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
 
             // Assert
             disposable.Verify();
@@ -984,7 +1062,7 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Act (will throw)
             try
             {
-                EnableQueryAttribute.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
+                QueryHelpers.SingleOrDefault(queryable.Object, new WebApiActionDescriptor(actionDescriptor));
             }
             catch
             {
@@ -1100,8 +1178,8 @@ namespace Microsoft.AspNet.OData.Test.Query
         public void OnActionExecuted_Works_WithPath()
         {
             // Arrange
-            Customer customer = new Customer();
-            SingleResult singleResult = new SingleResult<Customer>(new[] { customer }.AsQueryable());
+            SimpleCustomer customer = new SimpleCustomer();
+            SingleResult singleResult = new SingleResult<SimpleCustomer>(new[] { customer }.AsQueryable());
             HttpActionExecutedContext actionExecutedContext = GetActionExecutedContext("http://localhost/", singleResult);
             EnableQueryAttribute attribute = new EnableQueryAttribute();
             HttpRequestMessage request = actionExecutedContext.Request;
@@ -1116,6 +1194,12 @@ namespace Microsoft.AspNet.OData.Test.Query
             // Assert
             Assert.Equal(HttpStatusCode.OK, actionExecutedContext.Response.StatusCode);
             Assert.Equal(customer, ((ObjectContent)actionExecutedContext.Response.Content).Value);
+        }
+
+        private class SimpleCustomer
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
 
         [Fact]

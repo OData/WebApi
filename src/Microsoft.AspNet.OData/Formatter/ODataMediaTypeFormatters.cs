@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataMediaTypeFormatters.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
@@ -50,6 +54,7 @@ namespace Microsoft.AspNet.OData.Formatter
             formatter.MediaTypeMappings.Add(new ODataEnumValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataBinaryValueMediaTypeMapping());
             formatter.MediaTypeMappings.Add(new ODataCountMediaTypeMapping());
+            formatter.MediaTypeMappings.Add(new ODataStreamMediaTypeMapping());
             return formatter;
         }
 

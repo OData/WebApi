@@ -1,0 +1,107 @@
+schedules:
+- cron: "0 0 * * *"
+  displayName: Daily Nightly build
+  branches:
+    include:
+    - master
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: master
+variables:
+  BuildPlatform: 'Any Cpu'
+  BuildConfiguration: 'Release'
+  RootDir: '$(Build.SourcesDirectory)'
+  ProductBinPath: '$(RootDir)\bin\$(BuildConfiguration)'
+  RELEASE_SEMANTICS: '$(ReleaseSemantics)'
+  SourcesRoot: '$(RootDir)'
+stages:
+- stage: Build
+  variables:
+    - group: SigningConfig
+  jobs:
+    - job: Main
+      displayName: Main Build
+      # setting a 3hour timeout as webapi tests normally take about 2hr 30 mins
+      timeoutInMinutes: 180
+      pool:
+        vmImage: windows-latest
+      steps:
+      - template: ./common.yml
+      - task: MSBuild@1
+        displayName: 'Get Nuget Package Metadata'
+        inputs:
+          solution: tools/GetNugetPackageMetadata.proj
+          platform: '$(BuildPlatform)'
+          configuration: '$(BuildConfiguration)'
+      - pwsh: |
+               $date = Get-Date
+               $NightlyBuildVersion = $date.ToString('yyyyMMddHHmm')
+               echo "##vso[task.setvariable variable=NightlyBuildVersion]$NightlyBuildVersion"
+        displayName: Generate Nightly Build version
+      - task: DotNetCoreCLI@2
+        displayName: Packing ASP.NET Core OData
+        inputs:
+          command: custom
+          custom: pack
+          arguments: >
+            $(RootDir)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.csproj
+            /p:NuspecFile=$(rootDir)\src\Microsoft.AspNetCore.OData\Microsoft.AspNetCore.OData.$(RELEASE_SEMANTICS).nuspec
+            --configuration=$(buildConfiguration) 
+            --output=$(Build.ArtifactStagingDirectory)\Packages 
+            -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg
+
+      - task: NuGetCommand@2
+        displayName: 'Packing AspNet.OData'
+        inputs:
+          command: custom
+          arguments: pack $(RootDir)\src\Microsoft.AspNet.OData\Microsoft.AspNet.OData.$(RELEASE_SEMANTICS).nuspec -NonInteractive -OutputDirectory $(Build.ArtifactStagingDirectory)\Packages -Properties Configuration=$(BuildConfiguration);ProductRoot=$(ProductBinPath);SourcesRoot=$(Build.SourcesDirectory);VersionNuGetSemantic=$(VersionNuGetSemantic);NightlyBuildVersion=$(NightlyBuildVersion);AspNetPackageDependency="$(AspNetPackageDependency)";DependencyInjection1PackageDependency="$(DependencyInjection1PackageDependency)";ODataLibPackageDependency="$(ODataLibPackageDependency)" -Verbosity Detailed -Symbols  -SymbolPackageFormat snupkg
+      - publish: $(Build.ArtifactStagingDirectory)\Packages
+        displayName: Publish Build Artifacts  
+        artifact: BuildPackages
+      - pwsh: |
+              $config = "{""SignClient"":{""AzureAd"":{""AADInstance"":""$(AADInstance)"",""ClientId"":""$(ClientId)"",""TenantId"":""$(TenantId)""},""Service"":{""Url"":""https://codesign.dotnetfoundation.org/"",""ResourceId"":""$(ResourceId)""}}}"
+              $config > .\configs\SignClient.json
+        displayName: Generate Sign config
+      - publish: configs
+        displayName: Publish Signing Scripts
+        artifact: configs
+
+- stage: CodeSign
+  condition: and(succeeded('Build'), not(eq(variables['build.reason'], 'PullRequest')))
+  jobs:
+  - deployment: CodeSign
+    displayName: Code Signing
+    pool:
+      vmImage: windows-latest    
+    environment: Code Sign - Approvals
+    variables:
+    - group: Code Signing
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: custom
+              custom: tool
+              arguments: install --tool-path . SignClient
+            displayName: Install SignTool tool
+
+          - pwsh: |
+              .\SignClient "Sign" `
+              --baseDirectory "$(Pipeline.Workspace)\BuildPackages" `
+              --input "**/*.nupkg" `
+              --config "$(Pipeline.Workspace)\configs\SignClient.json" `
+              --filelist "$(Pipeline.Workspace)\configs\filelist.txt" `
+              --user "$(SignClientUser)" `
+              --secret "$(SignClientSecret)" `
+              --name "Code Sign packages" `
+              --description "Signing packages" `
+              --descriptionUrl "https://github.com/OData/WebApi"
+            displayName: Sign packages
+              
+          - publish: $(Pipeline.Workspace)/BuildPackages
+            displayName: Publish Signed Packages
+            artifact: SignedPackages

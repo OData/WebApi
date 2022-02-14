@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="SelectImprovementOnComplexTypeTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System.Linq;
 using System.Net;
@@ -226,7 +230,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         #endregion
 
         #region Nested query option on select
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("Taxes", "\"Taxes\":[7,5,9]")]
         [InlineData("Taxes($filter=$it eq 5)", "\"Taxes\":[5]")]
         [InlineData("Taxes($filter=$it le 8)", "\"Taxes\":[7,5]")]
@@ -240,7 +244,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             ExecuteAndVerifyQueryRequest(requestUri, equals);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("Taxes($orderby=$it)", "\"Taxes\":[5,7,9]")]
         [InlineData("Taxes($orderby =$it desc)", "\"Taxes\":[9,7,5]")]
         public void QueryEntityWithSelectOnCollectionPrimitivePropertyWithNestedOrderby(string select, string value)
@@ -267,7 +271,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             ExecuteAndVerifyQueryRequest(requestUri, equals);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("HomeLocation/Emails($filter=$it eq 'E3')")]
         [InlineData("HomeLocation($select=Emails($filter=$it eq 'E3'))")]
         public void QueryEntityWithSelectOnSubCollectionPrimitivePropertyOfComplexTypePropertyWithNestedFilter(string select)
@@ -282,7 +286,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             ExecuteAndVerifyQueryRequest(requestUri, equals);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("HomeLocation/Emails($orderby=$it)")]
         [InlineData("HomeLocation($select=Emails($orderby=$it desc))")]
         public void QueryEntityWithSelectOnCollectionPrimitivePropertyOfComplexPropertyWithNestedOrderby(string select)
@@ -320,7 +324,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             ExecuteAndVerifyQueryRequest(requestUri, equals);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("RepoLocations/Emails($filter=$it eq 'E3')")]
         [InlineData("RepoLocations($select=Emails($filter=$it eq 'E3'))")]
         public void QueryEntityWithSelectOnSubCollectionPrimitivePropertyOfCollectionComplexTypePropertyWithFilter(string select)
@@ -339,7 +343,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
             ExecuteAndVerifyQueryRequest(requestUri, equals);
         }
 
-        [Theory]
+        [Theory(Skip = "TODO: enable it when ODL supports $this")]
         [InlineData("RepoLocations/Emails($orderby=$it;$top=1;$skip=2)")]
         [InlineData("RepoLocations($select=Emails($orderby=$it;$top=1;$skip=2))")]
         public void QueryEntityWithSelectOnSubCollectionPrimitivePropertyOfCollectionComplexTypePropertyWithOrderByTopSkip(string select)
@@ -532,4 +536,3 @@ namespace Microsoft.Test.E2E.AspNet.OData.NavigationPropertyOnComplexType
         }
     }
 }
-

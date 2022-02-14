@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ResultHelpers.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Diagnostics.Contracts;
@@ -71,7 +75,7 @@ namespace Microsoft.AspNet.OData.Results
             }
         }
 
-        internal static ODataVersion GetODataResponseVersion(HttpRequest request)
+        internal static ODataVersion GetODataVersion(HttpRequest request)
         {
             Contract.Assert(request != null, "GetODataResponseVersion called with a null request");
             return request.ODataMaxServiceVersion() ??

@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataMetadataSerializer.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Threading.Tasks;
@@ -49,8 +53,7 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
             // NOTE: ODataMessageWriter doesn't have a way to set the IEdmModel. So, there is an underlying assumption here that
             // the model received by this method and the model passed(from configuration) while building ODataMessageWriter is the same (clr object).
 
-            // Note: MessageWriter doesn't have a WriteMetadataDocumentAsync method. We should fix that by providing a default implementation in the base class.
-            return Task.Run(() => messageWriter.WriteMetadataDocument());
+            return messageWriter.WriteMetadataDocumentAsync();
         }
     }
 }

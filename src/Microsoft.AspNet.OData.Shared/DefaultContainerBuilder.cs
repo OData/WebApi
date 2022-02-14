@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="DefaultContainerBuilder.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Reflection;
@@ -85,9 +89,7 @@ namespace Microsoft.AspNet.OData
             * More info at https://github.com/OData/WebApi/pull/1082
             */
 
-            Assembly microsoftExtensionsDependencyInjectionAssembly = services.GetType().GetTypeInfo().Assembly;
-            TypeInfo serviceCollectionContainerBuilderExtensionsType = microsoftExtensionsDependencyInjectionAssembly.GetType(typeof(ServiceCollectionContainerBuilderExtensions).GetTypeInfo().FullName).GetTypeInfo();
-            MethodInfo buildServiceProviderMethod = serviceCollectionContainerBuilderExtensionsType.GetMethod("BuildServiceProvider", new[] { typeof(IServiceCollection) });
+            MethodInfo buildServiceProviderMethod = typeof(ServiceCollectionContainerBuilderExtensions).GetMethod(nameof(ServiceCollectionContainerBuilderExtensions.BuildServiceProvider), new[] { typeof(IServiceCollection) });
 
             return (IServiceProvider)buildServiceProviderMethod.Invoke(null, new object[] { services });
         }

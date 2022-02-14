@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataOutputFormatter.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -200,7 +204,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             // Add version header.
-            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(ResultHelpers.GetODataResponseVersion(request));
+            response.Headers[ODataVersionConstraint.ODataServiceVersionHeader] = ODataUtils.ODataVersionToString(ResultHelpers.GetODataVersion(request));
         }
 
         /// <inheritdoc/>
@@ -220,6 +224,15 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             HttpResponse response = context.HttpContext.Response;
+            if (typeof(Stream).IsAssignableFrom(type))
+            {
+                // Ideally, it should go into the "ODataRawValueSerializer",
+                // However, OData lib doesn't provide the method to overwrite/copyto stream
+                // So, Here's the workaround
+                Stream objStream = context.Object as Stream;
+                return CopyStreamAsync(objStream, response);
+            }
+
             Uri baseAddress = GetBaseAddressInternal(request);
             MediaTypeHeaderValue contentType = GetContentType(response.Headers[HeaderNames.ContentType].FirstOrDefault());
 
@@ -237,7 +250,7 @@ namespace Microsoft.AspNet.OData.Formatter
                 type,
                 context.Object,
                 request.GetModel(),
-                ResultHelpers.GetODataResponseVersion(request),
+                ResultHelpers.GetODataVersion(request),
                 baseAddress,
                 contentType,
                 new WebApiUrlHelper(request.GetUrlHelper()),
@@ -247,6 +260,16 @@ namespace Microsoft.AspNet.OData.Formatter
                 (edmType) => serializerProvider.GetEdmTypeSerializer(edmType),
                 (objectType) => serializerProvider.GetODataPayloadSerializer(objectType, request),
                 getODataSerializerContext);
+        }
+
+        private static async Task CopyStreamAsync(Stream source, HttpResponse response)
+        {
+            if (source != null)
+            {
+                await source.CopyToAsync(response.Body);
+            }
+
+            await response.Body.FlushAsync();
         }
 
         /// <summary>
@@ -287,6 +310,18 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
+        }
+
+        /// <inheritdoc />
+        public override IReadOnlyList<string> GetSupportedContentTypes(string contentType, Type objectType)
+        {
+            if (SupportedMediaTypes.Count == 0)
+            {
+                // note: this is parity with the base implementation when there are no matches
+                return default;
+            }
+
+            return base.GetSupportedContentTypes(contentType, objectType);
         }
 
         private MediaTypeHeaderValue GetContentType(string contentTypeValue)

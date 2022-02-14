@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ReflectionAssert.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Linq.Expressions;
@@ -38,7 +42,30 @@ namespace Microsoft.AspNet.OData.Test.Common
             TestPropertyValue(instance, getFunc, setFunc, value, value);
         }
 
-        public static void Property<T, TResult>(T instance, Expression<Func<T, TResult>> propertyGetter, TResult expectedDefaultValue, bool allowNull = false, TResult roundTripTestValue = null) where TResult : class
+        public static void Property<T, TResult>(
+            T instance,
+            Expression<Func<T, TResult>> propertyGetter,
+            TResult expectedDefaultValue,
+            bool allowNull = false,
+            TResult roundTripTestValue = null)
+            where TResult : class
+        {
+            Property<T, TResult, ArgumentNullException>(
+                instance,
+                propertyGetter,
+                expectedDefaultValue,
+                allowNull,
+                roundTripTestValue);
+        }
+
+        public static void Property<T, TResult, TException>(
+            T instance,
+            Expression<Func<T, TResult>> propertyGetter,
+            TResult expectedDefaultValue,
+            bool allowNull = false,
+            TResult roundTripTestValue = null)
+            where TResult : class
+            where TException : ArgumentException
         {
             PropertyInfo property = GetPropertyInfo(propertyGetter);
             Func<T, TResult> getFunc = (obj) => (TResult)property.GetValue(obj, index: null);
@@ -52,10 +79,20 @@ namespace Microsoft.AspNet.OData.Test.Common
             }
             else
             {
-                ExceptionAssert.ThrowsArgumentNull(() =>
-                {
-                    setFunc(instance, null);
-                }, "value");
+                TException ex = ExceptionAssert.Throws<TException>(
+                    () =>
+                    {
+                        try
+                        {
+                            setFunc(instance, null);
+                        }
+                        catch (TargetInvocationException e)
+                        {
+                            throw e.InnerException;
+                        }
+                    });
+
+                Assert.Equal("value", ex.ParamName);
             }
 
             if (roundTripTestValue != null)

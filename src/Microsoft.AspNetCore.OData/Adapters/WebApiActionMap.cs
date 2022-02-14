@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="WebApiActionMap.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -42,6 +46,19 @@ namespace Microsoft.AspNet.OData.Adapters
         public bool Contains(string name)
         {
             return this.innerMap.Any(a => String.Equals(a.ActionName, name, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        /// <summary>
+        /// Gets the action descriptor of the specified action
+        /// </summary>
+        /// <param name="actionName">The name of the action</param>
+        /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
+        public IWebApiActionDescriptor GetActionDescriptor(string actionName)
+        {
+            ControllerActionDescriptor innerDescriptor = this.innerMap.FirstOrDefault(
+                a => string.Equals(a.ActionName, actionName, StringComparison.InvariantCultureIgnoreCase));
+
+            return innerDescriptor == null ? null : new WebApiActionDescriptor(innerDescriptor);
         }
     }
 }

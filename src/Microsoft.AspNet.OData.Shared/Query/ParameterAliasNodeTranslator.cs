@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ParameterAliasNodeTranslator.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Linq;
@@ -398,7 +402,7 @@ namespace Microsoft.AspNet.OData.Query
         /// <returns>The translated node.</returns> 
         public override QueryNode Visit(CountNode nodeIn)
         {
-            return new CountNode((CollectionNode)nodeIn.Source.Accept(this));
+            return new CountNode((CollectionNode)nodeIn.Source.Accept(this), nodeIn.FilterClause, nodeIn.SearchClause);
         }
     }
 }

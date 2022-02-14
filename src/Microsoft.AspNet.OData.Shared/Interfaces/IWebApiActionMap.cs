@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="IWebApiActionMap.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 namespace Microsoft.AspNet.OData.Interfaces
 {
@@ -19,5 +23,12 @@ namespace Microsoft.AspNet.OData.Interfaces
         /// <param name="name">The key.</param>
         /// <returns>True if the key exist; false otherwise.</returns>
         bool Contains(string name);
+
+        /// <summary>
+        /// Gets the action descriptor of the specified action
+        /// </summary>
+        /// <param name="actionName">The name of the action</param>
+        /// <returns>The <see cref="IWebApiActionDescriptor"/> if it exists, otherwise null</returns>
+        IWebApiActionDescriptor GetActionDescriptor(string actionName);
     }
 }

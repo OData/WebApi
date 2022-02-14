@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EnableQueryAttribute.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -140,7 +144,7 @@ namespace Microsoft.AspNet.OData
                 {
                     elementType = TypeHelper.GetImplementedIEnumerableType(returnType);
                 }
-                else if(TypeHelper.IsGenericType(returnType) && returnType.GetGenericTypeDefinition() == typeof(Task<>))
+                else if (TypeHelper.IsGenericType(returnType) && returnType.GetGenericTypeDefinition() == typeof(Task<>))
                 {
                     elementType = returnType.GetGenericArguments().First();
                 }
@@ -228,46 +232,44 @@ namespace Microsoft.AspNet.OData
             {
                 // actionExecutedContext.Result might also indicate a status code that has not yet
                 // been applied to the result; make sure it's also successful.
-                StatusCodeResult statusCodeResult = actionExecutedContext.Result as StatusCodeResult;
-                if (statusCodeResult == null || IsSuccessStatusCode(statusCodeResult.StatusCode))
+                ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
+
+                if (responseContent != null && (responseContent.StatusCode == null || IsSuccessStatusCode(responseContent.StatusCode.Value)))
                 {
-                    ObjectResult responseContent = actionExecutedContext.Result as ObjectResult;
-                    if (responseContent != null)
+
+                    //throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
+                    //    actionExecutedContext.Result.GetType().FullName);
+
+                    // Get collection from SingleResult.
+                    IQueryable singleResultCollection = null;
+                    SingleResult singleResult = responseContent.Value as SingleResult;
+                    if (singleResult != null)
                     {
-                        //throw Error.Argument("actionExecutedContext", SRResources.QueryingRequiresObjectContent,
-                        //    actionExecutedContext.Result.GetType().FullName);
+                        // This could be a SingleResult, which has the property Queryable.
+                        // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
+                        // on the property and get the one with the most parameters.
+                        PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
+                            .OrderBy(p => p.GetIndexParameters().Count())
+                            .Where(p => p.Name.Equals("Queryable"))
+                            .LastOrDefault();
 
-                        // Get collection from SingleResult.
-                        IQueryable singleResultCollection = null;
-                        SingleResult singleResult = responseContent.Value as SingleResult;
-                        if (singleResult != null)
-                        {
-                            // This could be a SingleResult, which has the property Queryable.
-                            // But it could be a SingleResult() or SingleResult<T>. Sort by number of parameters
-                            // on the property and get the one with the most parameters.
-                            PropertyInfo propInfo = responseContent.Value.GetType().GetProperties()
-                                .OrderBy(p => p.GetIndexParameters().Count())
-                                .Where(p => p.Name.Equals("Queryable"))
-                                .LastOrDefault();
+                        singleResultCollection = propInfo.GetValue(singleResult) as IQueryable;
+                    }
 
-                            singleResultCollection = propInfo.GetValue(singleResult) as IQueryable;
-                        }
+                    // Execution the action.
+                    object queryResult = OnActionExecuted(
+                        responseContent.Value,
+                        singleResultCollection,
+                        new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor),
+                        new WebApiRequestMessage(request),
+                        (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
+                        (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
+                        (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
+                        (statusCode, message, exception) => actionExecutedContext.Result = CreateBadRequestResult(message, exception));
 
-                        // Execution the action.
-                        object queryResult = OnActionExecuted(
-                            responseContent.Value,
-                            singleResultCollection,
-                            new WebApiActionDescriptor(actionDescriptor as ControllerActionDescriptor),
-                            new WebApiRequestMessage(request),
-                            (elementClrType) => GetModel(elementClrType, request, actionDescriptor),
-                            (queryContext) => CreateAndValidateQueryOptions(request, queryContext),
-                            (statusCode) => actionExecutedContext.Result = new StatusCodeResult((int)statusCode),
-                            (statusCode, message, exception) => actionExecutedContext.Result = CreateBadRequestResult(message, exception));
-
-                        if (queryResult != null)
-                        {
-                            responseContent.Value = queryResult;
-                        }
+                    if (queryResult != null)
+                    {
+                        responseContent.Value = queryResult;
                     }
                 }
             }

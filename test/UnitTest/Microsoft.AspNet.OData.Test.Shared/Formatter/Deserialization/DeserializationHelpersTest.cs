@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="DeserializationHelpersTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -24,9 +28,11 @@ using Microsoft.OData;
 using Microsoft.OData.Edm;
 using Moq;
 using Xunit;
+using Microsoft.AspNet.OData.Builder;
 
 namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class DeserializationHelpersTest
     {
         [Theory]
@@ -507,6 +513,42 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             Assert.Equal(expectedErrorMessage, exception.Message);
         }
 
+        [Theory]
+        [InlineData('\n', "\\n")]
+        [InlineData('\r', "\\r")]
+        [InlineData('\t', "\\t")]
+        [InlineData('\"', "\"")]
+        [InlineData('\\', "\\\\")]
+        [InlineData('\b', "\\b")]
+        [InlineData('\f', "\\f")]
+        public void ApplyProperty_UntypedValueOfTypeStringUnescaped(char token, string tokenEscaped)
+        {
+            // Arrange
+            var escapedValue = "\"Update of memo" + tokenEscaped + "4" + tokenEscaped + "40\"";
+            var propertyValue = new ODataUntypedValue { RawValue = escapedValue };
+            var property = new ODataProperty { Name = "Memo", Value = propertyValue };
+
+            EdmEntityType openType = new EdmEntityType("NS", "OpenType", null, false, true);
+            openType.AddKeys(openType.AddStructuralProperty("Id",
+                EdmLibHelpers.GetEdmPrimitiveTypeReferenceOrNull(typeof(int))));
+            EdmEntityTypeReference openTypeReference = new EdmEntityTypeReference(openType, isNullable: false);
+            ODataDeserializerProvider provider = ODataDeserializerProviderFactory.Create();
+
+            var resource = new OpenTypeTestClass();
+            var model = new EdmModel();
+            model.AddElement(openType);
+            model.SetAnnotationValue(openType, new DynamicPropertyDictionaryAnnotation(
+                typeof(OpenTypeTestClass).GetProperty("DynamicProperties")));
+
+            // Act
+            DeserializationHelpers.ApplyProperty(property, openTypeReference, resource, provider,
+                new ODataDeserializerContext { Model = model });
+
+            // Assert
+            Assert.True(resource.DynamicProperties.ContainsKey("Memo"));
+            Assert.Equal("Update of memo" + token + "4" + token + "40", resource.DynamicProperties["Memo"]);
+        }
+
         private static IEdmProperty GetMockEdmProperty(string name, EdmPrimitiveTypeKind elementType)
         {
             Mock<IEdmProperty> property = new Mock<IEdmProperty>();
@@ -617,6 +659,17 @@ namespace Microsoft.AspNet.OData.Test.Formatter.Deserialization
             {
                 throw new NotImplementedException();
             }
+        }
+
+        private class OpenTypeTestClass
+        {
+            public OpenTypeTestClass()
+            {
+                DynamicProperties = new Dictionary<string, object>();
+            }
+
+            public int Id { get; set; }
+            public IDictionary<string, object> DynamicProperties { get; set; }
         }
     }
 }

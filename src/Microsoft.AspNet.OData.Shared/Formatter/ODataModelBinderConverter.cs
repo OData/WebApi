@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataModelBinderConverter.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -31,7 +35,9 @@ namespace Microsoft.AspNet.OData.Formatter
     public static class ODataModelBinderConverter
     {
         private static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
-            .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+            .Single(m => m.Name.Equals("TryParse", StringComparison.Ordinal)
+                && m.GetParameters().Length == 2
+                && m.GetParameters()[0].ParameterType.Equals(typeof(string)));
 
         private static readonly MethodInfo CastMethodInfo = typeof(Enumerable).GetMethod("Cast");
 

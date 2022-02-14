@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="DeserializationHelpers.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -8,6 +12,7 @@ using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.OData;
@@ -577,7 +582,9 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                 throw new ODataException(Error.Format(SRResources.InvalidODataUntypedValue, value));
             }
 
-            return value.Substring(1, value.Length - 2);
+            // `JsonValueUtils`'s `GetEscapedJsonString` method in ODL converts string
+            // to Json-formatted string with specific special characters escaped.
+            return UnescapeString(value.Substring(1, value.Length - 2));
         }
 
         private static object ConvertEnumValue(ODataEnumValue enumValue, ref IEdmTypeReference propertyType,
@@ -602,6 +609,22 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
 
             ODataEdmTypeDeserializer deserializer = deserializerProvider.GetEdmTypeDeserializer(edmEnumType);
             return deserializer.ReadInline(enumValue, propertyType, readContext);
+        }
+
+        /// <summary>
+        /// Converts any escaped characters in the input string.
+        /// </summary>
+        /// <param name="inputString">The input string containing the text to convert.</param>
+        /// <returns>String with any escaped characters converted to their unescaped form.</returns>
+        private static string UnescapeString(string inputString)
+        {
+            if (string.IsNullOrWhiteSpace(inputString))
+            {
+                return inputString;
+            }
+
+            // Make use `Regex`'s `Unescape` method to pick out any escaped special characters and unescape them
+            return Regex.Unescape(inputString);
         }
 
         // The same logic from ODL to get the element type name in a collection.

@@ -1,12 +1,19 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EnableQueryTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
+#if NETCORE
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Query;
@@ -14,6 +21,23 @@ using Microsoft.AspNet.OData.Test.Abstraction;
 using Microsoft.AspNet.OData.Test.Common;
 using Microsoft.OData.Edm;
 using Xunit;
+#else
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Threading.Tasks;
+using System.Web.Http;
+using Microsoft.AspNet.OData.Builder;
+using Microsoft.AspNet.OData.Extensions;
+using Microsoft.AspNet.OData.Query;
+using Microsoft.AspNet.OData.Test.Abstraction;
+using Microsoft.AspNet.OData.Test.Common;
+using Microsoft.OData.Edm;
+using Xunit;
+#endif
 
 namespace Microsoft.AspNet.OData.Test
 {
@@ -448,13 +472,17 @@ namespace Microsoft.AspNet.OData.Test
 
         [Theory]
         [MemberData(nameof(AutoExpandedTestData))]
-        public async Task EnableQuery_Works_WithAutoExpanded(string queryString)
+        public async Task EnableQuery_Works_WithAutoExpand(string queryString)
         {
             // Arrange
             string url = "http://localhost/odata/AutoExpandedCustomers";
             Type[] controllers = new Type[] { typeof(AutoExpandedCustomersController) };
+
             ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
             builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
+            builder.EntitySet<EnableQueryCategory>("EnableQueryCategories");
+            builder.EntityType<PremiumEnableQueryCategory>();
+
             IEdmModel model = builder.GetEdmModel();
             var server = TestServerFactory.Create(controllers, (config) =>
             {
@@ -466,6 +494,59 @@ namespace Microsoft.AspNet.OData.Test
 
             // Act
             HttpResponseMessage response = await client.GetAsync(url + queryString);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            Assert.Contains("1234", responseString);
+            Assert.Contains("5678", responseString);
+        }
+
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(false, true)]
+        [InlineData(true, false)]
+        [InlineData(true, true)]
+        public async Task EnableQuery_Works_WithAutoExpandAndOperation(bool useAction, bool includeQueryString)
+        {
+            // Arrange
+            string baseUrl = "http://localhost/odata/AutoExpandedCustomers/";
+            Type[] controllers = new Type[] { typeof(AutoExpandedCustomersController) };
+
+            ODataModelBuilder builder = ODataConventionModelBuilderFactory.Create();
+            builder.EntitySet<AutoExpandedCustomer>("AutoExpandedCustomers");
+            builder.EntitySet<EnableQueryCategory>("EnableQueryCategories");
+            builder.EntityType<PremiumEnableQueryCategory>();
+
+            builder.EntityType<AutoExpandedCustomer>().Collection.Action("GetCategoryViaAction")
+                .ReturnsFromEntitySet<EnableQueryCategory>("EnableQueryCategories")
+                .Parameter(typeof(int), "id");
+            builder.EntityType<AutoExpandedCustomer>().Collection.Function("GetCategoryViaFunction")
+                .ReturnsFromEntitySet<EnableQueryCategory>("EnableQueryCategories")
+                .Parameter(typeof(int), "id");
+
+            IEdmModel model = builder.GetEdmModel();
+            var server = TestServerFactory.Create(controllers, (config) =>
+            {
+                config.MapODataServiceRoute("odata", "odata", model);
+                config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
+            });
+
+            HttpClient client = TestServerFactory.CreateClient(server);
+
+            // Act
+            HttpResponseMessage response = null;
+            if (useAction)
+            {
+                response = await client.PostAsync(
+                    baseUrl + "GetCategoryViaAction" + (includeQueryString ? "?a=b" : ""),
+                    new StringContent("{\"id\":1}", Encoding.UTF8, "application/json"));
+            }
+            else
+            {
+                response = await client.GetAsync(baseUrl + "GetCategoryViaFunction(id=1)" + (includeQueryString ? "?a=b" : ""));
+            }
+
             string responseString = await response.Content.ReadAsStringAsync();
 
             // Assert
@@ -602,6 +683,19 @@ namespace Microsoft.AspNet.OData.Test
             public IQueryable<AutoExpandedCustomer> Get()
             {
                 return _autoCustomers;
+            }
+
+            [EnableQuery]
+            [HttpPost]
+            public IQueryable<EnableQueryCategory> GetCategoryViaAction(ODataActionParameters parameters)
+            {
+                return _autoCustomers.Where(x => x.Id == (int)parameters["id"]).Select(x => x.Category).AsQueryable();
+            }
+
+            [EnableQuery]
+            public IQueryable<EnableQueryCategory> GetCategoryViaFunction(int id)
+            {
+                return _autoCustomers.Where(x => x.Id == id).Select(x => x.Category).AsQueryable();
             }
 
             static AutoExpandedCustomersController()

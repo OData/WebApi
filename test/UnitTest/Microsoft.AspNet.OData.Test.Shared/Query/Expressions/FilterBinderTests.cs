@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="FilterBinderTests.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -25,6 +29,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Query.Expressions
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class FilterBinderTests
     {
         private const string NotTesting = "";
@@ -72,7 +77,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             }
         }
 
-#region Inequalities
+        #region Inequalities
         [Theory]
         [InlineData(null, true, true)]
         [InlineData("", false, false)]
@@ -221,9 +226,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 expectedExpression);
         }
 
-#endregion
+        #endregion
 
-#region Logical Operators
+        #region Logical Operators
 
         [Fact]
         [ReplaceCulture]
@@ -324,9 +329,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "$it => Convert(Not(Not(Not($it.Discontinued))))",
                 "$it => (Not(Not(Not($it.Discontinued))) == True)");
         }
-#endregion
+        #endregion
 
-#region Arithmetic Operators
+        #region Arithmetic Operators
         [Theory]
         [InlineData(null, false, false)]
         [InlineData(5.0, true, true)]
@@ -378,9 +383,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 String.Format(CultureInfo.InvariantCulture, "$it => (($it.UnitPrice % Convert({0:0.00})) < Convert({1:0.00}))", 1.0, 5.0),
                 NotTesting);
         }
-#endregion
+        #endregion
 
-#region NULL  handling
+        #region NULL  handling
         [Theory]
         [InlineData("UnitsInStock eq UnitsOnOrder", null, null, false, true)]
         [InlineData("UnitsInStock ne UnitsOnOrder", null, null, false, false)]
@@ -424,7 +429,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 NotTesting,
                 "$it => (IIF((($it.ProductName == null) OrElse (\"Abc\" == null)), null, Convert($it.ProductName.StartsWith(\"Abc\"))) == True)");
         }
-#endregion
+        #endregion
 
         [Theory]
         [InlineData("StringProp gt 'Middle'", "Middle", false)]
@@ -524,7 +529,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
-#region Any/All
+        #region Any/All
 
         [Fact]
         public void AnyOnNavigationEnumerableCollections()
@@ -826,9 +831,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                NotTesting);
         }
 
-#endregion
+        #endregion
 
-#region String Functions
+        #region String Functions
 
         [Theory]
         [InlineData("Abcd", -1, "Abcd", true, typeof(ArgumentOutOfRangeException))]
@@ -1054,9 +1059,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
               new { WithNullPropagation = false, WithoutNullPropagation = typeof(InvalidOperationException) });
         }
 
-#endregion
+        #endregion
 
-#region Date Functions
+        #region Date Functions
         [Fact]
         public void DateDay()
         {
@@ -1214,6 +1219,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             "$it => ((((2015-02-26.Year * 10000) + (2015-02-26.Month * 100)) + 2015-02-26.Day) >= ((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day))")]
         [InlineData("null ne date(DiscontinuedDate)", "$it => (null != $it.DiscontinuedDate)")]
         [InlineData("date(DiscontinuedDate) eq null", "$it => ($it.DiscontinuedDate == null)")]
+        [InlineData("date(DiscontinuedDate) eq date(DiscontinuedDate)",
+            "$it => (((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day) == ((($it.DiscontinuedDate.Value.Year * 10000) + ($it.DiscontinuedDate.Value.Month * 100)) + $it.DiscontinuedDate.Value.Day))")]
+        [InlineData("date(now()) eq date(now())",
+            "$it => ((((DateTimeOffset.UtcNow.Year * 10000) + (DateTimeOffset.UtcNow.Month * 100)) + DateTimeOffset.UtcNow.Day) == (((DateTimeOffset.UtcNow.Year * 10000) + (DateTimeOffset.UtcNow.Month * 100)) + DateTimeOffset.UtcNow.Day))")]
         public void DateFunction_Nullable(string filter, string expression)
         {
             VerifyQueryDeserialization(filter, expression, NotTesting);
@@ -1257,7 +1266,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             VerifyQueryDeserialization(filter, expression);
         }
 
-#endregion
+        #endregion
 
         #region Math Functions
         [Theory, MemberData(nameof(MathRoundDecimal_DataSet))]
@@ -1410,9 +1419,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             var filters = VerifyQueryDeserialization<DataTypes>(filter);
             RunFilters(filters, new DataTypes(), new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
-#endregion
+        #endregion
 
-#region Custom Functions
+        #region Custom Functions
 
         [Fact]
         public void CustomMethod_InstanceMethodOfDeclaringType()
@@ -1472,7 +1481,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 string filter = String.Format("padright(ProductName, {0}) eq '{1}'", totalWidth, expectedProductName);
 
                 Action filterToExpression = () => VerifyQueryDeserialization(filter);
-                ExceptionAssert.Throws(typeof(NotImplementedException),filterToExpression);
+                ExceptionAssert.Throws(typeof(NotImplementedException), filterToExpression);
             }
             finally
             {
@@ -1585,9 +1594,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             }
         }
 
-#endregion
+        #endregion
 
-#region Data Types
+        #region Data Types
         [Fact]
         public void GuidExpression()
         {
@@ -1650,7 +1659,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "LongProp lt -987654321L and LongProp gt -123456789l",
                 "$it => (($it.LongProp < -987654321) AndAlso ($it.LongProp > -123456789))");
         }
-        
+
         [Fact]
         public void EnumInExpression()
         {
@@ -1661,7 +1670,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
             var values = (IList<SimpleEnum>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
-            Assert.Equal(new[] {SimpleEnum.First, SimpleEnum.Second}, values);
+            Assert.Equal(new[] { SimpleEnum.First, SimpleEnum.Second }, values);
         }
 
         [Fact]
@@ -1682,9 +1691,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
-            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, SimpleEnum.Second}, values);
+            Assert.Equal(new SimpleEnum?[] { SimpleEnum.First, SimpleEnum.Second }, values);
         }
-        
+
         [Fact]
         public void EnumInExpression_NullableEnum_WithNullValue()
         {
@@ -1695,7 +1704,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
 
             var memberAccess = (MemberExpression)((MethodCallExpression)expression.Body).Arguments[0];
             var values = (IList<SimpleEnum?>)ExpressionBinderBase.ExtractParameterizedConstant(memberAccess);
-            Assert.Equal(new SimpleEnum?[] {SimpleEnum.First, null}, values);
+            Assert.Equal(new SimpleEnum?[] { SimpleEnum.First, null }, values);
         }
 
         [Fact]
@@ -1769,9 +1778,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
-#endregion
+        #endregion
 
-#region Casts
+        #region Casts
 
         [Fact]
         public void NSCast_OnEnumerableEntityCollection_GeneratesExpression_WithOfTypeOnEnumerable()
@@ -1874,9 +1883,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "The child type 'Edm.NonExistentType' in a cast was not an entity type. Casts can only be performed on entity types.");
         }
 
-#endregion
+        #endregion
 
-#region cast in query option
+        #region cast in query option
 
         [Theory]
         [InlineData("cast(null,Edm.Int16) eq null", "$it => (null == null)")]
@@ -2315,7 +2324,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Theory]
-        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "$it => (($it As DerivedProduct).DerivedProductName == null)","$it => (IIF((($it As DerivedProduct) == null), null, ($it As DerivedProduct).DerivedProductName) == null)")]
+        [InlineData("cast('Microsoft.AspNet.OData.Test.Query.Expressions.DerivedProduct')/DerivedProductName eq null", "$it => (($it As DerivedProduct).DerivedProductName == null)", "$it => (IIF((($it As DerivedProduct) == null), null, ($it As DerivedProduct).DerivedProductName) == null)")]
         [InlineData("cast(Category,'Microsoft.AspNet.OData.Test.Query.Expressions.DerivedCategory')/DerivedCategoryName eq null", "$it => (($it.Category As DerivedCategory).DerivedCategoryName == null)", "$it => (IIF((($it.Category As DerivedCategory) == null), null, ($it.Category As DerivedCategory).DerivedCategoryName) == null)")]
         public void CastToQuotedEntityOrComplexType_DerivedProductName(string filter, string expectedExpression, string expectedExpressionWithNullCheck)
         {
@@ -2325,10 +2334,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 expectedResult: expectedExpression,
                 expectedResultWithNullPropagation: expectedExpressionWithNullCheck);
         }
-                
-#endregion
 
-#region 'isof' in query option
+        #endregion
+
+        #region 'isof' in query option
 
         [Theory]
         [InlineData("isof(Edm.Int16)", "$it => IIF(($it Is System.Int16), True, False)")]
@@ -2606,10 +2615,10 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             };
 
             // Act & Assert
-           var filters = VerifyQueryDeserialization<Product>(
-                filter,
-                expectedResult: NotTesting,
-                expectedResultWithNullPropagation: NotTesting);
+            var filters = VerifyQueryDeserialization<Product>(
+                 filter,
+                 expectedResult: NotTesting,
+                 expectedResultWithNullPropagation: NotTesting);
             RunFilters<Product>(filters, model, expectedValue: new { WithNullPropagation = true, WithoutNullPropagation = true });
         }
 
@@ -2635,9 +2644,9 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             RunFilters<Product>(filters, model, expectedValue: new { WithNullPropagation = false, WithoutNullPropagation = false });
         }
 
-#endregion
+        #endregion
 
-#region parameter alias for filter query option
+        #region parameter alias for filter query option
 
         [Theory]
         // Parameter alias value is not null.
@@ -2784,7 +2793,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 "Syntax error: character '#' is not valid at position 11 in 'IntProp eq #p'.");
         }
 
-#endregion
+        #endregion
 
 #if NETFX // Binary only supported on Net Framework
         [Theory]
@@ -2905,6 +2914,44 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         }
 
         [Fact]
+        public void DateTimeConstants_Are_Parameterized()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z",
+                "$it => ($it.Birthday == 11/08/2016 00:00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("Birthday eq 2016-11-08Z", "$it => ($it.Birthday == 11/08/2016 00:00:00)", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Parameterized()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00",
+                "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)",
+                NotTesting);
+        }
+
+        [Fact]
+        public void DateTimeOffsetsConstants_Are_Not_Parameterized_IfDisabled()
+        {
+            TimeZoneInfoHelper.TimeZone = TimeZoneInfo.Utc;
+            VerifyQueryDeserialization("NonNullableDiscontinuedDate eq 2016-11-08T00:00:00+00:00", "$it => ($it.NonNullableDiscontinuedDate == 11/08/2016 00:00:00 +00:00)", settingsCustomizer: (settings) =>
+            {
+                settings.EnableConstantParameterization = false;
+            });
+        }
+
+        [Fact]
         public void CollectionConstants_Are_Parameterized()
         {
             var result = VerifyQueryDeserialization("ProductName in ('Prod1', 'Prod2')",
@@ -2972,7 +3019,18 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
                 new { WithNullPropagation = withNullPropagation, WithoutNullPropagation = withNullPropagation });
         }
 
-#region Negative Tests
+        [Theory]
+        [InlineData("AlternateAddresses/$count gt 2", "$it => ($it.AlternateAddresses.LongCount() > 2)", "$it => ((IIF(($it.AlternateAddresses == null), null, Convert($it.AlternateAddresses.LongCount())) > Convert(2)) == True)")] // Products?$filter=AlternateAddresses/$count gt 2
+        [InlineData("Category/Products/$count($filter=ProductID gt 2) gt 2", "$it => ($it.Category.Products.Where($it => ($it.ProductID > 2)).LongCount() > 2)", "$it => ((IIF((IIF(($it.Category == null), null, $it.Category.Products).Where($it => ($it.ProductID > 2)) == null), null, Convert(IIF(($it.Category == null), null, $it.Category.Products).Where($it => ($it.ProductID > 2)).LongCount())) > Convert(2)) == True)")] // Products?$filter=Category/Products/$count($filter=ProductID gt 2) gt 2
+        public void CountExpression(string clause, string expectedExpression, string expectedExpressionWithNullPropagation)
+        {
+            VerifyQueryDeserialization(
+                clause,
+                expectedExpression,
+                expectedExpressionWithNullPropagation);
+        }
+
+        #region Negative Tests
 
         [Fact]
         public void TypeMismatchInComparison()
@@ -2980,7 +3038,7 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             ExceptionAssert.Throws<ODataException>(() => Bind("length(123) eq 12"));
         }
 
-#endregion
+        #endregion
 
         private Expression<Func<Product, bool>> Bind(string filter, ODataQuerySettings querySettings = null)
         {

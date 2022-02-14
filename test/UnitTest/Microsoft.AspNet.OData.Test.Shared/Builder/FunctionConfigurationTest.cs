@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="FunctionConfigurationTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -843,7 +847,7 @@ namespace Microsoft.AspNet.OData.Test.Builder
             var functionBuilder = movie.Function("FunctionName").Returns<int>();
             functionBuilder.Parameter(paramType, "p1");
 
-            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", BindingFlags.Instance | BindingFlags.Public);
+            MethodInfo method = typeof(OperationConfiguration).GetMethod("CollectionParameter", new Type[] { typeof(string) });
             method.MakeGenericMethod(paramType).Invoke(functionBuilder, new[] { "p2" });
 
             // Act

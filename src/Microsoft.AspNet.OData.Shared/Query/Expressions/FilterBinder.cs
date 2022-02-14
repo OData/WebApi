@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="FilterBinder.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -29,6 +33,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
     public class FilterBinder : ExpressionBinderBase
     {
         private const string ODataItParameterName = "$it";
+        private const string ODataThisParameterName = "$this";
 
         private Stack<Dictionary<string, ParameterExpression>> _parametersStack = new Stack<Dictionary<string, ParameterExpression>>();
         private Dictionary<string, ParameterExpression> _lambdaParameters;
@@ -223,7 +228,31 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 countMethod = ExpressionHelperMethods.EnumerableCountGeneric.MakeGenericMethod(elementType);
             }
 
-            // call Count() method. 
+            MethodInfo whereMethod;
+            if (typeof(IQueryable).IsAssignableFrom(source.Type))
+            {
+                whereMethod = ExpressionHelperMethods.QueryableWhereGeneric.MakeGenericMethod(elementType);
+            }
+            else
+            {
+                whereMethod = ExpressionHelperMethods.EnumerableWhereGeneric.MakeGenericMethod(elementType);
+            }
+
+            // Bind the inner $filter clause within the $count segment.
+            // e.g Books?$filter=Authors/$count($filter=Id gt 1) gt 1
+            Expression filterExpression = null;
+            if (node.FilterClause != null)
+            {
+                filterExpression = BindFilterClause(this, node.FilterClause, elementType);
+
+                // The source expression looks like: $it.Authors
+                // So the generated source expression below will look like: $it.Authors.Where($it => $it.Id > 1)
+                source = Expression.Call(null, whereMethod, new[] { source, filterExpression });
+            }
+
+            // append LongCount() method.
+            // The final countExpression with the nested $filter clause will look like: $it.Authors.Where($it => $it.Id > 1).LongCount()
+            // The final countExpression without the nested $filter clause will look like: $it.Authors.LongCount()
             countExpression = Expression.Call(null, countMethod, new[] { source });
 
             if (QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True)
@@ -338,7 +367,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             {
                 // To support to cast Entity/Complex type to the sub type now.
                 Expression source;
-                if(node.Source != null)
+                if (node.Source != null)
                 {
                     source = BindCastSourceNode(node.Source);
                 }
@@ -473,6 +502,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             Expression left = Bind(binaryOperatorNode.Left);
             Expression right = Bind(binaryOperatorNode.Right);
 
+            bool containsDateFunction = ContainsDateFunction(binaryOperatorNode);
             // handle null propagation only if either of the operands can be null
             bool isNullPropagationRequired = QuerySettings.HandleNullPropagation == HandleNullPropagationOption.True && (IsNullable(left.Type) || IsNullable(right.Type));
             if (isNullPropagationRequired)
@@ -504,11 +534,11 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                 }
 
                 // Expression trees do a very good job of handling the 3VL truth table if we pass liftToNull true.
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: liftToNull);
+                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: liftToNull, containsDateFunction);
             }
             else
             {
-                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: false);
+                return CreateBinaryExpression(binaryOperatorNode.OperatorKind, left, right, liftToNull: false, containsDateFunction);
             }
         }
 
@@ -600,7 +630,18 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         /// <returns>The LINQ <see cref="Expression"/> created.</returns>
         public virtual Expression BindRangeVariable(RangeVariable rangeVariable)
         {
-            ParameterExpression parameter = _lambdaParameters[rangeVariable.Name];
+            ParameterExpression parameter = null;
+
+            // When we have a $this RangeVariable, we still create a $it parameter.
+            // i.e $it => $it instead of $this => $this
+            if (rangeVariable.Name == ODataThisParameterName)
+            {
+                parameter = _lambdaParameters[ODataItParameterName];
+            }
+            else
+            {
+                parameter = _lambdaParameters[rangeVariable.Name];
+            }
             return ConvertNonStandardPrimitives(parameter);
         }
 
@@ -903,7 +944,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             foreach (RangeVariable rangeVariable in rangeVariables)
             {
                 ParameterExpression parameter;
-                if (!_lambdaParameters.TryGetValue(rangeVariable.Name, out parameter))
+
+                // Create a Parameter Expression for rangeVariables which are not $it Lambda parameters or $this.
+                if (!_lambdaParameters.TryGetValue(rangeVariable.Name, out parameter) && rangeVariable.Name != ODataThisParameterName)
                 {
                     // Work-around issue 481323 where UriParser yields a collection parameter type
                     // for primitive collections rather than the inner element type of the collection.

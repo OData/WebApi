@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="StructuralTypeConfiguration.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -97,9 +101,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _namespace = value;
@@ -118,9 +122,9 @@ namespace Microsoft.AspNet.OData.Builder
             }
             set
             {
-                if (value == null)
+                if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw Error.PropertyNull();
+                    throw Error.PropertyNullOrWhiteSpace();
                 }
 
                 _name = value;

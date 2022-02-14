@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="OperationConfiguration.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -289,12 +293,31 @@ namespace Microsoft.AspNet.OData.Builder
         /// <summary>
         /// Adds a new non-binding collection parameter
         /// </summary>
+        public ParameterConfiguration CollectionParameter(Type clrElementType, string name)
+        {
+            IEdmTypeConfiguration elementTypeConfiguration = GetOperationTypeConfiguration(clrElementType);
+            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(clrElementType));
+            return AddParameter(name, parameterType);
+        }
+
+        /// <summary>
+        /// Adds a new non-binding collection parameter
+        /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "In keeping with rest of API")]
         public ParameterConfiguration CollectionParameter<TElementType>(string name)
         {
-            Type elementType = typeof(TElementType);
-            IEdmTypeConfiguration elementTypeConfiguration = GetOperationTypeConfiguration(typeof(TElementType));
-            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration, typeof(IEnumerable<>).MakeGenericType(elementType));
+            return this.CollectionParameter(typeof(TElementType), name);
+        }
+
+        /// <summary>
+        /// Adds a new non-binding entity type parameter.
+        /// </summary>
+        public ParameterConfiguration EntityParameter(Type clrEntityType, string name)
+        {
+            IEdmTypeConfiguration parameterType =
+                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == clrEntityType) ??
+                ModelBuilder.AddEntityType(clrEntityType);
+
             return AddParameter(name, parameterType);
         }
 
@@ -305,10 +328,20 @@ namespace Microsoft.AspNet.OData.Builder
             Justification = "In keeping with rest of API")]
         public ParameterConfiguration EntityParameter<TEntityType>(string name) where TEntityType : class
         {
-            Type entityType = typeof(TEntityType);
-            IEdmTypeConfiguration parameterType =
-                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == entityType) ??
-                ModelBuilder.AddEntityType(entityType);
+            return this.EntityParameter(typeof(TEntityType), name);
+        }
+
+        /// <summary>
+        /// Adds a new non-binding collection of entity type parameter.
+        /// </summary>
+        public ParameterConfiguration CollectionEntityParameter(Type clrElementEntityType, string name)
+        {
+            IEdmTypeConfiguration elementTypeConfiguration =
+                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == clrElementEntityType) ??
+                ModelBuilder.AddEntityType(clrElementEntityType);
+
+            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration,
+                typeof(IEnumerable<>).MakeGenericType(clrElementEntityType));
 
             return AddParameter(name, parameterType);
         }
@@ -320,15 +353,7 @@ namespace Microsoft.AspNet.OData.Builder
             Justification = "In keeping with rest of API")]
         public ParameterConfiguration CollectionEntityParameter<TElementEntityType>(string name) where TElementEntityType : class
         {
-            Type elementType = typeof(TElementEntityType);
-            IEdmTypeConfiguration elementTypeConfiguration =
-                ModelBuilder.StructuralTypes.FirstOrDefault(t => t.ClrType == elementType) ??
-                ModelBuilder.AddEntityType(elementType);
-
-            CollectionTypeConfiguration parameterType = new CollectionTypeConfiguration(elementTypeConfiguration,
-                typeof(IEnumerable<>).MakeGenericType(elementType));
-
-            return AddParameter(name, parameterType);
+            return this.CollectionEntityParameter(typeof(TElementEntityType), name);
         }
 
         /// <summary>

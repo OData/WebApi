@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataResourceDeserializer.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -231,11 +235,11 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
                             structuredType.StructuredDefinition(), model);
 
                         return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties,
-                            dynamicDictionaryPropertyInfo);
+                            dynamicDictionaryPropertyInfo, structuredType.IsComplex());
                     }
                     else
                     {
-                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties);
+                        return Activator.CreateInstance(readContext.ResourceType, clrType, structuralProperties, null, structuredType.IsComplex());
                     }
                 }
                 else
@@ -492,6 +496,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
+                Request = readContext.Request,
             };
 
             Type clrType = null;
@@ -600,6 +605,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             {
                 Path = readContext.Path,
                 Model = readContext.Model,
+                Request = readContext.Request,
             };
 
             if (readContext.IsUntyped)

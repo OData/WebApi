@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ExpressionBinderBase.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -42,7 +46,9 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         internal static readonly Expression ZeroConstant = Expression.Constant(0);
 
         internal static readonly MethodInfo EnumTryParseMethod = typeof(Enum).GetMethods()
-                        .Single(m => m.Name == "TryParse" && m.GetParameters().Length == 2);
+            .Single(m => m.Name.Equals("TryParse", StringComparison.Ordinal)
+                && m.GetParameters().Length == 2
+                && m.GetParameters()[0].ParameterType.Equals(typeof(string)));
 
         internal static readonly Dictionary<BinaryOperatorKind, ExpressionType> BinaryOperatorMapping = new Dictionary<BinaryOperatorKind, ExpressionType>
         {
@@ -114,7 +120,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "These are simple conversion function and cannot be split up.")]
-        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull)
+        internal Expression CreateBinaryExpression(BinaryOperatorKind binaryOperator, Expression left, Expression right, bool liftToNull, bool containsDateFunction = false)
         {
             ExpressionType binaryExpressionType;
 
@@ -134,15 +140,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
 
             if (leftUnderlyingType == typeof(DateTime) && rightUnderlyingType == typeof(DateTimeOffset))
             {
-                right = DateTimeOffsetToDateTime(right);
+                right = DateTimeOffsetToDateTime(right, QuerySettings.EnableConstantParameterization);
             }
             else if (rightUnderlyingType == typeof(DateTime) && leftUnderlyingType == typeof(DateTimeOffset))
             {
-                left = DateTimeOffsetToDateTime(left);
+                left = DateTimeOffsetToDateTime(left, QuerySettings.EnableConstantParameterization);
             }
 
             if ((IsDateOrOffset(leftUnderlyingType) && IsDate(rightUnderlyingType)) ||
-                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)))
+                (IsDate(leftUnderlyingType) && IsDateOrOffset(rightUnderlyingType)) ||
+                containsDateFunction)
             {
                 left = CreateDateBinaryExpression(left);
                 right = CreateDateBinaryExpression(right);
@@ -971,7 +978,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return null;
         }
 
-        internal static Expression DateTimeOffsetToDateTime(Expression expression)
+        internal static Expression DateTimeOffsetToDateTime(Expression expression, bool EnableConstantParameterization = false)
         {
             var unaryExpression = expression as UnaryExpression;
             if (unaryExpression != null)
@@ -984,11 +991,26 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             }
             var parameterizedConstantValue = ExtractParameterizedConstant(expression);
             var dto = parameterizedConstantValue as DateTimeOffset?;
-            if (dto != null)
+            object expressionValue;
+
+            if(dto != null)
             {
-                expression = Expression.Constant(EdmPrimitiveHelpers.ConvertPrimitiveValue(dto.Value, typeof(DateTime)));
+                expressionValue = dto.Value;
             }
-            return expression;
+            else
+            {
+                expressionValue = (expression as ConstantExpression).Value;
+            }
+
+            object value = EdmPrimitiveHelpers.ConvertPrimitiveValue(expressionValue, typeof(DateTime));
+            if (EnableConstantParameterization)
+            {
+                return LinqParameterContainer.Parameterize(typeof(DateTime), value);
+            }
+            else
+            {
+                return Expression.Constant(value, typeof(DateTime));
+            }
         }
 
         internal static bool IsNullable(Type t)
@@ -1077,6 +1099,20 @@ namespace Microsoft.AspNet.OData.Query.Expressions
             return IsType<Date>(type);
         }
 
+        internal static bool ContainsDateFunction(BinaryOperatorNode binaryOperatorNode)
+        {
+            bool isDate = false;
+            if (binaryOperatorNode.Left is SingleValueFunctionCallNode leftFunctionCallNode)
+            {
+                isDate = leftFunctionCallNode.Name == "date";
+            }
+            if (!isDate && binaryOperatorNode.Left is SingleValueFunctionCallNode rightFunctionCallNode)
+            {
+                isDate = rightFunctionCallNode.Name == "date";
+            }
+            return isDate;
+        }
+
         internal static bool IsInteger(Type type)
         {
             return IsType<short>(type) || IsType<int>(type) || IsType<long>(type);
@@ -1110,7 +1146,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
         {
             var member = source as MemberExpression;
             return member != null
-                && this.Parameter.Type.IsGenericType() 
+                && this.Parameter.Type.IsGenericType()
                 && this.Parameter.Type.GetGenericTypeDefinition() == typeof(FlatteningWrapper<>)
                 && member.Expression == this.Parameter;
         }

@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ExpressionHelperMethods.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -110,6 +114,10 @@ namespace Microsoft.AspNet.OData
         private static MethodInfo _enumerableCountMethod = GenericMethodOf(_ => Enumerable.LongCount<int>(default(IEnumerable<int>)));
 
         private static MethodInfo _safeConvertToDecimalMethod = typeof(ExpressionHelperMethods).GetMethod("SafeConvertToDecimal");
+
+#if NETCORE // Not supported in NETFX
+        private static MethodInfo _queryableCreateSingleResultMethod = GenericMethodOf(_ => SingleResult.Create<int>(default(IQueryable<int>)));
+#endif
 
         public static MethodInfo EnumerableWhereGeneric
         {
@@ -365,6 +373,13 @@ namespace Microsoft.AspNet.OData
         {
             get { return _createQueryGenericMethod; }
         }
+
+#if NETCORE // Not supported in NETFX
+        public static MethodInfo QueryableCreateSingleResult
+        {
+            get { return _queryableCreateSingleResultMethod; }
+        }
+#endif
 
         public static decimal? SafeConvertToDecimal(object value)
         {

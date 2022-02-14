@@ -4,17 +4,18 @@
     <id>Microsoft.AspNet.OData</id>
     <title>Microsoft ASP.NET Web API 2.2 for OData v4.0</title>
     <version>$VersionNuGetSemantic$</version>
-    <authors>Microsoft</authors>
-    <copyright>&#169; Microsoft Corporation. All rights reserved.</copyright>
+    <authors>OData (.NET Foundation)</authors>
+    <copyright>&#169; .NET Foundation and Contributors. All rights reserved.</copyright>
     <description>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Web API and to support OData query syntax for your web APIs.</description>
     <summary>This package contains everything you need to create OData v4.0 endpoints using ASP.NET Web API.</summary>
 	<releaseNotes>https://docs.microsoft.com/en-us/odata/changelog/webapi-7x</releaseNotes>
     <language>en-US</language>
     <projectUrl>http://odata.github.io</projectUrl>
-    <licenseUrl>https://raw.githubusercontent.com/OData/WebApi/master/License.txt</licenseUrl>
+    <license type="expression">MIT</license>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <tags>Microsoft AspNet WebApi AspNetWebApi OData</tags>
-    <iconUrl>http://static.tumblr.com/hgchgxz/9ualgdf98/icon.png</iconUrl>
+    <icon>images\odata.png</icon>
+    <repository type="git" url="https://github.com/OData/WebApi.git" branch="master"/>
     <dependencies>
       <dependency id="Microsoft.AspNet.WebApi.Client" version="$AspNetPackageDependency$" />
       <dependency id="Microsoft.AspNet.WebApi.Core" version="$AspNetPackageDependency$" />
@@ -32,5 +33,6 @@
     <file src="$ProductRoot$\Microsoft.AspNet.OData.xml" target="lib\net45" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData\**\*.cs" target="src\Microsoft.AspNet.OData" />
     <file src="$SourcesRoot$\src\Microsoft.AspNet.OData.Shared\**\*.cs" target="src\Microsoft.AspNet.OData.Shared" />
+    <file src="$SourcesRoot$\images\odata.png" target="images\" />
   </files>
 </package>

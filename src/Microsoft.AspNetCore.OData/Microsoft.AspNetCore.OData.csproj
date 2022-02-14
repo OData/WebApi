@@ -41,9 +41,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.OData.Core" Version="7.7.3" />
-    <PackageReference Include="Microsoft.OData.Edm" Version="7.7.3" />
-    <PackageReference Include="Microsoft.Spatial" Version="7.7.3" />
+    <PackageReference Include="Microsoft.OData.Core" Version="7.9.0" />
+    <PackageReference Include="Microsoft.OData.Edm" Version="7.9.0" />
+    <PackageReference Include="Microsoft.Spatial" Version="7.9.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
@@ -76,4 +80,15 @@
       <DependentUpon>SRResources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+  <Target Name="SetNuspecProperties" BeforeTargets="GenerateNuspec">
+    <PropertyGroup>
+      <NuspecProperties>ProductRoot=$(ProductBinPath);VersionNuGetSemantic=$(VersionNuGetSemantic)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);NightlyBuildVersion=$(NightlyBuildVersion)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);SourcesRoot=$(RootDir)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);AspNetCorePackageDependency=$(AspNetCorePackageDependency)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);DependencyInjection2PackageDependency=$(DependencyInjection2PackageDependency)</NuspecProperties>
+       <NuspecProperties>$(NuspecProperties);ODataLibPackageDependency=$(ODataLibPackageDependency)</NuspecProperties>
+      <NuspecProperties>$(NuspecProperties);NewtonsoftJsonPackageDependency=$(NewtonsoftJsonPackageDependency)</NuspecProperties>
+    </PropertyGroup>
+  </Target>
 </Project>

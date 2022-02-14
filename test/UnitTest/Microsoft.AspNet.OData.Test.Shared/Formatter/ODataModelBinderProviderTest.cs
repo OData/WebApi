@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataModelBinderProviderTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 #if !NETCORE // TODO #939: Enable these test on AspNetCore.
 using System;
@@ -30,6 +34,7 @@ using Xunit;
 
 namespace Microsoft.AspNet.OData.Test.Formatter
 {
+    [Collection("TimeZoneTests")] // TimeZoneInfo is not thread-safe. Tests in this collection will be executed sequentially 
     public class ODataModelBinderProviderTest
     {
         private HttpConfiguration _configuration;
@@ -45,6 +50,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             _configuration.Routes.MapHttpRoute("default", "{controller}/{action}({id})");
 
             _server = new HttpServer(_configuration);
+
             _client = new HttpClient(_server);
         }
 

@@ -62,6 +62,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\IETagHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataBinaryValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataCountMediaTypeMapping.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataStreamMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataEnumValueMediaTypeMapping.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataInputFormatterHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Formatter\ODataModelBinderConverter.cs" />
@@ -76,7 +77,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)CompatibilityOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataNullValueMessageHandler.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerRouteContainerBase.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)QueryHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\DefaultSkipTokenHandler.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ODataPathQueryBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\ODataQueryOptionsParserFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\OrderByCountNode.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\PlainTextODataQueryOptionsParser.cs" />
@@ -258,6 +261,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Results\ResultHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\DynamicPropertyRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NavigationSourceRoutingConvention.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\NestedPathsRoutingConvention.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\RequestMethodExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SelectControllerResult.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Routing\Conventions\SingletonRoutingConvention.cs" />
@@ -366,7 +370,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Builder\EntityTypeConfigurationOfTEntityType.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\NavigationPropertyBindingConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\NavigationPropertyConfiguration.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Builder\NonbindingParameterConfiguration.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Builder\NonBindingParameterConfiguration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ODataConventionModelBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ODataModelBuilder.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Builder\ParameterConfiguration.cs" />
@@ -415,6 +419,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ExpressionHelperMethods.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ExpressionHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Query\FilterQueryOption.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\AutoSelectExpandHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\ExpandModelPath.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Query\SelectModelPath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IDelta.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ODataQueryContext.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)MetadataController.cs" />

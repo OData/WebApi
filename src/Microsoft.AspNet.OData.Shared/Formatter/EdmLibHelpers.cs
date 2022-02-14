@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="EdmLibHelpers.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -569,6 +573,43 @@ namespace Microsoft.AspNet.OData.Formatter
             return false;
         }
 
+        public static ModelBoundQuerySettings GetModelBoundQuerySettingsOrNull(this IEdmModel edmModel, IEdmStructuredType structuredType, IEdmProperty property)
+        {
+            if (edmModel == null)
+            {
+                throw Error.ArgumentNull(nameof(edmModel));
+            }
+
+            ModelBoundQuerySettings querySettingsOnType = null;
+            if (structuredType != null)
+            {
+                querySettingsOnType = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(structuredType);
+            }
+
+            if (property == null)
+            {
+                return querySettingsOnType;
+            }
+
+            ModelBoundQuerySettings querySettingsOnProperty = edmModel.GetAnnotationValue<ModelBoundQuerySettings>(property);
+            if (querySettingsOnProperty == null)
+            {
+                return querySettingsOnType;
+            }
+            else
+            {
+                if (querySettingsOnType == null)
+                {
+                    return querySettingsOnProperty;
+                }
+                else
+                {
+                    // Settings on property is higher priority than the ones on type.
+                    return GetMergedPropertyQuerySettings(querySettingsOnProperty, querySettingsOnType);
+                }
+            }
+        }
+
         public static ModelBoundQuerySettings GetModelBoundQuerySettings(IEdmProperty property,
             IEdmStructuredType structuredType, IEdmModel edmModel, DefaultQuerySettings defaultQuerySettings = null)
         {
@@ -625,20 +666,24 @@ namespace Microsoft.AspNet.OData.Formatter
             return edmTypeReference.Definition;
         }
 
-        public static void GetPropertyAndStructuredTypeFromPath(IEnumerable<ODataPathSegment> segments,
-            out IEdmProperty property, out IEdmStructuredType structuredType, out string name)
+        public static void GetPropertyAndStructuredTypeFromPath(
+            IEnumerable<ODataPathSegment> segments,
+            out IEdmProperty property,
+            out IEdmStructuredType structuredType,
+            out string name)
         {
             property = null;
             structuredType = null;
-            name = String.Empty;
-            string typeCast = String.Empty;
+            name = string.Empty;
+
             if (segments != null)
             {
+                string typeCast = string.Empty;
+
                 IEnumerable<ODataPathSegment> reverseSegments = segments.Reverse();
-                foreach (var segment in reverseSegments)
+                foreach (ODataPathSegment segment in reverseSegments)
                 {
-                    NavigationPropertySegment navigationPathSegment = segment as NavigationPropertySegment;
-                    if (navigationPathSegment != null)
+                    if (segment is NavigationPropertySegment navigationPathSegment)
                     {
                         property = navigationPathSegment.NavigationProperty;
                         if (structuredType == null)
@@ -650,31 +695,41 @@ namespace Microsoft.AspNet.OData.Formatter
                         return;
                     }
 
-                    PropertySegment propertyAccessPathSegment = segment as PropertySegment;
-                    if (propertyAccessPathSegment != null)
+                    if (segment is OperationSegment operationSegment)
+                    {
+                        if (structuredType == null)
+                        {
+                            structuredType = operationSegment.EdmType as IEdmStructuredType;
+                        }
+
+                        name = operationSegment.Operations.First().FullName() + typeCast;
+                        return;
+                    }
+
+                    if (segment is PropertySegment propertyAccessPathSegment)
                     {
                         property = propertyAccessPathSegment.Property;
                         if (structuredType == null)
                         {
                             structuredType = GetElementType(property.Type) as IEdmStructuredType;
                         }
+
                         name = property.Name + typeCast;
                         return;
                     }
 
-                    EntitySetSegment entitySetSegment = segment as EntitySetSegment;
-                    if (entitySetSegment != null)
+                    if (segment is EntitySetSegment entitySetSegment)
                     {
                         if (structuredType == null)
                         {
                             structuredType = entitySetSegment.EntitySet.EntityType();
                         }
+
                         name = entitySetSegment.EntitySet.Name + typeCast;
                         return;
                     }
 
-                    TypeSegment typeSegment = segment as TypeSegment;
-                    if (typeSegment != null)
+                    if (segment is TypeSegment typeSegment)
                     {
                         structuredType = GetElementType(typeSegment.EdmType.ToEdmTypeReference(false)) as IEdmStructuredType;
                         typeCast = "/" + structuredType;
@@ -891,6 +946,27 @@ namespace Microsoft.AspNet.OData.Formatter
         }
 
         /// <summary>
+        /// Get element type reference if it's collection or return itself
+        /// </summary>
+        /// <param name="typeReference">The test type reference.</param>
+        /// <returns>Element type or itself.</returns>
+        public static IEdmTypeReference GetElementTypeOrSelf(this IEdmTypeReference typeReference)
+        {
+            if (typeReference == null)
+            {
+                return typeReference;
+            }
+
+            if (typeReference.TypeKind() == EdmTypeKind.Collection)
+            {
+                IEdmCollectionTypeReference collectType = typeReference.AsCollection();
+                return collectType.ElementType();
+            }
+
+            return typeReference;
+        }
+
+        /// <summary>
         /// Get the expected payload type of an OData path.
         /// </summary>
         /// <param name="type">The Type to use.</param>
@@ -1026,7 +1102,7 @@ namespace Microsoft.AspNet.OData.Formatter
             }
         }
 
-        private static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
+        internal static QueryableRestrictionsAnnotation GetPropertyRestrictions(IEdmProperty edmProperty,
             IEdmModel edmModel)
         {
             Contract.Assert(edmProperty != null);

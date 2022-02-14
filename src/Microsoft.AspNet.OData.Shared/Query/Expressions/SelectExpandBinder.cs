@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="SelectExpandBinder.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -910,9 +914,16 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                     HandleNullPropagation = HandleNullPropagationOption.True,
                 };
 
-                LambdaExpression orderByExpression =
-                    FilterBinder.Bind(null, orderbyClause, elementType, _context, querySettings);
+                LambdaExpression orderByExpression = FilterBinder.Bind(null, orderbyClause, elementType, _context, querySettings);
                 source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction);
+
+                OrderByClause thenBy = orderbyClause.ThenBy;
+                while (thenBy != null)
+                {
+                    orderByExpression = FilterBinder.Bind(null, thenBy, elementType, _context, querySettings);
+                    source = ExpressionHelpers.OrderBy(source, orderByExpression, elementType, orderbyClause.Direction, true);
+                    thenBy = thenBy.ThenBy;
+                }
             }
 
             return source;
@@ -1021,8 +1032,7 @@ namespace Microsoft.AspNet.OData.Query.Expressions
                         bool alreadyOrdered = false;
                         foreach (var prop in properties)
                         {
-                            source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType,
-                                alreadyOrdered);
+                            source = ExpressionHelpers.OrderByPropertyExpression(source, prop.Name, elementType, alreadyOrdered);
                             if (!alreadyOrdered)
                             {
                                 alreadyOrdered = true;

@@ -1,9 +1,14 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="WebApiActionDescriptor.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Reflection;
 using System.Web.Http.Controllers;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Interfaces;
@@ -83,6 +88,17 @@ namespace Microsoft.AspNet.OData.Adapters
         public IEnumerable<T> GetCustomAttributes<T>(bool inherit) where T : Attribute
         {
             return this.innerDescriptor.GetCustomAttributes<T>(inherit);
+        }
+
+        /// <inheritdoc/>
+        public MethodInfo GetMethodInfo()
+        {
+            if (this.innerDescriptor is ReflectedHttpActionDescriptor actionDescriptor)
+            {
+                return actionDescriptor.MethodInfo;
+            }
+
+            return null;
         }
 
         /// <summary>

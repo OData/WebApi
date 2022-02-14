@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataInputFormatter.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -12,6 +16,7 @@ using Microsoft.AspNet.OData.Batch;
 using Microsoft.AspNet.OData.Common;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNet.OData.Formatter.Deserialization;
+using Microsoft.AspNet.OData.Results;
 using Microsoft.AspNet.OData.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Headers;
@@ -147,6 +152,7 @@ namespace Microsoft.AspNet.OData.Formatter
                     type,
                     defaultValue,
                     request.GetModel(),
+                    ResultHelpers.GetODataVersion(request),
                     GetBaseAddressInternal(request),
                     new WebApiRequestMessage(request),
                     () => ODataMessageWrapperHelper.Create(new StreamWrapper(request.Body), request.Headers, request.GetODataContentIdMapping(), request.GetRequestContainer()),
@@ -208,6 +214,18 @@ namespace Microsoft.AspNet.OData.Formatter
             }
 
             return baseAddress[baseAddress.Length - 1] != '/' ? new Uri(baseAddress + '/') : new Uri(baseAddress);
+        }
+
+        /// <inheritdoc />
+        public override IReadOnlyList<string> GetSupportedContentTypes(string contentType, Type objectType)
+        {
+            if (SupportedMediaTypes.Count == 0)
+            {
+                // note: this is parity with the base implementation when there are no matches
+                return default;
+            }
+
+            return base.GetSupportedContentTypes(contentType, objectType);
         }
 
         internal static ODataVersion GetODataResponseVersion(HttpRequest request)

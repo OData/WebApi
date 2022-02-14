@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
-// Licensed under the MIT License.  See License.txt in the project root for license information.
+//-----------------------------------------------------------------------------
+// <copyright file="ODataRoutingTest.cs" company=".NET Foundation">
+//      Copyright (c) .NET Foundation and Contributors. All rights reserved. 
+//      See License.txt in the project root for license information.
+// </copyright>
+//------------------------------------------------------------------------------
 
 #if NETCORE
 using System;
@@ -60,7 +64,12 @@ namespace Microsoft.AspNet.OData.Test.Routing
                 typeof(IncidentsController),
                 typeof(NotFoundWithIdCustomersController),
                 typeof(NotFoundCustomersController),
-                typeof(AttributeCustomersController)
+                typeof(AttributeCustomersController),
+#if NETCORE
+// TODO enable when [EnableNestedPaths] is supported in ASP.NET classic
+                typeof(NestedPathsCustomersController),
+                typeof(NestedPathsWithOverridesCustomersController)
+#endif
             };
 
             // Separate clients and servers so routes are not ambiguous.
@@ -304,7 +313,32 @@ namespace Microsoft.AspNet.OData.Test.Routing
                     { "GET", "Products/Default.GetCount(minSalary=1.3, maxSalary=3.4, aveSalary=4.5)", "GetCount(1.3, 3.4, 4.5)" },
                     // test [ODataRoute] works correctly for overloaded actions
                     { "GET", "AttributeCustomers", "Get()" },
-                    { "GET", "AttributeCustomers(10)", "Get(10)" }
+                    { "GET", "AttributeCustomers(10)", "Get(10)" },
+                    // test [ODataROute] works regardless of action parameters
+                    { "GET", "AttributeCustomers(10)/Products(20)", "GetProductWithAttributeRouting()" },
+
+#if NETCORE // TODO enable these scenarios for NETFX when support added for AspNet classic
+                    // test nested paths when there are no user-defined actions that override the [EnableNestedPaths] action
+                    // all Get() requests should route the Get() method with [EnableNestedPaths]
+                    { "GET", "NestedPathsCustomers", "Get()" },
+                    { "GET", "NestedPathsCustomers(1)", "Get()" },
+                    { "GET", "NestedPathsCustomers(1)/Name", "Get()" },
+                    { "GET", "NestedPathsCustomers(1)/Products", "Get()" },
+                    { "GET", "NestedPathsCustomers(1)/Products(1)/Name", "Get()" },
+                    { "GET", "NestedPathsCustomers(1)/Products/$count", "Get()" },
+                    { "GET", "NestedPathsCustomers/$count", "Get()" },
+
+                    // test nested paths when there's both a Get action with [EnableNestedPaths] as well
+                    // as other actions that may handle some GET requests (e.g. Get(int key), GetName(int key), ODataRoute, etc.)
+                    // the latter should take precedence
+                    { "GET", "NestedPathsWithOverridesCustomers", "GetNestedPathsWithOverridesCustomers()" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)", "Get(1)" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Name", "GetName(1)" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products(2)/Name", "GetProductName(1, 2)" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products/$count", "CountProducts(1)" },
+                    { "GET", "NestedPathsWithOverridesCustomers(1)/Products", "GetNestedPathsWithOverridesCustomers()" },
+                    { "GET", "NestedPathsWithOverridesCustomers/$count", "GetNestedPathsWithOverridesCustomers()" },
+#endif
                 };
             }
         }
@@ -965,5 +999,80 @@ namespace Microsoft.AspNet.OData.Test.Routing
         {
             return $"Get({key})";
         }
+
+#if NETCORE
+        //NOTE: This overload is excluded in NET FX tests because
+        // the ODataActionSelector in in ASP.NET classic does
+        // not have much control in deciding which overload
+        // gets selected among a list of potential candidates
+        // and therefore it cannot prioritize
+        // an overload based on the fact that it has the ODataRoute
+        // attribute
+
+        // the route AttributeCustomers(custId)/Products(prodId)
+        // should not reach this action despite that its parameters
+        // match the route. Priority goes to the action with
+        // using attribute routing
+        public string GetProduct(int custId, int prodId)
+        {
+            return $"GetProductWithConvention({custId}, {prodId})";
+        }
+#endif
+
+        // the route AttributeCustomers(custId)/Products(prodId)
+        // should be handled by this action despite the fact that
+        // parameters don't match the route keys.
+        // Since attribute routing is explicit, we assume the user
+        // knows exactly what they want
+        [ODataRoute("AttributeCustomers({custId})/Products({prodId})")]
+        public string GetProduct()
+        {
+            return $"GetProductWithAttributeRouting()";
+        }
     }
+
+#if NETCORE
+    // TODO: enable for NETFX when [EnableNestedPaths] are supported in AspNet classic
+    public class NestedPathsCustomersController: TestODataController
+    {
+        [EnableNestedPaths]
+        public string Get()
+        {
+            return "Get()";
+        }
+    }
+
+    public class NestedPathsWithOverridesCustomersController: TestODataController
+    {
+        [EnableNestedPaths]
+        public string GetNestedPathsWithOverridesCustomers()
+        {
+            return "GetNestedPathsWithOverridesCustomers()";
+        }
+
+        public string Get(int key)
+        {
+            return $"Get({key})";
+        }
+
+        public string GetName(int key)
+        {
+            return $"GetName({key})";
+        }
+
+        [ODataRoute("NestedPathsWithOverridesCustomers({key})/Products({relatedKey})/Name")]
+        public string GetProductName(int key, int relatedKey)
+        {
+            return $"GetProductName({key}, {relatedKey})";
+        }
+
+        [HttpGet]
+        [ODataRoute("NestedPathsWithOverridesCustomers({key})/Products/$count")]
+        public string CountProducts(int key)
+        {
+            return $"CountProducts({key})";
+        }
+    }
+#endif
+
 }

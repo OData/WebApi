@@ -488,7 +488,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 account.Address = new Address();
             }
 
-            address.Patch(account.Address);
+            account.Address = address.Patch(account.Address);
 
             return Updated(account);
         }

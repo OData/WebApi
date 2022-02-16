@@ -491,5 +491,43 @@ namespace Microsoft.AspNet.OData
 
             return null;
         }
+
+        /// <summary>
+        /// Searches the public property with the specified name from the target type and its base types safely,
+        /// circumventing <see cref="AmbiguousMatchException"/> where a property has been redeclared in a derived type.
+        /// </summary>
+        /// <param name="targetType">The type to search from.</param>
+        /// <param name="propertyName">The name of the public property to get.</param>
+        /// <returns>An object representing the public property with the specified name from the most derived class,
+        /// if found; otherwise, null.</returns>
+        internal static PropertyInfo GetProperty(Type targetType, string propertyName)
+        {
+            PropertyInfo[] properties = targetType.GetProperties().Where(d => d.Name.Equals(propertyName)).ToArray();
+
+            if (properties.Length == 0)
+            {
+                return null;
+            }
+
+            if (properties.Length == 1)
+            {
+                return properties[0];
+            }
+
+            Type declaringType = targetType;
+            PropertyInfo propertyInfo = null;
+
+            do
+            {
+                // Declaring type not expected to be null
+                Contract.Assert(declaringType != null, $"Declaring type for {propertyName} property not expected to be null");
+
+                propertyInfo = properties.FirstOrDefault(d => d.DeclaringType.Equals(declaringType));
+                declaringType = declaringType.BaseType;
+            }
+            while (propertyInfo == null);
+
+            return propertyInfo;
+        }
     }
 }

@@ -64,9 +64,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             switch (pathItems[cnt].Name)
             {
                 case "NewFriends":
-                    if (pathItems[cnt].IsCastType)
+                    CastTypePathItem castItem = pathItems[cnt] as CastTypePathItem;
+
+                    if (castItem != null)
                     {
-                        if (pathItems[cnt].CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
+                        if (castItem.CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
                         {
                             MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]) as MyNewFriend;
 
@@ -162,9 +164,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.BulkOperation
             switch (pathItems[++cnt].Name)
             {
                 case "NewFriends":
-                    if (pathItems[cnt].IsCastType)
+                    CastTypePathItem castItem = pathItems[cnt] as CastTypePathItem;
+
+                    if (castItem != null)
                     {
-                        if (pathItems[cnt].CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
+                        if (castItem.CastTypeName == "Microsoft.Test.E2E.AspNet.OData.BulkInsert.MyNewFriend")
                         {
                             MyNewFriend friend = employee.NewFriends.FirstOrDefault(x => x.Id == (int)pathItems[cnt].KeyProperties["Id"]) as MyNewFriend;
 

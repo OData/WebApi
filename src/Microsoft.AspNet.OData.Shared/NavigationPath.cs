@@ -59,8 +59,10 @@ namespace Microsoft.AspNet.OData
                 }
                 else if(segment is TypeSegment)
                 {
-                    currentPathItem.IsCastType = true;
-                    currentPathItem.CastTypeName = segment.Identifier;
+                    PathItem currentItem = this.Last();
+                    this.RemoveAt(this.Count - 1);
+                    this.Add(CreateCastTypePathItemFromPathItem(currentItem, segment.Identifier));
+                    currentPathItem = this.Last();                
                 }
                 else if (segment is KeySegment keySegment)
                 {
@@ -73,6 +75,16 @@ namespace Microsoft.AspNet.OData
                 }
                 
             }
+        }
+
+        private static CastTypePathItem CreateCastTypePathItemFromPathItem(PathItem item, string castTypeName)
+        {
+            CastTypePathItem segment = new CastTypePathItem();
+            segment.Name = item.Name;
+            segment.KeyProperties = item.KeyProperties;
+            segment.CastTypeName = castTypeName;
+
+            return segment;
         }
     }
 }

@@ -62,6 +62,8 @@ namespace Microsoft.AspNet.OData.Test
         async Task<IEnumerable<T>> ReadEntitiesFromResponse<T>(HttpResponseMessage httpResponseMessage) where T : class
         {
             string jsonContent = await httpResponseMessage.Content.ReadAsStringAsync();
+
+            Assert.True(jsonContent.Contains("\"TotalPrice\":10.00,") || jsonContent.Contains("\"TotalPrice\":10.00}"), jsonContent);
             return JsonConvert.DeserializeObject<ODataResponse<T>>(jsonContent).Value;
         }
     }

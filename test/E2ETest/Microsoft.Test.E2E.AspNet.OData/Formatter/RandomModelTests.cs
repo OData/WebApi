@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -36,7 +37,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 if (creator == null)
                 {
                     creator = new ODataModelTypeCreator();
-                    creator.CreateTypes(50, new Random(RandomSeedGenerator.GetRandomSeed()));
+                    var seed = RandomSeedGenerator.GetRandomSeed();
+                    Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+                    var random = new Random(seed);
+                    creator.CreateTypes(50, random);
                 }
                 return creator;
             }
@@ -77,7 +82,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             await this.ClearRepositoryAsync(entitySetName);
 
             // TODO: Get ride of random generator in test codes. It's bad idea to introduce random factors in functional test
-            var rand = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var rand = new Random(seed);
 
             T entityBaseline = await PostNewEntityAsync<T>(entitySetName, rand);
 

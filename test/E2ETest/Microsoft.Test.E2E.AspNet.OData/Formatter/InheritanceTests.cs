@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -271,7 +272,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
                 .FirstOrDefault();
 
             var concreteTestMethod = testMethod.MakeGenericMethod(entityType);
-            var rand = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var rand = new Random(seed);
 
             await (Task)concreteTestMethod.Invoke(this, new object[] { entitySetNam, rand });
         }
@@ -387,7 +391,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             // clear respository
             await this.ClearRepositoryAsync("InheritanceTests_Cars");
 
-            Random r = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var r = new Random(seed);
 
             // post new entity to repository
             CreatorSettings creatorSettings = new CreatorSettings()
@@ -429,7 +436,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             // clear respository
             await this.ClearRepositoryAsync("InheritanceTests_Cars");
 
-            Random r = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var r = new Random(seed);
 
             // post new entity to repository
             CreatorSettings creatorSettings = new CreatorSettings()
@@ -471,7 +481,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             // clear respository
             await this.ClearRepositoryAsync("InheritanceTests_Vehicles");
 
-            Random r = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var r = new Random(seed);
 
             // post new entity to repository
             CreatorSettings creatorSettings = new CreatorSettings()

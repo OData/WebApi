@@ -32,6 +32,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
             {
                 var data = new TheoryDataSet<string>();
                 int seed = RandomSeedGenerator.GetRandomSeed();
+                Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
                 var ranGen = new Random(seed);
 
                 for (int i = 5; i <= 10; i += 5)

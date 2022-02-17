@@ -33,6 +33,7 @@ using Xunit;
 #else
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.ComponentModel;
 using System.Dynamic;
 using System.Linq;
@@ -222,7 +223,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
 
             await this.Client.GetStringAsync(this.BaseAddress + "/$metadata");
 
-            Random r = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var r = new Random(seed);
 
             var s = new CreatorSettings()
             {

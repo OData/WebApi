@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.OData.Client;
@@ -66,7 +67,10 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter
             // clear respository
             await this.ClearRepositoryAsync("ComplexTypeTests_Entity");
 
-            var rand = new Random(RandomSeedGenerator.GetRandomSeed());
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var rand = new Random(seed);
 
             // post new entity to repository
             var baseline = InstanceCreator.CreateInstanceOf<ComplexTypeTests_Entity>(rand, settings);

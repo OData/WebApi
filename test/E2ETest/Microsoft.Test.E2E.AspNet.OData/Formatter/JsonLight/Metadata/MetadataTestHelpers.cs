@@ -6,6 +6,7 @@
 //------------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Microsoft.Test.E2E.AspNet.OData.Common.Instancing;
@@ -22,7 +23,12 @@ namespace Microsoft.Test.E2E.AspNet.OData.Formatter.JsonLight.Metadata
 
         public static T CreateInstances<T>()
         {
-            var results = InstanceCreator.CreateInstanceOf<T>(new Random(RandomSeedGenerator.GetRandomSeed()), new CreatorSettings { NullValueProbability = 0, AllowEmptyCollection = false });
+            var seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+            var random = new Random(seed);
+
+            var results = InstanceCreator.CreateInstanceOf<T>(random, new CreatorSettings { NullValueProbability = 0, AllowEmptyCollection = false });
 
             return results;
         }

@@ -54,7 +54,11 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
                 if (creator == null)
                 {
                     creator = new ODataModelTypeCreator();
-                    creator.CreateTypes(100, new Random(RandomSeedGenerator.GetRandomSeed()));
+                    var seed = RandomSeedGenerator.GetRandomSeed();
+                    Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
+                    var random = new Random(seed);
+                    creator.CreateTypes(100, random);
                 }
                 return creator;
             }
@@ -221,6 +225,8 @@ namespace Microsoft.Test.E2E.AspNet.OData.QueryComposition
         public void RunQueryableOnAllPossibleTypes(Type type, string queryString)
         {
             int seed = RandomSeedGenerator.GetRandomSeed();
+            Trace.WriteLine($"Generated seed for random number generator: {seed}");
+
             Random r = new Random(seed);
             Type generic = typeof(IEnumerable<>);
             var collectionType = generic.MakeGenericType(type);

@@ -20,18 +20,19 @@ namespace Microsoft.AspNet.OData
         public string Name { internal set; get; }
 
         /// <summary>
-        /// Whether the PathItem is a cast segment
+        /// List of Key properties of that entity
         /// </summary>
-        public bool IsCastType { internal set; get; }
+        public Dictionary<string, object> KeyProperties { internal set; get; }
+    }
 
+    /// <summary>
+    /// Class to hold the PathItem Name for the Cast Type
+    /// </summary>
+    public class CastTypePathItem : PathItem
+    {
         /// <summary>
         /// If the item is a cast segment, Name of the Path Item (eg: derived entity name, entity set name)
         /// </summary>
         public string CastTypeName { internal set; get; }
-
-        /// <summary>
-        /// List of Key properties of that entity
-        /// </summary>
-        public Dictionary<string, object> KeyProperties { internal set; get; }
     }
 }

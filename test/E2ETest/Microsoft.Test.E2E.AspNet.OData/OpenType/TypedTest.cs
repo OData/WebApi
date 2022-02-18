@@ -436,7 +436,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsObject<JObject>();
-                Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
+                Assert.Equal(7, content.Count); // @odata.context + 3 declared properties + 2 dynamic properties + 1 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
@@ -529,7 +529,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 response = await Client.SendAsync(request);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 content = await response.Content.ReadAsObject<JObject>();
-                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 new dynamic properties
+                Assert.Equal(6, content.Count); // @odata.context + 3 declared properties + 2 new dynamic properties
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("NewStreet", content["Street"]); // updated
                 Assert.Equal("US", content["CountryCode"]);

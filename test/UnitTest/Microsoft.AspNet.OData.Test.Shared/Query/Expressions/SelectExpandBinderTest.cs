@@ -1881,6 +1881,66 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
             Assert.True(expand.ToString().Contains("ToList") == enableOptimization);
         }
 
+        [Fact]
+        public void CreatePropertyValueExpression_DerivedNavigationPropertyRedeclared_ReturnsMemberAccessExpression()
+        {
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<QueryPolygon>("Shapes");
+            var model = modelBuilder.GetEdmModel();
+
+            var settings = new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False };
+            var context = new ODataQueryContext(model, typeof(QueryPolygon)) { RequestContainer = new MockContainer() };
+            var binder = new SelectExpandBinder(settings, context);
+
+            var queryPolygonEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "QueryPolygon");
+            var querySubCategoryEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "QuerySubCategory");
+
+            // Arrange
+            Expression source = Expression.Constant(new QueryPolygon());
+
+            var propertyName = "Category";
+            IEdmNavigationProperty navProperty = queryPolygonEntityType.NavigationProperties().Single(c => c.Name == propertyName);
+            Assert.NotNull(navProperty);
+
+            // Act
+            Expression propertyValue = binder.CreatePropertyValueExpression(querySubCategoryEntityType, navProperty, source, null);
+
+            // Assert
+            Assert.Equal(ExpressionType.MemberAccess, propertyValue.NodeType);
+            Assert.Equal(TypeHelper.GetProperty(typeof(QueryPolygon), propertyName), (propertyValue as MemberExpression).Member);
+            Assert.Equal(String.Format("({0} As QueryPolygon).{1}", source.ToString(), propertyName), propertyValue.ToString());
+        }
+
+        [Fact]
+        public void CreatePropertyValueExpression_DerivedNavigationPropertyRedeclaredInSubType_ReturnsMemberAccessExpression()
+        {
+            var modelBuilder = new ODataConventionModelBuilder();
+            modelBuilder.EntitySet<QueryPentagon>("Shapes");
+            var model = modelBuilder.GetEdmModel();
+
+            var settings = new ODataQuerySettings { HandleNullPropagation = HandleNullPropagationOption.False };
+            var context = new ODataQueryContext(model, typeof(QueryPentagon)) { RequestContainer = new MockContainer() };
+            var binder = new SelectExpandBinder(settings, context);
+
+            var queryPentagonEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "QueryPentagon");
+            var querySubCategoryEntityType = model.SchemaElements.OfType<IEdmEntityType>().First(c => c.Name == "QuerySubCategory");
+
+            // Arrange
+            Expression source = Expression.Constant(new QueryPentagon());
+
+            var propertyName = "Category";
+            IEdmNavigationProperty navProperty = queryPentagonEntityType.NavigationProperties().Single(c => c.Name == propertyName);
+            Assert.NotNull(navProperty);
+
+            // Act
+            Expression propertyValue = binder.CreatePropertyValueExpression(querySubCategoryEntityType, navProperty, source, null);
+
+            // Assert
+            Assert.Equal(ExpressionType.MemberAccess, propertyValue.NodeType);
+            Assert.Equal(TypeHelper.GetProperty(typeof(QueryPentagon), propertyName), (propertyValue as MemberExpression).Member);
+            Assert.Equal(String.Format("({0} As QueryPentagon).{1}", source.ToString(), propertyName), propertyValue.ToString());
+        }
+
         public static IEdmModel GetEdmModel()
         {
             var builder = new ODataConventionModelBuilder();
@@ -2025,5 +2085,31 @@ namespace Microsoft.AspNet.OData.Test.Query.Expressions
         Green,
 
         Blue
+    }
+
+    public class QueryShape
+    {
+        public int Id { get; set; }
+        public QueryCategory Category { get; set; }
+    }
+
+    public class QueryPolygon : QueryShape
+    {
+        public new int Id { get; set; }
+        public new QuerySubCategory Category { get; set; }
+    }
+
+    public class QueryPentagon : QueryPolygon
+    {
+
+    }
+
+    public class QueryCategory
+    {
+        public int Id { get; set; }
+    }
+
+    public class QuerySubCategory : QueryCategory
+    {
     }
 }

@@ -125,7 +125,10 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
                 typeName = primitiveType.FullName();
             }
 
-            primitive.TypeAnnotation = new ODataTypeAnnotation(typeName);
+            if (typeName != null)
+            {
+                primitive.TypeAnnotation = new ODataTypeAnnotation(typeName);
+            }
         }
 
         internal static ODataPrimitiveValue CreatePrimitive(object value, IEdmPrimitiveTypeReference primitiveType,

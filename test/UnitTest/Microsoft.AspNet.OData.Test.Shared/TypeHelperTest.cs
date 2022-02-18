@@ -315,6 +315,76 @@ namespace Microsoft.AspNet.OData.Test
             Assert.DoesNotContain(typeof(TypeHelperTest), foundTypes);
         }
 
+        [Fact]
+        public void GetPropertyDeclaredOnSelf()
+        {
+            // Arrange & Act
+            var prop = TypeHelper.GetProperty(typeof(TypeA), "Prop");
+
+            // Assert
+            Assert.Equal("Prop", prop.Name);
+            Assert.Equal(typeof(int), prop.PropertyType);
+            Assert.Equal(typeof(TypeA), prop.DeclaringType);
+        }
+
+        [Fact]
+        public void GetPropertyRedeclaredOnSelf()
+        {
+            // Arrange & Act
+            var prop = TypeHelper.GetProperty(typeof(TypeB), "Prop");
+
+            // Assert
+            Assert.Equal("Prop", prop.Name);
+            Assert.Equal(typeof(string), prop.PropertyType);
+            Assert.Equal(typeof(TypeB), prop.DeclaringType);
+        }
+
+        [Fact]
+        public void GetPropertyDeclaredOnImmediateParent()
+        {
+            // Arrange & Act
+            var prop = TypeHelper.GetProperty(typeof(TypeC), "Prop");
+
+            // Assert
+            Assert.Equal("Prop", prop.Name);
+            Assert.Equal(typeof(int), prop.PropertyType);
+            Assert.Equal(typeof(TypeA), prop.DeclaringType);
+        }
+
+        [Fact]
+        public void GetPropertyRedeclaredOnImmediateParent()
+        {
+            // Arrange & Act
+            var prop = TypeHelper.GetProperty(typeof(TypeD), "Prop");
+
+            // Assert
+            Assert.Equal("Prop", prop.Name);
+            Assert.Equal(typeof(string), prop.PropertyType);
+            Assert.Equal(typeof(TypeB), prop.DeclaringType);
+        }
+
+        [Fact]
+        public void GetPropertyDeclaredOnNonImmediateParent()
+        {
+            // Arrange & Act
+            var prop = TypeHelper.GetProperty(typeof(TypeE), "Prop");
+
+            // Assert
+            Assert.Equal("Prop", prop.Name);
+            Assert.Equal(typeof(string), prop.PropertyType);
+            Assert.Equal(typeof(TypeB), prop.DeclaringType);
+        }
+
+        [Fact]
+        public void GetPropertyForNonUndeclaredProperty()
+        {
+            // Arrange & Act
+            var undeclared = TypeHelper.GetProperty(typeof(TypeA), "Undeclared");
+
+            // Assert
+            Assert.Null(undeclared);
+        }
+
         /// <summary>
         /// Custom internal class
         /// </summary>
@@ -350,6 +420,28 @@ namespace Microsoft.AspNet.OData.Test
         private class CustomConcreteClass : CustomAbstractClass
         {
             public override int Area() { return 42; }
+        }
+
+        private class TypeA
+        {
+            public int Prop { get; set; }
+        }
+
+        private class TypeB : TypeA
+        {
+            public new string Prop { get; set; }
+        }
+
+        private class TypeC : TypeA
+        {
+        }
+
+        private class TypeD : TypeB
+        {
+        }
+
+        private class TypeE : TypeD
+        {
         }
     }
 }

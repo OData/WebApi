@@ -676,13 +676,15 @@ public abstract class Microsoft.AspNet.OData.Batch.ODataBatchHandler : System.We
 public abstract class Microsoft.AspNet.OData.Batch.ODataBatchRequestItem : IDisposable {
 	protected ODataBatchRequestItem ()
 
+	System.Collections.Generic.IDictionary`2[[System.String],[System.String]] ContentIdToLocationMapping  { public get; public set; }
+
 	public virtual void Dispose ()
 	protected abstract void Dispose (bool disposing)
 	public abstract System.Collections.Generic.IEnumerable`1[[System.IDisposable]] GetResourcesForDisposal ()
 	[
 	AsyncStateMachineAttribute(),
 	]
-	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendMessageAsync (System.Net.Http.HttpMessageInvoker invoker, System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken, System.Collections.Generic.Dictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
+	public static System.Threading.Tasks.Task`1[[System.Net.Http.HttpResponseMessage]] SendMessageAsync (System.Net.Http.HttpMessageInvoker invoker, System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken, System.Collections.Generic.IDictionary`2[[System.String],[System.String]] contentIdToLocationMapping)
 
 	public abstract System.Threading.Tasks.Task`1[[Microsoft.AspNet.OData.Batch.ODataBatchResponseItem]] SendRequestAsync (System.Net.Http.HttpMessageInvoker invoker, System.Threading.CancellationToken cancellationToken)
 }

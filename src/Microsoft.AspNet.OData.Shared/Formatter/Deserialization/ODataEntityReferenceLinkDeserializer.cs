@@ -77,7 +77,7 @@ namespace Microsoft.AspNet.OData.Formatter.Deserialization
             if (uri != null)
             {
                 IDictionary<string, string> contentIDToLocationMapping = readContext.InternalRequest.ODataContentIdMapping;
-                if (contentIDToLocationMapping != null)
+                if (contentIDToLocationMapping != null && contentIDToLocationMapping.Count > 0)
                 {
                     Uri baseAddress = new Uri(readContext.InternalUrlHelper.CreateODataLink());
                     string relativeUrl = uri.IsAbsoluteUri ? baseAddress.MakeRelativeUri(uri).OriginalString : uri.OriginalString;

@@ -47,7 +47,7 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("handler");
             }
 
-            await SendRequestAsync(handler, Context, null);
+            await SendRequestAsync(handler, Context, this.ContentIdToLocationMapping);
             return new OperationResponseItem(Context);
         }
     }

@@ -240,6 +240,7 @@ namespace Microsoft.AspNet.OData
         /// <param name="name">The name of the nested Property</param>
         /// <param name="value">The value of the nested Property</param>
         /// <returns><c>True</c> if the Property was found and is a nested Property</returns>
+        [SuppressMessage("Microsoft.Design", "CA1007:UseGenericsWhereAppropriate")]
         public bool TryGetNestedPropertyValue(string name, out object value)
         {
             if (name == null)

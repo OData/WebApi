@@ -421,7 +421,7 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
                 request.Content = new StringContent(
                     @"{
-                        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.OpenType.Address',
+                        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.OpenType.GlobalAddress',
                         'City':'NewCity',
                         'OtherProperty@odata.type':'#Date',
                         'OtherProperty':'2016-02-01'
@@ -440,6 +440,53 @@ namespace Microsoft.Test.E2E.AspNet.OData.OpenType
                 Assert.Equal("NewCity", content["City"]); // updated
                 Assert.Equal("1 Microsoft Way", content["Street"]);
                 Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["CountryOrRegion"]);
+                Assert.Equal("2016-02-01", content["OtherProperty"]);
+            }
+        }
+
+        [Fact]
+        public async Task PatchOpenComplexTypeProperty_WithDifferentType()
+        {
+            foreach (string routing in Routings)
+            {
+                await ResetDatasource();
+
+                // Get ~/Accounts(1)/Address
+                var requestUri = string.Format(BaseAddress + "/{0}/Accounts(1)/Address", routing);
+                var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                var response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                var content = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties
+                Assert.Equal("Redmond", content["City"]);
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+                Assert.Equal("US", content["CountryCode"]);
+                Assert.Equal("US", content["CountryOrRegion"]); // dynamic property
+
+                // Patch ~/Accounts(1)/Address
+                request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+                request.Content = new StringContent(
+                    @"{
+                        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.OpenType.Address',
+                        'City':'NewCity',
+                        'OtherProperty@odata.type':'#Date',
+                        'OtherProperty':'2016-02-01'
+                  }");
+                request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+
+                response = await this.Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+
+                // Get ~/Accounts(1)/Address
+                request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+                response = await Client.SendAsync(request);
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                content = await response.Content.ReadAsObject<JObject>();
+                Assert.Equal(5, content.Count); // @odata.context + 3 declared properties + 1 dynamic properties + 1 new dynamic properties
+                Assert.Equal("NewCity", content["City"]); // updated
+                Assert.Equal("1 Microsoft Way", content["Street"]);
+              
                 Assert.Equal("US", content["CountryOrRegion"]);
                 Assert.Equal("2016-02-01", content["OtherProperty"]);
             }

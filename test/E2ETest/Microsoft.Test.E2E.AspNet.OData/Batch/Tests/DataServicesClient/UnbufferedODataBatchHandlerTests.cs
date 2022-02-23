@@ -90,6 +90,15 @@ namespace Microsoft.Test.E2E.AspNet.OData.Batch.Tests.DataServicesClient
             : base("Id")
         {
         }
+
+        protected override Task<ITestActionResult> CreateEntityAsync(UnbufferedBatchOrder entity)
+        {
+            if (entity.Id < 0)
+            {
+                return Task.FromResult(BadRequest() as ITestActionResult);
+            }
+            return base.CreateEntityAsync(entity);
+        }
     }
 
     public class CUDBatchTests : WebHostTestBase
@@ -776,6 +785,191 @@ GET " + absoluteUri + @"(1) HTTP/1.1
                     }
                 }
             }
+            Assert.Equal(3, subResponseCount);
+        }
+
+        [Fact]
+        public async Task CanHandleContentIDInRelativeUrl()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            string defaultBatchCustomersAbsoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchCustomer";
+            string defaultBatchOrdersAbsoluteUri = this.BaseAddress + "/UnbufferedBatch/UnbufferedBatchOrder";
+
+            // Act
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("multipart/mixed"));
+            HttpContent content = new StringContent(@"
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0
+Content-Type: multipart/mixed; boundary=changeset_6c67825c-8938-4f11-af6b-a25861ee53cc
+
+--changeset_6c67825c-8938-4f11-af6b-a25861ee53cc
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 1
+
+POST " + defaultBatchCustomersAbsoluteUri + @" HTTP/1.1
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Content-Type: application/json;odata.metadata=minimal
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+
+{'Id':13,'Name':'Customer 13'}
+--changeset_6c67825c-8938-4f11-af6b-a25861ee53cc
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 2
+
+POST " + defaultBatchOrdersAbsoluteUri + @" HTTP/1.1
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+Content-Type: application/json;odata.metadata=minimal
+
+{'Id':13}
+--changeset_6c67825c-8938-4f11-af6b-a25861ee53cc
+Content-Type: application/http
+Content-Transfer-Encoding: binary
+Content-ID: 3
+
+POST $1/Orders/$ref HTTP/1.1
+OData-Version: 4.0;NetFx
+OData-MaxVersion: 4.0;NetFx
+Accept: application/json;odata.metadata=minimal
+Accept-Charset: UTF-8
+Content-Type: application/json;odata.metadata=minimal
+
+{'@odata.id':'$2'}
+--changeset_6c67825c-8938-4f11-af6b-a25861ee53cc--
+--batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0--
+");
+
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("multipart/mixed; boundary=batch_abbe2e6f-e45b-4458-9555-5fc70e3aebe0");
+            request.Content = content;
+            HttpResponseMessage response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+#if NETCORE
+                var subResponseStatusCodes = new int[] { 201, 201, 200 /*CreateRef*/ };
+#else
+                var subResponseStatusCodes = new int[] { 201, 201, 204 /*CreateRef*/ };
+#endif
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            var subResponseStatusCode = subResponseCount < subResponseStatusCodes.Length ? subResponseStatusCodes[subResponseCount] : 201;
+
+                            subResponseCount++;
+                            Assert.Equal(subResponseStatusCode, operationMessage.StatusCode);
+                            break;
+                    }
+                }
+            }
+
+            Assert.Equal(3, subResponseCount);
+        }
+
+        [Fact]
+        public async Task CanHandleReferencingOfRequestsNotSharingAutomicityGroup()
+        {
+            // Arrange
+            var requestUri = string.Format("{0}/UnbufferedBatch/$batch", this.BaseAddress);
+            string unbufferedBatchCustomersRelativeUri = "UnbufferedBatchCustomer";
+            string unbufferedBatchOrdersRelativeUri = "UnbufferedBatchOrder";
+
+            // Act
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            HttpContent content = new StringContent(@"
+        {
+            ""requests"": [{
+                    ""id"": ""1"",
+                    ""method"": ""POST"",
+                    ""url"": """ + unbufferedBatchCustomersRelativeUri + @""",
+                    ""headers"": {
+                        ""OData-Version"": ""4.0"",
+                        ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                        ""Accept"": ""application/json;odata.metadata=minimal""
+                    },
+                    ""body"": {
+                        ""Id"":7,
+                        ""Name"":""Customer 7""
+                    }
+                }, {
+                    ""id"": ""2"",
+                    ""dependsOn"": [""1""],
+                    ""method"": ""POST"",
+                    ""url"": """ + unbufferedBatchOrdersRelativeUri + @""",
+                    ""headers"": {
+                        ""OData-Version"": ""4.0"",
+                        ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                        ""Accept"": ""application/json;odata.metadata=minimal""
+                    },
+                    ""body"": {
+                        ""Id"":7
+                    }
+                }, {
+                    ""id"": ""3"",
+                    ""dependsOn"": [""1"", ""2""],
+                    ""method"": ""POST"",
+                    ""url"": ""$1/Orders/$ref"",
+                    ""headers"": {
+                        ""OData-Version"": ""4.0"",
+                        ""Content-Type"": ""application/json;odata.metadata=minimal"",
+                        ""Accept"": ""application/json;odata.metadata=minimal""
+                    },
+                    ""body"": {
+                        ""@odata.id"":""$2""
+                    }
+                }
+            ]
+        }");
+            content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
+            request.Content = content;
+            var response = await Client.SendAsync(request);
+
+            // Assert
+            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+            var stream = await response.Content.ReadAsStreamAsync();
+            IODataResponseMessage odataResponseMessage = new ODataMessageWrapper(stream, response.Content.Headers);
+            int subResponseCount = 0;
+            using (var messageReader = new ODataMessageReader(odataResponseMessage, new ODataMessageReaderSettings(), GetEdmModel(new ODataConventionModelBuilder())))
+            {
+                var batchReader = messageReader.CreateODataBatchReader();
+#if NETCORE
+                var subResponseStatusCodes = new int[] { 201, 201, 200 /*CreateRef*/ };
+#else
+                var subResponseStatusCodes = new int[] { 201, 201, 204 /*CreateRef*/ };
+#endif
+                while (batchReader.Read())
+                {
+                    switch (batchReader.State)
+                    {
+                        case ODataBatchReaderState.Operation:
+                            var operationMessage = batchReader.CreateOperationResponseMessage();
+                            var subResponseStatusCode = subResponseCount < subResponseStatusCodes.Length ? subResponseStatusCodes[subResponseCount] : 201;
+
+                            subResponseCount++;
+                            Assert.Equal(subResponseStatusCode, operationMessage.StatusCode);
+                            break;
+                    }
+                }
+            }
+
             Assert.Equal(3, subResponseCount);
         }
     }

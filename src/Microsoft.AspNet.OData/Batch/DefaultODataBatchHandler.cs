@@ -138,6 +138,8 @@ namespace Microsoft.AspNet.OData.Batch
             List<ODataBatchRequestItem> requests = new List<ODataBatchRequestItem>();
             ODataBatchReader batchReader = await reader.CreateODataBatchReaderAsync();
             Guid batchId = Guid.NewGuid();
+            Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
+
             while (await batchReader.ReadAsync())
             {
                 if (batchReader.State == ODataBatchReaderState.ChangesetStart)
@@ -148,14 +150,19 @@ namespace Microsoft.AspNet.OData.Batch
                         changeSetRequest.CopyBatchRequestProperties(request);
                         changeSetRequest.DeleteRequestContainer(false);
                     }
-                    requests.Add(new ChangeSetRequestItem(changeSetRequests));
+
+                    ChangeSetRequestItem requestItem = new ChangeSetRequestItem(changeSetRequests);
+                    requestItem.ContentIdToLocationMapping = contentIdToLocationMapping;
+                    requests.Add(requestItem);
                 }
                 else if (batchReader.State == ODataBatchReaderState.Operation)
                 {
                     HttpRequestMessage operationRequest = await batchReader.ReadOperationRequestAsync(batchId, bufferContentStream: true, cancellationToken: cancellationToken);
                     operationRequest.CopyBatchRequestProperties(request);
                     operationRequest.DeleteRequestContainer(false);
-                    requests.Add(new OperationRequestItem(operationRequest));
+                    OperationRequestItem requestItem = new OperationRequestItem(operationRequest);
+                    requestItem.ContentIdToLocationMapping = contentIdToLocationMapping;
+                    requests.Add(requestItem);
                 }
             }
 

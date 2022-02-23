@@ -164,12 +164,13 @@ namespace Microsoft.AspNet.OData.Batch
             }
 
             object contentIdMapping;
-            if (request.Properties.TryGetValue(ContentIdMappingKey, out contentIdMapping))
+            if (!request.Properties.TryGetValue(ContentIdMappingKey, out contentIdMapping))
             {
-                return contentIdMapping as IDictionary<string, string>;
+                contentIdMapping = new Dictionary<string, string>();
+                request.Properties.Add(new KeyValuePair<string, object>(ContentIdMappingKey, contentIdMapping));
             }
 
-            return null;
+            return contentIdMapping as IDictionary<string, string>;
         }
 
         /// <summary>

@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("invoker");
             }
 
-            HttpResponseMessage response = await SendMessageAsync(invoker, Request, cancellationToken, null);
+            HttpResponseMessage response = await SendMessageAsync(invoker, Request, cancellationToken, this.ContentIdToLocationMapping);
             return new OperationResponseItem(response);
         }
 

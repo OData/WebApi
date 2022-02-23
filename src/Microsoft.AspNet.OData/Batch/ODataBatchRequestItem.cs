@@ -29,7 +29,7 @@ namespace Microsoft.AspNet.OData.Batch
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <param name="contentIdToLocationMapping">The Content-ID to Location mapping.</param>
         /// <returns></returns>
-        public static async Task<HttpResponseMessage> SendMessageAsync(HttpMessageInvoker invoker, HttpRequestMessage request, CancellationToken cancellationToken, Dictionary<string, string> contentIdToLocationMapping)
+        public static async Task<HttpResponseMessage> SendMessageAsync(HttpMessageInvoker invoker, HttpRequestMessage request, CancellationToken cancellationToken, IDictionary<string, string> contentIdToLocationMapping)
         {
             if (invoker == null)
             {
@@ -58,6 +58,12 @@ namespace Microsoft.AspNet.OData.Batch
 
             return response;
         }
+
+        /// <summary>
+        /// Default dictionary that ODataBatchRequestItems should use when mapping ID references to URLs
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public IDictionary<string, string> ContentIdToLocationMapping { get; set; }
 
         private static void AddLocationHeaderToMapping(
             HttpResponseMessage response,

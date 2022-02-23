@@ -49,7 +49,7 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("handler");
             }
 
-            Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
+            IDictionary<string, string> contentIdToLocationMapping = this.ContentIdToLocationMapping ?? new Dictionary<string, string>();
             List<HttpContext> responseContexts = new List<HttpContext>();
 
             foreach (HttpContext context in Contexts)

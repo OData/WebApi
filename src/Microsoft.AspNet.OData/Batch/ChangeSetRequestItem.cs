@@ -51,7 +51,7 @@ namespace Microsoft.AspNet.OData.Batch
                 throw Error.ArgumentNull("invoker");
             }
 
-            Dictionary<string, string> contentIdToLocationMapping = new Dictionary<string, string>();
+            IDictionary<string, string> contentIdToLocationMapping = this.ContentIdToLocationMapping ?? new Dictionary<string, string>();
             List<HttpResponseMessage> responses = new List<HttpResponseMessage>();
 
             try

@@ -14,6 +14,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNet.OData.Common;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OData;
 
 namespace Microsoft.AspNet.OData.Batch
@@ -155,7 +156,15 @@ namespace Microsoft.AspNet.OData.Batch
             ODataBatchOperationRequestMessage batchRequest = await reader.CreateOperationRequestMessageAsync();
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = new HttpMethod(batchRequest.Method);
-            request.RequestUri = batchRequest.Url;
+            Uri requestUri = batchRequest.Url;
+
+            if (!requestUri.IsAbsoluteUri)
+            {
+                Uri baseUri = batchRequest.Container.GetRequiredService<ODataMessageReaderSettings>().BaseUri;
+                requestUri = new Uri(baseUri, requestUri);
+            }
+
+            request.RequestUri = requestUri;
 
             if (bufferContentStream)
             {

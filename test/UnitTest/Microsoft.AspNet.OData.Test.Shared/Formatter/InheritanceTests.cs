@@ -291,6 +291,27 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             Assert.Equal(7000, (int)result.MyV4Engine.Hp);
         }
 
+        [Fact]
+        public async Task Can_Patch_Complex_Derived_Engine()
+        {
+            // Arrange
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), "http://localhost/PatchMotorcycle_DerivedEngine");
+            request.Headers.Accept.Add(MediaTypeWithQualityHeaderValue.Parse("application/json"));
+            AddRequestInfo(request);
+            request.Content = new StringContent("{'@odata.type' : 'Microsoft.AspNet.OData.Test.Builder.TestModels.V4' ,'Hp':7000 } ");
+            request.Content.Headers.ContentType = MediaTypeWithQualityHeaderValue.Parse("application/json");
+
+            // Act
+            HttpResponseMessage response = await _client.SendAsync(request);
+
+            // Assert
+            ExceptionAssert.DoesNotThrow(() => response.EnsureSuccessStatusCode());
+
+            dynamic result = JObject.Parse(await response.Content.ReadAsStringAsync());
+
+            Assert.Contains("#Microsoft.AspNet.OData.Test.Builder.TestModels.V4", result["@odata.context"].ToString());
+            Assert.Equal(7000, (int)result.Hp);
+        }
 
         [Fact]
         public async Task Can_Patch_Entity_In_Inheritance_DerivedEngine_MultiLevel_ChildToParent2()
@@ -664,6 +685,10 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                .ReturnsFromEntitySet<Motorcycle>("motorcycles");
 
             builder
+               .Action("PatchMotorcycle_DerivedEngine")
+               .Returns(typeof(Engine));
+
+            builder
               .Action("PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine42")
               .ReturnsFromEntitySet<Motorcycle>("motorcycles");
 
@@ -747,8 +772,19 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             return motorcycle;
         }
 
+        public Engine PatchMotorcycle_DerivedEngine(Delta<Engine> patch)
+        {
+            var engine = patch.Patch(motorcycle.MyEngine);
+
+            Assert.NotNull(engine);
+            Assert.Equal(7000, engine.Hp);
+
+            return engine;
+        }
+
         public Motorcycle PatchMotorcycle_When_Expecting_Motorcycle_DerivedEngine2(Delta<Motorcycle> patch)
         {
+            
             patch.Patch(motorcycle1);
 
             var engine = motorcycle1.MyEngine as V4;

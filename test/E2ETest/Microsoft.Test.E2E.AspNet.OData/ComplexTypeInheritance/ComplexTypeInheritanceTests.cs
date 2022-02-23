@@ -342,22 +342,55 @@ namespace Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance
             // Attempt to PATCH nested resource with delta object of the different CLR type
             // will result an error.
             var content = @"
-{
-    'CurrentShape':
-    {
-        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',
-        'Radius':2,
-        'Center':{'X':1,'Y':2},
-        'HasBorder':true
-    },
-    'OptionalShapes': [ ]
-}";
+            {
+                'CurrentShape':
+                {
+                    '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',
+                    'Radius':2,
+                    'Center':{'X':1,'Y':2},
+                    'HasBorder':true
+                },
+                'OptionalShapes': [ ]
+            }";
+
             StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
             request.Content = stringContent;
             HttpResponseMessage response = await Client.SendAsync(request);
             string contentOfString = await response.Content.ReadAsStringAsync();
             Assert.True(HttpStatusCode.OK == response.StatusCode);
         }
+
+        [Theory]
+        [InlineData("convention")]
+        [InlineData("explicit")]
+        // Patch ~/Widnows(3)
+        public async Task Patch_Matched_DerivedComplexType(string modelMode)
+        {
+            string serviceRootUri = string.Format("{0}/{1}", BaseAddress, modelMode).ToLower();
+            string requestUri = serviceRootUri + "/Windows(3)/CurrentShape";
+
+            HttpRequestMessage request = new HttpRequestMessage(new HttpMethod("PATCH"), requestUri);
+
+            // Attempt to PATCH nested resource with delta object of the different CLR type
+            // will result an error.
+            
+
+           var content = @"
+    {
+        '@odata.type':'#Microsoft.Test.E2E.AspNet.OData.ComplexTypeInheritance.Circle',
+        'Radius':2,
+        'Center':{'X':1,'Y':2},
+        'HasBorder':true
+    }";
+
+            StringContent stringContent = new StringContent(content: content, encoding: Encoding.UTF8, mediaType: "application/json");
+            request.Content = stringContent;
+            HttpResponseMessage response = await Client.SendAsync(request);
+            JObject contentOfJObject = await response.Content.ReadAsObject<JObject>();
+            Assert.Equal(2, (int)contentOfJObject["Radius"]);
+            Assert.True(HttpStatusCode.OK == response.StatusCode);
+        }
+
 
         [Theory]
         [InlineData("convention")]

@@ -58,7 +58,7 @@ namespace Microsoft.AspNet.OData.Test.Formatter
                     {typeof(DateTimeOffset), new DateTimeOffset(2010, 1, 1, 0, 0, 0, TimeSpan.Zero), fullMetadata, "DateTimeOffsetFullMetadata.json"},
                     {typeof(Date), new Date(2014, 10, 14), fullMetadata, "DateFullMetadata.json"},
                     {typeof(TimeOfDay), new TimeOfDay(12, 13, 14, 15), fullMetadata, "TimeOfDayFullMetadata.json"},
-                    {typeof(decimal), 12345M, fullMetadata, "DecimalFullMetadata.json"},
+                    {typeof(decimal), 12345.99999M, fullMetadata, "DecimalFullMetadata.json"},
                     {typeof(double), 99999.12345, fullMetadata, "DoubleFullMetadata.json"},
                     {typeof(Guid), new Guid("f99080c0-2f9e-472e-8c72-1a8ecd9f902d"), fullMetadata, "GuidFullMetadata.json"},
                     {typeof(short), Int16.MinValue, fullMetadata, "Int16FullMetadata.json"},

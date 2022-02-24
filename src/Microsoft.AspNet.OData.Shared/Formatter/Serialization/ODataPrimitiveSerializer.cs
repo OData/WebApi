@@ -176,14 +176,14 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 if (primitiveType is EdmDecimalTypeReference decimalTypeReference && decimalTypeReference.Scale.HasValue && value is decimal decimalValue)
                 {
-                    return CalculateDecimalScale(decimalValue, decimalTypeReference.Scale.Value);
+                    return CalculateScaleOfDecimal(decimalValue, decimalTypeReference.Scale.Value);
                 }
             }
 
             return ConvertUnsupportedPrimitives(value);
         }
 
-        static decimal CalculateDecimalScale(decimal value, int scale)
+        static decimal CalculateScaleOfDecimal(decimal value, int scale)
         {
             string scaleForConverting = "0.";
             for (int i = 0; i < scale; i++)

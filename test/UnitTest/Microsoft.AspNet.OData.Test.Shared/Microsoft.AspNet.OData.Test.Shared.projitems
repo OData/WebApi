@@ -146,6 +146,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UIntEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\Types\UShortEnum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Common\VersionTestHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DecimalTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)EnableNestedPathsTest.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\HttpContentExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Extensions\IHeaderDictionaryExtensions.cs" />

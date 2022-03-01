@@ -184,7 +184,8 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
         {
             string leftSide = GetLeftSideFromPoint(value);
             string rightSide = GetRightSideFromPoint(value);
-            for (int i = 0; i < scale - rightSide.Length; i++)
+            var numberOfZeroToAddToTheEndOfDecimalValue = scale - rightSide.Length;
+            for (int i = 0; i < numberOfZeroToAddToTheEndOfDecimalValue; i++)
             {
                 rightSide += "0";
             }

@@ -182,12 +182,27 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
         static decimal CalculateScaleOfDecimal(decimal value, int scale)
         {
-            string scaleForConverting = "0.";
-            for (int i = 0; i < scale; i++)
+            string leftSide = GetLeftSideFromPoint(value);
+            string rightSide = GetRightSideFromPoint(value);
+            for (int i = 0; i < scale - rightSide.Length; i++)
             {
-                scaleForConverting += "0";
+                rightSide += "0";
             }
-            return decimal.Parse(value.ToString(scaleForConverting, CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
+            value = decimal.Parse($"{leftSide}.{rightSide}", CultureInfo.InvariantCulture);
+            return decimal.Round(value, scale, MidpointRounding.AwayFromZero);
+        }
+
+        static string GetLeftSideFromPoint(decimal value)
+        {
+            return value.ToString().Split('.')[0];
+        }
+
+        static string GetRightSideFromPoint(decimal value)
+        {
+            string[] splittedDecimalWithPoint = value.ToString().Split('.');
+            if (splittedDecimalWithPoint.Length > 1)
+                return splittedDecimalWithPoint[1];
+            return string.Empty;
         }
 
         internal static object ConvertUnsupportedPrimitives(object value)

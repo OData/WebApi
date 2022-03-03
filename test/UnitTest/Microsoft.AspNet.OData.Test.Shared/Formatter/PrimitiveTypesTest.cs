@@ -72,6 +72,36 @@ namespace Microsoft.AspNet.OData.Test.Formatter
             }
         }
 
+
+        [Theory]
+        [MemberData(nameof(PrimitiveTypesToTest))]
+        public async Task PrimitiveTypesSerializeAsOData2(Type valueType, object value, string mediaType, string resourceName)
+        {
+            // Arrange
+            string expectedEntity = Resources.GetString(resourceName);
+            Assert.NotNull(expectedEntity); // Guard
+
+            ODataConventionModelBuilder modelBuilder = ODataConventionModelBuilderFactory.Create();
+            modelBuilder.EntitySet<WorkItem>("WorkItems");
+            IEdmModel model = modelBuilder.GetEdmModel();
+            IEdmProperty property = model.EntityContainer.EntitySets().Single().EntityType().Properties().First();
+            ODataPath path = new ODataPath(new PropertySegment(property as IEdmStructuralProperty));
+
+            var configuration = RoutingConfigurationFactory.CreateWithRootContainer("OData");
+            var request = RequestFactory.Create(HttpMethod.Get, "http://localhost/WorkItems(10)/ID", configuration, "OData", path);
+
+            var formatter = FormatterTestHelper.GetFormatter(new ODataPayloadKind[] { ODataPayloadKind.Property }, request, mediaType);
+
+            // Act
+            Type type = (value != null) ? value.GetType() : typeof(Nullable<int>);
+            var content = FormatterTestHelper.GetContent(value, type, formatter, mediaType.ToString());
+            string actualEntity = await FormatterTestHelper.GetContentResult(content, request);
+
+            // Assert
+            Assert.NotNull(valueType);
+            JsonAssert.Equal(expectedEntity, actualEntity);
+        }
+
         [Theory]
         [MemberData(nameof(PrimitiveTypesToTest))]
         public async Task PrimitiveTypesSerializeAsOData(Type valueType, object value, string mediaType, string resourceName)

@@ -15,9 +15,9 @@ namespace Microsoft.AspNet.OData.Test
     public class DecimalTest
     {
         [Fact]
-        public async Task PrecitionOfDecimalProperty_ShouldBeCalculated_BasedOnScale()
+        public async Task Decimal_ScaleTest()
         {
-            const string Uri = "http://localhost/odata/Orders";
+            const string Uri = "http://localhost/odata/DecimalRoundTestEntity";
             using (HttpClient client = GetClient())
             {
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, Uri);
@@ -27,17 +27,17 @@ namespace Microsoft.AspNet.OData.Test
                 HttpResponseMessage response = await client.SendAsync(request);
 
                 // Assert
-                IEnumerable<Order> orders = await ReadEntitiesFromResponse<Order>(response);
-                foreach (Order order in orders)
+                IEnumerable<DecimalRoundTestEntity> decimalRoundTestEntities = await ReadEntitiesFromResponse<DecimalRoundTestEntity>(response);
+                foreach (DecimalRoundTestEntity decimalRoundTestEntity in decimalRoundTestEntities)
                 {
-                    Assert.Equal("10.00", order.TotalPrice.ToString());
+                    Assert.Equal(decimalRoundTestEntity.ExpectedDecimalValue, decimalRoundTestEntity.ActualDecimalValue);
                 }
             }
         }
 
         private static HttpClient GetClient()
         {
-            var controllers = new[] { typeof(MetadataController), typeof(OrdersController) };
+            var controllers = new[] { typeof(MetadataController), typeof(DecimalRoundTestEntityController) };
             var server = TestServerFactory.Create(controllers, (config) =>
             {
                 config.Count().OrderBy().Filter().Expand().MaxTop(null).Select();
@@ -50,8 +50,8 @@ namespace Microsoft.AspNet.OData.Test
         private static IEdmModel GetEdmModel()
         {
             ODataConventionModelBuilder builder = ODataConventionModelBuilderFactory.Create();
-            builder.EntitySet<Order>("Orders");
-            builder.EntityType<Order>().Property(s => s.TotalPrice).Scale = 2;
+            builder.EntitySet<DecimalRoundTestEntity>("DecimalRoundTestEntity");
+            builder.EntityType<DecimalRoundTestEntity>().Property(s => s.ActualDecimalValue).Scale = 2;
             return builder.GetEdmModel();
         }
 
@@ -62,32 +62,33 @@ namespace Microsoft.AspNet.OData.Test
         }
     }
 
-    public class OrdersController : TestODataController
+    public class DecimalRoundTestEntityController : TestODataController
     {
         private DecimalModelContext db = new DecimalModelContext();
 
         [EnableQuery]
         public ITestActionResult Get()
         {
-            return Ok(db.Orders);
+            return Ok(db.DecimalRoundTestEntities);
         }
     }
 
     class DecimalModelContext
     {
-        private static IList<Order> _orders;
+        private static IList<DecimalRoundTestEntity> _decimalRoundTestEntities;
 
         static DecimalModelContext()
         {
-            _orders = new List<Order>()
-            {
-                new Order(){ OrderId=1,TotalPrice=10 },
-                new Order(){ OrderId=2, TotalPrice=10.000m },
-                new Order(){ OrderId=3, TotalPrice=10.00m }
-            };
+            _decimalRoundTestEntities = new List<DecimalRoundTestEntity>();
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10, 10));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.01m, 10.01m));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.001m, 10.00m));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.999m, 11m));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(10.335m, 10.34m));
+            _decimalRoundTestEntities.Add(new DecimalRoundTestEntity(-10.335m, -10.32m));
         }
 
-        public IEnumerable<Order> Orders { get { return _orders; } }
+        public IEnumerable<DecimalRoundTestEntity> DecimalRoundTestEntities { get { return _decimalRoundTestEntities; } }
     }
 
     class ODataResponse<T>

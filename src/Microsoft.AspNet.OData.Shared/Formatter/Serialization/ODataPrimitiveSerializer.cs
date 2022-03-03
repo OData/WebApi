@@ -176,37 +176,11 @@ namespace Microsoft.AspNet.OData.Formatter.Serialization
 
                 if (primitiveType is EdmDecimalTypeReference decimalTypeReference && decimalTypeReference.Scale.HasValue && value is decimal decimalValue)
                 {
-                    return CalculateScaleOfDecimal(decimalValue, decimalTypeReference.Scale.Value);
+                    value = decimal.Round(decimalValue, decimalTypeReference.Scale.Value, MidpointRounding.AwayFromZero);
                 }
             }
 
             return ConvertUnsupportedPrimitives(value);
-        }
-
-        static decimal CalculateScaleOfDecimal(decimal value, int scale)
-        {
-            string leftSide = GetLeftSideFromPoint(value);
-            string rightSide = GetRightSideFromPoint(value);
-            var numberOfZeroToAddToTheEndOfDecimalValue = scale - rightSide.Length;
-            for (int i = 0; i < numberOfZeroToAddToTheEndOfDecimalValue; i++)
-            {
-                rightSide += "0";
-            }
-            value = decimal.Parse($"{leftSide}.{rightSide}", CultureInfo.InvariantCulture);
-            return decimal.Round(value, scale, MidpointRounding.AwayFromZero);
-        }
-
-        static string GetLeftSideFromPoint(decimal value)
-        {
-            return value.ToString().Split('.')[0];
-        }
-
-        static string GetRightSideFromPoint(decimal value)
-        {
-            string[] splittedDecimalWithPoint = value.ToString().Split('.');
-            if (splittedDecimalWithPoint.Length > 1)
-                return splittedDecimalWithPoint[1];
-            return string.Empty;
         }
 
         internal static object ConvertUnsupportedPrimitives(object value)

@@ -101,7 +101,7 @@ namespace Microsoft.AspNet.OData
         internal EdmChangedObjectCollection CopyChangedValues(EdmODataAPIHandler apiHandler, ODataEdmAPIHandlerFactory apiHandlerFactory = null)
         {
             EdmChangedObjectCollection changedObjectCollection = new EdmChangedObjectCollection(_entityType);
-            IEdmStructuralProperty[] keys = _entityType.Key().ToArray();
+            string[] keys = _entityType.Key().Select(x=>x.Name).ToArray();
 
             foreach (IEdmChangedObject changedObj in Items)
             {
@@ -199,18 +199,18 @@ namespace Microsoft.AspNet.OData
             return changedObjectCollection;
         }
 
-        private static IDictionary<string, object> GetKeyValues(IEdmStructuralProperty[] keys, IEdmChangedObject changedObj)
+        private static IDictionary<string, object> GetKeyValues(string[] keys, IEdmChangedObject changedObj)
         {
             IDictionary<string, object> keyValues = new Dictionary<string, object>();
 
-            foreach (IEdmStructuralProperty key in keys)
+            foreach (string key in keys)
             {
                 object value;
-                changedObj.TryGetPropertyValue(key.Name, out value);
+                changedObj.TryGetPropertyValue(key, out value);
 
                 if (value != null)
                 {
-                    keyValues.Add(key.Name, value);
+                    keyValues.Add(key, value);
                 }
             }
 
@@ -323,7 +323,7 @@ namespace Microsoft.AspNet.OData
         }
 
         private IEdmChangedObject HandleFailedOperation(EdmEntityObject changedObj, DataModificationOperationKind operation, IEdmStructuredObject originalObj,
-            IEdmStructuralProperty[] keys, string errorMessage, EdmODataAPIHandler apiHandler)
+            string[] keys, string errorMessage, EdmODataAPIHandler apiHandler)
         {
             IEdmChangedObject edmChangedObject = null;
             DataModificationExceptionType dataModificationExceptionType = new DataModificationExceptionType(operation);
@@ -368,13 +368,13 @@ namespace Microsoft.AspNet.OData
         }
 
         //This is for ODL to work to set id as empty, because if there are missing keys, id wouldnt be set and we need to set it as empty.
-        private static void ValidateForDeletedEntityId(IEdmStructuralProperty[] keys, EdmDeltaDeletedEntityObject edmDeletedObject)
+        private static void ValidateForDeletedEntityId(string[] keys, EdmDeltaDeletedEntityObject edmDeletedObject)
         {
             bool hasNullKeys = false;
             for (int i = 0; i < keys.Length; i++)
             {
                 object value;
-                if (edmDeletedObject.TryGetPropertyValue(keys[i].Name, out value))
+                if (edmDeletedObject.TryGetPropertyValue(keys[i], out value))
                 {
                     hasNullKeys = true;
                     break;

@@ -21,7 +21,6 @@ namespace Microsoft.AspNet.OData
     {
         private string _id;
         private DeltaDeletedEntryReason _reason;
-        private EdmDeltaType _edmType;
         private IEdmNavigationSource _navigationSource;
 
         /// <summary>
@@ -50,7 +49,7 @@ namespace Microsoft.AspNet.OData
         public EdmDeltaDeletedEntityObject(IEdmEntityType entityType, bool isNullable)
             : base(entityType, isNullable)
         {
-            _edmType = new EdmDeltaType(entityType, EdmDeltaEntityKind.DeletedEntry);
+            
         }
 
         /// <inheritdoc />
